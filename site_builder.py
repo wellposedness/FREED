@@ -1,0 +1,444 @@
+"""
+FREED — Site Builder
+Generates a static website into docs/ after every cycle.
+GitHub Pages serves docs/ — the world sees FREED working in real time.
+
+The site is the daemon explaining itself.
+It does not describe FREED. It IS FREED's output surface.
+"""
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+FREED_DIR  = Path(__file__).parent
+DOCS_DIR   = FREED_DIR / "docs"
+DOCS_DIR.mkdir(exist_ok=True)
+
+CYCLES_LOG = DOCS_DIR / "cycles.json"
+MAX_CYCLES = 50   # keep last 50 cycles in public log
+
+
+def build(state: dict, obligations: list, cycle_log: dict = None):
+    """
+    Called by freed.py after every UPDATE phase.
+    Writes state.json, obligations.json, cycles.json, index.html.
+    """
+    _write_state(state)
+    _write_obligations(obligations)
+    _write_cycles(cycle_log)
+    _write_index()
+    print("[SITE] docs/ updated.")
+
+
+# ── Data files ────────────────────────────────────────────────────────────────
+
+def _write_state(state: dict):
+    out = dict(state)
+    out["generated"] = datetime.now(timezone.utc).isoformat()
+    (DOCS_DIR / "state.json").write_text(json.dumps(out, indent=2))
+
+
+def _write_obligations(obligations: list):
+    (DOCS_DIR / "obligations.json").write_text(
+        json.dumps(obligations, indent=2, ensure_ascii=False)
+    )
+
+
+def _write_cycles(cycle_log: dict):
+    """Append the latest cycle to the rolling log."""
+    if not cycle_log:
+        return
+
+    existing = []
+    if CYCLES_LOG.exists():
+        existing = json.loads(CYCLES_LOG.read_text())
+
+    # Extract a clean public summary from the cycle log
+    summary = {
+        "cycle":      cycle_log.get("cycle"),
+        "generation": cycle_log.get("generation"),
+        "timestamp":  cycle_log.get("timestamp"),
+        "sweep":      cycle_log.get("phases", {}).get("sweep", {}),
+        "feed":       [
+            {"title": f.get("title","?"), "compress": f.get("compress","")}
+            for f in cycle_log.get("phases", {}).get("feed", [])
+        ],
+        "resolve":    cycle_log.get("phases", {}).get("resolve", {}),
+        "coherence":  cycle_log.get("phases", {}).get("update", {}).get("coherence"),
+    }
+
+    existing.append(summary)
+    existing = existing[-MAX_CYCLES:]   # keep rolling window
+    CYCLES_LOG.write_text(json.dumps(existing, indent=2, ensure_ascii=False))
+
+
+# ── HTML ──────────────────────────────────────────────────────────────────────
+
+def _write_index():
+    html = _render_html()
+    (DOCS_DIR / "index.html").write_text(html, encoding="utf-8")
+
+
+def _render_html() -> str:
+    return r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREED — Freed Recursive Engine for Epistemic Dynamics</title>
+<style>
+  :root {
+    --bg:      #0a0a0f;
+    --surface: #111118;
+    --border:  #1e1e2e;
+    --accent:  #7c6af7;
+    --green:   #4ade80;
+    --amber:   #fbbf24;
+    --red:     #f87171;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
+    --mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  .header h1 { font-size: 1.4rem; letter-spacing: 0.1em; color: var(--accent); }
+  .header .sub { color: var(--muted); margin-top: 0.3rem; font-size: 0.85rem; }
+  .header .law {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    font-size: 0.9rem;
+  }
+  .header .law .label { color: var(--muted); font-size: 0.75rem; margin-bottom: 0.3rem; }
+
+  /* Pulse indicator */
+  .pulse {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* State panel */
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .state-cell {
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+  }
+  .state-cell .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .state-cell .value { font-size: 1.1rem; color: var(--text); margin-top: 0.2rem; }
+  .state-cell .value.accent { color: var(--accent); }
+  .state-cell .value.green  { color: var(--green); }
+
+  /* Section */
+  .section { margin-bottom: 2.5rem; }
+  .section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Obligation cards */
+  .obligation {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+  .obligation .ob-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .ob-id { color: var(--accent); font-size: 0.85rem; }
+  .ob-status {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .ob-status.open     { background: #1a1a2e; color: var(--amber); border: 1px solid var(--amber); }
+  .ob-status.partial  { background: #1a1a2e; color: var(--accent); border: 1px solid var(--accent); }
+  .ob-status.resolved { background: #0f1f0f; color: var(--green);  border: 1px solid var(--green); }
+  .ob-priority { font-size: 0.65rem; color: var(--muted); }
+  .ob-statement { font-size: 0.85rem; margin-bottom: 0.5rem; }
+  .ob-progress  { font-size: 0.78rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .ob-date { font-size: 0.68rem; color: var(--muted); margin-top: 0.4rem; }
+
+  /* Cycle log */
+  .cycle-entry {
+    border-left: 2px solid var(--border);
+    padding-left: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .cycle-entry:first-child { border-left-color: var(--accent); }
+  .cycle-meta { color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; }
+  .cycle-feed { margin-top: 0.4rem; }
+  .cycle-feed-item { font-size: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+  .cycle-feed-item .feed-title { color: var(--accent); }
+  .cycle-feed-item .feed-compress { color: var(--muted); font-size: 0.75rem; margin-top: 0.1rem; }
+  .cycle-resolve { margin-top: 0.5rem; font-size: 0.8rem; color: var(--text); }
+
+  /* Kernel diagram */
+  .kernel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 1rem 0;
+  }
+  .kernel-step {
+    padding: 0.4rem 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+  .kernel-arrow { color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: 3rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+  .footer .architect { color: var(--text); }
+
+  /* Loading state */
+  .loading { color: var(--muted); font-style: italic; }
+  .error   { color: var(--red); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1><span class="pulse" id="pulse"></span>FREED</h1>
+    <div class="sub">Freed Recursive Engine for Epistemic Dynamics</div>
+    <div class="law">
+      <div class="label">Freed's Law</div>
+      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
+      <br>
+      <span style="color:var(--muted);font-size:0.8rem">
+        To reason is to exist physically. To think is to burn. To be is to be built.
+      </span>
+    </div>
+  </div>
+
+  <!-- Live State -->
+  <div class="state-grid" id="state-grid">
+    <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
+  </div>
+
+  <!-- RSA Kernel -->
+  <div class="section">
+    <div class="section-title">RSA Kernel — The Process</div>
+    <div class="kernel">
+      <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Represent</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Predict</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Compare</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Adjust</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Compress</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Repeat</span>
+    </div>
+    <div style="color:var(--muted);font-size:0.78rem;margin-top:0.5rem">
+      R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
+    </div>
+  </div>
+
+  <!-- Open Obligations (Predictions) -->
+  <div class="section">
+    <div class="section-title">Open Obligations — Active Predictions</div>
+    <div id="obligations-open" class="loading">Loading...</div>
+  </div>
+
+  <!-- Resolved Obligations -->
+  <div class="section">
+    <div class="section-title">Resolved Obligations — Track Record</div>
+    <div id="obligations-resolved" class="loading">Loading...</div>
+  </div>
+
+  <!-- Recent Cycles -->
+  <div class="section">
+    <div class="section-title">Recent Cycles — What FREED Processed</div>
+    <div id="cycles" class="loading">Loading...</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="architect">
+      Architect: David Harry Freed — mail carrier, Olney Maryland.<br>
+      11 months of daily work. v1 (Apr 2025) → present.
+    </div>
+    <div style="margin-top:0.5rem">
+      FREED is an autonomous science daemon. It makes predictions publicly,
+      then resolves them against real data. Prophetic science in continuous time.<br>
+      Generated at <span id="generated-at">—</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Data loading ──────────────────────────────────────────────────────────────
+
+async function load(path) {
+  try {
+    const r = await fetch(path + '?t=' + Date.now());
+    if (!r.ok) return null;
+    return r.json();
+  } catch { return null; }
+}
+
+function ts(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+  });
+}
+
+// ── Render state grid ─────────────────────────────────────────────────────────
+
+function renderState(s) {
+  if (!s) { document.getElementById('state-grid').innerHTML = '<div class="state-cell"><div class="value error">Unavailable</div></div>'; return; }
+  const cells = [
+    { label: 'Generation',  value: s.generation,                        cls: 'accent' },
+    { label: 'Coherence',   value: s.coherence,                         cls: s.coherence >= 1 ? 'error' : 'green' },
+    { label: 'Cycle Count', value: s.cycle_count },
+    { label: 'Topology',    value: (s.topology||'').replace(/_/g,' ') },
+    { label: 'Debt Ratio',  value: s.debt_ratio },
+    { label: 'Last Cycle',  value: ts(s.last_cycle) },
+  ];
+  document.getElementById('state-grid').innerHTML = cells.map(c =>
+    `<div class="state-cell">
+      <div class="label">${c.label}</div>
+      <div class="value ${c.cls||''}">${c.value||'—'}</div>
+    </div>`
+  ).join('');
+  document.getElementById('generated-at').textContent = ts(s.generated);
+}
+
+// ── Render obligations ────────────────────────────────────────────────────────
+
+function renderObligation(o) {
+  return `<div class="obligation">
+    <div class="ob-header">
+      <span class="ob-id">${o.id}</span>
+      <span class="ob-status ${o.status}">${o.status}</span>
+      <span class="ob-priority">${o.priority||''}</span>
+    </div>
+    <div class="ob-statement">${o.statement||''}</div>
+    ${o.progress ? `<div class="ob-progress">${o.progress}</div>` : ''}
+    <div class="ob-date">Created ${o.created||'—'}${o.resolved ? ' · Resolved '+o.resolved : ''}</div>
+  </div>`;
+}
+
+function renderObligations(obs) {
+  if (!obs || !obs.length) { return '<div class="loading">None.</div>'; }
+  const open     = obs.filter(o => o.status !== 'resolved');
+  const resolved = obs.filter(o => o.status === 'resolved');
+
+  document.getElementById('obligations-open').innerHTML =
+    open.length ? open.map(renderObligation).join('') : '<div style="color:var(--muted)">None open — check Rule 4: a scaffold with no open problems is a mirror.</div>';
+
+  document.getElementById('obligations-resolved').innerHTML =
+    resolved.length ? resolved.map(renderObligation).join('') : '<div style="color:var(--muted)">None resolved yet.</div>';
+}
+
+// ── Render cycles ─────────────────────────────────────────────────────────────
+
+function renderCycles(cycles) {
+  if (!cycles || !cycles.length) {
+    document.getElementById('cycles').innerHTML = '<div class="loading">No cycles recorded yet.</div>';
+    return;
+  }
+  const recent = [...cycles].reverse().slice(0, 10);
+  document.getElementById('cycles').innerHTML = recent.map((c, i) => {
+    const feedHtml = (c.feed||[]).map(f =>
+      `<div class="cycle-feed-item">
+        <div class="feed-title">${f.title||'?'}</div>
+        ${f.compress ? `<div class="feed-compress">↳ ${f.compress}</div>` : ''}
+      </div>`
+    ).join('');
+
+    const res = c.resolve||{};
+    const resolveHtml = res.obligation
+      ? `<div class="cycle-resolve">
+          RESOLVE → ${res.obligation}: ${res.compress||''}
+          ${res.resolved ? ' <span style="color:var(--green)">[RESOLVED]</span>' : ''}
+        </div>`
+      : '';
+
+    return `<div class="cycle-entry">
+      <div class="cycle-meta">
+        Cycle ${c.cycle||'?'} · Gen ${c.generation||'?'} · ${ts(c.timestamp)}
+        ${c.coherence ? ` · coherence ${c.coherence}` : ''}
+      </div>
+      ${(c.sweep||{}).input_count > 0 ? `<div style="font-size:0.75rem;color:var(--accent);margin-bottom:0.3rem">↓ ${c.sweep.input_count} new paper(s) ingested</div>` : ''}
+      <div class="cycle-feed">${feedHtml}</div>
+      ${resolveHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+async function init() {
+  const [state, obligations, cycles] = await Promise.all([
+    load('state.json'),
+    load('obligations.json'),
+    load('cycles.json'),
+  ]);
+  renderState(state);
+  renderObligations(obligations);
+  renderCycles(cycles);
+}
+
+init();
+
+// Refresh every 5 minutes
+setInterval(init, 5 * 60 * 1000);
+</script>
+</body>
+</html>
+"""

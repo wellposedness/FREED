@@ -1,0 +1,12 @@
+# Private runtime state
+astrocyte_state.json
+tamura_seen.json
+backfill_scores.json
+__pycache__/
+*.pyc
+
+# Logs (private, large)
+FREED_log/
+
+# macOS
+.DS_Store
