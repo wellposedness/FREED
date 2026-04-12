@@ -148,6 +148,32 @@
   }
   .kernel-arrow { color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
 
+  /* Project nodes */
+  .node {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .node-header { display: flex; gap: 0.75rem; align-items: baseline; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .node-title  { color: var(--accent); font-size: 0.95rem; }
+  .node-gen    { color: var(--muted); font-size: 0.7rem; }
+  .node-summary { font-size: 0.82rem; margin-bottom: 0.5rem; }
+  .node-compress {
+    font-size: 0.82rem; border-left: 2px solid var(--accent);
+    padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
+  }
+  .node-next   { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .node-tags   { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+  .node-tag    {
+    font-size: 0.65rem; padding: 0.1rem 0.4rem;
+    background: #1a1a2e; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 2px;
+  }
+  .node-tag.inv  { border-color: var(--accent); color: var(--accent); }
+  .node-tag.ob   { border-color: var(--amber);  color: var(--amber);  }
+  .node-council  { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+
   /* Footer */
   .footer {
     border-top: 1px solid var(--border);
@@ -212,6 +238,12 @@
   <div class="section">
     <div class="section-title">Resolved Obligations — Track Record</div>
     <div id="obligations-resolved" class="loading">Loading...</div>
+  </div>
+
+  <!-- Project Nodes -->
+  <div class="section">
+    <div class="section-title">Project Nodes — Framework Compressions</div>
+    <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
   </div>
 
   <!-- Recent Cycles -->
