@@ -224,6 +224,29 @@
   }
   .footer .architect { color: var(--text); }
 
+  /* Speak button */
+  .speak-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .speak-btn:hover { background: var(--accent); color: var(--bg); }
+  .speak-btn.speaking { background: var(--accent); color: var(--bg); }
+  .speak-btn.speaking:hover { background: transparent; color: var(--accent); }
+  .speak-status {
+    display: block; margin-top: 0.4rem;
+    font-size: 0.7rem; color: var(--muted);
+    min-height: 1em;
+  }
+
   /* Loading state */
   .loading { color: var(--muted); font-style: italic; }
   .error   { color: var(--red); }
@@ -244,6 +267,8 @@
         To reason is to exist physically. To think is to burn. To be is to be built.
       </span>
     </div>
+    <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
+    <span class="speak-status" id="speak-status"></span>
   </div>
 
   <!-- Live State -->
@@ -416,6 +441,114 @@ function renderCycles(cycles) {
   }).join('');
 }
 
+// ── Speak digest ─────────────────────────────────────────────────────────────
+
+let _speaking = false;
+let _loadedState = null, _loadedObligs = null, _loadedProjects = [], _loadedSymbols = null;
+
+function cleanText(s) {
+  return (s || '')
+    .replace(/\*{1,2}|_{1,2}|`{1,3}/g, '')
+    .replace(/[→↳·]/g, '.')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildDigest() {
+  const chunks = [];
+
+  // State
+  const s = _loadedState;
+  if (s) {
+    chunks.push(`FREED. Generation ${s.generation}. Coherence ${s.coherence}. ${s.cycle_count || 0} cycles completed.`);
+  }
+
+  // Open obligations
+  const open = (_loadedObligs || []).filter(o => o.status !== 'resolved');
+  if (open.length) {
+    chunks.push(`${open.length} open obligation${open.length !== 1 ? 's' : ''}.`);
+    open.forEach(o => {
+      chunks.push(`${o.id}. ${cleanText(o.statement)}`);
+      const prog = (o.progress || '').split('|')[0].trim();
+      if (prog) chunks.push(`Progress: ${cleanText(prog)}`);
+    });
+  }
+
+  // Node compresses
+  if (_loadedProjects.length) {
+    chunks.push(`${_loadedProjects.length} knowledge node${_loadedProjects.length !== 1 ? 's' : ''}.`);
+    _loadedProjects.forEach(n => {
+      if (n.compress) chunks.push(`${cleanText(n.title)}: ${cleanText(n.compress)}`);
+    });
+  }
+
+  // Top genome symbols (highest recurrence first, top 7)
+  if (_loadedSymbols) {
+    const entries = Object.entries(_loadedSymbols)
+      .filter(([k]) => k !== '_meta')
+      .sort((a, b) => (b[1].recurrence || 0) - (a[1].recurrence || 0))
+      .slice(0, 7);
+    if (entries.length) {
+      chunks.push(`Genome registry. ${entries.length} confirmed symbols.`);
+      entries.forEach(([key, sym]) => {
+        const name = key.replace(/_/g, ' ');
+        chunks.push(`${name}. ${cleanText(sym.genome_role || sym.canonical || '')}`);
+      });
+    }
+  }
+
+  return chunks;
+}
+
+function speakChunks(chunks, idx) {
+  if (!_speaking || idx >= chunks.length) {
+    stopSpeak();
+    return;
+  }
+  const section = idx === 0 ? 'state' :
+    idx <= (_loadedObligs || []).filter(o => o.status !== 'resolved').length * 2 ? 'obligations' :
+    idx <= (_loadedProjects.length * 1 + 2) ? 'nodes' : 'symbols';
+  document.getElementById('speak-status').textContent =
+    `${idx + 1} / ${chunks.length}  ·  ${section}`;
+
+  const u = new SpeechSynthesisUtterance(chunks[idx]);
+  u.rate  = 0.92;
+  u.pitch = 1.0;
+  u.onend   = () => speakChunks(chunks, idx + 1);
+  u.onerror = () => speakChunks(chunks, idx + 1);
+  window.speechSynthesis.speak(u);
+}
+
+function startSpeak() {
+  if (!window.speechSynthesis) {
+    alert('Speech synthesis not available in this browser.');
+    return;
+  }
+  _speaking = true;
+  const btn = document.getElementById('speak-btn');
+  btn.textContent = '■ STOP';
+  btn.classList.add('speaking');
+  const chunks = buildDigest();
+  if (!chunks.length) {
+    document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
+    stopSpeak(); return;
+  }
+  speakChunks(chunks, 0);
+}
+
+function stopSpeak() {
+  _speaking = false;
+  window.speechSynthesis.cancel();
+  const btn = document.getElementById('speak-btn');
+  btn.textContent = '▶ SPEAK DIGEST';
+  btn.classList.remove('speaking');
+  document.getElementById('speak-status').textContent = '';
+}
+
+function toggleSpeak() {
+  _speaking ? stopSpeak() : startSpeak();
+}
+
 // ── Render genome symbols ─────────────────────────────────────────────────────
 
 function renderSymbols(data) {
@@ -472,12 +605,17 @@ function renderSymbols(data) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  const [state, obligations, cycles, symbols] = await Promise.all([
+  const [state, obligations, cycles, symbols, projects] = await Promise.all([
     load('state.json'),
     load('obligations.json'),
     load('cycles.json'),
     load('symbols.json'),
+    load('projects.json'),
   ]);
+  _loadedState    = state;
+  _loadedObligs   = obligations;
+  _loadedProjects = projects || [];
+  _loadedSymbols  = symbols;
   renderState(state);
   renderObligations(obligations);
   renderCycles(cycles);
