@@ -174,6 +174,46 @@
   .node-tag.ob   { border-color: var(--amber);  color: var(--amber);  }
   .node-council  { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
 
+  /* Genome symbols */
+  .symbol {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+  .symbol-header {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    margin-bottom: 0.5rem; flex-wrap: wrap;
+  }
+  .symbol-name { color: var(--accent); font-size: 0.9rem; letter-spacing: 0.04em; }
+  .symbol-recurrence { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
+  .symbol-bar-track {
+    width: 80px; height: 6px;
+    background: var(--border); border-radius: 3px; overflow: hidden; display: inline-block;
+  }
+  .symbol-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .symbol-badge {
+    font-size: 0.6rem; padding: 0.1rem 0.35rem;
+    border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .symbol-badge.new-badge { background: #0f1f0f; color: var(--green); border: 1px solid var(--green); }
+  .symbol-canonical { font-size: 0.82rem; margin-bottom: 0.5rem; }
+  .symbol-role {
+    font-size: 0.78rem; border-left: 2px solid var(--accent);
+    padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
+  }
+  .symbol-confirmed { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.4rem; }
+  .symbol-confirmed-tag {
+    font-size: 0.62rem; padding: 0.1rem 0.35rem;
+    background: #1a1a2e; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 2px;
+  }
+  .symbol-drift {
+    font-size: 0.72rem; color: var(--muted);
+    border-left: 2px solid var(--amber); padding-left: 0.5rem; margin-top: 0.3rem;
+  }
+  .symbol-drift-label { color: var(--amber); font-size: 0.65rem; margin-bottom: 0.2rem; }
+
   /* Footer */
   .footer {
     border-top: 1px solid var(--border);
@@ -244,6 +284,12 @@
   <div class="section">
     <div class="section-title">Project Nodes — Framework Compressions</div>
     <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
+  </div>
+
+  <!-- Genome Registry -->
+  <div class="section">
+    <div class="section-title">Genome Registry — Confirmed Symbols</div>
+    <div id="symbols" class="loading">Loading...</div>
   </div>
 
   <!-- Recent Cycles -->
@@ -370,17 +416,72 @@ function renderCycles(cycles) {
   }).join('');
 }
 
+// ── Render genome symbols ─────────────────────────────────────────────────────
+
+function renderSymbols(data) {
+  const el = document.getElementById('symbols');
+  if (!data) { el.innerHTML = '<div class="loading">Unavailable.</div>'; return; }
+
+  const meta = data._meta || {};
+  const latestGen = meta.generation || 0;
+
+  const entries = Object.entries(data)
+    .filter(([k]) => k !== '_meta')
+    .sort((a, b) => (b[1].recurrence || 0) - (a[1].recurrence || 0));
+
+  if (!entries.length) { el.innerHTML = '<div class="loading">No symbols yet.</div>'; return; }
+
+  const html = entries.map(([key, sym]) => {
+    const rec = sym.recurrence || 0;
+    const pct = Math.round(rec * 100);
+    const isNew = sym.mining_generation && sym.mining_generation >= latestGen - 1;
+
+    const confirmedHtml = (sym.confirmed_by || []).map(c => {
+      const label = c.includes(':') ? c.split(':')[1].replace(/_/g, ' ').slice(0, 30) : c.replace(/_/g, ' ');
+      return `<span class="symbol-confirmed-tag">${label}</span>`;
+    }).join('');
+
+    const driftHtml = (sym.known_drift || []).length
+      ? `<div class="symbol-drift">
+           <div class="symbol-drift-label">known drift</div>
+           ${(sym.known_drift || []).map(d => `<div>· ${d}</div>`).join('')}
+         </div>`
+      : '';
+
+    return `<div class="symbol">
+  <div class="symbol-header">
+    <span class="symbol-name">${key.replace(/_/g, '_')}</span>
+    ${isNew ? '<span class="symbol-badge new-badge">new</span>' : ''}
+    <span class="symbol-recurrence">
+      <span class="symbol-bar-track"><span class="symbol-bar-fill" style="width:${pct}%"></span></span>
+      ${rec.toFixed(2)}
+      ${sym.mining_recurrence_count ? `· ${sym.mining_recurrence_count}× nodes` : ''}
+    </span>
+  </div>
+  <div class="symbol-canonical">${sym.canonical || ''}</div>
+  ${sym.genome_role ? `<div class="symbol-role">${sym.genome_role}</div>` : ''}
+  ${confirmedHtml ? `<div class="symbol-confirmed">${confirmedHtml}</div>` : ''}
+  ${driftHtml}
+</div>`;
+  }).join('');
+
+  const countLine = `<div style="color:var(--muted);font-size:0.72rem;margin-bottom:1rem">${entries.length} symbols · gen ${latestGen} · sorted by recurrence</div>`;
+  el.innerHTML = countLine + html;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  const [state, obligations, cycles] = await Promise.all([
+  const [state, obligations, cycles, symbols] = await Promise.all([
     load('state.json'),
     load('obligations.json'),
     load('cycles.json'),
+    load('symbols.json'),
   ]);
   renderState(state);
   renderObligations(obligations);
   renderCycles(cycles);
+  renderSymbols(symbols);
 }
 
 init();
