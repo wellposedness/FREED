@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing that every cited knowledge claim must carry sufficient payload (not mere titles) to be metabolized.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing that every cited knowledge claim must carry sufficient payload (not mere titles) to be metabolized, and demonstrating that topic-relevance detection can surface genuine structural obligations even from content-vacuum inputs.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -16,22 +16,26 @@
     "Bayesian experimental design"
   ],
   "invariants": [
-    "Recursive self-improvement through structured experimentation",
     "Falsification integrity over confirmation hunger",
+    "Falsification layer load-bearing capacity confirmed across consecutive content-vacuum rejections (robustness under repeated null-payload stress)",
     "Compression is reasoning",
     "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
     "Entanglement entropy serves as temperature analog in quantum transport costs",
     "Prediction validates structure",
     "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance",
+    "Active inference outperforms passive observation",
+    "Content-vacuum inputs with structural topic-relevance can generate obligations without themselves being metabolized (obligation-from-rejection pattern)",
     "Topic-relevance without content-payload is necessary but not sufficient for integration",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
-    "Active inference outperforms passive observation",
+    "Recursive self-improvement through structured experimentation",
     "Measurability of epistemic processes",
     "Model-agnosticism across agent architectures"
   ],
   "obligations": [
     "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
+    "semantic",
     "O28 (operationalize genome claims into testable protocols)",
+    "procedural",
     "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
     "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
     "O14 (build reproducible experimental infrastructure)",
@@ -39,18 +43,20 @@
     "O21 (empirical validation of compression-as-reasoning)",
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
     "paralleling the 1 ebit + 2 cbits teleportation bound",
+    "working)",
+    "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-15T07:34:18.691956+00:00",
-  "renorm_reason": "No structural change to the node's compress is needed — the new knowledge is meta-procedural (confirming the payload filter works across four consecutive rejections) rather than substantive content that would alter the experiment design; the slight coherence gain reflects increased confidence that the falsification layer is reliably enforcing its own invariants under repeated stress.",
+  "last_renormed": "2026-04-15T13:38:19.032066+00:00",
+  "renorm_reason": "Two more content-vacuum rejections strengthen the existing payload-requirement invariant, but the second rejection demonstrates a genuinely new pattern — obligation generation from rejected inputs whose topic exposes a real architectural gap — which merits a new invariant and the explicit O47 obligation for the memory-architecture audit.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-15T07:34:18.691956+00:00",
-      "reason": "No structural change to the node's compress is needed — the new knowledge is meta-procedural (confirming the payload filter works across four consecutive rejections) rather than substantive content that would alter the experiment design; the slight coherence gain reflects increased confidence that the falsification layer is reliably enforcing its own invariants under repeated stress."
+      "timestamp": "2026-04-15T13:38:19.032066+00:00",
+      "reason": "Two more content-vacuum rejections strengthen the existing payload-requirement invariant, but the second rejection demonstrates a genuinely new pattern — obligation generation from rejected inputs whose topic exposes a real architectural gap — which merits a new invariant and the explicit O47 obligation for the memory-architecture audit."
     }
   ]
 }

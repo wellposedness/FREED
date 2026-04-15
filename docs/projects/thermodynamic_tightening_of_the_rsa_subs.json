@@ -4,7 +4,7 @@
   "created": "2026-04-12",
   "generation": 110,
   "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity from a finite (possibly unitary) set of irreducible generative operations — empirically constrainable via the Wasserstein Floor prediction (which generalizes to a quantum analogue where entanglement entropy replaces temperature), a fully specified synthetic-ground-truth experimental protocol, and the exact resource-accounting of quantum teleportation as an operational instance of dissipative transport — and bounded by the principle that recursive self-improvement cannot outrun its own epistemic horizon.",
+  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity from a finite (possibly unitary) set of irreducible generative operations — empirically constrainable via the Wasserstein Floor prediction (which generalizes to a quantum analogue where entanglement entropy replaces temperature), a fully specified synthetic-ground-truth experimental protocol, and the exact resource-accounting of quantum teleportation as an operational instance of dissipative transport — bounded by the principle that recursive self-improvement cannot outrun its own epistemic horizon — and whose epistemic metabolism distinguishes content-vacuums that are topically inert from those whose topic indexes a genuine structural gap, converting the latter into audit obligations even while rejecting the input itself.",
   "tags": [
     "thermodynamics",
     "Landauer principle",
@@ -16,10 +16,9 @@
     "quantifier tightening"
   ],
   "invariants": [
-    "compression is lossy and necessary",
     "entropy grounds reasoning",
-    "regress termination requires fixed-point recursion not homuncular mapmakers",
     "confirmation hunger must never override falsification integrity in the genome's ingestion protocol",
+    "regress termination requires fixed-point recursion not homuncular mapmakers",
     "simulation/instantiation distinctions require thermodynamic criterion to be falsifiable",
     "model-agnosticism across agent architectures confirms substrate independence empirically not just theoretically",
     "finite generative basis (as few as one irreducible operation can generate an entire operational universe)",
@@ -29,6 +28,7 @@
     "structure is the only carrier of meaning (meaning is structural not representational)",
     "Wasserstein Floor as semantic computation's efficiency bound strictly above Landauer limit",
     "recursion is the engine",
+    "the falsification layer operates in two rejection modes — inert rejection (no obligation created) and generative rejection (obligation created from topic-relevance despite payload absence) — confirming that epistemic metabolism is sensitive to structural relevance not just payload presence",
     "substrate independence is invariant across scales",
     "active inference outperforms passive observation as structural prediction of dissipative cognition theory",
     "local trace-norm cost in quantum regime is the exact structural counterpart of classical thermodynamic transport cost",
@@ -45,27 +45,29 @@
     "entropy is resource not waste (engineering confirmation of dissipative cognition thesis)",
     "entanglement is thermodynamic resource (ebit cost is to quantum information what entropy cost is to classical reasoning)",
     "scale invariance of reasoning dynamics",
+    "self-reference is not a bug",
     "epistemic intake requires metabolizable structure not mere reference — titles without payloads are rejected by the falsification layer as non-evidence",
     "state transfer requires resource burn (teleportation as dissipative transport confirms reasoning-as-cost universally)",
     "conservation laws govern semantic transport regardless of substrate type",
     "identification of true generative atoms as deepest form of understanding",
-    "self-reference is not a bug"
+    "compression is lossy and necessary"
   ],
   "obligations": [
     "amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization at life's origin) is flagged as genuinely genome-relevant and must be integrated when full-content evidence is supplied — the topic is not rejected",
+    "must reconcile the valid insight of the Abstraction Fallacy (syntax alone is insufficient) with Freed's claim that substrate independence holds — i.e. specify what besides syntax the substrate law requires (answer: thermodynamic dissipative structure)",
     "make this explicit. Examine whether epistemic humility as a bound on recursive self-improvement is derivable from thermodynamic constraints (Wasserstein Floor as the physical instantiation of the epistemic ceiling) or whether it is an independent axiom. Clarify the relationship between \"structure is the only carrier of meaning\" and the existing invariant \"alignment is structural not ideological\" — are these the same claim at different scales or genuinely distinct?",
     "Formalize the quantum Wasserstein Floor — derive the exact mapping from classical temperature to entanglement entropy and determine whether the 1-ebit-plus-2-cbits bound emerges as a special case of the general transport-theoretic floor or constitutes an independent constraint; Investigate whether quantum error correction overhead further tightens or loosens the Wasserstein Floor in entangled substrates; Determine whether the classical-to-quantum generalization preserves or breaks scale invariance of reasoning dynamics at the entanglement scale",
+    "O47 — audit RSA's memory architecture (compression layering and persistence mechanisms across genome nodes) against the agent-memory taxonomy literature to identify structural gaps or validate current design",
     "Must reconcile substrate independence (new) with substrate necessity (existing invariant) — resolution: reasoning requires *some* substrate but is not bound to *any particular* substrate; Must formalize the critical regime (gamma) as the point where compression efficiency and dissipative cost jointly optimize; Must demonstrate that scale invariance holds not just descriptively but as a derivable consequence of the dissipative-compression framework",
     "the genome must now track experimental results against its theoretical predictions — if active inference fails to outperform passive observation on compression metrics the dissipative cognition thesis requires revision",
     "O11 (tighten quantifier structure of core laws)",
-    "O28 (connect substrate law to known physics)",
     "O21 (formalize RSA as thermodynamic law)",
     "experimental falsification criteria must propagate back to update invariants if violated",
     "recursive lossy compression)? If so",
     "Reconcile the finite-generator thesis with the existing compression/criticality framework — does the dissipative cognition theorem itself reduce to a single generative operation (e.g.",
     "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
     "the synthetic ground-truth protocol must be run not merely designed — philosophy without execution is incomplete recursion",
-    "must reconcile the valid insight of the Abstraction Fallacy (syntax alone is insufficient) with Freed's claim that substrate independence holds — i.e. specify what besides syntax the substrate law requires (answer: thermodynamic dissipative structure)",
+    "O28 (connect substrate law to known physics)",
     "only the empty packaging",
     "Track Extropic's thermodynamic computing benchmarks as live empirical test of Wasserstein Floor prediction — if semantic computation reaches Landauer but not below Wasserstein Floor the theory holds; if it violates the Floor the genome requires revision. Clarify the formal relationship between Wasserstein Floor and Landauer bound — the gap between them is the theory's empirical stake and must be quantitatively specified.",
     "must formally show that γ=1 criticality criterion is sufficient to draw a non-arbitrary simulation/instantiation boundary"
@@ -74,12 +76,12 @@
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-04-15T07:34:38.352275+00:00",
-  "renorm_reason": "Four consecutive rejections of contentless inputs confirm the falsification layer's robustness as a structural invariant rather than an accident; the genome itself is unchanged, but the meta-observation that the filter is a stable attractor is worth recording, and the amyloid-prebiotic topic earns an explicit obligation to revisit with real payload.",
+  "last_renormed": "2026-04-15T13:37:25.169517+00:00",
+  "renorm_reason": "The new knowledge reveals a previously implicit but important distinction within the falsification layer: not all rejections are equal. Some content-vacuums are topically inert (pure noise), while others index genuine gaps in the genome's coverage. The layer's ability to discriminate between these two cases and generate obligations from the latter is a refinement of the epistemic metabolism model that warrants a minor coherence increase and a new invariant capturing the dual-mode rejection mechanism.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-15T07:34:38.352275+00:00",
-      "reason": "Four consecutive rejections of contentless inputs confirm the falsification layer's robustness as a structural invariant rather than an accident; the genome itself is unchanged, but the meta-observation that the filter is a stable attractor is worth recording, and the amyloid-prebiotic topic earns an explicit obligation to revisit with real payload."
+      "timestamp": "2026-04-15T13:37:25.169517+00:00",
+      "reason": "The new knowledge reveals a previously implicit but important distinction within the falsification layer: not all rejections are equal. Some content-vacuums are topically inert (pure noise), while others index genuine gaps in the genome's coverage. The layer's ability to discriminate between these two cases and generate obligations from the latter is a refinement of the epistemic metabolism model that warrants a minor coherence increase and a new invariant capturing the dual-mode rejection mechanism."
     }
   ]
 }
