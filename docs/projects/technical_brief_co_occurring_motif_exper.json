@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing that every cited knowledge claim must carry sufficient payload (not mere titles) to be metabolized.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -16,34 +16,37 @@
     "Bayesian experimental design"
   ],
   "invariants": [
-    "Prediction validates structure",
-    "Entanglement entropy serves as temperature analog in quantum transport costs",
-    "Measurability of epistemic processes",
-    "Model-agnosticism across agent architectures",
-    "Recursive self-improvement through structured experimentation",
-    "Active inference outperforms passive observation",
+    "Falsification integrity over confirmation hunger",
     "Compression is reasoning",
-    "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance"
+    "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
+    "Entanglement entropy serves as temperature analog in quantum transport costs",
+    "Prediction validates structure",
+    "Active inference outperforms passive observation",
+    "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance",
+    "Recursive self-improvement through structured experimentation",
+    "Measurability of epistemic processes",
+    "Model-agnosticism across agent architectures"
   ],
   "obligations": [
-    "O14 (build reproducible experimental infrastructure)",
+    "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
     "O28 (operationalize genome claims into testable protocols)",
     "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
-    "O21 (empirical validation of compression-as-reasoning)",
+    "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
+    "O14 (build reproducible experimental infrastructure)",
     "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
-    "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
+    "O21 (empirical validation of compression-as-reasoning)",
     "paralleling the 1 ebit + 2 cbits teleportation bound"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-15T01:03:09.796583+00:00",
-  "renorm_reason": "The quantum Wasserstein result strengthens the substrate-independence claim (a core invariant) by showing the same transport-cost geometry holds across classical and quantum domains — this doesn't change the experiment's design but deepens the theoretical justification for why compression-as-reasoning should be model-agnostic, and creates an obligation to consider quantum agent architectures as a natural extension of the experimental framework.",
+  "last_renormed": "2026-04-15T01:31:20.918955+00:00",
+  "renorm_reason": "The new knowledge articulates a filtering principle (no title-without-payload metabolization) that directly strengthens the node's commitment to falsifiability and measurability — the experiment's epistemic hygiene now has an explicit input-quality gate, which was implicit before but is now a confirmed invariant.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-15T01:03:09.796583+00:00",
-      "reason": "The quantum Wasserstein result strengthens the substrate-independence claim (a core invariant) by showing the same transport-cost geometry holds across classical and quantum domains — this doesn't change the experiment's design but deepens the theoretical justification for why compression-as-reasoning should be model-agnostic, and creates an obligation to consider quantum agent architectures as a natural extension of the experimental framework."
+      "timestamp": "2026-04-15T01:31:20.918955+00:00",
+      "reason": "The new knowledge articulates a filtering principle (no title-without-payload metabolization) that directly strengthens the node's commitment to falsifiability and measurability — the experiment's epistemic hygiene now has an explicit input-quality gate, which was implicit before but is now a confirmed invariant."
     }
   ]
 }
