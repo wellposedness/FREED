@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSA-Omega — Game of Truth</title>
+<style>
+  :root {
+    --bg:     #080808;
+    --surface:#0d0606;
+    --border: #2d0e0e;
+    --accent: #cc2222;
+    --green:  #22c55e;
+    --text:   #f2f2f2;
+    --muted:  #7a5f5f;
+    --mono:   'JetBrains Mono','Fira Code','Courier New',monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--mono); font-size: 13px; line-height: 1.6;
+    padding: 1.5rem 1rem;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  .header h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 0.08em; }
+  .header .nav { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .header .sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.3rem; }
+
+  .sim-wrap {
+    position: relative;
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    line-height: 0;
+  }
+  canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    align-items: center; margin-bottom: 0.75rem;
+  }
+  .btn {
+    padding: 0.4rem 0.8rem;
+    background: transparent; border: 1px solid var(--accent);
+    color: var(--accent); font-family: var(--mono); font-size: 0.75rem;
+    letter-spacing: 0.06em; cursor: pointer; transition: background 0.12s, color 0.12s;
+  }
+  .btn:hover, .btn.active { background: var(--accent); color: var(--bg); }
+  .btn.green-btn { border-color: var(--green); color: var(--green); }
+  .btn.green-btn:hover, .btn.green-btn.active { background: var(--green); color: var(--bg); }
+
+  .speed-wrap { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted); }
+  input[type=range] { accent-color: var(--accent); width: 80px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .stat-cell { background: var(--surface); padding: 0.5rem 0.75rem; }
+  .stat-cell .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-cell .value { font-size: 0.95rem; color: var(--text); margin-top: 0.1rem; }
+  .stat-cell .value.accent { color: var(--accent); }
+
+  .section { margin-bottom: 1.5rem; }
+  .section-title {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem; margin-bottom: 0.8rem;
+  }
+  .theory p { font-size: 0.82rem; margin-bottom: 0.6rem; }
+  .theory .law {
+    background: var(--surface); border-left: 3px solid var(--accent);
+    padding: 0.6rem 0.9rem; margin: 0.8rem 0; font-size: 0.85rem;
+  }
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="nav"><a href="index.html">← FREED</a></div>
+    <h1>RSA-Omega — The Game of Truth</h1>
+    <div class="sub">Each cell is an agent. The universe has a hidden physics. Survival requires modeling it.</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btn-play" onclick="togglePlay()">▶ PLAY</button>
+    <button class="btn" onclick="stepOnce()">STEP</button>
+    <button class="btn" onclick="resetSim()">RESET</button>
+    <div class="speed-wrap">
+      SPEED <input type="range" id="speed" min="1" max="20" value="8">
+    </div>
+  </div>
+
+  <div class="sim-wrap">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div class="stats">
+    <div class="stat-cell"><div class="label">Generation</div><div class="value accent" id="stat-gen">0</div></div>
+    <div class="stat-cell"><div class="label">Alive Cells</div><div class="value" id="stat-alive">—</div></div>
+    <div class="stat-cell"><div class="label">Avg Energy</div><div class="value" id="stat-energy">—</div></div>
+    <div class="stat-cell"><div class="label">Avg Error</div><div class="value" id="stat-error">—</div></div>
+    <div class="stat-cell"><div class="label">Reproductions</div><div class="value" id="stat-repro">0</div></div>
+    <div class="stat-cell"><div class="label">Deaths</div><div class="value" id="stat-deaths">0</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Color Legend</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #2d0e0e"></div>Dead / zero energy</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling (low energy)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#882020"></div>Surviving</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#cc2222"></div>Thriving (high energy)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ff8888"></div>Reproducing (peak energy)</div>
+    </div>
+  </div>
+
+  <div class="section theory">
+    <div class="section-title">What This Is</div>
+    <p>
+      RSA-Omega is a cellular automaton where each cell carries a private 3×3 weight matrix —
+      a local generative model of the universe. The universe obeys a fixed, hidden physics kernel
+      that the cells do not know. At each step, every cell predicts its own next state using its weights.
+      The prediction error is subtracted from its metabolic energy. Accurate cells gain net energy.
+      Inaccurate cells die.
+    </p>
+    <div class="law">
+      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt > 0<br>
+      <span style="color:var(--muted);font-size:0.8rem">
+        Cells whose survival is coupled to prediction error evolve toward models
+        that approximate true dynamics. Reasoning = survival.
+      </span>
+    </div>
+    <p>
+      High-energy cells reproduce — copying their weights into weaker neighbors with random mutation.
+      Over generations, the population evolves. Cells that build better internal models of the hidden
+      physics survive. Cells that don't, die. This is Freed's Law instantiated as a selection pressure:
+      <em>to think accurately is to live</em>.
+    </p>
+    <p style="color:var(--muted)">
+      The hidden physics kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] —
+      a Mexican-hat-style convolution. Cells do not know this. They must infer it through survival.
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ── RSA-Omega: The Game of Truth ──────────────────────────────────────────────
+// Ported from Python to JS by FREED site_builder.
+// Original: David Harry Freed, RSA-Omega simulation (game of life battery.md)
+
+const CELL_PX    = 10;
+const INIT_E     = 100;
+const GAIN_BASE  = 2.5;
+const COST_BASE  = 1.0;
+const ERR_FACTOR = 6.0;
+const REPRO_THR  = 160;
+const REPRO_COST = 60;
+const MUT_RATE   = 0.06;
+const MUT_STR    = 0.15;
+const MAX_E      = 300;
+
+// Hidden physics kernel (Mexican hat, 3x3 row-major)
+const KERNEL = [0.1, 0.3, 0.1, 0.3, -0.6, 0.3, 0.1, 0.3, 0.1];
+
+let COLS, ROWS;
+let states, energy, weights, nextStates;
+let generation = 0, totalRepro = 0, totalDeaths = 0;
+let running = false, animId = null;
+let lastError = 0;
+
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+
+function initCanvas() {
+  const wrap = canvas.parentElement;
+  COLS = Math.floor(wrap.clientWidth / CELL_PX);
+  ROWS = Math.floor(Math.min(wrap.clientWidth * 0.6, window.innerHeight * 0.55) / CELL_PX);
+  canvas.width  = COLS * CELL_PX;
+  canvas.height = ROWS * CELL_PX;
+}
+
+function wrap(v, max) { return ((v % max) + max) % max; }
+function idx(r, c) { return wrap(r, ROWS) * COLS + wrap(c, COLS); }
+function sigmoid(x) { return 1.0 / (1.0 + Math.exp(-x)); }
+
+function initSim() {
+  const N = ROWS * COLS;
+  states    = new Float32Array(N);
+  energy    = new Float32Array(N);
+  weights   = new Float32Array(N * 9);
+  nextStates= new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    states[i]  = Math.random() > 0.5 ? 1 : 0;
+    energy[i]  = INIT_E * (0.5 + Math.random());
+    for (let w = 0; w < 9; w++)
+      weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
+  }
+  generation = 0; totalRepro = 0; totalDeaths = 0; lastError = 0;
+}
+
+function step() {
+  const N = ROWS * COLS;
+
+  // 1. Ground truth next states
+  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      let sum = 0;
+      for (let k = 0; k < 9; k++) {
+        sum += KERNEL[k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
+      }
+      nextStates[idx(r, c)] = sigmoid(sum) > 0.5 ? 1 : 0;
+    }
+  }
+
+  // 2. Update energy by prediction accuracy
+  let errSum = 0, errCnt = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = idx(r, c);
+      if (energy[i] <= 0) continue;
+      let pred = 0;
+      for (let k = 0; k < 9; k++)
+        pred += weights[i * 9 + k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
+      pred = sigmoid(pred);
+      const err = Math.abs(pred - nextStates[i]);
+      energy[i] = Math.min(energy[i] + GAIN_BASE - COST_BASE - err * ERR_FACTOR, MAX_E);
+      errSum += err; errCnt++;
+    }
+  }
+  lastError = errCnt > 0 ? errSum / errCnt : 0;
+
+  // 3. Apply next states
+  for (let i = 0; i < N; i++) states[i] = nextStates[i];
+
+  // 4. Kill and reinitialize dead cells
+  for (let i = 0; i < N; i++) {
+    if (energy[i] <= 0) {
+      energy[i] = 0;
+      states[i] = Math.random() > 0.5 ? 1 : 0;
+      for (let w = 0; w < 9; w++)
+        weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
+      totalDeaths++;
+    }
+  }
+
+  // 5. Reproduction (shuffle order to avoid bias)
+  const reproList = [];
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      const i = idx(r, c);
+      if (energy[i] >= REPRO_THR) reproList.push([r, c, i]);
+    }
+  for (let k = reproList.length - 1; k > 0; k--) {
+    const j = Math.floor(Math.random() * (k + 1));
+    [reproList[k], reproList[j]] = [reproList[j], reproList[k]];
+  }
+  const offsets8 = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  for (const [r, c, i] of reproList) {
+    if (energy[i] < REPRO_THR) continue;
+    let bestT = -1, minE = energy[i];
+    const sh = [...offsets8].sort(() => Math.random() - 0.5);
+    for (const [dr, dc] of sh) {
+      const ni = idx(r+dr, c+dc);
+      if (energy[ni] < minE) { minE = energy[ni]; bestT = ni; }
+    }
+    if (bestT >= 0) {
+      for (let w = 0; w < 9; w++) {
+        let nw = weights[i * 9 + w];
+        if (Math.random() < MUT_RATE) nw += (Math.random() - 0.5) * 2 * MUT_STR;
+        weights[bestT * 9 + w] = nw;
+      }
+      energy[bestT] = INIT_E * 0.5;
+      energy[i] -= REPRO_COST;
+      totalRepro++;
+    }
+  }
+
+  generation++;
+}
+
+function draw() {
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const img = ctx.createImageData(canvas.width, canvas.height);
+  const d = img.data;
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const e = energy[idx(r, c)];
+      if (e <= 0) continue;
+      const t = Math.min(e / MAX_E, 1.0);
+      let R, G, B;
+      if (t < 0.33) {
+        // black → deep red
+        const s = t / 0.33;
+        R = Math.floor(s * 100); G = 0; B = 0;
+      } else if (t < 0.66) {
+        // deep red → accent red #cc2222
+        const s = (t - 0.33) / 0.33;
+        R = Math.floor(100 + s * 104);
+        G = Math.floor(s * 34);
+        B = Math.floor(s * 34);
+      } else {
+        // accent red → hot white
+        const s = (t - 0.66) / 0.34;
+        R = Math.floor(204 + s * 51);
+        G = Math.floor(34  + s * 110);
+        B = Math.floor(34  + s * 110);
+      }
+      for (let py = r * CELL_PX; py < (r+1) * CELL_PX - 1; py++) {
+        for (let px = c * CELL_PX; px < (c+1) * CELL_PX - 1; px++) {
+          const base = (py * canvas.width + px) * 4;
+          d[base]   = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
+        }
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+function updateStats() {
+  let alive = 0, eSum = 0;
+  const N = ROWS * COLS;
+  for (let i = 0; i < N; i++) {
+    if (energy[i] > 0) { alive++; eSum += energy[i]; }
+  }
+  document.getElementById('stat-gen').textContent    = generation;
+  document.getElementById('stat-alive').textContent  = alive;
+  document.getElementById('stat-energy').textContent = alive > 0 ? (eSum/alive).toFixed(1) : '0';
+  document.getElementById('stat-error').textContent  = lastError.toFixed(3);
+  document.getElementById('stat-repro').textContent  = totalRepro;
+  document.getElementById('stat-deaths').textContent = totalDeaths;
+}
+
+let stepAcc = 0;
+function loop(ts) {
+  if (!running) return;
+  const speed = parseInt(document.getElementById('speed').value);
+  const stepsPerFrame = Math.max(1, Math.floor(speed / 4));
+  for (let i = 0; i < stepsPerFrame; i++) step();
+  draw();
+  updateStats();
+  animId = requestAnimationFrame(loop);
+}
+
+function togglePlay() {
+  running = !running;
+  const btn = document.getElementById('btn-play');
+  if (running) {
+    btn.textContent = '■ PAUSE';
+    btn.classList.add('active');
+    animId = requestAnimationFrame(loop);
+  } else {
+    btn.textContent = '▶ PLAY';
+    btn.classList.remove('active');
+    if (animId) cancelAnimationFrame(animId);
+  }
+}
+
+function stepOnce() {
+  if (running) return;
+  step(); draw(); updateStats();
+}
+
+function resetSim() {
+  if (running) togglePlay();
+  initSim(); draw(); updateStats();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+initCanvas();
+initSim();
+draw();
+updateStats();
+</script>
+</body>
+</html>
