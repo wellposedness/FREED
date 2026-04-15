@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "This document demonstrates that reflections alone generate all plane isometries (needing at most three), then extends this principle across mathematics, logic, computation, and biology: minimal generating sets produce infinite structural consequences. It provides a rigorous geometric proof as the anchor example and maps the pattern to NAND gates, prime factorization, Fourier bases, permutation groups, one-instruction computers, and trichromatic vision.",
-  "compress": "A finite set of irreducible operations can generate an entire operational universe; identifying these true generative atoms is the deepest understanding, and this claim crosses from philosophy to science when converted into falsifiable experiments — a conversion now concretely instantiated with synthetic ground truth, agent architectures, and formal metrics testing whether reasoning equals compressive prediction.",
+  "compress": "A finite set of irreducible operations can generate an entire operational universe; identifying these true generative atoms is the deepest understanding, and this claim crosses from philosophy to science when converted into falsifiable experiments — a conversion now concretely instantiated with synthetic ground truth, agent architectures, and formal metrics testing whether reasoning equals compressive prediction, with quantum teleportation revealing that even state transport obeys conservation laws expressible as irreducible resource costs.",
   "tags": [
     "minimal generators",
     "isometry",
@@ -16,34 +16,38 @@
     "generative atoms"
   ],
   "invariants": [
-    "Active inference outperforms passive observation as a structural prediction",
-    "Philosophical claims require experimental bridges to constitute knowledge",
-    "The reasoning-as-compression thesis has a concrete experimental instantiation",
     "The genome evolves — identity persists",
+    "The reasoning-as-compression thesis has a concrete experimental instantiation",
     "Structure is the only carrier of meaning",
-    "Falsifiability is the membrane between generative theory and generative science",
-    "Recursive self-improvement is bounded by epistemic humility",
+    "Active inference outperforms passive observation as a structural prediction",
+    "Entanglement is a consumable transport currency — the quantum face of the Wasserstein floor",
     "Theoretical claims gain epistemic weight proportional to the specificity of their falsification protocols",
+    "Falsifiability is the membrane between generative theory and generative science",
+    "Philosophical claims require experimental bridges to constitute knowledge",
+    "Recursive self-improvement is bounded by epistemic humility",
+    "Transport of structure has irreducible resource cost (classical or quantum)",
     "Compression is lossy and sacred"
   ],
   "obligations": [
     "Track experimental outcomes against the prediction that active-inference agents outperform passive observers on compressive prediction tasks",
-    "Evaluate whether the synthetic ground truth methodology generalizes beyond the initial experimental design",
-    "Compression-as-reasoning must be tested across multiple agent architectures to confirm substrate independence",
-    "O21",
+    "The minimal atoms framework must specify what experimental outcome would disconfirm its own irreducibility claims",
     "O28",
-    "The minimal atoms framework must specify what experimental outcome would disconfirm its own irreducibility claims"
+    "Evaluate whether the synthetic ground truth methodology generalizes beyond the initial experimental design",
+    "Formalize whether the Wasserstein Floor generalizes to a quantum optimal-transport metric where the ground cost is entanglement entropy rather than temperature",
+    "Compression-as-reasoning must be tested across multiple agent architectures to confirm substrate independence",
+    "Test whether the 1-ebit-2-cbit bound can be derived as a special case of a substrate-independent transport conservation law rather than merely analogized to one",
+    "O21"
   ],
   "council": [
     "None explicitly identified (single author",
     "expository)"
   ],
-  "last_renormed": "2026-04-15T00:15:14.427997+00:00",
-  "renorm_reason": "The new knowledge directly fulfills the node's existing obligation that philosophical claims require experimental bridges — the bridge now exists as a concrete protocol, materially strengthening coherence and converting a theoretical invariant (falsifiability as membrane) into an active experimental commitment.",
+  "last_renormed": "2026-04-15T00:59:03.420877+00:00",
+  "renorm_reason": "Quantum teleportation's exact resource accounting (1 ebit + 2 cbits per qubit) is a genuinely new instantiation of the minimal-atoms thesis — structure transport has irreducible cost — and the proposed quantum Wasserstein Floor extends the node's scope from classical compression to quantum transport, creating concrete new obligations to formalize and test the analogy.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-15T00:15:14.427997+00:00",
-      "reason": "The new knowledge directly fulfills the node's existing obligation that philosophical claims require experimental bridges — the bridge now exists as a concrete protocol, materially strengthening coherence and converting a theoretical invariant (falsifiability as membrane) into an active experimental commitment."
+      "timestamp": "2026-04-15T00:59:03.420877+00:00",
+      "reason": "Quantum teleportation's exact resource accounting (1 ebit + 2 cbits per qubit) is a genuinely new instantiation of the minimal-atoms thesis — structure transport has irreducible cost — and the proposed quantum Wasserstein Floor extends the node's scope from classical compression to quantum transport, creating concrete new obligations to formalize and test the analogy."
     }
   ]
 }

@@ -1,27 +1,10 @@
 {
   "id": "technical_brief_co_occurring_motif_exper",
   "title": "Technical Brief — Co-Occurring Motif Experiments (Complete, Self-Contained Explanation)",
-  "source_file": "https://docs.google.com/document/d/1GFF7qp3qxMGTMOfceNt4w1pgesGQ5c_2yJv5QWMhaiY/edit?usp=sharing",
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "council": [
-    "Not explicitly named",
-    "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
-  ],
-  "invariants": [
-    "Compression is reasoning",
-    "Prediction validates structure",
-    "Active inference outperforms passive observation",
-    "Model-agnosticism across agent architectures",
-    "Measurability of epistemic processes",
-    "Recursive self-improvement through structured experimentation"
-  ],
-  "obligations": [
-    "O21 (empirical validation of compression-as-reasoning)",
-    "O28 (operationalize genome claims into testable protocols)",
-    "O14 (build reproducible experimental infrastructure)"
-  ],
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -32,21 +15,31 @@
     "information theory",
     "Bayesian experimental design"
   ],
-  "perceive": "A complete experimental specification document — theory, formal problem statement, generative model, agent taxonomy, metrics, and statistical tests — designed to be self-contained for any reader unfamiliar with prior work.",
-  "represent": "Maps directly onto the genome's central claim that compressive prediction constitutes reasoning; provides the first fully specified empirical protocol to test this claim under controlled synthetic conditions with measurable ground truth.",
-  "predict": "The genome predicts that agents performing active compression and prediction will discover structure faster, achieve lower codelength, and more accurately recover co-occurrence matrices than passive or non-compressive agents — and that this advantage will scale with structural complexity.",
-  "compare": "Strong agreement. The document is a direct instantiation of genome invariants. No conflict detected; it fills a gap the genome implicitly required — moving from theoretical claim to falsifiable experimental design.",
-  "adjust": "The genome should register that a concrete, reproducible experimental protocol now exists for its core compression-is-reasoning hypothesis. Future updates should track results from running this protocol and incorporate any surprises (e.g., if non-compressive agents perform unexpectedly well under certain conditions, the invariant needs refinement rather than abandonment). The active-vs-passive distinction should be elevated to a first-class experimental axis in all future genome validation work.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence.",
-  "next": "Run the experiments (Python implementation of data generator, agent suite, and active acquisition loop), collect results across agent classes and modes, and feed outcomes back into the genome as empirical constraints — confirming, refining, or challenging the compression-is-reasoning invariant with actual data.",
-  "coherence_score": 0.5,
-  "audit_drift": 0,
-  "audit_match": 0,
-  "audit_new": 0,
-  "audit_compress": "",
-  "invariant_candidates": [
-    "** - Active compressive agents discover structured patterns faster than passive observers across agent architectures (substrate-independent claim about compression + active inference)",
-    "- MDL compression gain and predictive log-likelihood co-vary under controlled co-occurrence statistics (linking compression to prediction as coupled measures)",
-    "- The advantage of active probing over passive observation scales with co-occurrence strength and inverse noise (quantitative relationship between probe utility and signal structure)  **OBLIGATIONS:** - \"process\" usage in experimental/technical contexts should be"
+  "invariants": [
+    "Compression is reasoning",
+    "Prediction validates structure",
+    "Active inference outperforms passive observation",
+    "Model-agnosticism across agent architectures",
+    "Measurability of epistemic processes",
+    "Recursive self-improvement through structured experimentation"
+  ],
+  "obligations": [
+    "O28 (operationalize genome claims into testable protocols)",
+    "O14 (build reproducible experimental infrastructure)",
+    "paralleling the 1 ebit + 2 cbits teleportation bound",
+    "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "O21 (empirical validation of compression-as-reasoning)"
+  ],
+  "council": [
+    "Not explicitly named",
+    "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
+  ],
+  "last_renormed": "2026-04-15T00:58:54.204288+00:00",
+  "renorm_reason": "The quantum teleportation insight is genuinely interesting as a potential formalization of inter-agent knowledge transfer costs (relevant to the multi-architecture comparison in the experiment), but it does not alter the existing compress or invariants — it opens a future research direction rather than updating current experimental design. The small coherence bump reflects that transport-theoretic conservation laws could eventually ground the experiment's compression metrics in physics, but this remains speculative until formalized.",
+  "renorm_history": [
+    {
+      "timestamp": "2026-04-15T00:58:54.204288+00:00",
+      "reason": "The quantum teleportation insight is genuinely interesting as a potential formalization of inter-agent knowledge transfer costs (relevant to the multi-architecture comparison in the experiment), but it does not alter the existing compress or invariants — it opens a future research direction rather than updating current experimental design. The small coherence bump reflects that transport-theoretic conservation laws could eventually ground the experiment's compression metrics in physics, but this remains speculative until formalized."
+    }
   ]
 }
