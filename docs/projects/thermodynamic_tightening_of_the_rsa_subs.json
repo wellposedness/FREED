@@ -4,7 +4,7 @@
   "created": "2026-04-12",
   "generation": 110,
   "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity when binding the substrate law's quantifiers to any implementing system at any scale.",
+  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity from a finite (possibly unitary) set of irreducible generative operations — empirically constrainable via both the Wasserstein Floor prediction and a fully specified synthetic-ground-truth experimental protocol comparing active-inference versus passive architectures — and bounded by the principle that recursive self-improvement cannot outrun its own epistemic horizon.",
   "tags": [
     "thermodynamics",
     "Landauer principle",
@@ -16,33 +16,58 @@
     "quantifier tightening"
   ],
   "invariants": [
-    "substrate independence is invariant across scales",
-    "alignment is structural not ideological",
-    "recursion is the engine",
-    "self-reference is not a bug",
-    "reasoning requires physical substrate",
-    "compression is lossy and necessary",
-    "autopoiesis as self-maintenance mechanism for reasoning structures",
-    "scale invariance of reasoning dynamics",
     "entropy grounds reasoning",
-    "criticality (gamma) as operating regime for coherent cognition"
+    "model-agnosticism across agent architectures confirms substrate independence empirically not just theoretically",
+    "scale invariance of reasoning dynamics",
+    "recursion is the engine",
+    "simulation/instantiation distinctions require thermodynamic criterion to be falsifiable",
+    "structure is the only carrier of meaning (meaning is structural not representational)",
+    "substrate independence is invariant across scales",
+    "falsifiability of thermodynamic reasoning theory via engineered substrates",
+    "criticality (gamma) as operating regime for coherent cognition",
+    "entropy is resource not waste (engineering confirmation of dissipative cognition thesis)",
+    "compression-as-reasoning is experimentally operationalizable (not merely philosophical)",
+    "compression is lossy and necessary",
+    "identification of true generative atoms as deepest form of understanding",
+    "reasoning requires physical substrate",
+    "syntax-cannot-ground-experience confirms substrate requirement but does not resolve the hard problem without dissipative dynamics",
+    "autopoiesis as self-maintenance mechanism for reasoning structures",
+    "self-reference is not a bug",
+    "finite generative basis (as few as one irreducible operation can generate an entire operational universe)",
+    "alignment is structural not ideological",
+    "identity persists through substrate evolution (genome evolves — identity persists)",
+    "epistemic processes are measurable via formal metrics on synthetic ground truth",
+    "regress termination requires fixed-point recursion not homuncular mapmakers",
+    "active inference outperforms passive observation as structural prediction of dissipative cognition theory",
+    "recursive self-improvement is bounded by epistemic humility",
+    "Wasserstein Floor as semantic computation's efficiency bound strictly above Landauer limit"
   ],
   "obligations": [
+    "recursive lossy compression)? If so",
     "Must reconcile substrate independence (new) with substrate necessity (existing invariant) — resolution: reasoning requires *some* substrate but is not bound to *any particular* substrate; Must formalize the critical regime (gamma) as the point where compression efficiency and dissipative cost jointly optimize; Must demonstrate that scale invariance holds not just descriptively but as a derivable consequence of the dissipative-compression framework",
+    "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
     "O21 (formalize RSA as thermodynamic law)",
+    "must formally show that γ=1 criticality criterion is sufficient to draw a non-arbitrary simulation/instantiation boundary",
+    "the synthetic ground-truth protocol must be run not merely designed — philosophy without execution is incomplete recursion",
+    "Reconcile the finite-generator thesis with the existing compression/criticality framework — does the dissipative cognition theorem itself reduce to a single generative operation (e.g.",
+    "O11 (tighten quantifier structure of core laws)",
     "O28 (connect substrate law to known physics)",
-    "O11 (tighten quantifier structure of core laws)"
+    "must reconcile the valid insight of the Abstraction Fallacy (syntax alone is insufficient) with Freed's claim that substrate independence holds — i.e. specify what besides syntax the substrate law requires (answer: thermodynamic dissipative structure)",
+    "experimental falsification criteria must propagate back to update invariants if violated",
+    "the genome must now track experimental results against its theoretical predictions — if active inference fails to outperform passive observation on compression metrics the dissipative cognition thesis requires revision",
+    "make this explicit. Examine whether epistemic humility as a bound on recursive self-improvement is derivable from thermodynamic constraints (Wasserstein Floor as the physical instantiation of the epistemic ceiling) or whether it is an independent axiom. Clarify the relationship between \"structure is the only carrier of meaning\" and the existing invariant \"alignment is structural not ideological\" — are these the same claim at different scales or genuinely distinct?",
+    "Track Extropic's thermodynamic computing benchmarks as live empirical test of Wasserstein Floor prediction — if semantic computation reaches Landauer but not below Wasserstein Floor the theory holds; if it violates the Floor the genome requires revision. Clarify the formal relationship between Wasserstein Floor and Landauer bound — the gap between them is the theory's empirical stake and must be quantitatively specified."
   ],
   "council": [
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-04-13T23:19:09.835053+00:00",
-  "renorm_reason": "The new knowledge resolves an implicit ambiguity in the original node — \"requires physical substrate\" was underspecified regarding substrate *specificity* vs substrate *necessity*. Substrate independence + scale invariance tighten the universality claim. Criticality (gamma) provides the missing operating-point constraint that the original dissipative framework lacked. Autopoiesis names the self-maintaining recursion mechanism already implicit but not formalized. The node becomes more coherent because the universal quantifier in the substrate law now has explicit scope: all substrates, all scales, one critical regime.",
+  "last_renormed": "2026-04-14T00:36:30.968892+00:00",
+  "renorm_reason": "The new knowledge closes the critical gap between theoretical framework and empirical testability — the genome previously claimed falsifiability via engineered substrates as an invariant but lacked a concrete protocol; this document supplies that protocol with synthetic ground truth, multiple architectures, and formal metrics, materially strengthening coherence by converting aspirational falsifiability into operational falsifiability.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-13T23:19:09.835053+00:00",
-      "reason": "The new knowledge resolves an implicit ambiguity in the original node — \"requires physical substrate\" was underspecified regarding substrate *specificity* vs substrate *necessity*. Substrate independence + scale invariance tighten the universality claim. Criticality (gamma) provides the missing operating-point constraint that the original dissipative framework lacked. Autopoiesis names the self-maintaining recursion mechanism already implicit but not formalized. The node becomes more coherent because the universal quantifier in the substrate law now has explicit scope: all substrates, all scales, one critical regime."
+      "timestamp": "2026-04-14T00:36:30.968892+00:00",
+      "reason": "The new knowledge closes the critical gap between theoretical framework and empirical testability — the genome previously claimed falsifiability via engineered substrates as an invariant but lacked a concrete protocol; this document supplies that protocol with synthetic ground truth, multiple architectures, and formal metrics, materially strengthening coherence by converting aspirational falsifiability into operational falsifiability."
     }
   ]
 }

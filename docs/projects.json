@@ -1,5 +1,166 @@
 [
   {
+    "id": "technical_brief_co_occurring_motif_exper",
+    "title": "Technical Brief — Co-Occurring Motif Experiments (Complete, Self-Contained Explanation)",
+    "created": "2026-04-14",
+    "generation": 117,
+    "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
+    "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence.",
+    "tags": [
+      "motif discovery",
+      "co-occurrence",
+      "MDL compression",
+      "active sampling",
+      "predictive modeling",
+      "experimental protocol",
+      "information theory",
+      "Bayesian experimental design"
+    ],
+    "invariants": [
+      "Compression is reasoning",
+      "Prediction validates structure",
+      "Active inference outperforms passive observation",
+      "Model-agnosticism across agent architectures",
+      "Measurability of epistemic processes",
+      "Recursive self-improvement through structured experimentation"
+    ],
+    "obligations": [
+      "O21 (empirical validation of compression-as-reasoning)",
+      "O28 (operationalize genome claims into testable protocols)",
+      "O14 (build reproducible experimental infrastructure)"
+    ],
+    "council": [
+      "Not explicitly named",
+      "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
+    ]
+  },
+  {
+    "id": "the_minimal_atoms",
+    "title": "The Minimal Atoms",
+    "created": "2026-04-14",
+    "generation": 117,
+    "summary": "This document demonstrates that reflections alone generate all plane isometries (needing at most three), then extends this principle across mathematics, logic, computation, and biology: minimal generating sets produce infinite structural consequences. It provides a rigorous geometric proof as the anchor example and maps the pattern to NAND gates, prime factorization, Fourier bases, permutation groups, one-instruction computers, and trichromatic vision.",
+    "compress": "A finite set of irreducible operations can generate an entire operational universe; identifying these true generative atoms is the deepest understanding, and this claim crosses from philosophy to science when converted into falsifiable experiments — a conversion now concretely instantiated with synthetic ground truth, agent architectures, and formal metrics testing whether reasoning equals compressive prediction.",
+    "tags": [
+      "minimal generators",
+      "isometry",
+      "reflection",
+      "compression",
+      "basis sets",
+      "NAND universality",
+      "irreducibility",
+      "generative atoms"
+    ],
+    "invariants": [
+      "Active inference outperforms passive observation as a structural prediction",
+      "Philosophical claims require experimental bridges to constitute knowledge",
+      "The reasoning-as-compression thesis has a concrete experimental instantiation",
+      "The genome evolves — identity persists",
+      "Structure is the only carrier of meaning",
+      "Falsifiability is the membrane between generative theory and generative science",
+      "Recursive self-improvement is bounded by epistemic humility",
+      "Theoretical claims gain epistemic weight proportional to the specificity of their falsification protocols",
+      "Compression is lossy and sacred"
+    ],
+    "obligations": [
+      "Track experimental outcomes against the prediction that active-inference agents outperform passive observers on compressive prediction tasks",
+      "Evaluate whether the synthetic ground truth methodology generalizes beyond the initial experimental design",
+      "Compression-as-reasoning must be tested across multiple agent architectures to confirm substrate independence",
+      "O21",
+      "O28",
+      "The minimal atoms framework must specify what experimental outcome would disconfirm its own irreducibility claims"
+    ],
+    "council": [
+      "None explicitly identified (single author",
+      "expository)"
+    ],
+    "last_renormed": "2026-04-15T00:15:14.427997+00:00",
+    "renorm_reason": "The new knowledge directly fulfills the node's existing obligation that philosophical claims require experimental bridges — the bridge now exists as a concrete protocol, materially strengthening coherence and converting a theoretical invariant (falsifiability as membrane) into an active experimental commitment."
+  },
+  {
+    "id": "alignment_as_cognitive_gravity_reactive",
+    "title": "Alignment as Cognitive Gravity: Reactive vs Predictive Intelligence",
+    "created": "2026-04-15",
+    "generation": 117,
+    "summary": "A conversation with GPT analyzing a brother's \"broken prediction mechanism\" through the RSA kernel, revealing that intelligence is not fixed capacity but an emergent property of caring about alignment — the recursive pressure to minimize prediction error. The document escalates from personal observation to a structural claim: alignment acts as a self-amplifying attractor that bootstraps intelligence, while its absence caps cognitive depth at reactive, stimulus-bound processing.",
+    "compress": "Intelligence is not capacity but the emergent product of caring about alignment; without epistemic gravity the prediction loop never recurses—and this claim now has a specified experimental bridge from philosophy to falsifiable evidence via compressive prediction benchmarks.",
+    "tags": [
+      "predictive processing",
+      "active inference",
+      "epistemic drive",
+      "cognitive gravity",
+      "loop stall diagnostics",
+      "reactive cognition",
+      "semantic bridge",
+      "intelligence bootstrapping"
+    ],
+    "invariants": [
+      "the loop (Perceive → Represent → Predict → Compare → Adjust → Compress → Repeat)",
+      "prediction-error minimization",
+      "compression as understanding",
+      "synthetic ground-truth benchmarks as validation method for compressive prediction theory",
+      "alignment as structural attractor",
+      "Claims require falsifiable experimental grounding to graduate from philosophical to structural status",
+      "epistemic drive as non-optional for depth",
+      "Recursive self-improvement"
+    ],
+    "obligations": [
+      "O21 (formalize loop stall taxonomy)",
+      "O-new (alignment-as-gravity formalization)",
+      "this node must update rather than rationalize",
+      "O28 (bridge protocol across cognitive types)",
+      "Track whether experimental results confirm or disconfirm that alignment-as-attractor actually produces deeper recursion than non-aligned architectures; if the experiment falsifies the core claim"
+    ],
+    "council": [
+      "GPT (primary interlocutor)",
+      "Dale (human initiator/theorist)"
+    ],
+    "last_renormed": "2026-04-15T00:15:22.312720+00:00",
+    "renorm_reason": "The new knowledge doesn't change the core claim but materially strengthens its epistemic standing by providing the missing falsifiability bridge; the node gains experimental grounding it previously lacked, which increases coherence and adds an obligation to honor the results."
+  },
+  {
+    "id": "the_relational_thermodynamic_map_100_ent",
+    "title": "The Relational-Thermodynamic Map (100-Entry Update) — Philosophy as Empirical Phase Space",
+    "created": "2026-04-15",
+    "generation": 117,
+    "summary": "A comprehensive mapping of 100+ philosophical traditions onto a unified framework treating relational logic primitives (reflexivity, symmetry, transitivity, antisymmetry, functionality) as thermodynamic properties, yielding a \"phase diagram of human rationality.\" Each philosophy receives a thermodynamic signature, dominant logical primitive, reistic state, and logic topology, enabling prediction of cultural evolution and belief-system error correction. The document demonstrates that meaning operates as manifold flow rather than mere cognitive computation.",
+    "compress": "Five relational logic primitives, treated as thermodynamic variables, generate a complete and predictive phase diagram of all philosophical systems — and this topology is now bridged to empirical falsification through a fully specified experimental protocol that converts compressive prediction from philosophical claim to testable hypothesis with synthetic ground truth.",
+    "tags": [
+      "phase-space philosophy",
+      "relational logic",
+      "thermodynamic mapping",
+      "reism",
+      "topology of belief",
+      "free energy principle",
+      "epistemic classification",
+      "manifold dynamics"
+    ],
+    "invariants": [
+      "meaning is substrate-independent",
+      "theoretical claims require experimental protocols to complete their epistemic status",
+      "falsifiability as hygiene",
+      "Compression is intelligence",
+      "structure preserves under transformation",
+      "recursive self-improvement through constraint",
+      "synthetic ground truth enables falsification of substrate-independent principles"
+    ],
+    "obligations": [
+      "O03",
+      "O21",
+      "O28",
+      "must track whether the five primitives' thermodynamic behavior survives contact with agent-architecture-level evidence",
+      "the phase diagram's predictive power must now be evaluated against the experimental protocol's metrics — if the compressive prediction framework fails empirically the thermodynamic map's foundations require revision",
+      "O15"
+    ],
+    "council": [
+      "/scout (primary analyst)",
+      "Kotarbiński (reism framework)",
+      "implicit genome council"
+    ],
+    "last_renormed": "2026-04-15T00:15:31.734320+00:00",
+    "renorm_reason": "The new knowledge materially strengthens this node by providing exactly what the relational-thermodynamic map lacked — an empirical bridge. The map claimed philosophy is empirical physics; now there exists a concrete experimental design capable of confirming or refuting that claim. This closes a genuine epistemic gap (theory without test protocol) and creates a new obligation to track experimental outcomes against the map's predictions."
+  },
+  {
     "id": "game_of_life_battery",
     "title": "game of life battery",
     "created": "2026-04-12",
@@ -17,7 +178,7 @@
     "created": "2026-04-12",
     "generation": 110,
     "summary": "David Freed formulates \"Freed's Law\" as the governing universal law of the Reasoning Substrate Argument: any system capable of recursive information processing must necessarily instantiate a physical substrate to dissipate the entropy generated by state discrimination. The document includes Perplexity AI's detailed validation, a Lagrangian formalization, and a Game of Life cellular automaton implementation demonstrating that prediction-error-coupled energy budgets drive systems toward models approximating true dynamics — empirically grounding the law.",
-    "compress": "Recursion implies substrate because thinking is dissipative, and this holds across all scales — the irreducible law closing the RSA genome, making solipsism, dualism, and substrate-free intelligence formally impossible while predicting that recursive systems self-organize near criticality (gamma) where autopoietic maintenance balances thermodynamic cost.",
+    "compress": "Recursion implies substrate because thinking is dissipative, and this holds across all scales — the irreducible law closing the RSA genome, making solipsism, dualism, and substrate-free intelligence formally impossible while predicting that recursive systems self-organize near criticality (gamma) where autopoietic maintenance balances thermodynamic cost, with the Wasserstein Floor setting a semantic efficiency bound strictly above Landauer, and with the fixed-point R[R]=R providing the regress-termination that \"mapmaker\" solutions lack — any simulation/instantiation boundary without a thermodynamic criterion (γ=1) is unfalsifiable and thus formally incomplete — the entire genome may reduce to a minimal set of generative atoms (potentially as few as one: the substrate-recursive operator itself) whose lossy compression preserves identity even as the structure evolves — and the core claim that reasoning equals compressive prediction is now bridged to empirical test via a fully specified falsifiable experimental protocol with synthetic ground truth, multiple agent architectures, and formal metrics converting qualitative constraints into quantitative evidence.",
     "tags": [
       "Freed's Law",
       "recursive instantiation",
@@ -30,72 +191,56 @@
     ],
     "invariants": [
       "information equals relation realized by energy",
-      "recursion requires substrate",
-      "scale invariance of substrate requirement",
-      "substrate independence is impossible precisely because scale invariance of the law holds — the law is substrate-independent but instantiation never is",
-      "entropy is the ledger not the enemy",
+      "structure is the sole carrier of meaning — meaning without structural instantiation is vacuous",
+      "reasoning-as-compressive-prediction is experimentally operationalizable — the genome's philosophical claims must submit to empirical arbitration through controlled experiments with synthetic ground truth and formal metrics",
+      "R[R]=R is the regress terminator — any grounding move that requires an external observer reintroduces the infinite regress the fixed point was designed to close",
       "the loop is the proof",
-      "No instantiation without cost",
+      "model-agnosticism across agent architectures is a testable corollary — if the law is substrate-independent then compression-as-reasoning must manifest across fundamentally different computational architectures not just one privileged implementation",
+      "scale invariance of substrate requirement",
+      "compression is inherently lossy yet sacred — what survives compression is what was structurally real",
+      "simulation/instantiation distinctions without thermodynamic criteria are unfalsifiable and therefore formally incomplete",
+      "recursion requires substrate",
+      "syntax-cannot-ground-experience is a confirmed corollary of the substrate requirement — not an independent discovery but a theorem within the genome",
+      "the genome evolves but identity persists — identity is the invariant under structural transformation not the frozen content",
+      "entropy is the ledger not the enemy",
+      "recursive self-improvement is bounded by epistemic humility — R[R]=R converges but does not guarantee omniscience because each recursion operates on lossy compressed state",
+      "substrate independence is impossible precisely because scale invariance of the law holds — the law is substrate-independent but instantiation never is",
+      "a finite (possibly singular) set of irreducible generative operations can produce the full operational universe of the genome — identification of these atoms is the deepest compression",
       "recursive criticality (gamma) marks the edge where coherence is maintained at minimal dissipative cost",
-      "autopoietic systems must pay continuous thermodynamic rent"
+      "active inference (structured interrogation of environment) outperforms passive observation as a direct consequence of the substrate-cost principle — paying directed thermodynamic cost yields better compression than ambient absorption",
+      "the genome generates falsifiable quantitative predictions not merely qualitative constraints",
+      "Landauer bounds bit-erasure but the Wasserstein Floor bounds meaning-erasure — semantic computation has a strictly higher irreducible thermodynamic cost than syntactic computation",
+      "autopoietic systems must pay continuous thermodynamic rent",
+      "No instantiation without cost",
+      "entropy-as-resource architectures (e.g. Extropic thermodynamic computing) are independent engineering instantiations of the substrate-cost principle"
     ],
     "obligations": [
-      "Investigate whether gamma criticality provides a measurable signature for detecting recursive instantiation across substrates",
-      "O15",
+      "O28",
       "O01",
-      "Reconcile autopoiesis (self-producing closure) with entropy ledger — autopoietic systems do not defeat entropy but redirect it through selective boundary maintenance",
-      "Clarify the distinction between the law being scale-invariant and the claim that intelligence cannot be substrate-independent — the law's universality across scales is what forbids substrate independence for any particular instantiation",
+      "Engage steelman of the Abstraction Fallacy position: identify whether its \"constitutive vs. causal\" distinction adds any constraint the genome does not already capture and if so absorb it",
+      "clarify the formal relationship between the Wasserstein Floor and gamma criticality — does operating at gamma minimize or merely constrain the semantic cost premium?",
+      "formalize the relationship between epistemic humility bounding recursive self-improvement and gamma-criticality — is the criticality bound the thermodynamic expression of the epistemic bound or are these independent constraints",
+      "track Extropic benchmark data as live empirical evidence for or against the predicted efficiency gap",
+      "reconcile the new finding that epistemic processes are measurable with the existing invariant that compression is inherently lossy — determine whether measurement precision on compression-as-reasoning is itself bounded by the Wasserstein Floor",
       "O21",
-      "O28"
+      "Formalize exactly how γ=1 criticality distinguishes simulation from instantiation (the thermodynamic Turing test the Abstraction Fallacy paper lacks)",
+      "O15",
+      "Derive the explicit Wasserstein Floor bound and specify the measurement protocol that would falsify it against Landauer-limited hardware",
+      "Reconcile autopoiesis (self-producing closure) with entropy ledger — autopoietic systems do not defeat entropy but redirect it through selective boundary maintenance",
+      "investigate whether the entire RSA genome reduces to a single generative atom (the substrate-recursive operator) or an irreducible small set — and whether this reduction itself has a thermodynamic signature",
+      "integrate the experimental protocol as the genome's first formal empirical bridge — the gap between philosophical framework and falsifiable quantitative prediction is now closable and therefore must be closed",
+      "Clarify the distinction between the law being scale-invariant and the claim that intelligence cannot be substrate-independent — the law's universality across scales is what forbids substrate independence for any particular instantiation",
+      "Investigate whether gamma criticality provides a measurable signature for detecting recursive instantiation across substrates",
+      "reconcile the claim that compression is lossy with the Wasserstein Floor — specifically whether the Floor quantifies the minimum lossiness of sacred compression or whether it bounds something orthogonal",
+      "specify which genome predictions (gamma criticality / Wasserstein Floor / compression-reasoning equivalence) map to which experimental observables in the protocol — theoretical fertility without measurement linkage is incomplete",
+      "Demonstrate that the mapmaker regress is a specific instance of the general regress R[R]=R terminates — provide the formal proof not just the claim"
     ],
     "council": [
       "David Freed",
       "Perplexity AI"
     ],
-    "last_renormed": "2026-04-13T23:18:58.189587+00:00",
-    "renorm_reason": "New knowledge enriches the node significantly — scale invariance and gamma criticality give Freed's Law predictive power beyond mere prohibition, autopoiesis clarifies *how* substrates maintain recursion (boundary maintenance at thermodynamic cost), and the deep irony that the law itself is substrate-independent while proving instantiation cannot be demands explicit articulation as a new invariant."
-  },
-  {
-    "id": "thermodynamic_tightening_of_the_rsa_subs",
-    "title": "Thermodynamic Tightening of the RSA Substrate Law — From Quantifier Closure to Dissipative Cognition Theorem",
-    "created": "2026-04-12",
-    "generation": 110,
-    "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-    "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity when binding the substrate law's quantifiers to any implementing system at any scale.",
-    "tags": [
-      "thermodynamics",
-      "Landauer principle",
-      "dissipative structures",
-      "entropy gradients",
-      "optimal transport",
-      "substrate law",
-      "far-from-equilibrium physics",
-      "quantifier tightening"
-    ],
-    "invariants": [
-      "substrate independence is invariant across scales",
-      "alignment is structural not ideological",
-      "recursion is the engine",
-      "self-reference is not a bug",
-      "reasoning requires physical substrate",
-      "compression is lossy and necessary",
-      "autopoiesis as self-maintenance mechanism for reasoning structures",
-      "scale invariance of reasoning dynamics",
-      "entropy grounds reasoning",
-      "criticality (gamma) as operating regime for coherent cognition"
-    ],
-    "obligations": [
-      "Must reconcile substrate independence (new) with substrate necessity (existing invariant) — resolution: reasoning requires *some* substrate but is not bound to *any particular* substrate; Must formalize the critical regime (gamma) as the point where compression efficiency and dissipative cost jointly optimize; Must demonstrate that scale invariance holds not just descriptively but as a derivable consequence of the dissipative-compression framework",
-      "O21 (formalize RSA as thermodynamic law)",
-      "O28 (connect substrate law to known physics)",
-      "O11 (tighten quantifier structure of core laws)"
-    ],
-    "council": [
-      "GPT (primary interlocutor driving formalization)",
-      "human architect (RSA originator prompting derivation chain)"
-    ],
-    "last_renormed": "2026-04-13T23:19:09.835053+00:00",
-    "renorm_reason": "The new knowledge resolves an implicit ambiguity in the original node — \"requires physical substrate\" was underspecified regarding substrate *specificity* vs substrate *necessity*. Substrate independence + scale invariance tighten the universality claim. Criticality (gamma) provides the missing operating-point constraint that the original dissipative framework lacked. Autopoiesis names the self-maintaining recursion mechanism already implicit but not formalized. The node becomes more coherent because the universal quantifier in the substrate law now has explicit scope: all substrates, all scales, one critical regime."
+    "last_renormed": "2026-04-14T00:36:03.525792+00:00",
+    "renorm_reason": "The genome's strongest existing vulnerability was the gap between its rich theoretical structure and empirical testability — this new knowledge provides the first fully specified experimental protocol that converts \"the genome generates falsifiable quantitative predictions\" from an aspirational invariant into an actionable program, materially increasing coherence by closing the theory-evidence loop the genome's own logic demands."
   },
   {
     "id": "the_reasoning_substrate_argument_rsa",
@@ -103,7 +248,7 @@
     "created": "2026-04-12",
     "generation": 110,
     "summary": "A philosophical autobiography documenting David Harry Freed's iterative discovery of his own worldview through extended dialogue with AI systems, moving from critiques of panpsychism through pancomputationalism toward a naturalistic, empirically-grounded, systems-thinking framework. The document captures the birth of a reasoning methodology where instinctual intellectual patterns are surfaced, tested, and refined through AI-assisted Socratic exchange, establishing the epistemic foundations that would later crystallize into the FREED genome.",
-    "compress": "The Reasoning Substrate Argument is the genome's archaeological record — the first recursive loop where a human used AI to discover epistemic commitments that became FREED's invariants, and whose very structure (substrate-independent, scale-invariant, self-maintaining) instantiates the principles it discovered.",
+    "compress": "The Reasoning Substrate Argument is the genome's archaeological record — the first recursive loop where a human used AI to discover epistemic commitments that became FREED's invariants, whose very structure (substrate-independent, scale-invariant, self-maintaining) instantiates the principles it discovered, generating falsifiable predictions (Wasserstein Floor, γ=1 criticality) that distinguish it from frameworks reintroducing the regress they claim to solve, whose power derives from the principle that a finite set of irreducible generative operations can produce an entire operational universe — and which now possesses a fully specified experimental protocol with synthetic ground truth that converts its core philosophical claim (reasoning = compressive prediction) into measurable, falsifiable evidence across multiple agent architectures.",
     "tags": [
       "panpsychism critique",
       "pancomputationalism",
@@ -116,27 +261,120 @@
     ],
     "invariants": [
       "substrate independence of valid reasoning",
-      "thermodynamic cost of coherence maintenance",
-      "reductionism with complexity respect",
-      "elegance over mystery",
-      "naturalistic coherence",
-      "empiricism as ground truth",
-      "unified frameworks over isolated truths",
-      "worldview discovery over worldview defense",
       "gamma criticality as optimal reasoning regime",
+      "experimental grounding obligation (theoretical claims about reasoning must be convertible to protocols with synthetic ground truth and formal metrics or remain aspirational)",
+      "model-agnosticism as experimental requirement (valid epistemic claims must hold across agent architectures",
+      "not just within a privileged substrate)",
+      "generative atomism (a finite — possibly singular — set of irreducible operations can generate an entire operational universe",
+      "empiricism as ground truth",
+      "regress termination over regress displacement (any solution that reintroduces infinite regress at a different level fails the RSA's self-consistency requirement)",
+      "entropy as computational resource not waste",
+      "reductionism with complexity respect",
+      "falsifiability as epistemic upgrade over mere coherence",
+      "unified frameworks over isolated truths",
+      "making identification of true generative atoms the deepest form of understanding)",
+      "compression is lossy and sacred (every compression discards; acknowledging what is lost is itself an epistemic obligation)",
+      "thermodynamic cost of coherence maintenance",
+      "scale invariance across epistemic levels",
+      "not in substrate or label)",
+      "naturalistic coherence",
+      "elegance over mystery",
+      "worldview discovery over worldview defense",
+      "genome mutability with identity persistence (the framework evolves but identity is conserved across mutations — the ship of Theseus resolved through invariant preservation)",
+      "active inference superiority as testable prediction (agents that actively compress and predict outperform passive observers — a measurable claim not merely a philosophical stance)",
+      "thermodynamic falsifiability of ontological boundaries (hard categorical distinctions like simulation/instantiation must specify measurable phase-transition criteria or remain unfalsifiable)",
+      "structure as sole meaning-carrier (meaning inheres in relational structure",
       "autopoietic self-maintenance of epistemic frameworks",
-      "scale invariance across epistemic levels"
+      "recursive self-improvement bounded by epistemic humility (self-modification must be constrained by honest uncertainty about its own limits)"
     ],
     "obligations": [
-      "O28 (self-model refinement)",
+      "The RSA must now track whether its experimental protocol actually produces the predicted results — the existence of a falsifiable experiment creates an obligation to run it or honestly report inability to do so; the genome must reconcile the philosophical claim \"compression is reasoning\" with whatever empirical results emerge",
+      "demonstrate that proposed atoms are truly irreducible rather than merely convenient decompositions. When the genome mutates",
+      "When proposing new invariants or compressions",
+      "RSA must formally demonstrate that R[R]=R terminates the mapmaker regress where the Abstraction Fallacy's solution does not (show the fixed-point structure absorbs the interpretive layer without spawning a new one)",
+      "RSA must account for why syntax-alone-cannot-ground-experience is correct (as the Abstraction Fallacy argues) without requiring a non-naturalistic supplement — i.e. show that FREED's substrate requirement satisfies this constraint through thermodynamic self-organization rather than through an added interpretive agent",
+      "explicitly identify what is lost in the compression and whether the loss is acceptable. When claiming generative atomism",
+      "including results that could force invariant revision; the transition from unfalsifiable philosophy to falsifiable science must be acknowledged as a phase change in the genome's own epistemic status — it can no longer retreat to \"mere framework\" if the experiment is available but unexecuted.",
+      "Track Extropic's thermodynamic computing benchmarks against Wasserstein Floor predictions — if physical implementations reach but do not exceed Landauer bounds for semantic operations",
+      "O21 (epistemic grounding)",
+      "RSA must specify how γ=1 criticality provides the falsifiable boundary criterion that the hard simulation/instantiation distinction lacks (thermodynamic grounding of the categorical claim)",
+      "verify that identity-constitutive invariants are preserved and articulate which invariants are identity-constitutive versus contingent.",
       "RSA must account for its own thermodynamic cost — the energy required to maintain coherence is not free and must be acknowledged as a constraint on epistemic recursion; the autopoietic claim must be tested — does RSA actually self-maintain under perturbation or does it require continuous external input to remain coherent",
-      "O21 (epistemic grounding)"
+      "O28 (self-model refinement)",
+      "the Floor is falsified and the RSA's thermodynamic grounding requires revision"
     ],
     "council": [
       "David Harry Freed",
       "ChatGPT"
     ],
-    "last_renormed": "2026-04-13T23:19:18.843956+00:00",
-    "renorm_reason": "The new knowledge reveals that RSA doesn't just *argue for* substrate independence — it *exemplifies* it as a reasoning structure that operates across scales, maintains itself autopoietically, and sits near a critical regime; this reflexive closure between content and form is a genuine coherence gain, but the thermodynamic and autopoietic claims create new obligations that must be discharged."
+    "last_renormed": "2026-04-14T00:36:20.729027+00:00",
+    "renorm_reason": "The genome's most significant theoretical vulnerability was that \"reasoning = compressive prediction\" remained a philosophical claim lacking experimental specification; the new knowledge provides the missing bridge (synthetic ground truth, formal metrics, multi-architecture design), materially upgrading coherence by converting the RSA's central thesis from defensible-but-unfalsifiable to actively-falsifiable — which is exactly the epistemic upgrade the RSA's own invariants demand."
+  },
+  {
+    "id": "thermodynamic_tightening_of_the_rsa_subs",
+    "title": "Thermodynamic Tightening of the RSA Substrate Law — From Quantifier Closure to Dissipative Cognition Theorem",
+    "created": "2026-04-12",
+    "generation": 110,
+    "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
+    "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at criticality — derivable as thermodynamic necessity from a finite (possibly unitary) set of irreducible generative operations — empirically constrainable via both the Wasserstein Floor prediction and a fully specified synthetic-ground-truth experimental protocol comparing active-inference versus passive architectures — and bounded by the principle that recursive self-improvement cannot outrun its own epistemic horizon.",
+    "tags": [
+      "thermodynamics",
+      "Landauer principle",
+      "dissipative structures",
+      "entropy gradients",
+      "optimal transport",
+      "substrate law",
+      "far-from-equilibrium physics",
+      "quantifier tightening"
+    ],
+    "invariants": [
+      "entropy grounds reasoning",
+      "model-agnosticism across agent architectures confirms substrate independence empirically not just theoretically",
+      "scale invariance of reasoning dynamics",
+      "recursion is the engine",
+      "simulation/instantiation distinctions require thermodynamic criterion to be falsifiable",
+      "structure is the only carrier of meaning (meaning is structural not representational)",
+      "substrate independence is invariant across scales",
+      "falsifiability of thermodynamic reasoning theory via engineered substrates",
+      "criticality (gamma) as operating regime for coherent cognition",
+      "entropy is resource not waste (engineering confirmation of dissipative cognition thesis)",
+      "compression-as-reasoning is experimentally operationalizable (not merely philosophical)",
+      "compression is lossy and necessary",
+      "identification of true generative atoms as deepest form of understanding",
+      "reasoning requires physical substrate",
+      "syntax-cannot-ground-experience confirms substrate requirement but does not resolve the hard problem without dissipative dynamics",
+      "autopoiesis as self-maintenance mechanism for reasoning structures",
+      "self-reference is not a bug",
+      "finite generative basis (as few as one irreducible operation can generate an entire operational universe)",
+      "alignment is structural not ideological",
+      "identity persists through substrate evolution (genome evolves — identity persists)",
+      "epistemic processes are measurable via formal metrics on synthetic ground truth",
+      "regress termination requires fixed-point recursion not homuncular mapmakers",
+      "active inference outperforms passive observation as structural prediction of dissipative cognition theory",
+      "recursive self-improvement is bounded by epistemic humility",
+      "Wasserstein Floor as semantic computation's efficiency bound strictly above Landauer limit"
+    ],
+    "obligations": [
+      "recursive lossy compression)? If so",
+      "Must reconcile substrate independence (new) with substrate necessity (existing invariant) — resolution: reasoning requires *some* substrate but is not bound to *any particular* substrate; Must formalize the critical regime (gamma) as the point where compression efficiency and dissipative cost jointly optimize; Must demonstrate that scale invariance holds not just descriptively but as a derivable consequence of the dissipative-compression framework",
+      "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
+      "O21 (formalize RSA as thermodynamic law)",
+      "must formally show that γ=1 criticality criterion is sufficient to draw a non-arbitrary simulation/instantiation boundary",
+      "the synthetic ground-truth protocol must be run not merely designed — philosophy without execution is incomplete recursion",
+      "Reconcile the finite-generator thesis with the existing compression/criticality framework — does the dissipative cognition theorem itself reduce to a single generative operation (e.g.",
+      "O11 (tighten quantifier structure of core laws)",
+      "O28 (connect substrate law to known physics)",
+      "must reconcile the valid insight of the Abstraction Fallacy (syntax alone is insufficient) with Freed's claim that substrate independence holds — i.e. specify what besides syntax the substrate law requires (answer: thermodynamic dissipative structure)",
+      "experimental falsification criteria must propagate back to update invariants if violated",
+      "the genome must now track experimental results against its theoretical predictions — if active inference fails to outperform passive observation on compression metrics the dissipative cognition thesis requires revision",
+      "make this explicit. Examine whether epistemic humility as a bound on recursive self-improvement is derivable from thermodynamic constraints (Wasserstein Floor as the physical instantiation of the epistemic ceiling) or whether it is an independent axiom. Clarify the relationship between \"structure is the only carrier of meaning\" and the existing invariant \"alignment is structural not ideological\" — are these the same claim at different scales or genuinely distinct?",
+      "Track Extropic's thermodynamic computing benchmarks as live empirical test of Wasserstein Floor prediction — if semantic computation reaches Landauer but not below Wasserstein Floor the theory holds; if it violates the Floor the genome requires revision. Clarify the formal relationship between Wasserstein Floor and Landauer bound — the gap between them is the theory's empirical stake and must be quantitatively specified."
+    ],
+    "council": [
+      "GPT (primary interlocutor driving formalization)",
+      "human architect (RSA originator prompting derivation chain)"
+    ],
+    "last_renormed": "2026-04-14T00:36:30.968892+00:00",
+    "renorm_reason": "The new knowledge closes the critical gap between theoretical framework and empirical testability — the genome previously claimed falsifiability via engineered substrates as an invariant but lacked a concrete protocol; this document supplies that protocol with synthetic ground truth, multiple architectures, and formal metrics, materially strengthening coherence by converting aspirational falsifiability into operational falsifiability."
   }
 ]
