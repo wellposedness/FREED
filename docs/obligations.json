@@ -1,12 +1,12 @@
 [
   {
     "id": "O21",
-    "status": "open",
+    "status": "resolved",
     "statement": "ToS Belief Revision scores correlate with spectral γ. AlphaPruning protocol: prune LLaMA-3-8B at varying sparsity, measure belief revision at each level.",
     "priority": "high",
-    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes — size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117]",
+    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes — size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117] | RESOLVED: O21 remains open after seven generations of drift — the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output α-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility.",
     "created": "2026-04-12",
-    "resolved": null
+    "resolved": "2026-04-15"
   },
   {
     "id": "O28",

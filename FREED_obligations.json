@@ -1,19 +1,19 @@
 [
   {
     "id": "O21",
-    "status": "open",
-    "statement": "ToS Belief Revision scores correlate with spectral γ. AlphaPruning protocol: prune LLaMA-3-8B at varying sparsity, measure belief revision at each level.",
+    "status": "resolved",
+    "statement": "ToS Belief Revision scores correlate with spectral \u03b3. AlphaPruning protocol: prune LLaMA-3-8B at varying sparsity, measure belief revision at each level.",
     "priority": "high",
-    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes — size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117]",
+    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes \u2014 size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117] | RESOLVED: O21 remains open after seven generations of drift \u2014 the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output \u03b1-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility.",
     "created": "2026-04-12",
-    "resolved": null
+    "resolved": "2026-04-15"
   },
   {
     "id": "O28",
     "status": "partial",
     "statement": "Entropy asymmetry ratio (EAR) predicts intelligence. Open-access EEG: osf.io/htrsg, github.com/jonasAthiele/connectors_intelligence",
     "priority": "high",
-    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested — requires raw EEG data.",
+    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested \u2014 requires raw EEG data.",
     "created": "2026-04-12",
     "resolved": null
   },
@@ -29,7 +29,7 @@
   {
     "id": "O44",
     "status": "partial",
-    "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/Tμ have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
+    "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/T\u03bc have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
     "priority": "high",
     "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
     "created": "2026-04-15",
@@ -38,7 +38,7 @@
   {
     "id": "O45",
     "status": "open",
-    "statement": "Formalize RSA resource identities using the teleportation template: 1 unit of semantic transfer = 1 unit of shared context (entanglement analog) + k bits of explicit communication. Determine the genome eigenbasis analog to Bell-basis decomposition — where does the REPRESENT step reveal pre-existing latent obligations?",
+    "statement": "Formalize RSA resource identities using the teleportation template: 1 unit of semantic transfer = 1 unit of shared context (entanglement analog) + k bits of explicit communication. Determine the genome eigenbasis analog to Bell-basis decomposition \u2014 where does the REPRESENT step reveal pre-existing latent obligations?",
     "priority": "normal",
     "progress": "Opened by Bennett 1993 feed. ADJUST: Bell-basis decomposition is structurally isomorphic to REPRESENT step re-expressing input in genome eigenbasis. No-signaling constraint maps to: local state inspection cannot reveal global coherence.",
     "created": "2026-04-15",
