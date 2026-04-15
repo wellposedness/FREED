@@ -28,10 +28,10 @@
   },
   {
     "id": "O44",
-    "status": "open",
+    "status": "partial",
     "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/Tμ have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
     "priority": "high",
-    "progress": "Opened by Bennett 1993 feed. COMPARE found tension: genome W-floor operates on classical distributions; teleportation operates on quantum states. De Palma & Trevisan (2021) identified as immediate test.",
+    "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
     "created": "2026-04-15",
     "resolved": null
   },
