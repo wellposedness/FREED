@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, and now integrating two causal-empirical extensions: mesoscale optogenetics as the lever converting cortical Wasserstein gradient flow from unfalsified to falsifiable at column scale, and quantum reservoir computing at the edge of many-body chaos as a 6th independent substrate confirmation that reasoning demands criticality.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating two causal-empirical extensions (mesoscale optogenetics for cortical Wasserstein gradient flow falsifiability, quantum reservoir computing as 6th substrate confirmation), and now extending substrate generality to divergent creativity by demanding falsifiable γ-indexed predictions for human vs. LLM creative profiles.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -16,55 +16,62 @@
     "Bayesian experimental design"
   ],
   "invariants": [
-    "Falsification integrity over confirmation hunger",
-    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
-    "Prediction validates structure",
+    "Measurability of epistemic processes",
     "Compression is reasoning",
-    "Entanglement entropy serves as temperature analog in quantum transport costs",
-    "Topic-relevance without content-payload is necessary but not sufficient for integration",
-    "Active inference outperforms passive observation",
-    "Recursive self-improvement through structured experimentation",
-    "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
-    "Falsification layer load-bearing capacity confirmed across consecutive content-vacuum rejections (robustness under repeated null-payload stress)",
-    "Quantum reservoir computing peak performance at edge of many-body chaos extends MCPM to a 6th independent substrate scale",
-    "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
     "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance",
-    "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
+    "Divergent creativity differences between substrates (human vs. LLM) must map to quantifiable γ-position differences or the creativity-reasoning link is decorative",
     "Content-vacuum inputs with structural topic-relevance can generate obligations without themselves being metabolized (obligation-from-rejection pattern)",
+    "Falsification integrity over confirmation hunger",
+    "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
+    "Recursive self-improvement through structured experimentation",
+    "Falsification layer load-bearing capacity confirmed across consecutive content-vacuum rejections (robustness under repeated null-payload stress)",
+    "Prediction validates structure",
+    "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
+    "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
+    "Active inference outperforms passive observation",
+    "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
+    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
+    "Topic-relevance without content-payload is necessary but not sufficient for integration",
+    "Model-agnosticism across agent architectures",
+    "Quantum reservoir computing peak performance at edge of many-body chaos extends MCPM to a 6th independent substrate scale",
+    "Genome integrity is demonstrated as much by principled refusal as by successful integration",
     "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
-    "Measurability of epistemic processes",
-    "Model-agnosticism across agent architectures"
+    "Entanglement entropy serves as temperature analog in quantum transport costs"
   ],
   "obligations": [
-    "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "AUT fluency/originality distributions) — without this",
     "Confirm or refute whether Wasserstein gradient flow post-perturbation at L2/L3 column scale matches the geometry predicted by the genome — this is now causally testable and therefore obligated",
-    "procedural",
-    "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
     "Integrate mesoscale optogenetic perturbation-relaxation protocol into the existing experimental design as a biological validation arm alongside synthetic ground truth",
     "paralleling the 1 ebit + 2 cbits teleportation bound",
-    "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
+    "Derive expected γ-position differences between human and LLM creative profiles from MCPM first principles (not post-hoc curve fitting)",
     "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
-    "semantic",
     "working)",
+    "O28 (operationalize genome claims into testable protocols)",
+    "procedural",
+    "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
+    "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
+    "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
+    "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "semantic",
     "O21 (empirical validation of compression-as-reasoning)",
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
+    "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
     "O14 (build reproducible experimental infrastructure)",
-    "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
-    "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved",
-    "O28 (operationalize genome claims into testable protocols)",
-    "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains"
+    "the Freed's Law-to-creativity mapping remains decorative rather than structural",
+    "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
+    "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-16T01:41:25.648599+00:00",
-  "renorm_reason": "Two consecutive fully-orthogonal rejections confirm a stricter discrimination than the earlier obligation-from-rejection pattern: the falsification layer now demonstrably distinguishes topically-adjacent null-payloads (which can generate obligations) from fully-orthogonal null-payloads (which cannot), sharpening the boundary condition on what counts as metabolizable stress. This warrants a new invariant clarifying that discrimination boundary, and a small coherence bump for the added precision, but no compress change since the existing compress already subsumes payload enforcement.",
+  "last_renormed": "2026-04-16T06:41:52.700725+00:00",
+  "renorm_reason": "Two events: (1) a content-vacuum rejection (memory supply shortage) confirms existing rejection invariants and names a new failure mode (analogy inflation) worth preserving as an explicit invariant; (2) the human-vs-LLM divergent creativity input genuinely engages L1 substrate generality and γ-theory but creates a real obligation — the genome must cash out creativity predictions quantitatively or the extension is hollow. Both events strengthen the falsification layer while expanding scope.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-16T01:41:25.648599+00:00",
-      "reason": "Two consecutive fully-orthogonal rejections confirm a stricter discrimination than the earlier obligation-from-rejection pattern: the falsification layer now demonstrably distinguishes topically-adjacent null-payloads (which can generate obligations) from fully-orthogonal null-payloads (which cannot), sharpening the boundary condition on what counts as metabolizable stress. This warrants a new invariant clarifying that discrimination boundary, and a small coherence bump for the added precision, but no compress change since the existing compress already subsumes payload enforcement."
+      "timestamp": "2026-04-16T06:41:52.700725+00:00",
+      "reason": "Two events: (1) a content-vacuum rejection (memory supply shortage) confirms existing rejection invariants and names a new failure mode (analogy inflation) worth preserving as an explicit invariant; (2) the human-vs-LLM divergent creativity input genuinely engages L1 substrate generality and γ-theory but creates a real obligation — the genome must cash out creativity predictions quantitatively or the extension is hollow. Both events strengthen the falsification layer while expanding scope."
     }
   ]
 }
