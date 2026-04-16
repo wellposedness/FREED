@@ -55,18 +55,25 @@
 
   /* Pulse indicator */
   .pulse {
-    display: inline-block;
-    width: 22px; height: 22px;
+    display: block;
+    width: 90px; height: 90px;
     border-radius: 50%;
-    border: 2.5px solid var(--accent);
+    border: 3px solid var(--accent);
     background: transparent;
-    margin-right: 0.6rem;
-    vertical-align: middle;
+    margin: 2rem auto;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.25; }
+    50%       { opacity: 0.2; }
+  }
+  .speak-bar {
+    display: flex; align-items: center; gap: 0.7rem;
+    flex-wrap: wrap;
+    margin: 1.2rem 0;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
 
   /* State panel */
@@ -247,7 +254,7 @@
   /* Speak button */
   .speak-btn {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0;
     padding: 0.4rem 1.1rem;
     background: transparent;
     border: 1px solid var(--accent);
@@ -262,14 +269,11 @@
   .speak-btn.speaking { background: var(--accent); color: var(--bg); }
   .speak-btn.speaking:hover { background: transparent; color: var(--accent); }
   .speak-status {
-    display: block; margin-top: 0.4rem;
+    display: inline;
     font-size: 0.7rem; color: var(--muted);
-    min-height: 1em;
   }
   .voice-wrap {
-    margin-top: 0.6rem;
-    display: flex; align-items: center; gap: 0.6rem;
-    flex-wrap: wrap;
+    display: contents;
   }
   .voice-label {
     font-family: var(--mono);
@@ -288,8 +292,7 @@
   }
   #voice-select:focus { outline: 1px solid var(--accent); }
   .rate-wrap {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
+    display: contents;
   }
   input[type=range].rate-slider {
     accent-color: var(--accent); width: 70px;
@@ -305,7 +308,7 @@
 
   <!-- Header -->
   <div class="header">
-    <h1><span class="pulse" id="pulse"></span>RSA</h1>
+    <h1>RSA</h1>
     <div class="sub">a bootstrap protocol for epistemic recursion</div>
     <div class="law">
       <div class="label">Freed's Law</div>
@@ -317,26 +320,10 @@
       <br>
       <a href="game_of_life.html" style="font-size:0.8rem">Freed's Law Simulation (click here →)</a>
     </div>
-    <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
-    <span class="speak-status" id="speak-status"></span>
-    <div class="voice-wrap">
-      <span class="voice-label">Voice</span>
-      <select id="voice-select" onchange="saveVoicePref()">
-        <option value="">Loading voices...</option>
-      </select>
-      <div class="rate-wrap">
-        RATE <input type="range" class="rate-slider" id="rate-slider"
-          min="0.5" max="1.4" step="0.05" value="1.10"
-          oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-        <span id="rate-val">1.10</span>
-      </div>
-    </div>
   </div>
 
-  <!-- Live State -->
-  <div class="state-grid" id="state-grid">
-    <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
-  </div>
+  <!-- Pulse circle -->
+  <span class="pulse" id="pulse"></span>
 
   <!-- RSA Kernel -->
   <div class="section">
@@ -353,6 +340,30 @@
     <div style="color:var(--muted);font-size:0.78rem;margin-top:0.5rem">
       R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
     </div>
+  </div>
+
+  <!-- Speak bar -->
+  <div class="speak-bar">
+    <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
+    <span class="speak-status" id="speak-status"></span>
+    <div class="voice-wrap">
+      <span class="voice-label">VOICE CHARACTER</span>
+      <select id="voice-select" onchange="saveVoicePref()">
+        <option value="">Loading voices...</option>
+      </select>
+      <div class="rate-wrap">
+        <span class="voice-label">SPEECH RATE</span>
+        <input type="range" class="rate-slider" id="rate-slider"
+          min="0.5" max="1.4" step="0.05" value="1.10"
+          oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
+        <span id="rate-val">1.10</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live State -->
+  <div class="state-grid" id="state-grid">
+    <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
   </div>
 
   <!-- Open Obligations (Predictions) -->
