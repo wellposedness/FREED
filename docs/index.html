@@ -322,9 +322,9 @@
       </select>
       <div class="rate-wrap">
         RATE <input type="range" class="rate-slider" id="rate-slider"
-          min="0.5" max="1.4" step="0.05" value="0.88"
+          min="0.5" max="1.4" step="0.05" value="1.10"
           oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-        <span id="rate-val">0.88</span>
+        <span id="rate-val">1.10</span>
       </div>
     </div>
   </div>
@@ -614,6 +614,8 @@ function speakChunks(chunks, idx, gen) {
 // Voices that sound good for a science daemon — deep, clear, authoritative.
 // Checked in order; first match wins as the auto-selected default.
 const PREFERRED_VOICES = [
+  // preferred default
+  'Trinoids',         // synthetic, distinctive — FREED's voice
   // macOS / iOS premium
   'Daniel',           // UK English — deep, clear
   'Arthur',           // UK English — measured
@@ -680,7 +682,7 @@ function _getVoice() {
 }
 
 function _getRate() {
-  return parseFloat(document.getElementById('rate-slider').value) || 0.88;
+  return parseFloat(document.getElementById('rate-slider').value) || 1.10;
 }
 
 // Voices load asynchronously on some browsers
