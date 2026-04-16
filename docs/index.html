@@ -56,15 +56,17 @@
   /* Pulse indicator */
   .pulse {
     display: inline-block;
-    width: 8px; height: 8px;
+    width: 22px; height: 22px;
     border-radius: 50%;
-    background: var(--accent);
-    margin-right: 0.5rem;
+    border: 2.5px solid var(--accent);
+    background: transparent;
+    margin-right: 0.6rem;
+    vertical-align: middle;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+    50%       { opacity: 0.25; }
   }
 
   /* State panel */
@@ -303,8 +305,8 @@
 
   <!-- Header -->
   <div class="header">
-    <h1><span class="pulse" id="pulse"></span>FREED</h1>
-    <div class="sub">Freed Recursive Engine for Epistemic Dynamics</div>
+    <h1><span class="pulse" id="pulse"></span>RSA</h1>
+    <div class="sub">a bootstrap protocol for epistemic recursion</div>
     <div class="law">
       <div class="label">Freed's Law</div>
       ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
