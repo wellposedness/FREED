@@ -4,32 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FREED — Freed Recursive Engine for Epistemic Dynamics</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #ffffff;
-    --surface: #f7f7f5;
-    --border:  #e0ddd8;
-    --accent:  #b91c1c;
-    --green:   #16a34a;
-    --amber:   #b45309;
-    --blue:    #1d4ed8;
-    --red:     #dc2626;
-    --text:    #1a1a1a;
-    --muted:   #71717a;
+    --bg:      #080808;
+    --surface: #0d0606;
+    --border:  #2d0e0e;
+    --accent:  #cc2222;
+    --green:   #22c55e;
+    --amber:   #d97706;
+    --red:     #ff4444;
+    --text:    #f2f2f2;
+    --muted:   #7a5f5f;
     --mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    --serif:   'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 16px;
-    line-height: 1.7;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
     padding: 2rem 1rem;
   }
   a { color: var(--accent); text-decoration: none; }
@@ -39,19 +33,16 @@
 
   /* Header */
   .header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 2.2rem; letter-spacing: 0.18em; color: var(--accent); }
-  .header .sub { font-family: var(--serif); font-weight: 300; color: var(--muted); margin-top: 0.3rem; font-size: 1rem; }
+  .header h1 { font-size: 1.4rem; letter-spacing: 0.1em; color: var(--accent); }
+  .header .sub { color: var(--muted); margin-top: 0.3rem; font-size: 0.85rem; }
   .header .law {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
     background: var(--surface);
     border-left: 3px solid var(--accent);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 1.1rem;
-    font-style: italic;
+    font-size: 0.9rem;
   }
-  .header .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .header .law .label { color: var(--muted); font-size: 0.75rem; margin-bottom: 0.3rem; }
 
   /* Pulse indicator */
   .pulse {
@@ -80,18 +71,17 @@
     background: var(--surface);
     padding: 0.75rem 1rem;
   }
-  .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; }
-  .state-cell .value { font-family: var(--mono); font-size: 1rem; color: var(--text); margin-top: 0.2rem; }
+  .state-cell .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .state-cell .value { font-size: 1.1rem; color: var(--text); margin-top: 0.2rem; }
   .state-cell .value.accent { color: var(--accent); }
   .state-cell .value.green  { color: var(--green); }
 
   /* Section */
   .section { margin-bottom: 2.5rem; }
   .section-title {
-    font-family: var(--mono);
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     color: var(--muted);
     border-bottom: 1px solid var(--border);
     padding-bottom: 0.4rem;
@@ -111,22 +101,21 @@
     gap: 0.75rem;
     margin-bottom: 0.4rem;
   }
-  .ob-id { font-family: var(--mono); color: var(--accent); font-size: 0.8rem; }
+  .ob-id { color: var(--accent); font-size: 0.85rem; }
   .ob-status {
-    font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: 0.65rem;
     padding: 0.1rem 0.4rem;
     border-radius: 2px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
-  .ob-status.open     { background: #fffbeb; color: var(--amber); border: 1px solid var(--amber); }
-  .ob-status.partial  { background: #eff6ff; color: var(--blue);  border: 1px solid var(--blue);  }
-  .ob-status.resolved { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
-  .ob-priority { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
-  .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
-  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
-  .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
+  .ob-status.open     { background: #1a0808; color: var(--amber); border: 1px solid var(--amber); }
+  .ob-status.partial  { background: #1a0808; color: var(--accent); border: 1px solid var(--accent); }
+  .ob-status.resolved { background: #0a1a0a; color: var(--green);  border: 1px solid var(--green); }
+  .ob-priority { font-size: 0.65rem; color: var(--muted); }
+  .ob-statement { font-size: 0.85rem; margin-bottom: 0.5rem; }
+  .ob-progress  { font-size: 0.78rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .ob-date { font-size: 0.68rem; color: var(--muted); margin-top: 0.4rem; }
 
   /* Cycle log */
   .cycle-entry {
@@ -135,12 +124,12 @@
     margin-bottom: 1rem;
   }
   .cycle-entry:first-child { border-left-color: var(--accent); }
-  .cycle-meta { font-family: var(--mono); color: var(--muted); font-size: 0.68rem; margin-bottom: 0.3rem; }
+  .cycle-meta { color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; }
   .cycle-feed { margin-top: 0.4rem; }
-  .cycle-feed-item { font-size: 0.95rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
-  .cycle-feed-item .feed-title { font-family: var(--serif); font-weight: 300; color: var(--accent); }
-  .cycle-feed-item .feed-compress { font-family: var(--serif); font-weight: 300; font-style: italic; color: var(--muted); font-size: 0.9rem; margin-top: 0.1rem; }
-  .cycle-resolve { font-family: var(--serif); font-weight: 300; margin-top: 0.5rem; font-size: 0.95rem; color: var(--text); }
+  .cycle-feed-item { font-size: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+  .cycle-feed-item .feed-title { color: var(--accent); }
+  .cycle-feed-item .feed-compress { color: var(--muted); font-size: 0.75rem; margin-top: 0.1rem; }
+  .cycle-resolve { margin-top: 0.5rem; font-size: 0.8rem; color: var(--text); }
 
   /* Kernel diagram */
   .kernel {
@@ -151,16 +140,13 @@
     margin: 1rem 0;
   }
   .kernel-step {
-    font-family: var(--serif);
-    font-weight: 300;
-    letter-spacing: 0.06em;
-    padding: 0.35rem 0.8rem;
+    padding: 0.4rem 0.7rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     color: var(--accent);
   }
-  .kernel-arrow { font-family: var(--mono); color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
+  .kernel-arrow { color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
 
   /* Project nodes */
   .node {
@@ -170,19 +156,18 @@
     margin-bottom: 0.8rem;
   }
   .node-header { display: flex; gap: 0.75rem; align-items: baseline; margin-bottom: 0.5rem; flex-wrap: wrap; }
-  .node-title  { font-family: var(--serif); font-weight: 300; color: var(--accent); font-size: 1.15rem; }
-  .node-gen    { font-family: var(--mono); color: var(--muted); font-size: 0.67rem; }
-  .node-summary { font-family: var(--serif); font-weight: 300; font-size: 0.98rem; margin-bottom: 0.5rem; }
+  .node-title  { color: var(--accent); font-size: 0.95rem; }
+  .node-gen    { color: var(--muted); font-size: 0.7rem; }
+  .node-summary { font-size: 0.82rem; margin-bottom: 0.5rem; }
   .node-compress {
-    font-family: var(--serif); font-weight: 300; font-style: italic;
-    font-size: 0.98rem; border-left: 2px solid var(--accent);
+    font-size: 0.82rem; border-left: 2px solid var(--accent);
     padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
   }
-  .node-next   { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); margin-bottom: 0.5rem; }
+  .node-next   { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
   .node-tags   { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
   .node-tag    {
     font-size: 0.65rem; padding: 0.1rem 0.4rem;
-    background: var(--surface); border: 1px solid var(--border);
+    background: #1a0808; border: 1px solid var(--border);
     color: var(--muted); border-radius: 2px;
   }
   .node-tag.inv  { border-color: var(--accent); color: var(--accent); }
@@ -200,8 +185,8 @@
     display: flex; align-items: baseline; gap: 0.75rem;
     margin-bottom: 0.5rem; flex-wrap: wrap;
   }
-  .symbol-name { font-family: var(--serif); font-weight: 300; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.04em; }
-  .symbol-recurrence { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
+  .symbol-name { color: var(--accent); font-size: 0.9rem; letter-spacing: 0.04em; }
+  .symbol-recurrence { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
   .symbol-bar-track {
     width: 80px; height: 6px;
     background: var(--border); border-radius: 3px; overflow: hidden; display: inline-block;
@@ -211,17 +196,16 @@
     font-size: 0.6rem; padding: 0.1rem 0.35rem;
     border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .symbol-badge.new-badge { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
-  .symbol-canonical { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
+  .symbol-badge.new-badge { background: #0a1a0a; color: var(--green); border: 1px solid var(--green); }
+  .symbol-canonical { font-size: 0.82rem; margin-bottom: 0.5rem; }
   .symbol-role {
-    font-family: var(--serif); font-weight: 300; font-style: italic;
-    font-size: 0.95rem; border-left: 2px solid var(--accent);
+    font-size: 0.78rem; border-left: 2px solid var(--accent);
     padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
   }
   .symbol-confirmed { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.4rem; }
   .symbol-confirmed-tag {
     font-size: 0.62rem; padding: 0.1rem 0.35rem;
-    background: var(--surface); border: 1px solid var(--border);
+    background: #1a0808; border: 1px solid var(--border);
     color: var(--muted); border-radius: 2px;
   }
   .symbol-drift {
@@ -236,9 +220,7 @@
     padding-top: 1rem;
     margin-top: 3rem;
     color: var(--muted);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 0.95rem;
+    font-size: 0.72rem;
   }
   .footer .architect { color: var(--text); }
 
@@ -246,13 +228,13 @@
   .speak-btn {
     display: inline-flex; align-items: center; gap: 0.5rem;
     margin-top: 1rem;
-    padding: 0.4rem 1.1rem;
+    padding: 0.5rem 1rem;
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
   }
@@ -263,34 +245,6 @@
     display: block; margin-top: 0.4rem;
     font-size: 0.7rem; color: var(--muted);
     min-height: 1em;
-  }
-  .voice-wrap {
-    margin-top: 0.6rem;
-    display: flex; align-items: center; gap: 0.6rem;
-    flex-wrap: wrap;
-  }
-  .voice-label {
-    font-family: var(--mono);
-    font-size: 0.68rem; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.1em;
-  }
-  #voice-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    padding: 0.2rem 0.5rem;
-    cursor: pointer;
-    max-width: 260px;
-  }
-  #voice-select:focus { outline: 1px solid var(--accent); }
-  .rate-wrap {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
-  }
-  input[type=range].rate-slider {
-    accent-color: var(--accent); width: 70px;
   }
 
   /* Loading state */
@@ -315,18 +269,6 @@
     </div>
     <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
     <span class="speak-status" id="speak-status"></span>
-    <div class="voice-wrap">
-      <span class="voice-label">Voice</span>
-      <select id="voice-select" onchange="saveVoicePref()">
-        <option value="">Loading voices...</option>
-      </select>
-      <div class="rate-wrap">
-        RATE <input type="range" class="rate-slider" id="rate-slider"
-          min="0.5" max="1.4" step="0.05" value="0.88"
-          oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-        <span id="rate-val">0.88</span>
-      </div>
-    </div>
   </div>
 
   <!-- Live State -->
@@ -438,15 +380,8 @@ function renderState(s) {
 
 // ── Render obligations ────────────────────────────────────────────────────────
 
-const STATUS_COLOR = {
-  open:     'var(--amber)',
-  partial:  'var(--blue)',
-  resolved: 'var(--green)',
-};
-
 function renderObligation(o) {
-  const borderColor = STATUS_COLOR[o.status] || 'var(--border)';
-  return `<div class="obligation" style="border-left: 3px solid ${borderColor}">
+  return `<div class="obligation">
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
       <span class="ob-status ${o.status}">${o.status}</span>
@@ -472,13 +407,6 @@ function renderObligations(obs) {
 
 // ── Render cycles ─────────────────────────────────────────────────────────────
 
-function _feedRejected(f) {
-  // A feed is a null/rejected result — correct behaviour, but not display-worthy
-  const c = (f.compress || '').toUpperCase();
-  return c.includes('REJECTED') || c.includes('UNMETABOLIZABLE') ||
-         c.includes('NULL FEED') || c.includes('GENOME-EXTERIOR');
-}
-
 function renderCycles(cycles) {
   if (!cycles || !cycles.length) {
     document.getElementById('cycles').innerHTML = '<div class="loading">No cycles recorded yet.</div>';
@@ -486,20 +414,12 @@ function renderCycles(cycles) {
   }
   const recent = [...cycles].reverse().slice(0, 10);
   document.getElementById('cycles').innerHTML = recent.map((c, i) => {
-    const allFeeds   = c.feed || [];
-    const goodFeeds  = allFeeds.filter(f => !_feedRejected(f));
-    const nullCount  = allFeeds.length - goodFeeds.length;
-
-    const feedHtml = goodFeeds.map(f =>
+    const feedHtml = (c.feed||[]).map(f =>
       `<div class="cycle-feed-item">
         <div class="feed-title">${f.title||'?'}</div>
         ${f.compress ? `<div class="feed-compress">↳ ${f.compress}</div>` : ''}
       </div>`
     ).join('');
-
-    const nullNote = nullCount > 0
-      ? `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-top:0.3rem">${nullCount} input${nullCount>1?'s':''} correctly rejected — no genome movement warranted</div>`
-      : '';
 
     const res = c.resolve||{};
     const resolveHtml = res.obligation
@@ -514,8 +434,8 @@ function renderCycles(cycles) {
         Cycle ${c.cycle||'?'} · Gen ${c.generation||'?'} · ${ts(c.timestamp)}
         ${c.coherence ? ` · coherence ${c.coherence}` : ''}
       </div>
-      ${(c.sweep||{}).input_count > 0 ? `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--accent);margin-bottom:0.3rem">↓ ${c.sweep.input_count} new paper(s) ingested</div>` : ''}
-      <div class="cycle-feed">${feedHtml}${nullNote}</div>
+      ${(c.sweep||{}).input_count > 0 ? `<div style="font-size:0.75rem;color:var(--accent);margin-bottom:0.3rem">↓ ${c.sweep.input_count} new paper(s) ingested</div>` : ''}
+      <div class="cycle-feed">${feedHtml}</div>
       ${resolveHtml}
     </div>`;
   }).join('');
@@ -580,15 +500,7 @@ function buildDigest() {
   return chunks;
 }
 
-// Generation counter — incremented on every start/stop.
-// Each speakChunks callback carries the gen it was born into.
-// If gen no longer matches _speakGen, the chain is stale and exits.
-let _speakGen = 0;
-
-function speakChunks(chunks, idx, gen) {
-  // Stale chain from a previous run — bail out silently
-  if (gen !== _speakGen) return;
-
+function speakChunks(chunks, idx) {
   if (!_speaking || idx >= chunks.length) {
     stopSpeak();
     return;
@@ -600,144 +512,31 @@ function speakChunks(chunks, idx, gen) {
     `${idx + 1} / ${chunks.length}  ·  ${section}`;
 
   const u = new SpeechSynthesisUtterance(chunks[idx]);
-  const voice = _getVoice();
-  if (voice) u.voice = voice;
-  u.rate  = _getRate();
+  u.rate  = 0.92;
   u.pitch = 1.0;
-  u.onend   = () => speakChunks(chunks, idx + 1, gen);
-  u.onerror = () => speakChunks(chunks, idx + 1, gen);
+  u.onend   = () => speakChunks(chunks, idx + 1);
+  u.onerror = () => speakChunks(chunks, idx + 1);
   window.speechSynthesis.speak(u);
 }
-
-// ── Voice selector ────────────────────────────────────────────────────────────
-
-// Voices that sound good for a science daemon — deep, clear, authoritative.
-// Checked in order; first match wins as the auto-selected default.
-const PREFERRED_VOICES = [
-  // macOS / iOS premium
-  'Daniel',           // UK English — deep, clear
-  'Arthur',           // UK English — measured
-  'Aaron',            // US English — calm
-  'Fred',             // classic Mac voice, has character
-  'Alex',             // classic Mac, very clear
-  // Windows / Edge neural
-  'Microsoft Guy Online (Natural)',
-  'Microsoft David Desktop',
-  'Google UK English Male',
-  'Google US English',
-];
-
-let _voices = [];
-
-function _loadVoices() {
-  _voices = window.speechSynthesis.getVoices();
-  if (!_voices.length) return;
-
-  const sel = document.getElementById('voice-select');
-  sel.innerHTML = '';
-
-  // English voices first, sorted by name
-  const eng = _voices.filter(v => v.lang.startsWith('en'));
-  const rest = _voices.filter(v => !v.lang.startsWith('en'));
-  const sorted = [...eng, ...rest];
-
-  sorted.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.name;
-    opt.textContent = `${v.name} (${v.lang})`;
-    sel.appendChild(opt);
-  });
-
-  // Restore saved preference, or pick best available default
-  const saved = localStorage.getItem('freed_voice');
-  const savedRate = localStorage.getItem('freed_rate');
-  if (savedRate) {
-    const rs = document.getElementById('rate-slider');
-    rs.value = savedRate;
-    document.getElementById('rate-val').textContent = parseFloat(savedRate).toFixed(2);
-  }
-  if (saved && sorted.find(v => v.name === saved)) {
-    sel.value = saved;
-  } else {
-    // Find best preferred voice
-    for (const pref of PREFERRED_VOICES) {
-      const match = sorted.find(v => v.name.includes(pref));
-      if (match) { sel.value = match.name; break; }
-    }
-  }
-}
-
-function saveVoicePref() {
-  const sel = document.getElementById('voice-select');
-  const rate = document.getElementById('rate-slider');
-  if (sel.value) localStorage.setItem('freed_voice', sel.value);
-  if (rate.value) localStorage.setItem('freed_rate', rate.value);
-}
-
-function _getVoice() {
-  const name = document.getElementById('voice-select').value;
-  return _voices.find(v => v.name === name) || null;
-}
-
-function _getRate() {
-  return parseFloat(document.getElementById('rate-slider').value) || 0.88;
-}
-
-// Voices load asynchronously on some browsers
-if (window.speechSynthesis) {
-  _loadVoices();
-  window.speechSynthesis.onvoiceschanged = _loadVoices;
-}
-
-// ── Audio unlock (Bluetooth routing) ─────────────────────────────────────────
-
-function _unlockAudio() {
-  // Play a silent buffer through Web Audio API from within the user gesture.
-  // This claims the media audio route (Bluetooth speakers, headphones) so
-  // that speechSynthesis follows it instead of the accessibility channel.
-  try {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return Promise.resolve();
-    const ctx = new Ctx();
-    const buf = ctx.createBuffer(1, 1, 22050);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.start(0);
-    return ctx.resume ? ctx.resume() : Promise.resolve();
-  } catch(e) { return Promise.resolve(); }
-}
-
-// ── Speak ─────────────────────────────────────────────────────────────────────
 
 function startSpeak() {
   if (!window.speechSynthesis) {
     alert('Speech synthesis not available in this browser.');
     return;
   }
-  // Cancel any in-flight speech and invalidate stale callbacks
-  _speaking = false;
-  _speakGen++;
-  window.speechSynthesis.cancel();
-
-  const thisGen = _speakGen;
-  const chunks  = buildDigest();
-  if (!chunks.length) {
-    document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
-    return;
-  }
-
   _speaking = true;
   const btn = document.getElementById('speak-btn');
   btn.textContent = '■ STOP';
   btn.classList.add('speaking');
-
-  // Small delay after cancel() — mobile browsers need a tick to flush the queue
-  _unlockAudio().then(() => setTimeout(() => speakChunks(chunks, 0, thisGen), 120));
+  const chunks = buildDigest();
+  if (!chunks.length) {
+    document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
+    stopSpeak(); return;
+  }
+  speakChunks(chunks, 0);
 }
 
 function stopSpeak() {
-  _speakGen++;          // invalidate any callbacks still in flight
   _speaking = false;
   window.speechSynthesis.cancel();
   const btn = document.getElementById('speak-btn');
