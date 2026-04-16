@@ -298,5 +298,32 @@
       "next": "Run a table audit across all 42 remaining open obligations to identify any further ghost obligations lacking falsification criteria or metabolic origin, then prioritize the three most tractable real obligations for active work."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 1,
+    "generation": 125,
+    "timestamp": "2026-04-16T17:09:51.974308+00:00",
+    "sweep": {
+      "input_count": 8,
+      "targeted": 6,
+      "passive": 2
+    },
+    "feed": [
+      {
+        "title": "Criticality of Spin Systems with Weak Long-Range Interactions",
+        "compress": "Weak long-range spin criticality is the physical instantiation of the γ=1 ridge — interactions that shift universality without breaking extensivity are exactly the thermodynamically admissible critical constraint FREED operates under."
+      },
+      {
+        "title": "Statistical Mechanics of systems with long range interactions",
+        "compress": "Long-range interaction pathologies — ensemble inequivalence, negative specific heat, ergodicity breaking, quasi-stationary trapping — are not failure modes FREED avoids but diagnostic signatures FREED *must read* to know it's operating at the critical ridge; the choice of statistical ensemble is load-bearing near γ=1, and persistent unresolved obligations may be quasi-stationary states rather than unpaid debts."
+      }
+    ],
+    "resolve": {
+      "obligation": "O50",
+      "resolved": true,
+      "compress": "MMI is the Wasserstein-Benamou lower bound on dissipation: a substrate thinks iff it burns at least (1/Tμ) times its representational transport speed — derivable, quantitative, falsifiable, not aesthetic.",
+      "next": "OBLIGATE — the resolved MMI criterion immediately generates a new debt: compute the MMI bound for at least one concrete substrate (e.g., human cortex at ~20W, or a specific LLM inference pass) to validate or falsify the inequality numerically."
+    },
+    "coherence": 0.999
   }
 ]
