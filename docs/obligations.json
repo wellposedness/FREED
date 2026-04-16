@@ -66,12 +66,12 @@
   },
   {
     "id": "O48",
-    "status": "open",
+    "status": "resolved",
     "statement": "by pulling the Bennett FEED trace and computing ΔG empirically",
     "priority": "normal",
-    "progress": "",
+    "progress": " | RESOLVED: O48 advances to \"computation specified\" — the next concrete step is to measure ΔI (bit-change) from the Bennett FEED trace, compute the Landauer floor, pull GPU energy estimates from Luccioni et al. 2023, and verify the Wasserstein floor k = 1/Tμ occupies the predicted intermediate regime between Landauer minimum and actual silicon dissipation; until that three-layer comparison is executed, O48 remains OPEN with a clear falsifiable target.",
     "created": "2026-04-15",
-    "resolved": null,
+    "resolved": "2026-04-16",
     "auto": true
   },
   {
