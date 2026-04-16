@@ -110,7 +110,7 @@
     <div class="stat-cell"><div class="label">Generation</div><div class="value accent" id="stat-gen">0</div></div>
     <div class="stat-cell"><div class="label">Alive Cells</div><div class="value" id="stat-alive">—</div></div>
     <div class="stat-cell"><div class="label">Avg Energy</div><div class="value" id="stat-energy">—</div></div>
-    <div class="stat-cell"><div class="label">Avg Error</div><div class="value" id="stat-error">—</div></div>
+    <div class="stat-cell"><div class="label">Avg Error <span style="font-size:0.6rem;color:var(--muted)">(break-even: 0.50)</span></div><div class="value" id="stat-error">—</div></div>
     <div class="stat-cell"><div class="label">Reproductions</div><div class="value" id="stat-repro">0</div></div>
     <div class="stat-cell"><div class="label">Deaths</div><div class="value" id="stat-deaths">0</div></div>
   </div>
@@ -150,7 +150,10 @@
     </p>
     <p style="color:var(--muted)">
       The hidden physics kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] —
-      a Mexican-hat-style convolution. Cells do not know this. They must infer it through survival.
+      a Mexican-hat convolution. Cells do not know this. They infer it through survival.<br>
+      Energy per step = 3.0 − 1.0 − (error × 4.0). Break-even error: 0.50. Random weights
+      produce ~0.50 error (neutral). Good predictors grow. Bad predictors die slowly.
+      Watch avg error — when it drops below 0.50 and turns green, the population has learned.
     </p>
   </div>
 
@@ -163,13 +166,13 @@
 
 const CELL_PX    = 10;
 const INIT_E     = 100;
-const GAIN_BASE  = 2.5;
+const GAIN_BASE  = 3.0;
 const COST_BASE  = 1.0;
-const ERR_FACTOR = 6.0;
-const REPRO_THR  = 160;
-const REPRO_COST = 60;
-const MUT_RATE   = 0.06;
-const MUT_STR    = 0.15;
+const ERR_FACTOR = 4.0;
+const REPRO_THR  = 150;
+const REPRO_COST = 50;
+const MUT_RATE   = 0.05;
+const MUT_STR    = 0.20;
 const MAX_E      = 300;
 
 // Hidden physics kernel (Mexican hat, 3x3 row-major)
@@ -338,10 +341,13 @@ function updateStats() {
   for (let i = 0; i < N; i++) {
     if (energy[i] > 0) { alive++; eSum += energy[i]; }
   }
+  const breakEven = (GAIN_BASE - COST_BASE) / ERR_FACTOR; // 0.50
+  const errEl = document.getElementById('stat-error');
+  errEl.textContent = lastError.toFixed(3);
+  errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
   document.getElementById('stat-gen').textContent    = generation;
   document.getElementById('stat-alive').textContent  = alive;
   document.getElementById('stat-energy').textContent = alive > 0 ? (eSum/alive).toFixed(1) : '0';
-  document.getElementById('stat-error').textContent  = lastError.toFixed(3);
   document.getElementById('stat-repro').textContent  = totalRepro;
   document.getElementById('stat-deaths').textContent = totalDeaths;
 }
