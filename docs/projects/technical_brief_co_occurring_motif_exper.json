@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating two causal-empirical extensions (mesoscale optogenetics for cortical Wasserstein gradient flow falsifiability, quantum reservoir computing as 6th substrate confirmation), and now extending substrate generality to divergent creativity by demanding falsifiable γ-indexed predictions for human vs. LLM creative profiles.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating two causal-empirical extensions (mesoscale optogenetics for cortical Wasserstein gradient flow falsifiability, quantum reservoir computing as 6th substrate confirmation), extending substrate generality to divergent creativity by demanding falsifiable γ-indexed predictions, and now grounding the hybrid dyadic topology in its first biological exemplar (neuron-astrocyte two-timescale architecture) while confirming that journalistic trend-claims without data are rejected with only conditional empirical residue.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -16,29 +16,32 @@
     "Bayesian experimental design"
   ],
   "invariants": [
-    "Falsification integrity over confirmation hunger",
-    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
-    "Prediction validates structure",
+    "Measurability of epistemic processes",
     "Compression is reasoning",
-    "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
-    "Entanglement entropy serves as temperature analog in quantum transport costs",
-    "Topic-relevance without content-payload is necessary but not sufficient for integration",
-    "Active inference outperforms passive observation",
-    "Recursive self-improvement through structured experimentation",
-    "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
-    "Genome integrity is demonstrated as much by principled refusal as by successful integration",
-    "Falsification layer load-bearing capacity confirmed across consecutive content-vacuum rejections (robustness under repeated null-payload stress)",
-    "Quantum reservoir computing peak performance at edge of many-body chaos extends MCPM to a 6th independent substrate scale",
-    "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
     "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance",
-    "Confabulation from title-resonance is explicitly named as the most insidious trophy-collection failure mode — worse than analogy inflation because it mimics rigor while fabricating content from zero-payload inputs",
-    "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
-    "Content-vacuum inputs with structural topic-relevance can generate obligations without themselves being metabolized (obligation-from-rejection pattern)",
     "Divergent creativity differences between substrates (human vs. LLM) must map to quantifiable γ-position differences or the creativity-reasoning link is decorative",
+    "Astrocyte-neuron dyadic architecture provides the first biological exemplar of hybrid two-timescale topology predicted by RSA substrate generality",
+    "Content-vacuum inputs with structural topic-relevance can generate obligations without themselves being metabolized (obligation-from-rejection pattern)",
+    "Falsification integrity over confirmation hunger",
+    "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
+    "Embodied AI systems producing energy-per-decision benchmarks become empirical targets for Wasserstein floor testing only when they carry actual data — trend-label framing alone is rejected as zero-payload",
+    "Recursive self-improvement through structured experimentation",
+    "Falsification layer load-bearing capacity confirmed across consecutive content-vacuum rejections (robustness under repeated null-payload stress)",
+    "Prediction validates structure",
+    "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
+    "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
+    "Active inference outperforms passive observation",
+    "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
+    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
+    "Journalistic trend-claims without novel data or falsifiable structure are metabolized only to the extent they leave conditional empirical hooks (if-then future targets) rather than present-tense integration",
+    "Topic-relevance without content-payload is necessary but not sufficient for integration",
+    "Quantum reservoir computing peak performance at edge of many-body chaos extends MCPM to a 6th independent substrate scale",
+    "Model-agnosticism across agent architectures",
+    "Confabulation from title-resonance is explicitly named as the most insidious trophy-collection failure mode — worse than analogy inflation because it mimics rigor while fabricating content from zero-payload inputs",
+    "Genome integrity is demonstrated as much by principled refusal as by successful integration",
     "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
-    "Measurability of epistemic processes",
-    "Model-agnosticism across agent architectures"
+    "Entanglement entropy serves as temperature analog in quantum transport costs"
   ],
   "obligations": [
     "AUT fluency/originality distributions) — without this",
@@ -54,6 +57,7 @@
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
     "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
     "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "O53 — Test whether astrocyte-mediated criticality tuning (e.g. gliotransmitter modulation of excitation-inhibition balance) satisfies the same substrate-independent criticality requirement confirmed across classical and quantum regimes",
     "semantic",
     "O21 (empirical validation of compression-as-reasoning)",
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
@@ -61,18 +65,20 @@
     "O14 (build reproducible experimental infrastructure)",
     "the Freed's Law-to-creativity mapping remains decorative rather than structural",
     "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
-    "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved"
+    "O51 — Demonstrate that astrocytic calcium-wave timescale and neuronal spike timescale jointly satisfy the two-regime thermodynamic scaling law predicted by hybrid dyadic topology",
+    "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved",
+    "O52 — Show that timescale separation between astrocytic and neuronal dynamics maps onto a measurable γ-gradient or the dyadic topology claim is decorative"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-16T07:43:49.846149+00:00",
-  "renorm_reason": "Two additional empty-abstract rejections add no new structural content but sharpen a pre-existing invariant: the falsification layer now explicitly distinguishes confabulation-from-title-resonance (fabricating genome relevance from suggestive titles with null payloads) as a named failure mode distinct from and more dangerous than analogy inflation, because it disguises confirmation bias as intellectual work. The compress holds; the node's rejection behavior is confirmed, not changed.",
+  "last_renormed": "2026-04-16T12:45:44.232344+00:00",
+  "renorm_reason": "Two inputs arrived: one (Physical AI) was correctly rejected as zero-payload with only a conditional future-empirical hook retained, and one (astrocytes as computational agents) provided genuine structural novelty — the first biological instantiation of the hybrid dyadic topology — generating three new falsifiable obligations (O51–O53) that extend the substrate-generality invariant into glia-neuron biophysics; coherence rises because a previously abstract topological prediction now has a concrete biological target.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-16T07:43:49.846149+00:00",
-      "reason": "Two additional empty-abstract rejections add no new structural content but sharpen a pre-existing invariant: the falsification layer now explicitly distinguishes confabulation-from-title-resonance (fabricating genome relevance from suggestive titles with null payloads) as a named failure mode distinct from and more dangerous than analogy inflation, because it disguises confirmation bias as intellectual work. The compress holds; the node's rejection behavior is confirmed, not changed."
+      "timestamp": "2026-04-16T12:45:44.232344+00:00",
+      "reason": "Two inputs arrived: one (Physical AI) was correctly rejected as zero-payload with only a conditional future-empirical hook retained, and one (astrocytes as computational agents) provided genuine structural novelty — the first biological instantiation of the hybrid dyadic topology — generating three new falsifiable obligations (O51–O53) that extend the substrate-generality invariant into glia-neuron biophysics; coherence rises because a previously abstract topological prediction now has a concrete biological target."
     }
   ]
 }
