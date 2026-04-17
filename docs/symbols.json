@@ -10,7 +10,7 @@
       "kimi",
       "freed_daemon"
     ],
-    "last_updated": "2026-04-15",
+    "last_updated": "2026-04-17",
     "generation": 117
   },
   "entropy": {
@@ -71,9 +71,10 @@
       "human_intuition",
       "claude_sonnet",
       "gemini",
-      "freed_daemon"
+      "freed_daemon",
+      "document"
     ],
-    "recurrence": 0.57,
+    "recurrence": 0.71,
     "known_drift": [
       "Confused with lossy simplification or summarization — compression in genome context is lossless at the predictive level",
       "Used without MDL grounding — compression without a description length criterion is just 'making things shorter'",
@@ -214,9 +215,10 @@
       "freed_daemon:the_relational_thermodynamic_map_100_ent",
       "freed_daemon:freed_s_law_the_law_of_recursive_instant",
       "freed_daemon:the_reasoning_substrate_argument_rsa",
-      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs"
+      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs",
+      "document"
     ],
-    "recurrence": 0.88,
+    "recurrence": 1.14,
     "known_drift": [
       "Weakened to 'compression correlates with intelligence' — the genome claim is constitutive, not correlational",
       "Confused with Kolmogorov complexity alone — MDL compression is operational where K-complexity is uncomputable",

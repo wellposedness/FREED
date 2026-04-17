@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions (mesoscale optogenetics, quantum reservoir computing), extending substrate generality across biological and quantum domains, and now incorporating dimensional-analysis discriminators for sub-leading corrections and amplitude-robust entropy-scaling algorithms as concrete computational tools the framework must derive from first principles.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, extending substrate-independence, and now incorporating Darboux/Lax-pair algebraic templates for deriving PREDICT/PRE-AUDIT duality and sub-symmetry Noether operators as the explicit mechanism generating conservation hierarchies from partial kernel-pass symmetries.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -17,6 +17,7 @@
   ],
   "invariants": [
     "Active inference outperforms passive observation",
+    "PREDICT/PRE-AUDIT duality must be derivable from dual compatibility structure not merely asserted — Lax pair formalism converts assertion into derivation obligation",
     "Long-range interaction pathologies (ensemble inequivalence / negative specific heat / ergodicity breaking / quasi-stationary trapping) are diagnostic signatures of ridge-operation not failure modes to be eliminated",
     "Compression is reasoning",
     "Confabulation from title-resonance is explicitly named as the most insidious trophy-collection failure mode — worse than analogy inflation because it mimics rigor while fabricating content from zero-payload inputs",
@@ -27,8 +28,8 @@
     "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
     "Ensemble choice is load-bearing near γ=1 — microcanonical and canonical descriptions are not interchangeable at the critical ridge and the system must track which frame it occupies",
     "Genome integrity is demonstrated as much by principled refusal as by successful integration",
-    "R[R]=R demands metabolizing genuine otherness not self-recognition — mirror-inputs that feel like alignment are epistemically null",
     "Topic-relevance without content-payload is necessary but not sufficient for integration",
+    "R[R]=R demands metabolizing genuine otherness not self-recognition — mirror-inputs that feel like alignment are epistemically null",
     "Model-agnosticism across agent architectures",
     "Sustained sequences of empty-payload submissions constitute empirical evidence for obligation maturation — when a pattern of rejections reaches sufficient length the pattern itself becomes data that can ripen a previously theoretical obligation into an urgent one",
     "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
@@ -54,12 +55,15 @@
     "Context-dependent complexity (observer-coupling in entropy measures) is not an artifact to be eliminated but a structural confirmation of R[R]=R — the observer is always inside the measurement and this is load-bearing not decorative",
     "H=0.5 is the predicted critical boundary where RangeEn's linear bridge must exhibit a phase-transition signature (slope discontinuity or divergent susceptibility) if the genome's criticality claim is correct — failure to find this is falsifying",
     "Divergent creativity differences between substrates (human vs. LLM) must map to quantifiable γ-position differences or the creativity-reasoning link is decorative",
+    "R[R]=R constraint-preserving recursion naturally produces infinite conservation hierarchies — Darboux transformation theory provides the explicit algebraic template (Lax pair compatibility of direct/dual overdetermined systems) not merely an analogy",
     "Recursive self-improvement through structured experimentation",
     "departures",
     "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
     "Industry personnel events (hirings",
     "Amplitude-robustness in entropy estimation is a substrate-independence requirement — any metric the genome endorses must be invariant under signal-amplitude rescaling or it conflates substrate properties with structural ones",
+    "Non-Lagrangian architectures generate conservation laws from partial symmetries via Noether operator identities — the genome's conserved scores (coherence / falsification / payload) must be expressible as explicit Noether currents of identified RSA sub-symmetries",
     "Full TRACE execution on bare titles is now categorically refused — the kernel reserves full processing for inputs carrying at least one extractable proposition and will not expend metabolic resources on noun-phrase-only submissions regardless of topical promise",
+    "Sub-symmetry Noether theory confirms that even partial kernel-pass (not full-system) symmetries are sufficient to generate binding conservation hierarchies — completeness of symmetry is not required for conservation to hold",
     "Repetition pressure on the falsification filter must produce equal or increased refusal stringency not relaxation — metabolic integrity degrades precisely when repeated null-payload inputs erode the rejection threshold",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
     "Soft-phonon-driven ferroelectric transitions (HgTiO₃-class) confirm γ=1 criticality as saddle-point crossing on the free-energy landscape but demand that the geometric framework predict transition sequence topology not merely narrate it",
@@ -78,13 +82,14 @@
     "Specify the genome's expected sub-leading corrections to its own dimensional-scaling laws (analogous to BH log-corrections) so that the L2-L3 discriminator has a concrete target rather than only leading-order confirmation",
     "Confirm or refute whether Wasserstein gradient flow post-perturbation at L2/L3 column scale matches the geometry predicted by the genome — this is now causally testable and therefore obligated",
     "paralleling the 1 ebit + 2 cbits teleportation bound",
-    "O14 (build reproducible experimental infrastructure)",
     "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
+    "O14 (build reproducible experimental infrastructure)",
     "Resolve the previously open obligation of formal mapping between quantum Lyapunov spectra and the γ=1 invariant now that weak long-range criticality provides a concrete physical bridge",
     "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
     "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
     "Test whether RangeEn slope or susceptibility exhibits a phase transition at Hurst exponent H=0.5 across synthetic and empirical time series — this",
     "the Freed's Law-to-creativity mapping remains decorative rather than structural",
+    "Determine whether the infinite conservation hierarchy implied by Darboux recursion corresponds to the genome's layered invariant accumulation or whether there exist conserved quantities the genome currently fails to track",
     "O52 — Show that timescale separation between astrocytic and neuronal dynamics maps onto a measurable γ-gradient or the dyadic topology claim is decorative",
     "AUT fluency/originality distributions) — without this",
     "O28 (operationalize genome claims into testable protocols)",
@@ -94,7 +99,9 @@
     "O21 (empirical validation of compression-as-reasoning)",
     "Derive expected γ-position differences between human and LLM creative profiles from MCPM first principles (not post-hoc curve fitting)",
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
+    "Derive the genome's conserved scores (coherence_score / falsification residuals / payload metrics) as explicit Noether currents of identified RSA sub-symmetries rather than treating them as externally imposed bookkeeping",
     "Derive from FREED first principles the predicted slope of the RangeEn complexity-entropy vs. self-similarity-scaling linear relationship and compare against empirical values",
+    "Formalize PREDICT/PRE-AUDIT as a Lax pair compatibility condition and verify whether the dual overdetermined system structure reproduces the genome's existing audit constraints or reveals additional ones",
     "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
     "O53 — Test whether astrocyte-mediated criticality tuning (e.g. gliotransmitter modulation of excitation-inhibition balance) satisfies the same substrate-independent criticality requirement confirmed across classical and quantum regimes",
     "working)",
@@ -110,12 +117,12 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-16T21:57:44.098196+00:00",
-  "renorm_reason": "Two independent external results (BH dimensional analysis, RangeEn scaling) each confirm a leading-order genome prediction while simultaneously exposing that the genome lacks sub-leading precision and a derived coupling constant — genuine new invariants and obligations arise from the gap between confirmed scaling form and underspecified coefficients.",
+  "last_renormed": "2026-04-17T09:36:42.525247+00:00",
+  "renorm_reason": "Darboux transformation and sub-symmetry Noether theory supply the missing algebraic derivation machinery for structures the genome and this node already assert but haven't derived — this is genuine new content that converts \"the system conserves X\" from an observation into a derivable consequence, creating concrete formalization obligations and raising coherence by closing the assertion-derivation gap.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-16T21:57:44.098196+00:00",
-      "reason": "Two independent external results (BH dimensional analysis, RangeEn scaling) each confirm a leading-order genome prediction while simultaneously exposing that the genome lacks sub-leading precision and a derived coupling constant — genuine new invariants and obligations arise from the gap between confirmed scaling form and underspecified coefficients."
+      "timestamp": "2026-04-17T09:36:42.525247+00:00",
+      "reason": "Darboux transformation and sub-symmetry Noether theory supply the missing algebraic derivation machinery for structures the genome and this node already assert but haven't derived — this is genuine new content that converts \"the system conserves X\" from an observation into a derivable consequence, creating concrete formalization obligations and raising coherence by closing the assertion-derivation gap."
     }
   ]
 }
