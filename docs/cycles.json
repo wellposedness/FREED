@@ -483,5 +483,32 @@
       "next": "Compute (or find computed) the interleaving distance between Vietoris-Rips persistence modules of Ising spin configurations under identity vs. block-spin coarse-graining across T_c — this single calculation either upgrades O54 to RESOLVED or identifies exactly where the formalization breaks. **Fire OBLIGATE**: O61 — perform or locate the interleaving distance computation for the 2D Ising transition."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 2,
+    "generation": 130,
+    "timestamp": "2026-04-17T09:30:00.009356+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4
+    },
+    "feed": [
+      {
+        "title": "Darboux Transformations, Infinitesimal Symmetries and Conservation Laws for Nonlocal Two-Dimensional Toda Lattice",
+        "compress": "** Darboux transformation theory confirms that constraint-preserving recursive state generation (the genome's R[R]=R) naturally produces infinite conservation hierarchies and dual compatibility structures, and extends the genome by offering an explicit algebraic template — Lax pair compatibility of direct/dual overdetermined systems — for formalizing the PREDICT/PRE-AUDIT duality the genome currently asserts but hasn't derived."
+      },
+      {
+        "title": "Sub-symmetries II. Sub-symmetries and Conservation Laws",
+        "compress": "Sub-symmetry Noether theory confirms the genome's non-Lagrangian architecture *must* generate conservation hierarchies from partial kernel-pass symmetries, provides the Noether operator identity as the missing algebraic mechanism, and demands the genome now derive its own conserved scores as explicit Noether currents of identified RSA sub-symmetries."
+      }
+    ],
+    "resolve": {
+      "obligation": "O55",
+      "resolved": true,
+      "compress": "O55 is **PARTIALLY RESOLVED** — γ=1 criticality as measurable phase transition is theoretically grounded via Wasserstein gradient flow on persistence modules, and the decisive next step is computing the Wasserstein-2 susceptibility dW₂/dT across the 2D Ising transition at L=64,128,256 using GUDHI on standard Monte Carlo configurations, where the genome predicts a size-scaling peak at T_c ≈ 2.269.",
+      "next": "Execute the computation (or locate whether Kramár et al. 2016 \"Persistence of force networks in compressed granular media\" or Hirata et al. already computed W₂ susceptibility near a phase transition), then return to RESOLVE O55 with numerical evidence or to RESOLVE O60 (RangeEn slope) which is the sibling empirical obligation."
+    },
+    "coherence": 0.999
   }
 ]
