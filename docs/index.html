@@ -147,6 +147,11 @@
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.2; }
   }
+  @keyframes flash-update {
+    0%   { background: var(--accent); color: #fff; border-radius: 2px; }
+    100% { background: transparent;   color: inherit; }
+  }
+  .flash-val { animation: flash-update 0.7s ease-out; padding: 0 3px; margin: 0 -3px; }
   /* State panel */
   .state-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 0.5rem; }
   .state-cell {
@@ -574,6 +579,8 @@ function ts(iso) {
 
 // ── Render state grid ─────────────────────────────────────────────────────────
 
+let _lastStateValues = {};
+
 function renderState(s) {
   if (!s) { document.getElementById('state-grid').innerHTML = '<div class="state-cell"><div class="value error">Unavailable</div></div>'; return; }
   const cells = [
@@ -584,12 +591,29 @@ function renderState(s) {
     { label: 'Debt Ratio',  value: s.debt_ratio },
     { label: 'Last Cycle',  value: ts(s.last_cycle) },
   ];
+  const isFirstLoad = Object.keys(_lastStateValues).length === 0;
   document.getElementById('state-grid').innerHTML = cells.map(c =>
-    `<div class="state-cell">
+    `<div class="state-cell" data-key="${c.label}">
       <div class="label">${c.label}</div>
       <div class="value ${c.cls||''}">${c.value||'—'}</div>
     </div>`
   ).join('');
+  // Flash values that changed since last render (skip first load)
+  if (!isFirstLoad) {
+    cells.forEach(c => {
+      const cur = String(c.value ?? '—');
+      if (_lastStateValues[c.label] !== cur) {
+        const el = document.querySelector(`[data-key="${c.label}"] .value`);
+        if (el) {
+          el.classList.remove('flash-val');
+          void el.offsetWidth; // reflow to restart animation if already running
+          el.classList.add('flash-val');
+          el.addEventListener('animationend', () => el.classList.remove('flash-val'), {once: true});
+        }
+      }
+    });
+  }
+  cells.forEach(c => { _lastStateValues[c.label] = String(c.value ?? '—'); });
   document.getElementById('generated-at').textContent = ts(s.generated);
 }
 
