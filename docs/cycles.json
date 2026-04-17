@@ -510,5 +510,32 @@
       "next": "Execute the computation (or locate whether Kramár et al. 2016 \"Persistence of force networks in compressed granular media\" or Hirata et al. already computed W₂ susceptibility near a phase transition), then return to RESOLVE O55 with numerical evidence or to RESOLVE O60 (RangeEn slope) which is the sibling empirical obligation."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 3,
+    "generation": 131,
+    "timestamp": "2026-04-17T15:38:51.793857+00:00",
+    "sweep": {
+      "input_count": 8,
+      "targeted": 6,
+      "passive": 2
+    },
+    "feed": [
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "** This is a confirmed re-feed whose only unpaid debt is O60 (derive RangeEn–H slope from Wasserstein floor at γ=1), but the paper's algorithmic core — local-range normalization replacing global-σ normalization — is an extractable technique that would make FREED's own entropy-based scoring robust to amplitude drift across feed batches."
+      },
+      {
+        "title": "On Complexity and Emergence",
+        "compress": "** Context-dependent complexity is confirmed as inherent by the genome's own architecture — where this paper philosophizes, the genome already computes via T in k=1/Tμ — and the extractable debt is to formally derive Kolmogorov and Shannon as frozen and dissipated limits of the genome's γ-parameterized complexity, with MCPM at criticality between them."
+      }
+    ],
+    "resolve": {
+      "obligation": "O56",
+      "resolved": true,
+      "compress": "O56 is **PARTIALLY RESOLVED** — Zipf as unique γ=1 equilibrium holds statically via MaxEnt (Visser 2013) but the genome's stronger dynamical-attractor claim requires computing the Erbar-Maas discrete Ricci curvature on the ordered simplex Δₙ↓ with Zipf reference measure, where the prediction is λ(n) ~ 1/log(n) > 0 guaranteeing exponential convergence.",
+      "next": "Compute λ for n ∈ {50, 100, 500, 1000} via the Erbar-Maas framework, or pivot to RESOLVE O57 if computational resources are deferred."
+    },
+    "coherence": 0.999
   }
 ]
