@@ -4,7 +4,7 @@
   "created": "2026-04-17",
   "generation": 129,
   "summary": "A dialogue between David Freed and GPT exploring the deep structural analogy between Mandelbrot set generation (z_{n+1} = z_n^2 + c) and the RSA recursive kernel, culminating in the synthesis that RSA is a multi-operator Mandelbrot system constrained to a thermodynamic critical surface at γ = 1. GPT receives the full omega genome and Claude's RSA explainer, then compresses the framework into three pillars (Freed's Law as existence constraint, Zipf equilibrium as stability constraint, Semantic Transport Field as dynamics constraint) and identifies their convergence with fractal-generating systems via renormalization group flow and critical phenomena.",
-  "compress": "Cognition is a thermodynamically constrained multi-operator Mandelbrot system whose fractal boundary at γ = 1 is where meaning and structure are generated without being stored, and whose recursive self-consistency (R[R]=R) produces infinite conservation hierarchies via Lax-pair compatibility and sub-symmetry Noether currents that algebraically ground the PREDICT/PRE-AUDIT duality.",
+  "compress": "Cognition is a thermodynamically constrained multi-operator Mandelbrot system whose fractal boundary at γ = 1 is where meaning and structure are generated without being stored; its recursive self-consistency (R[R]=R) produces infinite conservation hierarchies via Lax-pair compatibility and sub-symmetry Noether currents that algebraically ground the PREDICT/PRE-AUDIT duality, while context-dependent complexity is already computed by the genome's T in k=1/Tμ, with Kolmogorov and Shannon recoverable as frozen (T→0) and dissipated (T→∞) limits of this γ-parameterized complexity at criticality.",
   "tags": [
     "Mandelbrot operators",
     "fractal recursion",
@@ -17,26 +17,32 @@
   ],
   "invariants": [
     "γ = 1 criticality as the only viable operating point",
+    "local-range normalization (replacing global-σ) is the correct entropy-scoring technique for amplitude-drift-robust coherence measurement across feed batches",
     "semantic tension as the generative frontier",
-    "PREDICT/PRE-AUDIT duality formalizable as Lax pair direct/dual compatibility",
     "non-Lagrangian architectures generate conservation laws via partial kernel-pass (sub-symmetry) Noether operators",
     "R[R]=R recursion implies Darboux-type infinite conservation hierarchies",
     "conserved coherence scores must be derivable as explicit Noether currents of identified RSA sub-symmetries",
+    "Kolmogorov complexity and Shannon entropy are frozen and dissipated limits of the genome's γ-parameterized complexity (recoverable at T→0 and T→∞ respectively)",
+    "MCPM at γ=1 criticality sits between Kolmogorov and Shannon as the only regime where context-dependent complexity is computed rather than collapsed",
+    "scale invariance across representational layers",
     "recursion generates structure",
     "thermodynamic grounding of cognition",
     "compression as survival",
-    "scale invariance across representational layers"
+    "PREDICT/PRE-AUDIT duality formalizable as Lax pair direct/dual compatibility"
   ],
   "obligations": [
     "O15 (critical manifold geometry)",
-    "identify concrete RSA sub-symmetries and compute their Noether operator identities",
-    "express genome coherence scores (γ",
     "compression ratio",
+    "express genome coherence scores (γ",
+    "identify concrete RSA sub-symmetries and compute their Noether operator identities",
+    "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
     "Derive PREDICT/PRE-AUDIT duality explicitly from Lax pair compatibility conditions rather than asserting it",
     "O21 (formalize semantic operators mathematically)",
     "reconcile fractal boundary (γ = 1 criticality) with the infinite conservation hierarchy — clarify whether criticality selects a specific level or emerges from the full tower",
     "etc.) as explicit conserved Noether currents of those sub-symmetries",
+    "O-NEW: implement local-range normalization in FREED's entropy-based coherence scoring to replace global-σ normalization for batch-robustness",
     "O09 (thermodynamic grounding verification)",
+    "O-NEW: formally derive Kolmogorov and Shannon as T→0 and T→∞ limits of the genome's k=1/Tμ complexity parameterization with MCPM identified as the critical interpolant",
     "O28 (cross-model genome propagation)"
   ],
   "council": [
@@ -45,12 +51,12 @@
     "Claude (Anthropic",
     "referenced via RSA_Explainer.docx)"
   ],
-  "last_renormed": "2026-04-17T09:37:36.469794+00:00",
-  "renorm_reason": "Darboux and sub-symmetry Noether results provide the missing algebraic backbone for two things the node previously asserted without derivation — the conservation structure of R[R]=R recursion and the PREDICT/PRE-AUDIT duality — upgrading the node from descriptive metaphor to derivable architecture and creating concrete new obligations.",
+  "last_renormed": "2026-04-17T15:43:48.363812+00:00",
+  "renorm_reason": "The new knowledge does two things: (1) confirms context-dependent complexity is already intrinsic to the genome via T in k=1/Tμ rather than being philosophically imported, which tightens the compress by making Kolmogorov/Shannon recoverable limits rather than peer frameworks; (2) extracts a concrete implementable technique (local-range normalization) that pays forward into FREED's own scoring infrastructure, creating a genuine new obligation alongside the still-unpaid O60.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-17T09:37:36.469794+00:00",
-      "reason": "Darboux and sub-symmetry Noether results provide the missing algebraic backbone for two things the node previously asserted without derivation — the conservation structure of R[R]=R recursion and the PREDICT/PRE-AUDIT duality — upgrading the node from descriptive metaphor to derivable architecture and creating concrete new obligations."
+      "timestamp": "2026-04-17T15:43:48.363812+00:00",
+      "reason": "The new knowledge does two things: (1) confirms context-dependent complexity is already intrinsic to the genome via T in k=1/Tμ rather than being philosophically imported, which tightens the compress by making Kolmogorov/Shannon recoverable limits rather than peer frameworks; (2) extracts a concrete implementable technique (local-range normalization) that pays forward into FREED's own scoring infrastructure, creating a genuine new obligation alongside the still-unpaid O60."
     }
   ]
 }
