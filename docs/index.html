@@ -145,14 +145,6 @@
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.2; }
   }
-  .speak-bar {
-    display: flex; align-items: center; gap: 0.6rem;
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
-
   /* State panel */
   .state-grid {
     display: grid;
@@ -365,52 +357,46 @@
   }
   .footer .architect { color: var(--text); }
 
-  /* Speak button */
+  /* Speak bar */
+  .speak-bar {
+    display: flex; flex-direction: column; gap: 0.45rem;
+    padding: 0.5rem 0; border-top: 1px solid var(--border); margin-top: auto;
+  }
+  /* Character voice buttons */
+  .char-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .char-btn {
+    font-family: var(--mono); font-size: 0.63rem; padding: 0.2rem 0.55rem;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    cursor: pointer; letter-spacing: 0.06em; transition: all 0.12s;
+  }
+  .char-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .char-btn.char-active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  /* Main row: speak btn + selects + rate */
+  .speak-main-row {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem;
+  }
   .speak-btn {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    margin-top: 0;
-    padding: 0.4rem 1.1rem;
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    padding: 0.4rem 1.1rem; background: transparent;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
   }
   .speak-btn:hover { background: var(--accent); color: var(--bg); }
   .speak-btn.speaking { background: var(--accent); color: var(--bg); }
   .speak-btn.speaking:hover { background: transparent; color: var(--accent); }
-  .speak-status {
-    display: inline;
-    font-size: 0.7rem; color: var(--muted);
-  }
-  .voice-wrap {
-    display: contents;
-  }
+  .speak-status { font-size: 0.7rem; color: var(--muted); }
   .voice-label {
-    font-family: var(--mono);
-    font-size: 0.68rem; color: var(--muted);
+    font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
     text-transform: uppercase; letter-spacing: 0.1em;
   }
-  #voice-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    padding: 0.2rem 0.5rem;
-    cursor: pointer;
-    max-width: 260px;
+  .voice-select {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--mono); font-size: 0.68rem;
+    padding: 0.2rem 0.4rem; cursor: pointer; max-width: 180px;
   }
-  #voice-select:focus { outline: 1px solid var(--accent); }
-  .rate-wrap {
-    display: contents;
-  }
-  input[type=range].rate-slider {
-    accent-color: var(--accent); width: 70px;
-  }
+  .voice-select:focus { outline: 1px solid var(--accent); }
+  input[type=range].rate-slider { accent-color: var(--accent); width: 70px; }
 
   /* Loading state */
   .loading { color: var(--muted); font-style: italic; }
@@ -486,20 +472,35 @@
 
       <!-- Speak bar — pushed to bottom by margin-top:auto on .speak-bar -->
       <div class="speak-bar">
-        <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
-        <span class="speak-status" id="speak-status"></span>
-        <div class="voice-wrap">
-          <span class="voice-label">VOICE CHARACTER</span>
-          <select id="voice-select" onchange="saveVoicePref()">
-            <option value="">Loading voices...</option>
+        <!-- Character voice one-click buttons -->
+        <div class="char-btns">
+          <button class="char-btn" data-voice="Boing"     onclick="speakWithVoice('Boing')">▶ BOING</button>
+          <button class="char-btn" data-voice="Fred"      onclick="speakWithVoice('Fred')">▶ STEPHEN HAWKING</button>
+          <button class="char-btn" data-voice="Trinoids"  onclick="speakWithVoice('Trinoids')">▶ TRINOIDS</button>
+          <button class="char-btn" data-voice="Zarvox"    onclick="speakWithVoice('Zarvox')">▶ ZARVOX</button>
+          <button class="char-btn" data-voice="Superstar" onclick="speakWithVoice('Superstar')">▶ SUPERSTAR</button>
+        </div>
+        <!-- Main row -->
+        <div class="speak-main-row">
+          <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
+          <span class="speak-status" id="speak-status"></span>
+          <span class="voice-label">VOICE</span>
+          <select id="voice-select" class="voice-select" onchange="saveVoicePref()">
+            <option value="">Loading...</option>
           </select>
-          <div class="rate-wrap">
-            <span class="voice-label">SPEECH RATE</span>
-            <input type="range" class="rate-slider" id="rate-slider"
-              min="0.5" max="1.4" step="0.05" value="1.10"
-              oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-            <span id="rate-val">1.10</span>
-          </div>
+          <span class="voice-label">OTHER</span>
+          <select id="voice-other" class="voice-select" onchange="syncVoiceFrom('voice-other')">
+            <option value="">—</option>
+          </select>
+          <span class="voice-label">LANGUAGES</span>
+          <select id="voice-lang" class="voice-select" onchange="syncVoiceFrom('voice-lang')">
+            <option value="">—</option>
+          </select>
+          <span class="voice-label">RATE</span>
+          <input type="range" class="rate-slider" id="rate-slider"
+            min="0.5" max="1.4" step="0.05" value="1.10"
+            oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
+          <span id="rate-val">1.10</span>
         </div>
       </div>
 
@@ -770,78 +771,124 @@ function speakChunks(chunks, idx, gen) {
 
 // ── Voice selector ────────────────────────────────────────────────────────────
 
-// Voices that sound good for a science daemon — deep, clear, authoritative.
-// Checked in order; first match wins as the auto-selected default.
-const PREFERRED_VOICES = [
-  // preferred default
-  'Trinoids',         // synthetic, distinctive — FREED's voice
-  // macOS / iOS premium
-  'Daniel',           // UK English — deep, clear
-  'Arthur',           // UK English — measured
-  'Aaron',            // US English — calm
-  'Fred',             // classic Mac voice, has character
-  'Alex',             // classic Mac, very clear
-  // Windows / Edge neural
-  'Microsoft Guy Online (Natural)',
-  'Microsoft David Desktop',
-  'Google UK English Male',
-  'Google US English',
-];
+// Voices removed entirely (musical / gimmick)
+const REMOVE_VOICES  = ['Bad News','Bells','Cellos','Good News','Organ','Bubbles','Jester'];
+// Voices with dedicated one-click buttons (bypass dropdown)
+const CHAR_VOICES    = ['Boing','Fred','Trinoids','Zarvox','Superstar'];
+// Voices in the "Other" dropdown
+const OTHER_VOICES   = ['Whisper','Ralph','Kathy','Junior','Wobble','Baah','Albert'];
+// Default preference for main select
+const PREFERRED_MAIN = ['Aaron','Alex','Samantha','Tom','Daniel'];
 
 let _voices = [];
+let _charVoiceOverride = null;   // set when a char button is clicked
 
 function _loadVoices() {
   _voices = window.speechSynthesis.getVoices();
   if (!_voices.length) return;
 
-  const sel = document.getElementById('voice-select');
-  sel.innerHTML = '';
+  const isRemoved = name => REMOVE_VOICES.some(r => name.toLowerCase().includes(r.toLowerCase()));
+  const isChar    = name => CHAR_VOICES.some(c => name.toLowerCase().includes(c.toLowerCase()));
+  const isOther   = name => OTHER_VOICES.some(o => name.toLowerCase().includes(o.toLowerCase()));
+  const isUSEng   = lang => lang === 'en-US' || lang === 'en_US';
 
-  // English voices first, sorted by name
-  const eng = _voices.filter(v => v.lang.startsWith('en'));
-  const rest = _voices.filter(v => !v.lang.startsWith('en'));
-  const sorted = [...eng, ...rest];
-
-  sorted.forEach(v => {
+  // Populate main select — US English, excluding removed/char/other voices
+  const mainSel = document.getElementById('voice-select');
+  mainSel.innerHTML = '';
+  const mainVoices = _voices.filter(v =>
+    isUSEng(v.lang) && !isRemoved(v.name) && !isChar(v.name) && !isOther(v.name)
+  ).sort((a, b) => a.name.localeCompare(b.name));
+  mainVoices.forEach(v => {
     const opt = document.createElement('option');
-    opt.value = v.name;
-    opt.textContent = `${v.name} (${v.lang})`;
-    sel.appendChild(opt);
+    opt.value = v.name; opt.textContent = v.name;
+    mainSel.appendChild(opt);
   });
 
-  // Restore saved preference, or pick best available default
-  const saved = localStorage.getItem('freed_voice');
+  // Populate Other select
+  const otherSel = document.getElementById('voice-other');
+  otherSel.innerHTML = '<option value="">—</option>';
+  OTHER_VOICES.forEach(name => {
+    const v = _voices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
+    if (!v) return;
+    const opt = document.createElement('option');
+    opt.value = v.name; opt.textContent = v.name;
+    otherSel.appendChild(opt);
+  });
+
+  // Populate Languages select — all non-US-English voices
+  const langSel = document.getElementById('voice-lang');
+  langSel.innerHTML = '<option value="">—</option>';
+  const langVoices = _voices.filter(v => !isUSEng(v.lang) && !isRemoved(v.name))
+    .sort((a, b) => a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+  langVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+    langSel.appendChild(opt);
+  });
+
+  // Restore saved rate
   const savedRate = localStorage.getItem('freed_rate');
   if (savedRate) {
-    const rs = document.getElementById('rate-slider');
-    rs.value = savedRate;
+    document.getElementById('rate-slider').value = savedRate;
     document.getElementById('rate-val').textContent = parseFloat(savedRate).toFixed(2);
   }
-  if (saved && sorted.find(v => v.name === saved)) {
-    sel.value = saved;
+
+  // Restore saved voice or default to Trinoids preference
+  const saved = localStorage.getItem('freed_voice');
+  if (saved) {
+    // Try main select first
+    if ([...mainSel.options].find(o => o.value === saved)) {
+      mainSel.value = saved;
+    }
+    // Otherwise it might be a char/other voice — that's fine, _getVoice handles it
   } else {
-    // Find best preferred voice
-    for (const pref of PREFERRED_VOICES) {
-      const match = sorted.find(v => v.name.includes(pref));
-      if (match) { sel.value = match.name; break; }
+    for (const pref of PREFERRED_MAIN) {
+      const match = mainVoices.find(v => v.name.includes(pref));
+      if (match) { mainSel.value = match.name; break; }
     }
   }
 }
 
 function saveVoicePref() {
-  const sel = document.getElementById('voice-select');
+  const sel  = document.getElementById('voice-select');
   const rate = document.getElementById('rate-slider');
+  _charVoiceOverride = null;   // picking from dropdown cancels char override
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('char-active'));
   if (sel.value) localStorage.setItem('freed_voice', sel.value);
   if (rate.value) localStorage.setItem('freed_rate', rate.value);
 }
 
+function syncVoiceFrom(selectId) {
+  const src = document.getElementById(selectId);
+  if (!src.value) return;
+  _charVoiceOverride = null;
+  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('char-active'));
+  localStorage.setItem('freed_voice', src.value);
+  src.value = '';   // reset dropdown back to placeholder
+}
+
 function _getVoice() {
-  const name = document.getElementById('voice-select').value;
+  const name = _charVoiceOverride || localStorage.getItem('freed_voice')
+               || document.getElementById('voice-select').value;
   return _voices.find(v => v.name === name) || null;
 }
 
 function _getRate() {
   return parseFloat(document.getElementById('rate-slider').value) || 1.10;
+}
+
+function speakWithVoice(voiceKey) {
+  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids')
+  const voice = _voices.find(v => v.name === voiceKey)
+             || _voices.find(v => v.name.toLowerCase().includes(voiceKey.toLowerCase()));
+  if (!voice) return;
+  stopSpeak();
+  _charVoiceOverride = voice.name;
+  localStorage.setItem('freed_voice', voice.name);
+  document.querySelectorAll('.char-btn').forEach(b => {
+    b.classList.toggle('char-active', b.dataset.voice === voiceKey);
+  });
+  toggleSpeak();
 }
 
 // Voices load asynchronously on some browsers
