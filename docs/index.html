@@ -97,12 +97,14 @@
   }
   .panel-title {
     font-family: var(--mono);
-    font-size: 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--muted);
+    color: var(--text);
+    text-align: center;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 0.35rem;
+    padding-bottom: 0.4rem;
     flex-shrink: 0;
   }
 
@@ -146,22 +148,17 @@
     50%       { opacity: 0.2; }
   }
   /* State panel */
-  .state-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-bottom: 2rem;
-  }
+  .state-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 0.5rem; }
   .state-cell {
-    background: var(--surface);
-    padding: 0.75rem 1rem;
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.32rem 0;
+    border-bottom: 1px solid var(--border);
   }
-  .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; }
-  .state-cell .value { font-family: var(--mono); font-size: 1rem; color: var(--text); margin-top: 0.2rem; }
-  .state-cell .value.accent { color: var(--accent); }
-  .state-cell .value.green  { color: var(--green); }
+  .state-cell:last-child { border-bottom: none; }
+  .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .state-cell .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
+  .state-cell .value.accent { color: var(--accent); font-weight: 600; }
+  .state-cell .value.green  { color: var(--green);  font-weight: 600; }
 
   /* Section */
   .section { margin-bottom: 2.5rem; }
