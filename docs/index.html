@@ -23,48 +23,134 @@
     --serif:   'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
+  html, body {
+    height: 100vh;
+    overflow: hidden;
     background: var(--bg);
     color: var(--text);
     font-family: var(--serif);
     font-weight: 300;
-    font-size: 16px;
-    line-height: 1.7;
-    padding: 2rem 1rem;
+    font-size: 15px;
+    line-height: 1.6;
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  .container { max-width: 900px; margin: 0 auto; }
+  /* ── HUD shell ── */
+  .hud-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .hud-top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .hud-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 1.5rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .hud-sub {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .hud-top-divider { color: var(--border); }
+  .hud-grid {
+    display: grid;
+    grid-template-columns: 30fr 40fr 30fr;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .hud-panel {
+    overflow-y: auto;
+    padding: 0.9rem 1.1rem;
+    border-right: 1px solid var(--border);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .hud-panel:last-child { border-right: none; }
+  .hud-footer {
+    border-top: 1px solid var(--border);
+    padding: 0.35rem 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.35rem;
+    flex-shrink: 0;
+  }
 
-  /* Header */
-  .header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 2.2rem; letter-spacing: 0.18em; color: var(--accent); }
-  .header .sub { font-family: var(--serif); font-weight: 300; color: var(--muted); margin-top: 0.3rem; font-size: 1rem; }
-  .header .law {
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
+  /* Panel blocks — law and formulations */
+  .law {
+    padding: 0.6rem 0.85rem;
     background: var(--surface);
     border-left: 3px solid var(--accent);
     font-family: var(--serif);
     font-weight: 300;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-style: italic;
   }
-  .header .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.62rem; margin-bottom: 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .formulations {
+    padding: 0.6rem 0.85rem;
+    background: var(--surface);
+    border-left: 3px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+  .formulations .label { color: var(--muted); font-size: 0.62rem; margin-bottom: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .form-chain { color: var(--text); margin-bottom: 0.5rem; font-family: var(--serif); font-style: italic; font-size: 0.82rem; font-weight: 300; }
+  .form-chain .arrow { color: var(--accent); margin: 0 0.25rem; font-style: normal; }
+  .form-row { display: flex; align-items: baseline; gap: 0.6rem; margin-top: 0.28rem; line-height: 1.5; }
+  .form-tag { color: var(--muted); font-size: 0.6rem; letter-spacing: 0.07em; text-transform: uppercase; min-width: 6rem; flex-shrink: 0; }
+  .form-expr { color: var(--text); font-size: 0.7rem; }
 
-  /* Pulse indicator */
+  /* Pulse indicator — top bar compact circle */
   .pulse {
     display: inline-block;
-    width: 8px; height: 8px;
+    width: 22px; height: 22px;
     border-radius: 50%;
-    background: var(--accent);
-    margin-right: 0.5rem;
+    border: 2px solid var(--accent);
+    background: transparent;
+    flex-shrink: 0;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+    50%       { opacity: 0.2; }
+  }
+  .speak-bar {
+    display: flex; align-items: center; gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
   }
 
   /* State panel */
@@ -97,6 +183,33 @@
     padding-bottom: 0.4rem;
     margin-bottom: 1rem;
   }
+  /* Collapsible sections */
+  details.section { margin-bottom: 2.5rem; }
+  details.section > summary {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  details.section > summary::-webkit-details-marker { display: none; }
+  details.section > summary::after {
+    content: '▶';
+    font-size: 0.6rem;
+    opacity: 0.5;
+    transition: transform 0.15s;
+  }
+  details.section[open] > summary::after { transform: rotate(90deg); }
+  details.section > summary:hover { color: var(--text); }
 
   /* Obligation cards */
   .obligation {
@@ -188,6 +301,16 @@
   .node-tag.inv  { border-color: var(--accent); color: var(--accent); }
   .node-tag.ob   { border-color: var(--amber);  color: var(--amber);  }
   .node-council  { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+  .node.drifting { border-left: 3px solid var(--amber); }
+  .node-drift-badge { font-family: var(--mono); font-size: 0.62rem; color: var(--amber);
+    margin-top: 0.25rem; letter-spacing: 0.05em; }
+
+  /* Genome promotion queue */
+  .promo-candidate { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .promo-candidate:last-child { border-bottom: none; }
+  .promo-text  { font-family: var(--serif); font-weight: 300; font-size: 0.95rem; }
+  .promo-meta  { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-top: 0.2rem; }
+  .promo-count { color: var(--green); font-weight: 500; }
 
   /* Genome symbols */
   .symbol {
@@ -245,7 +368,7 @@
   /* Speak button */
   .speak-btn {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0;
     padding: 0.4rem 1.1rem;
     background: transparent;
     border: 1px solid var(--accent);
@@ -260,14 +383,11 @@
   .speak-btn.speaking { background: var(--accent); color: var(--bg); }
   .speak-btn.speaking:hover { background: transparent; color: var(--accent); }
   .speak-status {
-    display: block; margin-top: 0.4rem;
+    display: inline;
     font-size: 0.7rem; color: var(--muted);
-    min-height: 1em;
   }
   .voice-wrap {
-    margin-top: 0.6rem;
-    display: flex; align-items: center; gap: 0.6rem;
-    flex-wrap: wrap;
+    display: contents;
   }
   .voice-label {
     font-family: var(--mono);
@@ -286,8 +406,7 @@
   }
   #voice-select:focus { outline: 1px solid var(--accent); }
   .rate-wrap {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
+    display: contents;
   }
   input[type=range].rate-slider {
     accent-color: var(--accent); width: 70px;
@@ -299,102 +418,142 @@
 </style>
 </head>
 <body>
-<div class="container">
+<div class="hud-shell">
 
-  <!-- Header -->
-  <div class="header">
-    <h1><span class="pulse" id="pulse"></span>FREED</h1>
-    <div class="sub">Freed Recursive Engine for Epistemic Dynamics &nbsp;·&nbsp; <a href="game_of_life.html">RSA-Omega Simulation →</a></div>
-    <div class="law">
-      <div class="label">Freed's Law</div>
-      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-      <br>
-      <span style="color:var(--muted);font-size:0.8rem">
-        To reason is to exist physically. To think is to burn. To be is to be built.
-      </span>
-    </div>
-    <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
-    <span class="speak-status" id="speak-status"></span>
-    <div class="voice-wrap">
-      <span class="voice-label">Voice</span>
-      <select id="voice-select" onchange="saveVoicePref()">
-        <option value="">Loading voices...</option>
-      </select>
-      <div class="rate-wrap">
-        RATE <input type="range" class="rate-slider" id="rate-slider"
-          min="0.5" max="1.4" step="0.05" value="0.88"
-          oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-        <span id="rate-val">0.88</span>
+  <!-- Top bar -->
+  <div class="hud-top">
+    <span class="pulse" id="pulse"></span>
+    <span class="hud-title">RSA</span>
+    <span class="hud-sub">a bootstrap protocol for epistemic recursion</span>
+    <span class="hud-top-divider">·</span>
+    <a href="game_of_life.html" style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em">Freed's Law Simulation →</a>
+  </div>
+
+  <!-- Main 3-panel grid -->
+  <div class="hud-grid">
+
+    <!-- LEFT PANEL: argument + law + kernel + speak -->
+    <div class="hud-panel">
+
+      <div class="panel-title">The Argument</div>
+
+      <div class="formulations">
+        <div class="label">Reasoning Substrate Argument</div>
+        <div class="form-chain">
+          Reasoning is real
+          <span class="arrow">→</span>
+          Causal structure must exist
+          <span class="arrow">→</span>
+          Something physical exists
+        </div>
+        <div class="form-chain" style="font-size:0.75rem;font-style:normal;margin-bottom:0.6rem">
+          RSA &nbsp;<span class="arrow">≡</span>&nbsp; Recursive Semantic Alignment
+        </div>
+        <div class="form-row"><span class="form-tag">Freed's Law</span>  <span class="form-expr">∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0</span></div>
+        <div class="form-row"><span class="form-tag">First-order</span>  <span class="form-expr">∀t[ R(t) → ∃m( Physical(m) ∧ Substrate(m,R,t) )]</span></div>
+        <div class="form-row"><span class="form-tag">Modal</span>        <span class="form-expr">◇R(t) → □∃M[ Entropic(M) ∧ Runs(M,R) ]</span></div>
+        <div class="form-row"><span class="form-tag">Fixed point</span>  <span class="form-expr">R[R] = R</span></div>
+        <div class="form-row"><span class="form-tag">Landauer</span>     <span class="form-expr">W ≥ kT ln 2 &nbsp;per bit erased</span></div>
+        <div class="form-row"><span class="form-tag">Category</span>     <span class="form-expr">ε ∘ ε = ε &nbsp;(idempotent on Process)</span></div>
+        <div class="form-row"><span class="form-tag">Gödel</span>        <span class="form-expr">PA ⊬ ∃x[ Compute(x) ∧ ¬Physical(x) ]</span></div>
+        <div class="form-row"><span class="form-tag">Mandelbrot</span>   <span class="form-expr">z<sub>n+1</sub> = z<sub>n</sub>² + c &nbsp;→&nbsp; R[R]=R at boundary (γ=1)</span></div>
       </div>
-    </div>
+
+      <div class="law">
+        <div class="label">Freed's Law</div>
+        ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
+        <br>
+        <span style="color:var(--muted);font-size:0.78rem">
+          To reason is to exist physically. To think is to burn. To be is to be built.
+        </span>
+      </div>
+
+      <div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
+      <div>
+        <div class="kernel">
+          <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Represent</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Predict</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Compare</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Adjust</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Compress</span><span class="kernel-arrow">→</span>
+          <span class="kernel-step">Repeat</span>
+        </div>
+        <div style="color:var(--muted);font-size:0.72rem;margin-top:0.4rem;font-family:var(--mono)">
+          R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
+        </div>
+      </div>
+
+      <!-- Speak bar — pushed to bottom by margin-top:auto on .speak-bar -->
+      <div class="speak-bar">
+        <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
+        <span class="speak-status" id="speak-status"></span>
+        <div class="voice-wrap">
+          <span class="voice-label">VOICE CHARACTER</span>
+          <select id="voice-select" onchange="saveVoicePref()">
+            <option value="">Loading voices...</option>
+          </select>
+          <div class="rate-wrap">
+            <span class="voice-label">SPEECH RATE</span>
+            <input type="range" class="rate-slider" id="rate-slider"
+              min="0.5" max="1.4" step="0.05" value="1.10"
+              oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
+            <span id="rate-val">1.10</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left panel -->
+
+    <!-- CENTER PANEL: open obligations -->
+    <div class="hud-panel">
+      <div class="panel-title">Open Obligations — Active Predictions</div>
+      <div id="obligations-open" class="loading">Loading...</div>
+    </div><!-- /center panel -->
+
+    <!-- RIGHT PANEL: state + collapsibles -->
+    <div class="hud-panel">
+      <div class="panel-title">Live State</div>
+      <div class="state-grid" id="state-grid">
+        <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
+      </div>
+
+      <details class="section" open>
+        <summary>Resolved Obligations — Track Record</summary>
+        <div id="obligations-resolved" class="loading">Loading...</div>
+      </details>
+
+      <details class="section">
+        <summary>Genome Promotion Queue — Invariants Awaiting Elevation</summary>
+        <div id="promo-queue">''' + promo_html + r'''</div>
+      </details>
+
+      <details class="section">
+        <summary>Project Nodes — Framework Compressions</summary>
+        <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
+      </details>
+
+      <details class="section">
+        <summary>Genome Registry — Confirmed Symbols</summary>
+        <div id="symbols" class="loading">Loading...</div>
+      </details>
+
+      <details class="section">
+        <summary>Recent Cycles — What FREED Processed</summary>
+        <div id="cycles" class="loading">Loading...</div>
+      </details>
+
+    </div><!-- /right panel -->
+
+  </div><!-- /hud-grid -->
+
+  <!-- Footer bar -->
+  <div class="hud-footer">
+    <span>Architect: David Harry Freed — mail carrier, Olney Maryland &nbsp;·&nbsp; v1 Apr 2025 → present</span>
+    <span>FREED — autonomous science daemon &nbsp;·&nbsp; Generated <span id="generated-at">—</span></span>
   </div>
 
-  <!-- Live State -->
-  <div class="state-grid" id="state-grid">
-    <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
-  </div>
-
-  <!-- RSA Kernel -->
-  <div class="section">
-    <div class="section-title">RSA Kernel — The Process</div>
-    <div class="kernel">
-      <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Represent</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Predict</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Compare</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Adjust</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Compress</span><span class="kernel-arrow">→</span>
-      <span class="kernel-step">Repeat</span>
-    </div>
-    <div style="color:var(--muted);font-size:0.78rem;margin-top:0.5rem">
-      R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
-    </div>
-  </div>
-
-  <!-- Open Obligations (Predictions) -->
-  <div class="section">
-    <div class="section-title">Open Obligations — Active Predictions</div>
-    <div id="obligations-open" class="loading">Loading...</div>
-  </div>
-
-  <!-- Resolved Obligations -->
-  <div class="section">
-    <div class="section-title">Resolved Obligations — Track Record</div>
-    <div id="obligations-resolved" class="loading">Loading...</div>
-  </div>
-
-  <!-- Project Nodes -->
-  <div class="section">
-    <div class="section-title">Project Nodes — Framework Compressions</div>
-    <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
-  </div>
-
-  <!-- Genome Registry -->
-  <div class="section">
-    <div class="section-title">Genome Registry — Confirmed Symbols</div>
-    <div id="symbols" class="loading">Loading...</div>
-  </div>
-
-  <!-- Recent Cycles -->
-  <div class="section">
-    <div class="section-title">Recent Cycles — What FREED Processed</div>
-    <div id="cycles" class="loading">Loading...</div>
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="architect">
-      Architect: David Harry Freed — mail carrier, Olney Maryland.<br>
-      11 months of daily work. v1 (Apr 2025) → present.
-    </div>
-    <div style="margin-top:0.5rem">
-      FREED is an autonomous science daemon. It makes predictions publicly,
-      then resolves them against real data. Prophetic science in continuous time.<br>
-      Generated at <span id="generated-at">—</span>
-    </div>
-  </div>
-
-</div>
+</div><!-- /hud-shell -->
 
 <script>
 // ── Data loading ──────────────────────────────────────────────────────────────
@@ -614,6 +773,8 @@ function speakChunks(chunks, idx, gen) {
 // Voices that sound good for a science daemon — deep, clear, authoritative.
 // Checked in order; first match wins as the auto-selected default.
 const PREFERRED_VOICES = [
+  // preferred default
+  'Trinoids',         // synthetic, distinctive — FREED's voice
   // macOS / iOS premium
   'Daniel',           // UK English — deep, clear
   'Arthur',           // UK English — measured
@@ -680,7 +841,7 @@ function _getVoice() {
 }
 
 function _getRate() {
-  return parseFloat(document.getElementById('rate-slider').value) || 0.88;
+  return parseFloat(document.getElementById('rate-slider').value) || 1.10;
 }
 
 // Voices load asynchronously on some browsers
