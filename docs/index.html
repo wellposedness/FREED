@@ -39,8 +39,8 @@
 
   /* Header */
   .header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 2.2rem; letter-spacing: 0.18em; color: var(--accent); }
-  .header .sub { font-family: var(--serif); font-weight: 300; color: var(--muted); margin-top: 0.3rem; font-size: 1rem; }
+  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 2.2rem; letter-spacing: 0.18em; color: var(--accent); text-align: center; }
+  .header .sub { font-family: var(--serif); font-weight: 300; color: var(--muted); margin-top: 0.3rem; font-size: 1rem; text-align: center; }
   .header .law {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
@@ -52,15 +52,29 @@
     font-style: italic;
   }
   .header .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .header .formulations {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-left: 3px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  .header .formulations .label { color: var(--muted); font-size: 0.68rem; margin-bottom: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .form-chain { color: var(--text); margin-bottom: 0.7rem; font-family: var(--serif); font-style: italic; font-size: 0.9rem; font-weight: 300; }
+  .form-chain .arrow { color: var(--accent); margin: 0 0.3rem; font-style: normal; }
+  .form-row { display: flex; align-items: baseline; gap: 0.8rem; margin-top: 0.35rem; line-height: 1.6; }
+  .form-tag { color: var(--muted); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; min-width: 7rem; flex-shrink: 0; }
+  .form-expr { color: var(--text); }
 
   /* Pulse indicator */
   .pulse {
     display: block;
-    width: 90px; height: 90px;
+    width: 110px; height: 110px;
     border-radius: 50%;
     border: 3px solid var(--accent);
     background: transparent;
-    margin: 2rem auto;
+    margin: 2rem auto 1.5rem;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
@@ -306,10 +320,37 @@
 <body>
 <div class="container">
 
+  <!-- Pulse circle -->
+  <span class="pulse" id="pulse"></span>
+
   <!-- Header -->
   <div class="header">
     <h1>RSA</h1>
     <div class="sub">a bootstrap protocol for epistemic recursion</div>
+
+    <div class="formulations">
+      <div class="label">The Argument</div>
+      <div class="form-chain">
+        Reasoning Substrate Argument
+        <span class="arrow">≡</span>
+        Recursive Semantic Alignment
+      </div>
+      <div class="form-chain">
+        Reasoning is real
+        <span class="arrow">→</span>
+        Causal structure must exist
+        <span class="arrow">→</span>
+        Something physical exists
+      </div>
+      <div class="form-row"><span class="form-tag">Freed's Law</span>     <span class="form-expr">∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0</span></div>
+      <div class="form-row"><span class="form-tag">First-order</span>     <span class="form-expr">∀t[ R(t) → ∃m( Physical(m) ∧ Substrate(m, R, t) )]</span></div>
+      <div class="form-row"><span class="form-tag">Modal</span>           <span class="form-expr">◇R(t) → □∃M[ Entropic(M) ∧ Runs(M, R) ]</span></div>
+      <div class="form-row"><span class="form-tag">Fixed point</span>     <span class="form-expr">R[R] = R</span></div>
+      <div class="form-row"><span class="form-tag">Landauer</span>        <span class="form-expr">W ≥ kT ln 2 &nbsp;per bit erased</span></div>
+      <div class="form-row"><span class="form-tag">Category</span>        <span class="form-expr">ε ∘ ε = ε &nbsp;(idempotent endomorphism on Process)</span></div>
+      <div class="form-row"><span class="form-tag">Gödel</span>           <span class="form-expr">PA ⊬ ∃x[ Compute(x) ∧ ¬Physical(x) ]</span></div>
+    </div>
+
     <div class="law">
       <div class="label">Freed's Law</div>
       ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
@@ -321,9 +362,6 @@
       <a href="game_of_life.html" style="font-size:0.8rem">Freed's Law Simulation (click here →)</a>
     </div>
   </div>
-
-  <!-- Pulse circle -->
-  <span class="pulse" id="pulse"></span>
 
   <!-- RSA Kernel -->
   <div class="section">
