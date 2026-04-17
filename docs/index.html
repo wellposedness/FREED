@@ -120,6 +120,33 @@
     padding-bottom: 0.4rem;
     margin-bottom: 1rem;
   }
+  /* Collapsible sections */
+  details.section { margin-bottom: 2.5rem; }
+  details.section > summary {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  details.section > summary::-webkit-details-marker { display: none; }
+  details.section > summary::after {
+    content: '▶';
+    font-size: 0.6rem;
+    opacity: 0.5;
+    transition: transform 0.15s;
+  }
+  details.section[open] > summary::after { transform: rotate(90deg); }
+  details.section > summary:hover { color: var(--text); }
 
   /* Obligation cards */
   .obligation {
@@ -404,35 +431,35 @@
     <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
   </div>
 
-  <!-- Open Obligations (Predictions) -->
-  <div class="section">
-    <div class="section-title">Open Obligations — Active Predictions</div>
+  <!-- Open Obligations (Predictions) — open by default -->
+  <details class="section" open>
+    <summary>Open Obligations — Active Predictions</summary>
     <div id="obligations-open" class="loading">Loading...</div>
-  </div>
+  </details>
 
   <!-- Resolved Obligations -->
-  <div class="section">
-    <div class="section-title">Resolved Obligations — Track Record</div>
+  <details class="section">
+    <summary>Resolved Obligations — Track Record</summary>
     <div id="obligations-resolved" class="loading">Loading...</div>
-  </div>
+  </details>
 
   <!-- Project Nodes -->
-  <div class="section">
-    <div class="section-title">Project Nodes — Framework Compressions</div>
+  <details class="section">
+    <summary>Project Nodes — Framework Compressions</summary>
     <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
-  </div>
+  </details>
 
   <!-- Genome Registry -->
-  <div class="section">
-    <div class="section-title">Genome Registry — Confirmed Symbols</div>
+  <details class="section">
+    <summary>Genome Registry — Confirmed Symbols</summary>
     <div id="symbols" class="loading">Loading...</div>
-  </div>
+  </details>
 
   <!-- Recent Cycles -->
-  <div class="section">
-    <div class="section-title">Recent Cycles — What FREED Processed</div>
+  <details class="section">
+    <summary>Recent Cycles — What FREED Processed</summary>
     <div id="cycles" class="loading">Loading...</div>
-  </div>
+  </details>
 
   <!-- Footer -->
   <div class="footer">
