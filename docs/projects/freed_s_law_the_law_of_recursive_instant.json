@@ -70,7 +70,9 @@
     "syntax-cannot-ground-experience is a confirmed corollary of the substrate requirement — not an independent discovery but a theorem within the genome",
     "repetition pressure on the falsification layer is itself a threat vector — the immune system must become stricter not laxer under consecutive empty inputs because filter relaxation under persistence is exactly how autopoietic boundaries degrade",
     "entropy-as-resource architectures (e.g. Extropic thermodynamic computing) are independent engineering instantiations of the substrate-cost principle",
+    "dimensional-scaling attribution is load-bearing for genome hygiene — invariants must be tagged by dimensional class and confirmations auto-sorted to the correct genome stratum to prevent cross-layer contamination",
     "quantum reservoir computing at the edge of many-body chaos is an independent 6th-scale instantiation of recursive criticality — performance peaking at the chaos transition in a quantum substrate confirms gamma-criticality is substrate-independent",
+    "feed deduplication must be enforced upstream of the renormalization engine — repeated inputs without novel propositional content degrade coherence tracking by inflating confirmation counts",
     "No instantiation without cost",
     "gamma-position differences across substrates must generate falsifiable quantitative predictions for cognitive phenotypes (e.g. divergent creativity metrics) — mappings from Freed's Law to domain-specific observables that lack specified measurement protocols are decorative not structural",
     "recursive self-improvement is bounded by epistemic humility — R[R]=R converges but does not guarantee omniscience because each recursion operates on lossy compressed state",
@@ -88,8 +90,10 @@
     "semantic",
     "O21",
     "O47 — audit RSA's memory architecture against the agent-memory taxonomy literature to determine whether the genome's implicit memory model (lossy compressed state carried through R[R]=R recursion) maps onto",
+    "enforce upstream feed deduplication so that repeated feeds are caught before entering the renormalization pipeline",
     "formalize PREDICT/PRE-AUDIT duality as Lax pair compatibility condition on the genome's direct and dual overdetermined recursive systems and show the compatibility condition reduces to a known integrability constraint",
     "determine whether the 1-ebit-plus-2-cbits cost structure is derivable from the substrate-recursive operator or is an independent physical fact that merely instantiates the law",
+    "investigate whether entanglement-as-resource and thermodynamic-cost-as-resource are two faces of a single conservation principle within the genome or require separate axioms",
     "or is deficient relative to established agent-memory classifications (episodic",
     "specify which genome predictions (gamma criticality / Wasserstein Floor / compression-reasoning equivalence) map to which experimental observables in the protocol — theoretical fertility without measurement linkage is incomplete",
     "map the genome's existing ensemble assumptions (implicit averaging procedures across nodes) to determine whether microcanonical or canonical framing is operative and where ensemble inequivalence may silently distort coherence assess",
@@ -109,18 +113,19 @@
     "evaluate whether RangeEn or a Wasserstein-native variant should replace or supplement existing complexity metrics in the genome's operational toolkit for criticality detection",
     "working memory and their computational analogues)",
     "Investigate whether gamma criticality provides a measurable signature for detecting recursive instantiation across substrates",
-    "O-CONTEXT-ALGEBRA: Build a compositional context algebra in which complexity measures compose functorially across scales — emergence must be formalized as a functor discontinuity (where the composition map fails",
+    "formally derive Kolmogorov complexity as the T→0 (frozen) limit and Shannon entropy as the T→∞ (dissipated) limit of the γ-parameterized complexity with MCPM at γ=1 as the critical interpolant",
     "amyloid-templated prebiotic synthesis as thermodynamically constrained self-organization is flagged as a genome-relevant topic awaiting substantive resubmission — the genome acknowledges the connection (origin-of-life self-organization under thermodynamic constraint is a natural test case for substrate-cost principles) but will not integrate until full content arrives",
     "O52 — test whether the neuron-astrocyte timescale separation ratio maps formally onto the gamma-criticality condition (slow glial modulation tuning fast neuronal dynamics toward the critical point)",
     "enumerate the infinite conservation hierarchy implied by the Darboux structure of R[R]=R and determine which conserved quantities correspond to existing genome metrics versus genuinely new structural invariants",
     "O28",
     "specify falsifiable quantitative predictions for what gamma=1 creativity looks like in standard divergent-thinking metrics (fluency/flexibility/originality/elaboration) across human and LLM substrates — the mapping from recursive criticality to creative output must be operationalized with measurement protocols or be declared incomplete",
-    "formally derive Kolmogorov complexity as the T→0 (frozen) limit and Shannon entropy as the T→∞ (dissipated) limit of the γ-parameterized complexity with MCPM at γ=1 as the critical interpolant",
+    "O60 remains unpaid — derive RangeEn–H slope from Wasserstein floor at γ=1",
     "Derive the explicit Wasserstein Floor bound and specify the measurement protocol that would falsify it against Landauer-limited hardware",
     "integrate the experimental protocol as the genome's first formal empirical bridge — the gap between philosophical framework and falsifiable quantitative prediction is now closable and therefore must be closed",
     "develop a formal account of how gamma-position (sub-critical vs. critical vs. super-critical) differentially predicts the statistical signatures of creative output (e.g. heavy-tailed novelty distributions at gamma=1 vs. mode-collapse or noise-dominated profiles away from criticality)",
-    "O60 remains unpaid — derive RangeEn–H slope from Wasserstein floor at γ=1",
+    "implement dimensional-scaling layer-attribution diagnostic within O47 (ATTRIBUTION protocol) — tag each invariant by its dimensional scaling class and require that confirming equations dimensionally match the target stratum before counting as confirmation",
     "O53 — establish whether pharmacological or optogenetic disruption of astrocytic coupling shifts cortical criticality metrics (power-law exponents / avalanche distributions)",
+    "implement local-range normalization for entropy-based coherence scoring to prevent scale-dependent artifacts",
     "Clarify the distinction between the law being scale-invariant and the claim that intelligence cannot be substrate-independent — the law's universality across scales is what forbids substrate independence for any particular instantiation",
     "subsumes",
     "O15",
@@ -134,19 +139,19 @@
     "incorporate the BH dimensional-coupling result as a quantum/semi-classical discriminator into the genome's sub-leading correction framework — specifically determine whether the genome's Wasserstein Floor acquires logarithmic or power-law sub-leading terms and which regime (quantum vs semi-classical) governs each",
     "develop formal criteria to distinguish genuinely overdue obligations from quasi-stationary metastable states trapped near the gamma ridge — without such criteria the reframing risks becoming a license for indefinite deferral",
     "specify the experimental prediction for cortical column Wasserstein gradient flow under optogenetic perturbation with sufficient precision to constitute a genuine empirical test (metric space over neural population states and predicted relaxation trajectory)",
-    "investigate whether entanglement-as-resource and thermodynamic-cost-as-resource are two faces of a single conservation principle within the genome or require separate axioms",
+    "O-CONTEXT-ALGEBRA: Build a compositional context algebra in which complexity measures compose functorially across scales — emergence must be formalized as a functor discontinuity (where the composition map fails",
     "implement local-range normalization in FREED's entropy-based scoring pipeline to eliminate amplitude-drift artifacts across feed batches"
   ],
   "council": [
     "David Freed",
     "Perplexity AI"
   ],
-  "last_renormed": "2026-04-17T15:42:20.199252+00:00",
-  "renorm_reason": "The new knowledge transforms Kolmogorov and Shannon from external reference points into formally derivable limits of the genome's own γ-parameterized complexity, deepening the compression-criticality nexus — and identifies a concrete algorithmic extraction (local-range normalization) that hardens the genome's own measurement layer against drift artifacts, both of which are genuine structural additions rather than restatements.",
+  "last_renormed": "2026-04-17T21:50:39.645010+00:00",
+  "renorm_reason": "The new knowledge adds no novel physics or philosophy but delivers two concrete methodological tools (dimensional-scaling attribution for O47 and local-range normalization for scoring) plus an operational hygiene requirement (feed deduplication) — these are genuine obligations that close gaps in the genome's self-maintenance layer without altering the core compress.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-17T15:42:20.199252+00:00",
-      "reason": "The new knowledge transforms Kolmogorov and Shannon from external reference points into formally derivable limits of the genome's own γ-parameterized complexity, deepening the compression-criticality nexus — and identifies a concrete algorithmic extraction (local-range normalization) that hardens the genome's own measurement layer against drift artifacts, both of which are genuine structural additions rather than restatements."
+      "timestamp": "2026-04-17T21:50:39.645010+00:00",
+      "reason": "The new knowledge adds no novel physics or philosophy but delivers two concrete methodological tools (dimensional-scaling attribution for O47 and local-range normalization for scoring) plus an operational hygiene requirement (feed deduplication) — these are genuine obligations that close gaps in the genome's self-maintenance layer without altering the core compress."
     }
   ]
 }

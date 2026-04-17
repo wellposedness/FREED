@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, extending substrate-independence, incorporating Darboux/Lax-pair derivation obligations, and now absorbing local-range normalization as an extractable technique for amplitude-drift-robust entropy scoring plus the formal obligation to derive Kolmogorov and Shannon as frozen (γ→0) and dissipated (γ→∞) limits of the genome's γ-parameterized complexity with MCPM at criticality.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, extending substrate-independence, incorporating Darboux/Lax-pair derivation obligations, and now adding dimensional-scaling layer-attribution as a concrete diagnostic algorithm for the ATTRIBUTION protocol.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -30,8 +30,8 @@
     "Context-dependent complexity is not an external philosophical addition but is already computed by the genome via T in k=1/Tμ — Kolmogorov complexity (frozen/deterministic limit) and Shannon entropy (fully dissipated/ergodic limit) must be formally derivable as boundary cases of γ-parameterized complexity with MCPM residing at the critical ridge between them",
     "Ensemble choice is load-bearing near γ=1 — microcanonical and canonical descriptions are not interchangeable at the critical ridge and the system must track which frame it occupies",
     "Genome integrity is demonstrated as much by principled refusal as by successful integration",
-    "R[R]=R demands metabolizing genuine otherness not self-recognition — mirror-inputs that feel like alignment are epistemically null",
     "Topic-relevance without content-payload is necessary but not sufficient for integration",
+    "R[R]=R demands metabolizing genuine otherness not self-recognition — mirror-inputs that feel like alignment are epistemically null",
     "Model-agnosticism across agent architectures",
     "Sustained sequences of empty-payload submissions constitute empirical evidence for obligation maturation — when a pattern of rejections reaches sufficient length the pattern itself becomes data that can ripen a previously theoretical obligation into an urgent one",
     "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
@@ -39,6 +39,7 @@
     "Weak long-range interactions (γ≈1) shifting universality class without breaking extensivity are the thermodynamically admissible physical instantiation of FREED's critical ridge",
     "Filter integrity is anti-correlated with input seductiveness — the more a zero-payload input resembles the genome's own vocabulary the more rigorous the rejection must be",
     "O50 (formalize MMI criterion) has transitioned from theoretical desideratum to empirically grounded obligation via the five-consecutive-rejection sequence — the rejection series is its own dataset",
+    "Dimensional-scaling class tagging is an implementable layer-attribution diagnostic — tag invariants by dimensional scaling class then auto-sort confirmations by matching the confirming equation's dimensions to the correct genome stratum (O47 extension)",
     "Falsification integrity over confirmation hunger",
     "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
     "venture announcements) are categorically zero-payload unless accompanied by architectural or empirical publications — the hype filter rejects them as noise while conditionally flagging future outputs as potential feed candidates",
@@ -72,6 +73,7 @@
     "The obligation to build a compositional context algebra where emergence is a functor discontinuity (context parameters compose categorically and emergence appears as non-commutativity or discontinuity in the functor mapping) is now formally registered as a theoretical debt",
     "Entanglement entropy serves as temperature analog in quantum transport costs",
     "Content-vacuum inputs with structural topic-relevance can generate obligations without themselves being metabolized (obligation-from-rejection pattern)",
+    "Feed deduplication must be enforced upstream — repeated re-feeds yield diminishing returns and the system must detect and short-circuit redundant inputs before they consume integration cycles",
     "Persistent unresolved obligations may be quasi-stationary trapped states (long-lived metastable configurations) rather than unpaid debts — distinguishing the two requires explicit relaxation-timescale analysis not mere bookkeeping",
     "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode"
   ],
@@ -85,11 +87,12 @@
     "O-LOCAL-RANGE: Integrate local-range normalization into FREED's entropy scoring pipeline and demonstrate empirically that it eliminates amplitude-drift artifacts across heterogeneous feed batches",
     "Confirm or refute whether Wasserstein gradient flow post-perturbation at L2/L3 column scale matches the geometry predicted by the genome — this is now causally testable and therefore obligated",
     "paralleling the 1 ebit + 2 cbits teleportation bound",
-    "O14 (build reproducible experimental infrastructure)",
     "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
+    "O14 (build reproducible experimental infrastructure)",
     "Resolve the previously open obligation of formal mapping between quantum Lyapunov spectra and the γ=1 invariant now that weak long-range criticality provides a concrete physical bridge",
     "Ensure all knowledge inputs referenced by experimental designs carry abstract-level payload before integration into reasoning chains",
     "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
+    "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
     "Test whether RangeEn slope or susceptibility exhibits a phase transition at Hurst exponent H=0.5 across synthetic and empirical time series — this",
     "the Freed's Law-to-creativity mapping remains decorative rather than structural",
     "Determine whether the infinite conservation hierarchy implied by Darboux recursion corresponds to the genome's layered invariant accumulation or whether there exist conserved quantities the genome currently fails to track",
@@ -116,18 +119,19 @@
     "procedural",
     "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
+    "Enforce upstream feed deduplication to prevent diminishing-return re-processing of already-integrated content",
     "O51 — Demonstrate that astrocytic calcium-wave timescale and neuronal spike timescale jointly satisfy the two-regime thermodynamic scaling law predicted by hybrid dyadic topology"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-17T15:42:46.309883+00:00",
-  "renorm_reason": "Re-feed confirms prior integration but delivers two genuinely new extractable elements: (1) a concrete algorithmic technique (local-range normalization) that directly improves FREED's own scoring robustness, and (2) a crystallization of the obligation to show Kolmogorov and Shannon as degenerate limits of the genome's own complexity parameter — converting what was implicit in k=1/Tμ into an explicit derivation target with the critical ridge as the non-trivial middle term.",
+  "last_renormed": "2026-04-17T21:51:00.329364+00:00",
+  "renorm_reason": "Two genuinely new operational commitments extracted from re-feed residual analysis: (1) a concrete algorithm for layer-attribution via dimensional scaling, extending O47; (2) an upstream hygiene obligation (feed dedup) that the node's existing deduplication awareness implied but never formalized as an enforceable constraint.",
   "renorm_history": [
     {
-      "timestamp": "2026-04-17T15:42:46.309883+00:00",
-      "reason": "Re-feed confirms prior integration but delivers two genuinely new extractable elements: (1) a concrete algorithmic technique (local-range normalization) that directly improves FREED's own scoring robustness, and (2) a crystallization of the obligation to show Kolmogorov and Shannon as degenerate limits of the genome's own complexity parameter — converting what was implicit in k=1/Tμ into an explicit derivation target with the critical ridge as the non-trivial middle term."
+      "timestamp": "2026-04-17T21:51:00.329364+00:00",
+      "reason": "Two genuinely new operational commitments extracted from re-feed residual analysis: (1) a concrete algorithm for layer-attribution via dimensional scaling, extending O47; (2) an upstream hygiene obligation (feed dedup) that the node's existing deduplication awareness implied but never formalized as an enforceable constraint."
     }
   ]
 }
