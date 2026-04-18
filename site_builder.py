@@ -789,9 +789,11 @@ def _render_projects(projects: list) -> str:
 
         council     = ", ".join(n.get("council") or [])
         drift_class = ' drifting' if n.get("drift_flag") else ''
+        _ov = n.get("drift_overlap")
+        _ov_str = f'{_ov:.2f}' if isinstance(_ov, (int, float)) else '?'
         drift_html  = (
             f'<div class="node-drift-badge">⚠ DRIFT — compress overlap '
-            f'{n.get("drift_overlap","?"):.2f} (re-examine)</div>'
+            f'{_ov_str} (re-examine)</div>'
             if n.get("drift_flag") else ''
         )
         parts.append(f"""<div class="node{drift_class}">
