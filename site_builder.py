@@ -91,7 +91,7 @@ def _write_game_of_life():
 <title>Freed's Law Simulation — FREED</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Mr+De+Haviland&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Parisienne&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:      #ffffff;
@@ -603,7 +603,7 @@ def _render_html(projects: list = None) -> str:
 <title>FREED — Freed Recursive Engine for Epistemic Dynamics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Mr+De+Haviland&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Parisienne&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:      #ffffff;
@@ -759,7 +759,7 @@ def _render_html(projects: list = None) -> str:
   .state-cell:last-child { border-bottom: none; }
   .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .state-cell .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
-  .value.soliton { font-family: 'Mr De Haviland', cursive; font-size: 1.1rem; line-height: 1; }
+  .value.soliton { font-family: 'Parisienne', cursive; font-size: 1.1rem; line-height: 1; }
   .state-cell .value.accent { color: var(--accent); font-weight: 600; }
   .state-cell .value.green  { color: var(--green);  font-weight: 600; }
 
