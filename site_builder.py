@@ -1254,8 +1254,20 @@ def _render_html(projects: list = None) -> str:
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     cursor: pointer; letter-spacing: 0.06em; transition: all 0.12s;
   }
-  .char-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .char-btn.char-active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .char-btn:hover { opacity: 0.8; }
+  .char-btn.char-active { filter: brightness(0.75); }
+  /* Individual voice colors */
+  .char-btn[data-voice="Boing"]     { border-color: #65a30d; color: #65a30d; }
+  .char-btn[data-voice="Fred"]      { border-color: #c9a87c; color: #c9a87c; }
+  .char-btn[data-voice="Zarvox"]    { border-color: #7c3aed; color: #7c3aed; }
+  .char-btn[data-voice="Superstar"] { border-color: #0ea5e9; color: #0ea5e9; }
+  .char-btn[data-voice="Trinoids"]  { border-color: transparent; color: #fff;
+    background: linear-gradient(90deg,#f472b6,#818cf8,#34d399,#fbbf24,#f472b6);
+    background-size: 300% 100%; animation: holo 3s linear infinite; }
+  @keyframes holo {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
   /* Main row: speak btn + selects + rate */
   .speak-main-row {
     display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem;
