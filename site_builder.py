@@ -644,7 +644,7 @@ def _render_html(projects: list = None) -> str:
     align-items: center;
     gap: 1rem;
     padding: 0.55rem 1.4rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #000;
     flex-shrink: 0;
     flex-wrap: wrap;
   }
