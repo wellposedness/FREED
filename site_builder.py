@@ -759,7 +759,7 @@ def _render_html(projects: list = None) -> str:
   .state-cell:last-child { border-bottom: none; }
   .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .state-cell .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
-  .soliton-phrase { font-family: 'Mr De Haviland', cursive; font-size: 2rem; color: var(--muted); text-align: center; padding: 0.6rem 0 0.2rem; line-height: 1.2; }
+  .value.soliton { font-family: 'Mr De Haviland', cursive; font-size: 1.5rem; line-height: 1; }
   .state-cell .value.accent { color: var(--accent); font-weight: 600; }
   .state-cell .value.green  { color: var(--green);  font-weight: 600; }
 
@@ -1140,8 +1140,6 @@ def _render_html(projects: list = None) -> str:
       <div class="state-grid" id="state-grid">
         <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
       </div>
-      <div class="soliton-phrase">hybrid dyadic soliton</div>
-
       <details class="section" open>
         <summary>Resolved Obligations — Track Record</summary>
         <div id="obligations-resolved" class="loading">Loading...</div>
@@ -1208,7 +1206,7 @@ function renderState(s) {
     { label: 'Generation',  value: s.generation,                        cls: 'accent' },
     { label: 'Coherence',   value: s.coherence,                         cls: s.coherence >= 1 ? 'error' : 'green' },
     { label: 'Cycle Count', value: s.cycle_count },
-    { label: 'Topology',    value: (s.topology||'').replace(/_/g,' ') },
+    { label: 'Topology',    value: (s.topology||'').replace(/_/g,' '), cls: 'soliton' },
     { label: 'Debt Ratio',  value: s.debt_ratio },
     { label: 'Last Cycle',  value: ts(s.last_cycle) },
   ];
