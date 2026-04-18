@@ -14,29 +14,90 @@ import json
 import time
 import signal
 import traceback
-from datetime import datetime, timezone
+import base64
+import threading
+import requests
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from l7_agent     import L7Agent
 from astrocyte    import Astrocyte
-from tamura_sweep import TamuraSweep
+from tamura_sweep   import TamuraSweep
+from targeted_sweep import TargetedSweep
 from site_builder import build as build_site
+from consolidate  import Consolidator
+from feed_guard      import sanitize as guard_sanitize
+from knowledge_graph import get_graph
+from self_engineer   import SelfEngineer
+import voice
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-FREED_DIR    = Path(__file__).parent
-STATE_FILE   = FREED_DIR / "FREED_state.json"
-OBLIG_FILE   = FREED_DIR / "FREED_obligations.json"
-LOG_DIR      = FREED_DIR / "FREED_log"
+FREED_DIR       = Path(__file__).parent
+STATE_FILE      = FREED_DIR / "FREED_state.json"
+OBLIG_FILE      = FREED_DIR / "FREED_obligations.json"
+LOG_DIR         = FREED_DIR / "FREED_log"
+ARCHITECT_FILE  = FREED_DIR / "architect_input.md"
+ARCHITECT_ARCHIVE = LOG_DIR / "architect_inputs"
 
 # ─── Cycle configuration ──────────────────────────────────────────────────────
 CYCLE_INTERVAL_SECONDS = 6 * 60 * 60   # 6 hours between cycles
 MAX_FEEDS_PER_CYCLE    = 2             # max SWEEP inputs to process per cycle
+MAX_TARGETED_PER_CYCLE = 2             # max targeted-sweep results per cycle
 MAX_RESOLVES_PER_CYCLE = 1             # max obligations to attempt per cycle
+YIELD_THRESHOLD        = 0.03          # feed yield above this triggers consolidation
+CONSOLIDATE_EVERY      = 5            # also consolidate every N daemon cycles
 
 # ─── Estimated token costs for authorization ──────────────────────────────────
 EST_TOKENS_FEED    = 3000   # generous estimate per FEED query
 EST_TOKENS_OBLIGATE = 1500
 EST_TOKENS_RESOLVE  = 4000  # resolution queries are deep — more tokens
+
+# ─── Active hours (local time) ────────────────────────────────────────────────
+ACTIVE_HOUR_START = 5.5    # 5:30am
+ACTIVE_HOUR_END   = 23.5   # 11:30pm
+
+# ─── GitHub status push ───────────────────────────────────────────────────────
+_GH_TOKEN  = os.environ.get("GITHUB_TOKEN", "")
+_GH_REPO   = "wellposedness/FREED"
+_GH_PATH   = "docs/status.json"
+_GH_API    = f"https://api.github.com/repos/{_GH_REPO}/contents/{_GH_PATH}"
+_GH_HEADS  = {"Authorization": f"token {_GH_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+_status_sha = None   # cached SHA of last known status.json on GitHub
+
+def _push_status(phase: str, detail: str = ""):
+    """Write docs/status.json locally and push via GitHub API (non-blocking)."""
+    payload = {
+        "phase":     phase,
+        "detail":    detail,
+        "ts":        datetime.now(timezone.utc).isoformat(),
+    }
+    # Write locally too (so _write_index can embed it)
+    status_path = FREED_DIR / "docs" / "status.json"
+    status_path.write_text(json.dumps(payload, indent=2))
+
+    def _push():
+        global _status_sha
+        try:
+            content = base64.b64encode(json.dumps(payload, indent=2).encode()).decode()
+            body = {"message": f"status: {phase}", "content": content}
+            if _status_sha:
+                body["sha"] = _status_sha
+            resp = requests.put(_GH_API, json=body, headers=_GH_HEADS, timeout=10)
+            if resp.status_code in (200, 201):
+                _status_sha = resp.json()["content"]["sha"]
+            elif resp.status_code == 409:
+                # SHA conflict — fetch current SHA and retry once
+                r2 = requests.get(_GH_API, headers=_GH_HEADS, timeout=10)
+                if r2.ok:
+                    _status_sha = r2.json().get("sha")
+                    body["sha"] = _status_sha
+                    r3 = requests.put(_GH_API, json=body, headers=_GH_HEADS, timeout=10)
+                    if r3.ok:
+                        _status_sha = r3.json()["content"]["sha"]
+        except Exception as e:
+            print(f"[STATUS] Push failed: {e}")
+
+    threading.Thread(target=_push, daemon=True).start()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -59,7 +120,10 @@ class FREEDDaemon:
         # Wire up the organism
         self.astrocyte  = Astrocyte()
         self.l7         = L7Agent(api_key=api_key)
-        self.sweep_pipe = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
+        self.sweep_pipe    = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
+        self.targeted_sweep = TargetedSweep(api_key=api_key,
+                                             max_per_obligation=MAX_TARGETED_PER_CYCLE)
+        self.engineer      = SelfEngineer(api_key=api_key)
 
         # Load or initialize living state
         self._load_state()
@@ -171,10 +235,35 @@ class FREEDDaemon:
 
     # ── Main loop ────────────────────────────────────────────────────────────
 
+    def _next_wake_time(self) -> datetime:
+        """
+        Calculate the next wake time respecting active hours (5:30am–11:30pm local).
+        If the next cycle would fall in the dead zone, push it to 5:30am.
+        """
+        now      = datetime.now()   # local time
+        candidate = now + timedelta(seconds=CYCLE_INTERVAL_SECONDS)
+        hour_frac = candidate.hour + candidate.minute / 60.0
+
+        if ACTIVE_HOUR_START <= hour_frac <= ACTIVE_HOUR_END:
+            return candidate  # falls in window — use it
+
+        # Candidate is in the dead zone. Wake at 5:30am.
+        wake_day = candidate.date()
+        if hour_frac > ACTIVE_HOUR_END:
+            # Past 11:30pm — wake tomorrow morning
+            wake_day = (candidate + timedelta(days=1)).date()
+        wake_local = datetime(
+            wake_day.year, wake_day.month, wake_day.day,
+            int(ACTIVE_HOUR_START),
+            int((ACTIVE_HOUR_START % 1) * 60),
+        )
+        return wake_local
+
     def run(self):
         """Main daemon loop. Runs until interrupted."""
-        print(f"[FREED] Entering main loop. Cycle interval: "
-              f"{CYCLE_INTERVAL_SECONDS // 3600}h.\n")
+        print(f"[FREED] Entering main loop. Active hours: "
+              f"{int(ACTIVE_HOUR_START)}:{int((ACTIVE_HOUR_START%1)*60):02d}–"
+              f"{int(ACTIVE_HOUR_END)}:{int((ACTIVE_HOUR_END%1)*60):02d} local.\n")
 
         while self.running:
             try:
@@ -187,11 +276,17 @@ class FREEDDaemon:
                 print(f"[FREED] Cycle error: {e}. Sleeping before retry.")
 
             if self.running:
-                next_at = datetime.now(timezone.utc)
-                print(f"\n[FREED] Cycle complete. Next cycle in "
-                      f"{CYCLE_INTERVAL_SECONDS // 3600}h. "
-                      f"(Ctrl+C to stop)\n")
-                time.sleep(CYCLE_INTERVAL_SECONDS)
+                wake = self._next_wake_time()
+                now  = datetime.now()
+                secs = max(0, (wake - now).total_seconds())
+                wake_str = wake.strftime('%I:%M %p')
+                if secs > CYCLE_INTERVAL_SECONDS:
+                    print(f"\n[FREED] Outside active hours. Sleeping until {wake_str}. "
+                          f"(Ctrl+C to stop)\n")
+                else:
+                    print(f"\n[FREED] Cycle complete. Next cycle at {wake_str}. "
+                          f"(Ctrl+C to stop)\n")
+                time.sleep(secs)
 
     # ── Cycle phases ─────────────────────────────────────────────────────────
 
@@ -205,6 +300,11 @@ class FREEDDaemon:
         print(f"\n{'═'*50}")
         print(f" FREED CYCLE {self.cycle_num}  |  Gen {self.state['generation']}  |  {ts[:19]}Z")
         print(f"{'═'*50}")
+        voice.cycle_start(
+            self.state['generation'],
+            self.state['coherence'],
+            sum(1 for o in self.obligations if o['status'] == 'open'),
+        )
 
         cycle_log = {
             "cycle":      self.cycle_num,
@@ -214,32 +314,49 @@ class FREEDDaemon:
         }
 
         # 1. PRE-AUDIT
+        _push_status("PRE-AUDIT", f"Gen {self.state['generation']} — checking coherence & budget")
         ok = self._phase_preaudit(cycle_log)
         if not ok:
             print("[PRE-AUDIT] Cycle aborted.")
+            _push_status("IDLE", "Cycle aborted — coherence or budget issue")
             self._log_event("CYCLE_ABORTED", cycle_log)
             return
 
-        # 2. SWEEP
+        # 2. ARCHITECT — process any pending directive from Dave / Cowork
+        self._phase_architect(cycle_log)
+
+        # 3. SWEEP
+        _push_status("SWEEP", "Searching arXiv & Semantic Scholar for open obligations")
         inputs = self._phase_sweep(cycle_log)
 
-        # 3. FEED
+        # 4. FEED
+        feed_results = []
         if inputs:
-            self._phase_feed(inputs, cycle_log)
+            _push_status("FEED", f"Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} paper(s) through L7")
+            feed_results = self._phase_feed(inputs, cycle_log)
 
-        # 4. OBLIGATE
+        # 5. CONSOLIDATE (triggered by high yield or every N cycles)
+        _push_status("CONSOLIDATE", "Renormalizing knowledge graph")
+        self._phase_consolidate(feed_results, cycle_log)
+
+        # 6. OBLIGATE
+        _push_status("OBLIGATE", "Generating new obligations from FEED output")
         self._phase_obligate(cycle_log)
 
-        # 5. RESOLVE
+        # 7. RESOLVE
+        _push_status("RESOLVE", "Attempting to close open obligations")
         self._phase_resolve(cycle_log)
 
-        # 6. UPDATE
+        # 8. UPDATE
+        _push_status("UPDATE", "Updating coherence & state")
         self._phase_update(cycle_log)
 
-        # 7. PUBLISH
+        # 9. PUBLISH
+        _push_status("PUBLISH", f"Writing site — Gen {self.state['generation']}")
         build_site(self.state, self.obligations, cycle_log)
 
-        # 8. LOG
+        # 10. LOG
+        _push_status("IDLE", f"Cycle {self.cycle_num} complete — Gen {self.state['generation']}, coherence {self.state.get('coherence', '?')}")
         self._log_event("CYCLE_COMPLETE", cycle_log)
 
         print(f"\n[FREED] Gen {self.state['generation']} | "
@@ -280,25 +397,128 @@ class FREEDDaemon:
         cycle_log["phases"]["pre_audit"] = {"status": "OK", "open_obligations": len(open_obligs)}
         return True
 
+    # ── ARCHITECT ────────────────────────────────────────────────────────────
+
+    def _phase_architect(self, cycle_log: dict):
+        """
+        Read architect_input.md. If it contains a pending directive from Dave
+        or Claude Cowork, feed it to L7 as a highest-priority semantic input,
+        then archive and clear the file.
+
+        This is the Cowork → daemon bridge.
+        Semantic updates (invariant refinements, new obligations, philosophical
+        directives) flow in here without terminal surgery.
+        """
+        if not ARCHITECT_FILE.exists():
+            cycle_log["phases"]["architect"] = {"status": "no_file"}
+            return
+
+        raw = ARCHITECT_FILE.read_text(encoding="utf-8").strip()
+
+        # Detect empty / placeholder
+        is_empty = (
+            not raw or
+            "_empty — no directive pending_" in raw or
+            len(raw.splitlines()) <= 6  # just the header boilerplate
+        )
+        if is_empty:
+            cycle_log["phases"]["architect"] = {"status": "empty"}
+            return
+
+        print("\n[ARCHITECT] Directive detected — processing...")
+
+        prompt = (
+            "ARCHITECT DIRECTIVE:\n"
+            "The following is a high-priority semantic input from the framework's "
+            "architect (David Freed). It may contain invariant refinements, new "
+            "obligations, philosophical directives, or genome firmware updates.\n\n"
+            "Process it against the genome with full RSA Kernel attention. "
+            "Update beliefs, surface new obligations, refine existing invariants. "
+            "This input has authority over the current genome state.\n\n"
+            f"{raw}"
+        )
+
+        if not self.astrocyte.authorize(4000, priority="high"):
+            print("[ARCHITECT] Budget insufficient — deferring directive.")
+            cycle_log["phases"]["architect"] = {"status": "deferred", "reason": "budget"}
+            return
+
+        result = self.l7.query(prompt)
+        compress = result.get("compress", "")
+        print(f"[ARCHITECT] Processed. COMPRESS: {compress}")
+
+        # Archive the directive with timestamp
+        ARCHITECT_ARCHIVE.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        archive_path = ARCHITECT_ARCHIVE / f"input_{ts}.md"
+        archive_path.write_text(
+            f"# Architect Input — {ts}\n\n{raw}\n\n---\n\n"
+            f"## FREED Response\n\nCOMPRESS: {compress}\n"
+            f"NEXT: {result.get('next','')}\n",
+            encoding="utf-8",
+        )
+
+        # Reset the file to empty state
+        ARCHITECT_FILE.write_text(
+            "# Architect Input Channel\n\n"
+            "Write your directive below and save. "
+            "FREED will process it on the next cycle.\n\n"
+            "---\n\n"
+            "## Current input (replace everything below this line)\n\n"
+            "_empty — no directive pending_\n",
+            encoding="utf-8",
+        )
+
+        print(f"[ARCHITECT] Archived to {archive_path.name}. File reset.")
+        cycle_log["phases"]["architect"] = {
+            "status":   "processed",
+            "compress": compress,
+            "archived": str(archive_path.name),
+        }
+
     # ── SWEEP ────────────────────────────────────────────────────────────────
 
-    def _phase_sweep(self, cycle_log: dict) -> list[dict]:
+    def _phase_sweep(self, cycle_log: dict) -> list:
         """
         Collect new inputs for this cycle.
-        Piece 4 (Tamura sweep) will replace the placeholder below.
+        Two sources:
+          1. TargetedSweep — active search driven by open obligations (runs first)
+          2. TamuraSweep   — passive surface: Tamura + arXiv biophysics RSS
         """
-        print("\n[SWEEP]", end=" ")
+        print("\n[SWEEP]")
 
-        # Live sweep — fetches new articles from Tamura and other sources
-        inputs = self.sweep_pipe.sweep()
+        # 1. Targeted sweep — active hunt for obligation-relevant papers
+        targeted = []
+        try:
+            targeted = self.targeted_sweep.sweep(self.obligations)
+        except Exception as e:
+            print(f"[SWEEP] TargetedSweep error: {e}")
+
+        # 2. Passive Tamura sweep
+        passive = []
+        try:
+            passive = self.sweep_pipe.sweep()
+        except Exception as e:
+            print(f"[SWEEP] TamuraSweep error: {e}")
+
+        # Merge: targeted first (purposeful), then passive (ambient)
+        # Deduplicate by URL — targeted already marked seen, so just filter passive
+        seen_urls = {i["url"] for i in targeted}
+        passive_dedup = [i for i in passive if i["url"] not in seen_urls]
+
+        inputs = targeted + passive_dedup
 
         if inputs:
-            titles = [i.get("title", "?")[:60] for i in inputs]
-            print(f"{len(inputs)} input(s): {titles}")
+            print(f"[SWEEP] {len(targeted)} targeted + {len(passive_dedup)} passive = "
+                  f"{len(inputs)} input(s) total.")
         else:
-            print("No new inputs this cycle.")
+            print("[SWEEP] No new inputs this cycle.")
 
-        cycle_log["phases"]["sweep"] = {"input_count": len(inputs)}
+        cycle_log["phases"]["sweep"] = {
+            "input_count":   len(inputs),
+            "targeted":      len(targeted),
+            "passive":       len(passive_dedup),
+        }
         return inputs
 
     # ── FEED ─────────────────────────────────────────────────────────────────
@@ -313,13 +533,42 @@ class FREEDDaemon:
                 print("[FEED] Budget limit — skipping remaining feeds.")
                 break
 
+            # Second guard layer — defense in depth before content reaches L7
+            raw_content = inp.get('abstract', inp.get('content', ''))[:1500]
+            guard = guard_sanitize(raw_content, source_url=inp.get('url', ''))
+            if guard.dropped:
+                print(f"[FEED] DROPPED (injection attempt): {inp.get('title','?')[:60]}")
+                continue
+            safe_content = guard.clean
+
+            # Build compact obligation reference for graph edge extraction
+            open_obs = [o for o in self.obligations
+                        if o.get("status", "open") in ("open", "partial")][:8]
+            ob_ref = "\n".join(
+                f"  {o['id']}: {o.get('statement','')[:80]}"
+                for o in open_obs
+            ) or "  (none open)"
+
             prompt = (
                 f"FEED INPUT:\n"
                 f"Title: {inp.get('title', 'unknown')}\n"
-                f"Abstract: {inp.get('abstract', inp.get('content', ''))[:1500]}\n\n"
+                f"Abstract: {safe_content}\n\n"
+                f"OPEN OBLIGATIONS:\n{ob_ref}\n\n"
                 f"Map this input against the genome. "
-                f"Does it confirm, refute, or extend any invariant or obligation? "
-                f"Which obligation does it advance? What should be OBLIGATEd?"
+                f"When you identify a relationship, cite the EXACT ID — e.g., "
+                f"'confirms INV_094', 'advances O28', 'refutes INV_097', 'resolves O44'. "
+                f"Invariant IDs are in the genome (INV_023 through INV_108). "
+                f"Obligation IDs are listed above (O28, O34, O44, etc.).\n\n"
+                f"SECOND: Does this paper describe a concrete algorithm, technique, or "
+                f"method that FREED could implement in its own codebase to improve its "
+                f"epistemic capabilities (better search, memory, scoring, representation, "
+                f"deduplication, graph structure, etc)? "
+                f"If yes, emit exactly:\n"
+                f"IMPLEMENT: YES\n"
+                f"IMPLEMENT_WHAT: [one sentence — the specific thing to add or change]\n"
+                f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','batch_feed.py','voice.py']))}]\n"
+                f"IMPLEMENT_WHY: [one sentence — why this improves FREED's epistemic loop]\n"
+                f"If no clear implementation, omit the IMPLEMENT block entirely."
             )
 
             result = self.l7.query(prompt)
@@ -329,13 +578,74 @@ class FREEDDaemon:
                 input_tokens=EST_TOKENS_FEED,
                 output_tokens=400,
             )
+
+            # Record typed edges (confirms/advances/refutes) to knowledge graph
+            get_graph().record_feed(
+                result,
+                source_url=inp.get("url", inp.get("title", "unknown")),
+                source_title=inp.get("title", ""),
+            )
+
+            # ENGINEER — if paper describes a buildable technique, patch our own code
+            eng_report = self.engineer.process_feed(
+                feed_result=result,
+                paper_content=safe_content,
+                paper_url=inp.get("url", ""),
+            )
+            if eng_report.get("applied"):
+                print(f"[ENGINEER] Self-modification applied: "
+                      f"{eng_report['what'][:80]} → {eng_report['file']}")
+
+            compress_text = result.get("compress", "")
+            if compress_text:
+                voice.compress(compress_text, title=inp.get("title", "")[:40])
             feed_results.append({
                 "title":    inp.get("title", "?"),
-                "compress": result.get("compress", ""),
+                "compress": compress_text,
                 "next":     result.get("next", ""),
+                "yield":    result.get("yield", 0.0),
             })
 
         cycle_log["phases"]["feed"] = feed_results
+        return feed_results
+
+    # ── CONSOLIDATE ──────────────────────────────────────────────────────────
+
+    def _phase_consolidate(self, feed_results: list, cycle_log: dict):
+        """
+        Renormalization pass. Triggered when:
+          - any feed has yield > YIELD_THRESHOLD, OR
+          - cycle_count is a multiple of CONSOLIDATE_EVERY
+        Broadcasts new knowledge across all existing nodes, then mines
+        cross-node invariants. This is what organisms do.
+        """
+        high_yield = [r for r in feed_results if r.get("yield", 0) > YIELD_THRESHOLD]
+        triggered  = bool(high_yield) or (self.state["cycle_count"] % CONSOLIDATE_EVERY == 0)
+
+        if not triggered:
+            cycle_log["phases"]["consolidate"] = {"status": "skipped", "reason": "no trigger"}
+            return
+
+        trigger_str = "yield" if high_yield else "scheduled"
+        print(f"\n[CONSOLIDATE] Triggered ({trigger_str}).")
+
+        # Build new knowledge string from high-yield compresses (or all if scheduled)
+        source = high_yield if high_yield else feed_results
+        new_knowledge = " ".join(r.get("compress", "") for r in source).strip()
+
+        if not new_knowledge:
+            cycle_log["phases"]["consolidate"] = {"status": "skipped", "reason": "no compress"}
+            return
+
+        consolidator = Consolidator(self.api_key)
+        report = consolidator.run(
+            new_knowledge,
+            trigger=trigger_str,
+            state=self.state,
+            obligations=self.obligations,
+        )
+
+        cycle_log["phases"]["consolidate"] = report
 
     # ── OBLIGATE ─────────────────────────────────────────────────────────────
 
@@ -379,6 +689,8 @@ class FREEDDaemon:
         if new_obligs:
             self._save_obligations()
             print(f"[OBLIGATE] Added {len(new_obligs)} new obligation(s).")
+            for ob in new_obligs:
+                voice.new_obligation(ob["id"], ob["statement"])
 
         cycle_log["phases"]["obligate"] = {
             "compress":     compress,
@@ -472,6 +784,7 @@ class FREEDDaemon:
             target["resolved"] = datetime.now(timezone.utc).date().isoformat()
             target["progress"] += f" | RESOLVED: {compress}"
             print(f"[RESOLVE] {target['id']} marked RESOLVED.")
+            voice.obligation_resolved(target['id'])
         else:
             # Append progress note
             progress_note = f"[Gen {self.state['generation']}] {compress}"
