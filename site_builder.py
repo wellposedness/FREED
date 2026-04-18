@@ -1371,13 +1371,9 @@ def _render_html(projects: list = None) -> str:
         <div class="speak-main-row">
           <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
           <span class="speak-status" id="speak-status"></span>
-          <span class="voice-label">VOICE</span>
-          <select id="voice-select" class="voice-select" onchange="saveVoicePref()">
+          <span class="voice-label" style="color:var(--accent)">VOICE</span>
+          <select id="voice-select" class="voice-select" onchange="saveVoicePref()" style="border-color:var(--accent);color:var(--accent)">
             <option value="">Loading...</option>
-          </select>
-          <span class="voice-label">OTHER</span>
-          <select id="voice-other" class="voice-select" onchange="syncVoiceFrom('voice-other')">
-            <option value="">—</option>
           </select>
           <span class="voice-label">LANGUAGES</span>
           <select id="voice-lang" class="voice-select" onchange="syncVoiceFrom('voice-lang')">
@@ -1742,27 +1738,16 @@ function _loadVoices() {
   const isOther   = name => OTHER_VOICES.some(o => name.toLowerCase().includes(o.toLowerCase()));
   const isUSEng   = lang => lang === 'en-US' || lang === 'en_US';
 
-  // Populate main select — US English, excluding removed/char/other voices
+  // Populate main select — US English, excluding removed/char voices (other voices included)
   const mainSel = document.getElementById('voice-select');
   mainSel.innerHTML = '';
   const mainVoices = _voices.filter(v =>
-    isUSEng(v.lang) && !isRemoved(v.name) && !isChar(v.name) && !isOther(v.name)
+    isUSEng(v.lang) && !isRemoved(v.name) && !isChar(v.name)
   ).sort((a, b) => a.name.localeCompare(b.name));
   mainVoices.forEach(v => {
     const opt = document.createElement('option');
     opt.value = v.name; opt.textContent = v.name;
     mainSel.appendChild(opt);
-  });
-
-  // Populate Other select
-  const otherSel = document.getElementById('voice-other');
-  otherSel.innerHTML = '<option value="">—</option>';
-  OTHER_VOICES.forEach(name => {
-    const v = _voices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
-    if (!v) return;
-    const opt = document.createElement('option');
-    opt.value = v.name; opt.textContent = v.name;
-    otherSel.appendChild(opt);
   });
 
   // Populate Languages select — all non-US-English voices
