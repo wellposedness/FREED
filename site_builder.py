@@ -1298,6 +1298,28 @@ def _render_html(projects: list = None) -> str:
   /* Loading state */
   .loading { color: var(--muted); font-style: italic; }
   .error   { color: var(--red); }
+
+  /* ── Mobile ────────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .hud-shell { height: auto; min-height: 100vh; }
+    .hud-grid {
+      grid-template-columns: 1fr;
+      overflow: visible;
+      flex: none;
+    }
+    .hud-panel {
+      overflow-y: visible;
+      min-height: auto;
+      border-right: none;
+      border-bottom: 1px solid #000;
+    }
+    .hud-panel:last-child { border-bottom: none; }
+    .hud-top { padding: 0.6rem 0.9rem; gap: 0.6rem; }
+    .hud-title { font-size: 1.15rem; }
+    .speak-bar { margin-top: 0; }
+    .speak-main-row { flex-wrap: wrap; }
+    .state-grid { border: 1px solid var(--green); }
+  }
 </style>
 </head>
 <body>
