@@ -759,7 +759,7 @@ def _render_html(projects: list = None) -> str:
   .state-cell:last-child { border-bottom: none; }
   .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .state-cell .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
-  .value.soliton { font-family: 'Mr De Haviland', cursive; font-size: 1.5rem; line-height: 1; }
+  .value.soliton { font-family: 'Mr De Haviland', cursive; font-size: 1.1rem; line-height: 1; }
   .state-cell .value.accent { color: var(--accent); font-weight: 600; }
   .state-cell .value.green  { color: var(--green);  font-weight: 600; }
 
