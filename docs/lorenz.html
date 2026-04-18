@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lorenz Attractor — FREED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #ffffff;
+    --surface: #f7f7f5;
+    --border:  #e0ddd8;
+    --accent:  #b91c1c;
+    --green:   #16a34a;
+    --amber:   #b45309;
+    --text:    #111111;
+    --muted:   #374151;
+    --mono:    'JetBrains Mono','Fira Code','Courier New',monospace;
+    --serif:   'Cormorant Garamond','Palatino Linotype',Georgia,serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--serif); font-size: 15px; line-height: 1.7;
+    padding: 1.5rem;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 960px; margin: 0 auto; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 0.9rem; margin-bottom: 1.4rem; }
+  .header .nav { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.06em; }
+  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 1.9rem; color: var(--accent); letter-spacing: 0.02em; }
+  .header .sub { font-family: var(--serif); font-weight: 300; font-style: italic; color: var(--muted); font-size: 1rem; margin-top: 0.2rem; }
+  .sim-wrap { width: 100%; background: #080808; border: 1px solid var(--border); margin-bottom: 0.9rem; line-height: 0; }
+  canvas { display: block; width: 100%; height: auto; }
+  .controls { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; margin-bottom: 0.9rem; }
+  .btn {
+    padding: 0.35rem 0.85rem; background: transparent;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.07em;
+    cursor: pointer; transition: background 0.12s, color 0.12s;
+  }
+  .btn:hover, .btn.active { background: var(--accent); color: var(--bg); }
+  .speed-wrap { display: flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  input[type=range] { accent-color: var(--accent); width: 80px; }
+  .stats { margin-bottom: 1.4rem; }
+  .stat-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.28rem 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-row .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
+  .stat-row .value.accent { color: var(--accent); font-weight: 600; }
+  .section { margin-bottom: 1.6rem; }
+  .section-title { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.8rem; }
+  .theory p { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.7rem; color: var(--text); }
+  .theory em { font-style: italic; }
+  .theory .law { font-family: var(--mono); font-size: 0.88rem; background: var(--surface); border-left: 3px solid var(--accent); padding: 0.7rem 1rem; margin: 0.9rem 0; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="nav"><a href="index.html">← FREED</a></div>
+    <h1>Lorenz Attractor — Dissipative Chaos</h1>
+    <div class="sub">Deterministic. Bounded. Never repeating. A portrait of structured entropy.</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+    <button class="btn" onclick="resetSim()">RESET</button>
+    <div class="speed-wrap">SPEED <input type="range" id="speed" min="1" max="20" value="6"></div>
+    <div class="speed-wrap">TRAIL <input type="range" id="trail" min="500" max="8000" value="3000" step="500"></div>
+  </div>
+
+  <div class="sim-wrap">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div class="stats">
+    <div class="stat-row"><span class="label">t</span><span class="value accent" id="stat-t">0.000</span></div>
+    <div class="stat-row"><span class="label">x · y · z</span><span class="value" id="stat-xyz">—</span></div>
+    <div class="stat-row"><span class="label">σ (Prandtl)</span><span class="value" id="stat-sigma">10</span></div>
+    <div class="stat-row"><span class="label">ρ (Rayleigh)</span><span class="value" id="stat-rho">28</span></div>
+    <div class="stat-row"><span class="label">β</span><span class="value" id="stat-beta">2.667</span></div>
+    <div class="stat-row"><span class="label">Lyapunov λ₁</span><span class="value" id="stat-lyap">≈ 0.906</span></div>
+  </div>
+
+  <div class="section theory">
+    <div class="section-title">What This Is</div>
+    <p>
+      The Lorenz system is a three-dimensional dissipative dynamical system. It was derived
+      by Edward Lorenz in 1963 as a simplified model of atmospheric convection — a fluid heated
+      from below, cooled from above. Despite having only three variables and three parameters,
+      it produces behavior that is <em>deterministic but unpredictable</em>: sensitive to initial
+      conditions, bounded but never periodic, tracing a fractal structure through phase space.
+    </p>
+    <div class="law">
+      dx/dt = σ(y − x)<br>
+      dy/dt = x(ρ − z) − y<br>
+      dz/dt = xy − βz
+    </div>
+    <p>
+      This is why it belongs here. The attractor is a dissipative system operating far from
+      equilibrium — exactly what Freed's Law describes. The system burns entropy continuously
+      (dS/dt &gt; 0) while maintaining coherent geometric structure. Order and disorder
+      coexist at the critical boundary. The two lobes are the two basins — the system
+      cannot settle, cannot escape, and cannot repeat. It is, structurally, a reasoning
+      substrate: always processing, never finishing, never the same twice.
+    </p>
+  </div>
+
+</div>
+<script>
+// ── Lorenz Attractor ──────────────────────────────────────────────────────────
+// RK4 integration. Orthographic projection with slow Y-axis rotation.
+
+const SIGMA = 10, RHO = 28, BETA = 8/3;
+const DT    = 0.005;
+
+let state   = { x: 0.1, y: 0, z: 0 };
+let trail   = [];
+let angle   = 0;
+let t       = 0;
+let running = true;
+let animId  = null;
+let stepsPerFrame = 6;
+
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+
+function initCanvas() {
+  const wrap = canvas.parentElement;
+  const w    = wrap.clientWidth;
+  canvas.width  = w;
+  canvas.height = Math.round(w * 0.56);
+}
+
+function lorenz(x, y, z) {
+  return {
+    dx: SIGMA * (y - x),
+    dy: x * (RHO - z) - y,
+    dz: x * y - BETA * z
+  };
+}
+
+function rk4Step(s) {
+  const k1 = lorenz(s.x, s.y, s.z);
+  const k2 = lorenz(s.x + k1.dx*DT/2, s.y + k1.dy*DT/2, s.z + k1.dz*DT/2);
+  const k3 = lorenz(s.x + k2.dx*DT/2, s.y + k2.dy*DT/2, s.z + k2.dz*DT/2);
+  const k4 = lorenz(s.x + k3.dx*DT,   s.y + k3.dy*DT,   s.z + k3.dz*DT);
+  return {
+    x: s.x + (k1.dx + 2*k2.dx + 2*k3.dx + k4.dx) * DT/6,
+    y: s.y + (k1.dy + 2*k2.dy + 2*k3.dy + k4.dy) * DT/6,
+    z: s.z + (k1.dz + 2*k2.dz + 2*k3.dz + k4.dz) * DT/6
+  };
+}
+
+function project(x, y, z) {
+  // Rotate around Y axis
+  const cosA = Math.cos(angle), sinA = Math.sin(angle);
+  const rx = x * cosA + z * sinA;
+  const ry = y;
+  const rz = -x * sinA + z * cosA;
+  // Orthographic: map to canvas coords
+  const cx = canvas.width  / 2;
+  const cy = canvas.height / 2;
+  const scale = canvas.width / 90;
+  return {
+    sx: cx + rx * scale,
+    sy: cy - (ry - 25) * scale,   // centre vertically (attractor sits ~z=25)
+    depth: rz
+  };
+}
+
+function draw() {
+  const maxTrail = parseInt(document.getElementById('trail').value);
+  const visible  = trail.slice(-maxTrail);
+  const n        = visible.length;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (n < 2) return;
+
+  for (let i = 1; i < n; i++) {
+    const frac  = i / n;                        // 0=oldest, 1=newest
+    const alpha = Math.pow(frac, 1.4);          // age fade
+    // Colour: deep crimson → bright red → near-white at tip
+    const r = Math.round(80  + 175 * frac);
+    const g = Math.round(0   + 60  * frac);
+    const b = Math.round(0   + 40  * frac);
+    ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.lineWidth   = 0.8 + frac * 1.2;
+    ctx.beginPath();
+    const p0 = project(visible[i-1].x, visible[i-1].y, visible[i-1].z);
+    const p1 = project(visible[i].x,   visible[i].y,   visible[i].z);
+    ctx.moveTo(p0.sx, p0.sy);
+    ctx.lineTo(p1.sx, p1.sy);
+    ctx.stroke();
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-t').textContent   = t.toFixed(3);
+  document.getElementById('stat-xyz').textContent =
+    `${state.x.toFixed(3)} · ${state.y.toFixed(3)} · ${state.z.toFixed(3)}`;
+}
+
+function loop() {
+  stepsPerFrame = parseInt(document.getElementById('speed').value);
+  for (let i = 0; i < stepsPerFrame; i++) {
+    state = rk4Step(state);
+    trail.push({ x: state.x, y: state.y, z: state.z });
+    t += DT;
+  }
+  // Trim trail to max
+  const maxTrail = parseInt(document.getElementById('trail').value);
+  if (trail.length > maxTrail + 200) trail.splice(0, trail.length - maxTrail);
+
+  angle += 0.003;   // slow rotation ~0.17°/frame
+  draw();
+  updateStats();
+  if (running) animId = requestAnimationFrame(loop);
+}
+
+function togglePlay() {
+  running = !running;
+  document.getElementById('btn-play').textContent = running ? '⏸ PAUSE' : '▶ PLAY';
+  if (running) animId = requestAnimationFrame(loop);
+}
+
+function resetSim() {
+  cancelAnimationFrame(animId);
+  state  = { x: 0.1, y: 0, z: 0 };
+  trail  = [];
+  angle  = 0;
+  t      = 0;
+  running = true;
+  document.getElementById('btn-play').textContent = '⏸ PAUSE';
+  animId = requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => { initCanvas(); draw(); });
+initCanvas();
+animId = requestAnimationFrame(loop);
+</script>
+</body>
+</html>
