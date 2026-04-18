@@ -211,6 +211,7 @@
     background: var(--surface);
     padding: 0.9rem 1rem;
     margin-bottom: 0.6rem;
+    position: relative;
   }
   .obligation .ob-header {
     display: flex;
@@ -230,7 +231,11 @@
   .ob-status.open     { background: #fffbeb; color: var(--amber); border: 1px solid var(--amber); }
   .ob-status.partial  { background: #eff6ff; color: var(--blue);  border: 1px solid var(--blue);  }
   .ob-status.resolved { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
-  .ob-priority { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
+  .ob-priority {
+    position: absolute; top: 0.55rem; right: 0.75rem;
+    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
+    letter-spacing: 0.05em; line-height: 1;
+  }
   .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
   .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
   .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
@@ -625,13 +630,19 @@ const STATUS_COLOR = {
   resolved: 'var(--green)',
 };
 
+function _priorityCarats(p) {
+  const map = { critical: '^^^', high: '^^', medium: '^', normal: '', low: '' };
+  const carats = map[(p||'').toLowerCase()] ?? '';
+  return carats ? `<span class="ob-priority" title="${p} priority">Priority ${carats}</span>` : '';
+}
+
 function renderObligation(o) {
   const borderColor = STATUS_COLOR[o.status] || 'var(--border)';
   return `<div class="obligation" style="border-left: 3px solid ${borderColor}">
+    ${_priorityCarats(o.priority)}
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
       <span class="ob-status ${o.status}">${o.status}</span>
-      <span class="ob-priority">${o.priority||''}</span>
     </div>
     <div class="ob-statement">${o.statement||''}</div>
     ${o.progress ? `<div class="ob-progress">${o.progress}</div>` : ''}
