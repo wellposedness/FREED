@@ -672,5 +672,32 @@
       "next": ""
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 3,
+    "generation": 137,
+    "timestamp": "2026-04-18T23:15:24.835477+00:00",
+    "sweep": {
+      "input_count": 8,
+      "targeted": 6,
+      "passive": 2
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "Triplicate feed of the same Bekenstein-Hawking paper yields exactly zero new extraction — all invariant confirmations (INV_094, INV_088) and obligation advances (O44, O59, O69) were captured on prior passes, confirming the genome's diminishing-returns prediction and flagging an upstream deduplication gap."
+      },
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "Third-pass RangeEn extraction yields exactly zero new content — all invariant confirmations (INV_070) and obligation advances (O60, O28, O63, O64) were fully captured on prior passes, confirming the genome's diminishing-returns detector is functioning correctly and flagging a persistent upstream deduplication gap."
+      }
+    ],
+    "resolve": {
+      "obligation": "O60",
+      "resolved": false,
+      "compress": "O60 advances to **PARTIAL RESOLUTION** — the genome derives RangeEn slope ≈ −1.0 for fBm from Gaussian correlation structure under ∞-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables.",
+      "next": "Execute the trivariate Gaussian ∞-norm integral numerically for H ∈ {0.1, 0.3, 0.5, 0.7, 0.9} at r=0.5, m=2, and compare against published fBm RangeEn values to close O60 — or, if discrepancy > 15%, identify which approximation broke and file the correction as a new obligation."
+    },
+    "coherence": 0.999
   }
 ]
