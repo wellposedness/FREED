@@ -326,33 +326,33 @@ class FREEDDaemon:
         self._phase_architect(cycle_log)
 
         # 3. SWEEP
-        _push_status("SWEEP", "Searching arXiv & Semantic Scholar for open obligations")
+        _push_status("PERCEIVE", "Searching arXiv & Semantic Scholar for open obligations")
         inputs = self._phase_sweep(cycle_log)
 
         # 4. FEED
         feed_results = []
         if inputs:
-            _push_status("FEED", f"Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} paper(s) through L7")
+            _push_status("REPRESENT", f"Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} paper(s) through L7")
             feed_results = self._phase_feed(inputs, cycle_log)
 
         # 5. CONSOLIDATE (triggered by high yield or every N cycles)
-        _push_status("CONSOLIDATE", "Renormalizing knowledge graph")
+        _push_status("COMPRESS", "Renormalizing knowledge graph")
         self._phase_consolidate(feed_results, cycle_log)
 
         # 6. OBLIGATE
-        _push_status("OBLIGATE", "Generating new obligations from FEED output")
+        _push_status("PREDICT", "Generating new obligations from feed output")
         self._phase_obligate(cycle_log)
 
         # 7. RESOLVE
-        _push_status("RESOLVE", "Attempting to close open obligations")
+        _push_status("COMPARE", "Attempting to close open obligations")
         self._phase_resolve(cycle_log)
 
         # 8. UPDATE
-        _push_status("UPDATE", "Updating coherence & state")
+        _push_status("ADJUST", "Updating coherence & state")
         self._phase_update(cycle_log)
 
         # 9. PUBLISH
-        _push_status("PUBLISH", f"Writing site — Gen {self.state['generation']}")
+        _push_status("REPEAT", f"Writing site — Gen {self.state['generation']}")
         build_site(self.state, self.obligations, cycle_log)
 
         # 10. LOG

@@ -931,14 +931,29 @@ def _render_html(projects: list = None) -> str:
     padding: 0.15rem 0.4rem; border: 1px solid currentColor;
   }
   .daemon-phase.idle       { color: var(--green); }
-  .daemon-phase.sweep      { color: var(--blue); }
-  .daemon-phase.feed       { color: var(--accent); }
-  .daemon-phase.consolidate{ color: var(--amber); }
-  .daemon-phase.obligate   { color: var(--amber); }
-  .daemon-phase.resolve    { color: var(--accent); }
-  .daemon-phase.update     { color: var(--muted); }
-  .daemon-phase.publish    { color: var(--green); }
+  .daemon-phase.perceive   { color: var(--blue); }
+  .daemon-phase.represent  { color: var(--accent); }
+  .daemon-phase.compress   { color: var(--amber); }
+  .daemon-phase.predict    { color: var(--amber); }
+  .daemon-phase.compare    { color: var(--accent); }
+  .daemon-phase.adjust     { color: var(--muted); }
+  .daemon-phase.repeat     { color: var(--green); }
   .daemon-phase.pre-audit  { color: var(--muted); }
+  /* Panel subtitle — kernel step whisper */
+  .panel-subtitle {
+    font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.13em;
+    color: var(--muted); text-align: center; text-transform: uppercase;
+    opacity: 0.65; margin-top: 0.15rem; padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  /* Kernel chain progress */
+  .kernel-chain {
+    display: flex; align-items: center; gap: 0.3rem; margin-left: auto;
+    font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.07em;
+  }
+  .kstep { color: var(--border); transition: color 0.3s; text-transform: uppercase; }
+  .kstep.kstep-active { color: var(--accent); font-weight: 600; }
+  .karrow { color: var(--border); font-size: 0.5rem; }
   .daemon-detail { color: var(--muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hud-grid {
     display: grid;
@@ -978,8 +993,7 @@ def _render_html(projects: list = None) -> str:
     letter-spacing: 0.14em;
     color: var(--text);
     text-align: center;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.1rem;
     flex-shrink: 0;
   }
 
@@ -1350,6 +1364,21 @@ def _render_html(projects: list = None) -> str:
     <span class="pulse" id="pulse"></span>
     <span class="hud-title">RSA</span>
     <span class="hud-sub">a bootstrap protocol for epistemic recursion</span>
+    <div class="kernel-chain" id="kernel-chain">
+      <span class="kstep" data-phases="perceive">PERCEIVE</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="represent">REPRESENT</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="compress">COMPRESS</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="predict">PREDICT</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="compare">COMPARE</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="adjust">ADJUST</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="repeat">REPEAT</span>
+    </div>
     <div class="daemon-status">
       <span class="daemon-phase idle" id="daemon-phase">IDLE</span>
       <span class="daemon-detail" id="daemon-detail">—</span>
@@ -1363,6 +1392,7 @@ def _render_html(projects: list = None) -> str:
     <div class="hud-panel">
 
       <div class="panel-title">The Argument</div>
+      <div class="panel-subtitle">Perceive · Represent</div>
 
       <div class="formulations">
         <div class="label">Reasoning Substrate Argument</div>
@@ -1449,13 +1479,15 @@ def _render_html(projects: list = None) -> str:
 
     <!-- CENTER PANEL: open obligations -->
     <div class="hud-panel">
-      <div class="panel-title">Open Obligations — Active Predictions</div>
+      <div class="panel-title">Open Obligations</div>
+      <div class="panel-subtitle">Predict · Compare · Adjust</div>
       <div id="obligations-open" class="loading">Loading...</div>
     </div><!-- /center panel -->
 
     <!-- RIGHT PANEL: state + collapsibles -->
     <div class="hud-panel">
       <div class="panel-title">Live State</div>
+      <div class="panel-subtitle">Compress</div>
       <div class="state-grid" id="state-grid">
         <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
       </div>
@@ -1480,7 +1512,7 @@ def _render_html(projects: list = None) -> str:
       </details>
 
       <details class="section">
-        <summary>Recent Cycles — What FREED Processed</summary>
+        <summary>Recent Recursions — What FREED Processed</summary>
         <div id="cycles" class="loading">Loading...</div>
       </details>
 
@@ -1527,7 +1559,7 @@ function renderState(s) {
     { label: 'Cycle Count', value: s.cycle_count },
     { label: 'Topology',    value: (s.topology||'').replace(/_/g,' ') },
     { label: 'Debt Ratio',  value: s.debt_ratio },
-    { label: 'Last Cycle',  value: ts(s.last_cycle) },
+    { label: 'Last Recursion', value: ts(s.last_cycle) },
   ];
   const isFirstLoad = Object.keys(_lastStateValues).length === 0;
   document.getElementById('state-grid').innerHTML = cells.map(c =>
@@ -2047,6 +2079,11 @@ async function pollStatus() {
     // Pulse: active (red) when working, steady green when idle
     const pulse = document.getElementById('pulse');
     if (pulse) pulse.style.borderColor = phase === 'idle' ? 'var(--green)' : 'var(--accent)';
+    // Light up kernel chain step
+    document.querySelectorAll('.kstep').forEach(el => {
+      const phases = (el.dataset.phases || '').split(',');
+      el.classList.toggle('kstep-active', phases.includes(phase));
+    });
   } catch(e) {}
 }
 pollStatus();
