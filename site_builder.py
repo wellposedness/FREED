@@ -1255,7 +1255,6 @@ function renderObligation(o) {
     ${_priorityCarats(o.priority)}
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
-      ${o.status === 'resolved' ? `<span class="ob-status ${o.status}">${o.status}</span>` : ''}
     </div>
     <div class="ob-statement">${o.statement||''}</div>
     ${o.progress ? `<div class="ob-progress">${o.progress}</div>` : ''}
