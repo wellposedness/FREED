@@ -211,6 +211,12 @@
   }
   details.section[open] > summary::before,
   details.ob-group[open] > summary.ob-group-title::before { transform: rotate(90deg); opacity: 1; }
+  details.section > summary::after,
+  details.ob-group > summary.ob-group-title::after {
+    content: ' (click to open)'; font-size: 0.58rem; color: var(--muted); opacity: 0.7; font-weight: 400; letter-spacing: 0.04em;
+  }
+  details.section[open] > summary::after,
+  details.ob-group[open] > summary.ob-group-title::after { content: ''; }
   details.section > summary:hover,
   details.ob-group > summary.ob-group-title:hover { color: var(--text); }
 
@@ -476,6 +482,8 @@
         </span>
         <br>
         <a href="game_of_life.html" style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--accent)">Freed's Law Simulation (click here →)</a>
+        <br>
+        <a href="lorenz.html" style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--accent)">Lorenz Attractor (click here →)</a>
       </div>
 
       <div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
@@ -542,7 +550,7 @@
       <div class="state-grid" id="state-grid">
         <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
       </div>
-      <details class="section" open>
+      <details class="section">
         <summary>Resolved Obligations — Track Record</summary>
         <div id="obligations-resolved" class="loading">Loading...</div>
       </details>
