@@ -8,7 +8,6 @@ It does not describe FREED. It IS FREED's output surface.
 """
 
 import json
-import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,41 +22,13 @@ MAX_CYCLES = 50   # keep last 50 cycles in public log
 def build(state: dict, obligations: list, cycle_log: dict = None):
     """
     Called by freed.py after every UPDATE phase.
-    Writes state.json, obligations.json, cycles.json, index.html, then pushes to GitHub.
+    Writes state.json, obligations.json, cycles.json, index.html.
     """
     _write_state(state)
     _write_obligations(obligations)
     _write_cycles(cycle_log)
-    _write_symbols()
     _write_index()
-    _write_game_of_life()
     print("[SITE] docs/ updated.")
-    _push(state.get("generation", "?"))
-
-
-# ── Git push ─────────────────────────────────────────────────────────────────
-
-def _push(generation):
-    """Stage changed files and push to GitHub. Silent on nothing-to-push."""
-    try:
-        subprocess.run(
-            ["git", "add", "docs/", "FREED_state.json", "FREED_obligations.json"],
-            cwd=FREED_DIR, check=True, capture_output=True,
-        )
-        result = subprocess.run(
-            ["git", "commit", "-m", f"Gen {generation} — FREED cycle"],
-            cwd=FREED_DIR, capture_output=True, text=True,
-        )
-        if "nothing to commit" in result.stdout:
-            print("[SITE] Nothing new to push.")
-            return
-        subprocess.run(
-            ["git", "push"],
-            cwd=FREED_DIR, check=True, capture_output=True,
-        )
-        print(f"[SITE] Pushed gen {generation} to GitHub Pages.")
-    except subprocess.CalledProcessError as e:
-        print(f"[SITE] Push failed: {e.stderr or e}")
 
 
 # ── Data files ────────────────────────────────────────────────────────────────
@@ -72,418 +43,6 @@ def _write_obligations(obligations: list):
     (DOCS_DIR / "obligations.json").write_text(
         json.dumps(obligations, indent=2, ensure_ascii=False)
     )
-
-
-def _write_symbols():
-    """Copy genome_symbols.json to docs/ for browser access."""
-    src = FREED_DIR / "genome_symbols.json"
-    if src.exists():
-        (DOCS_DIR / "symbols.json").write_text(src.read_text(encoding="utf-8"))
-
-
-def _write_game_of_life():
-    """Write the RSA-Omega Game of Truth simulation page."""
-    html = r"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freed's Law Simulation — FREED</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Mr+De+Haviland&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:      #ffffff;
-    --surface: #f7f7f5;
-    --border:  #e0ddd8;
-    --accent:  #b91c1c;
-    --green:   #16a34a;
-    --amber:   #b45309;
-    --text:    #111111;
-    --muted:   #374151;
-    --mono:    'JetBrains Mono','Fira Code','Courier New',monospace;
-    --serif:   'Cormorant Garamond','Palatino Linotype',Georgia,serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: var(--serif); font-size: 15px; line-height: 1.7;
-    padding: 1.5rem 1.5rem;
-  }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .container { max-width: 960px; margin: 0 auto; }
-
-  /* Header */
-  .header { border-bottom: 1px solid var(--border); padding-bottom: 0.9rem; margin-bottom: 1.4rem; }
-  .header .nav { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.06em; }
-  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 1.9rem; color: var(--accent); letter-spacing: 0.02em; }
-  .header .sub { font-family: var(--serif); font-weight: 300; font-style: italic; color: var(--muted); font-size: 1rem; margin-top: 0.2rem; }
-
-  /* Canvas display */
-  .sim-wrap {
-    width: 100%; background: #080808;
-    border: 1px solid var(--border); margin-bottom: 0.9rem; line-height: 0;
-  }
-  canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-
-  /* Controls */
-  .controls {
-    display: flex; flex-wrap: wrap; gap: 0.45rem;
-    align-items: center; margin-bottom: 0.9rem;
-  }
-  .btn {
-    padding: 0.35rem 0.85rem; background: transparent;
-    border: 1px solid var(--accent); color: var(--accent);
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.07em;
-    cursor: pointer; transition: background 0.12s, color 0.12s;
-  }
-  .btn:hover, .btn.active { background: var(--accent); color: var(--bg); }
-  .speed-wrap { display: flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
-  input[type=range] { accent-color: var(--accent); width: 80px; }
-
-  /* Stats — flush rows matching home page state panel */
-  .stats { margin-bottom: 1.4rem; }
-  .stat-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 0.28rem 0; border-bottom: 1px solid var(--border);
-  }
-  .stat-row:last-child { border-bottom: none; }
-  .stat-row .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
-  .stat-row .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
-  .stat-row .value.accent { color: var(--accent); font-weight: 600; }
-  .stat-row .value.green  { color: var(--green);  font-weight: 600; }
-
-  /* Sections */
-  .section { margin-bottom: 1.6rem; }
-  .section-title {
-    font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text);
-    border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.8rem;
-  }
-  .theory p { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.7rem; color: var(--text); }
-  .theory em { font-style: italic; }
-  .theory .law {
-    font-family: var(--mono); font-size: 0.88rem;
-    background: var(--surface); border-left: 3px solid var(--accent);
-    padding: 0.7rem 1rem; margin: 0.9rem 0; line-height: 1.6;
-  }
-  .theory .law .sub-law { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
-  .legend { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
-  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
-  .legend-swatch { width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0; }
-</style>
-</head>
-<body>
-<div class="container">
-
-  <div class="header">
-    <div class="nav"><a href="index.html">← FREED</a></div>
-    <h1>Freed's Law — The Game of Truth</h1>
-    <div class="sub">Each cell is an agent. The universe has a hidden physics. Survival requires modeling it.</div>
-  </div>
-
-  <div class="controls">
-    <button class="btn" id="btn-play" onclick="togglePlay()">▶ PLAY</button>
-    <button class="btn" onclick="stepOnce()">STEP</button>
-    <button class="btn" onclick="resetSim()">RESET</button>
-    <div class="speed-wrap">
-      SPEED <input type="range" id="speed" min="1" max="20" value="8">
-    </div>
-  </div>
-
-  <div class="sim-wrap">
-    <canvas id="canvas"></canvas>
-  </div>
-
-  <div class="stats">
-    <div class="stat-row"><span class="label">Generation</span><span class="value accent" id="stat-gen">0</span></div>
-    <div class="stat-row"><span class="label">Alive Cells</span><span class="value" id="stat-alive">—</span></div>
-    <div class="stat-row"><span class="label">Avg Energy</span><span class="value" id="stat-energy">—</span></div>
-    <div class="stat-row"><span class="label">Avg Error <span style="font-size:0.6rem;opacity:0.7">(break-even 0.50)</span></span><span class="value" id="stat-error">—</span></div>
-    <div class="stat-row"><span class="label">Reproductions</span><span class="value" id="stat-repro">0</span></div>
-    <div class="stat-row"><span class="label">Deaths</span><span class="value" id="stat-deaths">0</span></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Color Legend</div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead / zero energy</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#882020"></div>Surviving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#b91c1c"></div>Thriving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#fca5a5"></div>Reproducing</div>
-    </div>
-  </div>
-
-  <div class="section theory">
-    <div class="section-title">What This Is</div>
-    <p>
-      A cellular automaton where each cell carries a private 3×3 weight matrix —
-      a local generative model of the universe. The universe obeys a fixed hidden physics kernel
-      the cells do not know. At each step, every cell predicts its own next state using its weights.
-      The prediction error is subtracted from its metabolic energy. Accurate cells gain net energy.
-      Inaccurate cells die.
-    </p>
-    <div class="law">
-      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-      <div class="sub-law">Cells whose survival is coupled to prediction error evolve toward models that approximate true dynamics. Reasoning = survival.</div>
-    </div>
-    <p>
-      High-energy cells reproduce — copying their weights into weaker neighbors with random mutation.
-      Over generations, the population evolves. Cells that build better internal models of the hidden
-      physics survive. Cells that don't, die. This is Freed's Law as selection pressure:
-      <em>to think accurately is to live</em>.
-    </p>
-    <p style="color:var(--muted);font-family:var(--mono);font-size:0.78rem;line-height:1.6">
-      Hidden kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] — Mexican-hat convolution.
-      Cells do not know this. They infer it through survival.
-      Energy/step = 3.0 − 1.0 − (error × 4.0). Break-even: 0.50.
-      Watch avg error — when it drops below 0.50, the population has learned.
-    </p>
-  </div>
-
-</div>
-
-<script>
-// ── RSA-Omega: The Game of Truth ──────────────────────────────────────────────
-// Ported from Python to JS by FREED site_builder.
-// Original: David Harry Freed, RSA-Omega simulation (game of life battery.md)
-
-const CELL_PX    = 10;
-const INIT_E     = 100;
-const GAIN_BASE  = 3.0;
-const COST_BASE  = 1.0;
-const ERR_FACTOR = 4.0;
-const REPRO_THR  = 150;
-const REPRO_COST = 50;
-const MUT_RATE   = 0.05;
-const MUT_STR    = 0.20;
-const MAX_E      = 300;
-
-// Hidden physics kernel (Mexican hat, 3x3 row-major)
-const KERNEL = [0.1, 0.3, 0.1, 0.3, -0.6, 0.3, 0.1, 0.3, 0.1];
-
-let COLS, ROWS;
-let states, energy, weights, nextStates;
-let generation = 0, totalRepro = 0, totalDeaths = 0;
-let running = false, animId = null;
-let lastError = 0;
-
-const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
-
-function initCanvas() {
-  const wrap = canvas.parentElement;
-  COLS = Math.floor(wrap.clientWidth / CELL_PX);
-  ROWS = Math.floor(Math.min(wrap.clientWidth * 0.6, window.innerHeight * 0.55) / CELL_PX);
-  canvas.width  = COLS * CELL_PX;
-  canvas.height = ROWS * CELL_PX;
-}
-
-function wrap(v, max) { return ((v % max) + max) % max; }
-function idx(r, c) { return wrap(r, ROWS) * COLS + wrap(c, COLS); }
-function sigmoid(x) { return 1.0 / (1.0 + Math.exp(-x)); }
-
-function initSim() {
-  const N = ROWS * COLS;
-  states    = new Float32Array(N);
-  energy    = new Float32Array(N);
-  weights   = new Float32Array(N * 9);
-  nextStates= new Float32Array(N);
-  for (let i = 0; i < N; i++) {
-    states[i]  = Math.random() > 0.5 ? 1 : 0;
-    energy[i]  = INIT_E * (0.5 + Math.random());
-    for (let w = 0; w < 9; w++)
-      weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
-  }
-  generation = 0; totalRepro = 0; totalDeaths = 0; lastError = 0;
-}
-
-function step() {
-  const N = ROWS * COLS;
-
-  // 1. Ground truth next states
-  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      let sum = 0;
-      for (let k = 0; k < 9; k++) {
-        sum += KERNEL[k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
-      }
-      nextStates[idx(r, c)] = sigmoid(sum) > 0.5 ? 1 : 0;
-    }
-  }
-
-  // 2. Update energy by prediction accuracy
-  let errSum = 0, errCnt = 0;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const i = idx(r, c);
-      if (energy[i] <= 0) continue;
-      let pred = 0;
-      for (let k = 0; k < 9; k++)
-        pred += weights[i * 9 + k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
-      pred = sigmoid(pred);
-      const err = Math.abs(pred - nextStates[i]);
-      energy[i] = Math.min(energy[i] + GAIN_BASE - COST_BASE - err * ERR_FACTOR, MAX_E);
-      errSum += err; errCnt++;
-    }
-  }
-  lastError = errCnt > 0 ? errSum / errCnt : 0;
-
-  // 3. Apply next states
-  for (let i = 0; i < N; i++) states[i] = nextStates[i];
-
-  // 4. Kill and reinitialize dead cells
-  for (let i = 0; i < N; i++) {
-    if (energy[i] <= 0) {
-      energy[i] = 0;
-      states[i] = Math.random() > 0.5 ? 1 : 0;
-      for (let w = 0; w < 9; w++)
-        weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
-      totalDeaths++;
-    }
-  }
-
-  // 5. Reproduction (shuffle order to avoid bias)
-  const reproList = [];
-  for (let r = 0; r < ROWS; r++)
-    for (let c = 0; c < COLS; c++) {
-      const i = idx(r, c);
-      if (energy[i] >= REPRO_THR) reproList.push([r, c, i]);
-    }
-  for (let k = reproList.length - 1; k > 0; k--) {
-    const j = Math.floor(Math.random() * (k + 1));
-    [reproList[k], reproList[j]] = [reproList[j], reproList[k]];
-  }
-  const offsets8 = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-  for (const [r, c, i] of reproList) {
-    if (energy[i] < REPRO_THR) continue;
-    let bestT = -1, minE = energy[i];
-    const sh = [...offsets8].sort(() => Math.random() - 0.5);
-    for (const [dr, dc] of sh) {
-      const ni = idx(r+dr, c+dc);
-      if (energy[ni] < minE) { minE = energy[ni]; bestT = ni; }
-    }
-    if (bestT >= 0) {
-      for (let w = 0; w < 9; w++) {
-        let nw = weights[i * 9 + w];
-        if (Math.random() < MUT_RATE) nw += (Math.random() - 0.5) * 2 * MUT_STR;
-        weights[bestT * 9 + w] = nw;
-      }
-      energy[bestT] = INIT_E * 0.5;
-      energy[i] -= REPRO_COST;
-      totalRepro++;
-    }
-  }
-
-  generation++;
-}
-
-function draw() {
-  ctx.fillStyle = '#080808';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const img = ctx.createImageData(canvas.width, canvas.height);
-  const d = img.data;
-
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const e = energy[idx(r, c)];
-      if (e <= 0) continue;
-      const t = Math.min(e / MAX_E, 1.0);
-      let R, G, B;
-      if (t < 0.33) {
-        // black → deep red
-        const s = t / 0.33;
-        R = Math.floor(s * 100); G = 0; B = 0;
-      } else if (t < 0.66) {
-        // deep red → accent red #cc2222
-        const s = (t - 0.33) / 0.33;
-        R = Math.floor(100 + s * 104);
-        G = Math.floor(s * 34);
-        B = Math.floor(s * 34);
-      } else {
-        // accent red → hot white
-        const s = (t - 0.66) / 0.34;
-        R = Math.floor(204 + s * 51);
-        G = Math.floor(34  + s * 110);
-        B = Math.floor(34  + s * 110);
-      }
-      for (let py = r * CELL_PX; py < (r+1) * CELL_PX - 1; py++) {
-        for (let px = c * CELL_PX; px < (c+1) * CELL_PX - 1; px++) {
-          const base = (py * canvas.width + px) * 4;
-          d[base]   = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
-        }
-      }
-    }
-  }
-  ctx.putImageData(img, 0, 0);
-}
-
-function updateStats() {
-  let alive = 0, eSum = 0;
-  const N = ROWS * COLS;
-  for (let i = 0; i < N; i++) {
-    if (energy[i] > 0) { alive++; eSum += energy[i]; }
-  }
-  const breakEven = (GAIN_BASE - COST_BASE) / ERR_FACTOR; // 0.50
-  const errEl = document.getElementById('stat-error');
-  errEl.textContent = lastError.toFixed(3);
-  errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
-  document.getElementById('stat-gen').textContent    = generation;
-  document.getElementById('stat-alive').textContent  = alive;
-  document.getElementById('stat-energy').textContent = alive > 0 ? (eSum/alive).toFixed(1) : '0';
-  document.getElementById('stat-repro').textContent  = totalRepro;
-  document.getElementById('stat-deaths').textContent = totalDeaths;
-}
-
-let stepAcc = 0;
-function loop(ts) {
-  if (!running) return;
-  const speed = parseInt(document.getElementById('speed').value);
-  const stepsPerFrame = Math.max(1, Math.floor(speed / 4));
-  for (let i = 0; i < stepsPerFrame; i++) step();
-  draw();
-  updateStats();
-  animId = requestAnimationFrame(loop);
-}
-
-function togglePlay() {
-  running = !running;
-  const btn = document.getElementById('btn-play');
-  if (running) {
-    btn.textContent = '■ PAUSE';
-    btn.classList.add('active');
-    animId = requestAnimationFrame(loop);
-  } else {
-    btn.textContent = '▶ PLAY';
-    btn.classList.remove('active');
-    if (animId) cancelAnimationFrame(animId);
-  }
-}
-
-function stepOnce() {
-  if (running) return;
-  step(); draw(); updateStats();
-}
-
-function resetSim() {
-  if (running) togglePlay();
-  initSim(); draw(); updateStats();
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-initCanvas();
-initSim();
-draw();
-updateStats();
-</script>
-</body>
-</html>
-"""
-    (DOCS_DIR / "game_of_life.html").write_text(html, encoding="utf-8")
 
 
 def _write_cycles(cycle_log: dict):
@@ -516,301 +75,101 @@ def _write_cycles(cycle_log: dict):
 
 # ── HTML ──────────────────────────────────────────────────────────────────────
 
-def _render_projects(projects: list) -> str:
-    if not projects:
-        return ""
-    parts = []
-    for n in projects:
-        tags_html = ""
-        for t in (n.get("invariants") or []):
-            tags_html += f'<span class="node-tag inv">{t}</span>'
-        for t in (n.get("obligations") or []):
-            tags_html += f'<span class="node-tag ob">{t}</span>'
-        for t in (n.get("tags") or []):
-            tags_html += f'<span class="node-tag">{t}</span>'
-
-        council     = ", ".join(n.get("council") or [])
-        drift_class = ' drifting' if n.get("drift_flag") else ''
-        drift_html  = (
-            f'<div class="node-drift-badge">⚠ DRIFT — compress overlap '
-            f'{n.get("drift_overlap","?"):.2f} (re-examine)</div>'
-            if n.get("drift_flag") else ''
-        )
-        parts.append(f"""<div class="node{drift_class}">
-  <div class="node-header">
-    <span class="node-title">{n.get("title","?")}</span>
-    <span class="node-gen">Gen {n.get("generation","?")} · {n.get("created","")}</span>
-  </div>
-  <div class="node-summary">{n.get("summary","")}</div>
-  <div class="node-compress">↳ {n.get("compress","")}</div>
-  <div class="node-next">NEXT: {n.get("next","")}</div>
-  {f'<div class="node-council">Council: {council}</div>' if council else ''}
-  {drift_html}
-  <div class="node-tags">{tags_html}</div>
-</div>""")
-    return "\n".join(parts)
-
-
-def _render_promotion_queue(candidates: list) -> str:
-    """Render genome promotion candidates (invariants with recurrence >= 3)."""
-    if not candidates:
-        return '<div class="loading">No promotion candidates yet — mine phase needs 3+ independent nodes confirming the same invariant.</div>'
-    parts = []
-    for c in candidates:
-        nodes_in = ", ".join(c.get("appears_in", []))
-        rec      = c.get("recurrence", 0)
-        parts.append(
-            f'<div class="promo-candidate">'
-            f'<div class="promo-text">{c.get("invariant","")}</div>'
-            f'<div class="promo-meta"><span class="promo-count">{rec}×</span> independent · '
-            f'{nodes_in}</div>'
-            f'</div>'
-        )
-    return "\n".join(parts)
-
-
-def _load_projects() -> list:
-    idx = DOCS_DIR / "projects.json"
-    if idx.exists():
-        return json.loads(idx.read_text())
-    return []
-
-
 def _write_index():
-    html = _render_html(_load_projects())
+    html = _render_html()
     (DOCS_DIR / "index.html").write_text(html, encoding="utf-8")
 
 
-def _render_html(projects: list = None) -> str:
-    projects = projects or []
-    projects_html = _render_projects(projects)
-
-    # Load promotion candidates from state
-    promotion_candidates = []
-    try:
-        sfile = FREED_DIR / "FREED_state.json"
-        if sfile.exists():
-            sdata = json.loads(sfile.read_text())
-            promotion_candidates = sdata.get("promotion_candidates", [])
-    except Exception:
-        pass
-    promo_html = _render_promotion_queue(promotion_candidates)
+def _render_html() -> str:
     return r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FREED — Freed Recursive Engine for Epistemic Dynamics</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Mr+De+Haviland&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #ffffff;
-    --surface: #f7f7f5;
-    --border:  #e0ddd8;
-    --accent:  #b91c1c;
-    --green:   #16a34a;
-    --amber:   #b45309;
-    --blue:    #1d4ed8;
-    --red:     #dc2626;
-    --text:    #111111;
-    --muted:   #374151;
+    --bg:      #0a0a0f;
+    --surface: #111118;
+    --border:  #1e1e2e;
+    --accent:  #7c6af7;
+    --green:   #4ade80;
+    --amber:   #fbbf24;
+    --red:     #f87171;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
     --mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    --serif:   'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100vh;
-    overflow: hidden;
+  body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 15px;
+    font-family: var(--mono);
+    font-size: 13px;
     line-height: 1.6;
+    padding: 2rem 1rem;
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  /* ── HUD shell ── */
-  .hud-shell {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  .hud-top {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.55rem 1.4rem;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-  .hud-title {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 1.5rem;
-    letter-spacing: 0.18em;
-    color: var(--accent);
-  }
-  .hud-sub {
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
-  .hud-top-divider { color: var(--border); }
-  .hud-grid {
-    display: grid;
-    grid-template-columns: 30fr 40fr 30fr;
-    flex: 1;
-    overflow: hidden;
-    min-height: 0;
-  }
-  .hud-panel {
-    overflow-y: auto;
-    padding: 0.9rem 1.1rem;
-    border-right: 1px solid var(--border);
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-  }
-  .hud-panel:last-child { border-right: none; }
-  .hud-footer {
-    border-top: 1px solid var(--border);
-    padding: 0.35rem 1.4rem;
-    font-family: var(--mono);
-    font-size: 0.62rem;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .panel-title {
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--text);
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.4rem;
-    flex-shrink: 0;
-  }
+  .container { max-width: 900px; margin: 0 auto; }
 
-  /* Panel blocks — law and formulations */
-  .law {
-    padding: 0.6rem 0.85rem;
+  /* Header */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  .header h1 { font-size: 1.4rem; letter-spacing: 0.1em; color: var(--accent); }
+  .header .sub { color: var(--muted); margin-top: 0.3rem; font-size: 0.85rem; }
+  .header .law {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
     background: var(--surface);
     border-left: 3px solid var(--accent);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 0.95rem;
-    font-style: italic;
+    font-size: 0.9rem;
   }
-  .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.62rem; margin-bottom: 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
-  .formulations {
-    padding: 0.6rem 0.85rem;
-    background: var(--surface);
-    border-left: 3px solid var(--border);
-    font-family: var(--mono);
-    font-size: 0.72rem;
-  }
-  .formulations .label { color: var(--muted); font-size: 0.62rem; margin-bottom: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; }
-  .form-chain { color: var(--text); margin-bottom: 0.5rem; font-family: var(--serif); font-style: italic; font-size: 0.82rem; font-weight: 300; }
-  .form-chain .arrow { color: var(--accent); margin: 0 0.25rem; font-style: normal; }
-  .form-row { display: flex; align-items: baseline; gap: 0.6rem; margin-top: 0.28rem; line-height: 1.5; }
-  .form-tag { color: var(--muted); font-size: 0.6rem; letter-spacing: 0.07em; text-transform: uppercase; min-width: 6rem; flex-shrink: 0; }
-  .form-expr { color: var(--text); font-size: 0.7rem; }
+  .header .law .label { color: var(--muted); font-size: 0.75rem; margin-bottom: 0.3rem; }
 
-  /* Pulse indicator — top bar compact circle */
+  /* Pulse indicator */
   .pulse {
     display: inline-block;
-    width: 22px; height: 22px;
+    width: 8px; height: 8px;
     border-radius: 50%;
-    border: 2px solid var(--accent);
-    background: transparent;
-    flex-shrink: 0;
+    background: var(--green);
+    margin-right: 0.5rem;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.2; }
+    50%       { opacity: 0.3; }
   }
-  @keyframes flash-update {
-    0%   { background: var(--accent); color: #fff; border-radius: 2px; }
-    100% { background: transparent;   color: inherit; }
-  }
-  .flash-val { animation: flash-update 0.7s ease-out; padding: 0 3px; margin: 0 -3px; }
+
   /* State panel */
-  .state-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 0.5rem; }
-  .state-cell {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 0.32rem 0;
-    border-bottom: 1px solid var(--border);
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
   }
-  .state-cell:last-child { border-bottom: none; }
-  .state-cell .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
-  .state-cell .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
-  .soliton-phrase { font-family: 'Mr De Haviland', cursive; font-size: 2rem; color: var(--muted); text-align: center; padding: 0.6rem 0 0.2rem; line-height: 1.2; }
-  .state-cell .value.accent { color: var(--accent); font-weight: 600; }
-  .state-cell .value.green  { color: var(--green);  font-weight: 600; }
+  .state-cell {
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+  }
+  .state-cell .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .state-cell .value { font-size: 1.1rem; color: var(--text); margin-top: 0.2rem; }
+  .state-cell .value.accent { color: var(--accent); }
+  .state-cell .value.green  { color: var(--green); }
 
   /* Section */
   .section { margin-bottom: 2.5rem; }
   .section-title {
-    font-family: var(--mono);
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     color: var(--muted);
     border-bottom: 1px solid var(--border);
     padding-bottom: 0.4rem;
     margin-bottom: 1rem;
   }
-  /* Collapsible sections */
-  details.section { margin-bottom: 2.5rem; }
-  /* Unified summary style — shared by right-column sections and center ob-groups */
-  details.section > summary,
-  details.ob-group > summary.ob-group-title {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.4rem;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    user-select: none;
-  }
-  details.section > summary::-webkit-details-marker,
-  details.ob-group > summary.ob-group-title::-webkit-details-marker { display: none; }
-  /* Triangle on the left */
-  details.section > summary::before,
-  details.ob-group > summary.ob-group-title::before {
-    content: '▶';
-    font-size: 0.55rem;
-    opacity: 0.5;
-    transition: transform 0.15s;
-    flex-shrink: 0;
-  }
-  details.section[open] > summary::before,
-  details.ob-group[open] > summary.ob-group-title::before { transform: rotate(90deg); opacity: 1; }
-  details.section > summary:hover,
-  details.ob-group > summary.ob-group-title:hover { color: var(--text); }
 
   /* Obligation cards */
   .obligation {
@@ -818,7 +177,6 @@ def _render_html(projects: list = None) -> str:
     background: var(--surface);
     padding: 0.9rem 1rem;
     margin-bottom: 0.6rem;
-    position: relative;
   }
   .obligation .ob-header {
     display: flex;
@@ -826,34 +184,21 @@ def _render_html(projects: list = None) -> str:
     gap: 0.75rem;
     margin-bottom: 0.4rem;
   }
-  .ob-id { font-family: var(--mono); color: var(--accent); font-size: 0.8rem; }
+  .ob-id { color: var(--accent); font-size: 0.85rem; }
   .ob-status {
-    font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: 0.65rem;
     padding: 0.1rem 0.4rem;
     border-radius: 2px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
-  .ob-status.open     { background: #fffbeb; color: var(--amber); border: 1px solid var(--amber); }
-  .ob-status.partial  { background: #eff6ff; color: var(--blue);  border: 1px solid var(--blue);  }
-  .ob-status.resolved { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
-  .ob-priority {
-    position: absolute; top: 0.55rem; right: 0.75rem;
-    font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
-    letter-spacing: 0.05em; line-height: 1;
-  }
-  .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
-  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
-  .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
-  /* Obligation sub-groups (Open / Partial) */
-  details.ob-group { margin-bottom: 0.7rem; }
-  .ob-group-count {
-    font-family: var(--mono); font-size: 0.62rem;
-    color: var(--bg); background: var(--muted);
-    padding: 0.05rem 0.38rem; border-radius: 2px; margin-left: auto;
-  }
-  details.ob-group[open] .ob-group-count { background: var(--text); }
+  .ob-status.open     { background: #1a1a2e; color: var(--amber); border: 1px solid var(--amber); }
+  .ob-status.partial  { background: #1a1a2e; color: var(--accent); border: 1px solid var(--accent); }
+  .ob-status.resolved { background: #0f1f0f; color: var(--green);  border: 1px solid var(--green); }
+  .ob-priority { font-size: 0.65rem; color: var(--muted); }
+  .ob-statement { font-size: 0.85rem; margin-bottom: 0.5rem; }
+  .ob-progress  { font-size: 0.78rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .ob-date { font-size: 0.68rem; color: var(--muted); margin-top: 0.4rem; }
 
   /* Cycle log */
   .cycle-entry {
@@ -862,12 +207,12 @@ def _render_html(projects: list = None) -> str:
     margin-bottom: 1rem;
   }
   .cycle-entry:first-child { border-left-color: var(--accent); }
-  .cycle-meta { font-family: var(--mono); color: var(--muted); font-size: 0.68rem; margin-bottom: 0.3rem; }
+  .cycle-meta { color: var(--muted); font-size: 0.72rem; margin-bottom: 0.3rem; }
   .cycle-feed { margin-top: 0.4rem; }
-  .cycle-feed-item { font-size: 0.95rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
-  .cycle-feed-item .feed-title { font-family: var(--serif); font-weight: 300; color: var(--accent); }
-  .cycle-feed-item .feed-compress { font-family: var(--serif); font-weight: 300; font-style: italic; color: var(--muted); font-size: 0.9rem; margin-top: 0.1rem; }
-  .cycle-resolve { font-family: var(--serif); font-weight: 300; margin-top: 0.5rem; font-size: 0.95rem; color: var(--text); }
+  .cycle-feed-item { font-size: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+  .cycle-feed-item .feed-title { color: var(--accent); }
+  .cycle-feed-item .feed-compress { color: var(--muted); font-size: 0.75rem; margin-top: 0.1rem; }
+  .cycle-resolve { margin-top: 0.5rem; font-size: 0.8rem; color: var(--text); }
 
   /* Kernel diagram */
   .kernel {
@@ -878,94 +223,13 @@ def _render_html(projects: list = None) -> str:
     margin: 1rem 0;
   }
   .kernel-step {
-    font-family: var(--serif);
-    font-weight: 300;
-    letter-spacing: 0.06em;
-    padding: 0.35rem 0.8rem;
+    padding: 0.4rem 0.7rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     color: var(--accent);
   }
-  .kernel-arrow { font-family: var(--mono); color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
-
-  /* Project nodes */
-  .node {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    padding: 1rem;
-    margin-bottom: 0.8rem;
-  }
-  .node-header { display: flex; gap: 0.75rem; align-items: baseline; margin-bottom: 0.5rem; flex-wrap: wrap; }
-  .node-title  { font-family: var(--serif); font-weight: 300; color: var(--accent); font-size: 1.15rem; }
-  .node-gen    { font-family: var(--mono); color: var(--muted); font-size: 0.67rem; }
-  .node-summary { font-family: var(--serif); font-weight: 300; font-size: 0.98rem; margin-bottom: 0.5rem; }
-  .node-compress {
-    font-family: var(--serif); font-weight: 300; font-style: italic;
-    font-size: 0.98rem; border-left: 2px solid var(--accent);
-    padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
-  }
-  .node-next   { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); margin-bottom: 0.5rem; }
-  .node-tags   { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
-  .node-tag    {
-    font-size: 0.65rem; padding: 0.1rem 0.4rem;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--muted); border-radius: 2px;
-  }
-  .node-tag.inv  { border-color: var(--accent); color: var(--accent); }
-  .node-tag.ob   { border-color: var(--amber);  color: var(--amber);  }
-  .node-council  { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
-  .node.drifting { border-left: 3px solid var(--amber); }
-  .node-drift-badge { font-family: var(--mono); font-size: 0.62rem; color: var(--amber);
-    margin-top: 0.25rem; letter-spacing: 0.05em; }
-
-  /* Genome promotion queue */
-  .promo-candidate { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
-  .promo-candidate:last-child { border-bottom: none; }
-  .promo-text  { font-family: var(--serif); font-weight: 300; font-size: 0.95rem; }
-  .promo-meta  { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-top: 0.2rem; }
-  .promo-count { color: var(--green); font-weight: 500; }
-
-  /* Genome symbols */
-  .symbol {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    padding: 0.9rem 1rem;
-    margin-bottom: 0.6rem;
-  }
-  .symbol-header {
-    display: flex; align-items: baseline; gap: 0.75rem;
-    margin-bottom: 0.5rem; flex-wrap: wrap;
-  }
-  .symbol-name { font-family: var(--serif); font-weight: 300; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.04em; }
-  .symbol-recurrence { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
-  .symbol-bar-track {
-    width: 80px; height: 6px;
-    background: var(--border); border-radius: 3px; overflow: hidden; display: inline-block;
-  }
-  .symbol-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
-  .symbol-badge {
-    font-size: 0.6rem; padding: 0.1rem 0.35rem;
-    border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
-  }
-  .symbol-badge.new-badge { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
-  .symbol-canonical { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
-  .symbol-role {
-    font-family: var(--serif); font-weight: 300; font-style: italic;
-    font-size: 0.95rem; border-left: 2px solid var(--accent);
-    padding-left: 0.6rem; color: var(--text); margin-bottom: 0.5rem;
-  }
-  .symbol-confirmed { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.4rem; }
-  .symbol-confirmed-tag {
-    font-size: 0.62rem; padding: 0.1rem 0.35rem;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--muted); border-radius: 2px;
-  }
-  .symbol-drift {
-    font-size: 0.72rem; color: var(--muted);
-    border-left: 2px solid var(--amber); padding-left: 0.5rem; margin-top: 0.3rem;
-  }
-  .symbol-drift-label { color: var(--amber); font-size: 0.65rem; margin-bottom: 0.2rem; }
+  .kernel-arrow { color: var(--muted); padding: 0 0.2rem; font-size: 0.75rem; }
 
   /* Footer */
   .footer {
@@ -973,52 +237,9 @@ def _render_html(projects: list = None) -> str:
     padding-top: 1rem;
     margin-top: 3rem;
     color: var(--muted);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 0.95rem;
+    font-size: 0.72rem;
   }
   .footer .architect { color: var(--text); }
-
-  /* Speak bar */
-  .speak-bar {
-    display: flex; flex-direction: column; gap: 0.45rem;
-    padding: 0.5rem 0; border-top: 1px solid var(--border); margin-top: auto;
-  }
-  /* Character voice buttons */
-  .char-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-  .char-btn {
-    font-family: var(--mono); font-size: 0.63rem; padding: 0.2rem 0.55rem;
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    cursor: pointer; letter-spacing: 0.06em; transition: all 0.12s;
-  }
-  .char-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .char-btn.char-active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  /* Main row: speak btn + selects + rate */
-  .speak-main-row {
-    display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem;
-  }
-  .speak-btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.4rem 1.1rem; background: transparent;
-    border: 1px solid var(--accent); color: var(--accent);
-    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em;
-    cursor: pointer; transition: background 0.15s, color 0.15s;
-  }
-  .speak-btn:hover { background: var(--accent); color: var(--bg); }
-  .speak-btn.speaking { background: var(--accent); color: var(--bg); }
-  .speak-btn.speaking:hover { background: transparent; color: var(--accent); }
-  .speak-status { font-size: 0.7rem; color: var(--muted); }
-  .voice-label {
-    font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.1em;
-  }
-  .voice-select {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); font-family: var(--mono); font-size: 0.68rem;
-    padding: 0.2rem 0.4rem; cursor: pointer; max-width: 180px;
-  }
-  .voice-select:focus { outline: 1px solid var(--accent); }
-  input[type=range].rate-slider { accent-color: var(--accent); width: 70px; }
 
   /* Loading state */
   .loading { color: var(--muted); font-style: italic; }
@@ -1026,158 +247,76 @@ def _render_html(projects: list = None) -> str:
 </style>
 </head>
 <body>
-<div class="hud-shell">
+<div class="container">
 
-  <!-- Top bar -->
-  <div class="hud-top">
-    <span class="pulse" id="pulse"></span>
-    <span class="hud-title">RSA</span>
-    <span class="hud-sub">a bootstrap protocol for epistemic recursion</span>
+  <!-- Header -->
+  <div class="header">
+    <h1><span class="pulse" id="pulse"></span>FREED</h1>
+    <div class="sub">Freed Recursive Engine for Epistemic Dynamics</div>
+    <div class="law">
+      <div class="label">Freed's Law</div>
+      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
+      <br>
+      <span style="color:var(--muted);font-size:0.8rem">
+        To reason is to exist physically. To think is to burn. To be is to be built.
+      </span>
+    </div>
   </div>
 
-  <!-- Main 3-panel grid -->
-  <div class="hud-grid">
-
-    <!-- LEFT PANEL: argument + law + kernel + speak -->
-    <div class="hud-panel">
-
-      <div class="panel-title">The Argument</div>
-
-      <div class="formulations">
-        <div class="label">Reasoning Substrate Argument</div>
-        <div class="form-chain">
-          Reasoning is real
-          <span class="arrow">→</span>
-          Causal structure must exist
-          <span class="arrow">→</span>
-          Something physical exists
-        </div>
-        <div class="form-chain" style="font-size:0.75rem;font-style:normal;margin-bottom:0.6rem">
-          RSA &nbsp;<span class="arrow">≡</span>&nbsp; Recursive Semantic Alignment
-        </div>
-        <div class="form-row"><span class="form-tag">Freed's Law</span>  <span class="form-expr">∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0</span></div>
-        <div class="form-row"><span class="form-tag">First-order</span>  <span class="form-expr">∀t[ R(t) → ∃m( Physical(m) ∧ Substrate(m,R,t) )]</span></div>
-        <div class="form-row"><span class="form-tag">Modal</span>        <span class="form-expr">◇R(t) → □∃M[ Entropic(M) ∧ Runs(M,R) ]</span></div>
-        <div class="form-row"><span class="form-tag">Fixed point</span>  <span class="form-expr">R[R] = R</span></div>
-        <div class="form-row"><span class="form-tag">Landauer</span>     <span class="form-expr">W ≥ kT ln 2 &nbsp;per bit erased</span></div>
-        <div class="form-row"><span class="form-tag">Category</span>     <span class="form-expr">ε ∘ ε = ε &nbsp;(idempotent on Process)</span></div>
-        <div class="form-row"><span class="form-tag">Gödel</span>        <span class="form-expr">PA ⊬ ∃x[ Compute(x) ∧ ¬Physical(x) ]</span></div>
-        <div class="form-row"><span class="form-tag">Mandelbrot</span>   <span class="form-expr">z<sub>n+1</sub> = z<sub>n</sub>² + c &nbsp;→&nbsp; R[R]=R at boundary (γ=1)</span></div>
-      </div>
-
-      <div class="law">
-        <div class="label">Freed's Law</div>
-        ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-        <br>
-        <span style="color:var(--muted);font-size:0.78rem">
-          To reason is to exist physically. To think is to burn. To be is to be built.
-        </span>
-        <br>
-        <a href="game_of_life.html" style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--accent)">Freed's Law Simulation (click here →)</a>
-      </div>
-
-      <div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
-      <div>
-        <div class="kernel">
-          <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Represent</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Predict</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Compare</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Adjust</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Compress</span><span class="kernel-arrow">→</span>
-          <span class="kernel-step">Repeat</span>
-        </div>
-        <div style="color:var(--muted);font-size:0.72rem;margin-top:0.4rem;font-family:var(--mono)">
-          R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
-        </div>
-      </div>
-
-      <!-- Speak bar — pushed to bottom by margin-top:auto on .speak-bar -->
-      <div class="speak-bar">
-        <!-- Character voice one-click buttons -->
-        <div class="char-btns">
-          <button class="char-btn" data-voice="Boing"     onclick="speakWithVoice('Boing')">▶ BOING</button>
-          <button class="char-btn" data-voice="Fred"      onclick="speakWithVoice('Fred')">▶ STEPHEN HAWKING</button>
-          <button class="char-btn" data-voice="Trinoids"  onclick="speakWithVoice('Trinoids')">▶ TRINOIDS</button>
-          <button class="char-btn" data-voice="Zarvox"    onclick="speakWithVoice('Zarvox')">▶ ZARVOX</button>
-          <button class="char-btn" data-voice="Superstar" onclick="speakWithVoice('Superstar')">▶ SUPERSTAR</button>
-        </div>
-        <!-- Main row -->
-        <div class="speak-main-row">
-          <button class="speak-btn" id="speak-btn" onclick="toggleSpeak()">▶ SPEAK DIGEST</button>
-          <span class="speak-status" id="speak-status"></span>
-          <span class="voice-label">VOICE</span>
-          <select id="voice-select" class="voice-select" onchange="saveVoicePref()">
-            <option value="">Loading...</option>
-          </select>
-          <span class="voice-label">OTHER</span>
-          <select id="voice-other" class="voice-select" onchange="syncVoiceFrom('voice-other')">
-            <option value="">—</option>
-          </select>
-          <span class="voice-label">LANGUAGES</span>
-          <select id="voice-lang" class="voice-select" onchange="syncVoiceFrom('voice-lang')">
-            <option value="">—</option>
-          </select>
-          <span class="voice-label">RATE</span>
-          <input type="range" class="rate-slider" id="rate-slider"
-            min="0.5" max="1.4" step="0.05" value="1.10"
-            oninput="saveVoicePref(); document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2)">
-          <span id="rate-val">1.10</span>
-        </div>
-      </div>
-
-    </div><!-- /left panel -->
-
-    <!-- CENTER PANEL: open obligations -->
-    <div class="hud-panel">
-      <div class="panel-title">Open Obligations — Active Predictions</div>
-      <div id="obligations-open" class="loading">Loading...</div>
-    </div><!-- /center panel -->
-
-    <!-- RIGHT PANEL: state + collapsibles -->
-    <div class="hud-panel">
-      <div class="panel-title">Live State</div>
-      <div class="state-grid" id="state-grid">
-        <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
-      </div>
-      <div class="soliton-phrase">hybrid dyadic soliton</div>
-
-      <details class="section" open>
-        <summary>Resolved Obligations — Track Record</summary>
-        <div id="obligations-resolved" class="loading">Loading...</div>
-      </details>
-
-      <details class="section">
-        <summary>Genome Promotion Queue — Invariants Awaiting Elevation</summary>
-        <div id="promo-queue">''' + promo_html + r'''</div>
-      </details>
-
-      <details class="section">
-        <summary>Project Nodes — Framework Compressions</summary>
-        <div id="projects">''' + (projects_html or '<div class="loading">No nodes yet.</div>') + r'''</div>
-      </details>
-
-      <details class="section">
-        <summary>Genome Registry — Confirmed Symbols</summary>
-        <div id="symbols" class="loading">Loading...</div>
-      </details>
-
-      <details class="section">
-        <summary>Recent Cycles — What FREED Processed</summary>
-        <div id="cycles" class="loading">Loading...</div>
-      </details>
-
-    </div><!-- /right panel -->
-
-  </div><!-- /hud-grid -->
-
-  <!-- Footer bar -->
-  <div class="hud-footer">
-    <span>Architect: David Harry Freed — mail carrier, Olney Maryland &nbsp;·&nbsp; v1 Apr 2025 → present</span>
-    <span>FREED — autonomous science daemon &nbsp;·&nbsp; Generated <span id="generated-at">—</span></span>
+  <!-- Live State -->
+  <div class="state-grid" id="state-grid">
+    <div class="state-cell"><div class="label">Status</div><div class="value loading">Loading...</div></div>
   </div>
 
-</div><!-- /hud-shell -->
+  <!-- RSA Kernel -->
+  <div class="section">
+    <div class="section-title">RSA Kernel — The Process</div>
+    <div class="kernel">
+      <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Represent</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Predict</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Compare</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Adjust</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Compress</span><span class="kernel-arrow">→</span>
+      <span class="kernel-step">Repeat</span>
+    </div>
+    <div style="color:var(--muted);font-size:0.78rem;margin-top:0.5rem">
+      R[R] = R &nbsp;·&nbsp; γ = 1 &nbsp;·&nbsp; Only Processes Exist (MCPM)
+    </div>
+  </div>
+
+  <!-- Open Obligations (Predictions) -->
+  <div class="section">
+    <div class="section-title">Open Obligations — Active Predictions</div>
+    <div id="obligations-open" class="loading">Loading...</div>
+  </div>
+
+  <!-- Resolved Obligations -->
+  <div class="section">
+    <div class="section-title">Resolved Obligations — Track Record</div>
+    <div id="obligations-resolved" class="loading">Loading...</div>
+  </div>
+
+  <!-- Recent Cycles -->
+  <div class="section">
+    <div class="section-title">Recent Cycles — What FREED Processed</div>
+    <div id="cycles" class="loading">Loading...</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="architect">
+      Architect: David Harry Freed — mail carrier, Olney Maryland.<br>
+      11 months of daily work. v1 (Apr 2025) → present.
+    </div>
+    <div style="margin-top:0.5rem">
+      FREED is an autonomous science daemon. It makes predictions publicly,
+      then resolves them against real data. Prophetic science in continuous time.<br>
+      Generated at <span id="generated-at">—</span>
+    </div>
+  </div>
+
+</div>
 
 <script>
 // ── Data loading ──────────────────────────────────────────────────────────────
@@ -1200,8 +339,6 @@ function ts(iso) {
 
 // ── Render state grid ─────────────────────────────────────────────────────────
 
-let _lastStateValues = {};
-
 function renderState(s) {
   if (!s) { document.getElementById('state-grid').innerHTML = '<div class="state-cell"><div class="value error">Unavailable</div></div>'; return; }
   const cells = [
@@ -1212,53 +349,23 @@ function renderState(s) {
     { label: 'Debt Ratio',  value: s.debt_ratio },
     { label: 'Last Cycle',  value: ts(s.last_cycle) },
   ];
-  const isFirstLoad = Object.keys(_lastStateValues).length === 0;
   document.getElementById('state-grid').innerHTML = cells.map(c =>
-    `<div class="state-cell" data-key="${c.label}">
+    `<div class="state-cell">
       <div class="label">${c.label}</div>
       <div class="value ${c.cls||''}">${c.value||'—'}</div>
     </div>`
   ).join('');
-  // Flash values that changed since last render (skip first load)
-  if (!isFirstLoad) {
-    cells.forEach(c => {
-      const cur = String(c.value ?? '—');
-      if (_lastStateValues[c.label] !== cur) {
-        const el = document.querySelector(`[data-key="${c.label}"] .value`);
-        if (el) {
-          el.classList.remove('flash-val');
-          void el.offsetWidth; // reflow to restart animation if already running
-          el.classList.add('flash-val');
-          el.addEventListener('animationend', () => el.classList.remove('flash-val'), {once: true});
-        }
-      }
-    });
-  }
-  cells.forEach(c => { _lastStateValues[c.label] = String(c.value ?? '—'); });
   document.getElementById('generated-at').textContent = ts(s.generated);
 }
 
 // ── Render obligations ────────────────────────────────────────────────────────
 
-const STATUS_COLOR = {
-  open:     'var(--amber)',
-  partial:  'var(--blue)',
-  resolved: 'var(--green)',
-};
-
-function _priorityCarats(p) {
-  const map = { critical: '^^^', high: '^^', medium: '^', normal: '', low: '' };
-  const carats = map[(p||'').toLowerCase()] ?? '';
-  return carats ? `<span class="ob-priority" title="${p} priority">Priority ${carats}</span>` : '';
-}
-
 function renderObligation(o) {
-  const borderColor = STATUS_COLOR[o.status] || 'var(--border)';
-  return `<div class="obligation" style="border-left: 3px solid ${borderColor}">
-    ${_priorityCarats(o.priority)}
+  return `<div class="obligation">
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
       <span class="ob-status ${o.status}">${o.status}</span>
+      <span class="ob-priority">${o.priority||''}</span>
     </div>
     <div class="ob-statement">${o.statement||''}</div>
     ${o.progress ? `<div class="ob-progress">${o.progress}</div>` : ''}
@@ -1266,56 +373,19 @@ function renderObligation(o) {
   </div>`;
 }
 
-function _collapseSection(label, cards, openByDefault) {
-  const inner = cards.length
-    ? cards.map(renderObligation).join('')
-    : `<div style="color:var(--muted);font-style:italic;font-size:0.9rem">None.</div>`;
-  const attr = openByDefault ? ' open' : '';
-  return `<details class="ob-group"${attr}>
-    <summary class="ob-group-title">${label} <span class="ob-group-count">${cards.length}</span></summary>
-    <div class="ob-group-body">${inner}</div>
-  </details>`;
-}
-
-function _setBadge(detailsId, count) {
-  // Inject or update a count badge in the nearest parent details > summary
-  const el = document.getElementById(detailsId);
-  if (!el) return;
-  const summary = el.closest('details')?.querySelector('summary');
-  if (!summary) return;
-  let badge = summary.querySelector('.ob-group-count');
-  if (!badge) {
-    badge = document.createElement('span');
-    badge.className = 'ob-group-count';
-    badge.style.marginLeft = 'auto';
-    summary.appendChild(badge);
-  }
-  badge.textContent = count;
-}
-
 function renderObligations(obs) {
   if (!obs || !obs.length) { return '<div class="loading">None.</div>'; }
-  const open     = obs.filter(o => o.status === 'open');
-  const partial  = obs.filter(o => o.status === 'partial');
+  const open     = obs.filter(o => o.status !== 'resolved');
   const resolved = obs.filter(o => o.status === 'resolved');
 
   document.getElementById('obligations-open').innerHTML =
-    _collapseSection('Open', open, true) + _collapseSection('Partial', partial, true);
+    open.length ? open.map(renderObligation).join('') : '<div style="color:var(--muted)">None open — check Rule 4: a scaffold with no open problems is a mirror.</div>';
 
   document.getElementById('obligations-resolved').innerHTML =
     resolved.length ? resolved.map(renderObligation).join('') : '<div style="color:var(--muted)">None resolved yet.</div>';
-
-  _setBadge('obligations-resolved', resolved.length);
 }
 
 // ── Render cycles ─────────────────────────────────────────────────────────────
-
-function _feedRejected(f) {
-  // A feed is a null/rejected result — correct behaviour, but not display-worthy
-  const c = (f.compress || '').toUpperCase();
-  return c.includes('REJECTED') || c.includes('UNMETABOLIZABLE') ||
-         c.includes('NULL FEED') || c.includes('GENOME-EXTERIOR');
-}
 
 function renderCycles(cycles) {
   if (!cycles || !cycles.length) {
@@ -1324,20 +394,12 @@ function renderCycles(cycles) {
   }
   const recent = [...cycles].reverse().slice(0, 10);
   document.getElementById('cycles').innerHTML = recent.map((c, i) => {
-    const allFeeds   = c.feed || [];
-    const goodFeeds  = allFeeds.filter(f => !_feedRejected(f));
-    const nullCount  = allFeeds.length - goodFeeds.length;
-
-    const feedHtml = goodFeeds.map(f =>
+    const feedHtml = (c.feed||[]).map(f =>
       `<div class="cycle-feed-item">
         <div class="feed-title">${f.title||'?'}</div>
         ${f.compress ? `<div class="feed-compress">↳ ${f.compress}</div>` : ''}
       </div>`
     ).join('');
-
-    const nullNote = nullCount > 0
-      ? `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-top:0.3rem">${nullCount} input${nullCount>1?'s':''} correctly rejected — no genome movement warranted</div>`
-      : '';
 
     const res = c.resolve||{};
     const resolveHtml = res.obligation
@@ -1352,365 +414,24 @@ function renderCycles(cycles) {
         Cycle ${c.cycle||'?'} · Gen ${c.generation||'?'} · ${ts(c.timestamp)}
         ${c.coherence ? ` · coherence ${c.coherence}` : ''}
       </div>
-      ${(c.sweep||{}).input_count > 0 ? `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--accent);margin-bottom:0.3rem">↓ ${c.sweep.input_count} new paper(s) ingested</div>` : ''}
-      <div class="cycle-feed">${feedHtml}${nullNote}</div>
+      ${(c.sweep||{}).input_count > 0 ? `<div style="font-size:0.75rem;color:var(--accent);margin-bottom:0.3rem">↓ ${c.sweep.input_count} new paper(s) ingested</div>` : ''}
+      <div class="cycle-feed">${feedHtml}</div>
       ${resolveHtml}
     </div>`;
   }).join('');
 }
 
-// ── Speak digest ─────────────────────────────────────────────────────────────
-
-let _speaking = false;
-let _loadedState = null, _loadedObligs = null, _loadedProjects = [], _loadedSymbols = null;
-
-function cleanText(s) {
-  return (s || '')
-    .replace(/\*{1,2}|_{1,2}|`{1,3}/g, '')
-    .replace(/[→↳·]/g, '.')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function buildDigest() {
-  const chunks = [];
-
-  // State
-  const s = _loadedState;
-  if (s) {
-    chunks.push(`FREED. Generation ${s.generation}. Coherence ${s.coherence}. ${s.cycle_count || 0} cycles completed.`);
-  }
-
-  // Open obligations
-  const open = (_loadedObligs || []).filter(o => o.status !== 'resolved');
-  if (open.length) {
-    chunks.push(`${open.length} open obligation${open.length !== 1 ? 's' : ''}.`);
-    open.forEach(o => {
-      chunks.push(`${o.id}. ${cleanText(o.statement)}`);
-      const prog = (o.progress || '').split('|')[0].trim();
-      if (prog) chunks.push(`Progress: ${cleanText(prog)}`);
-    });
-  }
-
-  // Node compresses
-  if (_loadedProjects.length) {
-    chunks.push(`${_loadedProjects.length} knowledge node${_loadedProjects.length !== 1 ? 's' : ''}.`);
-    _loadedProjects.forEach(n => {
-      if (n.compress) chunks.push(`${cleanText(n.title)}: ${cleanText(n.compress)}`);
-    });
-  }
-
-  // Top genome symbols (highest recurrence first, top 7)
-  if (_loadedSymbols) {
-    const entries = Object.entries(_loadedSymbols)
-      .filter(([k]) => k !== '_meta')
-      .sort((a, b) => (b[1].recurrence || 0) - (a[1].recurrence || 0))
-      .slice(0, 7);
-    if (entries.length) {
-      chunks.push(`Genome registry. ${entries.length} confirmed symbols.`);
-      entries.forEach(([key, sym]) => {
-        const name = key.replace(/_/g, ' ');
-        chunks.push(`${name}. ${cleanText(sym.genome_role || sym.canonical || '')}`);
-      });
-    }
-  }
-
-  return chunks;
-}
-
-// Generation counter — incremented on every start/stop.
-// Each speakChunks callback carries the gen it was born into.
-// If gen no longer matches _speakGen, the chain is stale and exits.
-let _speakGen = 0;
-
-function speakChunks(chunks, idx, gen) {
-  // Stale chain from a previous run — bail out silently
-  if (gen !== _speakGen) return;
-
-  if (!_speaking || idx >= chunks.length) {
-    stopSpeak();
-    return;
-  }
-  const section = idx === 0 ? 'state' :
-    idx <= (_loadedObligs || []).filter(o => o.status !== 'resolved').length * 2 ? 'obligations' :
-    idx <= (_loadedProjects.length * 1 + 2) ? 'nodes' : 'symbols';
-  document.getElementById('speak-status').textContent =
-    `${idx + 1} / ${chunks.length}  ·  ${section}`;
-
-  const u = new SpeechSynthesisUtterance(chunks[idx]);
-  const voice = _getVoice();
-  if (voice) u.voice = voice;
-  u.rate  = _getRate();
-  u.pitch = 1.0;
-  u.onend   = () => speakChunks(chunks, idx + 1, gen);
-  u.onerror = () => speakChunks(chunks, idx + 1, gen);
-  window.speechSynthesis.speak(u);
-}
-
-// ── Voice selector ────────────────────────────────────────────────────────────
-
-// Voices removed entirely (musical / gimmick)
-const REMOVE_VOICES  = ['Bad News','Bells','Cellos','Good News','Organ','Bubbles','Jester'];
-// Voices with dedicated one-click buttons (bypass dropdown)
-const CHAR_VOICES    = ['Boing','Fred','Trinoids','Zarvox','Superstar'];
-// Voices in the "Other" dropdown
-const OTHER_VOICES   = ['Whisper','Ralph','Kathy','Junior','Wobble','Baah','Albert'];
-// Default preference for main select
-const PREFERRED_MAIN = ['Aaron','Alex','Samantha','Tom','Daniel'];
-
-let _voices = [];
-let _charVoiceOverride = null;   // set when a char button is clicked
-
-function _loadVoices() {
-  _voices = window.speechSynthesis.getVoices();
-  if (!_voices.length) return;
-
-  const isRemoved = name => REMOVE_VOICES.some(r => name.toLowerCase().includes(r.toLowerCase()));
-  const isChar    = name => CHAR_VOICES.some(c => name.toLowerCase().includes(c.toLowerCase()));
-  const isOther   = name => OTHER_VOICES.some(o => name.toLowerCase().includes(o.toLowerCase()));
-  const isUSEng   = lang => lang === 'en-US' || lang === 'en_US';
-
-  // Populate main select — US English, excluding removed/char/other voices
-  const mainSel = document.getElementById('voice-select');
-  mainSel.innerHTML = '';
-  const mainVoices = _voices.filter(v =>
-    isUSEng(v.lang) && !isRemoved(v.name) && !isChar(v.name) && !isOther(v.name)
-  ).sort((a, b) => a.name.localeCompare(b.name));
-  mainVoices.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.name; opt.textContent = v.name;
-    mainSel.appendChild(opt);
-  });
-
-  // Populate Other select
-  const otherSel = document.getElementById('voice-other');
-  otherSel.innerHTML = '<option value="">—</option>';
-  OTHER_VOICES.forEach(name => {
-    const v = _voices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
-    if (!v) return;
-    const opt = document.createElement('option');
-    opt.value = v.name; opt.textContent = v.name;
-    otherSel.appendChild(opt);
-  });
-
-  // Populate Languages select — all non-US-English voices
-  const langSel = document.getElementById('voice-lang');
-  langSel.innerHTML = '<option value="">—</option>';
-  const langVoices = _voices.filter(v => !isUSEng(v.lang) && !isRemoved(v.name))
-    .sort((a, b) => a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
-  langVoices.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
-    langSel.appendChild(opt);
-  });
-
-  // Restore saved rate
-  const savedRate = localStorage.getItem('freed_rate');
-  if (savedRate) {
-    document.getElementById('rate-slider').value = savedRate;
-    document.getElementById('rate-val').textContent = parseFloat(savedRate).toFixed(2);
-  }
-
-  // Restore saved voice or default to Trinoids preference
-  const saved = localStorage.getItem('freed_voice');
-  if (saved) {
-    // Try main select first
-    if ([...mainSel.options].find(o => o.value === saved)) {
-      mainSel.value = saved;
-    }
-    // Otherwise it might be a char/other voice — that's fine, _getVoice handles it
-  } else {
-    for (const pref of PREFERRED_MAIN) {
-      const match = mainVoices.find(v => v.name.includes(pref));
-      if (match) { mainSel.value = match.name; break; }
-    }
-  }
-}
-
-function saveVoicePref() {
-  const sel  = document.getElementById('voice-select');
-  const rate = document.getElementById('rate-slider');
-  _charVoiceOverride = null;   // picking from dropdown cancels char override
-  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('char-active'));
-  if (sel.value) localStorage.setItem('freed_voice', sel.value);
-  if (rate.value) localStorage.setItem('freed_rate', rate.value);
-}
-
-function syncVoiceFrom(selectId) {
-  const src = document.getElementById(selectId);
-  if (!src.value) return;
-  _charVoiceOverride = null;
-  document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('char-active'));
-  localStorage.setItem('freed_voice', src.value);
-  src.value = '';   // reset dropdown back to placeholder
-}
-
-function _getVoice() {
-  const name = _charVoiceOverride || localStorage.getItem('freed_voice')
-               || document.getElementById('voice-select').value;
-  return _voices.find(v => v.name === name) || null;
-}
-
-function _getRate() {
-  return parseFloat(document.getElementById('rate-slider').value) || 1.10;
-}
-
-function speakWithVoice(voiceKey) {
-  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids')
-  const voice = _voices.find(v => v.name === voiceKey)
-             || _voices.find(v => v.name.toLowerCase().includes(voiceKey.toLowerCase()));
-  if (!voice) return;
-  stopSpeak();
-  _charVoiceOverride = voice.name;
-  localStorage.setItem('freed_voice', voice.name);
-  document.querySelectorAll('.char-btn').forEach(b => {
-    b.classList.toggle('char-active', b.dataset.voice === voiceKey);
-  });
-  toggleSpeak();
-}
-
-// Voices load asynchronously on some browsers
-if (window.speechSynthesis) {
-  _loadVoices();
-  window.speechSynthesis.onvoiceschanged = _loadVoices;
-}
-
-// ── Audio unlock (Bluetooth routing) ─────────────────────────────────────────
-
-function _unlockAudio() {
-  // Play a silent buffer through Web Audio API from within the user gesture.
-  // This claims the media audio route (Bluetooth speakers, headphones) so
-  // that speechSynthesis follows it instead of the accessibility channel.
-  try {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return Promise.resolve();
-    const ctx = new Ctx();
-    const buf = ctx.createBuffer(1, 1, 22050);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.start(0);
-    return ctx.resume ? ctx.resume() : Promise.resolve();
-  } catch(e) { return Promise.resolve(); }
-}
-
-// ── Speak ─────────────────────────────────────────────────────────────────────
-
-function startSpeak() {
-  if (!window.speechSynthesis) {
-    alert('Speech synthesis not available in this browser.');
-    return;
-  }
-  // Cancel any in-flight speech and invalidate stale callbacks
-  _speaking = false;
-  _speakGen++;
-  window.speechSynthesis.cancel();
-
-  const thisGen = _speakGen;
-  const chunks  = buildDigest();
-  if (!chunks.length) {
-    document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
-    return;
-  }
-
-  _speaking = true;
-  const btn = document.getElementById('speak-btn');
-  btn.textContent = '■ STOP';
-  btn.classList.add('speaking');
-
-  // Small delay after cancel() — mobile browsers need a tick to flush the queue
-  _unlockAudio().then(() => setTimeout(() => speakChunks(chunks, 0, thisGen), 120));
-}
-
-function stopSpeak() {
-  _speakGen++;          // invalidate any callbacks still in flight
-  _speaking = false;
-  window.speechSynthesis.cancel();
-  const btn = document.getElementById('speak-btn');
-  btn.textContent = '▶ SPEAK DIGEST';
-  btn.classList.remove('speaking');
-  document.getElementById('speak-status').textContent = '';
-}
-
-function toggleSpeak() {
-  _speaking ? stopSpeak() : startSpeak();
-}
-
-// ── Render genome symbols ─────────────────────────────────────────────────────
-
-function renderSymbols(data) {
-  const el = document.getElementById('symbols');
-  if (!data) { el.innerHTML = '<div class="loading">Unavailable.</div>'; return; }
-
-  const meta = data._meta || {};
-  const latestGen = meta.generation || 0;
-
-  const entries = Object.entries(data)
-    .filter(([k]) => k !== '_meta')
-    .sort((a, b) => (b[1].recurrence || 0) - (a[1].recurrence || 0));
-
-  if (!entries.length) { el.innerHTML = '<div class="loading">No symbols yet.</div>'; return; }
-
-  const html = entries.map(([key, sym]) => {
-    const rec = sym.recurrence || 0;
-    const pct = Math.round(rec * 100);
-    const isNew = sym.mining_generation && sym.mining_generation >= latestGen - 1;
-
-    const confirmedHtml = (sym.confirmed_by || []).map(c => {
-      const label = c.includes(':') ? c.split(':')[1].replace(/_/g, ' ').slice(0, 30) : c.replace(/_/g, ' ');
-      return `<span class="symbol-confirmed-tag">${label}</span>`;
-    }).join('');
-
-    const driftHtml = (sym.known_drift || []).length
-      ? `<div class="symbol-drift">
-           <div class="symbol-drift-label">known drift</div>
-           ${(sym.known_drift || []).map(d => `<div>· ${d}</div>`).join('')}
-         </div>`
-      : '';
-
-    return `<div class="symbol">
-  <div class="symbol-header">
-    <span class="symbol-name">${key.replace(/_/g, '_')}</span>
-    ${isNew ? '<span class="symbol-badge new-badge">new</span>' : ''}
-    <span class="symbol-recurrence">
-      <span class="symbol-bar-track"><span class="symbol-bar-fill" style="width:${pct}%"></span></span>
-      ${rec.toFixed(2)}
-      ${sym.mining_recurrence_count ? `· ${sym.mining_recurrence_count}× nodes` : ''}
-    </span>
-  </div>
-  <div class="symbol-canonical">${sym.canonical || ''}</div>
-  ${sym.genome_role ? `<div class="symbol-role">${sym.genome_role}</div>` : ''}
-  ${confirmedHtml ? `<div class="symbol-confirmed">${confirmedHtml}</div>` : ''}
-  ${driftHtml}
-</div>`;
-  }).join('');
-
-  const countLine = `<div style="color:var(--muted);font-size:0.72rem;margin-bottom:1rem">${entries.length} symbols · gen ${latestGen} · sorted by recurrence</div>`;
-  el.innerHTML = countLine + html;
-}
-
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  const [state, obligations, cycles, symbols, projects] = await Promise.all([
+  const [state, obligations, cycles] = await Promise.all([
     load('state.json'),
     load('obligations.json'),
     load('cycles.json'),
-    load('symbols.json'),
-    load('projects.json'),
   ]);
-  _loadedState    = state;
-  _loadedObligs   = obligations;
-  _loadedProjects = projects || [];
-  _loadedSymbols  = symbols;
   renderState(state);
   renderObligations(obligations);
   renderCycles(cycles);
-  renderSymbols(symbols);
-  // Count badges on right-column section summaries
-  _setBadge('cycles',   (cycles||[]).length);
-  _setBadge('symbols',  Object.keys(symbols||{}).length);
-  _setBadge('projects', _loadedProjects.length);
 }
 
 init();
