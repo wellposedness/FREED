@@ -1369,13 +1369,13 @@ def _render_html(projects: list = None) -> str:
       <span class="karrow">→</span>
       <span class="kstep" data-phases="represent">REPRESENT</span>
       <span class="karrow">→</span>
-      <span class="kstep" data-phases="compress">COMPRESS</span>
-      <span class="karrow">→</span>
       <span class="kstep" data-phases="predict">PREDICT</span>
       <span class="karrow">→</span>
       <span class="kstep" data-phases="compare">COMPARE</span>
       <span class="karrow">→</span>
       <span class="kstep" data-phases="adjust">ADJUST</span>
+      <span class="karrow">→</span>
+      <span class="kstep" data-phases="compress">COMPRESS</span>
       <span class="karrow">→</span>
       <span class="kstep" data-phases="repeat">REPEAT</span>
     </div>
