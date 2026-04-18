@@ -251,8 +251,8 @@
     font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
     letter-spacing: 0.05em; line-height: 1;
   }
-  .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
-  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.92rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 0.88rem; margin-bottom: 0.5rem; }
+  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.82rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
   .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
   /* Obligation sub-groups (Open / Partial) */
   details.ob-group { margin-bottom: 0.7rem; }
@@ -660,6 +660,16 @@ function _priorityCarats(p) {
   return carats ? `<span class="ob-priority" title="${p} priority">Priority ${carats}</span>` : '';
 }
 
+function _linkify(text) {
+  return (text||'').replace(
+    /\b(https?:\/\/\S+|(?:www\.|osf\.io|github\.com|arxiv\.org)\S*)/g,
+    url => {
+      const href = url.startsWith('http') ? url : 'https://' + url;
+      return `<a href="${href}" target="_blank" rel="noopener" style="color:var(--accent)">click this hyperlink</a>`;
+    }
+  );
+}
+
 function renderObligation(o) {
   const borderColor = STATUS_COLOR[o.status] || 'var(--border)';
   return `<div class="obligation" style="border-left: 3px solid ${borderColor}">
@@ -667,8 +677,8 @@ function renderObligation(o) {
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
     </div>
-    <div class="ob-statement">${o.statement||''}</div>
-    ${o.progress ? `<div class="ob-progress">${o.progress}</div>` : ''}
+    <div class="ob-statement">${_linkify(o.statement)}</div>
+    ${o.progress ? `<div class="ob-progress">${_linkify(o.progress)}</div>` : ''}
     <div class="ob-date">Created ${o.created||'—'}${o.resolved ? ' · Resolved '+o.resolved : ''}</div>
   </div>`;
 }
