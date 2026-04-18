@@ -709,7 +709,7 @@ def _render_html(projects: list = None) -> str:
   .law {
     padding: 0.6rem 0.85rem;
     background: var(--surface);
-    border-left: 3px solid var(--accent);
+    border: 1px solid var(--accent);
     font-family: var(--serif);
     font-weight: 300;
     font-size: 0.95rem;
