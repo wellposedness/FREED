@@ -981,7 +981,7 @@ def _render_html(projects: list = None) -> str:
   /* Speak bar */
   .speak-bar {
     display: flex; flex-direction: column; gap: 0.45rem;
-    padding: 0.5rem 0; border-top: 1px solid var(--border); margin-top: auto;
+    padding: 0.5rem 0.6rem; border: 1px solid #000; margin-top: auto;
   }
   /* Character voice buttons */
   .char-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
