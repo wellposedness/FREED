@@ -1562,7 +1562,7 @@ function renderObligations(obs) {
   const resolved = obs.filter(o => o.status === 'resolved');
 
   document.getElementById('obligations-open').innerHTML =
-    _collapseSection('Open', open, true) + _collapseSection('Partial', partial, true);
+    _collapseSection('Open', open, false) + _collapseSection('Partial', partial, false);
 
   document.getElementById('obligations-resolved').innerHTML =
     resolved.length ? resolved.map(renderObligation).join('') : '<div style="color:var(--muted)">None resolved yet.</div>';
