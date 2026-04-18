@@ -65,24 +65,6 @@
     color: var(--muted);
   }
   .hud-top-divider { color: var(--border); }
-  .daemon-status {
-    margin-left: auto; display: flex; align-items: center; gap: 0.5rem;
-    font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
-  }
-  .daemon-phase {
-    font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0.15rem 0.4rem; border: 1px solid currentColor;
-  }
-  .daemon-phase.idle       { color: var(--green); }
-  .daemon-phase.sweep      { color: var(--blue); }
-  .daemon-phase.feed       { color: var(--accent); }
-  .daemon-phase.consolidate{ color: var(--amber); }
-  .daemon-phase.obligate   { color: var(--amber); }
-  .daemon-phase.resolve    { color: var(--accent); }
-  .daemon-phase.update     { color: var(--muted); }
-  .daemon-phase.publish    { color: var(--green); }
-  .daemon-phase.pre-audit  { color: var(--muted); }
-  .daemon-detail { color: var(--muted); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hud-grid {
     display: grid;
     grid-template-columns: 30fr 40fr 30fr;
@@ -493,10 +475,6 @@
     <span class="pulse" id="pulse"></span>
     <span class="hud-title">RSA</span>
     <span class="hud-sub">a bootstrap protocol for epistemic recursion</span>
-    <div class="daemon-status">
-      <span class="daemon-phase idle" id="daemon-phase">IDLE</span>
-      <span class="daemon-detail" id="daemon-detail">—</span>
-    </div>
   </div>
 
   <!-- Main 3-panel grid -->
@@ -1175,25 +1153,6 @@ init();
 
 // Refresh every 5 minutes
 setInterval(init, 5 * 60 * 1000);
-
-// ── Daemon status polling (every 30s) ─────────────────────────────────────────
-async function pollStatus() {
-  try {
-    const s = await load('status.json');
-    if (!s) return;
-    const phaseEl  = document.getElementById('daemon-phase');
-    const detailEl = document.getElementById('daemon-detail');
-    const phase    = (s.phase || 'IDLE').toLowerCase().replace(/[^a-z-]/g, '');
-    phaseEl.textContent  = (s.phase || 'IDLE').toUpperCase();
-    phaseEl.className    = `daemon-phase ${phase}`;
-    detailEl.textContent = s.detail || '—';
-    // Pulse: active (red) when working, steady green when idle
-    const pulse = document.getElementById('pulse');
-    if (pulse) pulse.style.borderColor = phase === 'idle' ? 'var(--green)' : 'var(--accent)';
-  } catch(e) {}
-}
-pollStatus();
-setInterval(pollStatus, 30 * 1000);
 </script>
 </body>
 </html>

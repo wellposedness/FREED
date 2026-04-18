@@ -3,85 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RSA-Omega — Game of Truth</title>
+<title>Freed's Law Simulation — FREED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:     #080808;
-    --surface:#0d0606;
-    --border: #2d0e0e;
-    --accent: #cc2222;
-    --green:  #22c55e;
-    --text:   #f2f2f2;
-    --muted:  #7a5f5f;
-    --mono:   'JetBrains Mono','Fira Code','Courier New',monospace;
+    --bg:      #ffffff;
+    --surface: #f7f7f5;
+    --border:  #e0ddd8;
+    --accent:  #b91c1c;
+    --green:   #16a34a;
+    --amber:   #b45309;
+    --text:    #111111;
+    --muted:   #374151;
+    --mono:    'JetBrains Mono','Fira Code','Courier New',monospace;
+    --serif:   'Cormorant Garamond','Palatino Linotype',Georgia,serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--text);
-    font-family: var(--mono); font-size: 13px; line-height: 1.6;
-    padding: 1.5rem 1rem;
+    font-family: var(--serif); font-size: 15px; line-height: 1.7;
+    padding: 1.5rem 1.5rem;
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .container { max-width: 900px; margin: 0 auto; }
+  .container { max-width: 960px; margin: 0 auto; }
 
-  .header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
-  .header h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 0.08em; }
-  .header .nav { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
-  .header .sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.3rem; }
+  /* Header */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 0.9rem; margin-bottom: 1.4rem; }
+  .header .nav { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.06em; }
+  .header h1 { font-family: var(--serif); font-weight: 300; font-size: 1.9rem; color: var(--accent); letter-spacing: 0.02em; }
+  .header .sub { font-family: var(--serif); font-weight: 300; font-style: italic; color: var(--muted); font-size: 1rem; margin-top: 0.2rem; }
 
+  /* Canvas display */
   .sim-wrap {
-    position: relative;
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    margin-bottom: 1rem;
-    line-height: 0;
+    width: 100%; background: #080808;
+    border: 1px solid var(--border); margin-bottom: 0.9rem; line-height: 0;
   }
   canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 
+  /* Controls */
   .controls {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    align-items: center; margin-bottom: 0.75rem;
+    display: flex; flex-wrap: wrap; gap: 0.45rem;
+    align-items: center; margin-bottom: 0.9rem;
   }
   .btn {
-    padding: 0.4rem 0.8rem;
-    background: transparent; border: 1px solid var(--accent);
-    color: var(--accent); font-family: var(--mono); font-size: 0.75rem;
-    letter-spacing: 0.06em; cursor: pointer; transition: background 0.12s, color 0.12s;
+    padding: 0.35rem 0.85rem; background: transparent;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.07em;
+    cursor: pointer; transition: background 0.12s, color 0.12s;
   }
   .btn:hover, .btn.active { background: var(--accent); color: var(--bg); }
-  .btn.green-btn { border-color: var(--green); color: var(--green); }
-  .btn.green-btn:hover, .btn.green-btn.active { background: var(--green); color: var(--bg); }
-
-  .speed-wrap { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted); }
+  .speed-wrap { display: flex; align-items: center; gap: 0.45rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
   input[type=range] { accent-color: var(--accent); width: 80px; }
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1px; background: var(--border); border: 1px solid var(--border);
-    margin-bottom: 1.5rem;
+  /* Stats — flush rows matching home page state panel */
+  .stats { margin-bottom: 1.4rem; }
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.28rem 0; border-bottom: 1px solid var(--border);
   }
-  .stat-cell { background: var(--surface); padding: 0.5rem 0.75rem; }
-  .stat-cell .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-  .stat-cell .value { font-size: 0.95rem; color: var(--text); margin-top: 0.1rem; }
-  .stat-cell .value.accent { color: var(--accent); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { font-family: var(--mono); color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-row .value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
+  .stat-row .value.accent { color: var(--accent); font-weight: 600; }
+  .stat-row .value.green  { color: var(--green);  font-weight: 600; }
 
-  .section { margin-bottom: 1.5rem; }
+  /* Sections */
+  .section { margin-bottom: 1.6rem; }
   .section-title {
-    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--muted); border-bottom: 1px solid var(--border);
-    padding-bottom: 0.3rem; margin-bottom: 0.8rem;
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text);
+    border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.8rem;
   }
-  .theory p { font-size: 0.82rem; margin-bottom: 0.6rem; }
+  .theory p { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.7rem; color: var(--text); }
+  .theory em { font-style: italic; }
   .theory .law {
+    font-family: var(--mono); font-size: 0.88rem;
     background: var(--surface); border-left: 3px solid var(--accent);
-    padding: 0.6rem 0.9rem; margin: 0.8rem 0; font-size: 0.85rem;
+    padding: 0.7rem 1rem; margin: 0.9rem 0; line-height: 1.6;
   }
-  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
-  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
-  .legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+  .theory .law .sub-law { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
+  .legend { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+  .legend-swatch { width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -89,7 +95,7 @@
 
   <div class="header">
     <div class="nav"><a href="index.html">← FREED</a></div>
-    <h1>RSA-Omega — The Game of Truth</h1>
+    <h1>Freed's Law — The Game of Truth</h1>
     <div class="sub">Each cell is an agent. The universe has a hidden physics. Survival requires modeling it.</div>
   </div>
 
@@ -107,53 +113,49 @@
   </div>
 
   <div class="stats">
-    <div class="stat-cell"><div class="label">Generation</div><div class="value accent" id="stat-gen">0</div></div>
-    <div class="stat-cell"><div class="label">Alive Cells</div><div class="value" id="stat-alive">—</div></div>
-    <div class="stat-cell"><div class="label">Avg Energy</div><div class="value" id="stat-energy">—</div></div>
-    <div class="stat-cell"><div class="label">Avg Error <span style="font-size:0.6rem;color:var(--muted)">(break-even: 0.50)</span></div><div class="value" id="stat-error">—</div></div>
-    <div class="stat-cell"><div class="label">Reproductions</div><div class="value" id="stat-repro">0</div></div>
-    <div class="stat-cell"><div class="label">Deaths</div><div class="value" id="stat-deaths">0</div></div>
+    <div class="stat-row"><span class="label">Generation</span><span class="value accent" id="stat-gen">0</span></div>
+    <div class="stat-row"><span class="label">Alive Cells</span><span class="value" id="stat-alive">—</span></div>
+    <div class="stat-row"><span class="label">Avg Energy</span><span class="value" id="stat-energy">—</span></div>
+    <div class="stat-row"><span class="label">Avg Error <span style="font-size:0.6rem;opacity:0.7">(break-even 0.50)</span></span><span class="value" id="stat-error">—</span></div>
+    <div class="stat-row"><span class="label">Reproductions</span><span class="value" id="stat-repro">0</span></div>
+    <div class="stat-row"><span class="label">Deaths</span><span class="value" id="stat-deaths">0</span></div>
   </div>
 
   <div class="section">
     <div class="section-title">Color Legend</div>
     <div class="legend">
-      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #2d0e0e"></div>Dead / zero energy</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling (low energy)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead / zero energy</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#882020"></div>Surviving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#cc2222"></div>Thriving (high energy)</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#ff8888"></div>Reproducing (peak energy)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#b91c1c"></div>Thriving</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fca5a5"></div>Reproducing</div>
     </div>
   </div>
 
   <div class="section theory">
     <div class="section-title">What This Is</div>
     <p>
-      RSA-Omega is a cellular automaton where each cell carries a private 3×3 weight matrix —
-      a local generative model of the universe. The universe obeys a fixed, hidden physics kernel
-      that the cells do not know. At each step, every cell predicts its own next state using its weights.
+      A cellular automaton where each cell carries a private 3×3 weight matrix —
+      a local generative model of the universe. The universe obeys a fixed hidden physics kernel
+      the cells do not know. At each step, every cell predicts its own next state using its weights.
       The prediction error is subtracted from its metabolic energy. Accurate cells gain net energy.
       Inaccurate cells die.
     </p>
     <div class="law">
-      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt > 0<br>
-      <span style="color:var(--muted);font-size:0.8rem">
-        Cells whose survival is coupled to prediction error evolve toward models
-        that approximate true dynamics. Reasoning = survival.
-      </span>
+      ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
+      <div class="sub-law">Cells whose survival is coupled to prediction error evolve toward models that approximate true dynamics. Reasoning = survival.</div>
     </div>
     <p>
       High-energy cells reproduce — copying their weights into weaker neighbors with random mutation.
       Over generations, the population evolves. Cells that build better internal models of the hidden
-      physics survive. Cells that don't, die. This is Freed's Law instantiated as a selection pressure:
+      physics survive. Cells that don't, die. This is Freed's Law as selection pressure:
       <em>to think accurately is to live</em>.
     </p>
-    <p style="color:var(--muted)">
-      The hidden physics kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] —
-      a Mexican-hat convolution. Cells do not know this. They infer it through survival.<br>
-      Energy per step = 3.0 − 1.0 − (error × 4.0). Break-even error: 0.50. Random weights
-      produce ~0.50 error (neutral). Good predictors grow. Bad predictors die slowly.
-      Watch avg error — when it drops below 0.50 and turns green, the population has learned.
+    <p style="color:var(--muted);font-family:var(--mono);font-size:0.78rem;line-height:1.6">
+      Hidden kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] — Mexican-hat convolution.
+      Cells do not know this. They infer it through survival.
+      Energy/step = 3.0 − 1.0 − (error × 4.0). Break-even: 0.50.
+      Watch avg error — when it drops below 0.50, the population has learned.
     </p>
   </div>
 
