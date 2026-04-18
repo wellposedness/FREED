@@ -179,9 +179,12 @@
   }
   /* Collapsible sections */
   details.section { margin-bottom: 2.5rem; }
-  details.section > summary {
+  /* Unified summary style — shared by right-column sections and center ob-groups */
+  details.section > summary,
+  details.ob-group > summary.ob-group-title {
     font-family: var(--mono);
     font-size: 0.68rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--muted);
@@ -191,19 +194,25 @@
     cursor: pointer;
     list-style: none;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
     user-select: none;
   }
-  details.section > summary::-webkit-details-marker { display: none; }
-  details.section > summary::after {
+  details.section > summary::-webkit-details-marker,
+  details.ob-group > summary.ob-group-title::-webkit-details-marker { display: none; }
+  /* Triangle on the left */
+  details.section > summary::before,
+  details.ob-group > summary.ob-group-title::before {
     content: '▶';
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     opacity: 0.5;
     transition: transform 0.15s;
+    flex-shrink: 0;
   }
-  details.section[open] > summary::after { transform: rotate(90deg); }
-  details.section > summary:hover { color: var(--text); }
+  details.section[open] > summary::before,
+  details.ob-group[open] > summary.ob-group-title::before { transform: rotate(90deg); opacity: 1; }
+  details.section > summary:hover,
+  details.ob-group > summary.ob-group-title:hover { color: var(--text); }
 
   /* Obligation cards */
   .obligation {
@@ -241,24 +250,12 @@
   .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
   /* Obligation sub-groups (Open / Partial) */
   details.ob-group { margin-bottom: 0.7rem; }
-  details.ob-group > summary.ob-group-title {
-    font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
-    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.3rem 0; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem;
-    user-select: none;
-  }
-  details.ob-group > summary.ob-group-title::-webkit-details-marker { display: none; }
-  details.ob-group > summary.ob-group-title::before {
-    content: '▶'; font-size: 0.55rem; transition: transform 0.15s; color: var(--muted);
-  }
-  details.ob-group[open] > summary.ob-group-title::before { transform: rotate(90deg); }
   .ob-group-count {
-    font-family: var(--mono); font-size: 0.65rem;
+    font-family: var(--mono); font-size: 0.62rem;
     color: var(--bg); background: var(--muted);
-    padding: 0 0.35rem; border-radius: 2px;
+    padding: 0.05rem 0.38rem; border-radius: 2px; margin-left: auto;
   }
-  details.ob-group[open] > summary.ob-group-title { color: var(--text); }
+  details.ob-group[open] .ob-group-count { background: var(--text); }
 
   /* Cycle log */
   .cycle-entry {
@@ -681,6 +678,22 @@ function _collapseSection(label, cards, openByDefault) {
   </details>`;
 }
 
+function _setBadge(detailsId, count) {
+  // Inject or update a count badge in the nearest parent details > summary
+  const el = document.getElementById(detailsId);
+  if (!el) return;
+  const summary = el.closest('details')?.querySelector('summary');
+  if (!summary) return;
+  let badge = summary.querySelector('.ob-group-count');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'ob-group-count';
+    badge.style.marginLeft = 'auto';
+    summary.appendChild(badge);
+  }
+  badge.textContent = count;
+}
+
 function renderObligations(obs) {
   if (!obs || !obs.length) { return '<div class="loading">None.</div>'; }
   const open     = obs.filter(o => o.status === 'open');
@@ -692,6 +705,8 @@ function renderObligations(obs) {
 
   document.getElementById('obligations-resolved').innerHTML =
     resolved.length ? resolved.map(renderObligation).join('') : '<div style="color:var(--muted)">None resolved yet.</div>';
+
+  _setBadge('obligations-resolved', resolved.length);
 }
 
 // ── Render cycles ─────────────────────────────────────────────────────────────
@@ -1093,6 +1108,10 @@ async function init() {
   renderObligations(obligations);
   renderCycles(cycles);
   renderSymbols(symbols);
+  // Count badges on right-column section summaries
+  _setBadge('cycles',   (cycles||[]).length);
+  _setBadge('symbols',  Object.keys(symbols||{}).length);
+  _setBadge('projects', _loadedProjects.length);
 }
 
 init();
