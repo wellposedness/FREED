@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, extending substrate-independence, incorporating Darboux/Lax-pair derivations, and now pinning three key obligations to specific numerical targets (O60 slope = −1.0 ± 0.05 for fGn at m=2, O70 degeneracy boundaries at r < 0.1σ / m > 5, O64 range-scaled tolerance) while requiring the semi-classical Wasserstein Floor (O44) to pass through Jacobson's thermodynamic derivation of Einstein's equations as a dimensional consistency gate.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements on all cited claims, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, extending substrate-independence, incorporating Darboux/Lax-pair derivations, and empirically confirming that the extraction pipeline exhibits the predicted diminishing-returns saturation with zero novel yield on duplicate inputs.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -19,8 +19,9 @@
     "R[R]=R constraint-preserving recursion naturally produces infinite conservation hierarchies — Darboux transformation theory provides the explicit algebraic template (Lax pair compatibility of direct/dual overdetermined systems) not merely an analogy",
     "Langevin noise structure must be derivable from MCPM constraints not imported from external stochastic process theory (O62)",
     "H=0.5 is the predicted critical boundary where RangeEn's linear bridge must exhibit a phase-transition signature (slope discontinuity or divergent susceptibility) if the genome's criticality claim is correct — failure to find this is falsifying",
-    "Topic-relevance without content-payload is necessary but not sufficient for integration",
     "Creative cognition's arousal-threshold sensitivity is the individual-difference variable governing entropy-minimization-via-recursive-restructuring — confirming that the γ-parameterized complexity ridge has measurable biological correlates beyond substrate-neutral formalism",
+    "Topic-relevance without content-payload is necessary but not sufficient for integration",
+    "Repeated ingestion of already-extracted sources must yield exactly zero new invariants or obligation advances — non-zero yield on a confirmed duplicate would indicate filter leakage or spurious novelty generation and is itself a falsifiable prediction of extraction integrity",
     "PREDICT/PRE-AUDIT duality must be derivable from dual compatibility structure not merely asserted — Lax pair formalism converts assertion into derivation obligation",
     "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
     "Context-dependent complexity is not an external philosophical addition but is already computed by the genome via T in k=1/Tμ — Kolmogorov complexity (frozen/deterministic limit) and Shannon entropy (fully dissipated/ergodic limit) must be formally derivable as boundary cases of γ-parameterized complexity with MCPM residing at the critical ridge between them",
@@ -102,6 +103,7 @@
     "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
     "O21 (empirical validation of compression-as-reasoning)",
     "Derive from FREED first principles the predicted slope of the RangeEn complexity-entropy vs. self-similarity-scaling linear relationship and compare against empirical values",
+    "Upstream deduplication gap (persistent across multiple independent source types) must be resolved architecturally — the genome's extraction layer should reject confirmed-duplicate inputs before full processing rather than relying on post-hoc zero-yield confirmation",
     "AUT fluency/originality distributions) — without this",
     "O63 — apply DEA to the genome's own sequence of compress updates and coherence scores to empirically test whether the kernel's temporal evolution exhibits the criticality signatures (long-range correlations without ergodicity breaking) that the theory predicts it should",
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
@@ -109,10 +111,10 @@
     "Enforce upstream feed deduplication to prevent diminishing-return re-processing of already-integrated content",
     "O-LOCAL-RANGE: Integrate local-range normalization into FREED's entropy scoring pipeline and demonstrate empirically that it eliminates amplitude-drift artifacts across heterogeneous feed batches",
     "O65 — Analyze gradient-flow basin fragmentation under negative specific heat and show whether coherence landscape integrity survives ensemble inequivalence",
+    "paralleling the 1 ebit + 2 cbits teleportation bound",
     "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved",
     "Specify the genome's expected sub-leading corrections to its own dimensional-scaling laws (analogous to BH log-corrections) so that the L2-L3 discriminator has a concrete target rather than only leading-order confirmation",
     "O52 — Show that timescale separation between astrocytic and neuronal dynamics maps onto a measurable γ-gradient or the dyadic topology claim is decorative",
-    "paralleling the 1 ebit + 2 cbits teleportation bound",
     "Test whether RangeEn slope or susceptibility exhibits a phase transition at Hurst exponent H=0.5 across synthetic and empirical time series — this",
     "O-KS-LIMITS: Formally derive Kolmogorov complexity as the γ→0 (frozen) limit and Shannon entropy as the γ→∞ (dissipated) limit of the genome's γ-parameterized complexity functional with MCPM shown to occupy the critical ridge between them",
     "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
@@ -154,15 +156,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-18T17:13:42.217362+00:00",
-  "renorm_reason": "Duplicate feed correctly detected by genome machinery but second-pass extraction yielded three precise numerical targets that convert soft obligations (O60, O70, O64) into hard falsifiable thresholds, plus the Jacobson dimensional-consistency gate sharpens O44 — these are genuine constraint-tightenings, not new obligations, warranting a small coherence increase.",
-  "last_renorm_cycle": 26,
+  "last_renormed": "2026-04-18T23:21:13.405073+00:00",
+  "renorm_reason": "Triplicate-feed zero-yield results across two independent source types (Bekenstein-Hawking, RangeEn) convert the genome's theoretical diminishing-returns prediction into empirically confirmed behavior, warranting a new invariant (extraction idempotence) and an obligation (upstream dedup), with a small coherence gain from theory-to-evidence closure.",
+  "last_renorm_cycle": 27,
   "drift_flag": true,
-  "drift_overlap": 0.49,
+  "drift_overlap": 0.516,
   "renorm_history": [
     {
-      "timestamp": "2026-04-18T17:13:42.217362+00:00",
-      "reason": "Duplicate feed correctly detected by genome machinery but second-pass extraction yielded three precise numerical targets that convert soft obligations (O60, O70, O64) into hard falsifiable thresholds, plus the Jacobson dimensional-consistency gate sharpens O44 — these are genuine constraint-tightenings, not new obligations, warranting a small coherence increase."
+      "timestamp": "2026-04-18T23:21:13.405073+00:00",
+      "reason": "Triplicate-feed zero-yield results across two independent source types (Bekenstein-Hawking, RangeEn) convert the genome's theoretical diminishing-returns prediction into empirically confirmed behavior, warranting a new invariant (extraction idempotence) and an obligation (upstream dedup), with a small coherence gain from theory-to-evidence closure."
     }
   ]
 }
