@@ -672,7 +672,7 @@ def _render_html(projects: list = None) -> str:
   .hud-panel {
     overflow-y: auto;
     padding: 0.9rem 1.1rem;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid #000;
     min-height: 0;
     display: flex;
     flex-direction: column;
