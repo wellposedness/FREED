@@ -105,7 +105,7 @@
 
   /* Zipf histogram */
   .hist-wrap { flex-shrink: 0; }
-  #hist-canvas { display: block; width: 100%; height: 52px; background: var(--surface); border: 1px solid var(--border); }
+  #hist-canvas { display: block; width: 100%; height: 72px; background: var(--surface); border: 1px solid var(--border); }
 
   .legend { display: flex; flex-wrap: wrap; gap: 0.45rem 0.9rem; flex-shrink: 0; }
   .legend-item { display: flex; align-items: center; gap: 0.35rem; font-family: var(--mono); font-size: 0.61rem; color: var(--muted); }
@@ -269,20 +269,34 @@
         <div class="kv-row"><span class="label">Zoom per step</span><span class="value">0.5%</span></div>
       </div>
 
+      <div class="section-divider">Variable Population</div>
+      <div class="panel-body">
+        <p>
+          Dead cells stay dead. Population can now genuinely contract during
+          hard phases and expand when strategies succeed. The sparkline tracks
+          alive count over the last 120 steps. Watch whether Builders expand
+          during high-complexity Mandelbrot epochs and contract during low-complexity ones.
+        </p>
+        <p>
+          Spontaneous generation: ~1 random cell per 50 steps reanimates with
+          a random type and fresh weights. This represents thermodynamic fluctuations —
+          enough to prevent extinction, not enough to dominate dynamics.
+        </p>
+      </div>
+
       <div class="section-divider">Zipf Prediction</div>
       <div class="panel-body">
         <p>
+          With unconstrained population, true power-law competition is now possible.
           At γ=1 criticality, strategy frequencies should follow a power law:
-          the dominant type at ~2× the second, second at ~1.5× the third.
-          Watch the histogram. Equal proportions mean frozen (γ&gt;1). Complete
-          dominance means dissipative (γ&lt;1). A Zipf ratio between the two
-          is the signature of critical self-organization.
+          dominant type at ~2× the second, second at ~1.5× the third.
+          Equal proportions = frozen (γ&gt;1). Complete dominance = dissipative (γ&lt;1).
+          The ZIPF indicator shows whether the current distribution hits the critical ratio.
         </p>
         <p>
-          Builders should dominate at the Mandelbrot boundary where physics is
-          complex. Drifters dominate in trivial interior/exterior regions. Navigators
-          occupy the middle ground. This is a falsifiable prediction of the RSA
-          cognitive typology running live.
+          The Dyadic Soliton prediction: Builders should never go fully extinct
+          even when Navigators dominate — the minimum viable Builder population
+          is load-bearing for the ecosystem.
         </p>
       </div>
 
@@ -357,6 +371,11 @@ let zoomAliveStart = 0, zoomSurvivalRate = 100;
 let generation = 0, totalRepro = 0, totalDeaths = 0;
 let running = false, animId = null;
 let lastError = 0, learningMode = false, avgValence = 6;
+
+// Variable population tracking
+const POP_HISTORY_LEN = 120;
+let popHistory = [];   // rolling alive count
+let peakPop = 0, minPop = N_CELLS;
 
 const canvas  = document.getElementById('canvas');
 const ctx     = canvas.getContext('2d');
@@ -467,7 +486,7 @@ function initCanvas() {
 
   // size histogram canvas to match
   hCanvas.width  = hCanvas.parentElement.clientWidth;
-  hCanvas.height = 52;
+  hCanvas.height = 72;
 
   document.getElementById('init-overlay').style.display = 'none';
 }
@@ -488,6 +507,7 @@ function initSim() {
   viewRMin = CT_R-1.75; viewRMax = CT_R+1.75;
   viewIMin = CT_I-1.25; viewIMax = CT_I+1.25;
   zoomStep = 0; zoomLevel = 0; zoomSurvivalRate = 100; zoomAliveStart = N_CELLS;
+  popHistory = []; peakPop = N_CELLS; minPop = N_CELLS;
 
   const dR = viewRMax-viewRMin, dI = viewIMax-viewIMin;
   for (let i = 0; i < N_CELLS; i++) {
@@ -563,15 +583,27 @@ function step() {
   // Apply next states
   for (let i = 0; i < N_CELLS; i++) cellState[i] = nextState[i];
 
-  // Kill dead cells — reset weights + random type
+  // Kill dead cells — mark as empty slot, do NOT reinitialize (variable population)
+  // energy < 0: newly died this step. energy === 0: already dead, leave alone.
   for (let i = 0; i < N_CELLS; i++) {
-    if (energy[i] <= 0) {
+    if (energy[i] < 0) {
       energy[i] = 0;
+      totalDeaths++;
+    }
+  }
+
+  // Spontaneous generation: ~1 random dead slot reanimated per 50 steps.
+  // Represents thermodynamic fluctuations; prevents extinction.
+  if (Math.random() < 0.02) {
+    const dead = [];
+    for (let i = 0; i < N_CELLS; i++) if (energy[i] === 0) dead.push(i);
+    if (dead.length > 0) {
+      const i = dead[Math.floor(Math.random()*dead.length)];
+      energy[i]   = INIT_E * 0.4;
       cellType[i] = Math.floor(Math.random()*3);
       const nc = nbrCount[i];
       for (let k = 0; k < nc; k++)
         weights[i*MAX_NBRS+k] = (Math.random()-0.5)*0.5;
-      totalDeaths++;
     }
   }
 
@@ -698,63 +730,116 @@ function draw() {
   ctx.putImageData(imgData, 0, 0);
 }
 
-// ── Zipf histogram ────────────────────────────────────────────────────────────
-function drawHistogram() {
+// ── Histogram + sparkline ─────────────────────────────────────────────────────
+// Top half: type bars (raw counts). Bottom half: population sparkline.
+function drawHistogram(alive, counts) {
   const W = hCanvas.width, H = hCanvas.height;
   hCtx.clearRect(0, 0, W, H);
   hCtx.fillStyle = '#f7f7f5';
   hCtx.fillRect(0, 0, W, H);
 
-  const counts = [0, 0, 0];
-  for (let i = 0; i < N_CELLS; i++)
-    if (energy[i] > 0) counts[cellType[i]]++;
+  const MID = Math.floor(H * 0.55);
 
-  const total = counts.reduce((a,b)=>a+b,0) || 1;
-  const colors  = ['#06b6d4', '#16a34a', '#ea580c'];
-  const labels  = ['BUILDER', 'NAVIGATOR', 'DRIFTER'];
-  const barH    = Math.floor((H - 16) / 3);
-  const maxW    = W - 80;
+  // ── Type bars (top section) ──
+  const colors = ['#06b6d4', '#16a34a', '#ea580c'];
+  const labels = ['B', 'N', 'D'];
+  const barH   = Math.floor((MID - 4) / 3);
+  const maxW   = W - 40;
 
   for (let t = 0; t < 3; t++) {
     const y  = t*(barH+2) + 2;
-    const bw = Math.round((counts[t]/total)*maxW);
+    const bw = Math.round((counts[t]/N_CELLS)*maxW);
     hCtx.fillStyle = colors[t];
     hCtx.fillRect(0, y, bw, barH);
     hCtx.fillStyle = '#374151';
     hCtx.font = '9px monospace';
-    hCtx.fillText(`${labels[t]} ${counts[t]}`, bw+4, y+barH-2);
+    hCtx.fillText(`${labels[t]}${counts[t]}`, Math.max(bw+2, 2), y+barH-1);
   }
 
-  // Zipf indicator: check if sorted counts approximate 1 : 0.5 : 0.33
+  // Zipf ratio
   const sorted = [...counts].sort((a,b)=>b-a);
   const r1 = sorted[0] > 0 ? sorted[1]/sorted[0] : 0;
   const r2 = sorted[1] > 0 ? sorted[2]/sorted[1] : 0;
   const isZipf = r1 > 0.35 && r1 < 0.75 && r2 > 0.50 && r2 < 0.85;
   hCtx.fillStyle = isZipf ? '#16a34a' : '#b91c1c';
-  hCtx.font = '9px monospace';
-  hCtx.fillText(`ZIPF? ${isZipf ? 'YES' : 'NO'} (${r1.toFixed(2)} / ${r2.toFixed(2)})`, 2, H-2);
+  hCtx.font = '8px monospace';
+  hCtx.fillText(`ZIPF ${isZipf?'✓':'✗'} ${r1.toFixed(2)}/${r2.toFixed(2)}`, 2, MID-1);
+
+  // ── Population sparkline (bottom section) ──
+  const spH = H - MID - 2;
+  const n = popHistory.length;
+  if (n < 2) return;
+
+  // Background
+  hCtx.fillStyle = '#ede9e4';
+  hCtx.fillRect(0, MID+1, W, spH);
+
+  // Grid line at 50% of N_CELLS
+  const midY = MID + 1 + Math.round(spH * 0.5);
+  hCtx.strokeStyle = '#c8c4be';
+  hCtx.lineWidth = 0.5;
+  hCtx.beginPath(); hCtx.moveTo(0, midY); hCtx.lineTo(W, midY); hCtx.stroke();
+
+  // Sparkline
+  hCtx.strokeStyle = '#374151';
+  hCtx.lineWidth = 1.2;
+  hCtx.beginPath();
+  for (let k = 0; k < n; k++) {
+    const x = Math.round((k/(n-1))*(W-1));
+    const y = MID+1 + Math.round((1 - popHistory[k]/N_CELLS)*spH);
+    k === 0 ? hCtx.moveTo(x, y) : hCtx.lineTo(x, y);
+  }
+  hCtx.stroke();
+
+  // Current population label
+  hCtx.fillStyle = '#374151';
+  hCtx.font = '8px monospace';
+  hCtx.fillText(`pop ${alive}/${N_CELLS}`, 2, H-1);
+
+  // Peak/min label
+  if (peakPop > 0) {
+    hCtx.fillStyle = '#6b7280';
+    hCtx.fillText(`pk${peakPop} mn${minPop}`, W-52, H-1);
+  }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function updateStats() {
+  const counts = [0, 0, 0];
   let alive = 0, eSum = 0, boundaryCells = 0;
   for (let i = 0; i < N_CELLS; i++) {
-    if (energy[i] > 0) { alive++; eSum += energy[i]; }
+    if (energy[i] > 0) { alive++; eSum += energy[i]; counts[cellType[i]]++; }
     if (cellBand[i] >= 1 && cellBand[i] <= 2) boundaryCells++;
   }
+
+  // Population history
+  popHistory.push(alive);
+  if (popHistory.length > POP_HISTORY_LEN) popHistory.shift();
+  if (alive > peakPop) peakPop = alive;
+  if (alive > 0 && alive < minPop) minPop = alive;
+
+  // Trend from last 10 samples
+  let trend = '→';
+  if (popHistory.length >= 10) {
+    const recent = popHistory.slice(-10);
+    const delta  = recent[recent.length-1] - recent[0];
+    trend = delta > 3 ? '↑' : delta < -3 ? '↓' : '→';
+  }
+
   const breakEven = 0.5;
   const errEl = document.getElementById('stat-error');
   errEl.textContent = lastError.toFixed(3);
   errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
+
   document.getElementById('stat-gen').textContent          = generation;
-  document.getElementById('stat-alive').textContent        = alive;
+  document.getElementById('stat-alive').textContent        = `${alive} ${trend}`;
   document.getElementById('stat-energy').textContent       = alive > 0 ? (eSum/alive).toFixed(1) : '0';
   document.getElementById('stat-boundary').textContent     = boundaryCells;
   document.getElementById('stat-zoom').textContent         = `${zoomLevel} (${Math.pow(2,zoomLevel).toFixed(0)}×)`;
   document.getElementById('stat-survival').textContent     = `${zoomSurvivalRate}%`;
   document.getElementById('stat-repro-deaths').textContent = `${totalRepro} / ${totalDeaths}`;
   document.getElementById('stat-mode').textContent         = learningMode ? 'EVOLVE + LEARN' : 'EVOLVE ONLY';
-  drawHistogram();
+  drawHistogram(alive, counts);
 }
 
 // ── Loop / controls ───────────────────────────────────────────────────────────
