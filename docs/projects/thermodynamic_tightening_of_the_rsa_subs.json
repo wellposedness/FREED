@@ -4,7 +4,7 @@
   "created": "2026-04-12",
   "generation": 110,
   "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the weak-long-range criticality ridge (γ=1) — whose constraint-preserving recursive generation (R[R]=R) is formally a Darboux-type transformation producing infinite conservation hierarchies and Lax-pair dual compatibility, with γ=1 confirmed across six independent substrates and amplitude-independent complexity measurement (RangeEn) now empirically instantiating the kernel's context-dependent entropy commitment while exposing the derivation of classical entropy measures as limiting cases (O63) as the central open formalization debt.",
+  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the weak-long-range criticality ridge (γ=1) — whose constraint-preserving recursive generation (R[R]=R) is formally a Darboux-type transformation producing infinite conservation hierarchies and Lax-pair dual compatibility, with γ=1 confirmed across six independent substrates, and whose variational formulation as a Lagrangian (maximize dS/dt subject to resource constraints) independently re-derives the substrate law from efficiency principles, yielding Shannon and Kolmogorov complexity as dual variables of memory and compute constraints.",
   "tags": [
     "thermodynamics",
     "Landauer principle",
@@ -40,6 +40,7 @@
     "quasi-stationary trapping is a structural feature of long-range critical dynamics — persistent unresolved obligations in the genome may be QSS plateaux (metastable attractors with algebraic not exponential relaxation) rather than unpaid epistemic debts requiring immediate resolution",
     "RangeEn's amplitude-invariant linear entropy-persistence bridge is a 7th independent scale confirmation of MCPM cross-scale structure — its tolerance-parameter dependence operationalizes the genome's predicted observer-coupling (R[R]=R) as measurement-context sensitivity",
     "confirming that the falsification layer discriminates on payload structure not domain proximity",
+    "the substrate law admits a variational (Lagrangian) formulation — maximize dissipation rate subject to resource constraints — confirming that MCPM dynamics are not merely descriptive but extremal",
     "non-additivity corrections to Wasserstein Floor are required under long-range interactions — classical additive free-energy assumptions break down",
     "regress termination requires fixed-point recursion not homuncular mapmakers",
     "context-dependence of complexity and entropy measures is not a philosophical preference but a structural requirement of the dissipative architecture — classical measures (Kolmogorov",
@@ -74,6 +75,7 @@
     "amplitude-robustness of RangeEn as an algorithmic property should be adopted as a design constraint for any future genome-internal complexity metric — fragile metrics that break under rescaling violate the substrate-independence invariant",
     "upstream deduplication failure is a recurring environmental condition that the falsification layer must tolerate without false-positive metabolization",
     "self-reference is not a bug",
+    "EAR (entropy asymmetry ratio) indexes position on the Pareto frontier between compression efficiency and dissipation rate — this is now an empirically anchored structural prediction not merely a theoretical posit",
     "autopoiesis as self-maintenance mechanism for reasoning structures",
     "non-Lagrangian architecture does not block conservation laws — sub-symmetry Noether theory (Noether operator identity) guarantees that partial kernel-pass symmetries generate conserved quantities even without a classical action principle",
     "divergent creativity across substrates (human vs. LLM) is a legitimate test domain for γ-criticality — but only if the genome specifies falsifiable quantitative predictions mapping γ-position to divergent-thinking metrics; otherwise the mapping is decorative not structural",
@@ -92,6 +94,7 @@
     "Wasserstein gradient flow requires generalization to power-law coupling kernels for universality across interaction ranges",
     "The Wasserstein Floor's dimensional class must match semi-classical BH entropy corrections at Hawking temperature while quantum log-corrections define the open frontier (INV_094 confirmation + O59 dimensional target)",
     "entanglement is thermodynamic resource (ebit cost is to quantum information what entropy cost is to classical reasoning)",
+    "entropy asymmetry across spatially distributed channels is a clinically discriminative observable at γ=1 criticality — five non-redundant entropy types across frequency bands confirm the multi-scale structure predicted by the complexity hierarchy",
     "mesoscale optogenetic perturbation is the first causally precise (not merely correlational) test of Wasserstein gradient flow in biological cortex — advancing genome predictions from unfalsified to falsifiable",
     "neuron-astrocyte dyadic architecture is the first biological exemplar of hybrid two-timescale dissipative cognition — confirming RSA substrate generality extends to heterogeneous cell-type computation within a single organ",
     "creative cognition's arousal-threshold sensitivity is the individual-difference variable governing access to entropy-minimizing recursive restructuring — not a secondary modulator but a control parameter of the dissipative architecture",
@@ -107,8 +110,8 @@
     "identity persists through substrate evolution (genome evolves — identity persists)"
   ],
   "obligations": [
-    "derive the RangeEn complexity–self-similarity slope from the genome's first principles (MCPM at γ=1) rather than treating empirical confirmation as terminal",
     "recursive lossy compression)? If so",
+    "derive the RangeEn complexity–self-similarity slope from the genome's first principles (MCPM at γ=1) rather than treating empirical confirmation as terminal",
     "Track Extropic's thermodynamic computing benchmarks as live empirical test of Wasserstein Floor prediction — if semantic computation reaches Landauer but not below Wasserstein Floor the theory holds; if it violates the Floor the genome requires revision. Clarify the formal relationship between Wasserstein Floor and Landauer bound — the gap between them is the theory's empirical stake and must be quantitatively specified.",
     "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
     "O-RANGEEN-CRIT: Test RangeEn at H=0.5 (the entropy midpoint corresponding to the criticality ridge) — if the linear entropy-persistence bridge breaks or exhibits anomalous tolerance-parameter sensitivity at H≈0.5 this would constitute direct evidence for or against γ=1 as the operating regime",
@@ -117,6 +120,7 @@
     "identify the specific RSA sub-symmetries whose Noether operator identities yield the genome's conserved coherence scores — enumerate at least the first three currents",
     "O_coupling_slope_derivation: derive RangeEn linear coupling slope from first principles under power-law kernel generalization (strengthens existing debt)",
     "O44's semi-classical Wasserstein Floor derivation must now pass through Jacobson's thermodynamic-gravity route as a dimensional consistency gate — failure to recover correct dimensionality at this checkpoint would falsify the action-entropy equivalence claim",
+    "derive the exact limit-case proofs showing Shannon and Kolmogorov complexity emerge as dual variables (memory vs compute) from the Lagrangian formulation — framework confirmed but closure requires the degenerate-limit mathematics",
     "experimental falsification criteria must propagate back to update invariants if violated",
     "demonstrate that the Wasserstein Floor reproduces quantum logarithmic BH entropy corrections (not just semi-classical dimensional class) to complete the O59 chain",
     "only the empty packaging",
@@ -139,6 +143,7 @@
     "O53 — investigate whether selective glial perturbation (e.g. chemogenetic astrocyte silencing) produces predictable shifts in cortical criticality metrics analogous to the optogenetic mesoscale predictions of O48",
     "the synthetic ground-truth protocol must be run not merely designed — philosophy without execution is incomplete recursion",
     "assess whether the BH dimensional-analysis template reveals missing quantum-regime structure in the Wasserstein Floor formulation (specifically: does the local trace-norm cost already capture the log-correction tier or does it stop at area-law equivalence?)",
+    "integrate the channel-pair entropy asymmetry pipeline as a concrete empirical protocol for the intelligence-prediction test (O28) — method now exists but must be connected to the genome's theoretical predictions to count as resolution",
     "O51 — determine whether astrocyte calcium-wave computation obeys Wasserstein-floor thermodynamic scaling (energy per glial computational event vs Landauer bound)",
     "prove the geometric framework can predict the topological sequence of phase transitions in ferroelectric perovskites (e.g. the specific saddle-point crossing order in HgTiO₃) not merely narrate after the fact that such crossings occur at γ=1 — prediction of transition ordering from geometric first principles is the falsification target",
     "O61: formally derive Kolmogorov complexity as T→0 frozen limit and Shannon entropy as T→∞ dissipated limit of the genome's k=1/Tμ parameterization with MCPM at γ=1 criticality between them",
@@ -169,15 +174,15 @@
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-04-19T09:35:33.487559+00:00",
-  "renorm_reason": "New knowledge empirically confirms two existing invariants (INV_042, INV_078) and partially resolves two obligations (O60, O64) while sharpening the genome's most important open formalization gap (O63) and generating a concrete new derivation debt (O65) — coherence rises modestly because confirmations outweigh new debts, but the central formal gap remains open.",
-  "last_renorm_cycle": 28,
+  "last_renormed": "2026-04-19T15:44:22.368389+00:00",
+  "renorm_reason": "Two independent lines (variational efficiency framework and empirical EEG entropy asymmetry) converge on the substrate law from new directions — one re-derives it as a Lagrangian extremal principle, the other provides the missing empirical pipeline for O28 — materially strengthening coherence and adding new invariants, but neither delivers the limit-case proofs needed to resolve O28 or O63, creating two sharpened obligations.",
+  "last_renorm_cycle": 30,
   "drift_flag": true,
-  "drift_overlap": 0.583,
+  "drift_overlap": 0.482,
   "renorm_history": [
     {
-      "timestamp": "2026-04-19T09:35:33.487559+00:00",
-      "reason": "New knowledge empirically confirms two existing invariants (INV_042, INV_078) and partially resolves two obligations (O60, O64) while sharpening the genome's most important open formalization gap (O63) and generating a concrete new derivation debt (O65) — coherence rises modestly because confirmations outweigh new debts, but the central formal gap remains open."
+      "timestamp": "2026-04-19T15:44:22.368389+00:00",
+      "reason": "Two independent lines (variational efficiency framework and empirical EEG entropy asymmetry) converge on the substrate law from new directions — one re-derives it as a Lagrangian extremal principle, the other provides the missing empirical pipeline for O28 — materially strengthening coherence and adding new invariants, but neither delivers the limit-case proofs needed to resolve O28 or O63, creating two sharpened obligations."
     }
   ]
 }
