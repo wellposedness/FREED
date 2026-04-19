@@ -181,7 +181,7 @@ def _write_game_of_life():
   <div class="header">
     <div class="nav"><a href="index.html">← FREED</a></div>
     <h1>Freed's Law — The Game of Truth</h1>
-    <div class="sub">Each cell is an agent. The universe has a hidden physics. Survival requires modeling it.</div>
+    <div class="sub">Each cell is an agent. The hidden physics is Mandelbrot. The plane drifts. Survival requires modeling it.</div>
   </div>
 
   <div class="controls">
@@ -203,6 +203,7 @@ def _write_game_of_life():
     <div class="stat-row"><span class="label">Avg Energy</span><span class="value" id="stat-energy">—</span></div>
     <div class="stat-row"><span class="label">Avg Error <span style="font-size:0.6rem;opacity:0.7">(break-even 0.50)</span></span><span class="value" id="stat-error">—</span></div>
     <div class="stat-row"><span class="label">Avg Complexity <span style="font-size:0.6rem;opacity:0.7">(L1 weight norm)</span></span><span class="value" id="stat-complex">—</span></div>
+    <div class="stat-row"><span class="label">Boundary cells <span style="font-size:0.6rem;opacity:0.7">(near fractal edge — harder to predict)</span></span><span class="value" id="stat-boundary">—</span></div>
     <div class="stat-row"><span class="label">Reproductions</span><span class="value" id="stat-repro">0</span></div>
     <div class="stat-row"><span class="label">Deaths</span><span class="value" id="stat-deaths">0</span></div>
   </div>
@@ -224,20 +225,23 @@ def _write_game_of_life():
     <div class="section-title">What This Is</div>
     <p>
       A cellular automaton where each cell carries a private 3×3 weight matrix —
-      a local generative model of the universe. The universe obeys a fixed hidden physics kernel
-      the cells do not know. At each step, every cell predicts its own next state using its weights.
-      The prediction error is subtracted from its metabolic energy. Accurate cells gain net energy.
-      Inaccurate cells die.
+      a local generative model of the universe. The hidden physics is the Mandelbrot set:
+      z<sub>n+1</sub> = z²<sub>n</sub> + c. Each cell maps to a point c in the complex plane.
+      Its true state is how quickly z escapes to infinity — the escape velocity band.
+      The complex plane drifts slowly each step (real: +0.003, imag: +0.0017 — incommensurate,
+      so the path never repeats). Cells see their neighbors' bands and try to predict what band
+      they will be in next step. Prediction error costs energy. Inaccuracy kills.
     </p>
     <div class="law">
       ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-      <div class="sub-law">Cells whose survival is coupled to prediction error evolve toward models that approximate true dynamics. Reasoning = survival.</div>
+      <div class="sub-law">Cells near the fractal boundary face irreducible prediction difficulty. Cells in smooth interior regions can compress their model. Cyan cells found the compressed rule.</div>
     </div>
     <p>
       High-energy cells reproduce — copying their weights into weaker neighbors with random mutation.
-      Over generations, the population evolves. Cells that build better internal models of the hidden
-      physics survive. Cells that don't, die. This is Freed's Law as selection pressure:
-      <em>to think accurately is to live</em>.
+      Over generations, the population evolves. The fractal boundary is where reasoning is hardest:
+      small shifts in c produce wildly different escape bands. Interior cells (black) are trivial —
+      always inside. Far-exterior cells (deep red or orange) are easy too — always escape fast.
+      The <em>interesting region</em> is the boundary, and that's where most deaths happen.
     </p>
     <p>
       Cell color encodes position in the <em>error × complexity</em> tradeoff space — two quantities
@@ -248,10 +252,10 @@ def _write_game_of_life():
       but carry too much weight. White cells are reproducing — spreading their model to neighbors.
     </p>
     <p style="color:var(--muted);font-family:var(--mono);font-size:0.78rem;line-height:1.6">
-      Hidden kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] — Mexican-hat convolution.
-      Cells do not know this. They infer it through survival.
-      Energy/step = 3.0 − 1.0 − (error × 4.0). Break-even: 0.50.
-      Low error threshold: 0.35. Complexity threshold: L1 norm 1.2.
+      Hidden physics: z_{n+1} = z²_n + c, max 100 iterations. Grid maps to [-2.5,1.0] × [-1.25,1.25].
+      Drift: real +0.003/step, imag +0.0017/step (incommensurate — never repeats).
+      Bands 1-2 (slow escape) = boundary region. Energy/step = 3.0 − 1.0 − (error × 4.0).
+      Falsifiable prediction: boundary cells show higher avg error and lower avg energy than interior.
     </p>
   </div>
 
@@ -273,11 +277,11 @@ const MUT_RATE   = 0.05;
 const MUT_STR    = 0.20;
 const MAX_E      = 300;
 
-// Hidden physics kernel (Mexican hat, 3x3 row-major)
-const KERNEL = [0.1, 0.3, 0.1, 0.3, -0.6, 0.3, 0.1, 0.3, 0.1];
+const MB_MAX = 100;  // Mandelbrot max iterations — hidden physics
 
 let COLS, ROWS;
-let states, energy, weights, nextStates, cellError, cellRepro;
+let states, energy, weights, nextStates, cellError, cellRepro, cellBand, cReal, cImag;
+let driftReal = 0, driftImag = 0;
 let generation = 0, totalRepro = 0, totalDeaths = 0;
 let running = false, animId = null;
 let lastError = 0;
@@ -297,20 +301,54 @@ function wrap(v, max) { return ((v % max) + max) % max; }
 function idx(r, c) { return wrap(r, ROWS) * COLS + wrap(c, COLS); }
 function sigmoid(x) { return 1.0 / (1.0 + Math.exp(-x)); }
 
+// Mandelbrot escape band: 0=inside set, 1-5=slow→fast escape, 6=immediate
+function escapeband(cr, ci) {
+  let zr = 0, zi = 0;
+  for (let n = 0; n < MB_MAX; n++) {
+    const zr2 = zr*zr - zi*zi + cr;
+    zi = 2*zr*zi + ci;
+    zr = zr2;
+    if (zr*zr + zi*zi > 4) {
+      if (n <  5) return 6;
+      if (n < 15) return 5;
+      if (n < 30) return 4;
+      if (n < 50) return 3;
+      if (n < 70) return 2;
+      return 1;
+    }
+  }
+  return 0;
+}
+
 function initSim() {
   const N = ROWS * COLS;
   states    = new Float32Array(N);
   energy    = new Float32Array(N);
   weights   = new Float32Array(N * 9);
   nextStates= new Float32Array(N);
+  cellError = new Float32Array(N);
+  cellRepro = new Uint8Array(N);
+  cellBand  = new Uint8Array(N);
+  cReal     = new Float32Array(N);
+  cImag     = new Float32Array(N);
+  driftReal = 0; driftImag = 0;
+  // Precompute base c for each cell (grid → complex plane [-2.5,1.0] x [-1.25,1.25])
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = idx(r, c);
+      cReal[i] = -2.5 + (c / COLS) * 3.5;
+      cImag[i] = -1.25 + (r / ROWS) * 2.5;
+    }
+  }
+  // Initial states from Mandelbrot physics
   for (let i = 0; i < N; i++) {
-    states[i]  = Math.random() > 0.5 ? 1 : 0;
-    energy[i]  = INIT_E * (0.5 + Math.random());
+    const band = escapeband(cReal[i], cImag[i]);
+    cellBand[i] = band;
+    states[i]   = band / 6.0;
+    energy[i]   = INIT_E * (0.5 + Math.random());
     for (let w = 0; w < 9; w++)
       weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
   }
-  cellError = new Float32Array(N);
-  cellRepro = new Uint8Array(N);
   generation = 0; totalRepro = 0; totalDeaths = 0; lastError = 0;
 }
 
@@ -320,17 +358,14 @@ function step() {
   // 0. Clear repro flags from last step
   cellRepro.fill(0);
 
-  // 1. Ground truth next states
-  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      let sum = 0;
-      for (let k = 0; k < 9; k++) {
-        sum += KERNEL[k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
-      }
-      nextStates[idx(r, c)] = sigmoid(sum) > 0.5 ? 1 : 0;
-    }
+  // 1. Ground truth next states — Mandelbrot bands at next drift position
+  const nextDR = driftReal + 0.003, nextDI = driftImag + 0.0017;
+  for (let i = 0; i < N; i++) {
+    const band = escapeband(cReal[i] + nextDR, cImag[i] + nextDI);
+    cellBand[i]   = band;
+    nextStates[i] = band / 6.0;
   }
+  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
 
   // 2. Update energy by prediction accuracy
   let errSum = 0, errCnt = 0;
@@ -350,14 +385,15 @@ function step() {
   }
   lastError = errCnt > 0 ? errSum / errCnt : 0;
 
-  // 3. Apply next states
+  // 3. Apply next states + advance drift
   for (let i = 0; i < N; i++) states[i] = nextStates[i];
+  driftReal = nextDR;
+  driftImag = nextDI;
 
-  // 4. Kill and reinitialize dead cells
+  // 4. Kill and reinitialize dead cells (state stays Mandelbrot-determined)
   for (let i = 0; i < N; i++) {
     if (energy[i] <= 0) {
       energy[i] = 0;
-      states[i] = Math.random() > 0.5 ? 1 : 0;
       for (let w = 0; w < 9; w++)
         weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
       totalDeaths++;
@@ -457,7 +493,7 @@ function draw() {
 }
 
 function updateStats() {
-  let alive = 0, eSum = 0, cSum = 0;
+  let alive = 0, eSum = 0, cSum = 0, boundaryCells = 0;
   const N = ROWS * COLS;
   for (let i = 0; i < N; i++) {
     if (energy[i] > 0) {
@@ -466,17 +502,20 @@ function updateStats() {
       for (let w = 0; w < 9; w++) L1 += Math.abs(weights[i * 9 + w]);
       cSum += L1;
     }
+    // Boundary: slow-escape bands (1-2) — hardest to predict
+    if (cellBand[i] >= 1 && cellBand[i] <= 2) boundaryCells++;
   }
   const breakEven = (GAIN_BASE - COST_BASE) / ERR_FACTOR; // 0.50
   const errEl = document.getElementById('stat-error');
   errEl.textContent = lastError.toFixed(3);
   errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
-  document.getElementById('stat-gen').textContent     = generation;
-  document.getElementById('stat-alive').textContent   = alive;
-  document.getElementById('stat-energy').textContent  = alive > 0 ? (eSum/alive).toFixed(1) : '0';
-  document.getElementById('stat-complex').textContent = alive > 0 ? (cSum/alive).toFixed(2) : '0';
-  document.getElementById('stat-repro').textContent   = totalRepro;
-  document.getElementById('stat-deaths').textContent  = totalDeaths;
+  document.getElementById('stat-gen').textContent      = generation;
+  document.getElementById('stat-alive').textContent    = alive;
+  document.getElementById('stat-energy').textContent   = alive > 0 ? (eSum/alive).toFixed(1) : '0';
+  document.getElementById('stat-complex').textContent  = alive > 0 ? (cSum/alive).toFixed(2) : '0';
+  document.getElementById('stat-boundary').textContent = boundaryCells;
+  document.getElementById('stat-repro').textContent    = totalRepro;
+  document.getElementById('stat-deaths').textContent   = totalDeaths;
 }
 
 let stepAcc = 0;
