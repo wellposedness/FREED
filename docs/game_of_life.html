@@ -96,13 +96,14 @@
   <div class="header">
     <div class="nav"><a href="index.html">← FREED</a></div>
     <h1>Freed's Law — The Game of Truth</h1>
-    <div class="sub">Each cell is an agent. The universe has a hidden physics. Survival requires modeling it.</div>
+    <div class="sub">Each cell is an agent. The hidden physics is Mandelbrot. The view zooms into the boundary. Survival requires modeling it. Two modes: evolution only, or the full RSA kernel.</div>
   </div>
 
   <div class="controls">
     <button class="btn" id="btn-play" onclick="togglePlay()">▶ PLAY</button>
     <button class="btn" onclick="stepOnce()">STEP</button>
     <button class="btn" onclick="resetSim()">RESET</button>
+    <button class="btn" id="btn-mode" onclick="toggleMode()">○ EVOLVE ONLY</button>
     <div class="speed-wrap">
       SPEED <input type="range" id="speed" min="1" max="20" value="8">
     </div>
@@ -117,18 +118,27 @@
     <div class="stat-row"><span class="label">Alive Cells</span><span class="value" id="stat-alive">—</span></div>
     <div class="stat-row"><span class="label">Avg Energy</span><span class="value" id="stat-energy">—</span></div>
     <div class="stat-row"><span class="label">Avg Error <span style="font-size:0.6rem;opacity:0.7">(break-even 0.50)</span></span><span class="value" id="stat-error">—</span></div>
+    <div class="stat-row"><span class="label">Avg Complexity <span style="font-size:0.6rem;opacity:0.7">(L1 weight norm)</span></span><span class="value" id="stat-complex">—</span></div>
+    <div class="stat-row"><span class="label">Boundary cells <span style="font-size:0.6rem;opacity:0.7">(near fractal edge — harder to predict)</span></span><span class="value" id="stat-boundary">—</span></div>
+    <div class="stat-row"><span class="label">Zoom level</span><span class="value" id="stat-zoom">0 (1×)</span></div>
+    <div class="stat-row"><span class="label">Survival rate this level</span><span class="value" id="stat-survival">100%</span></div>
+    <div class="stat-row"><span class="label">Compression ratio <span style="font-size:0.6rem;opacity:0.7">(survivors L1 / level-start L1)</span></span><span class="value" id="stat-compress-r">—</span></div>
+    <div class="stat-row"><span class="label">Avg error at level start</span><span class="value" id="stat-err-start">—</span></div>
     <div class="stat-row"><span class="label">Reproductions</span><span class="value" id="stat-repro">0</span></div>
     <div class="stat-row"><span class="label">Deaths</span><span class="value" id="stat-deaths">0</span></div>
+    <div class="stat-row"><span class="label">Mode</span><span class="value" id="stat-mode">EVOLVE ONLY</span></div>
   </div>
 
   <div class="section">
-    <div class="section-title">Color Legend</div>
+    <div class="section-title">Color Legend — Error × Complexity</div>
     <div class="legend">
-      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead / zero energy</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#882020"></div>Surviving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#b91c1c"></div>Thriving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#fca5a5"></div>Reproducing</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead — no model</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#7f1d1d"></div>Deep red — overfitting (high error, high complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ea580c"></div>Orange — underfitting (high error, low complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ca8a04"></div>Yellow — exploring (converging, not yet stable)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#16a34a"></div>Green — accurate but expensive (low error, high complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#06b6d4"></div>Cyan — compression attractor (low error, low complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f8fafc;border:1px solid #ccc"></div>White — reproducing</div>
     </div>
   </div>
 
@@ -136,26 +146,39 @@
     <div class="section-title">What This Is</div>
     <p>
       A cellular automaton where each cell carries a private 3×3 weight matrix —
-      a local generative model of the universe. The universe obeys a fixed hidden physics kernel
-      the cells do not know. At each step, every cell predicts its own next state using its weights.
-      The prediction error is subtracted from its metabolic energy. Accurate cells gain net energy.
-      Inaccurate cells die.
+      a local generative model of the universe. The hidden physics is the Mandelbrot set:
+      z<sub>n+1</sub> = z²<sub>n</sub> + c. Each cell maps to a point c in the complex plane.
+      Its true state is how quickly z escapes to infinity — the escape velocity band.
+      Each step the viewport zooms 0.5% toward c = −0.75 + 0.1i (cardioid/bulb boundary —
+      aperiodic, non-repeating at every scale). Zoom doubles every ~140 steps.
+      Cells see their neighbors' bands and try to predict what band they will be in next step.
+      Prediction error costs energy. Inaccuracy kills.
     </p>
     <div class="law">
       ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-      <div class="sub-law">Cells whose survival is coupled to prediction error evolve toward models that approximate true dynamics. Reasoning = survival.</div>
+      <div class="sub-law">Cells near the fractal boundary face irreducible prediction difficulty. Cells in smooth interior regions can compress their model. Cyan cells found the compressed rule.</div>
     </div>
     <p>
       High-energy cells reproduce — copying their weights into weaker neighbors with random mutation.
-      Over generations, the population evolves. Cells that build better internal models of the hidden
-      physics survive. Cells that don't, die. This is Freed's Law as selection pressure:
-      <em>to think accurately is to live</em>.
+      Over generations, the population evolves. The fractal boundary is where reasoning is hardest:
+      small shifts in c produce wildly different escape bands. Interior cells (black) are trivial —
+      always inside. Far-exterior cells (deep red or orange) are easy too — always escape fast.
+      The <em>interesting region</em> is the boundary, and that's where most deaths happen.
+    </p>
+    <p>
+      Cell color encodes position in the <em>error × complexity</em> tradeoff space — two quantities
+      the Compression principle says must both be minimized. Cyan cells have achieved it: low prediction
+      error, low weight complexity. They found the compressed rule. Every other color is a failure mode
+      on the path to cyan. Deep red cells burn the most energy: large models, wrong predictions.
+      Orange cells are too simple to see the pattern. Yellow cells are learning. Green cells learned
+      but carry too much weight. White cells are reproducing — spreading their model to neighbors.
     </p>
     <p style="color:var(--muted);font-family:var(--mono);font-size:0.78rem;line-height:1.6">
-      Hidden kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] — Mexican-hat convolution.
-      Cells do not know this. They infer it through survival.
-      Energy/step = 3.0 − 1.0 − (error × 4.0). Break-even: 0.50.
-      Watch avg error — when it drops below 0.50, the population has learned.
+      Hidden physics: z_{n+1} = z²_n + c, max 100 iterations. Zoom target: c = −0.75 + 0.1i (always centered).
+      Bands 1-2 (slow escape) = boundary region. Energy/step = 3.0 − 1.0 − (error × 4.0).
+      Two modes: <em>Evolve Only</em> — Darwinian selection on random variation, no individual learning.
+      <em>Evolve+Learn</em> — adds per-step delta rule (∂L/∂w = errSigned × σ′ × input), closing the ADJUST step.
+      Toggle mid-run to compare convergence rates. Falsifiable: does individual learning change the error trajectory?
     </p>
   </div>
 
@@ -176,15 +199,28 @@ const REPRO_COST = 50;
 const MUT_RATE   = 0.05;
 const MUT_STR    = 0.20;
 const MAX_E      = 300;
+const LEARN_RATE = 0.10;  // per-step weight update (Evolution+Learning mode only)
 
-// Hidden physics kernel (Mexican hat, 3x3 row-major)
-const KERNEL = [0.1, 0.3, 0.1, 0.3, -0.6, 0.3, 0.1, 0.3, 0.1];
+const MB_MAX = 100;  // Mandelbrot max iterations — hidden physics
 
 let COLS, ROWS;
-let states, energy, weights, nextStates;
+let states, energy, weights, nextStates, cellError, cellRepro, cellBand, cReal, cImag;
+
+// Zoom viewport
+let viewRMin, viewRMax, viewIMin, viewIMax;
+const CT_R = -0.75, CT_I = 0.1;   // zoom target: cardioid/bulb boundary
+const ZOOM_PER_STEP = 0.995;       // 0.5% per step → doubling every ~140 steps
+const ZOOM_STEPS = 140;
+
+// Zoom metrics
+let zoomStep = 0, zoomLevel = 0;
+let zoomAliveStart = 0, zoomL1Start = 1.0;
+let zoomSurvivalRate = 100, zoomCompressRatio = 1.0, zoomErrAtStart = 0;
+
 let generation = 0, totalRepro = 0, totalDeaths = 0;
 let running = false, animId = null;
 let lastError = 0;
+let learningMode = false;
 
 const canvas = document.getElementById('canvas');
 const ctx    = canvas.getContext('2d');
@@ -201,35 +237,92 @@ function wrap(v, max) { return ((v % max) + max) % max; }
 function idx(r, c) { return wrap(r, ROWS) * COLS + wrap(c, COLS); }
 function sigmoid(x) { return 1.0 / (1.0 + Math.exp(-x)); }
 
+// Mandelbrot escape band: 0=inside set, 1-5=slow→fast escape, 6=immediate
+function escapeband(cr, ci) {
+  let zr = 0, zi = 0;
+  for (let n = 0; n < MB_MAX; n++) {
+    const zr2 = zr*zr - zi*zi + cr;
+    zi = 2*zr*zi + ci;
+    zr = zr2;
+    if (zr*zr + zi*zi > 4) {
+      if (n <  5) return 6;
+      if (n < 15) return 5;
+      if (n < 30) return 4;
+      if (n < 50) return 3;
+      if (n < 70) return 2;
+      return 1;
+    }
+  }
+  return 0;
+}
+
 function initSim() {
   const N = ROWS * COLS;
   states    = new Float32Array(N);
   energy    = new Float32Array(N);
   weights   = new Float32Array(N * 9);
   nextStates= new Float32Array(N);
-  for (let i = 0; i < N; i++) {
-    states[i]  = Math.random() > 0.5 ? 1 : 0;
-    energy[i]  = INIT_E * (0.5 + Math.random());
-    for (let w = 0; w < 9; w++)
-      weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
+  cellError = new Float32Array(N);
+  cellRepro = new Uint8Array(N);
+  cellBand  = new Uint8Array(N);
+  cReal     = new Float32Array(N);
+  cImag     = new Float32Array(N);
+
+  // Viewport centered on zoom target from the start
+  viewRMin = CT_R - 1.75; viewRMax = CT_R + 1.75;
+  viewIMin = CT_I - 1.25; viewIMax = CT_I + 1.25;
+  zoomStep = 0; zoomLevel = 0;
+  zoomSurvivalRate = 100; zoomCompressRatio = 1.0; zoomErrAtStart = 0;
+
+  // Compute c values from initial viewport
+  const dR = viewRMax - viewRMin, dI = viewIMax - viewIMin;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = idx(r, c);
+      cReal[i] = viewRMin + (c / COLS) * dR;
+      cImag[i] = viewIMin + (r / ROWS) * dI;
+    }
   }
+
+  // Initial states from Mandelbrot physics; compute initial complexity baseline
+  let initL1Sum = 0;
+  for (let i = 0; i < N; i++) {
+    const band = escapeband(cReal[i], cImag[i]);
+    cellBand[i] = band;
+    states[i]   = band / 6.0;
+    energy[i]   = INIT_E * (0.5 + Math.random());
+    for (let w = 0; w < 9; w++) {
+      weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
+      initL1Sum += Math.abs(weights[i * 9 + w]);
+    }
+  }
+  zoomAliveStart = N;
+  zoomL1Start    = N > 0 ? initL1Sum / N : 1.0;
+
   generation = 0; totalRepro = 0; totalDeaths = 0; lastError = 0;
 }
 
 function step() {
   const N = ROWS * COLS;
 
-  // 1. Ground truth next states
-  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
+  // 0. Clear repro flags from last step
+  cellRepro.fill(0);
+
+  // 1. Ground truth next states — zoom toward CT_R,CT_I keeping it fixed at grid center
+  const halfR = (viewRMax - viewRMin) * 0.5 * ZOOM_PER_STEP;
+  const halfI = (viewIMax - viewIMin) * 0.5 * ZOOM_PER_STEP;
+  const nRMin = CT_R - halfR, nRMax = CT_R + halfR;
+  const nIMin = CT_I - halfI, nIMax = CT_I + halfI;
+  const ndR = nRMax - nRMin, ndI = nIMax - nIMin;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      let sum = 0;
-      for (let k = 0; k < 9; k++) {
-        sum += KERNEL[k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
-      }
-      nextStates[idx(r, c)] = sigmoid(sum) > 0.5 ? 1 : 0;
+      const i = idx(r, c);
+      const band = escapeband(nRMin + (c / COLS) * ndR, nIMin + (r / ROWS) * ndI);
+      cellBand[i]   = band;
+      nextStates[i] = band / 6.0;
     }
   }
+  const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
 
   // 2. Update energy by prediction accuracy
   let errSum = 0, errCnt = 0;
@@ -241,21 +334,58 @@ function step() {
       for (let k = 0; k < 9; k++)
         pred += weights[i * 9 + k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
       pred = sigmoid(pred);
-      const err = Math.abs(pred - nextStates[i]);
+      const errSigned = pred - nextStates[i];
+      const err = Math.abs(errSigned);
+      cellError[i] = err;
       energy[i] = Math.min(energy[i] + GAIN_BASE - COST_BASE - err * ERR_FACTOR, MAX_E);
+      if (learningMode) {
+        const dpred = pred * (1.0 - pred);
+        for (let k = 0; k < 9; k++) {
+          const xi = states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
+          weights[i * 9 + k] -= LEARN_RATE * errSigned * dpred * xi;
+        }
+      }
       errSum += err; errCnt++;
     }
   }
   lastError = errCnt > 0 ? errSum / errCnt : 0;
 
-  // 3. Apply next states
+  // 3. Apply next states + advance zoom viewport + recompute c
   for (let i = 0; i < N; i++) states[i] = nextStates[i];
+  viewRMin = nRMin; viewRMax = nRMax; viewIMin = nIMin; viewIMax = nIMax;
+  const cdR = viewRMax - viewRMin, cdI = viewIMax - viewIMin;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = idx(r, c);
+      cReal[i] = viewRMin + (c / COLS) * cdR;
+      cImag[i] = viewIMin + (r / ROWS) * cdI;
+    }
+  }
 
-  // 4. Kill and reinitialize dead cells
+  // Zoom level tracking + per-level metrics
+  zoomStep++;
+  const newZoomLevel = Math.floor(zoomStep / ZOOM_STEPS);
+  if (newZoomLevel > zoomLevel) {
+    let aliveNow = 0, l1Now = 0;
+    for (let i = 0; i < N; i++) {
+      if (energy[i] > 0) {
+        aliveNow++;
+        for (let w = 0; w < 9; w++) l1Now += Math.abs(weights[i * 9 + w]);
+      }
+    }
+    zoomSurvivalRate  = zoomAliveStart > 0 ? Math.round(100 * aliveNow / zoomAliveStart) : 0;
+    const avgL1Now    = aliveNow > 0 ? l1Now / aliveNow : 1.0;
+    zoomCompressRatio = zoomL1Start > 0.001 ? avgL1Now / zoomL1Start : 1.0;
+    zoomErrAtStart    = lastError;
+    zoomAliveStart    = aliveNow;
+    zoomL1Start       = avgL1Now;
+    zoomLevel         = newZoomLevel;
+  }
+
+  // 4. Kill and reinitialize dead cells (state stays Mandelbrot-determined)
   for (let i = 0; i < N; i++) {
     if (energy[i] <= 0) {
       energy[i] = 0;
-      states[i] = Math.random() > 0.5 ? 1 : 0;
       for (let w = 0; w < 9; w++)
         weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
       totalDeaths++;
@@ -290,6 +420,7 @@ function step() {
       }
       energy[bestT] = INIT_E * 0.5;
       energy[i] -= REPRO_COST;
+      cellRepro[i] = 1;
       totalRepro++;
     }
   }
@@ -303,33 +434,49 @@ function draw() {
   const img = ctx.createImageData(canvas.width, canvas.height);
   const d = img.data;
 
+  // Error/complexity thresholds
+  const ERR_LOW = 0.35, ERR_HIGH = 0.50, COMPLEX_THRESH = 1.2;
+
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const e = energy[idx(r, c)];
-      if (e <= 0) continue;
-      const t = Math.min(e / MAX_E, 1.0);
+      const i = idx(r, c);
+      if (energy[i] <= 0) continue;  // dead = black background
+
       let R, G, B;
-      if (t < 0.33) {
-        // black → deep red
-        const s = t / 0.33;
-        R = Math.floor(s * 100); G = 0; B = 0;
-      } else if (t < 0.66) {
-        // deep red → accent red #cc2222
-        const s = (t - 0.33) / 0.33;
-        R = Math.floor(100 + s * 104);
-        G = Math.floor(s * 34);
-        B = Math.floor(s * 34);
+
+      if (cellRepro[i]) {
+        // White — reproducing: copying compressed model to neighbors
+        R = 248; G = 250; B = 252;
       } else {
-        // accent red → hot white
-        const s = (t - 0.66) / 0.34;
-        R = Math.floor(204 + s * 51);
-        G = Math.floor(34  + s * 110);
-        B = Math.floor(34  + s * 110);
+        const err = cellError[i];
+        let L1 = 0;
+        for (let w = 0; w < 9; w++) L1 += Math.abs(weights[i * 9 + w]);
+        const highComplex = L1 > COMPLEX_THRESH;
+        const lowErr  = err < ERR_LOW;
+        const highErr = err >= ERR_HIGH;
+
+        if (lowErr && !highComplex) {
+          // Cyan — low error, low complexity: compression attractor (optimal)
+          R = 6; G = 182; B = 212;
+        } else if (lowErr && highComplex) {
+          // Green — low error, high complexity: accurate but metabolically expensive
+          R = 22; G = 163; B = 74;
+        } else if (!highErr) {
+          // Yellow — medium error: exploring, model converging
+          R = 202; G = 138; B = 4;
+        } else if (!highComplex) {
+          // Orange — high error, low complexity: underfitting, too simple
+          R = 234; G = 88; B = 12;
+        } else {
+          // Deep red — high error, high complexity: overfitting, burning energy fast
+          R = 127; G = 29; B = 29;
+        }
       }
+
       for (let py = r * CELL_PX; py < (r+1) * CELL_PX - 1; py++) {
         for (let px = c * CELL_PX; px < (c+1) * CELL_PX - 1; px++) {
           const base = (py * canvas.width + px) * 4;
-          d[base]   = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
+          d[base] = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
         }
       }
     }
@@ -338,20 +485,33 @@ function draw() {
 }
 
 function updateStats() {
-  let alive = 0, eSum = 0;
+  let alive = 0, eSum = 0, cSum = 0, boundaryCells = 0;
   const N = ROWS * COLS;
   for (let i = 0; i < N; i++) {
-    if (energy[i] > 0) { alive++; eSum += energy[i]; }
+    if (energy[i] > 0) {
+      alive++; eSum += energy[i];
+      let L1 = 0;
+      for (let w = 0; w < 9; w++) L1 += Math.abs(weights[i * 9 + w]);
+      cSum += L1;
+    }
+    // Boundary: slow-escape bands (1-2) — hardest to predict
+    if (cellBand[i] >= 1 && cellBand[i] <= 2) boundaryCells++;
   }
   const breakEven = (GAIN_BASE - COST_BASE) / ERR_FACTOR; // 0.50
   const errEl = document.getElementById('stat-error');
   errEl.textContent = lastError.toFixed(3);
   errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
-  document.getElementById('stat-gen').textContent    = generation;
-  document.getElementById('stat-alive').textContent  = alive;
-  document.getElementById('stat-energy').textContent = alive > 0 ? (eSum/alive).toFixed(1) : '0';
-  document.getElementById('stat-repro').textContent  = totalRepro;
-  document.getElementById('stat-deaths').textContent = totalDeaths;
+  document.getElementById('stat-gen').textContent      = generation;
+  document.getElementById('stat-alive').textContent    = alive;
+  document.getElementById('stat-energy').textContent   = alive > 0 ? (eSum/alive).toFixed(1) : '0';
+  document.getElementById('stat-complex').textContent  = alive > 0 ? (cSum/alive).toFixed(2) : '0';
+  document.getElementById('stat-boundary').textContent = boundaryCells;
+  document.getElementById('stat-zoom').textContent     = `${zoomLevel} (${Math.pow(2,zoomLevel).toFixed(0)}×)`;
+  document.getElementById('stat-survival').textContent = `${zoomSurvivalRate}%`;
+  document.getElementById('stat-compress-r').textContent = zoomCompressRatio.toFixed(3);
+  document.getElementById('stat-err-start').textContent  = zoomErrAtStart.toFixed(3);
+  document.getElementById('stat-repro').textContent    = totalRepro;
+  document.getElementById('stat-deaths').textContent   = totalDeaths;
 }
 
 let stepAcc = 0;
@@ -387,6 +547,14 @@ function stepOnce() {
 function resetSim() {
   if (running) togglePlay();
   initSim(); draw(); updateStats();
+}
+
+function toggleMode() {
+  learningMode = !learningMode;
+  const btn = document.getElementById('btn-mode');
+  btn.textContent = learningMode ? '⟳ EVOLVE+LEARN' : '○ EVOLVE ONLY';
+  btn.classList.toggle('active', learningMode);
+  document.getElementById('stat-mode').textContent = learningMode ? 'EVOLVE + LEARN' : 'EVOLVE ONLY';
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
