@@ -202,18 +202,21 @@ def _write_game_of_life():
     <div class="stat-row"><span class="label">Alive Cells</span><span class="value" id="stat-alive">—</span></div>
     <div class="stat-row"><span class="label">Avg Energy</span><span class="value" id="stat-energy">—</span></div>
     <div class="stat-row"><span class="label">Avg Error <span style="font-size:0.6rem;opacity:0.7">(break-even 0.50)</span></span><span class="value" id="stat-error">—</span></div>
+    <div class="stat-row"><span class="label">Avg Complexity <span style="font-size:0.6rem;opacity:0.7">(L1 weight norm)</span></span><span class="value" id="stat-complex">—</span></div>
     <div class="stat-row"><span class="label">Reproductions</span><span class="value" id="stat-repro">0</span></div>
     <div class="stat-row"><span class="label">Deaths</span><span class="value" id="stat-deaths">0</span></div>
   </div>
 
   <div class="section">
-    <div class="section-title">Color Legend</div>
+    <div class="section-title">Color Legend — Error × Complexity</div>
     <div class="legend">
-      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead / zero energy</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#440808"></div>Struggling</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#882020"></div>Surviving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#b91c1c"></div>Thriving</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#fca5a5"></div>Reproducing</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead — no model</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#7f1d1d"></div>Deep red — overfitting (high error, high complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ea580c"></div>Orange — underfitting (high error, low complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ca8a04"></div>Yellow — exploring (converging, not yet stable)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#16a34a"></div>Green — accurate but expensive (low error, high complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#06b6d4"></div>Cyan — compression attractor (low error, low complexity)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f8fafc;border:1px solid #ccc"></div>White — reproducing</div>
     </div>
   </div>
 
@@ -236,11 +239,19 @@ def _write_game_of_life():
       physics survive. Cells that don't, die. This is Freed's Law as selection pressure:
       <em>to think accurately is to live</em>.
     </p>
+    <p>
+      Cell color encodes position in the <em>error × complexity</em> tradeoff space — two quantities
+      the Compression principle says must both be minimized. Cyan cells have achieved it: low prediction
+      error, low weight complexity. They found the compressed rule. Every other color is a failure mode
+      on the path to cyan. Deep red cells burn the most energy: large models, wrong predictions.
+      Orange cells are too simple to see the pattern. Yellow cells are learning. Green cells learned
+      but carry too much weight. White cells are reproducing — spreading their model to neighbors.
+    </p>
     <p style="color:var(--muted);font-family:var(--mono);font-size:0.78rem;line-height:1.6">
       Hidden kernel: [0.1, 0.3, 0.1 / 0.3, −0.6, 0.3 / 0.1, 0.3, 0.1] — Mexican-hat convolution.
       Cells do not know this. They infer it through survival.
       Energy/step = 3.0 − 1.0 − (error × 4.0). Break-even: 0.50.
-      Watch avg error — when it drops below 0.50, the population has learned.
+      Low error threshold: 0.35. Complexity threshold: L1 norm 1.2.
     </p>
   </div>
 
@@ -266,7 +277,7 @@ const MAX_E      = 300;
 const KERNEL = [0.1, 0.3, 0.1, 0.3, -0.6, 0.3, 0.1, 0.3, 0.1];
 
 let COLS, ROWS;
-let states, energy, weights, nextStates;
+let states, energy, weights, nextStates, cellError, cellRepro;
 let generation = 0, totalRepro = 0, totalDeaths = 0;
 let running = false, animId = null;
 let lastError = 0;
@@ -298,11 +309,16 @@ function initSim() {
     for (let w = 0; w < 9; w++)
       weights[i * 9 + w] = (Math.random() - 0.5) * 0.5;
   }
+  cellError = new Float32Array(N);
+  cellRepro = new Uint8Array(N);
   generation = 0; totalRepro = 0; totalDeaths = 0; lastError = 0;
 }
 
 function step() {
   const N = ROWS * COLS;
+
+  // 0. Clear repro flags from last step
+  cellRepro.fill(0);
 
   // 1. Ground truth next states
   const OFFSETS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]];
@@ -327,6 +343,7 @@ function step() {
         pred += weights[i * 9 + k] * states[idx(r + OFFSETS[k][0], c + OFFSETS[k][1])];
       pred = sigmoid(pred);
       const err = Math.abs(pred - nextStates[i]);
+      cellError[i] = err;
       energy[i] = Math.min(energy[i] + GAIN_BASE - COST_BASE - err * ERR_FACTOR, MAX_E);
       errSum += err; errCnt++;
     }
@@ -375,6 +392,7 @@ function step() {
       }
       energy[bestT] = INIT_E * 0.5;
       energy[i] -= REPRO_COST;
+      cellRepro[i] = 1;
       totalRepro++;
     }
   }
@@ -388,33 +406,49 @@ function draw() {
   const img = ctx.createImageData(canvas.width, canvas.height);
   const d = img.data;
 
+  // Error/complexity thresholds
+  const ERR_LOW = 0.35, ERR_HIGH = 0.50, COMPLEX_THRESH = 1.2;
+
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const e = energy[idx(r, c)];
-      if (e <= 0) continue;
-      const t = Math.min(e / MAX_E, 1.0);
+      const i = idx(r, c);
+      if (energy[i] <= 0) continue;  // dead = black background
+
       let R, G, B;
-      if (t < 0.33) {
-        // black → deep red
-        const s = t / 0.33;
-        R = Math.floor(s * 100); G = 0; B = 0;
-      } else if (t < 0.66) {
-        // deep red → accent red #cc2222
-        const s = (t - 0.33) / 0.33;
-        R = Math.floor(100 + s * 104);
-        G = Math.floor(s * 34);
-        B = Math.floor(s * 34);
+
+      if (cellRepro[i]) {
+        // White — reproducing: copying compressed model to neighbors
+        R = 248; G = 250; B = 252;
       } else {
-        // accent red → hot white
-        const s = (t - 0.66) / 0.34;
-        R = Math.floor(204 + s * 51);
-        G = Math.floor(34  + s * 110);
-        B = Math.floor(34  + s * 110);
+        const err = cellError[i];
+        let L1 = 0;
+        for (let w = 0; w < 9; w++) L1 += Math.abs(weights[i * 9 + w]);
+        const highComplex = L1 > COMPLEX_THRESH;
+        const lowErr  = err < ERR_LOW;
+        const highErr = err >= ERR_HIGH;
+
+        if (lowErr && !highComplex) {
+          // Cyan — low error, low complexity: compression attractor (optimal)
+          R = 6; G = 182; B = 212;
+        } else if (lowErr && highComplex) {
+          // Green — low error, high complexity: accurate but metabolically expensive
+          R = 22; G = 163; B = 74;
+        } else if (!highErr) {
+          // Yellow — medium error: exploring, model converging
+          R = 202; G = 138; B = 4;
+        } else if (!highComplex) {
+          // Orange — high error, low complexity: underfitting, too simple
+          R = 234; G = 88; B = 12;
+        } else {
+          // Deep red — high error, high complexity: overfitting, burning energy fast
+          R = 127; G = 29; B = 29;
+        }
       }
+
       for (let py = r * CELL_PX; py < (r+1) * CELL_PX - 1; py++) {
         for (let px = c * CELL_PX; px < (c+1) * CELL_PX - 1; px++) {
           const base = (py * canvas.width + px) * 4;
-          d[base]   = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
+          d[base] = R; d[base+1] = G; d[base+2] = B; d[base+3] = 255;
         }
       }
     }
@@ -423,20 +457,26 @@ function draw() {
 }
 
 function updateStats() {
-  let alive = 0, eSum = 0;
+  let alive = 0, eSum = 0, cSum = 0;
   const N = ROWS * COLS;
   for (let i = 0; i < N; i++) {
-    if (energy[i] > 0) { alive++; eSum += energy[i]; }
+    if (energy[i] > 0) {
+      alive++; eSum += energy[i];
+      let L1 = 0;
+      for (let w = 0; w < 9; w++) L1 += Math.abs(weights[i * 9 + w]);
+      cSum += L1;
+    }
   }
   const breakEven = (GAIN_BASE - COST_BASE) / ERR_FACTOR; // 0.50
   const errEl = document.getElementById('stat-error');
   errEl.textContent = lastError.toFixed(3);
   errEl.style.color = lastError < breakEven ? 'var(--green)' : 'var(--accent)';
-  document.getElementById('stat-gen').textContent    = generation;
-  document.getElementById('stat-alive').textContent  = alive;
-  document.getElementById('stat-energy').textContent = alive > 0 ? (eSum/alive).toFixed(1) : '0';
-  document.getElementById('stat-repro').textContent  = totalRepro;
-  document.getElementById('stat-deaths').textContent = totalDeaths;
+  document.getElementById('stat-gen').textContent     = generation;
+  document.getElementById('stat-alive').textContent   = alive;
+  document.getElementById('stat-energy').textContent  = alive > 0 ? (eSum/alive).toFixed(1) : '0';
+  document.getElementById('stat-complex').textContent = alive > 0 ? (cSum/alive).toFixed(2) : '0';
+  document.getElementById('stat-repro').textContent   = totalRepro;
+  document.getElementById('stat-deaths').textContent  = totalDeaths;
 }
 
 let stepAcc = 0;
