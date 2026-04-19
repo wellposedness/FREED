@@ -105,7 +105,7 @@
 
   /* Zipf histogram */
   .hist-wrap { flex-shrink: 0; }
-  #hist-canvas { display: block; width: 100%; height: 72px; background: var(--surface); border: 1px solid var(--border); }
+  #hist-canvas { display: block; width: 100%; height: 100px; background: var(--surface); border: 1px solid var(--border); }
 
   .legend { display: flex; flex-wrap: wrap; gap: 0.45rem 0.9rem; flex-shrink: 0; }
   .legend-item { display: flex; align-items: center; gap: 0.35rem; font-family: var(--mono); font-size: 0.61rem; color: var(--muted); }
@@ -153,27 +153,27 @@
         </p>
       </div>
 
-      <div class="section-divider">Three Cognitive Types</div>
+      <div class="section-divider">Six Cognitive Types</div>
       <div class="panel-body">
         <p>
-          <em style="color:#06b6d4">Kernel Builders</em> run the full RSA loop across all
-          neighbors — expensive, adaptive, dominant in complex regions. In Evolve+Learn mode
-          they update weights in real time. Blue-cyan when thriving.
+          Two axes: <em>loop depth</em> (Builder → Navigator → Drifter) and
+          <em>grounding</em> (Physics vs Symbol). Physics cells predict against the
+          true Mandelbrot band. Symbol cells predict against their own lagged internal
+          map — and pay a divergence tax whenever reality moves faster than the map updates.
         </p>
         <p>
-          <em style="color:#16a34a">Local Navigators</em> use shallow prediction over three
-          neighbors — medium cost, faster reproduction, win in simple stable regions.
-          Green when thriving.
+          <em style="color:#06b6d4">Physics Builders</em> (cyan) run the full RSA loop
+          against territory. <em style="color:#a855f7">Symbol Builders</em> (violet) run
+          the same deep loop but against their own representation — fine in stable zones,
+          catastrophic at the Mandelbrot boundary where the map lags reality.
         </p>
         <p>
-          <em style="color:#ea580c">Reactive Drifters</em> make no prediction — pure noise
-          response, cheapest to run, fastest to reproduce. Orange-red always. They dominate
-          early and in trivially predictable territory, then get outcompeted as physics
-          complexity rises.
-        </p>
-        <p>
-          Watch the foam boundaries. Where Builders and Drifters meet at the Mandelbrot
-          edge is where the cognitive typology prediction is tested in real time.
+          <em style="color:#16a34a">Physics Navigators</em> (green) and
+          <em style="color:#d97706">Symbol Navigators</em> (amber) use shallow
+          3-neighbor prediction. <em style="color:#ea580c">Physics Drifters</em> (orange)
+          and <em style="color:#f43f5e">Symbol Drifters</em> (rose) are pure noise —
+          Symbol Drifters additionally bleed energy through divergence tax even when
+          their cost is otherwise identical.
         </p>
       </div>
 
@@ -192,7 +192,7 @@
     <!-- CENTER PANEL -->
     <div class="hud-panel">
       <div class="panel-title">Simulation</div>
-      <div class="panel-subtitle">Voronoi Foam · Mandelbrot Physics · Three Cognitive Types</div>
+      <div class="panel-subtitle">Voronoi Foam · Mandelbrot Physics · Physics vs Symbol × Depth</div>
 
       <div class="controls">
         <button class="btn" id="btn-play" onclick="togglePlay()">▶ PLAY</button>
@@ -228,12 +228,12 @@
 
       <div class="legend">
         <div class="legend-item"><div class="legend-swatch" style="background:#080808;border:1px solid #333"></div>Dead</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#06b6d4"></div>Builder (thriving)</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#164e63"></div>Builder (struggling)</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#16a34a"></div>Navigator (thriving)</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#14532d"></div>Navigator (struggling)</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#ea580c"></div>Drifter (high energy)</div>
-        <div class="legend-item"><div class="legend-swatch" style="background:#7c2d12"></div>Drifter (low energy)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#06b6d4"></div>Physics Builder</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#a855f7"></div>Symbol Builder</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#16a34a"></div>Physics Navigator</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#d97706"></div>Symbol Navigator</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#ea580c"></div>Physics Drifter</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#f43f5e"></div>Symbol Drifter</div>
         <div class="legend-item"><div class="legend-swatch" style="background:#f8fafc;border:1px solid #ccc"></div>Reproducing</div>
         <div class="legend-item"><div class="legend-swatch" style="background:#333"></div>Type boundary</div>
       </div>
@@ -254,16 +254,15 @@
 
       <div class="section-divider">Type Parameters</div>
       <div class="kv-grid">
-        <div class="kv-row"><span class="label" style="color:#06b6d4">Builder cost/step</span><span class="value">1.5</span></div>
-        <div class="kv-row"><span class="label" style="color:#06b6d4">Builder err factor</span><span class="value">5.0</span></div>
-        <div class="kv-row"><span class="label" style="color:#06b6d4">Builder repro thr</span><span class="value">200</span></div>
-        <div class="kv-row"><span class="label" style="color:#16a34a">Navigator cost/step</span><span class="value">0.8</span></div>
-        <div class="kv-row"><span class="label" style="color:#16a34a">Navigator err factor</span><span class="value">3.5</span></div>
-        <div class="kv-row"><span class="label" style="color:#16a34a">Navigator repro thr</span><span class="value">150</span></div>
-        <div class="kv-row"><span class="label" style="color:#ea580c">Drifter cost/step</span><span class="value">0.4</span></div>
-        <div class="kv-row"><span class="label" style="color:#ea580c">Drifter err factor</span><span class="value">3.0</span></div>
-        <div class="kv-row"><span class="label" style="color:#ea580c">Drifter repro thr</span><span class="value">100</span></div>
-        <div class="kv-row"><span class="label">Type mutation rate</span><span class="value">5%</span></div>
+        <div class="kv-row"><span class="label" style="color:#06b6d4">Phys Builder cost/repro</span><span class="value">1.5 / 200</span></div>
+        <div class="kv-row"><span class="label" style="color:#a855f7">Sym Builder cost/repro</span><span class="value">1.5 / 200</span></div>
+        <div class="kv-row"><span class="label" style="color:#16a34a">Phys Navigator cost/repro</span><span class="value">0.8 / 150</span></div>
+        <div class="kv-row"><span class="label" style="color:#d97706">Sym Navigator cost/repro</span><span class="value">0.8 / 150</span></div>
+        <div class="kv-row"><span class="label" style="color:#ea580c">Phys Drifter cost/repro</span><span class="value">0.4 / 100</span></div>
+        <div class="kv-row"><span class="label" style="color:#f43f5e">Sym Drifter cost/repro</span><span class="value">0.4 / 100</span></div>
+        <div class="kv-row"><span class="label">Symbol map lag</span><span class="value">0.65</span></div>
+        <div class="kv-row"><span class="label">Divergence tax/unit</span><span class="value">2.5</span></div>
+        <div class="kv-row"><span class="label">Depth mut / Ground mut</span><span class="value">5% / 3%</span></div>
         <div class="kv-row"><span class="label">Gain / step (all types)</span><span class="value">3.0</span></div>
         <div class="kv-row"><span class="label">Foam cells</span><span class="value">220</span></div>
         <div class="kv-row"><span class="label">Zoom per step</span><span class="value">0.5%</span></div>
@@ -321,25 +320,37 @@
 </div><!-- /hud-shell -->
 
 <script>
-// ── RSA-Omega: The Game of Truth — Voronoi Foam + Three Cognitive Types ───────
+// ── RSA-Omega: The Game of Truth — Voronoi Foam + Six Cognitive Types ────────
 // David Harry Freed.
-// Three cell types coexist and compete: Kernel Builders (full RSA loop),
-// Local Navigators (shallow prediction), Reactive Drifters (noise response).
+// Two axes: loop depth (Builder/Navigator/Drifter) × grounding (Physics/Symbol).
+// Physics cells predict against territory (true Mandelbrot band).
+// Symbol cells predict against their lagged internal map — and pay a
+// map-territory divergence tax when reality changes faster than their map updates.
 // Hidden physics: Mandelbrot set, zooming toward cardioid/bulb boundary.
-// Zipf histogram shows whether strategy distribution approaches power law.
 
-// ── Cell types ────────────────────────────────────────────────────────────────
-const T_BUILDER   = 0;
-const T_NAVIGATOR = 1;
-const T_DRIFTER   = 2;
+// ── Cell type encoding ────────────────────────────────────────────────────────
+// type = depth*2 + grounding
+// depth:    0=Builder, 1=Navigator, 2=Drifter
+// grounding: 0=Physics, 1=Symbol
+// type:   0=PhysBuilder, 1=SymBuilder, 2=PhysNav, 3=SymNav, 4=PhysDrift, 5=SymDrift
+const N_TYPES  = 6;
+function typeDepth(t)   { return Math.floor(t/2); }  // 0/1/2
+function typeGround(t)  { return t % 2; }             // 0=physics, 1=symbol
+function makeType(d, g) { return d*2 + g; }
 
-//                          Builder  Navigator  Drifter
-const TYPE_COST    = [       1.5,     0.8,       0.4  ];
-const TYPE_ERR_F   = [       5.0,     3.5,       3.0  ];
-const TYPE_REPRO_T = [       200,     150,       100  ];
-const TYPE_REPRO_C = [       70,      50,        30   ];
-const TYPE_NBR_D   = [       999,     3,         0    ]; // neighbor depth (999 = all)
-const TYPE_MUT     = 0.05;   // probability of type switch on reproduction
+//                           PB    SB    PN    SN    PD    SD
+const TYPE_COST    = [      1.5,  1.5,  0.8,  0.8,  0.4,  0.4 ];
+const TYPE_ERR_F   = [      5.0,  5.0,  3.5,  3.5,  3.0,  3.0 ];
+const TYPE_REPRO_T = [      200,  200,  150,  150,  100,  100  ];
+const TYPE_REPRO_C = [      70,   70,   50,   50,   30,   30   ];
+const TYPE_NBR_D   = [      999, 999,   3,    3,    0,    0    ];
+
+const TYPE_MUT     = 0.05;  // depth mutation rate on reproduction (toward Navigator)
+const GROUND_MUT   = 0.03;  // grounding axis flip rate on reproduction
+
+// Symbol grounding mechanics
+const SYMBOL_LAG   = 0.65;  // symbol map update speed (lower = slower to track reality)
+const GROUND_TAX   = 2.5;   // extra energy cost per unit map-territory divergence
 
 // ── Simulation constants ──────────────────────────────────────────────────────
 const N_CELLS    = 220;
@@ -361,6 +372,7 @@ let canvasW, canvasH;
 let seedX, seedY, voronoiMap, nbrList, nbrCount, imgData;
 
 let energy, cellState, nextState, cellError, cellRepro, cellBand, cellType;
+let symbolMap;   // lagged band representation for symbol-grounded cells
 let weights;
 let cReal, cImag;
 
@@ -486,7 +498,7 @@ function initCanvas() {
 
   // size histogram canvas to match
   hCanvas.width  = hCanvas.parentElement.clientWidth;
-  hCanvas.height = 72;
+  hCanvas.height = 100;
 
   document.getElementById('init-overlay').style.display = 'none';
 }
@@ -500,6 +512,7 @@ function initSim() {
   cellRepro = new Uint8Array(N_CELLS);
   cellBand  = new Uint8Array(N_CELLS);
   cellType  = new Uint8Array(N_CELLS);
+  symbolMap = new Float32Array(N_CELLS);
   weights   = new Float32Array(N_CELLS*MAX_NBRS);
   cReal     = new Float32Array(N_CELLS);
   cImag     = new Float32Array(N_CELLS);
@@ -514,10 +527,11 @@ function initSim() {
     cReal[i] = viewRMin + (seedX[i]/canvasW)*dR;
     cImag[i] = viewIMin + (seedY[i]/canvasH)*dI;
     const band = escapeband(cReal[i], cImag[i]);
-    cellBand[i]  = band;
-    cellState[i] = band/6.0;
-    energy[i]    = INIT_E*(0.5+Math.random());
-    cellType[i]  = Math.floor(Math.random()*3);   // random starting type
+    cellBand[i]   = band;
+    cellState[i]  = band/6.0;
+    symbolMap[i]  = band/6.0;
+    energy[i]     = INIT_E*(0.5+Math.random());
+    cellType[i]   = Math.floor(Math.random()*N_TYPES);
     const nc = nbrCount[i];
     for (let k = 0; k < nc; k++)
       weights[i*MAX_NBRS+k] = (Math.random()-0.5)*0.5;
@@ -545,35 +559,54 @@ function step() {
     nextState[i] = band/6.0;
   }
 
-  // Predict and update energy — type-specific
+  // Update symbol maps first (lagged band representation for symbol cells)
+  for (let i = 0; i < N_CELLS; i++) {
+    if (energy[i] > 0 && typeGround(cellType[i]) === 1)
+      symbolMap[i] = SYMBOL_LAG*symbolMap[i] + (1-SYMBOL_LAG)*nextState[i];
+  }
+
+  // Predict and update energy — type-specific + grounding axis
   let errSum = 0, errCnt = 0;
   for (let i = 0; i < N_CELLS; i++) {
     if (energy[i] <= 0) continue;
-    const t  = cellType[i];
-    const nc = nbrCount[i];
+    const t      = cellType[i];
+    const depth  = typeDepth(t);
+    const ground = typeGround(t);
+    const nc     = nbrCount[i];
     let pred;
 
-    if (t === T_DRIFTER) {
-      pred = Math.random();   // no model — pure noise
+    if (depth === 2) {
+      pred = Math.random();   // Drifter: pure noise regardless of grounding
     } else {
-      const depth = (t === T_BUILDER) ? nc : Math.min(TYPE_NBR_D[t], nc);
+      const d = depth === 0 ? nc : Math.min(TYPE_NBR_D[t], nc);
       let sum = 0;
-      for (let k = 0; k < depth; k++)
+      for (let k = 0; k < d; k++)
         sum += weights[i*MAX_NBRS+k] * cellState[nbrList[i*MAX_NBRS+k]];
       pred = sigmoid(sum);
     }
 
-    const errSigned = pred - nextState[i];
-    const err = Math.abs(errSigned);
-    cellError[i] = err;
+    // Physics cells predict against territory; Symbol cells against their lagged map
+    const target   = ground === 0 ? nextState[i] : symbolMap[i];
+    const errSigned = pred - target;
+    const err       = Math.abs(errSigned);
+    cellError[i]    = err;
     energy[i] = Math.min(energy[i] + GAIN_BASE - TYPE_COST[t] - err*TYPE_ERR_F[t], MAX_E);
 
+    // Symbol cells pay an additional map-territory divergence tax
+    if (ground === 1) {
+      const divergence = Math.abs(symbolMap[i] - nextState[i]);
+      energy[i] -= GROUND_TAX * divergence;
+    }
+
     // Builders get the delta-rule update in Evolve+Learn mode
-    if (learningMode && t === T_BUILDER) {
-      const dpred = pred*(1.0-pred);
+    // Physics Builders learn toward territory; Symbol Builders toward their map
+    if (learningMode && depth === 0) {
+      const learnTarget  = ground === 0 ? nextState[i] : symbolMap[i];
+      const learnErr     = pred - learnTarget;
+      const dpred        = pred*(1.0-pred);
       for (let k = 0; k < nc; k++) {
         const xi = cellState[nbrList[i*MAX_NBRS+k]];
-        weights[i*MAX_NBRS+k] -= LEARN_RATE*errSigned*dpred*xi;
+        weights[i*MAX_NBRS+k] -= LEARN_RATE*learnErr*dpred*xi;
       }
     }
     errSum += err; errCnt++;
@@ -600,7 +633,7 @@ function step() {
     if (dead.length > 0) {
       const i = dead[Math.floor(Math.random()*dead.length)];
       energy[i]   = INIT_E * 0.4;
-      cellType[i] = Math.floor(Math.random()*3);
+      cellType[i] = Math.floor(Math.random()*N_TYPES);
       const nc = nbrCount[i];
       for (let k = 0; k < nc; k++)
         weights[i*MAX_NBRS+k] = (Math.random()-0.5)*0.5;
@@ -634,14 +667,16 @@ function step() {
         if (Math.random() < MUT_RATE) nw += (Math.random()-0.5)*2*MUT_STR;
         weights[bestT*MAX_NBRS+k] = nw;
       }
-      // Type inheritance with mutation (adjacent type only)
-      let newType = t;
+      // Type inheritance with 2D mutation: depth axis + grounding axis
+      let newDepth  = typeDepth(t);
+      let newGround = typeGround(t);
       if (Math.random() < TYPE_MUT) {
-        if (t === T_BUILDER)   newType = T_NAVIGATOR;
-        else if (t === T_DRIFTER) newType = T_NAVIGATOR;
-        else newType = Math.random() < 0.5 ? T_BUILDER : T_DRIFTER;
+        if (newDepth === 0)      newDepth = 1;
+        else if (newDepth === 2) newDepth = 1;
+        else newDepth = Math.random() < 0.5 ? 0 : 2;
       }
-      cellType[bestT] = newType;
+      if (Math.random() < GROUND_MUT) newGround = 1 - newGround;
+      cellType[bestT] = makeType(newDepth, newGround);
       energy[bestT] = INIT_E*0.5;
       energy[i] -= TYPE_REPRO_C[t];
       cellRepro[i] = 1;
@@ -667,30 +702,16 @@ function step() {
 // Color encodes: type × health (energy/MAX_E)
 // Type boundaries drawn in dark gray instead of black to distinguish from foam edges
 
+// Color palette per type (dark → bright as energy rises)
+// PB=cyan, SB=violet, PN=green, SN=amber, PD=orange, SD=rose
+const TYPE_COLOR_DARK  = [[22,78,99],[76,29,100],[20,83,45],[92,60,12],[124,45,18],[136,19,44]];
+const TYPE_COLOR_LIGHT = [[6,182,212],[167,139,250],[22,163,74],[180,113,9],[234,88,12],[244,63,100]];
+
 function typeColor(t, e) {
   const s = Math.min(e/MAX_E, 1.0);
-  if (t === T_BUILDER) {
-    // dark cyan (#164e63) → bright cyan (#06b6d4)
-    return [
-      Math.floor(22  + s*(6   - 22)),   // actually let me just lerp RGB
-      Math.floor(78  + s*(182 - 78)),
-      Math.floor(99  + s*(212 - 99)),
-    ];
-  } else if (t === T_NAVIGATOR) {
-    // dark green (#14532d) → bright green (#16a34a)
-    return [
-      Math.floor(20  + s*(22  - 20)),
-      Math.floor(83  + s*(163 - 83)),
-      Math.floor(45  + s*(74  - 45)),
-    ];
-  } else {
-    // dark orange (#7c2d12) → bright orange (#ea580c)
-    return [
-      Math.floor(124 + s*(234 - 124)),
-      Math.floor(45  + s*(88  - 45)),
-      Math.floor(18  + s*(12  - 18)),
-    ];
-  }
+  const [dr,dg,db] = TYPE_COLOR_DARK[t];
+  const [lr,lg,lb] = TYPE_COLOR_LIGHT[t];
+  return [Math.floor(dr+s*(lr-dr)), Math.floor(dg+s*(lg-dg)), Math.floor(db+s*(lb-db))];
 }
 
 function draw() {
@@ -740,23 +761,23 @@ function drawHistogram(alive, counts) {
 
   const MID = Math.floor(H * 0.55);
 
-  // ── Type bars (top section) ──
-  const colors = ['#06b6d4', '#16a34a', '#ea580c'];
-  const labels = ['B', 'N', 'D'];
-  const barH   = Math.floor((MID - 4) / 3);
-  const maxW   = W - 40;
+  // ── Type bars (top section) — 6 types: PB SB PN SN PD SD ──
+  const barColors = ['#06b6d4','#a855f7','#16a34a','#d97706','#ea580c','#f43f5e'];
+  const barLabels = ['PB','SB','PN','SN','PD','SD'];
+  const barH      = Math.floor((MID - 4) / 6);
+  const maxW      = W - 36;
 
-  for (let t = 0; t < 3; t++) {
-    const y  = t*(barH+2) + 2;
+  for (let t = 0; t < N_TYPES; t++) {
+    const y  = t*(barH+1) + 2;
     const bw = Math.round((counts[t]/N_CELLS)*maxW);
-    hCtx.fillStyle = colors[t];
+    hCtx.fillStyle = barColors[t];
     hCtx.fillRect(0, y, bw, barH);
     hCtx.fillStyle = '#374151';
-    hCtx.font = '9px monospace';
-    hCtx.fillText(`${labels[t]}${counts[t]}`, Math.max(bw+2, 2), y+barH-1);
+    hCtx.font = '8px monospace';
+    hCtx.fillText(`${barLabels[t]}${counts[t]}`, Math.max(bw+2, 2), y+barH-1);
   }
 
-  // Zipf ratio
+  // Zipf ratio across all 6 types
   const sorted = [...counts].sort((a,b)=>b-a);
   const r1 = sorted[0] > 0 ? sorted[1]/sorted[0] : 0;
   const r2 = sorted[1] > 0 ? sorted[2]/sorted[1] : 0;
@@ -805,7 +826,7 @@ function drawHistogram(alive, counts) {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function updateStats() {
-  const counts = [0, 0, 0];
+  const counts = new Array(N_TYPES).fill(0);
   let alive = 0, eSum = 0, boundaryCells = 0;
   for (let i = 0; i < N_CELLS; i++) {
     if (energy[i] > 0) { alive++; eSum += energy[i]; counts[cellType[i]]++; }
