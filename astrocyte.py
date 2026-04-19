@@ -23,9 +23,9 @@ PRICE_INPUT_PER_TOKEN  = 5.00  / 1_000_000   # $5.00 per million input tokens
 PRICE_OUTPUT_PER_TOKEN = 25.00 / 1_000_000   # $25.00 per million output tokens
 
 # ─── Default daily budget ─────────────────────────────────────────────────────
-DEFAULT_DAILY_INPUT_TOKENS  = 40_000   # ~$0.20/day input
-DEFAULT_DAILY_OUTPUT_TOKENS = 10_000   # ~$0.25/day output
-# Total default: ~$0.45/day — adjust freely
+DEFAULT_DAILY_INPUT_TOKENS  = 100_000  # ~$0.50/day input
+DEFAULT_DAILY_OUTPUT_TOKENS =  40_000  # ~$1.00/day output
+# Total default: ~$1.50/day — covers scoring + node building + cycle queries
 
 
 class Astrocyte:

@@ -1,0 +1,755 @@
+"""
+FREED — Batch Feed
+Processes links_queue.json through L7, N links at a time.
+
+Usage:
+  python3 batch_feed.py             # process next 5 links
+  python3 batch_feed.py --n 10      # process next 10 links
+  python3 batch_feed.py --n 0       # process ALL remaining (careful with credits)
+  python3 batch_feed.py --stats     # show queue status only
+  python3 batch_feed.py --academic  # only process academic sources (score >= 6)
+
+Results are written back to links_queue.json (status: done/failed).
+Engrams go to the normal FREED log. Successful feeds update FREED_state.json.
+"""
+
+import os
+import sys
+import json
+import time
+import hashlib
+import argparse
+import re as _re_module
+import requests
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
+from feed_guard import sanitize as guard_sanitize
+from l7_agent import L7Agent
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+FREED_DIR   = Path(__file__).parent
+QUEUE_FILE  = FREED_DIR / "links_queue.json"
+STATE_FILE  = FREED_DIR / "FREED_state.json"
+SEEN_FILE   = FREED_DIR / "tamura_seen.json"
+LOG_DIR     = FREED_DIR / "FREED_log"
+DEDUP_FILE  = FREED_DIR / "feed_dedup_index.json"
+CONTENT_DEDUP_FILE = FREED_DIR / "feed_content_dedup.json"
+
+DEFAULT_BATCH   = 5
+POLITENESS_SEC  = 2      # delay between fetches
+REQUEST_TIMEOUT = 15
+MAX_CONTENT_CHARS = 8000  # truncate long pages before feeding
+
+# ─── RangeEn normalization parameters ─────────────────────────────────────────
+# Window length m for local-range normalization (RangeEn-style).
+# Range = max - min over a sliding window of length m.
+# This replaces global σ normalization for coherence/novelty scoring.
+RANGEEN_WINDOW_M = 5
+RANGEEN_FLOOR    = 1e-6   # avoid division by zero when range is flat
+
+
+# ─── RangeEn local-range normalization ────────────────────────────────────────
+
+def _range_normalize(scores):
+    """
+    RangeEn-style local sliding-window range normalization.
+
+    Instead of normalizing a batch of scores by global standard deviation
+    (which is sensitive to amplitude outliers from e.g. highly-cited papers
+    or very long abstracts), we normalize each score by the local range
+    (max - min) over a sliding window of length m centered on that score.
+
+    This decouples each feed's score from batch composition, improving
+    cross-session score comparability and reducing false-novelty signals
+    from amplitude artifacts.
+
+    Parameters follow the RangeEn paper: window length m, with range =
+    max(window) - min(window), and a floor to avoid division by zero.
+
+    Args:
+        scores: list of float — raw yield/coherence scores for a batch
+
+    Returns:
+        list of float — range-normalized scores
+    """
+    if not scores:
+        return scores
+
+    n = len(scores)
+    m = RANGEEN_WINDOW_M
+    normalized = []
+
+    for i in range(n):
+        # Define the window: m elements centered on i (or as close as possible)
+        half = m // 2
+        win_start = max(0, i - half)
+        win_end = min(n, i + half + 1)
+        # Ensure we get at least m elements if possible
+        if win_end - win_start < m:
+            if win_start == 0:
+                win_end = min(n, m)
+            elif win_end == n:
+                win_start = max(0, n - m)
+
+        window = scores[win_start:win_end]
+        local_range = max(window) - min(window)
+
+        if local_range < RANGEEN_FLOOR:
+            # Flat region — score is at baseline, normalize to 0.5
+            normalized.append(0.5)
+        else:
+            # Normalize score within the local range to [0, 1]
+            val = (scores[i] - min(window)) / local_range
+            normalized.append(val)
+
+    return normalized
+
+
+# ─── Content-level deduplication (DOI / title+abstract hash) ──────────────────
+#
+# This layer hashes each feed input by DOI (if available) or by a SHA-256 of
+# the normalized title+abstract. If the hash has been seen before, processing
+# is blocked and a short "DUPLICATE — see gen N" notice is emitted instead.
+#
+# Rationale: the quadruple-feed of the RangeEn paper proved the pipeline wastes
+# kernel cycles on already-digested material. Content-level dedup enforces γ=1
+# criticality by redirecting processing budget toward novel inputs that can
+# actually move obligations or generate new ones.
+
+def _extract_doi_from_data(data):
+    """
+    Try to extract a DOI from fetched data.
+    Checks explicit 'doi' field and scans content/abstract for DOI patterns.
+    """
+    # Explicit field
+    doi = data.get('doi', '')
+    if doi:
+        return doi.strip().lower()
+
+    # Scan title, abstract, content for DOI pattern
+    for field in ('abstract', 'content', 'title'):
+        text = data.get(field, '')
+        if text:
+            m = _re_module.search(r'(10\.\d{4,9}/[^\s]+)', text)
+            if m:
+                return m.group(1).rstrip('.,;)').lower()
+
+    return None
+
+
+def _extract_doi_from_url(url):
+    """Try to extract a DOI from common DOI URL patterns."""
+    if not url:
+        return None
+    # doi.org direct links
+    m = _re_module.search(r'doi\.org/(10\.\d{4,9}/[^\s?#]+)', url)
+    if m:
+        return m.group(1).rstrip('.,;)').lower()
+    return None
+
+
+def _content_hash(doi, title, abstract):
+    """
+    Compute a content dedup hash.
+    Priority: DOI if available, else SHA-256 of normalized title+abstract.
+    Returns (hash_key: str, hash_type: str) or (None, None) if insufficient data.
+    """
+    if doi:
+        # DOI is the gold standard — normalize and hash
+        normalized_doi = doi.strip().lower()
+        h = hashlib.sha256(('doi:' + normalized_doi).encode('utf-8')).hexdigest()[:40]
+        return h, 'doi'
+
+    # Fall back to title+abstract
+    norm_title = _re_module.sub(r'\s+', ' ', (title or '').strip().lower())
+    norm_abstract = _re_module.sub(r'\s+', ' ', (abstract or '').strip().lower())
+
+    if not norm_title and not norm_abstract:
+        return None, None
+
+    combined = norm_title + '|||' + norm_abstract
+    h = hashlib.sha256(combined.encode('utf-8')).hexdigest()[:40]
+    return h, 'title+abstract'
+
+
+def _load_content_dedup():
+    """Load the content-level dedup registry from disk."""
+    if CONTENT_DEDUP_FILE.exists():
+        try:
+            with open(CONTENT_DEDUP_FILE) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {}
+
+
+def _save_content_dedup(registry):
+    """Persist the content-level dedup registry."""
+    with open(CONTENT_DEDUP_FILE, 'w') as f:
+        json.dump(registry, f, indent=2, ensure_ascii=False)
+
+
+def _content_dedup_check(doi, title, abstract):
+    """
+    Check if content has already been processed (by DOI or title+abstract hash).
+    Returns (is_duplicate: bool, generation: int or None, hash_type: str or None).
+    """
+    h, htype = _content_hash(doi, title, abstract)
+    if h is None:
+        return False, None, None
+
+    registry = _load_content_dedup()
+    if h in registry:
+        prev = registry[h]
+        return True, prev.get('generation', '?'), htype
+
+    return False, None, None
+
+
+def _content_dedup_register(doi, title, abstract, url, generation):
+    """Register content hash after successful processing."""
+    h, htype = _content_hash(doi, title, abstract)
+    if h is None:
+        return
+
+    registry = _load_content_dedup()
+    registry[h] = {
+        'generation': generation,
+        'hash_type': htype,
+        'url': url,
+        'title': (title or '')[:120],
+        'registered_at': datetime.now(timezone.utc).isoformat()
+    }
+    _save_content_dedup(registry)
+
+
+def _bootstrap_content_dedup_from_logs():
+    """
+    On first run (no content dedup file yet), scan existing engram logs to
+    populate the content dedup registry. Also scans the existing dedup index
+    and queue for previously processed entries. Idempotent.
+    """
+    if CONTENT_DEDUP_FILE.exists():
+        return  # already bootstrapped
+
+    registry = {}
+    gen_counter = 0
+
+    # Scan engram logs
+    if LOG_DIR.exists():
+        for log_file in sorted(LOG_DIR.glob('freed_*.jsonl')):
+            try:
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            entry = json.loads(line)
+                            title = entry.get('title', '')
+                            abstract = entry.get('abstract', '')
+                            url = entry.get('url', '')
+                            doi = entry.get('doi', '') or _extract_doi_from_url(url)
+
+                            gen_counter += 1
+                            h, htype = _content_hash(doi, title, abstract)
+                            if h and h not in registry:
+                                registry[h] = {
+                                    'generation': gen_counter,
+                                    'hash_type': htype,
+                                    'url': url,
+                                    'title': (title or '')[:120],
+                                    'registered_at': entry.get('fed_at', entry.get('timestamp', ''))
+                                }
+                        except (json.JSONDecodeError, KeyError):
+                            continue
+            except IOError:
+                continue
+
+    # Also scan queue for already-done entries
+    if QUEUE_FILE.exists():
+        try:
+            with open(QUEUE_FILE) as f:
+                q = json.load(f)
+            for entry in q:
+                if entry.get('status') == 'done':
+                    title = entry.get('title', '')
+                    url = entry.get('url', '')
+                    doi = _extract_doi_from_url(url)
+                    # Queue entries usually don't have abstract, but try
+                    abstract = entry.get('abstract', '')
+                    h, htype = _content_hash(doi, title, abstract)
+                    if h and h not in registry:
+                        gen_counter += 1
+                        registry[h] = {
+                            'generation': gen_counter,
+                            'hash_type': htype,
+                            'url': url,
+                            'title': (title or '')[:120],
+                            'registered_at': entry.get('fed_at', '')
+                        }
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    _save_content_dedup(registry)
+    if registry:
+        print(f'[CONTENT-DEDUP] Bootstrapped content dedup index: {len(registry)} hash(es) indexed.')
+
+
+# ─── Deduplication ────────────────────────────────────────────────────────────
+
+def _title_hash(title):
+    """
+    Compute a stable hash from a paper title.
+    Normalizes whitespace and case before hashing.
+    """
+    import re
+    if not title:
+        return None
+    normalized = re.sub(r'\s+', ' ', title.strip().lower())
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()[:32]
+
+
+def _abstract_fingerprint(abstract):
+    """
+    Compute a fingerprint from abstract text.
+    Uses first 500 chars after normalization to handle minor variations
+    (e.g. trailing whitespace, line breaks) across different sources.
+    """
+    import re
+    if not abstract:
+        return None
+    normalized = re.sub(r'\s+', ' ', abstract.strip().lower())[:500]
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()[:32]
+
+
+def _load_dedup_index():
+    """Load the deduplication index from disk."""
+    if DEDUP_FILE.exists():
+        try:
+            with open(DEDUP_FILE) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {'title_hashes': {}, 'abstract_fps': {}}
+
+
+def _save_dedup_index(index):
+    """Persist the deduplication index."""
+    with open(DEDUP_FILE, 'w') as f:
+        json.dump(index, f, indent=2, ensure_ascii=False)
+
+
+def _check_duplicate(title, abstract):
+    """
+    Check if a paper (by title hash or abstract fingerprint) has already
+    been processed. Returns (is_duplicate: bool, match_info: str or None).
+
+    Per Seed Integrity Rule 9: generate and pay debts, not collect trophies.
+    Re-feeding confirmed duplicates wastes kernel cycles for diminishing returns.
+    """
+    index = _load_dedup_index()
+
+    th = _title_hash(title)
+    af = _abstract_fingerprint(abstract)
+
+    # Check title hash
+    if th and th in index.get('title_hashes', {}):
+        prev = index['title_hashes'][th]
+        return True, "title match — previously fed at {}".format(prev.get('fed_at', '?'))
+
+    # Check abstract fingerprint
+    if af and af in index.get('abstract_fps', {}):
+        prev = index['abstract_fps'][af]
+        return True, "abstract match — previously fed at {}".format(prev.get('fed_at', '?'))
+
+    return False, None
+
+
+def _register_in_dedup_index(title, abstract, url):
+    """Register a successfully processed paper in the dedup index."""
+    index = _load_dedup_index()
+
+    now = datetime.now(timezone.utc).isoformat()
+    record = {'url': url, 'fed_at': now}
+
+    th = _title_hash(title)
+    af = _abstract_fingerprint(abstract)
+
+    if 'title_hashes' not in index:
+        index['title_hashes'] = {}
+    if 'abstract_fps' not in index:
+        index['abstract_fps'] = {}
+
+    if th:
+        index['title_hashes'][th] = record
+    if af:
+        index['abstract_fps'][af] = record
+
+    _save_dedup_index(index)
+
+
+# ─── Engram log scanning for dedup bootstrap ──────────────────────────────────
+
+def _bootstrap_dedup_from_logs():
+    """
+    On first run (no dedup index yet), scan existing engram logs to populate
+    the dedup index with previously processed papers. Idempotent.
+    """
+    if DEDUP_FILE.exists():
+        return  # already bootstrapped
+
+    index = {'title_hashes': {}, 'abstract_fps': {}}
+    if not LOG_DIR.exists():
+        _save_dedup_index(index)
+        return
+
+    count = 0
+    for log_file in sorted(LOG_DIR.glob('freed_*.jsonl')):
+        try:
+            with open(log_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                        title = entry.get('title', '')
+                        abstract = entry.get('abstract', '')
+                        url = entry.get('url', '')
+                        fed_at = entry.get('fed_at', entry.get('timestamp', ''))
+
+                        record = {'url': url, 'fed_at': fed_at}
+                        th = _title_hash(title)
+                        af = _abstract_fingerprint(abstract)
+                        if th:
+                            index['title_hashes'][th] = record
+                            count += 1
+                        if af:
+                            index['abstract_fps'][af] = record
+                    except (json.JSONDecodeError, KeyError):
+                        continue
+        except IOError:
+            continue
+
+    _save_dedup_index(index)
+    if count:
+        print(f'[DEDUP] Bootstrapped dedup index from logs: {count} title(s) indexed.')
+
+
+# ─── Fetch helpers ────────────────────────────────────────────────────────────
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+}
+
+
+def _fetch_arxiv(arxiv_id: str) -> dict:
+    """
+    Fetch title + abstract for an arXiv paper.
+    Primary: Atom API. Fallback: scrape the abstract HTML page.
+    Returns empty dict only if both fail.
+    """
+    import re as _re
+    import xml.etree.ElementTree as ET
+
+    # ── Try Atom API first ────────────────────────────────────────────────────
+    try:
+        r = requests.get(
+            f"https://export.arxiv.org/api/query?id_list={arxiv_id}",
+            headers=HEADERS, timeout=REQUEST_TIMEOUT
+        )
+        if r.status_code == 200:
+            ns = {'atom': 'http://www.w3.org/2005/Atom'}
+            root = ET.fromstring(r.text)
+            entry = root.find('atom:entry', ns)
+            if entry is not None:
+                title    = (entry.findtext('atom:title', '', ns) or '').strip().replace('\n', ' ')
+                abstract = (entry.findtext('atom:summary', '', ns) or '').strip().replace('\n', ' ')
+                authors  = [a.findtext('atom:name', '', ns)
+                            for a in entry.findall('atom:author', ns)]
+                if title and abstract:
+                    return {'title': title, 'abstract': abstract, 'authors': authors}
+    except Exception as e:
+        print(f"  [FETCH] arXiv API error: {e}")
+
+    # ── Fallback: scrape abstract page HTML ───────────────────────────────────
+    try:
+        r = requests.get(
+            f"https://arxiv.org/abs/{arxiv_id}",
+            headers=HEADERS, timeout=REQUEST_TIMEOUT, allow_redirects=True
+        )
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+
+            # Title: <h1 class="title mathjax">
+            title_tag = soup.find('h1', class_='title')
+            if not title_tag:
+                title_tag = soup.find('title')
+            title = title_tag.get_text(strip=True).replace('Title:', '').strip() if title_tag else ''
+
+            # Abstract: <blockquote class="abstract mathjax">
+            abs_tag = soup.find('blockquote', class_='abstract')
+            abstract = abs_tag.get_text(strip=True).replace('Abstract:', '').strip() if abs_tag else ''
+
+            # Authors: <div class="authors">
+            auth_tag = soup.find('div', class_='authors')
+            authors = []
+            if auth_tag:
+                authors = [a.get_text(strip=True) for a in auth_tag.find_all('a')][:5]
+
+            if title or abstract:
+                print(f"  [FETCH] arXiv API empty — used HTML fallback.")
+                return {'title': title, 'abstract': abstract, 'authors': authors}
+    except Exception as e:
+        print(f"  [FETCH] arXiv HTML fallback error: {e}")
+
+    return {}
+
+
+def _extract_arxiv_id(url: str):
+    """Extract arXiv ID from URL like arxiv.org/abs/2304.01904."""
+    import re
+    m = re.search(r'arxiv\.org/(?:abs|pdf)/([0-9]+\.[0-9v]+)', url)
+    return m.group(1) if m else None
+
+
+def _fetch_generic(url: str) -> dict:
+    """Fetch title + body text from a generic web page."""
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT,
+                         allow_redirects=True)
+        if r.status_code != 200:
+            return {'error': f'HTTP {r.status_code}'}
+        soup = BeautifulSoup(r.text, 'html.parser')
+
+        # Title
+        title_tag = soup.find('title')
+        title = title_tag.get_text(strip=True) if title_tag else ''
+
+        # Remove nav/header/footer noise
+        for tag in soup(['nav', 'header', 'footer', 'aside', 'script', 'style']):
+            tag.decompose()
+
+        # Try article/main first, fall back to body
+        content_tag = (
+            soup.find('article') or
+            soup.find('main') or
+            soup.find('div', class_=lambda c: c and any(
+                x in c.lower() for x in ['content', 'article', 'post', 'entry']
+            )) or
+            soup.find('body')
+        )
+        text = content_tag.get_text(separator=' ', strip=True) if content_tag else ''
+        # Collapse whitespace
+        import re
+        text = re.sub(r'\s+', ' ', text).strip()
+        return {'title': title, 'content': text[:MAX_CONTENT_CHARS]}
+    except Exception as e:
+        return {'error': str(e)}
+
+
+def is_search_url(url: str) -> bool:
+    """True for Google Scholar / search fallback URLs — these return no content."""
+    return 'scholar.google.com/scholar?q=' in url or 'google.com/search?q=' in url
+
+
+def fetch_url(url: str) -> dict:
+    """
+    Fetch content from a URL. Returns dict with title, abstract/content.
+    Handles arXiv specially for clean abstract extraction.
+    """
+    if is_search_url(url):
+        return {'error': 'search_url — no direct paper URL available'}
+
+    arxiv_id = _extract_arxiv_id(url)
+    if arxiv_id:
+        result = _fetch_arxiv(arxiv_id)
+        if result.get('title') or result.get('abstract'):
+            return result
+        # Both methods failed — let generic try
+        print(f"  [FETCH] arXiv fetch failed for {arxiv_id}, trying generic...")
+
+    return _fetch_generic(url)
+
+
+# ─── Feed prompt builder ──────────────────────────────────────────────────────
+
+def build_feed_prompt(url: str, data: dict) -> str:
+    title    = data.get('title', '(no title)')
+    abstract = data.get('abstract', '')
+    content  = data.get('content', '')
+    authors  = data.get('authors', [])
+
+    author_str = ', '.join(authors[:3]) if authors else ''
+    body = abstract or content or '(no content retrieved)'
+
+    parts = [f"FEED INPUT:\nURL: {url}"]
+    if title:
+        parts.append(f"Title: {title}")
+    if author_str:
+        parts.append(f"Authors: {author_str}")
+    parts.append(f"\n{body[:MAX_CONTENT_CHARS]}")
+    parts.append(
+        "\nMap this input against the genome. "
+        "Does it confirm, refute, or extend any invariant or obligation? "
+        "Which obligation does it advance? What should be OBLIGATEd?"
+    )
+    return '\n'.join(parts)
+
+
+# ─── State management ─────────────────────────────────────────────────────────
+
+def load_state() -> dict:
+    if STATE_FILE.exists():
+        with open(STATE_FILE) as f:
+            return json.load(f)
+    return {'generation': 0, 'coherence': 0.993, 'cycle_count': 0}
+
+
+def save_state(state: dict):
+    with open(STATE_FILE, 'w') as f:
+        json.dump(state, f, indent=2)
+
+
+def mark_seen(url: str):
+    seen = set()
+    if SEEN_FILE.exists():
+        with open(SEEN_FILE) as f:
+            seen = set(json.load(f))
+    seen.add(url)
+    with open(SEEN_FILE, 'w') as f:
+        json.dump(sorted(seen), f, indent=2)
+
+
+def log_result(result: dict):
+    date_str = datetime.utcnow().strftime('%Y-%m-%d')
+    log_file = LOG_DIR / f'freed_{date_str}.jsonl'
+    with open(log_file, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(result) + '\n')
+
+
+# ─── Queue management ─────────────────────────────────────────────────────────
+
+def load_queue() -> list:
+    if not QUEUE_FILE.exists():
+        print(f'[BATCH] No queue found at {QUEUE_FILE}')
+        print('  Run: python3 extract_links.py')
+        sys.exit(1)
+    with open(QUEUE_FILE) as f:
+        return json.load(f)
+
+
+def save_queue(queue: list):
+    with open(QUEUE_FILE, 'w') as f:
+        json.dump(queue, f, indent=2, ensure_ascii=False)
+
+
+def print_stats(queue: list):
+    queued   = [e for e in queue if e['status'] == 'queued']
+    done     = [e for e in queue if e['status'] == 'done']
+    failed   = [e for e in queue if e['status'] == 'failed']
+    academic = [e for e in queued if e.get('score', 0) >= 6]
+    human    = [e for e in queued if e.get('from') == 'human']
+
+    # Count content-level duplicates in done entries
+    dedup_ct = sum(1 for e in done if e.get('content_dedup'))
+
+    print(f'\n[BATCH] Queue: {QUEUE_FILE.name}')
+    print(f'  Queued:   {len(queued):>4}  (academic: {len(academic)}, yours: {len(human)})')
+    print(f'  Done:     {len(done):>4}  (content-deduped: {dedup_ct})')
+    print(f'  Failed:   {len(failed):>4}')
+    if queued:
+        print(f'\n  Next up:')
+        for e in queued[:5]:
+            src  = e.get('source', 'web')
+            frm  = '★' if e.get('from') == 'human' else ' '
+            conv = e.get('conv', '')[:40]
+            print(f'  {frm} [{src:<16}] {e["url"][:60]}')
+            if conv and conv != 'link_list':
+                print(f'              from: "{conv}"')
+
+    # Content dedup index stats
+    if CONTENT_DEDUP_FILE.exists():
+        try:
+            with open(CONTENT_DEDUP_FILE) as f:
+                cd = json.load(f)
+            print(f'  Content dedup index: {len(cd)} unique hash(es)')
+        except (json.JSONDecodeError, IOError):
+            pass
+    print()
+
+
+# ─── Main feed loop ───────────────────────────────────────────────────────────
+
+def run_batch(n: int, academic_only: bool = False):
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        api_key = input('Paste your Anthropic API key: ').strip()
+
+    # Bootstrap dedup indices from logs on first run
+    _bootstrap_dedup_from_logs()
+    _bootstrap_content_dedup_from_logs()
+
+    queue = load_queue()
+    state = load_state()
+
+    # Select candidates — skip dead-end search URLs
+    candidates = [e for e in queue if e['status'] == 'queued'
+                  and not is_search_url(e['url'])]
+
+    if academic_only:
+        candidates = [e for e in candidates if e.get('score', 0) >= 6]
+
+    # Sort: human-submitted first, then by score desc — arXiv/academic naturally
+    # floats to top, but web content (blogs, articles) is included and L7 decides
+    candidates.sort(key=lambda x: (
+        0 if x.get('from') in ('human', 'manual') else 1,
+        -x.get('score', 0)
+    ))
+
+    if not candidates:
+        print('[BATCH] Nothing queued. Run extract_links.py to add more links.')
+        return
+
+    if n == 0:
+        batch = candidates
+    else:
+        batch = candidates[:n]
+
+    print(f'\n[BATCH] Processing {len(batch)} link(s).')
+    if academic_only:
+        print('[BATCH] Academic sources only (score >= 6).')
+    else:
+        web_ct = sum(1 for e in batch if e.get('score', 0) < 6)
+        if web_ct:
+            print(f'[BATCH] Includes {web_ct} non-academic link(s) — L7 will self-regulate.')
+
+    # Boot L7 once for the whole batch
+    print('[BATCH] Booting L7...')
+    l7 = L7Agent(api_key=api_key)
+
+    results = []
+    raw_yields = []   # collect raw yield scores for RangeEn normalization
+    result_entries = []  # parallel list of (entry, result) for post-normalization update
+    dedup_skipped = 0  # counter for content-deduped entries this batch
+
+    for i, entry in enumerate(batch):
+        url = entry['url']
+        print(f'\n[{i+1}/{len(batch)}] {url}')
+
+        # Fetch
+        print('  Fetching...')
+        data = fetch_url(url)
+        if data.get('error'):
+            print(f'  Fetch failed: {data["error"]}')
+            entry['status'] = 'failed'
+            entry['error']  = data['error']
+            save_queue

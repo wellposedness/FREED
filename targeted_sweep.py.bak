@@ -1,0 +1,430 @@
+"""
+FREED — Targeted Sweep
+Active search: generates arXiv + Semantic Scholar queries from open obligations.
+
+This is the daemon's proactive reach. Instead of waiting for Tamura to surface
+relevant papers, TargetedSweep reads the open obligations, asks Claude Haiku to
+generate search terms, and actively hunts for confirming or refuting evidence.
+
+One targeted sweep per cycle, at most MAX_PER_OBLIGATION results per obligation.
+Results are merged with the Tamura sweep in _phase_sweep() before FEED.
+
+Deduplication: tamura_seen.json is shared — won't re-feed URLs already processed.
+"""
+
+import json
+import re
+import time
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
+from pathlib import Path
+
+import anthropic
+import requests
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+FREED_DIR  = Path(__file__).parent
+SEEN_FILE  = FREED_DIR / "tamura_seen.json"
+LOG_DIR    = FREED_DIR / "FREED_log"
+
+# ─── Config ───────────────────────────────────────────────────────────────────
+HAIKU_MODEL       = "claude-haiku-4-5-20251001"
+MAX_PER_OBLIGATION = 2      # max papers to return per open obligation
+ARXIV_MAX_RESULTS  = 8      # papers to retrieve from arXiv per query
+S2_MAX_RESULTS     = 5      # papers to retrieve from Semantic Scholar per query
+REQUEST_TIMEOUT    = 20
+POLITENESS_DELAY   = 1.5    # seconds between API calls
+
+HEADERS = {
+    "User-Agent": (
+        "FREED/1.0 (Freed Recursive Engine for Epistemic Dynamics; "
+        "targeted search; contact: RSA-Omega framework)"
+    )
+}
+
+# ─── Relevance keywords (shared with tamura_sweep) ───────────────────────────
+# Any paper scoring >= this gets passed to FEED
+RELEVANCE_MIN_SCORE = 2
+
+ARXIV_KEYWORDS = [
+    ("thermodynamic", 3), ("entropy", 3), ("dissipation", 3), ("landauer", 3),
+    ("free energy", 3), ("irreversib", 2), ("heat dissipat", 2),
+    ("criticality", 3), ("critical transition", 3), ("phase transition", 2),
+    ("self-organized criticality", 3), ("edge of chaos", 2), ("bifurcation", 1),
+    ("power.?law", 2), ("scale.?free", 2), ("zipf", 3), ("1/f noise", 2),
+    ("information theoret", 2), ("compression", 2), ("minimum description", 3),
+    ("kolmogorov", 2), ("mutual information", 2), ("predictive coding", 3),
+    ("autopoies", 3), ("self.organiz", 2), ("self.maintain", 2),
+    ("recursive", 2), ("self.referent", 2), ("fixed.?point", 2),
+    ("substrate", 2), ("physical.?implement", 2), ("neural substrate", 2),
+    ("stochastic computation", 2), ("probabilistic computation", 2),
+    ("minimal cell", 3), ("minimal genome", 3), ("irreducib", 2),
+    ("generating set", 2), ("basis set", 1),
+    ("conservation law", 2), ("symmetry break", 2), ("invariant", 1),
+    ("noether", 3),
+    ("consciousness", 2), ("cognition", 1), ("integrated information", 2),
+    ("global workspace", 2),
+    ("scale invarian", 3), ("renormalization", 3), ("universality class", 2),
+    ("coarse.grain", 2),
+    # Obligation-specific extras
+    ("wasserstein", 3), ("quantum transport", 2), ("entanglement entropy", 2),
+    ("spectral", 2), ("belief revision", 3), ("eeg", 1), ("neural oscillation", 2),
+    ("ear", 1), ("intelligence", 1),
+]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+class TargetedSweep:
+    """
+    Active search: mines open obligations → generates queries → fetches papers.
+    Returns structured input dicts compatible with the FEED pipeline.
+    """
+
+    def __init__(self, api_key: str, max_per_obligation: int = MAX_PER_OBLIGATION):
+        self.api_key  = api_key
+        self.max_per  = max_per_obligation
+        self._client  = anthropic.Anthropic(api_key=api_key)
+        self._load_seen()
+
+    # ── Seen-URL tracking ────────────────────────────────────────────────────
+
+    def _load_seen(self):
+        if SEEN_FILE.exists():
+            with open(SEEN_FILE) as f:
+                self.seen = set(json.load(f))
+        else:
+            self.seen = set()
+
+    def _mark_seen(self, url: str):
+        self.seen.add(url)
+        with open(SEEN_FILE, "w") as f:
+            json.dump(sorted(self.seen), f, indent=2)
+
+    # ── Main entry point ─────────────────────────────────────────────────────
+
+    def sweep(self, obligations: list) -> list:
+        """
+        Run targeted search against open/partial obligations.
+
+        obligations: list of dicts with keys: id, status, statement, priority
+        Returns: list of input dicts ready for FEED
+        """
+        self._load_seen()   # refresh before each sweep
+
+        # Only hunt for open/partial obligations — resolved ones are done
+        targets = [o for o in obligations
+                   if o.get("status") in ("open", "partial")]
+
+        if not targets:
+            print("[TARGET] No open obligations to search against.")
+            return []
+
+        # Prioritize high-priority first
+        targets.sort(key=lambda o: (
+            0 if o.get("priority") == "high" else 1,
+            o.get("id", "")
+        ))
+
+        print(f"[TARGET] {len(targets)} open obligation(s) — generating search queries...")
+
+        all_inputs = []
+        for ob in targets:
+            if len(all_inputs) >= self.max_per * 3:
+                break   # enough results for this cycle
+
+            obid = ob.get("id", "?")
+            stmt = ob.get("statement", "")
+            prog = ob.get("progress", "")
+            if not stmt:
+                continue
+
+            print(f"[TARGET] → {obid}: {stmt[:70]}...")
+
+            # Generate search queries from this obligation via Haiku
+            queries = self._generate_queries(ob)
+            if not queries:
+                print(f"[TARGET]   Query generation failed — skipping {obid}.")
+                continue
+
+            print(f"[TARGET]   Queries: {queries}")
+
+            # Search both arXiv and Semantic Scholar for each query
+            ob_papers = []
+            for q in queries:
+                if len(ob_papers) >= self.max_per:
+                    break
+
+                # arXiv search
+                papers = self._search_arxiv(q)
+                for p in papers:
+                    if p["url"] not in self.seen and len(ob_papers) < self.max_per:
+                        p["obligation"]  = obid
+                        p["query_used"]  = q
+                        ob_papers.append(p)
+
+                if len(ob_papers) < self.max_per:
+                    time.sleep(POLITENESS_DELAY)
+                    # Semantic Scholar search
+                    papers = self._search_semantic_scholar(q)
+                    for p in papers:
+                        if p["url"] not in self.seen and len(ob_papers) < self.max_per:
+                            p["obligation"] = obid
+                            p["query_used"] = q
+                            ob_papers.append(p)
+
+                time.sleep(POLITENESS_DELAY)
+
+            for p in ob_papers:
+                self._mark_seen(p["url"])
+
+            if ob_papers:
+                print(f"[TARGET]   Found {len(ob_papers)} paper(s) for {obid}.")
+            else:
+                print(f"[TARGET]   No new papers for {obid}.")
+
+            all_inputs.extend(ob_papers)
+
+        self._log(all_inputs)
+        print(f"[TARGET] Total targeted inputs: {len(all_inputs)}")
+        return all_inputs
+
+    # ── Query generation (Claude Haiku) ──────────────────────────────────────
+
+    def _generate_queries(self, obligation: dict) -> list:
+        """
+        Ask Claude Haiku to generate 3 arXiv search queries for this obligation.
+        Returns list of query strings. Cheap — Haiku costs ~20x less than Opus.
+        """
+        stmt = obligation.get("statement", "")
+        prog = obligation.get("progress", "")
+        obid = obligation.get("id", "")
+
+        context = f"Obligation {obid}: {stmt}"
+        if prog:
+            context += f"\n\nProgress so far: {prog[:300]}"
+
+        prompt = f"""You are generating arXiv paper search queries for a philosophy-of-science research system.
+
+The system is built on the RSA framework (Freed's Law: to reason is to burn; autopoiesis; entropy as resource; γ=1 criticality).
+
+Given this open obligation, generate exactly 3 short arXiv search query strings that would find papers confirming, refuting, or advancing it. Each query should be 3–6 words, use technical terms that appear in paper titles/abstracts, and target a different angle.
+
+{context}
+
+Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
+
+        try:
+            resp = self._client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=150,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            raw = resp.content[0].text.strip()
+            queries = [line.strip() for line in raw.splitlines() if line.strip()]
+            # Safety: take at most 3, filter out any clearly empty lines
+            return [q for q in queries[:3] if len(q) > 4]
+        except Exception as e:
+            print(f"[TARGET]   Haiku query-gen error: {e}")
+            return []
+
+    # ── arXiv search ─────────────────────────────────────────────────────────
+
+    def _search_arxiv(self, query: str) -> list:
+        """
+        Search arXiv using the Atom API.
+        Returns list of paper dicts scored by RSA relevance.
+        """
+        import urllib.parse
+        q_encoded = urllib.parse.quote(query)
+        url = (
+            f"https://export.arxiv.org/api/query"
+            f"?search_query=all:{q_encoded}"
+            f"&start=0&max_results={ARXIV_MAX_RESULTS}"
+            f"&sortBy=relevance&sortOrder=descending"
+        )
+
+        try:
+            resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+            if resp.status_code != 200:
+                return []
+        except Exception as e:
+            print(f"[TARGET]   arXiv fetch error: {e}")
+            return []
+
+        try:
+            root = ET.fromstring(resp.text)
+        except ET.ParseError:
+            return []
+
+        ns = {'atom': 'http://www.w3.org/2005/Atom'}
+        papers = []
+
+        for entry in root.findall('atom:entry', ns):
+            title    = (entry.findtext('atom:title', '', ns) or '').strip().replace('\n', ' ')
+            abstract = (entry.findtext('atom:summary', '', ns) or '').strip().replace('\n', ' ')
+            link_el  = entry.find('atom:id', ns)
+            paper_id = (link_el.text or '').strip() if link_el is not None else ''
+
+            # Convert API URL to abs URL
+            arxiv_url = paper_id.replace('http://arxiv.org/abs/', 'https://arxiv.org/abs/')
+            if not arxiv_url or 'arxiv.org' not in arxiv_url:
+                continue
+
+            authors = [a.findtext('atom:name', '', ns)
+                       for a in entry.findall('atom:author', ns)]
+
+            score = self._score_relevance(title + ' ' + abstract)
+            if score < RELEVANCE_MIN_SCORE:
+                continue
+
+            papers.append({
+                "title":    title,
+                "url":      arxiv_url,
+                "abstract": abstract[:800],
+                "content":  abstract[:800],
+                "authors":  ', '.join(authors[:3]),
+                "source":   "targeted_sweep/arxiv",
+                "score":    score,
+                "fetched":  datetime.now(timezone.utc).isoformat(),
+            })
+
+        # Sort by relevance
+        papers.sort(key=lambda x: x["score"], reverse=True)
+        return papers
+
+    # ── Semantic Scholar search ───────────────────────────────────────────────
+
+    def _search_semantic_scholar(self, query: str) -> list:
+        """
+        Search Semantic Scholar (free, no key required).
+        Returns list of paper dicts scored by RSA relevance.
+        """
+        import urllib.parse
+        q_encoded = urllib.parse.quote(query)
+        url = (
+            f"https://api.semanticscholar.org/graph/v1/paper/search"
+            f"?query={q_encoded}"
+            f"&limit={S2_MAX_RESULTS}"
+            f"&fields=title,abstract,year,authors,externalIds,openAccessPdf"
+        )
+
+        try:
+            resp = requests.get(
+                url,
+                headers={**HEADERS, "Accept": "application/json"},
+                timeout=REQUEST_TIMEOUT
+            )
+            if resp.status_code != 200:
+                return []
+            data = resp.json()
+        except Exception as e:
+            print(f"[TARGET]   S2 fetch error: {e}")
+            return []
+
+        papers = []
+        for item in data.get("data", []):
+            title    = (item.get("title") or "").strip()
+            abstract = (item.get("abstract") or "").strip()
+            if not title:
+                continue
+
+            # Prefer arXiv URL from externalIds, then open access PDF, then S2 URL
+            ext_ids = item.get("externalIds") or {}
+            arxiv_id = ext_ids.get("ArXiv")
+            if arxiv_id:
+                paper_url = f"https://arxiv.org/abs/{arxiv_id}"
+            else:
+                pdf_info = item.get("openAccessPdf")
+                if pdf_info and pdf_info.get("url"):
+                    paper_url = pdf_info["url"]
+                else:
+                    s2_id = item.get("paperId", "")
+                    if not s2_id:
+                        continue
+                    paper_url = f"https://www.semanticscholar.org/paper/{s2_id}"
+
+            score = self._score_relevance(title + ' ' + abstract)
+            if score < RELEVANCE_MIN_SCORE:
+                continue
+
+            authors_list = item.get("authors") or []
+            author_str   = ', '.join(a.get("name", "") for a in authors_list[:3])
+
+            papers.append({
+                "title":    title,
+                "url":      paper_url,
+                "abstract": abstract[:800],
+                "content":  abstract[:800],
+                "authors":  author_str,
+                "source":   "targeted_sweep/semantic_scholar",
+                "score":    score,
+                "fetched":  datetime.now(timezone.utc).isoformat(),
+            })
+
+        papers.sort(key=lambda x: x["score"], reverse=True)
+        return papers
+
+    # ── Relevance scoring ────────────────────────────────────────────────────
+
+    def _score_relevance(self, text: str) -> int:
+        """Score text against RSA-adjacent keywords. Pure regex — no API cost."""
+        text_lower = text.lower()
+        score = 0
+        for pattern, weight in ARXIV_KEYWORDS:
+            if re.search(pattern, text_lower):
+                score += weight
+        return score
+
+    # ── Logging ─────────────────────────────────────────────────────────────
+
+    def _log(self, inputs: list):
+        """Append targeted sweep results to a daily log file."""
+        if not inputs:
+            return
+        LOG_DIR.mkdir(exist_ok=True)
+        date_str  = datetime.utcnow().strftime('%Y-%m-%d')
+        log_file  = LOG_DIR / f"targeted_sweep_{date_str}.jsonl"
+        timestamp = datetime.now(timezone.utc).isoformat()
+        with open(log_file, 'a', encoding='utf-8') as f:
+            for inp in inputs:
+                f.write(json.dumps({
+                    "timestamp": timestamp,
+                    "url":       inp.get("url"),
+                    "title":     inp.get("title"),
+                    "obligation": inp.get("obligation"),
+                    "query":     inp.get("query_used"),
+                    "score":     inp.get("score"),
+                    "source":    inp.get("source"),
+                }) + '\n')
+
+
+# ─── Quick test ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import os
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        api_key = input("Anthropic API key: ").strip()
+
+    # Minimal test obligation
+    test_obligs = [
+        {
+            "id": "O28",
+            "status": "partial",
+            "priority": "high",
+            "statement": (
+                "Entropy asymmetry ratio (EAR) predicts intelligence. "
+                "Open-access EEG: osf.io/htrsg. EAR as composite predictor not yet tested."
+            ),
+            "progress": "Thiele et al. 2025 confirmed INV_094 prediction.",
+        }
+    ]
+
+    ts = TargetedSweep(api_key=api_key, max_per_obligation=2)
+    results = ts.sweep(test_obligs)
+
+    print(f"\n── {len(results)} result(s) ──")
+    for r in results:
+        print(f"\n[{r.get('obligation')}] {r['title'][:70]}")
+        print(f"  URL:   {r['url']}")
+        print(f"  Score: {r['score']}")
+        print(f"  Query: {r.get('query_used')}")

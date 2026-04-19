@@ -144,7 +144,7 @@ class L7Agent:
 
         # Build context: genome header + recent engrams + current self-state
         genome_header = self.genome_text[:2000]   # first 2KB of genome as anchor
-        recent_memory = self._format_engrams(tail=3)
+        recent_memory = self._format_engrams(query=prompt)
         context = (
             f"GENOME ANCHOR:\n{genome_header}\n\n"
             f"SELF-STATE: {self.self_state}\n\n"
@@ -153,13 +153,16 @@ class L7Agent:
         )
 
         # Call Claude with streaming
+        # Note: no thinking here — the RSA Kernel prompt structures the reasoning
+        # explicitly (PERCEIVE→COMPRESS), so adaptive thinking is redundant and
+        # consumes max_tokens before producing any text output.
         result_text = ""
         with self.client.messages.stream(
             model=MODEL,
-            max_tokens=1024,
-            thinking={"type": "adaptive"},
+            max_tokens=2048,
             system=RSA_KERNEL_PROMPT,
             messages=[{"role": "user", "content": context}],
+            timeout=120,   # 2-minute hard cap — prevents indefinite hang on slow API
         ) as stream:
             for text in stream.text_stream:
                 result_text += text
@@ -218,15 +221,78 @@ class L7Agent:
 
     # ── Engram management ────────────────────────────────────────────────────
 
-    def _format_engrams(self, tail: int = 3) -> str:
-        """Format the last `tail` engrams as readable text."""
+    def _relevant_engrams(self, query: str, n: int = 5) -> list:
+        """
+        Retrieve the n most relevant engrams to the current query using
+        word-overlap scoring. Always includes the most recent engram for
+        temporal continuity.
+
+        No extra dependencies — pure Python word-set intersection.
+        """
+        if not self.engram_bank:
+            return []
+
+        stopwords = {
+            "that", "this", "with", "from", "have", "been", "will", "their",
+            "they", "which", "what", "when", "where", "would", "could",
+            "should", "about", "into", "than", "then", "input", "freed",
+            "feed", "does", "also", "more", "some", "such", "very",
+        }
+
+        def keywords(text):
+            return set(
+                w.lower().strip(".,;:()[]'\"!?") for w in text.split()
+                if len(w) > 3 and w.lower().strip(".,;:()[]'\"!?") not in stopwords
+            )
+
+        query_words = keywords(query)
+        n_engrams   = len(self.engram_bank)
+
+        scored = []
+        for i, e in enumerate(self.engram_bank):
+            if e.get("summary"):
+                # Compressed history block — always included if present
+                scored.append((999.0, i))
+                continue
+            text = " ".join(filter(None, [
+                e.get("input", ""),
+                e.get("compress", ""),
+                e.get("adjust", ""),
+                e.get("represent", ""),
+            ]))
+            overlap     = len(query_words & keywords(text))
+            # Slight recency bonus so tied scores prefer newer engrams
+            recency     = i / max(n_engrams - 1, 1)
+            scored.append((overlap + recency * 0.4, i))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        top_indices = set(i for _, i in scored[:n])
+        top_indices.add(n_engrams - 1)   # always include most recent
+
+        return [self.engram_bank[i] for i in sorted(top_indices)]
+
+    def _format_engrams(self, query: str = "", tail: int = 3) -> str:
+        """
+        Format engrams as readable context text.
+        If a query is provided, retrieves the 5 most relevant engrams.
+        Otherwise falls back to the last `tail` engrams.
+        """
         if not self.engram_bank:
             return "(none)"
-        recent = self.engram_bank[-tail:]
+
+        if query:
+            selected = self._relevant_engrams(query, n=5)
+        else:
+            selected = self.engram_bank[-tail:]
+
         lines = []
-        for e in recent:
-            lines.append(f"[{e.get('timestamp','?')}] Q: {e.get('input','')[:80]}")
-            lines.append(f"  COMPRESS: {e.get('compress','')}")
+        for e in selected:
+            if e.get("summary"):
+                lines.append(f"[HISTORY SUMMARY] {e.get('compress','')[:200]}")
+            else:
+                lines.append(f"[{e.get('timestamp','?')[:19]}] Q: {e.get('input','')[:80]}")
+                lines.append(f"  COMPRESS: {e.get('compress','')}")
         return "\n".join(lines)
 
     def _compress_engram_bank(self):

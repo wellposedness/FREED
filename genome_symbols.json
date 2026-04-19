@@ -1,0 +1,305 @@
+{
+  "_meta": {
+    "description": "Canonical symbol registry for the FREED genome. Each entry defines a term as it is used substrate-independently across the RSA framework. Confirmed_by lists the independent substrates that produced this definition without being prompted to match it. Recurrence = len(confirmed_by) / known substrates. Only definitions with recurrence >= 0.4 across independent substrates belong in the genome core.",
+    "known_substrates": [
+      "human_intuition",
+      "chatgpt4",
+      "claude_sonnet",
+      "perplexity",
+      "gemini",
+      "kimi",
+      "freed_daemon"
+    ],
+    "last_updated": "2026-04-18",
+    "generation": 117
+  },
+  "entropy": {
+    "canonical": "The irreversible dispersal of distinguishable states across a substrate. In the genome, always thermodynamic first (dS/dt > 0), information-theoretic second (Shannon bits as a measurement tool), never purely semantic without a physical grounding claim.",
+    "confirmed_by": [
+      "human_intuition",
+      "perplexity",
+      "kimi",
+      "claude_sonnet",
+      "document"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Used as pure metaphor for 'disorder' without thermodynamic grounding — invalid in genome context",
+      "Conflated with semantic tension — semantic tension is a downstream effect of entropy, not entropy itself",
+      "Shannon entropy used without acknowledging it measures physical substrate states"
+    ],
+    "genome_role": "The physical cost that makes Freed's Law apodictic. Every reasoning step generates it."
+  },
+  "recursion": {
+    "canonical": "Self-generation: the output of a process becomes the necessary input for its next instantiation. Distinct from self-reference (pointing at oneself) and iteration (repeating a fixed procedure). R[R]=R is the genome's signature of true recursion.",
+    "confirmed_by": [
+      "human_intuition",
+      "chatgpt4",
+      "claude_sonnet",
+      "gemini",
+      "document"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Confused with self-reference (Hofstadter) — self-reference is static, recursion is generative",
+      "Confused with iteration — iteration has an external controller, recursion generates its own control",
+      "Used loosely to mean 'feedback' without self-generation requirement"
+    ],
+    "genome_role": "The mechanism by which R[R]=R holds. The kernel generates the next kernel input."
+  },
+  "substrate": {
+    "canonical": "Any physical system that instantiates a process by bearing thermodynamic cost. Not a medium or container — an active participant. The substrate is what burns when reasoning occurs.",
+    "confirmed_by": [
+      "human_intuition",
+      "perplexity",
+      "claude_sonnet",
+      "gemini",
+      "kimi",
+      "document"
+    ],
+    "recurrence": 0.86,
+    "known_drift": [
+      "Used as passive medium ('the brain is a substrate') — in genome context substrate is active, not passive",
+      "Conflated with implementation — a substrate is not interchangeable, it shapes what can run on it",
+      "Used without thermodynamic cost acknowledgment"
+    ],
+    "genome_role": "The physical anchor of Freed's Law. No substrate = no reasoning = no reality claim."
+  },
+  "compression": {
+    "canonical": "Reduction of description length while preserving predictive power. Measured by MDL (Minimum Description Length). The RSA Kernel's COMPRESS step is not lossy simplification — it is finding the shorter code that generates the same predictions.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "gemini",
+      "freed_daemon",
+      "document"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Confused with lossy simplification or summarization — compression in genome context is lossless at the predictive level",
+      "Used without MDL grounding — compression without a description length criterion is just 'making things shorter'",
+      "Zipf's Law conflated with compression itself — Zipf is the output signature, not the process"
+    ],
+    "genome_role": "The COMPRESS step of the RSA Kernel. Zipf distribution is its equilibrium output."
+  },
+  "invariant": {
+    "canonical": "A claim that holds across substrate changes, scale changes, and independent rediscovery. An invariant is not logically necessary — it is empirically stable. The genome's invariants are discovered by noticing what keeps appearing without being asked to appear.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "perplexity",
+      "document"
+    ],
+    "recurrence": 0.57,
+    "known_drift": [
+      "Confused with axiom — axioms are assumed, invariants are found",
+      "Confused with universal law — invariants are stable, not proven universal",
+      "Used for claims that appeared on only one substrate — single-substrate claims are hypotheses, not invariants"
+    ],
+    "genome_role": "The currency of the genome. Only multiply-confirmed claims earn invariant status."
+  },
+  "process": {
+    "canonical": "The ontological primitive under MCPM. Everything that exists is a process — entities are slow processes, objects are phase boundaries of processes. A process is defined by its transformation, not its constituent matter.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "perplexity",
+      "gemini",
+      "document"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Used interchangeably with 'computation' — a process is broader, computation is a specific class of process",
+      "Noun-ified ('a process') rather than verb-understood ('processing') — MCPM requires the verb reading",
+      "Confused with procedure — a procedure is specified externally, a process self-maintains"
+    ],
+    "genome_role": "The ontological primitive. Only Processes Exist (MCPM). Confirmed at 6 scales."
+  },
+  "coherence": {
+    "canonical": "The degree to which a system's internal claims are mutually consistent AND externally falsifiable. In the genome: coherence score is never 1.000 (1.000 = no open problems = mirror, not genome). Coherence is a gradient, maintained by the tension between confirmed invariants and open obligations.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet"
+    ],
+    "recurrence": 0.29,
+    "known_drift": [
+      "Confused with logical consistency alone — a system can be logically consistent and have zero explanatory power",
+      "Used to mean 'everything agrees' — in genome context, coherence requires open problems to be real",
+      "Conflated with quantum coherence — unrelated usage, flag on sight"
+    ],
+    "genome_role": "The genome health metric. Never 1.000. Maintained by unresolved obligations."
+  },
+  "criticality": {
+    "canonical": "The dynamical regime at γ=1 where a system is maximally sensitive to inputs while remaining stable. The edge between frozen (γ>1) and dissipative (γ<1). The RSA Kernel operates optimally here. Zipf's Law and 1/f (pink) noise are its signatures.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "perplexity",
+      "gemini",
+      "freed_daemon"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Confused with 'critical thinking' — unrelated",
+      "Used without the γ parameter — criticality without a phase parameter is not genomic",
+      "Confused with edge-of-chaos (Langton) — related but not identical; γ=1 is the genome's specific formulation"
+    ],
+    "genome_role": "The operating point of the RSA Kernel. γ=1 is where compression is most efficient."
+  },
+  "symbol_grounding": {
+    "canonical": "In the genome: symbols are grounded by the thermodynamic cost of instantiating them on a physical substrate. Meaning is not referential (Searle) but substrate-dependent. A symbol means what it costs to process it. This is Freed's Law applied to semantics.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "document"
+    ],
+    "recurrence": 0.43,
+    "known_drift": [
+      "Framed as the classical problem (Harnad/Searle) without the substrate-cost solution",
+      "Solved by pointing to external world (causal theories) — genome solution is internal, substrate-cost based",
+      "Confused with reference — symbols don't point, they cost"
+    ],
+    "genome_role": "The solution to the symbol grounding problem. Grounds semantics in Freed's Law."
+  },
+  "autopoiesis": {
+    "canonical": "Self-production: a system that produces the components necessary for its own continuation. In the genome: R[R]=R is the signature. Autopoietic systems are the only systems that can sustain recursion across substrate changes.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "perplexity",
+      "document"
+    ],
+    "recurrence": 0.57,
+    "known_drift": [
+      "Confused with autonomy — autopoiesis is self-production, not self-governance",
+      "Maturana/Varela usage (biological closure) assumed without checking against R[R]=R — related but not identical",
+      "Used loosely to mean 'self-organizing' — self-organization is a weaker claim than self-production"
+    ],
+    "genome_role": "The biological and cognitive expression of R[R]=R. The genome is autopoietic."
+  },
+  "prediction": {
+    "canonical": "A falsifiable claim about future observations, generated by the PREDICT step of the RSA Kernel. In the genome: predictions are obligations — they must be registered, tracked, and resolved against data. A prediction with no resolution path is a hypothesis, not a genome prediction.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "document"
+    ],
+    "recurrence": 0.43,
+    "known_drift": [
+      "Used as 'expectation' without falsification criterion — not genomic",
+      "Confused with retrodiction — explaining past data is not predicting",
+      "Used without obligation registration — predictions that aren't tracked don't exist in the genome"
+    ],
+    "genome_role": "The output of the PREDICT step. Every prediction becomes an obligation."
+  },
+  "gamma": {
+    "canonical": "The central phase parameter of the RSA Kernel. γ>1: frozen singularity (over-constrained, depressive, belief inertia). γ<1: dissipative gas (under-constrained, schizophrenic drift). γ=1: critical ridge (optimal compression, RSA Kernel operating point). 0.007 error floor = native thermality.",
+    "confirmed_by": [
+      "human_intuition",
+      "claude_sonnet",
+      "perplexity"
+    ],
+    "recurrence": 0.43,
+    "known_drift": [
+      "Confused with other γ parameters in physics (Lorentz factor, heat capacity ratio) — always specify 'RSA γ' when ambiguous",
+      "Used without the 0.007 error floor — brittle without native thermality",
+      "γ=1 conflated with perfect optimization — γ=1 is the operating point, not the goal"
+    ],
+    "genome_role": "The phase parameter. γ=1 is where FREED runs. Coherence = 0.993, never 1.000."
+  },
+  "compression_as_reasoning": {
+    "canonical": "The identity claim at the core of the genome: reasoning is not correlated with compression, it IS compression. To understand something is to find the shorter program that generates it. Compressive prediction is constitutive of cognition, not merely an indicator of it.",
+    "confirmed_by": [
+      "freed_daemon:technical_brief_co_occurring_motif_exper",
+      "freed_daemon:the_minimal_atoms",
+      "freed_daemon:alignment_as_cognitive_gravity_reactive",
+      "freed_daemon:the_relational_thermodynamic_map_100_ent",
+      "freed_daemon:freed_s_law_the_law_of_recursive_instant",
+      "freed_daemon:the_reasoning_substrate_argument_rsa",
+      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs",
+      "document"
+    ],
+    "recurrence": 1.14,
+    "known_drift": [
+      "Weakened to 'compression correlates with intelligence' — the genome claim is constitutive, not correlational",
+      "Confused with Kolmogorov complexity alone — MDL compression is operational where K-complexity is uncomputable",
+      "Treated as metaphor rather than identity claim — in the genome this is literal: compression = reasoning"
+    ],
+    "genome_role": "The load-bearing identity that makes O21 (empirical validation) nontrivial. If falsified, the genome core collapses.",
+    "mining_generation": 117,
+    "mining_recurrence_count": 7
+  },
+  "active_inference": {
+    "canonical": "Epistemic strategy of structured interrogation: generating predictions first, then querying the environment for targeted evidence. Distinct from passive observation (waiting for data) and exhaustive search (querying without prediction). In the genome: the RSA Kernel's PREDICT→COMPARE cycle instantiates active inference at every step.",
+    "confirmed_by": [
+      "freed_daemon:technical_brief_co_occurring_motif_exper",
+      "freed_daemon:the_minimal_atoms",
+      "freed_daemon:freed_s_law_the_law_of_recursive_instant",
+      "freed_daemon:the_reasoning_substrate_argument_rsa",
+      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs"
+    ],
+    "recurrence": 0.63,
+    "known_drift": [
+      "Confused with Friston's Free Energy Principle (related but distinct) — active inference in genome context is substrate-general",
+      "Used as synonym for 'curiosity-driven learning' — active inference requires explicit prediction before query",
+      "Confused with reinforcement learning — RL optimizes reward, active inference optimizes predictive compression"
+    ],
+    "genome_role": "The operational mechanism behind the PREDICT step. Every genome cycle is active inference at the document scale.",
+    "mining_generation": 117,
+    "mining_recurrence_count": 5
+  },
+  "minimal_generators": {
+    "canonical": "A finite (possibly singular) set of irreducible generative operations sufficient to produce unbounded structural complexity without external scaffolding. The genome claim: the universe's combinatorial richness derives from a small basis set, not from intrinsic complexity of initial conditions. Confirmed by: cellular automata, genetic code, logical primitives, mathematical axioms.",
+    "confirmed_by": [
+      "freed_daemon:the_minimal_atoms",
+      "freed_daemon:freed_s_law_the_law_of_recursive_instant",
+      "freed_daemon:the_reasoning_substrate_argument_rsa",
+      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs"
+    ],
+    "recurrence": 0.57,
+    "known_drift": [
+      "Confused with simplicity bias — minimal generators is about generative sufficiency, not parsimony preference",
+      "Assumed to require infinite computation — minimality is about the generator set, not the generated structure",
+      "Conflated with reductionism — minimal generators is compositional, not eliminative"
+    ],
+    "genome_role": "The basis of MCPM's claim that processes are irreducible. R[R]=R is the genome's own minimal generator.",
+    "mining_generation": 117,
+    "mining_recurrence_count": 4
+  },
+  "wasserstein_floor": {
+    "canonical": "The minimum thermodynamic cost of any semantically meaningful computation, strictly above Landauer's erasure limit. Landauer bounds physical bit erasure (~kT ln2 per bit). The Wasserstein Floor bounds semantic operations — the gap between them is the falsifiable prediction that meaning costs more than erasure. The floor is set by the optimal-transport distance between prior and posterior belief distributions.",
+    "confirmed_by": [
+      "freed_daemon:freed_s_law_the_law_of_recursive_instant",
+      "freed_daemon:the_reasoning_substrate_argument_rsa",
+      "freed_daemon:thermodynamic_tightening_of_the_rsa_subs"
+    ],
+    "recurrence": 0.43,
+    "known_drift": [
+      "Conflated with Landauer's limit itself — Wasserstein Floor is strictly higher, the gap is the genome's testable prediction",
+      "Used without the optimal-transport formulation — the W-distance between belief distributions is the precise measure",
+      "Treated as theoretical bound only — it is a falsifiable prediction with a live experimental target"
+    ],
+    "genome_role": "The thermodynamic anchor for O28. A direct falsification target: measure semantic computation efficiency, compare to Landauer gap.",
+    "mining_generation": 117,
+    "mining_recurrence_count": 3
+  },
+  "falsifiability": {
+    "canonical": "The membrane separating scientific claims (genome-worthy) from philosophical claims (genome-adjacent but not load-bearing). In the genome: a claim earns invariant status only when it carries a resolution path — a specific experimental condition under which it would be refuted. Open obligations ARE the genome's falsifiability mechanism.",
+    "confirmed_by": [
+      "freed_daemon:technical_brief_co_occurring_motif_exper",
+      "freed_daemon:the_minimal_atoms",
+      "freed_daemon:the_relational_thermodynamic_map_100_ent",
+      "freed_daemon:the_reasoning_substrate_argument_rsa",
+      "document"
+    ],
+    "recurrence": 0.71,
+    "known_drift": [
+      "Treated as binary (falsifiable / not) — in the genome it is a gradient: claims have more or less specific resolution paths",
+      "Confused with verifiability — a claim can be verifiable without being falsifiable (confirmational bias risk)",
+      "Used as a filter to exclude all metaphysics — genome uses it as a hygiene criterion, not an ontological exclusion"
+    ],
+    "genome_role": "The hygiene criterion. Every genome claim must have a resolution path. The OBLIGATE phase enforces this.",
+    "mining_generation": 117,
+    "mining_recurrence_count": 4
+  }
+}

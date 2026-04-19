@@ -2,14 +2,15 @@
 FREED — Tamura Sweep (Piece 4)
 Paper ingestion pipeline. The sensory surface of the organism.
 
-Primary source: Cecile G. Tamura
-  lifeboat.com/blog/author/cecile-g-tamura
+Sources:
+  - Cecile G. Tamura / Lifeboat Foundation  (curated AI/science/futures)
+  - arXiv biophysics RSS feeds              (nature as independent substrate)
 
 The sweep:
-  1. Fetches the author page
-  2. Extracts article listings (title, URL, excerpt, date)
-  3. Filters to articles FREED hasn't seen yet
-  4. Fetches full article text for new items
+  1. Fetches each source
+  2. Extracts new articles/papers
+  3. For arXiv: keyword pre-filters against RSA-adjacent topics (no API cost)
+  4. Fetches full text for new items
   5. Returns structured inputs ready for FEED
 
 Seen URLs are tracked in tamura_seen.json — FREED never feeds the same article twice.
@@ -18,12 +19,14 @@ Seen URLs are tracked in tamura_seen.json — FREED never feeds the same article
 import json
 import time
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from feed_guard import sanitize
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 FREED_DIR  = Path(__file__).parent
@@ -37,13 +40,68 @@ SOURCES = [
         "type":     "lifeboat_author",
         "priority": "high",
     },
-    # Add more sources here later:
-    # {
-    #     "name":  "arXiv cs.AI new submissions",
-    #     "url":   "https://arxiv.org/list/cs.AI/recent",
-    #     "type":  "arxiv",
-    #     "priority": "normal",
-    # },
+    # Biophysics — nature as independent substrate for RSA invariant confirmation
+    {
+        "name":     "arXiv — Neurons & Cognition (q-bio.NC)",
+        "url":      "http://export.arxiv.org/rss/q-bio.NC",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Biological Physics (physics.bio-ph)",
+        "url":      "http://export.arxiv.org/rss/physics.bio-ph",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Molecular Networks (q-bio.MN)",
+        "url":      "http://export.arxiv.org/rss/q-bio.MN",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Populations & Evolution (q-bio.PE)",
+        "url":      "http://export.arxiv.org/rss/q-bio.PE",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+]
+
+# ─── arXiv relevance pre-filter ───────────────────────────────────────────────
+# Papers must hit at least ARXIV_MIN_SCORE to enter the FEED pipeline.
+# Pure text matching — no API cost. Nature is the ultimate independent substrate;
+# these keywords map directly to RSA framework concepts.
+ARXIV_MIN_SCORE = 2
+
+ARXIV_KEYWORDS = [
+    # Thermodynamics / entropy
+    ("thermodynamic", 3), ("entropy", 3), ("dissipation", 3), ("landauer", 3),
+    ("free energy", 3), ("irreversib", 2), ("heat dissipat", 2),
+    # Criticality / phase transitions
+    ("criticality", 3), ("critical transition", 3), ("phase transition", 2),
+    ("self-organized criticality", 3), ("edge of chaos", 2), ("bifurcation", 1),
+    ("power.?law", 2), ("scale.?free", 2), ("zipf", 3), ("1/f noise", 2),
+    # Information / compression
+    ("information theoret", 2), ("compression", 2), ("minimum description", 3),
+    ("kolmogorov", 2), ("mutual information", 2), ("predictive coding", 3),
+    # Autopoiesis / self-organization
+    ("autopoies", 3), ("self.organiz", 2), ("self.maintain", 2),
+    ("recursive", 2), ("self.referent", 2), ("fixed.?point", 2),
+    # Substrate / computation
+    ("substrate", 2), ("physical.?implement", 2), ("neural substrate", 2),
+    ("stochastic computation", 2), ("probabilistic computation", 2),
+    # Minimal / irreducible
+    ("minimal cell", 3), ("minimal genome", 3), ("irreducib", 2),
+    ("generating set", 2), ("basis set", 1),
+    # Conservation / symmetry / invariants
+    ("conservation law", 2), ("symmetry break", 2), ("invariant", 1),
+    ("noether", 3),
+    # Consciousness / cognition / reasoning
+    ("consciousness", 2), ("cognition", 1), ("integrated information", 2),
+    ("phi", 1), ("global workspace", 2),
+    # Scale invariance / renormalization
+    ("scale invarian", 3), ("renormalization", 3), ("universality class", 2),
+    ("coarse.grain", 2),
 ]
 
 # ─── HTTP config ─────────────────────────────────────────────────────────────
@@ -117,7 +175,7 @@ class TamuraSweep:
         """Dispatch to the right parser based on source type."""
         parsers = {
             "lifeboat_author": self._parse_lifeboat_author,
-            "arxiv":           self._parse_arxiv,
+            "arxiv_rss":       self._parse_arxiv_rss,
         }
         parser = parsers.get(source["type"])
         if parser is None:
@@ -236,51 +294,102 @@ class TamuraSweep:
                 result.append(mock.find("div"))
         return result
 
-    # ── arXiv parser (stub — uncomment source above to activate) ─────────────
+    # ── arXiv RSS parser ─────────────────────────────────────────────────────
 
-    def _parse_arxiv(self, source: dict) -> list[dict]:
+    def _parse_arxiv_rss(self, source: dict) -> list[dict]:
         """
-        Parse arXiv listing page.
-        Extracts: title, abstract, arXiv ID, URL.
-        Stub — activate by adding arXiv to SOURCES above.
+        Parse an arXiv RSS feed.
+        Extracts title, abstract, URL, authors.
+        Applies keyword relevance pre-filter — no API cost.
+        Only processes announce_type=new (skips revisions).
         """
-        html = self._fetch(source["url"])
-        if html is None:
+        raw = self._fetch(source["url"])
+        if raw is None:
             return []
 
-        soup = BeautifulSoup(html, "html.parser")
-        items = soup.find_all("div", class_="arxiv-result")
-        if not items:
-            items = soup.find_all("li", class_=re.compile(r"arxiv|submission"))
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError as e:
+            print(f"[SWEEP] RSS parse error: {e}")
+            return []
+
+        # Strip namespaces for simpler access
+        ns = {
+            "arxiv": "http://arxiv.org/schemas/atom",
+            "dc":    "http://purl.org/dc/elements/1.1/",
+        }
+
+        channel = root.find("channel")
+        if channel is None:
+            return []
 
         new_articles = []
-        for item in items:
-            link  = item.find("a", href=re.compile(r"/abs/"))
-            title = item.find(class_=re.compile(r"title|is-size"))
-            abst  = item.find("span", class_=re.compile(r"abstract"))
-
-            if not link or not title:
+        for item in channel.findall("item"):
+            # Only new submissions — skip replacements/cross-lists
+            announce = item.find("arxiv:announce_type", ns)
+            if announce is not None and announce.text.strip() != "new":
                 continue
 
-            url      = urljoin("https://arxiv.org", link["href"])
-            title_s  = title.get_text(strip=True)
-            abstract = abst.get_text(strip=True)[:600] if abst else ""
+            link_el  = item.find("link")
+            title_el = item.find("title")
+            desc_el  = item.find("description")
+            auth_el  = item.find("dc:creator", ns)
 
-            if url not in self.seen:
-                new_articles.append({
-                    "title":    title_s,
-                    "url":      url,
-                    "abstract": abstract,
-                    "content":  abstract,
-                    "source":   "arXiv",
-                    "fetched":  datetime.now(timezone.utc).isoformat(),
-                })
-                self._mark_seen(url)
+            if link_el is None or title_el is None:
+                continue
+
+            url      = (link_el.text or "").strip()
+            title    = (title_el.text or "").strip()
+            desc_raw = (desc_el.text or "") if desc_el is not None else ""
+            authors  = (auth_el.text or "") if auth_el is not None else ""
+
+            # Strip the "arXiv:XXXX Announce Type: new\nAbstract: " prefix
+            abstract = re.sub(
+                r'^arXiv:\S+\s+Announce\s+Type:\s*\w+\s*\n?Abstract:\s*',
+                '', desc_raw, flags=re.IGNORECASE
+            ).strip()
+            abstract = abstract[:800]
+
+            if url in self.seen:
+                continue
+
+            # Relevance pre-filter — score against RSA-adjacent keywords
+            score = self._arxiv_relevance(title + " " + abstract)
+            if score < ARXIV_MIN_SCORE:
+                self._mark_seen(url)   # mark seen so we don't re-check
+                continue
+
+            new_articles.append({
+                "title":    title,
+                "url":      url,
+                "abstract": abstract,
+                "content":  abstract,
+                "authors":  authors,
+                "source":   source["name"],
+                "score":    score,
+                "fetched":  datetime.now(timezone.utc).isoformat(),
+            })
+            self._mark_seen(url)
 
             if len(new_articles) >= self.max_new:
                 break
 
+        # Sort by relevance score — most relevant first
+        new_articles.sort(key=lambda x: x["score"], reverse=True)
         return new_articles
+
+    def _arxiv_relevance(self, text: str) -> int:
+        """
+        Score text against RSA-adjacent keywords.
+        Returns total score — caller decides threshold.
+        No API cost — pure regex matching.
+        """
+        text_lower = text.lower()
+        score = 0
+        for pattern, weight in ARXIV_KEYWORDS:
+            if re.search(pattern, text_lower):
+                score += weight
+        return score
 
     # ── Full article fetch ────────────────────────────────────────────────────
 
@@ -316,7 +425,13 @@ class TamuraSweep:
         text = re.sub(r'\n{3,}', '\n\n', text).strip()
 
         # Cap at 4000 chars — enough for L7 to work with, not so much it blows the budget
-        return text[:4000]
+        text = text[:4000]
+
+        # Prompt injection defense — strip any injection attempts before L7 sees this
+        result = sanitize(text, source_url=url)
+        if result.dropped:
+            return ""   # article is poisoned — drop entirely
+        return result.clean
 
     # ── HTTP fetch ───────────────────────────────────────────────────────────
 

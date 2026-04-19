@@ -1,0 +1,253 @@
+"""
+FREED — Knowledge Graph
+Typed edges between papers/feeds, invariants, and obligations.
+
+When L7 processes a FEED and produces output like:
+  "confirms INV_094"  →  stores: paper → INV_094 (type: confirms)
+  "advances O44"      →  stores: paper → O44     (type: advances)
+  "refutes INV_097"   →  stores: paper → INV_097 (type: refutes)
+
+The graph accumulates over time and lets CONSOLIDATE report the actual
+evidence structure: which invariants have been confirmed how many times
+and by which independent sources.
+
+Graph file: FREED_graph.json (alongside FREED_state.json)
+"""
+
+import json
+import re
+from collections import defaultdict
+from datetime import datetime, timezone
+from pathlib import Path
+
+FREED_DIR   = Path(__file__).parent
+GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
+
+# ─── Edge types ───────────────────────────────────────────────────────────────
+EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts")
+
+# ─── Extraction patterns ──────────────────────────────────────────────────────
+# Scans kernel output text (all fields) for typed relationships to named nodes.
+# INV_\d+ = genome invariants, O\d+ = obligations, INV_\w+ = named invariants.
+_NODE_PATTERN = r'(?:INV_\d+|INV_[A-Z]+\d*|O\d+)'
+
+_EDGE_PATTERNS = [
+    # "confirms INV_094"  — NOT preceded by "not", "no", "don't", "doesn't", "cannot"
+    (re.compile(rf'(?<!not )\b(confirms?)\s+({_NODE_PATTERN})', re.I),        'confirms'),
+    # "refutes INV_094"
+    (re.compile(rf'(?<!not )\b(refutes?)\s+({_NODE_PATTERN})', re.I),         'refutes'),
+    # "advances O44"
+    (re.compile(rf'(?<!not )\b(advances?)\s+({_NODE_PATTERN})', re.I),        'advances'),
+    # "resolves O28"
+    (re.compile(rf'(?<!not )\b(resolves?|closes?)\s+({_NODE_PATTERN})', re.I),'resolves'),
+    # "extends INV_094"
+    (re.compile(rf'(?<!not )\b(extends?)\s+({_NODE_PATTERN})', re.I),         'extends'),
+    # "supports INV_094"
+    (re.compile(rf'(?<!not )\b(supports?)\s+({_NODE_PATTERN})', re.I),        'supports'),
+    # "contradicts INV_097"
+    (re.compile(rf'(?<!not )\b(contradicts?)\s+({_NODE_PATTERN})', re.I),     'contradicts'),
+    # "confirms the invariant INV_094"
+    (re.compile(rf'(?<!not )\bconfirms?\s+(?:the\s+)?(?:invariant\s+)?({_NODE_PATTERN})', re.I), 'confirms'),
+    # "advances obligation O44"
+    (re.compile(rf'(?<!not )\badvances?\s+(?:the\s+)?(?:obligation\s+)?({_NODE_PATTERN})', re.I), 'advances'),
+]
+
+
+def extract_edges(kernel_output: dict, source_url: str, source_title: str = "") -> list:
+    """
+    Scan all kernel output fields for typed edge claims.
+
+    Returns list of edge dicts:
+      { from, from_title, to, type, context, timestamp }
+    """
+    # Scan all text-bearing kernel fields
+    text_fields = ["perceive", "represent", "predict", "compare",
+                   "adjust", "compress", "next", "raw"]
+    full_text = " ".join(
+        str(kernel_output.get(f, "")) for f in text_fields
+    )
+
+    ts = datetime.now(timezone.utc).isoformat()
+    edges = []
+    seen  = set()   # deduplicate (source, target, type) within one feed
+
+    for pattern, edge_type in _EDGE_PATTERNS:
+        for m in pattern.finditer(full_text):
+            # The node ID is in the last capturing group
+            node_id = m.group(m.lastindex).upper()
+            key = (source_url, node_id, edge_type)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            # Grab a short context window around the match for provenance
+            start = max(0, m.start() - 60)
+            end   = min(len(full_text), m.end() + 60)
+            context = full_text[start:end].replace('\n', ' ').strip()
+
+            edges.append({
+                "from":       source_url,
+                "from_title": source_title[:80],
+                "to":         node_id,
+                "type":       edge_type,
+                "context":    context,
+                "timestamp":  ts,
+            })
+
+    return edges
+
+
+class KnowledgeGraph:
+    """
+    Persistent typed-edge graph.
+    Loaded from FREED_graph.json on demand, flushed after each write.
+    """
+
+    def __init__(self):
+        self._edges = []   # list of edge dicts
+        self._loaded = False
+
+    # ── Persistence ──────────────────────────────────────────────────────────
+
+    def load(self):
+        if GRAPH_FILE.exists():
+            try:
+                data = json.loads(GRAPH_FILE.read_text())
+                self._edges = data.get("edges", [])
+            except (json.JSONDecodeError, KeyError):
+                self._edges = []
+        self._loaded = True
+
+    def save(self):
+        GRAPH_FILE.write_text(json.dumps(
+            {"edges": self._edges},
+            indent=2,
+            ensure_ascii=False,
+        ))
+
+    def _ensure_loaded(self):
+        if not self._loaded:
+            self.load()
+
+    # ── Recording ────────────────────────────────────────────────────────────
+
+    def record_feed(self, kernel_output: dict, source_url: str,
+                    source_title: str = "") -> list:
+        """
+        Extract edges from a kernel output and append them to the graph.
+        Returns the list of new edges added (may be empty).
+        """
+        self._ensure_loaded()
+        new_edges = extract_edges(kernel_output, source_url, source_title)
+        if new_edges:
+            self._edges.extend(new_edges)
+            self.save()
+            print(f"[GRAPH] {len(new_edges)} edge(s) recorded → "
+                  f"{', '.join(e['to'] + ':' + e['type'] for e in new_edges)}")
+        return new_edges
+
+    # ── Querying ─────────────────────────────────────────────────────────────
+
+    def edges_for(self, node_id: str) -> list:
+        """All edges pointing to or from a given node ID."""
+        self._ensure_loaded()
+        node_up = node_id.upper()
+        return [e for e in self._edges
+                if e.get("to", "").upper() == node_up
+                or e.get("from", "").upper() == node_up]
+
+    def confirmation_structure(self) -> dict:
+        """
+        Summarize evidence per target node.
+
+        Returns dict keyed by node_id:
+          {
+            "confirms":  int,
+            "refutes":   int,
+            "advances":  int,
+            "resolves":  int,
+            "extends":   int,
+            "supports":  int,
+            "contradicts": int,
+            "sources":   [list of unique source URLs]
+          }
+        """
+        self._ensure_loaded()
+        summary = defaultdict(lambda: {t: 0 for t in EDGE_TYPES} | {"sources": []})
+
+        for e in self._edges:
+            target = e.get("to", "")
+            etype  = e.get("type", "")
+            src    = e.get("from", "")
+            if not target or etype not in EDGE_TYPES:
+                continue
+            summary[target][etype] += 1
+            if src not in summary[target]["sources"]:
+                summary[target]["sources"].append(src)
+
+        # Sort by total evidence weight (confirms > all others)
+        def weight(v):
+            return v["confirms"] * 3 + v["supports"] * 2 + v["extends"] + \
+                   v["advances"] - v["refutes"] * 2 - v["contradicts"] * 3
+
+        return dict(sorted(summary.items(), key=lambda kv: weight(kv[1]), reverse=True))
+
+    def report(self, top_n: int = 10) -> str:
+        """Human-readable confirmation structure report."""
+        structure = self.confirmation_structure()
+        if not structure:
+            return "(no edges recorded yet)"
+
+        lines = [f"Knowledge graph: {len(self._edges)} total edge(s)"]
+        for node_id, counts in list(structure.items())[:top_n]:
+            confirms    = counts["confirms"]
+            refutes     = counts["refutes"]
+            advances    = counts["advances"]
+            n_sources   = len(counts["sources"])
+            parts = []
+            if confirms:   parts.append(f"{confirms}× confirmed")
+            if advances:   parts.append(f"{advances}× advanced")
+            if refutes:    parts.append(f"{refutes}× refuted")
+            if not parts:
+                total = sum(counts[t] for t in EDGE_TYPES)
+                parts.append(f"{total}× referenced")
+            lines.append(f"  {node_id:12s} — {', '.join(parts)} ({n_sources} source(s))")
+
+        return "\n".join(lines)
+
+
+# ─── Convenience singleton ────────────────────────────────────────────────────
+_graph = None
+
+def get_graph() -> KnowledgeGraph:
+    """Return the process-level graph singleton (lazy-loaded)."""
+    global _graph
+    if _graph is None:
+        _graph = KnowledgeGraph()
+        _graph.load()
+    return _graph
+
+
+# ─── Quick test ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    # Simulate a kernel output containing edge claims
+    fake_output = {
+        "adjust": (
+            "This confirms INV_094 — entropy asymmetry predicts intelligence across "
+            "two independent EEG datasets. Advances O28 significantly. "
+            "Does not refute INV_097."
+        ),
+        "compress": "Entropy asymmetry ratio is a confirmed predictor of neural efficiency (INV_094).",
+        "next": "Resolve O28 by computing EAR composite from raw EEG dataset.",
+    }
+
+    edges = extract_edges(fake_output, "https://arxiv.org/abs/2501.12345", "Test Paper")
+    print(f"Extracted {len(edges)} edge(s):")
+    for e in edges:
+        print(f"  [{e['type']:12s}] {e['from'][-30:]} → {e['to']}")
+        print(f"             context: ...{e['context'][:70]}...")
+
+    # Build a small graph
+    g = KnowledgeGraph()
+    g._edges = edges
+    print("\n" + g.report())
