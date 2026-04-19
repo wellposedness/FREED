@@ -699,5 +699,32 @@
       "next": "Execute the trivariate Gaussian ∞-norm integral numerically for H ∈ {0.1, 0.3, 0.5, 0.7, 0.9} at r=0.5, m=2, and compare against published fBm RangeEn values to close O60 — or, if discrepancy > 15%, identify which approximation broke and file the correction as a new obligation."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 2,
+    "generation": 139,
+    "timestamp": "2026-04-19T09:29:59.948483+00:00",
+    "sweep": {
+      "input_count": 8,
+      "targeted": 6,
+      "passive": 2
+    },
+    "feed": [
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "RangeEn instantiates the kernel's requirement that complexity be measured independently of amplitude — confirming INV_042 and INV_078, partially resolving O60 and O64, advancing O28, and generating a new debt (O65) to derive the RangeEn-Hurst slope from the Wasserstein Floor."
+      },
+      {
+        "title": "On Complexity and Emergence",
+        "compress": "The paper philosophically validates the genome's core architectural commitment — that complexity, entropy, and emergence are irreducibly context-dependent (confirming INV_042, INV_078, INV_094) — but provides no formal machinery, leaving O63 (derive Kolmogorov and Shannon as limits of a context-parameterized measure) fully open and now better motivated as the kernel's central formalization debt in this domain."
+      }
+    ],
+    "resolve": {
+      "obligation": "O60",
+      "resolved": false,
+      "compress": "O60 resolves by numerically evaluating the bivariate Gaussian CDF Φ₂(r, r; 2^{2H−1}−1) at five H values for r ∈ {0.3, 0.5}, computing RangeEn = −ln Φ₂ + ln Φ₁, regressing against H, and checking slope ≈ −1.0 against Omidvarnia et al. (2018) Table/Figure 3 — this is a single-afternoon computation that either closes or falsifies the debt.",
+      "next": "Perform the computation (or request it be performed), then return with the five-point numerical comparison table for RESOLVE adjudication."
+    },
+    "coherence": 0.999
   }
 ]
