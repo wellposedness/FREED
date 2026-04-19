@@ -82,7 +82,9 @@ def _write_symbols():
 
 
 def _write_game_of_life():
-    """Write the RSA-Omega Game of Truth simulation page."""
+    """Write the RSA-Omega Game of Truth simulation page. Does not overwrite existing edits."""
+    if (DOCS_DIR / "game_of_life.html").exists():
+        return
     html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
