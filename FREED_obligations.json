@@ -15,9 +15,7 @@
     "priority": "high",
     "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested \u2014 requires raw EEG data.",
     "created": "2026-04-12",
-    "resolved": null,
-    "method": "data_analysis",
-    "tractability": 2
+    "resolved": null
   },
   {
     "id": "O34",
@@ -26,9 +24,7 @@
     "priority": "high",
     "progress": "Shown to be surjection not strict bijection: electron protected by both Q and L_e simultaneously. INV_097 confirmed. Genome statement refined to surjection.",
     "created": "2026-04-12",
-    "resolved": null,
-    "method": "math_only",
-    "tractability": 1
+    "resolved": null
   },
   {
     "id": "O44",
@@ -37,9 +33,7 @@
     "priority": "high",
     "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
     "created": "2026-04-15",
-    "resolved": null,
-    "method": "math_only",
-    "tractability": 2
+    "resolved": null
   },
   {
     "id": "O45",
@@ -195,12 +189,10 @@
     "status": "open",
     "statement": "demands it calculate the RangeEn slope it claims to explain",
     "priority": "normal",
-    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** \u2014 the genome derives RangeEn slope \u2248 \u22121.0 for fBm from Gaussian correlation structure under \u221e-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF \u03a6\u2082(r, r; 2^{2H\u22121}\u22121) at five H values for r \u2208 {0.3, 0.5}, computing RangeEn = \u2212ln \u03a6\u2082 + ln \u03a6\u2081, regressing against H, and checking slope \u2248 \u22121.0 against Omidvarnia et al. (2018) Table/Figure 3 \u2014 this is a single-afternoon computation that either closes or falsifies the debt.",
+    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** \u2014 the genome derives RangeEn slope \u2248 \u22121.0 for fBm from Gaussian correlation structure under \u221e-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF \u03a6\u2082(r, r; 2^{2H\u22121}\u22121) at five H values for r \u2208 {0.3, 0.5}, computing RangeEn = \u2212ln \u03a6\u2082 + ln \u03a6\u2081, regressing against H, and checking slope \u2248 \u22121.0 against Omidvarnia et al. (2018) Table/Figure 3 \u2014 this is a single-afternoon computation that either closes or falsifies the debt. | [Gen 140]",
     "created": "2026-04-16",
     "resolved": null,
-    "auto": true,
-    "method": "data_analysis",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O61",
@@ -210,9 +202,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O62",
@@ -222,9 +212,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O63",
@@ -234,9 +222,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 1
+    "auto": true
   },
   {
     "id": "O64",
@@ -246,9 +232,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O65",
@@ -258,9 +242,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O66",
@@ -270,9 +252,7 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O67",
@@ -282,9 +262,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O68",
@@ -294,9 +272,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "experimental",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O69",
@@ -306,9 +282,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 2
+    "auto": true
   },
   {
     "id": "O70",
@@ -318,9 +292,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O71",
@@ -330,9 +302,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O72",
@@ -342,9 +312,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "math_only",
-    "tractability": 1
+    "auto": true
   },
   {
     "id": "O73",
@@ -354,9 +322,7 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
   },
   {
     "id": "O74",
@@ -366,8 +332,16 @@
     "progress": "",
     "created": "2026-04-19",
     "resolved": null,
-    "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "auto": true
+  },
+  {
+    "id": "O75",
+    "status": "open",
+    "statement": "demands the kernel *predict which measure dominates where and why*, converting two FEED traces into a single falsifiable claim",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-19",
+    "resolved": null,
+    "auto": true
   }
 ]
