@@ -58,6 +58,7 @@ SACRED = {
     "freed.py",          # the daemon itself cannot self-modify its own heartbeat
     "self_engineer.py",  # the engineer cannot rewrite itself
     "astrocyte.py",      # budget governor stays stable
+    "docs/game_of_life.html",  # hand-edited CA page — never overwrite
 }
 
 

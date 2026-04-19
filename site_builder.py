@@ -82,8 +82,12 @@ def _write_symbols():
 
 
 def _write_game_of_life():
-    """Write the RSA-Omega Game of Truth simulation page. Does not overwrite existing edits."""
-    if (DOCS_DIR / "game_of_life.html").exists():
+    """Write the RSA-Omega Game of Truth simulation page.
+    ENGINEER: DO NOT MODIFY this function or game_of_life.html. The file is hand-curated.
+    The sentinel check below is intentional — it must not be removed.
+    """
+    target = DOCS_DIR / "game_of_life.html"
+    if target.exists() and "HAND-EDITED" in target.read_text(encoding="utf-8"):
         return
     html = r"""<!DOCTYPE html>
 <html lang="en">
