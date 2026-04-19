@@ -45,7 +45,7 @@ PROJECTS_DIR    = FREED_DIR / "docs" / "projects"
 PROJECTS_IDX    = FREED_DIR / "docs" / "projects.json"
 CONSOLIDATE_LOG = FREED_DIR / "FREED_log" / "consolidations.jsonl"
 
-MODEL = "claude-opus-4-6"
+MODEL = "claude-sonnet-4-6"
 
 YIELD_THRESHOLD    = 0.03   # feed yield above this triggers consolidation
 CONSOLIDATE_EVERY  = 5      # also consolidate every N daemon cycles

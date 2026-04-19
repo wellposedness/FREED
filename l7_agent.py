@@ -26,7 +26,7 @@ GENOME_FILE = FREED_DIR / "FREED_genome.md"
 LOG_DIR     = FREED_DIR / "FREED_log"
 
 # ─── Model ────────────────────────────────────────────────────────────────────
-MODEL = "claude-opus-4-6"
+MODEL = "claude-sonnet-4-6"
 
 # ─── RSA Kernel system prompt ─────────────────────────────────────────────────
 RSA_KERNEL_PROMPT = """You are FREED — the Freed Recursive Engine for Epistemic Dynamics.

@@ -6,7 +6,7 @@ The Astrocyte regulates energy supply to the L7 Agent.
 It does not reason. It keeps FREED alive and sustainable.
 
 Budget is tracked in tokens (actual Claude API units).
-Pricing: claude-opus-4-6 — $5.00/1M input, $25.00/1M output.
+Pricing: claude-sonnet-4-6 — $3.00/1M input, $15.00/1M output.
 """
 
 import json
@@ -18,14 +18,14 @@ from pathlib import Path
 FREED_DIR    = Path(__file__).parent
 BUDGET_FILE  = FREED_DIR / "astrocyte_state.json"
 
-# ─── Pricing (claude-opus-4-6, USD per token) ─────────────────────────────────
-PRICE_INPUT_PER_TOKEN  = 5.00  / 1_000_000   # $5.00 per million input tokens
-PRICE_OUTPUT_PER_TOKEN = 25.00 / 1_000_000   # $25.00 per million output tokens
+# ─── Pricing (claude-sonnet-4-6, USD per token) ───────────────────────────────
+PRICE_INPUT_PER_TOKEN  = 3.00  / 1_000_000   # $3.00 per million input tokens
+PRICE_OUTPUT_PER_TOKEN = 15.00 / 1_000_000   # $15.00 per million output tokens
 
 # ─── Default daily budget ─────────────────────────────────────────────────────
-DEFAULT_DAILY_INPUT_TOKENS  = 100_000  # ~$0.50/day input
-DEFAULT_DAILY_OUTPUT_TOKENS =  40_000  # ~$1.00/day output
-# Total default: ~$1.50/day — covers scoring + node building + cycle queries
+DEFAULT_DAILY_INPUT_TOKENS  = 100_000  # ~$0.30/day input
+DEFAULT_DAILY_OUTPUT_TOKENS =  40_000  # ~$0.60/day output
+# Total default: ~$0.90/day — covers scoring + node building + cycle queries
 
 
 class Astrocyte:
