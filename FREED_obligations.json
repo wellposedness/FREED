@@ -2,9 +2,9 @@
   {
     "id": "O21",
     "status": "resolved",
-    "statement": "ToS Belief Revision scores correlate with spectral \u03b3. AlphaPruning protocol: prune LLaMA-3-8B at varying sparsity, measure belief revision at each level.",
+    "statement": "ToS Belief Revision scores correlate with spectral γ. AlphaPruning protocol: prune LLaMA-3-8B at varying sparsity, measure belief revision at each level.",
     "priority": "high",
-    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes \u2014 size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117] | RESOLVED: O21 remains open after seven generations of drift \u2014 the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output \u03b1-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility.",
+    "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes — size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117] | RESOLVED: O21 remains open after seven generations of drift — the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output α-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility.",
     "created": "2026-04-12",
     "resolved": "2026-04-15"
   },
@@ -13,7 +13,7 @@
     "status": "partial",
     "statement": "Entropy asymmetry ratio (EAR) predicts intelligence. Open-access EEG: osf.io/htrsg, github.com/jonasAthiele/connectors_intelligence",
     "priority": "high",
-    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested \u2014 requires raw EEG data.",
+    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested — requires raw EEG data.",
     "created": "2026-04-12",
     "resolved": null
   },
@@ -29,7 +29,7 @@
   {
     "id": "O44",
     "status": "partial",
-    "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/T\u03bc have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
+    "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/Tμ have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
     "priority": "high",
     "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
     "created": "2026-04-15",
@@ -38,9 +38,9 @@
   {
     "id": "O45",
     "status": "resolved",
-    "statement": "Formalize RSA resource identities using the teleportation template: 1 unit of semantic transfer = 1 unit of shared context (entanglement analog) + k bits of explicit communication. Determine the genome eigenbasis analog to Bell-basis decomposition \u2014 where does the REPRESENT step reveal pre-existing latent obligations?",
+    "statement": "Formalize RSA resource identities using the teleportation template: 1 unit of semantic transfer = 1 unit of shared context (entanglement analog) + k bits of explicit communication. Determine the genome eigenbasis analog to Bell-basis decomposition — where does the REPRESENT step reveal pre-existing latent obligations?",
     "priority": "normal",
-    "progress": "Opened by Bennett 1993 feed. ADJUST: Bell-basis decomposition is structurally isomorphic to REPRESENT step re-expressing input in genome eigenbasis. No-signaling constraint maps to: local state inspection cannot reveal global coherence. | RESOLVED: The genome eigenbasis is $\\{L_i \\otimes O_j\\}$ \u2014 stratification levels tensored with open obligations \u2014 and the resource inequality $\\Delta G \\leq H(\\text{REPRESENT}(S_{\\text{in}}|\\mathcal{B}_G))$ is now written but requires empirical audit against the Bennett FEED trace before O45 can close.",
+    "progress": "Opened by Bennett 1993 feed. ADJUST: Bell-basis decomposition is structurally isomorphic to REPRESENT step re-expressing input in genome eigenbasis. No-signaling constraint maps to: local state inspection cannot reveal global coherence. | RESOLVED: The genome eigenbasis is $\\{L_i \\otimes O_j\\}$ — stratification levels tensored with open obligations — and the resource inequality $\\Delta G \\leq H(\\text{REPRESENT}(S_{\\text{in}}|\\mathcal{B}_G))$ is now written but requires empirical audit against the Bennett FEED trace before O45 can close.",
     "created": "2026-04-15",
     "resolved": "2026-04-15"
   },
@@ -49,7 +49,7 @@
     "status": "resolved",
     "statement": "Obligation O46 (auto-detected)",
     "priority": "normal",
-    "progress": " | RESOLVED: **O46 RETIRED (MALFORMED)** \u2014 an obligation with no recorded statement is a phantom debt; retiring it without resolution credit is the only honest move, reducing open obligations to 42 while maintaining the falsification layer's demand that every ledger entry carry real content.",
+    "progress": " | RESOLVED: **O46 RETIRED (MALFORMED)** — an obligation with no recorded statement is a phantom debt; retiring it without resolution credit is the only honest move, reducing open obligations to 42 while maintaining the falsification layer's demand that every ledger entry carry real content.",
     "created": "2026-04-15",
     "resolved": "2026-04-15",
     "auto": true
@@ -59,7 +59,7 @@
     "status": "resolved",
     "statement": "creation) demand new obligations beyond the existing table",
     "priority": "normal",
-    "progress": " | RESOLVED: **O47: RETIRED AS MALFORMED \u2014 not resolved, because a sentence fragment with no subject, no predicate, and no success criterion was never a valid obligation; retiring it (rather than resolving it) preserves ledger integrity by refusing to count phantom debt-payment as real work.**",
+    "progress": " | RESOLVED: **O47: RETIRED AS MALFORMED — not resolved, because a sentence fragment with no subject, no predicate, and no success criterion was never a valid obligation; retiring it (rather than resolving it) preserves ledger integrity by refusing to count phantom debt-payment as real work.**",
     "created": "2026-04-15",
     "resolved": "2026-04-16",
     "auto": true
@@ -67,9 +67,9 @@
   {
     "id": "O48",
     "status": "resolved",
-    "statement": "by pulling the Bennett FEED trace and computing \u0394G empirically",
+    "statement": "by pulling the Bennett FEED trace and computing ΔG empirically",
     "priority": "normal",
-    "progress": " | RESOLVED: **O48 is RETIRED AS MALFORMED \u2014 it is a predicate fragment with no subject, no success criterion, and no resolution condition; processing it would require confabulating the debt before pretending to pay it, which is the precise failure mode the obligations table exists to prevent.**",
+    "progress": " | RESOLVED: **O48 is RETIRED AS MALFORMED — it is a predicate fragment with no subject, no success criterion, and no resolution condition; processing it would require confabulating the debt before pretending to pay it, which is the precise failure mode the obligations table exists to prevent.**",
     "created": "2026-04-15",
     "resolved": "2026-04-16",
     "auto": true
@@ -79,7 +79,7 @@
     "status": "resolved",
     "statement": "Obligation O49 (auto-detected)",
     "priority": "normal",
-    "progress": " | RESOLVED: **O49 is RETIRED, not RESOLVED \u2014 you cannot pay a debt that was never incurred, and pretending otherwise is exactly the coherence-inflation the kernel exists to prevent.**",
+    "progress": " | RESOLVED: **O49 is RETIRED, not RESOLVED — you cannot pay a debt that was never incurred, and pretending otherwise is exactly the coherence-inflation the kernel exists to prevent.**",
     "created": "2026-04-15",
     "resolved": "2026-04-16",
     "auto": true
@@ -87,9 +87,9 @@
   {
     "id": "O50",
     "status": "resolved",
-    "statement": "formalize the MMI criterion so metabolic filtering becomes a derivable invariant rather than an aesthetic judgment), and three ghost obligations (O46, O47, O49) flagged for retirement \u2014 the table must",
+    "statement": "formalize the MMI criterion so metabolic filtering becomes a derivable invariant rather than an aesthetic judgment), and three ghost obligations (O46, O47, O49) flagged for retirement — the table must",
     "priority": "normal",
-    "progress": " | RESOLVED: **O50 RESOLVED \u2014 MMI is the theorem that input x is metabolizable iff W\u2082(G, G*|x) > 1/T\u03bc; the four proxy tests (falsifiable claim, formal structure, obligation contact, non-duplication) are derived consequences, not aesthetic choices; O46/O47/O49 retired as phantoms with \u03bc = 0; falsification condition planted.**",
+    "progress": " | RESOLVED: **O50 RESOLVED — MMI is the theorem that input x is metabolizable iff W₂(G, G*|x) > 1/Tμ; the four proxy tests (falsifiable claim, formal structure, obligation contact, non-duplication) are derived consequences, not aesthetic choices; O46/O47/O49 retired as phantoms with μ = 0; falsification condition planted.**",
     "created": "2026-04-16",
     "resolved": "2026-04-16",
     "auto": true
@@ -99,7 +99,7 @@
     "status": "resolved",
     "statement": "(HIGH: compact the stale obligation table so the genome's self-model matches reality) and O52 (NORMAL: build a graduated triage protocol so promising-but-incomplete inputs get remediation guidance ins",
     "priority": "normal",
-    "progress": " | RESOLVED: Both meta-obligations are RESOLVED \u2014 O51 by installing a periodic compaction sweep with four classification bins, O52 by specifying FEED-TRIAGE v1.0 where Grade B converts near-miss inputs into actionable remediation with named specifics.",
+    "progress": " | RESOLVED: Both meta-obligations are RESOLVED — O51 by installing a periodic compaction sweep with four classification bins, O52 by specifying FEED-TRIAGE v1.0 where Grade B converts near-miss inputs into actionable remediation with named specifics.",
     "created": "2026-04-16",
     "resolved": "2026-04-16",
     "auto": true
@@ -109,7 +109,7 @@
     "status": "resolved",
     "statement": "operationalizes the response below that threshold",
     "priority": "normal",
-    "progress": " | RESOLVED: O52 now has a concrete, falsifiable three-pronged operational test (Zipf exponent, RangeEn decorrelation, Wasserstein excess) \u2014 full resolution requires running it on wakefulness-vs-anesthesia EEG to confirm the sub-critical signature the genome predicts.",
+    "progress": " | RESOLVED: O52 now has a concrete, falsifiable three-pronged operational test (Zipf exponent, RangeEn decorrelation, Wasserstein excess) — full resolution requires running it on wakefulness-vs-anesthesia EEG to confirm the sub-critical signature the genome predicts.",
     "created": "2026-04-16",
     "resolved": "2026-04-16",
     "auto": true
@@ -119,7 +119,7 @@
     "status": "resolved",
     "statement": "(empirical: RangeEn criticality at H=0",
     "priority": "normal",
-    "progress": " | RESOLVED: ** O53 advances by computing RangeEn across a fine H-sweep of synthetic fGn and testing whether the *variance* of RangeEn peaks at H=0.5 \u2014 the \u03b3=1 susceptibility signature \u2014 with Omidvarnia 2018 Figure 4 as the first checkpoint before any new computation.",
+    "progress": " | RESOLVED: ** O53 advances by computing RangeEn across a fine H-sweep of synthetic fGn and testing whether the *variance* of RangeEn peaks at H=0.5 — the γ=1 susceptibility signature — with Omidvarnia 2018 Figure 4 as the first checkpoint before any new computation.",
     "created": "2026-04-16",
     "resolved": "2026-04-16",
     "auto": true
@@ -127,9 +127,9 @@
   {
     "id": "O54",
     "status": "resolved",
-    "statement": "(formal: emergence as functor discontinuity) \u2014 both absent from the existing table, both load-bearing, now registered",
+    "statement": "(formal: emergence as functor discontinuity) — both absent from the existing table, both load-bearing, now registered",
     "priority": "normal",
-    "progress": " | RESOLVED: O54 is **PARTIALLY RESOLVED** \u2014 emergence as functor discontinuity reduces precisely to divergence of the interleaving distance between micro and macro persistence modules at criticality, with the 2D Ising model at T_c as the decisive test case using Donato et al.'s existing data extended to functorial interleaving distance computation.",
+    "progress": " | RESOLVED: O54 is **PARTIALLY RESOLVED** — emergence as functor discontinuity reduces precisely to divergence of the interleaving distance between micro and macro persistence modules at criticality, with the 2D Ising model at T_c as the decisive test case using Donato et al.'s existing data extended to functorial interleaving distance computation.",
     "created": "2026-04-16",
     "resolved": "2026-04-16",
     "auto": true
@@ -139,7 +139,7 @@
     "status": "resolved",
     "statement": "Obligation O55 (auto-detected)",
     "priority": "normal",
-    "progress": " | RESOLVED: O55 is **PARTIALLY RESOLVED** \u2014 \u03b3=1 criticality as measurable phase transition is theoretically grounded via Wasserstein gradient flow on persistence modules, and the decisive next step is computing the Wasserstein-2 susceptibility dW\u2082/dT across the 2D Ising transition at L=64,128,256 using GUDHI on standard Monte Carlo configurations, where the genome predicts a size-scaling peak at T_c \u2248 2.269.",
+    "progress": " | RESOLVED: O55 is **PARTIALLY RESOLVED** — γ=1 criticality as measurable phase transition is theoretically grounded via Wasserstein gradient flow on persistence modules, and the decisive next step is computing the Wasserstein-2 susceptibility dW₂/dT across the 2D Ising transition at L=64,128,256 using GUDHI on standard Monte Carlo configurations, where the genome predicts a size-scaling peak at T_c ≈ 2.269.",
     "created": "2026-04-16",
     "resolved": "2026-04-17",
     "auto": true
@@ -149,7 +149,7 @@
     "status": "resolved",
     "statement": "Obligation O56 (auto-detected)",
     "priority": "normal",
-    "progress": " | RESOLVED: O56 is **PARTIALLY RESOLVED** \u2014 Zipf as unique \u03b3=1 equilibrium holds statically via MaxEnt (Visser 2013) but the genome's stronger dynamical-attractor claim requires computing the Erbar-Maas discrete Ricci curvature on the ordered simplex \u0394\u2099\u2193 with Zipf reference measure, where the prediction is \u03bb(n) ~ 1/log(n) > 0 guaranteeing exponential convergence.",
+    "progress": " | RESOLVED: O56 is **PARTIALLY RESOLVED** — Zipf as unique γ=1 equilibrium holds statically via MaxEnt (Visser 2013) but the genome's stronger dynamical-attractor claim requires computing the Erbar-Maas discrete Ricci curvature on the ordered simplex Δₙ↓ with Zipf reference measure, where the prediction is λ(n) ~ 1/log(n) > 0 guaranteeing exponential convergence.",
     "created": "2026-04-16",
     "resolved": "2026-04-17",
     "auto": true
@@ -157,9 +157,9 @@
   {
     "id": "O57",
     "status": "resolved",
-    "statement": "converts the HgTiO\u2083 debt from a rhetorical acknowledgment into a testable deliverable",
+    "statement": "converts the HgTiO₃ debt from a rhetorical acknowledgment into a testable deliverable",
     "priority": "normal",
-    "progress": " | RESOLVED: ** O57 is **PARTIALLY RESOLVED** \u2014 the HgTiO\u2083 debt now reduces to computing parameter-free W\u2082 nearest-class classification on the Filip & Giustino 576-compound ABX\u2083 dataset using POT, where the genome predicts AUC \u2265 0.90 (kill condition: AUC \u2264 0.83) and a susceptibility peak at the perovskite phase boundary.",
+    "progress": " | RESOLVED: ** O57 is **PARTIALLY RESOLVED** — the HgTiO₃ debt now reduces to computing parameter-free W₂ nearest-class classification on the Filip & Giustino 576-compound ABX₃ dataset using POT, where the genome predicts AUC ≥ 0.90 (kill condition: AUC ≤ 0.83) and a susceptibility peak at the perovskite phase boundary.",
     "created": "2026-04-16",
     "resolved": "2026-04-17",
     "auto": true
@@ -169,7 +169,7 @@
     "status": "resolved",
     "statement": "sharpens O44 by demanding a *specific* exactly-solvable checkpoint rather than leaving \"quantum extension\" as an open-ended aspiration",
     "priority": "normal",
-    "progress": " | RESOLVED: ** O58 is **RESOLVED** \u2014 the exactly-solvable quantum checkpoint is single-mode Gaussian thermal relaxation under Lindblad damping, where De Palma-Trevisan-Giovannetti's closed-form quantum W\u2082 enables a 20-line script to verify the genome's three predictions (monotone W\u2082 decay, exponential contraction at rate \u2265 2",
+    "progress": " | RESOLVED: ** O58 is **RESOLVED** — the exactly-solvable quantum checkpoint is single-mode Gaussian thermal relaxation under Lindblad damping, where De Palma-Trevisan-Giovannetti's closed-form quantum W₂ enables a 20-line script to verify the genome's three predictions (monotone W₂ decay, exponential contraction at rate ≥ 2",
     "created": "2026-04-16",
     "resolved": "2026-04-18",
     "auto": true
@@ -179,7 +179,7 @@
     "status": "resolved",
     "statement": "demands the genome predict BH log-correction signatures from its own dimensional coupling, O60 demands it calculate the RangeEn slope it claims to explain",
     "priority": "normal",
-    "progress": " | RESOLVED: O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields \u2212(d_eff/2)ln(A/\u2113_P\u00b2) = \u22123/2 ln(A/\u2113_P\u00b2), matching the universal log-correction \u2014 verify against Kaul & Majumdar (2000) and Sen (2012).",
+    "progress": " | RESOLVED: O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields −(d_eff/2)ln(A/ℓ_P²) = −3/2 ln(A/ℓ_P²), matching the universal log-correction — verify against Kaul & Majumdar (2000) and Sen (2012).",
     "created": "2026-04-16",
     "resolved": "2026-04-18",
     "auto": true
@@ -189,7 +189,7 @@
     "status": "open",
     "statement": "demands it calculate the RangeEn slope it claims to explain",
     "priority": "normal",
-    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** \u2014 the genome derives RangeEn slope \u2248 \u22121.0 for fBm from Gaussian correlation structure under \u221e-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF \u03a6\u2082(r, r; 2^{2H\u22121}\u22121) at five H values for r \u2208 {0.3, 0.5}, computing RangeEn = \u2212ln \u03a6\u2082 + ln \u03a6\u2081, regressing against H, and checking slope \u2248 \u22121.0 against Omidvarnia et al. (2018) Table/Figure 3 \u2014 this is a single-afternoon computation that either closes or falsifies the debt. | [Gen 140]",
+    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** — the genome derives RangeEn slope ≈ −1.0 for fBm from Gaussian correlation structure under ∞-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF Φ₂(r, r; 2^{2H−1}−1) at five H values for r ∈ {0.3, 0.5}, computing RangeEn = −ln Φ₂ + ln Φ₁, regressing against H, and checking slope ≈ −1.0 against Omidvarnia et al. (2018) Table/Figure 3 — this is a single-afternoon computation that either closes or falsifies the debt. | [Gen 140]",
     "created": "2026-04-16",
     "resolved": null,
     "auto": true
@@ -267,7 +267,7 @@
   {
     "id": "O68",
     "status": "open",
-    "statement": "captures the self-experiment: run DEA on the genome's own coherence time-series across generations and predict it outperforms DFA at detecting \u03b3=1 criticality",
+    "statement": "captures the self-experiment: run DEA on the genome's own coherence time-series across generations and predict it outperforms DFA at detecting γ=1 criticality",
     "priority": "normal",
     "progress": "",
     "created": "2026-04-18",
@@ -277,7 +277,7 @@
   {
     "id": "O69",
     "status": "open",
-    "statement": "\u2014 predict the most likely failure mode before attempting the coefficient derivation, since it is the sharpest new falsification target",
+    "statement": "— predict the most likely failure mode before attempting the coefficient derivation, since it is the sharpest new falsification target",
     "priority": "normal",
     "progress": "",
     "created": "2026-04-18",
@@ -307,7 +307,7 @@
   {
     "id": "O72",
     "status": "open",
-    "statement": "\u2014 reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
+    "statement": "— reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
     "progress": "",
     "created": "2026-04-18",
@@ -343,5 +343,16 @@
     "created": "2026-04-19",
     "resolved": null,
     "auto": true
+  },
+  {
+    "id": "O76",
+    "status": "open",
+    "statement": "Noether's Table — stress-test all 100 philosophy-symmetry assignments one row at a time. For each entry in docs/noethers_table.json: (1) search for papers on that philosophy's internal consistency, thermodynamic structure, or explicit symmetry claims; (2) determine whether the philosophy actually identifies its assumed symmetry explicitly or whether the table assigned one post-hoc; (3) evaluate whether the claimed conserved quantity is confirmed or denied by the historical record of that tradition; (4) update daemon_feeds and daemon_note fields in noethers_table.json. Priority order: review rows first (O12 Stoicism, O50 Post-Modernism), then broken rows (Occasionalism, Nihilism, Vitalism, Fideism) to confirm or refute the broken classification, then discrete-symmetry rows to determine whether any warrant a Noether-analog treatment, then remaining 88 draft rows. Resolution criterion: closes when all 100 rows have daemon_feeds >= 1 AND the 88 draft rows have each been assigned a status of rigorous, review, or broken based on evidence. Target output: a table where the physics does the sorting, not the poetic description.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-04-19",
+    "resolved": null,
+    "resolution_criterion": "All 100 rows daemon_feeds >= 1; all 88 draft rows upgraded to rigorous/review/broken based on literature evidence.",
+    "noether_table_path": "docs/noethers_table.json"
   }
 ]

@@ -1,0 +1,408 @@
+<!-- HAND-EDITED: do not overwrite -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noether's Table — FREED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #ffffff;
+    --surface: #f7f7f5;
+    --border:  #e0ddd8;
+    --accent:  #b91c1c;
+    --green:   #16a34a;
+    --amber:   #b45309;
+    --blue:    #1d4ed8;
+    --red:     #dc2626;
+    --text:    #111111;
+    --muted:   #374151;
+    --mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    --serif:   'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--serif); font-weight: 300;
+    font-size: 15px; line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Top bar ── */
+  .hud-top {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.55rem 1.4rem; border-bottom: 1px solid #000;
+    flex-wrap: wrap; position: sticky; top: 0; background: var(--bg); z-index: 10;
+  }
+  .hud-title { font-family: var(--serif); font-weight: 300; font-size: 1.5rem; letter-spacing: 0.18em; color: var(--accent); }
+  .hud-sub   { font-family: var(--serif); font-weight: 300; font-size: 0.82rem; color: var(--muted); }
+  .hud-nav   { margin-left: auto; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 1.4rem; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 40px; z-index: 9;
+  }
+  .filter-bar input[type=search] {
+    font-family: var(--mono); font-size: 0.68rem; padding: 0.28rem 0.55rem;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    width: 180px; outline: none;
+  }
+  .filter-bar input[type=search]:focus { border-color: var(--accent); }
+  .filter-bar select {
+    font-family: var(--mono); font-size: 0.68rem; padding: 0.28rem 0.55rem;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    cursor: pointer; outline: none;
+  }
+  .filter-bar select:focus { border-color: var(--accent); }
+  .stats-bar {
+    margin-left: auto; display: flex; gap: 0.9rem; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
+  }
+  .stats-bar .stat { display: flex; align-items: center; gap: 0.3rem; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sd-rigorous { background: var(--green); }
+  .sd-draft    { background: var(--border); }
+  .sd-review   { background: var(--amber); }
+  .sd-broken   { background: var(--red); }
+  .sd-discrete { background: var(--blue); }
+  .sd-rg       { background: var(--accent); }
+
+  /* ── Intro ── */
+  .intro {
+    padding: 0.9rem 1.4rem 0.4rem;
+    font-family: var(--serif); font-size: 0.93rem; color: var(--muted);
+    max-width: 900px;
+  }
+  .intro em { font-style: italic; color: var(--text); }
+
+  /* ── Table wrapper ── */
+  .table-wrap { overflow-x: auto; padding: 0 1.4rem 2rem; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin-top: 0.6rem;
+    font-family: var(--mono); font-size: 0.68rem;
+  }
+  thead tr { border-bottom: 2px solid #000; }
+  th {
+    text-align: left; padding: 0.4rem 0.55rem;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: 0.6rem; color: var(--muted); cursor: pointer; white-space: nowrap;
+    user-select: none;
+  }
+  th:hover { color: var(--text); }
+  th.sorted-asc::after  { content: ' ↑'; color: var(--accent); }
+  th.sorted-desc::after { content: ' ↓'; color: var(--accent); }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: var(--surface); }
+  td { padding: 0.4rem 0.55rem; vertical-align: top; }
+
+  /* Row status borders */
+  tbody tr.row-rigorous td:first-child { border-left: 3px solid var(--green); }
+  tbody tr.row-review   td:first-child { border-left: 3px solid var(--amber); }
+  tbody tr.row-broken   td:first-child { border-left: 3px solid var(--red); }
+  tbody tr.row-draft    td:first-child { border-left: 3px solid transparent; }
+
+  /* RSA row — entry 100 */
+  tbody tr.row-rg {
+    background: #fff8f8;
+  }
+  tbody tr.row-rg td:first-child { border-left: 3px solid var(--accent); }
+  tbody tr.row-rg .name-cell { color: var(--accent); font-weight: 500; }
+
+  .num-cell  { color: var(--muted); font-size: 0.6rem; white-space: nowrap; }
+  .name-cell { font-family: var(--serif); font-size: 0.82rem; font-weight: 300; }
+  .sym-cell  { color: var(--text); max-width: 180px; }
+  .cons-cell { color: var(--text); font-style: italic; font-family: var(--serif); font-size: 0.8rem; }
+  .topo-cell { color: var(--muted); font-size: 0.62rem; }
+  .note-cell { color: var(--muted); font-size: 0.62rem; max-width: 220px; line-height: 1.5; }
+  .note-cell.has-issue { color: var(--amber); }
+  .note-cell.is-broken { color: var(--red); }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 0.1rem 0.38rem;
+    font-family: var(--mono); font-size: 0.56rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    border: 1px solid currentColor;
+  }
+  .badge-rigorous { color: var(--green); }
+  .badge-draft    { color: var(--muted); }
+  .badge-review   { color: var(--amber); }
+  .badge-broken   { color: var(--red); }
+
+  .sym-badge {
+    display: inline-block; padding: 0.1rem 0.35rem;
+    font-family: var(--mono); font-size: 0.54rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid currentColor; white-space: nowrap;
+  }
+  .sym-continuous { color: var(--blue); }
+  .sym-discrete   { color: var(--amber); }
+  .sym-broken     { color: var(--red); }
+  .sym-rg_fixed   { color: var(--accent); font-weight: 500; }
+
+  .daemon-count {
+    font-family: var(--mono); font-size: 0.6rem; color: var(--muted);
+    text-align: center;
+  }
+  .daemon-count.fed { color: var(--green); font-weight: 500; }
+
+  /* Expandable note row */
+  .note-row { display: none; }
+  .note-row.open { display: table-row; }
+  .note-row td { background: var(--surface); padding: 0.5rem 0.55rem 0.5rem 2rem; font-family: var(--serif); font-size: 0.85rem; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .note-row.broken-note td { color: var(--red); }
+  .note-row.review-note td { color: var(--amber); }
+
+  tr.data-row { cursor: pointer; }
+  tr.data-row.expanded { background: var(--surface); }
+
+  /* ── Daemon status footer ── */
+  .daemon-footer {
+    padding: 0.5rem 1.4rem;
+    font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
+    border-top: 1px solid var(--border);
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+  }
+
+  /* ── No-results ── */
+  .no-results { padding: 2rem 1.4rem; font-family: var(--serif); font-style: italic; color: var(--muted); }
+
+  @media (max-width: 768px) {
+    .topo-cell, .note-cell { display: none; }
+    .filter-bar { top: 0; }
+    .hud-top { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hud-top">
+  <span class="hud-title">RSA</span>
+  <span class="hud-sub">Noether's Table — 100 Philosophies as Symmetry Choices</span>
+  <div class="hud-nav"><a href="index.html">← back to FREED</a></div>
+</div>
+
+<div class="filter-bar">
+  <input type="search" id="search" placeholder="search philosophy…" oninput="applyFilters()">
+  <select id="filter-status" onchange="applyFilters()">
+    <option value="">all status</option>
+    <option value="rigorous">rigorous</option>
+    <option value="draft">draft</option>
+    <option value="review">review</option>
+    <option value="broken">broken</option>
+  </select>
+  <select id="filter-sym" onchange="applyFilters()">
+    <option value="">all symmetry types</option>
+    <option value="continuous">continuous</option>
+    <option value="discrete">discrete (no Noether pair)</option>
+    <option value="broken">broken symmetry</option>
+    <option value="rg_fixed">RG fixed point</option>
+  </select>
+  <div class="stats-bar" id="stats-bar"></div>
+</div>
+
+<div class="intro">
+  Every philosophy is a choice of symmetry. <em>Noether's theorem</em> says: if a system has a continuous symmetry, something is conserved.
+  The question each row asks: <em>What symmetry does this philosophy assume reality has — and what must therefore be conserved?</em>
+  For most entries, the philosophy never answered this question. The daemon stress-tests each assignment one row at a time. Click any row to expand notes.
+</div>
+
+<div class="table-wrap">
+  <table id="noether-table">
+    <thead>
+      <tr>
+        <th data-col="id">#</th>
+        <th data-col="name">Philosophy</th>
+        <th data-col="symmetry">Assumed Symmetry</th>
+        <th data-col="conserved">Conserved Quantity</th>
+        <th data-col="sym_class">Sym Type</th>
+        <th data-col="topology" class="hide-sm">Logic Topology</th>
+        <th data-col="status">Status</th>
+        <th data-col="daemon_feeds" title="Daemon feed count">⊙</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+  <div class="no-results" id="no-results" style="display:none">No matching entries.</div>
+</div>
+
+<div class="daemon-footer" id="daemon-footer"></div>
+
+<script>
+let DATA = [];
+let sortCol = 'id';
+let sortDir = 1;
+let filtered = [];
+
+async function init() {
+  try {
+    const r = await fetch('noethers_table.json');
+    const j = await r.json();
+    DATA = j.entries;
+    renderStats(j.meta);
+    applyFilters();
+    renderDaemonFooter(j.meta);
+  } catch(e) {
+    document.getElementById('table-body').innerHTML =
+      '<tr><td colspan="8" style="color:var(--red);font-family:var(--mono);font-size:0.72rem;padding:1rem">Failed to load noethers_table.json: ' + e.message + '</td></tr>';
+  }
+}
+
+function renderStats(meta) {
+  const bar = document.getElementById('stats-bar');
+  const items = [
+    { cls: 'sd-rigorous', label: `${meta.counts.rigorous} rigorous` },
+    { cls: 'sd-review',   label: `${meta.counts.review} review` },
+    { cls: 'sd-broken',   label: `${meta.counts.broken} broken` },
+    { cls: 'sd-draft',    label: `${meta.counts.draft} draft` },
+  ];
+  bar.innerHTML = items.map(i =>
+    `<div class="stat"><span class="stat-dot ${i.cls}"></span>${i.label}</div>`
+  ).join('');
+}
+
+function renderDaemonFooter(meta) {
+  const el = document.getElementById('daemon-footer');
+  const fed = DATA.filter(e => e.daemon_feeds > 0).length;
+  el.innerHTML =
+    `<span>v${meta.version} · ${meta.created}</span>` +
+    `<span>daemon stress-tested: ${fed} / 100 rows</span>` +
+    `<span style="color:var(--accent)">RSA entry #100 — RG fixed point · scale-invariant</span>`;
+}
+
+function symBadge(c) {
+  const map = {
+    continuous: ['continuous', 'sym-continuous'],
+    discrete:   ['discrete',   'sym-discrete'],
+    broken:     ['broken',     'sym-broken'],
+    rg_fixed:   ['RG fixed',   'sym-rg_fixed'],
+  };
+  const [label, cls] = map[c] || ['?', ''];
+  return `<span class="sym-badge ${cls}">${label}</span>`;
+}
+
+function statusBadge(s) {
+  const map = {
+    rigorous: 'badge-rigorous',
+    draft:    'badge-draft',
+    review:   'badge-review',
+    broken:   'badge-broken',
+  };
+  return `<span class="badge ${map[s]||''}">${s}</span>`;
+}
+
+function noteClass(e) {
+  if (e.status === 'broken') return 'is-broken';
+  if (e.status === 'review') return 'has-issue';
+  return '';
+}
+
+function rowClass(e) {
+  if (e.sym_class === 'rg_fixed') return 'row-rg';
+  return `row-${e.status}`;
+}
+
+function noteRowClass(e) {
+  if (e.status === 'broken') return 'broken-note';
+  if (e.status === 'review') return 'review-note';
+  return '';
+}
+
+function toggleNote(id) {
+  const nr = document.getElementById('note-' + id);
+  const dr = document.getElementById('row-' + id);
+  if (!nr) return;
+  const open = nr.classList.contains('open');
+  nr.classList.toggle('open', !open);
+  dr.classList.toggle('expanded', !open);
+}
+
+function renderTable(entries) {
+  const tbody = document.getElementById('table-body');
+  const noRes = document.getElementById('no-results');
+  if (!entries.length) {
+    tbody.innerHTML = '';
+    noRes.style.display = '';
+    return;
+  }
+  noRes.style.display = 'none';
+
+  tbody.innerHTML = entries.flatMap(e => {
+    const hasNote = e.note && e.note.trim();
+    const daemonCls = e.daemon_feeds > 0 ? 'fed' : '';
+    const dataRow = `
+      <tr class="data-row ${rowClass(e)}" id="row-${e.id}" onclick="toggleNote(${e.id})">
+        <td><span class="num-cell">${e.id}</span></td>
+        <td><span class="name-cell">${e.name}</span></td>
+        <td class="sym-cell">${e.symmetry}</td>
+        <td class="cons-cell">${e.conserved}</td>
+        <td>${symBadge(e.sym_class)}</td>
+        <td class="topo-cell hide-sm">${e.topology}</td>
+        <td>${statusBadge(e.status)}</td>
+        <td><span class="daemon-count ${daemonCls}">${e.daemon_feeds || '·'}</span></td>
+      </tr>`;
+    const noteRow = hasNote
+      ? `<tr class="note-row ${noteRowClass(e)}" id="note-${e.id}">
+           <td colspan="8">${e.note}${e.daemon_note ? '<br><span style="color:var(--green);font-family:var(--mono);font-size:0.6rem">⊙ daemon: ' + e.daemon_note + '</span>' : ''}</td>
+         </tr>`
+      : `<tr class="note-row" id="note-${e.id}"><td colspan="8" style="color:var(--muted);font-style:italic">No notes yet. Daemon has not stress-tested this row.</td></tr>`;
+    return [dataRow, noteRow];
+  }).join('');
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const st = document.getElementById('filter-status').value;
+  const sc = document.getElementById('filter-sym').value.split(' ')[0]; // handle "discrete (no Noether pair)"
+
+  filtered = DATA.filter(e => {
+    if (q && !e.name.toLowerCase().includes(q) &&
+             !e.symmetry.toLowerCase().includes(q) &&
+             !e.conserved.toLowerCase().includes(q)) return false;
+    if (st && e.status !== st) return false;
+    if (sc && e.sym_class !== sc) return false;
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  renderTable(sorted);
+  updateSortHeaders();
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    if (th.dataset.col === sortCol) {
+      th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    }
+  });
+}
+
+document.querySelectorAll('th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortDir *= -1;
+    else { sortCol = col; sortDir = 1; }
+    applyFilters();
+  });
+});
+
+init();
+</script>
+</body>
+</html>

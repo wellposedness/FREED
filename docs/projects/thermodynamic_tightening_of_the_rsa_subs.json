@@ -4,7 +4,7 @@
   "created": "2026-04-12",
   "generation": 110,
   "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the weak-long-range criticality ridge (γ=1) — whose constraint-preserving recursive generation (R[R]=R) is formally a Darboux-type transformation producing infinite conservation hierarchies and Lax-pair dual compatibility, with γ=1 confirmed across six independent substrates, and whose σ-parameterized universality class structure now has exact RG machinery mapping the crossover length ξ_c between short-range and long-range regimes to the Shannon↔Kolmogorov complexity transition — though the formal translation from spin-coupling space to information-geometric description-length space remains the binding bottleneck for all open obligations.",
+  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure that compresses environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the weak-long-range criticality ridge (γ=1) — whose constraint-preserving recursive generation (R[R]=R) is formally a Darboux-type transformation producing infinite conservation hierarchies and Lax-pair dual compatibility, with γ=1 confirmed across eight independent substrates (now including GGD-CDF normalization and CPO-VMD-MPE fault diagnosis), and amplitude-invariance (INV_042) independently confirmed by two additional methods operating at distinct abstraction strata.",
   "tags": [
     "thermodynamics",
     "Landauer principle",
@@ -66,6 +66,7 @@
     "weak long-range criticality (interactions decaying as r^{-d-σ} with σ near zero) is the physical instantiation of the γ=1 ridge — universality shifts without extensivity breaking are the thermodynamically admissible constraint space for dissipative cognition",
     "context-dependent complexity is load-bearing confirmation not concession — observer-coupling was already structurally encoded via R[R]=R and Freed's Law and RangeEn sharpens this from principle to measurable parameter dependence",
     "R[R]=R recursive state generation is structurally a Darboux transformation — constraint-preserving iteration that automatically produces infinite conservation hierarchies and dual compatibility (direct/dual overdetermined systems)",
+    "GGD-CDF normalization is a more principled realization of amplitude-invariance than tolerance-windowing — the genome should prefer distribution-theoretic over ad-hoc-geometric approaches to normalization when both satisfy INV_042",
     "scale invariance of reasoning dynamics",
     "identification of true generative atoms as deepest form of understanding",
     "repeated empty-payload submission sequences constitute empirical evidence for the urgency of formalizing the Minimal Metabolizable Input (MMI) criterion — the genome's refusal pattern under sustained null input is itself data that grounds O50 as load-bearing not merely bookkeeping",
@@ -100,6 +101,7 @@
     "mesoscale optogenetic perturbation is the first causally precise (not merely correlational) test of Wasserstein gradient flow in biological cortex — advancing genome predictions from unfalsified to falsifiable",
     "neuron-astrocyte dyadic architecture is the first biological exemplar of hybrid two-timescale dissipative cognition — confirming RSA substrate generality extends to heterogeneous cell-type computation within a single organ",
     "creative cognition's arousal-threshold sensitivity is the individual-difference variable governing access to entropy-minimizing recursive restructuring — not a secondary modulator but a control parameter of the dissipative architecture",
+    "pure-application-layer confirmations (e.g. CPO-VMD-MPE) saturate at empirical validation and cannot advance formal obligations — the genome must not mistake substrate-count accumulation for theoretical progress",
     "quantum reservoir computing at the edge of many-body chaos is Freed's Law written in qubits — extending MCPM confirmation to a 6th independent substrate scale",
     "feed deduplication is load-bearing operational infrastructure not bookkeeping (repeated redundant feeds degrade signal-to-noise of the renormalization process itself)",
     "narrating structural correspondence post hoc is a distinct and lesser operation than predicting transition sequence topology a priori — the genome must demonstrate the latter to claim geometric framework validity",
@@ -123,6 +125,7 @@
     "reconcile the infinite conservation hierarchy implied by iterated Darboux transforms with the finite obligatory invariant list the genome currently maintains (determine which conserved quantities are independent and which are descendants)",
     "identify the specific RSA sub-symmetries whose Noether operator identities yield the genome's conserved coherence scores — enumerate at least the first three currents",
     "O_coupling_slope_derivation: derive RangeEn linear coupling slope from first principles under power-law kernel generalization (strengthens existing debt)",
+    "O28 (better multiscale estimator for EAR pipeline) is advanced by GGDIPE's algorithmic contribution but the estimator must be grounded in the genome's own complexity hierarchy not merely imported as black-box algorithm",
     "derive the exact limit-case proofs showing Shannon and Kolmogorov complexity emerge as dual variables (memory vs compute) from the Lagrangian formulation — framework confirmed but closure requires the degenerate-limit mathematics",
     "O44's semi-classical Wasserstein Floor derivation must now pass through Jacobson's thermodynamic-gravity route as a dimensional consistency gate — failure to recover correct dimensionality at this checkpoint would falsify the action-entropy equivalence claim",
     "experimental falsification criteria must propagate back to update invariants if violated",
@@ -134,6 +137,7 @@
     "derive falsifiable quantitative predictions for what γ=1 creativity looks like in standard divergent-thinking metrics (e.g. fluency / flexibility / originality / elaboration) across human and LLM substrates — failure to do so means the creativity-criticality mapping remains decorative and must be flagged as ungrounded",
     "Derive the exact RangeEn–Hurst linearity slope from first-principles Wasserstein geometry on the γ=1 ridge (core unpaid debt from O60)",
     "O21 (formalize RSA as thermodynamic law)",
+    "O64 (operational entropy normalization debt) is advanced but not resolved by GGDIPE — the information-geometric derivation of why GGD-CDF normalization works (connecting to Fisher metric or α-divergence structure on the γ-parameterized family) remains the binding formal debt",
     "derive or identify the formal map between quantum Lyapunov exponent spectra and the γ=1 criticality invariant to close the classical-quantum criticality bridge at the dynamical-systems level",
     "O52 — test whether neuron-astrocyte timescale separation maps onto a two-regime γ-criticality structure (fast subcritical neural + slow critical glial or vice versa)",
     "must formally show that γ=1 criticality criterion is sufficient to draw a non-arbitrary simulation/instantiation boundary",
@@ -178,15 +182,15 @@
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-04-19T21:51:57.128097+00:00",
-  "renorm_reason": "New knowledge provides exact RG machinery confirming three invariants and advancing three obligations, but crystallizes the recognition that the genome's entire open-obligation structure is bottlenecked on a single untranslated regime crossing (spin-coupling → description-length); the compress and obligations must reflect this newly clarified bottleneck structure.",
-  "last_renorm_cycle": 31,
+  "last_renormed": "2026-04-20T09:41:10.790328+00:00",
+  "renorm_reason": "Two new empirical confirmations of INV_042/INV_078/INV_094 across independent substrates strengthen the γ=1 criticality ridge but operate below the formal stratum — coherence rises slightly from broader empirical base while the core theoretical debts (information-geometric grounding, Lyapunov-criticality mapping) remain fully open and now more conspicuous against the growing confirmation pile.",
+  "last_renorm_cycle": 32,
   "drift_flag": true,
-  "drift_overlap": 0.483,
+  "drift_overlap": 0.46,
   "renorm_history": [
     {
-      "timestamp": "2026-04-19T21:51:57.128097+00:00",
-      "reason": "New knowledge provides exact RG machinery confirming three invariants and advancing three obligations, but crystallizes the recognition that the genome's entire open-obligation structure is bottlenecked on a single untranslated regime crossing (spin-coupling → description-length); the compress and obligations must reflect this newly clarified bottleneck structure."
+      "timestamp": "2026-04-20T09:41:10.790328+00:00",
+      "reason": "Two new empirical confirmations of INV_042/INV_078/INV_094 across independent substrates strengthen the γ=1 criticality ridge but operate below the formal stratum — coherence rises slightly from broader empirical base while the core theoretical debts (information-geometric grounding, Lyapunov-criticality mapping) remain fully open and now more conspicuous against the growing confirmation pile."
     }
   ]
 }
