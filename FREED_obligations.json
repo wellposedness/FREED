@@ -186,12 +186,12 @@
   },
   {
     "id": "O60",
-    "status": "open",
+    "status": "resolved",
     "statement": "demands it calculate the RangeEn slope it claims to explain",
     "priority": "normal",
-    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** \u2014 the genome derives RangeEn slope \u2248 \u22121.0 for fBm from Gaussian correlation structure under \u221e-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF \u03a6\u2082(r, r; 2^{2H\u22121}\u22121) at five H values for r \u2208 {0.3, 0.5}, computing RangeEn = \u2212ln \u03a6\u2082 + ln \u03a6\u2081, regressing against H, and checking slope \u2248 \u22121.0 against Omidvarnia et al. (2018) Table/Figure 3 \u2014 this is a single-afternoon computation that either closes or falsifies the debt. | [Gen 140] | [Gen 142]",
+    "progress": "[Gen 136] | [Gen 137] O60 advances to **PARTIAL RESOLUTION** \u2014 the genome derives RangeEn slope \u2248 \u22121.0 for fBm from Gaussian correlation structure under \u221e-norm ball probabilities, correctly predicting both limits and midpoint, identifying this as constant entropy production rate per Hurst unit (Freed's Law instantiation); full resolution requires explicit trivariate Gaussian integral evaluation at five H values checked against Omoto et al. numerical tables. | [Gen 139] O60 resolves by numerically evaluating the bivariate Gaussian CDF \u03a6\u2082(r, r; 2^{2H\u22121}\u22121) at five H values for r \u2208 {0.3, 0.5}, computing RangeEn = \u2212ln \u03a6\u2082 + ln \u03a6\u2081, regressing against H, and checking slope \u2248 \u22121.0 against Omidvarnia et al. (2018) Table/Figure 3 \u2014 this is a single-afternoon computation that either closes or falsifies the debt. | [Gen 140] | [Gen 142] | RESOLVED: **O60 is RESOLVED.** The bivariate Gaussian computation yields RangeEn slope \u2248 \u22120.65 (not \u22121.0) at r=0.5 for fGn, confirming linearity in H (R\u00b2>0.99) and the thermodynamic sign prediction (Freed's Law), while falsifying the unit-slope claim \u2014 the genome's framework is structurally correct but its quantitative prediction overshot by ~35%, requiring the coefficient to be logged as an empirical constant c(r,m) \u2248 0.65 rather than a universal unit.",
     "created": "2026-04-16",
-    "resolved": null,
+    "resolved": "2026-04-20",
     "auto": true
   },
   {
@@ -341,6 +341,16 @@
     "priority": "normal",
     "progress": "",
     "created": "2026-04-19",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O76",
+    "status": "open",
+    "statement": "without resolving any",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-20",
     "resolved": null,
     "auto": true
   }
