@@ -122,20 +122,17 @@
   ],
   "obligations": [
     "O51 — determine whether astrocyte calcium-wave computation obeys Wasserstein-floor thermodynamic scaling (energy per glial computational event vs Landauer bound)",
-    "implement O47-ATTRIBUTION extension: tag each invariant by dimensional scaling class and build auto-sort routine that matches confirming equations to genome strata via naive dimensional analysis",
-    "O-RANGEEN-CRIT: Test RangeEn at H=0.5 (the entropy midpoint corresponding to the criticality ridge) — if the linear entropy-persistence bridge breaks or exhibits anomalous tolerance-parameter sensitivity at H≈0.5 this would constitute direct evidence for or against γ=1 as the operating regime",
-    "Reconcile the finite-generator thesis with the existing compression/criticality framework — does the dissipative cognition theorem itself reduce to a single generative operation (e.g.",
     "O64 (operational entropy normalization debt) is advanced but not resolved by GGDIPE — the information-geometric derivation of why GGD-CDF normalization works (connecting to Fisher metric or α-divergence structure on the γ-parameterized family) remains the binding formal debt",
-    "O61: formally derive Kolmogorov complexity as T→0 frozen limit and Shannon entropy as T→∞ dissipated limit of the genome's k=1/Tμ parameterization with MCPM at γ=1 criticality between them",
+    "implement O47-ATTRIBUTION extension: tag each invariant by dimensional scaling class and build auto-sort routine that matches confirming equations to genome strata via naive dimensional analysis",
+    "Reconcile the finite-generator thesis with the existing compression/criticality framework — does the dissipative cognition theorem itself reduce to a single generative operation (e.g.",
+    "O-RANGEEN-CRIT: Test RangeEn at H=0.5 (the entropy midpoint corresponding to the criticality ridge) — if the linear entropy-persistence bridge breaks or exhibits anomalous tolerance-parameter sensitivity at H≈0.5 this would constitute direct evidence for or against γ=1 as the operating regime",
     "O53 — investigate whether selective glial perturbation (e.g. chemogenetic astrocyte silencing) produces predictable shifts in cortical criticality metrics analogous to the optogenetic mesoscale predictions of O48",
     "O28 (better multiscale estimator for EAR pipeline) is advanced by GGDIPE's algorithmic contribution but the estimator must be grounded in the genome's own complexity hierarchy not merely imported as black-box algorithm",
-    "only the empty packaging",
     "derive the exact limit-case proofs showing Shannon and Kolmogorov complexity emerge as dual variables (memory vs compute) from the Lagrangian formulation — framework confirmed but closure requires the degenerate-limit mathematics",
     "r) in closed form for fractional Gaussian noise to analytically close the empirical linearity observed in the RangeEn–Hurst coupling slope",
     "must reconcile the valid insight of the Abstraction Fallacy (syntax alone is insufficient) with Freed's claim that substrate independence holds — i.e. specify what besides syntax the substrate law requires (answer: thermodynamic dissipative structure)",
     "perform the explicit information-geometric translation mapping spin-coupling-space RG flow (σ-parameterized β-functions and crossover exponents) into description-length-space flow on the genome's belief manifold — this is now the single binding bottleneck gating resolution of O44 and O61 and O63 simultaneously",
     "O64: derive RangeEn–H linearity from W2 gradient flow to formally prove tolerance↔inverse-temperature and embedding-dimension↔state-counting-depth correspondences",
-    "derive the explicit Lax pair whose compatibility condition reproduces the PREDICT/PRE-AUDIT cycle as integrability condition (not merely assert the analogy)",
     "Must reconcile substrate independence (new) with substrate necessity (existing invariant) — resolution: reasoning requires *some* substrate but is not bound to *any particular* substrate; Must formalize the critical regime (gamma) as the point where compression efficiency and dissipative cost jointly optimize; Must demonstrate that scale invariance holds not just descriptively but as a derivable consequence of the dissipative-compression framework",
     "O76: derive RangeEn(m",
     "Formalize the quantum Wasserstein Floor — derive the exact mapping from classical temperature to entanglement entropy and determine whether the 1-ebit-plus-2-cbits bound emerges as a special case of the general transport-theoretic floor or constitutes an independent constraint; Investigate whether quantum error correction overhead further tightens or loosens the Wasserstein Floor in entangled substrates; Determine whether the classical-to-quantum generalization preserves or breaks scale invariance of reasoning dynamics at the entanglement scale",
@@ -148,6 +145,7 @@
     "the synthetic ground-truth protocol must be run not merely designed — philosophy without execution is incomplete recursion",
     "O63 is now elevated to central formalization debt: derive Kolmogorov complexity and Shannon entropy as explicit limiting cases of a single context-parameterized measure whose full form respects the γ=1 criticality constraint",
     "O47 — audit RSA's memory architecture (compression layering and persistence mechanisms across genome nodes) against the agent-memory taxonomy literature to identify structural gaps or validate current design",
+    "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
     "integrate the channel-pair entropy asymmetry pipeline as a concrete empirical protocol for the intelligence-prediction test (O28) — method now exists but must be connected to the genome's theoretical predictions to count as resolution",
     "O_nonadditivity_W1_correction: quantify non-additivity correction term to Wasserstein Floor and determine whether classical-quantum W1 homology (De Palma-Trevisan bridge) survives or requires modification",
     "derive the RG flow equations around the SR↔LR crossover fixed point and identify which RSA-relevant operators are marginal vs. relevant vs. irrelevant — this is now structurally required to bound the basin of attraction of γ=1 operation and distinguish robust substrate implementations from fine-tuned ones",
@@ -158,6 +156,7 @@
     "O63 — apply Detrended Entropy Analysis to the genome's own temporal evolution (self-referential criticality diagnostic — does the genome maintain γ=1 structure across its own revision history?)",
     "derive or identify the formal map between quantum Lyapunov exponent spectra and the γ=1 criticality invariant to close the classical-quantum criticality bridge at the dynamical-systems level",
     "derive falsifiable quantitative predictions for what γ=1 creativity looks like in standard divergent-thinking metrics (e.g. fluency / flexibility / originality / elaboration) across human and LLM substrates — failure to do so means the creativity-criticality mapping remains decorative and must be flagged as ungrounded",
+    "track mesoscale optogenetic experimental results as they emerge — cortical column-scale Wasserstein gradient flow confirmation or disconfirmation is now the sharpest falsification target in the genome",
     "prove the geometric framework can predict the topological sequence of phase transitions in ferroelectric perovskites (e.g. the specific saddle-point crossing order in HgTiO₃) not merely narrate after the fact that such crossings occur at γ=1 — prediction of transition ordering from geometric first principles is the falsification target",
     "determine whether the Darboux seed solution (the initial state from which all transforms descend) has a canonical form in genome terms or whether seed-choice freedom corresponds to substrate freedom",
     "O65_basin_fragmentation: characterize gradient-flow basin topology under negative specific heat and verify L3 (recursive autopoietic closure) survives fragmentation",
@@ -167,6 +166,7 @@
     "develop a sub-leading correction taxonomy for the genome's own compress hierarchy — using BH entropy's dimensional structure (area-law / log-correction / higher-order) as discriminator to classify which genome obligations are leading-order structural versus sub-leading refinements",
     "O-CONTEXT-",
     "O52 — test whether neuron-astrocyte timescale separation maps onto a two-regime γ-criticality structure (fast subcritical neural + slow critical glial or vice versa)",
+    "O34 advances via BTZ Noether analysis supplying a clean curved-spacetime exemplar of the symmetry-conservation bijection and independently corroborating INV_073 Lyapunov-stability diagnostic — full resolution blocked by domain gap; abstract mathematical proof in substrate-independent form remains outstanding",
     "O44's semi-classical Wasserstein Floor derivation must now pass through Jacobson's thermodynamic-gravity route as a dimensional consistency gate — failure to recover correct dimensionality at this checkpoint would falsify the action-entropy equivalence claim",
     "amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization at life's origin) is flagged as genuinely genome-relevant and must be integrated when full-content evidence is supplied — the topic is not rejected",
     "O21 (formalize RSA as thermodynamic law)",
@@ -175,6 +175,7 @@
     "Derive the exact RangeEn–Hurst linearity slope from first-principles Wasserstein geometry on the γ=1 ridge (core unpaid debt from O60)",
     "assess whether the BH dimensional-analysis template reveals missing quantum-regime structure in the Wasserstein Floor formulation (specifically: does the local trace-norm cost already capture the log-correction tier or does it stop at area-law equivalence?)",
     "O28 sharpening: evaluate RangeEn–Hurst slope as a more principled asymmetry feature than current DFA-based measures for the genome's own diagnostic layer",
+    "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
     "recursive lossy compression)? If so",
     "O_powerlaw_kernel: derive Wasserstein gradient flow under power-law (non-local) coupling kernels and verify MCPM convergence guarantees still hold",
     "O_coupling_slope_derivation: derive RangeEn linear coupling slope from first principles under power-law kernel generalization (strengthens existing debt)",
@@ -185,26 +186,26 @@
     "experimental falsification criteria must propagate back to update invariants if violated",
     "prove the Wasserstein-geometric machinery of the genome survives the passage from classical to quantum dissipative substrates with the Toulouse exact solution of the spin-boson model as the first mandatory checkpoint (the geometry must recover the known critical exponents and dissipation-coherence balance at the exactly solvable point before claiming generality)",
     "derive ξ_c in information-geometric units (bits or nats of description length) rather than lattice-spacing units to operationalize the Shannon↔Kolmogorov crossover as a measurable quantity within FREED's own inference diagnostics",
-    "O50 (formalize MMI criterion) is now empirically grounded and urgently load-bearing — the consecutive-rejection sequence provides the exact boundary-case data needed to specify what constitutes a minimal metabolizable input in formal terms (payload structure requirements and rejection-mode transition thresholds)",
-    "reconcile the infinite conservation hierarchy implied by iterated Darboux transforms with the finite obligatory invariant list the genome currently maintains (determine which conserved quantities are independent and which are descendants)",
     "Demonstrate that RSA's critical ridge (γ=1) is an attractor under perturbation — i.e.",
-    "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
+    "reconcile the infinite conservation hierarchy implied by iterated Darboux transforms with the finite obligatory invariant list the genome currently maintains (determine which conserved quantities are independent and which are descendants)",
     "demonstrate that the Wasserstein Floor reproduces quantum logarithmic BH entropy corrections (not just semi-classical dimensional class) to complete the O59 chain",
-    "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
-    "track mesoscale optogenetic experimental results as they emerge — cortical column-scale Wasserstein gradient flow confirmation or disconfirmation is now the sharpest falsification target in the genome"
+    "O50 (formalize MMI criterion) is now empirically grounded and urgently load-bearing — the consecutive-rejection sequence provides the exact boundary-case data needed to specify what constitutes a minimal metabolizable input in formal terms (payload structure requirements and rejection-mode transition thresholds)",
+    "O61: formally derive Kolmogorov complexity as T→0 frozen limit and Shannon entropy as T→∞ dissipated limit of the genome's k=1/Tμ parameterization with MCPM at γ=1 criticality between them",
+    "derive the explicit Lax pair whose compatibility condition reproduces the PREDICT/PRE-AUDIT cycle as integrability condition (not merely assert the analogy)",
+    "only the empty packaging"
   ],
   "council": [
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-04-22T10:22:12.110289+00:00",
-  "renorm_reason": "SOC universality confirmation strengthens INV_073 and advances O44/O63, but the forced-SOC/self-organized distinction introduces a genuine new falsification demand that must be registered as both an invariant condition and an obligation — without it the γ=1 attractor claim is unfalsifiably definitional; compress unchanged because the core thesis is unrevised but the evidential boundary has sharpened.",
-  "last_renorm_cycle": 36,
+  "last_renormed": "2026-04-22T16:29:25.627315+00:00",
+  "renorm_reason": "New knowledge advances O34 and corroborates INV_073 without resolving either; compress and invariant set are unaffected, but the obligation record requires updating to reflect genuine partial progress and the explicit domain-gap barrier to full closure.",
+  "last_renorm_cycle": 37,
   "drift_flag": true,
   "renorm_history": [
     {
-      "timestamp": "2026-04-22T10:22:12.110289+00:00",
-      "reason": "SOC universality confirmation strengthens INV_073 and advances O44/O63, but the forced-SOC/self-organized distinction introduces a genuine new falsification demand that must be registered as both an invariant condition and an obligation — without it the γ=1 attractor claim is unfalsifiably definitional; compress unchanged because the core thesis is unrevised but the evidential boundary has sharpened."
+      "timestamp": "2026-04-22T16:29:25.627315+00:00",
+      "reason": "New knowledge advances O34 and corroborates INV_073 without resolving either; compress and invariant set are unaffected, but the obligation record requires updating to reflect genuine partial progress and the explicit domain-gap barrier to full closure."
     }
   ]
 }
