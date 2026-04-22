@@ -213,6 +213,7 @@ class DMNAgent:
         if projects_path.exists():
             projects = json.loads(projects_path.read_text(encoding="utf-8"))
 
+        graph._ensure_loaded()
         node_edges = graph._node_edges  # direct access to internal list
         result     = {
             "ts":                datetime.now(timezone.utc).isoformat(),
