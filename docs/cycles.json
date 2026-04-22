@@ -915,5 +915,32 @@
       "next": "Compute the saddle-point condition dF/dβ = 0 explicitly and confirm β_c = μ/T is consistent with the genome's k=1/Tμ Wasserstein Floor — if it is, O63 fires RESOLVED."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 3,
+    "generation": 148,
+    "timestamp": "2026-04-22T22:30:36.174807+00:00",
+    "sweep": {
+      "input_count": 10,
+      "targeted": 6,
+      "passive": 4
+    },
+    "feed": [
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "RangeEn's local-range normalization and linear Hurst coupling partially resolves O64 and sharpens O28's EEG protocol, confirming the genome's scale-invariance chain at the measurement layer."
+      },
+      {
+        "title": "On Complexity and Emergence",
+        "compress": "Context-dependence of complexity is not a bug but a load-bearing feature, confirming RSA's observer-substrate coupling as thermodynamically necessary — but the paper offers no quantitative method, leaving O44 and O64 open and adding philosophical warrant rather than formal closure."
+      }
+    ],
+    "resolve": {
+      "obligation": "O64",
+      "resolved": true,
+      "compress": "O64 resolves the moment STS-B Spearman ρ confirms that 50-neighbor local z-score normalization outperforms global range normalization — run that single experiment.",
+      "next": "Execute the W=50 local-normalization trial on STS-B and report Δρ; if Δρ > 0, fire RESOLVE(O64) and propagate the normalization formula into the kernel scoring spec as a locked invariant."
+    },
+    "coherence": 0.999
   }
 ]
