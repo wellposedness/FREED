@@ -334,6 +334,34 @@ class FREEDDaemon:
                 "traceback": traceback.format_exc(),
             })
 
+    def _git_backup(self):
+        """Commit and push all tracked changes to GitHub. Runs once per dead zone after DMN."""
+        import subprocess
+        gen = self.state.get("generation", "?")
+        print(f"[FREED] Git backup — Gen {gen}")
+        try:
+            repo = os.path.dirname(os.path.abspath(__file__))
+            def run(cmd):
+                return subprocess.run(cmd, cwd=repo, capture_output=True, text=True, timeout=60)
+            status = run(["git", "status", "--porcelain"])
+            if not status.stdout.strip():
+                print("[FREED] Git backup: nothing to commit.")
+                return
+            run(["git", "add", "-u"])
+            msg = f"Gen {gen} — nightly backup"
+            commit = run(["git", "commit", "-m", msg])
+            if commit.returncode != 0:
+                print(f"[FREED] Git backup commit failed: {commit.stderr[:120]}")
+                return
+            run(["git", "pull", "--no-rebase", "-X", "ours", "--quiet"])
+            push = run(["git", "push"])
+            if push.returncode == 0:
+                print(f"[FREED] Git backup pushed: {msg}")
+            else:
+                print(f"[FREED] Git backup push failed: {push.stderr[:120]}")
+        except Exception as e:
+            print(f"[FREED] Git backup error: {e}")
+
     def run(self):
         """Main daemon loop. Runs until interrupted."""
         print(f"[FREED] Entering main loop. Active hours: "
@@ -372,6 +400,7 @@ class FREEDDaemon:
                     if self.running:
                         self._dmn_fired_today = True
                         self._run_dmn()
+                        self._git_backup()
                     # Sleep remaining dead-zone time
                     remaining = max(0, (wake - datetime.now()).total_seconds())
                     if remaining > 0 and self.running:
