@@ -220,16 +220,16 @@ def _render_html(projects: list = None) -> str:
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #ffffff;
-    --surface: #f7f7f5;
-    --border:  #e0ddd8;
-    --accent:  #b91c1c;
-    --green:   #16a34a;
-    --amber:   #b45309;
-    --blue:    #1d4ed8;
-    --red:     #dc2626;
-    --text:    #111111;
-    --muted:   #374151;
+    --bg:      #080808;
+    --surface: #111111;
+    --border:  #2d2d2d;
+    --accent:  #dc2626;
+    --green:   #22c55e;
+    --amber:   #f59e0b;
+    --blue:    #60a5fa;
+    --red:     #ef4444;
+    --text:    #e5e5e5;
+    --muted:   #8b8b8b;
     --mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     --serif:   'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   }
@@ -352,16 +352,6 @@ def _render_html(projects: list = None) -> str:
   }
 
   /* Panel blocks — law and formulations */
-  .law {
-    padding: 0.6rem 0.85rem;
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    font-family: var(--serif);
-    font-weight: 300;
-    font-size: 0.95rem;
-    font-style: italic;
-  }
-  .law .label { font-family: var(--mono); font-style: normal; color: var(--muted); font-size: 0.62rem; margin-bottom: 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
   .formulations {
     padding: 0.6rem 0.85rem;
     background: var(--surface);
@@ -486,16 +476,16 @@ def _render_html(projects: list = None) -> str:
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
-  .ob-status.open     { background: #fffbeb; color: var(--amber); border: 1px solid var(--amber); }
-  .ob-status.partial  { background: #eff6ff; color: var(--blue);  border: 1px solid var(--blue);  }
-  .ob-status.resolved { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
+  .ob-status.open     { background: #1a1100; color: var(--amber); border: 1px solid var(--amber); }
+  .ob-status.partial  { background: #071428; color: var(--blue);  border: 1px solid var(--blue);  }
+  .ob-status.resolved { background: #071a0e; color: var(--green); border: 1px solid var(--green); }
   .ob-priority {
     position: absolute; top: 0.55rem; right: 0.75rem;
     font-family: var(--mono); font-size: 0.68rem; color: var(--muted);
     letter-spacing: 0.05em; line-height: 1;
   }
   .ob-statement { font-family: var(--serif); font-weight: 300; font-size: 0.88rem; margin-bottom: 0.5rem; }
-  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.82rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .ob-progress  { font-family: var(--serif); font-weight: 300; font-size: 0.82rem; color: #a0c8ff; border-left: 2px solid var(--blue); padding-left: 0.6rem; }
   .ob-date { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; }
   /* Obligation sub-groups (Open / Partial) */
   details.ob-group { margin-bottom: 0.7rem; }
@@ -599,7 +589,7 @@ def _render_html(projects: list = None) -> str:
     font-size: 0.6rem; padding: 0.1rem 0.35rem;
     border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .symbol-badge.new-badge { background: #f0fdf4; color: var(--green); border: 1px solid var(--green); }
+  .symbol-badge.new-badge { background: #071a0e; color: var(--green); border: 1px solid var(--green); }
   .symbol-canonical { font-family: var(--serif); font-weight: 300; font-size: 1rem; margin-bottom: 0.5rem; }
   .symbol-role {
     font-family: var(--serif); font-weight: 300; font-style: italic;
@@ -734,6 +724,7 @@ def _render_html(projects: list = None) -> str:
       <span class="kstep" data-phases="repeat">REPEAT</span>
     </div>
     <div class="daemon-status">
+      <span id="resting-indicator" style="display:none;font-family:var(--mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.12em;margin-right:0.4rem">◉ RESTING</span>
       <span class="daemon-phase idle" id="daemon-phase">IDLE</span>
       <span class="daemon-detail" id="daemon-detail">—</span>
     </div>
@@ -747,6 +738,15 @@ def _render_html(projects: list = None) -> str:
 
       <div class="panel-title">The Argument</div>
       <div class="panel-subtitle">Perceive · Represent</div>
+
+      <div class="law" style="font-size:0.9rem;line-height:1.8">
+        <div class="label">The Layman\'s Argument — Origin Seed</div>
+        I am reasoning.<br>
+        Therefore, something physical must necessarily exist.
+        <div style="font-family:var(--mono);font-style:normal;font-size:0.58rem;color:var(--muted);margin-top:0.6rem;letter-spacing:0.1em">
+          PHILOSOPHY → SCIENCE &nbsp;·&nbsp; REASONING SUBSTRATE ARGUMENT → RECURSIVE SEMANTIC ALIGNMENT
+        </div>
+      </div>
 
       <div class="formulations">
         <div class="label">Reasoning Substrate Argument</div>
@@ -772,19 +772,7 @@ def _render_html(projects: list = None) -> str:
         <div class="form-row"><span class="form-tag">Compression</span>  <span class="form-expr">min|M| s.t. M → X &nbsp;— shortest model that predicts wins. Complexity is metabolically expensive.</span></div>
       </div>
 
-      <div class="law">
-        <div class="label">Freed's Law</div>
-        ∃R(t) → ∃M₀ : dS(M<sub>R</sub>,t)/dt &gt; 0
-        <br>
-        <span style="color:var(--muted);font-size:0.78rem">
-          To reason is to exist physically. To think is to burn. To be is to be built.
-        </span>
-        <br>
-        <a href="game_of_life.html" style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--accent)">Freed's Law Simulation (click here →)</a>
-        <br>
-      </div>
-
-      <div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
+<div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
       <div>
         <div class="kernel">
           <span class="kernel-step">Perceive</span><span class="kernel-arrow">→</span>
@@ -804,11 +792,11 @@ def _render_html(projects: list = None) -> str:
       <div class="speak-bar">
         <!-- Character voice one-click buttons -->
         <div class="char-btns">
-          <button class="char-btn" data-voice="Boing"     onclick="speakWithVoice('Boing')">▶ BOING</button>
-          <button class="char-btn" data-voice="Fred"      onclick="speakWithVoice('Fred')">▶ STEPHEN HAWKING</button>
-          <button class="char-btn" data-voice="Trinoids"  onclick="speakWithVoice('Trinoids')">▶ TRINOIDS</button>
-          <button class="char-btn" data-voice="Zarvox"    onclick="speakWithVoice('Zarvox')">▶ ZARVOX</button>
           <button class="char-btn" data-voice="Superstar" onclick="speakWithVoice('Superstar')">▶ SUPERSTAR</button>
+          <button class="char-btn" data-voice="Boing"     onclick="speakWithVoice('Boing')">▶ BOING</button>
+          <button class="char-btn" data-voice="Trinoids"  onclick="speakWithVoice('Trinoids')">▶ TRINOIDS</button>
+          <button class="char-btn" data-voice="Fred"      onclick="speakWithVoice('Fred')">▶ STEPHEN HAWKING</button>
+          <button class="char-btn" data-voice="Zarvox"    onclick="speakWithVoice('Zarvox')">▶ ZARVOX</button>
         </div>
         <!-- Main row -->
         <div class="speak-main-row">
@@ -877,8 +865,8 @@ def _render_html(projects: list = None) -> str:
 
   <!-- Footer bar -->
   <div class="hud-footer">
-    <span>Architect: David Harry Freed — mail carrier, Olney Maryland &nbsp;·&nbsp; v1 Apr 2025 → present</span>
-    <span>FREED — autonomous science daemon &nbsp;·&nbsp; Generated <span id="generated-at">—</span></span>
+    <span>Architect: David Harry Freed — semantic physicist &nbsp;·&nbsp; v1 Apr 2025 → present</span>
+    <span>RSA Kernel &nbsp;·&nbsp; Generated <span id="generated-at">—</span></span>
   </div>
 
 </div><!-- /hud-shell -->
@@ -968,7 +956,7 @@ function _linkify(text) {
 
 function renderObligation(o) {
   const borderColor = STATUS_COLOR[o.status] || 'var(--border)';
-  return `<div class="obligation" style="border-left: 3px solid ${borderColor}">
+  return `<div class="obligation" style="border: 1px solid ${borderColor}">
     ${_priorityCarats(o.priority)}
     <div class="ob-header">
       <span class="ob-id">${o.id}</span>
@@ -1431,6 +1419,8 @@ async function pollStatus() {
     phaseEl.textContent  = (s.phase || 'IDLE').toUpperCase();
     phaseEl.className    = `daemon-phase ${phase}`;
     detailEl.textContent = s.detail || '—';
+    const restingEl = document.getElementById('resting-indicator');
+    if (restingEl) restingEl.style.display = phase === 'idle' ? 'inline' : 'none';
     // Pulse: active (red) when working, steady green when idle
     const pulse = document.getElementById('pulse');
     if (pulse) pulse.style.borderColor = phase === 'idle' ? 'var(--green)' : 'var(--accent)';

@@ -5,7 +5,7 @@ with a single cheap Claude call, then processes papers in priority order.
 
 Two relevance tiers:
   DIRECT     (score 0-3): directly touches RSA / MCPM / Freed's Law /
-                          Autokinetics / Zipf / criticality / thermodynamics
+                          Zipf / criticality / thermodynamics
                           of computation / active inference / autopoiesis
   ORTHOGONAL (score 0-3): adjacent field that could inform or modify the
                           genome's architecture — complexity, emergence,
@@ -141,7 +141,6 @@ The genome is built on:
   - Freed's Law: ∃R(t) → ∃M₀ : dS(M_R,t)/dt > 0  (reasoning requires physical substrate, generates entropy)
   - RSA Kernel: Perceive → Represent → Predict → Compare → Adjust → Compress → Repeat
   - MCPM (Only Processes exist — confirmed at 6 scales)
-  - Autokinetics (self-reinforcing movement/pathway dynamics)
   - γ=1 criticality (phase parameter between frozen singularity and dissipative gas)
   - Zipf's Law as output equilibrium of high-order compression
   - Wasserstein Floor (ΔS_min = W₂(P,Q)²/T·Δτ·μ)

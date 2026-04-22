@@ -65,6 +65,63 @@ SOURCES = [
         "type":     "arxiv_rss",
         "priority": "normal",
     },
+    # Physics / computation / information theory — kernel step confirmation
+    {
+        "name":     "arXiv — Statistical Mechanics (cond-mat.stat-mech)",
+        "url":      "http://export.arxiv.org/rss/cond-mat.stat-mech",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Information Theory (cs.IT)",
+        "url":      "http://export.arxiv.org/rss/cs.IT",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Nonlinear: Adaptation & Self-Organizing Systems (nlin.AO)",
+        "url":      "http://export.arxiv.org/rss/nlin.AO",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Pattern Formation & Solitons (nlin.PS)",
+        "url":      "http://export.arxiv.org/rss/nlin.PS",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "arXiv — Disordered Systems & Neural Networks (cond-mat.dis-nn)",
+        "url":      "http://export.arxiv.org/rss/cond-mat.dis-nn",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    # bioRxiv preprints — independent biological substrate confirmation
+    # connect.biorxiv.org is the canonical RSS endpoint (30 most recent per subject)
+    {
+        "name":     "bioRxiv — Biophysics",
+        "url":      "http://connect.biorxiv.org/biorxiv_xml.php?subject=biophysics",
+        "type":     "biorxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "bioRxiv — Systems Biology",
+        "url":      "http://connect.biorxiv.org/biorxiv_xml.php?subject=systems_biology",
+        "type":     "biorxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "bioRxiv — Neuroscience",
+        "url":      "http://connect.biorxiv.org/biorxiv_xml.php?subject=neuroscience",
+        "type":     "biorxiv_rss",
+        "priority": "normal",
+    },
+    {
+        "name":     "bioRxiv — Evolutionary Biology",
+        "url":      "http://connect.biorxiv.org/biorxiv_xml.php?subject=evolutionary_biology",
+        "type":     "biorxiv_rss",
+        "priority": "normal",
+    },
 ]
 
 # ─── arXiv relevance pre-filter ───────────────────────────────────────────────
@@ -176,6 +233,7 @@ class TamuraSweep:
         parsers = {
             "lifeboat_author": self._parse_lifeboat_author,
             "arxiv_rss":       self._parse_arxiv_rss,
+            "biorxiv_rss":     self._parse_biorxiv_rss,
         }
         parser = parsers.get(source["type"])
         if parser is None:
@@ -293,6 +351,77 @@ class TamuraSweep:
                 )
                 result.append(mock.find("div"))
         return result
+
+    # ── bioRxiv RSS parser (RDF/RSS 1.0) ─────────────────────────────────────
+
+    def _parse_biorxiv_rss(self, source):
+        """
+        Parse a bioRxiv subject feed from connect.biorxiv.org.
+
+        Format: RSS 1.0 / RDF with dc: and prism: namespaces.
+        Each feed returns the 30 most recent preprints for the subject.
+        URL pattern: http://connect.biorxiv.org/biorxiv_xml.php?subject={subject}
+        """
+        RSS  = "http://purl.org/rss/1.0/"
+        DC   = "http://purl.org/dc/elements/1.1/"
+
+        raw = self._fetch(source["url"])
+        if raw is None:
+            return []
+
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError as e:
+            print(f"[SWEEP] bioRxiv RSS parse error: {e}")
+            return []
+
+        items = root.findall(f"{{{RSS}}}item")
+        new_articles = []
+
+        for item in items:
+            link_el  = item.find(f"{{{RSS}}}link")
+            title_el = item.find(f"{{{RSS}}}title")
+            desc_el  = item.find(f"{{{RSS}}}description")
+            auth_el  = item.find(f"{{{DC}}}creator")
+
+            if link_el is None or title_el is None:
+                continue
+
+            # Strip the ?rss=1 tracking suffix for canonical URL
+            raw_url = (link_el.text or "").strip()
+            paper_url = raw_url.split("?")[0]
+            if not paper_url:
+                continue
+
+            if paper_url in self.seen:
+                continue
+
+            title    = (title_el.text or "").strip()
+            abstract = (desc_el.text  or "").strip()[:800] if desc_el is not None else ""
+            authors  = (auth_el.text  or "").strip()       if auth_el is not None else ""
+
+            score = self._arxiv_relevance(title + " " + abstract)
+            if score < ARXIV_MIN_SCORE:
+                self._mark_seen(paper_url)
+                continue
+
+            new_articles.append({
+                "title":    title,
+                "url":      paper_url,
+                "abstract": abstract,
+                "content":  abstract,
+                "authors":  authors,
+                "source":   source["name"],
+                "score":    score,
+                "fetched":  datetime.now(timezone.utc).isoformat(),
+            })
+            self._mark_seen(paper_url)
+
+            if len(new_articles) >= self.max_new:
+                break
+
+        new_articles.sort(key=lambda x: x["score"], reverse=True)
+        return new_articles
 
     # ── arXiv RSS parser ─────────────────────────────────────────────────────
 

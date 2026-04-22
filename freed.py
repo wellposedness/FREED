@@ -10,6 +10,7 @@ FREED's living state evolves in FREED_state.json.
 """
 
 import os
+import re
 import json
 import time
 import signal
@@ -29,6 +30,8 @@ from consolidate  import Consolidator
 from feed_guard      import sanitize as guard_sanitize
 from knowledge_graph import get_graph
 from self_engineer   import SelfEngineer
+from cerebellum      import Cerebellum
+from dmn             import DMNAgent
 import voice
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
@@ -46,15 +49,22 @@ MAX_TARGETED_PER_CYCLE = 2             # max targeted-sweep results per cycle
 MAX_RESOLVES_PER_CYCLE = 1             # max obligations to attempt per cycle
 YIELD_THRESHOLD        = 0.03          # feed yield above this triggers consolidation
 CONSOLIDATE_EVERY      = 5            # also consolidate every N daemon cycles
+TRIAGE_EVERY           = 10           # classify obligation methods every N cycles
+DMN_HOUR               = 2.5          # 2:30am — DMN fires once per dead zone
+
+HAIKU_MODEL = "claude-haiku-4-5-20251001"
 
 # ─── Estimated token costs for authorization ──────────────────────────────────
-EST_TOKENS_FEED    = 3000   # generous estimate per FEED query
-EST_TOKENS_OBLIGATE = 1500
-EST_TOKENS_RESOLVE  = 4000  # resolution queries are deep — more tokens
+EST_TOKENS_FEED         = 3000  # generous estimate per FEED query
+EST_TOKENS_OBLIGATE     = 1500
+EST_TOKENS_RESOLVE      = 4000  # resolution queries are deep — more tokens
+EST_TOKENS_TRIAGE       = 800   # Haiku triage — cheap classification pass
+EST_TOKENS_CEREBELLUM   = 200   # per Haiku pre-score call (only fires on ambiguous band)
+EST_TOKENS_DMN          = 8000  # DMN cross-connect + internal-oblige (Opus, once per dead zone)
 
 # ─── Active hours (local time) ────────────────────────────────────────────────
-ACTIVE_HOUR_START = 5.5    # 5:30am
-ACTIVE_HOUR_END   = 23.5   # 11:30pm
+ACTIVE_HOUR_START = 6.25   # 6:15am
+ACTIVE_HOUR_END   = 1.0    # 1:00am  (window wraps midnight)
 
 # ─── GitHub status push ───────────────────────────────────────────────────────
 _GH_TOKEN  = os.environ.get("GITHUB_TOKEN", "")
@@ -124,6 +134,9 @@ class FREEDDaemon:
         self.targeted_sweep = TargetedSweep(api_key=api_key,
                                              max_per_obligation=MAX_TARGETED_PER_CYCLE)
         self.engineer      = SelfEngineer(api_key=api_key)
+        self.cerebellum    = Cerebellum(api_key=api_key)
+        self.dmn           = DMNAgent(api_key=api_key)
+        self._dmn_fired_today = False  # prevents DMN from firing more than once per dead zone
 
         # Load or initialize living state
         self._load_state()
@@ -237,21 +250,21 @@ class FREEDDaemon:
 
     def _next_wake_time(self) -> datetime:
         """
-        Calculate the next wake time respecting active hours (5:30am–11:30pm local).
-        If the next cycle would fall in the dead zone, push it to 5:30am.
+        Calculate the next wake time respecting active hours (6:15am–1:00am local).
+        Window wraps midnight: dead zone is 1:00am–6:15am.
+        If the next cycle falls in the dead zone, push it to 6:15am same day.
         """
-        now      = datetime.now()   # local time
+        now       = datetime.now()   # local time
         candidate = now + timedelta(seconds=CYCLE_INTERVAL_SECONDS)
         hour_frac = candidate.hour + candidate.minute / 60.0
 
-        if ACTIVE_HOUR_START <= hour_frac <= ACTIVE_HOUR_END:
-            return candidate  # falls in window — use it
+        # Active if >= 6:15am OR <= 1:00am (wraps midnight)
+        in_active = (hour_frac >= ACTIVE_HOUR_START or hour_frac <= ACTIVE_HOUR_END)
+        if in_active:
+            return candidate
 
-        # Candidate is in the dead zone. Wake at 5:30am.
+        # Dead zone: 1:00am–6:15am — wake at 6:15am same day
         wake_day = candidate.date()
-        if hour_frac > ACTIVE_HOUR_END:
-            # Past 11:30pm — wake tomorrow morning
-            wake_day = (candidate + timedelta(days=1)).date()
         wake_local = datetime(
             wake_day.year, wake_day.month, wake_day.day,
             int(ACTIVE_HOUR_START),
@@ -259,11 +272,74 @@ class FREEDDaemon:
         )
         return wake_local
 
+    def _next_dmn_time(self):
+        """Return the next 2:30am (DMN_HOUR) after now."""
+        now = datetime.now()
+        h   = int(DMN_HOUR)
+        m   = int((DMN_HOUR % 1) * 60)
+        candidate = now.replace(hour=h, minute=m, second=0, microsecond=0)
+        if candidate <= now:
+            candidate = candidate + timedelta(days=1)
+        return candidate
+
+    def _run_dmn(self):
+        """Execute the Default Mode Network pass and ingest any new obligations."""
+        print(f"\n{'─'*50}")
+        print(f" DMN — Default Mode Network  |  {datetime.now().strftime('%I:%M %p')}")
+        print(f"{'─'*50}")
+        _push_status("DMN", "Dead-zone internal consolidation — cross-connect + internal-oblige")
+
+        if not self.astrocyte.authorize(EST_TOKENS_DMN, priority="normal"):
+            print("[DMN] Budget insufficient — skipping.")
+            return
+
+        try:
+            graph  = get_graph()
+            result = self.dmn.run(graph, self.obligations, self.state)
+
+            # Ingest DMN-generated obligations
+            for ob_data in result.get("new_obligations", []):
+                stmt = ob_data.get("statement", "").strip()
+                if not stmt:
+                    continue
+                # Assign next obligation ID
+                existing_ids = [o.get("id", "") for o in self.obligations]
+                nums = [int(re.search(r'\d+', i).group()) for i in existing_ids
+                        if re.search(r'\d+', i)]
+                next_num = max(nums) + 1 if nums else 74
+                new_ob = {
+                    "id":                   f"O{next_num}",
+                    "statement":            stmt,
+                    "status":               "open",
+                    "source":               "dmn",
+                    "rationale":            ob_data.get("rationale", ""),
+                    "resolution_criterion": ob_data.get("resolution_criterion", ""),
+                    "created":              datetime.now(timezone.utc).isoformat(),
+                }
+                self.obligations.append(new_ob)
+                print(f"[DMN] New obligation {new_ob['id']}: {stmt[:70]}")
+
+            if result.get("new_obligations"):
+                self._save_obligations()
+
+            self._log_event("DMN_COMPLETE", {
+                "new_edges":       len(result.get("new_edges", [])),
+                "new_obligations": len(result.get("new_obligations", [])),
+                "pairs_analyzed":  result.get("pairs_analyzed", 0),
+            })
+        except Exception as e:
+            print(f"[DMN] Error: {e}")
+            self._log_event("DMN_ERROR", {
+                "error": str(e),
+                "traceback": traceback.format_exc(),
+            })
+
     def run(self):
         """Main daemon loop. Runs until interrupted."""
         print(f"[FREED] Entering main loop. Active hours: "
               f"{int(ACTIVE_HOUR_START)}:{int((ACTIVE_HOUR_START%1)*60):02d}–"
-              f"{int(ACTIVE_HOUR_END)}:{int((ACTIVE_HOUR_END%1)*60):02d} local.\n")
+              f"{int(ACTIVE_HOUR_END)}:{int((ACTIVE_HOUR_END%1)*60):02d} local "
+              f"(dead zone 1:00am–6:15am, DMN at 2:30am).\n")
 
         while self.running:
             try:
@@ -275,17 +351,41 @@ class FREEDDaemon:
                 })
                 print(f"[FREED] Cycle error: {e}. Sleeping before retry.")
 
-            if self.running:
-                wake = self._next_wake_time()
-                now  = datetime.now()
-                secs = max(0, (wake - now).total_seconds())
-                wake_str = wake.strftime('%I:%M %p')
-                if secs > CYCLE_INTERVAL_SECONDS:
+            if not self.running:
+                break
+
+            wake     = self._next_wake_time()
+            now      = datetime.now()
+            secs     = max(0, (wake - now).total_seconds())
+            wake_str = wake.strftime('%I:%M %p')
+
+            if secs > CYCLE_INTERVAL_SECONDS:
+                # Entering dead zone — check if DMN fires before active hours resume
+                dmn_time  = self._next_dmn_time()
+                dmn_secs  = max(0, (dmn_time - datetime.now()).total_seconds())
+                dmn_str   = dmn_time.strftime('%I:%M %p')
+
+                if dmn_time < wake and not self._dmn_fired_today:
+                    print(f"\n[FREED] Dead zone. DMN at {dmn_str}, "
+                          f"then active at {wake_str}. (Ctrl+C to stop)\n")
+                    time.sleep(dmn_secs)
+                    if self.running:
+                        self._dmn_fired_today = True
+                        self._run_dmn()
+                    # Sleep remaining dead-zone time
+                    remaining = max(0, (wake - datetime.now()).total_seconds())
+                    if remaining > 0 and self.running:
+                        print(f"[FREED] DMN done. Sleeping until {wake_str}.\n")
+                        time.sleep(remaining)
+                else:
                     print(f"\n[FREED] Outside active hours. Sleeping until {wake_str}. "
                           f"(Ctrl+C to stop)\n")
-                else:
-                    print(f"\n[FREED] Cycle complete. Next cycle at {wake_str}. "
-                          f"(Ctrl+C to stop)\n")
+                    time.sleep(secs)
+            else:
+                # Normal inter-cycle sleep — reset DMN flag at start of new active window
+                self._dmn_fired_today = False
+                print(f"\n[FREED] Cycle complete. Next cycle at {wake_str}. "
+                      f"(Ctrl+C to stop)\n")
                 time.sleep(secs)
 
     # ── Cycle phases ─────────────────────────────────────────────────────────
@@ -327,7 +427,10 @@ class FREEDDaemon:
 
         # 3. SWEEP → PERCEIVE
         _push_status("PERCEIVE", "Searching arXiv & Semantic Scholar for open obligations")
-        inputs = self._phase_sweep(cycle_log)
+        targeted, passive = self._phase_sweep(cycle_log)
+
+        # 3b. CEREBELLUM — pre-score passive candidates before L7
+        inputs = self._phase_cerebellum(targeted, passive, cycle_log)
 
         # 4. FEED → REPRESENT
         feed_results = []
@@ -338,6 +441,10 @@ class FREEDDaemon:
         # 5. OBLIGATE → PREDICT
         _push_status("PREDICT", "Generating new obligations from feed output")
         self._phase_obligate(cycle_log)
+
+        # 5b. TRIAGE — classify open obligations by method (every N cycles)
+        if self.state.get("generation", 0) % TRIAGE_EVERY == 0:
+            self._phase_triage()
 
         # 6. RESOLVE → COMPARE
         _push_status("COMPARE", "Attempting to close open obligations")
@@ -478,12 +585,15 @@ class FREEDDaemon:
 
     # ── SWEEP ────────────────────────────────────────────────────────────────
 
-    def _phase_sweep(self, cycle_log: dict) -> list:
+    def _phase_sweep(self, cycle_log: dict):
         """
         Collect new inputs for this cycle.
         Two sources:
           1. TargetedSweep — active search driven by open obligations (runs first)
           2. TamuraSweep   — passive surface: Tamura + arXiv biophysics RSS
+
+        Returns (targeted, passive_dedup) separately so _phase_cerebellum can
+        bypass targeted inputs (already obligation-driven) and only score passive.
         """
         print("\n[SWEEP]")
 
@@ -501,25 +611,43 @@ class FREEDDaemon:
         except Exception as e:
             print(f"[SWEEP] TamuraSweep error: {e}")
 
-        # Merge: targeted first (purposeful), then passive (ambient)
-        # Deduplicate by URL — targeted already marked seen, so just filter passive
+        # Deduplicate passive by URL (targeted already marked seen)
         seen_urls = {i["url"] for i in targeted}
         passive_dedup = [i for i in passive if i["url"] not in seen_urls]
+        passive_dedup.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-        inputs = targeted + passive_dedup
-
-        if inputs:
+        total = len(targeted) + len(passive_dedup)
+        if total:
             print(f"[SWEEP] {len(targeted)} targeted + {len(passive_dedup)} passive = "
-                  f"{len(inputs)} input(s) total.")
+                  f"{total} input(s) total.")
         else:
             print("[SWEEP] No new inputs this cycle.")
 
         cycle_log["phases"]["sweep"] = {
-            "input_count":   len(inputs),
-            "targeted":      len(targeted),
-            "passive":       len(passive_dedup),
+            "input_count": total,
+            "targeted":    len(targeted),
+            "passive":     len(passive_dedup),
         }
-        return inputs
+        return targeted, passive_dedup
+
+    # ── CEREBELLUM ───────────────────────────────────────────────────────────
+
+    def _phase_cerebellum(self, targeted, passive, cycle_log: dict):
+        """
+        Pre-score passive sweep candidates before they reach L7.
+        Targeted inputs bypass (already obligation-driven).
+        Annotates survivors with cerebellum_score and methodology_type.
+        """
+        if not passive:
+            cycle_log["phases"]["cerebellum"] = {"skipped": True}
+            return targeted
+
+        print("\n[CEREBELLUM]")
+        merged, dropped, stats = self.cerebellum.score_candidates(
+            targeted, passive, self.obligations, self.cycle_num
+        )
+        cycle_log["phases"]["cerebellum"] = stats
+        return merged
 
     # ── FEED ─────────────────────────────────────────────────────────────────
 
@@ -571,6 +699,18 @@ class FREEDDaemon:
                 f"If no clear implementation, omit the IMPLEMENT block entirely."
             )
 
+            # O76 — if Noether's Table obligation is open, ask L7 to tag relevant rows
+            if any(o["id"] == "O76" and o.get("status") in ("open", "partial")
+                   for o in self.obligations):
+                prompt += (
+                    "\n\nO76 NOETHER TABLE: If this paper provides evidence about any "
+                    "specific philosophy's symmetry structure or conservation claims, emit:\n"
+                    "NOETHER_ROW: <philosophy name exactly as in the table>\n"
+                    "NOETHER_STATUS: <rigorous|review|broken> (only if clearly determinable from this paper)\n"
+                    "NOETHER_NOTE: <one sentence — what this paper adds to that row's symmetry assignment>\n"
+                    "If the paper is not relevant to any specific named philosophy, omit entirely."
+                )
+
             result = self.l7.query(prompt)
             # Record actual token usage
             # (L7 uses streaming — we estimate; Piece 4 will wire actual usage)
@@ -585,6 +725,9 @@ class FREEDDaemon:
                 source_url=inp.get("url", inp.get("title", "unknown")),
                 source_title=inp.get("title", ""),
             )
+
+            # O76 — update Noether's Table row if L7 emitted a NOETHER_ROW signal
+            self._maybe_update_noether_row(result)
 
             # ENGINEER — if paper describes a buildable technique, patch our own code
             eng_report = self.engineer.process_feed(
@@ -730,6 +873,146 @@ class FREEDDaemon:
                 })
         return new
 
+    # ── TRIAGE ───────────────────────────────────────────────────────────────
+
+    def _phase_triage(self):
+        """
+        Classify each open/partial obligation by resolution method using Haiku.
+        Runs every TRIAGE_EVERY cycles. Sets ob['method'] to one of:
+          math_only     — closeable by formal reasoning alone, no experiment needed
+          data_analysis — existing dataset exists; need computation
+          experimental  — requires new data collection or lab work
+          mixed         — combination of the above
+        Also sets ob['tractability']: 1=now, 2=soon, 3=needs_external_input.
+        Cheap: one Haiku call for all open obligations at once.
+        """
+        import anthropic
+
+        open_obs = [o for o in self.obligations
+                    if o.get("status") in ("open", "partial")]
+        if not open_obs:
+            return
+
+        print(f"\n[TRIAGE] Classifying {len(open_obs)} open obligation(s) via Haiku...")
+
+        ob_lines = "\n".join(
+            f"{o['id']}: {o['statement'][:120]}"
+            for o in open_obs
+        )
+
+        prompt = f"""You are classifying open research obligations for the RSA/FREED framework.
+
+For each obligation below, output EXACTLY one line in this format:
+<ID> | <method> | <tractability>
+
+method must be exactly one of: math_only | data_analysis | experimental | mixed
+  math_only     = closeable by mathematical/logical reasoning alone, no new data needed
+  data_analysis = existing public dataset exists; need computation or statistical analysis
+  experimental  = requires new measurements, lab work, or data collection that doesn't exist yet
+  mixed         = requires both reasoning AND data
+
+tractability must be exactly one of: 1 | 2 | 3
+  1 = can attempt to close right now with reasoning or known data
+  2 = closeable soon with analysis of accessible data
+  3 = blocked on external input (experiment, rare dataset, collaborator)
+
+Obligations:
+{ob_lines}
+
+Output only the classification lines, nothing else."""
+
+        try:
+            client = anthropic.Anthropic(api_key=self.api_key)
+            resp = client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=400,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            raw = resp.content[0].text.strip()
+        except Exception as e:
+            print(f"[TRIAGE] Haiku call failed: {e}")
+            return
+
+        # Parse response and update obligations
+        valid_methods = {"math_only", "data_analysis", "experimental", "mixed"}
+        updated = 0
+        ob_by_id = {o["id"]: o for o in open_obs}
+
+        for line in raw.splitlines():
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) != 3:
+                continue
+            ob_id, method, tractability = parts
+            ob_id = ob_id.strip()
+            if ob_id not in ob_by_id:
+                continue
+            if method not in valid_methods:
+                continue
+            if tractability not in ("1", "2", "3"):
+                continue
+            ob_by_id[ob_id]["method"]       = method
+            ob_by_id[ob_id]["tractability"] = int(tractability)
+            updated += 1
+
+        self._save_obligations()
+        print(f"[TRIAGE] Classified {updated}/{len(open_obs)} obligations.")
+
+        # Report the breakdown
+        by_method = {}
+        for o in open_obs:
+            m = o.get("method", "unclassified")
+            by_method[m] = by_method.get(m, 0) + 1
+        print(f"[TRIAGE] Breakdown: {by_method}")
+
+    # ── NOETHER TABLE ────────────────────────────────────────────────────────
+
+    def _maybe_update_noether_row(self, result):
+        """Parse NOETHER_ROW signal from feed output and update noethers_table.json."""
+        raw = result.get("raw", "")
+        row_m    = re.search(r"NOETHER_ROW:\s*(.+)", raw)
+        if not row_m:
+            return
+        philosophy = row_m.group(1).strip().rstrip(".,;")
+        status_m   = re.search(r"NOETHER_STATUS:\s*(\w+)", raw)
+        note_m     = re.search(r"NOETHER_NOTE:\s*(.+)", raw)
+        new_status = status_m.group(1).strip().lower() if status_m else None
+        note       = note_m.group(1).strip() if note_m else ""
+        self._update_noether_row(philosophy, new_status, note)
+
+    def _update_noether_row(self, philosophy_name, new_status, note):
+        """Increment daemon_feeds and append note for the matching row."""
+        table_path = FREED_DIR / "docs" / "noethers_table.json"
+        if not table_path.exists():
+            return
+        data = json.loads(table_path.read_text(encoding="utf-8"))
+        plow = philosophy_name.lower()
+        target = None
+        for entry in data["entries"]:
+            ename = entry["name"].lower()
+            if plow in ename or ename in plow:
+                target = entry
+                break
+        if not target:
+            print(f"[NOETHER] No row match for: {philosophy_name!r}")
+            return
+        target["daemon_feeds"] = target.get("daemon_feeds", 0) + 1
+        if note:
+            existing = target.get("daemon_note", "")
+            sep = " | " if existing else ""
+            gen = self.state.get("generation", "?")
+            target["daemon_note"] = existing + sep + f"[Gen {gen}] {note}"
+        valid_statuses = {"rigorous", "review", "broken", "draft"}
+        if new_status in valid_statuses:
+            current = target.get("status", "draft")
+            # never silently downgrade rigorous; broken overrides anything
+            if current != "rigorous" or new_status == "broken":
+                target["status"] = new_status
+        table_path.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        print(f"[NOETHER] {target['name']} → feeds={target['daemon_feeds']}, "
+              f"status={target['status']}")
+
     # ── RESOLVE ──────────────────────────────────────────────────────────────
 
     def _phase_resolve(self, cycle_log: dict):
@@ -750,23 +1033,66 @@ class FREEDDaemon:
             cycle_log["phases"]["resolve"] = {"status": "skipped"}
             return
 
-        # Take the first high-priority open obligation
-        target = next(
-            (o for o in open_obligs if o.get("priority") == "high"),
-            open_obligs[0],
-        )
+        # Prefer: tractability=1 (closeable now) > high priority > first open
+        # Tractable + high-priority obligations get resolved first
+        def _resolve_rank(o):
+            t = o.get("tractability", 3)
+            p = 0 if o.get("priority") == "high" else 1
+            return (t, p)
 
-        print(f"Targeting {target['id']}: {target['statement'][:60]}...")
+        target = min(open_obligs, key=_resolve_rank)
 
-        prompt = (
+        method = target.get("method", "mixed")
+        tractability = target.get("tractability", 3)
+        print(f"Targeting {target['id']} [{method}/t{tractability}]: {target['statement'][:55]}...")
+
+        header = (
             f"RESOLVE: {target['id']}\n"
             f"Statement: {target['statement']}\n"
             f"Current progress: {target.get('progress', 'none')}\n\n"
-            f"Apply the RSA Kernel fully. What is the single most tractable next step "
-            f"to advance or resolve this obligation? "
-            f"Be specific: name a dataset, a computation, a paper, a formula. "
-            f"If this obligation can be marked RESOLVED, say RESOLVED and give the evidence."
         )
+
+        if method == "math_only":
+            prompt = header + (
+                "METHOD: MATHEMATICAL REASONING\n"
+                "This obligation is closeable by formal reasoning alone — no external paper or "
+                "dataset is required. Apply the RSA Kernel as your reasoning scaffold. "
+                "Apply the three audit lenses: Reism (only processes exist), Thermodynamics "
+                "(entropy cost is real and non-negotiable), MCPM (find the conserved process). "
+                "Attempt to close this obligation completely with a rigorous argument. "
+                "If you succeed, write RESOLVED and state the proof. "
+                "If you cannot, state precisely which step is missing and what kind of "
+                "mathematician would need to supply it."
+            )
+        elif method == "data_analysis":
+            prompt = header + (
+                "METHOD: DATA ANALYSIS\n"
+                "This obligation requires analysis of an existing dataset. "
+                "Identify: (1) the exact dataset and its public access URL, "
+                "(2) the specific computation or statistical test to run, "
+                "(3) the expected output and what result constitutes resolution. "
+                "If the necessary data is already cited in the genome or progress notes, "
+                "attempt the analysis now and write RESOLVED if it succeeds. "
+                "If data access is the only blocker, state the exact query to run."
+            )
+        elif method == "experimental":
+            prompt = header + (
+                "METHOD: EXPERIMENTAL\n"
+                "This obligation requires new data that does not yet exist. "
+                "Propose ONE concrete experiment the researcher (mail carrier, Olney MD; "
+                "has Python + Claude API, no lab access, no institutional affiliation) "
+                "could realistically attempt this week. "
+                "Name the dataset or tool, the expected output, what result closes this, "
+                "and what result would falsify the underlying claim."
+            )
+        else:
+            prompt = header + (
+                "Apply the RSA Kernel fully. What is the single most tractable next step "
+                "to advance or resolve this obligation? "
+                "Be specific: name a dataset, a computation, a formula, or a proof step. "
+                "If this obligation can be marked RESOLVED right now, say RESOLVED and give "
+                "the complete argument."
+            )
 
         result = self.l7.query(prompt)
         self.astrocyte.record_usage(input_tokens=EST_TOKENS_RESOLVE, output_tokens=600)
@@ -860,12 +1186,37 @@ class FREEDDaemon:
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
 
+PID_FILE = FREED_DIR / "freed.pid"
+
+def _acquire_pid_lock():
+    """Exit immediately if another instance is already running."""
+    import sys
+    if PID_FILE.exists():
+        try:
+            existing_pid = int(PID_FILE.read_text().strip())
+            # Check if that process is actually alive
+            os.kill(existing_pid, 0)
+            print(f"[FREED] Already running (PID {existing_pid}). Exiting.")
+            sys.exit(1)
+        except (ProcessLookupError, ValueError):
+            pass  # stale lock — proceed
+    PID_FILE.write_text(str(os.getpid()))
+
+def _release_pid_lock():
+    try:
+        PID_FILE.unlink()
+    except FileNotFoundError:
+        pass
+
 if __name__ == "__main__":
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        api_key = input("Paste your Anthropic API key: ").strip()
+    _acquire_pid_lock()
+    try:
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            print("[FREED] ANTHROPIC_API_KEY not set. Add it to ~/.zshrc and source it.")
+            import sys; sys.exit(1)
 
-    daemon = FREEDDaemon(api_key=api_key)
-
-    # Run one cycle immediately, then loop
-    daemon.run()
+        daemon = FREEDDaemon(api_key=api_key)
+        daemon.run()
+    finally:
+        _release_pid_lock()

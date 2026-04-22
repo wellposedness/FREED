@@ -45,7 +45,6 @@ MODIFIABLE = {
     "tamura_sweep.py",
     "l7_agent.py",
     "consolidate.py",
-    "knowledge_graph.py",
     "site_builder.py",
     "batch_feed.py",
     "voice.py",
@@ -55,9 +54,10 @@ MODIFIABLE = {
 SACRED = {
     "FREED_genome.md",
     "feed_guard.py",
-    "freed.py",          # the daemon itself cannot self-modify its own heartbeat
-    "self_engineer.py",  # the engineer cannot rewrite itself
-    "astrocyte.py",      # budget governor stays stable
+    "freed.py",            # the daemon itself cannot self-modify its own heartbeat
+    "self_engineer.py",    # the engineer cannot rewrite itself
+    "astrocyte.py",        # budget governor stays stable
+    "knowledge_graph.py",  # graph schema is load-bearing — patch wiped KnowledgeGraph class (Apr 2026)
     "docs/noethers_table.html", # hand-edited Noether's Table page — never overwrite
 }
 

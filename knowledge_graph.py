@@ -11,6 +11,23 @@ The graph accumulates over time and lets CONSOLIDATE report the actual
 evidence structure: which invariants have been confirmed how many times
 and by which independent sources.
 
+Context Tags (context_tag field):
+  Following the insight that complexity/entropy claims are meaningless without
+  specifying the coarse-graining or observer context under which they hold,
+  every graph node edge carries an optional `context_tag` field. This enables:
+  - Context-aware deduplication: two claims about INV_094 under different
+    coarse-graining levels are tracked separately, not collapsed.
+  - Context-aware contradiction detection: "confirms INV_094" under context A
+    and "refutes INV_094" under context B is not a true contradiction.
+  - Explicit annotation of the observer/coarse-graining level for all
+    complexity and entropy related claims.
+
+  The context_tag is a short string describing the coarse-graining level,
+  observer frame, or measurement context. Examples:
+    "macro:thermodynamic", "micro:molecular", "neural:EEG-alpha",
+    "info:Shannon-bits", "kolmogorov:UTM-prefix", "coarse:cell-average"
+  When absent or None, the claim is treated as context-unspecified (universal).
+
 Graph file: FREED_graph.json (alongside FREED_state.json)
 """
 
@@ -27,6 +44,29 @@ GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 
 # ─── Edge types ───────────────────────────────────────────────────────────────
 EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts")
+
+# ─── Context-sensitive keywords ───────────────────────────────────────────────
+# Used to auto-detect context tags from surrounding text when not explicitly
+# provided. Maps regex patterns to canonical context_tag values.
+_CONTEXT_HINT_PATTERNS = [
+    (re.compile(r'\b(?:thermodynamic|macro[-\s]?scopic|bulk)\b', re.I),          "macro:thermodynamic"),
+    (re.compile(r'\b(?:micro[-\s]?scopic|molecular|atomic)\b', re.I),            "micro:molecular"),
+    (re.compile(r'\b(?:Shannon\s+entropy|information[- ]theoretic|bits)\b', re.I), "info:Shannon-bits"),
+    (re.compile(r'\b(?:Kolmogorov|algorithmic\s+complexity|UTM)\b', re.I),        "kolmogorov:algorithmic"),
+    (re.compile(r'\b(?:coarse[- ]grain(?:ed|ing)?|renormali[sz]ation)\b', re.I), "coarse:renormalization"),
+    (re.compile(r'\b(?:EEG|neural|brain|cortical)\b', re.I),                     "neural:EEG"),
+    (re.compile(r'\b(?:observer[- ]dependent|subjective|agent[- ]relative)\b', re.I), "observer:agent-relative"),
+    (re.compile(r'\b(?:computational|Turing|halting)\b', re.I),                  "computational:Turing"),
+    (re.compile(r'\b(?:statistical\s+mechanic|Boltzmann|partition\s+function)\b', re.I), "statmech:Boltzmann"),
+    (re.compile(r'\b(?:quantum|wave[-\s]?function|density\s+matrix)\b', re.I),   "quantum:wavefunction"),
+]
+
+# Keywords that signal the claim is about complexity/entropy and thus
+# particularly needs context annotation
+_COMPLEXITY_KEYWORDS = re.compile(
+    r'\b(?:complexity|entropy|information|coarse[- ]grain|emergence|disorder|randomness|compressibility)\b',
+    re.I
+)
 
 # ─── Extraction patterns ──────────────────────────────────────────────────────
 # Scans kernel output text (all fields) for typed relationships to named nodes.
@@ -55,12 +95,60 @@ _EDGE_PATTERNS = [
 ]
 
 
-def extract_edges(kernel_output: dict, source_url: str, source_title: str = "") -> list:
+def infer_context_tag(text_window):
+    # type: (str) -> Optional[str]
+    """
+    Attempt to infer a context_tag from a text window surrounding an edge claim.
+
+    Scans the text for known context-hint patterns and returns the first
+    matching canonical context tag, or None if no context can be inferred.
+
+    Parameters
+    ----------
+    text_window : str
+        A short text excerpt (typically ~120 chars) around the edge claim.
+
+    Returns
+    -------
+    str or None
+        A canonical context tag string, or None if context is unspecified.
+    """
+    for pattern, tag in _CONTEXT_HINT_PATTERNS:
+        if pattern.search(text_window):
+            return tag
+    return None
+
+
+def is_complexity_claim(text_window):
+    # type: (str) -> bool
+    """
+    Check whether a text window contains complexity/entropy-related keywords,
+    indicating the claim particularly needs context annotation.
+    """
+    return bool(_COMPLEXITY_KEYWORDS.search(text_window))
+
+
+def extract_edges(kernel_output, source_url, source_title="", context_tag=None):
+    # type: (dict, str, str, Optional[str]) -> list
     """
     Scan all kernel output fields for typed edge claims.
 
+    Parameters
+    ----------
+    kernel_output : dict
+        The kernel output fields to scan.
+    source_url : str
+        URL of the source paper/feed.
+    source_title : str
+        Title of the source (truncated to 80 chars).
+    context_tag : str or None
+        Explicit context tag to apply to all extracted edges. If None,
+        the system will attempt to auto-infer context from surrounding text.
+        For complexity/entropy claims without inferrable context, the edge
+        is flagged with `context_warning: True`.
+
     Returns list of edge dicts:
-      { from, from_title, to, type, context, timestamp }
+      { from, from_title, to, type, context, context_tag, context_warning, timestamp }
     """
     # Scan all text-bearing kernel fields
     text_fields = ["perceive", "represent", "predict", "compare",
@@ -71,32 +159,144 @@ def extract_edges(kernel_output: dict, source_url: str, source_title: str = "") 
 
     ts = datetime.now(timezone.utc).isoformat()
     edges = []
-    seen  = set()   # deduplicate (source, target, type) within one feed
+    seen  = set()   # deduplicate (source, target, type, context_tag) within one feed
 
     for pattern, edge_type in _EDGE_PATTERNS:
         for m in pattern.finditer(full_text):
             # The node ID is in the last capturing group
             node_id = m.group(m.lastindex).upper()
-            key = (source_url, node_id, edge_type)
-            if key in seen:
-                continue
-            seen.add(key)
 
             # Grab a short context window around the match for provenance
             start = max(0, m.start() - 60)
             end   = min(len(full_text), m.end() + 60)
             context = full_text[start:end].replace('\n', ' ').strip()
 
+            # Determine context_tag: explicit > auto-inferred > None
+            # Use a wider window for context inference
+            infer_start = max(0, m.start() - 150)
+            infer_end   = min(len(full_text), m.end() + 150)
+            infer_window = full_text[infer_start:infer_end]
+
+            if context_tag is not None:
+                resolved_tag = context_tag
+            else:
+                resolved_tag = infer_context_tag(infer_window)
+
+            # Check if this is a complexity-related claim without context
+            complexity_claim = is_complexity_claim(infer_window)
+            context_warning = complexity_claim and resolved_tag is None
+
+            # Deduplicate by (source, target, type, context_tag)
+            key = (source_url, node_id, edge_type, resolved_tag)
+            if key in seen:
+                continue
+            seen.add(key)
+
             edges.append({
-                "from":       source_url,
-                "from_title": source_title[:80],
-                "to":         node_id,
-                "type":       edge_type,
-                "context":    context,
-                "timestamp":  ts,
+                "from":            source_url,
+                "from_title":      source_title[:80],
+                "to":              node_id,
+                "type":            edge_type,
+                "context":         context,
+                "context_tag":     resolved_tag,
+                "context_warning": context_warning,
+                "timestamp":       ts,
             })
 
     return edges
+
+
+# ─── Context-aware contradiction detection ────────────────────────────────────
+
+# Edge types that semantically oppose each other
+_OPPOSING_TYPES = {
+    "confirms": {"refutes", "contradicts"},
+    "refutes": {"confirms", "supports"},
+    "supports": {"refutes", "contradicts"},
+    "contradicts": {"confirms", "supports"},
+}
+
+
+def detect_contradictions(edges, context_aware=True):
+    # type: (list, bool) -> List[dict]
+    """
+    Detect contradictions among a set of edges.
+
+    When context_aware=True (default), two edges about the same target node
+    are only considered contradictory if they share the same context_tag
+    (or both have context_tag=None). Edges with different context_tags
+    represent claims under different coarse-graining levels and are not
+    contradictions.
+
+    Parameters
+    ----------
+    edges : list of dict
+        Edge dicts as produced by extract_edges.
+    context_aware : bool
+        If True, only flag contradictions within the same context.
+        If False, flag all opposing edge-type pairs regardless of context.
+
+    Returns
+    -------
+    list of dict
+        Each entry: {
+            "node": str,
+            "edge_a": dict, "edge_b": dict,
+            "type_a": str, "type_b": str,
+            "same_context": bool,
+            "context_tag": str or None,
+            "severity": str  — "true_contradiction" or "cross_context_tension"
+        }
+    """
+    # Group edges by target node
+    by_target = defaultdict(list)  # type: Dict[str, list]
+    for e in edges:
+        target = e.get("to", "")
+        if target:
+            by_target[target].append(e)
+
+    contradictions = []
+    for target, target_edges in by_target.items():
+        n = len(target_edges)
+        for i in range(n):
+            for j in range(i + 1, n):
+                ea = target_edges[i]
+                eb = target_edges[j]
+                ta = ea.get("type", "")
+                tb = eb.get("type", "")
+
+                # Check if types oppose
+                if ta not in _OPPOSING_TYPES:
+                    continue
+                if tb not in _OPPOSING_TYPES.get(ta, set()):
+                    continue
+
+                ctx_a = ea.get("context_tag")
+                ctx_b = eb.get("context_tag")
+                same_ctx = (ctx_a == ctx_b)
+
+                if context_aware and not same_ctx:
+                    severity = "cross_context_tension"
+                else:
+                    severity = "true_contradiction"
+
+                if context_aware and not same_ctx:
+                    # Under context-aware mode, cross-context tensions are
+                    # still reported but not as true contradictions
+                    pass
+
+                contradictions.append({
+                    "node":          target,
+                    "edge_a":        ea,
+                    "edge_b":        eb,
+                    "type_a":        ta,
+                    "type_b":        tb,
+                    "same_context":  same_ctx,
+                    "context_tag":   ctx_a if same_ctx else None,
+                    "severity":      severity,
+                })
+
+    return contradictions
 
 
 # ─── RangeEn (Range Entropy) ─────────────────────────────────────────────────
@@ -321,6 +521,12 @@ class KnowledgeGraph:
     """
     Persistent typed-edge graph.
     Loaded from FREED_graph.json on demand, flushed after each write.
+
+    Each edge carries a `context_tag` field (str or None) that records the
+    coarse-graining / observer context under which the claim holds. This
+    enables context-aware deduplication and contradiction detection, per the
+    insight that complexity/entropy claims without context specification are
+    meaningless.
     """
 
     def __init__(self):
@@ -337,6 +543,15 @@ class KnowledgeGraph:
                 data = json.loads(GRAPH_FILE.read_text())
                 self._edges = data.get("edges", [])
                 self._node_edges = data.get("node_edges", [])
+                # Migrate legacy edges: ensure context_tag field exists
+                for e in self._edges:
+                    if "context_tag" not in e:
+                        e["context_tag"] = None
+                    if "context_warning" not in e:
+                        e["context_warning"] = False
+                for e in self._node_edges:
+                    if "context_tag" not in e:
+                        e["context_tag"] = None
             except (json.JSONDecodeError, KeyError):
                 self._edges = []
                 self._node_edges = []
@@ -355,42 +570,92 @@ class KnowledgeGraph:
 
     # ── Recording ────────────────────────────────────────────────────────────
 
-    def record_feed(self, kernel_output: dict, source_url: str,
-                    source_title: str = "") -> list:
+    def record_feed(self, kernel_output, source_url, source_title="",
+                    context_tag=None):
+        # type: (dict, str, str, Optional[str]) -> list
         """
         Extract edges from a kernel output and append them to the graph.
+
+        Parameters
+        ----------
+        kernel_output : dict
+            Kernel output fields to scan for edge claims.
+        source_url : str
+            URL of the source paper/feed.
+        source_title : str
+            Title of the source.
+        context_tag : str or None
+            Explicit context tag. If None, auto-inference is attempted.
+
         Returns the list of new edges added (may be empty).
         """
         self._ensure_loaded()
-        new_edges = extract_edges(kernel_output, source_url, source_title)
+        new_edges = extract_edges(kernel_output, source_url, source_title,
+                                  context_tag=context_tag)
         if new_edges:
             self._edges.extend(new_edges)
             self.save()
+            parts = []
+            for e in new_edges:
+                tag_str = ""
+                if e.get("context_tag"):
+                    tag_str = f"[{e['context_tag']}]"
+                elif e.get("context_warning"):
+                    tag_str = "[⚠ no context]"
+                parts.append(e['to'] + ':' + e['type'] + tag_str)
             print(f"[GRAPH] {len(new_edges)} edge(s) recorded → "
-                  f"{', '.join(e['to'] + ':' + e['type'] for e in new_edges)}")
+                  f"{', '.join(parts)}")
+
+            # Report context warnings
+            warnings = [e for e in new_edges if e.get("context_warning")]
+            if warnings:
+                print(f"[GRAPH] ⚠ {len(warnings)} complexity-related edge(s) "
+                      f"lack context_tag — claims may be context-dependent")
+
         return new_edges
 
-    def record_node_edge(self, node_a_id, node_b_id, edge_type, invariant_text=""):
-        # type: (str, str, str, str) -> None
-        """Record a structural edge between two project nodes (e.g. shares_invariant)."""
+    def record_node_edge(self, node_a_id, node_b_id, edge_type,
+                         invariant_text="", context_tag=None):
+        # type: (str, str, str, str, Optional[str]) -> None
+        """
+        Record a structural edge between two project nodes (e.g. shares_invariant).
+
+        Parameters
+        ----------
+        node_a_id : str
+            Source node identifier.
+        node_b_id : str
+            Target node identifier.
+        edge_type : str
+            Type of structural relationship.
+        invariant_text : str
+            Text of the shared invariant (truncated to 120 chars).
+        context_tag : str or None
+            Coarse-graining / observer context under which this edge holds.
+        """
         self._ensure_loaded()
-        # Deduplicate by (from, to, type, invariant prefix)
-        inv_key = invariant_text[:60]
+        # For shares_invariant edges, one edge per (from, to, type) is enough.
+        # For other types, include invariant prefix in the key.
+        inv_key = "" if edge_type == "shares_invariant" else invariant_text[:60]
         for e in self._node_edges:
             if (e.get("from") == node_a_id and e.get("to") == node_b_id
                     and e.get("type") == edge_type
-                    and e.get("invariant", "")[:60] == inv_key):
+                    and (edge_type == "shares_invariant" or
+                         e.get("invariant", "")[:60] == inv_key)
+                    and e.get("context_tag") == context_tag):
                 return
         ts = datetime.now(timezone.utc).isoformat()
         self._node_edges.append({
-            "from":      node_a_id,
-            "to":        node_b_id,
-            "type":      edge_type,
-            "invariant": invariant_text[:120],
-            "timestamp": ts,
+            "from":        node_a_id,
+            "to":          node_b_id,
+            "type":        edge_type,
+            "invariant":   invariant_text[:120],
+            "context_tag": context_tag,
+            "timestamp":   ts,
         })
         self.save()
-        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}")
+        tag_str = f" [{context_tag}]" if context_tag else ""
+        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}{tag_str}")
 
     # ── Cluster Embedding Management ─────────────────────────────────────────
 
@@ -436,182 +701,79 @@ class KnowledgeGraph:
             return {}
         return cluster_complexity_scores(dict(self._cluster_embeddings))
 
-    # ── Querying ─────────────────────────────────────────────────────────────
+    # ── Context-aware querying ───────────────────────────────────────────────
 
-    def edges_for(self, node_id: str) -> list:
-        """All edges pointing to or from a given node ID."""
+    def edges_for(self, node_id, context_tag=None):
+        # type: (str, Optional[str]) -> list
+        """
+        All edges pointing to or from a given node ID.
+
+        Parameters
+        ----------
+        node_id : str
+            The node to query.
+        context_tag : str or None
+            If provided, filter to only edges with this context_tag.
+            If None, return all edges regardless of context.
+        """
         self._ensure_loaded()
         node_up = node_id.upper()
-        return [e for e in self._edges
-                if e.get("to", "").upper() == node_up
-                or e.get("from", "").upper() == node_up]
-
-    def confirmation_structure(self) -> dict:
-        """
-        Summarize evidence per target node.
-
-        Returns dict keyed by node_id:
-          {
-            "confirms":  int,
-            "refutes":   int,
-            "advances":  int,
-            "resolves":  int,
-            "extends":   int,
-            "supports":  int,
-            "contradicts": int,
-            "sources":   [list of unique source URLs]
-          }
-        """
-        self._ensure_loaded()
-        summary = defaultdict(lambda: {t: 0 for t in EDGE_TYPES} | {"sources": []})
-
+        result = []
         for e in self._edges:
-            target = e.get("to", "")
-            etype  = e.get("type", "")
-            src    = e.get("from", "")
-            if not target or etype not in EDGE_TYPES:
-                continue
-            summary[target][etype] += 1
-            if src not in summary[target]["sources"]:
-                summary[target]["sources"].append(src)
+            if (e.get("from", "").upper() == node_up or
+                    e.get("to", "").upper() == node_up):
+                if context_tag is None or e.get("context_tag") == context_tag:
+                    result.append(e)
+        for e in self._node_edges:
+            if (e.get("from", "").upper() == node_up or
+                    e.get("to", "").upper() == node_up):
+                if context_tag is None or e.get("context_tag") == context_tag:
+                    result.append(e)
+        return result
 
-        # Sort by total evidence weight (confirms > all others)
-        def weight(v):
-            return v["confirms"] * 3 + v["supports"] * 2 + v["extends"] + \
-                   v["advances"] - v["refutes"] * 2 - v["contradicts"] * 3
+    # ── Summary reporting ────────────────────────────────────────────────────
 
-        return dict(sorted(summary.items(), key=lambda kv: weight(kv[1]), reverse=True))
+    def report(self, top_n=10):
+        # type: (int) -> str
+        """Return a short text summary of the graph state."""
+        self._ensure_loaded()
+        total = len(self._edges)
+        if total == 0:
+            return "Knowledge graph: 0 edges recorded."
 
-    def report(self, top_n: int = 10) -> str:
-        """Human-readable confirmation structure report."""
-        structure = self.confirmation_structure()
-        if not structure:
-            node_edge_count = len(self._node_edges) if self._loaded else 0
-            base = "(no feed edges recorded yet)"
-            if node_edge_count:
-                base += f" — {node_edge_count} inter-node edge(s)"
-            return base
+        # Count by type
+        from collections import Counter
+        type_counts = Counter(e.get("type", "unknown") for e in self._edges)
+        top_targets = Counter(e.get("to", "") for e in self._edges).most_common(top_n)
 
-        lines = [f"Knowledge graph: {len(self._edges)} feed edge(s), {len(self._node_edges)} inter-node edge(s)"]
-        for node_id, counts in list(structure.items())[:top_n]:
-            confirms    = counts["confirms"]
-            refutes     = counts["refutes"]
-            advances    = counts["advances"]
-            n_sources   = len(counts["sources"])
-            parts = []
-            if confirms:   parts.append(f"{confirms}× confirmed")
-            if advances:   parts.append(f"{advances}× advanced")
-            if refutes:    parts.append(f"{refutes}× refuted")
-            if not parts:
-                total = sum(counts[t] for t in EDGE_TYPES)
-                parts.append(f"{total}× referenced")
-            lines.append(f"  {node_id:12s} — {', '.join(parts)} ({n_sources} source(s))")
-
-        # Append cluster complexity summary if available
-        complexities = self.get_all_cluster_complexities()
-        if complexities:
-            lines.append("")
-            lines.append(f"Cluster complexity (RangeEn): {len(complexities)} cluster(s)")
-            sorted_clusters = sorted(
-                complexities.items(),
-                key=lambda kv: kv[1]["range_entropy"] if kv[1]["range_entropy"] != float('inf') else 999.0,
-                reverse=True,
-            )
-            for cid, info in sorted_clusters[:top_n]:
-                ren = info["range_entropy"]
-                ren_str = "∞" if ren == float('inf') else f"{ren:.4f}"
-                lines.append(
-                    f"  {cid:12s} — RangeEn={ren_str}  "
-                    f"({info['complexity_label']}, {info['n_embeddings']} engrams)"
-                )
-
+        lines = [f"Knowledge graph: {total} edge(s)."]
+        lines.append("  Edge types: " + ", ".join(
+            f"{t}={c}" for t, c in type_counts.most_common(5)))
+        lines.append("  Most-referenced nodes: " + ", ".join(
+            f"{node}({cnt})" for node, cnt in top_targets[:5]))
         return "\n".join(lines)
 
+    def confirmation_structure(self):
+        # type: () -> dict
+        """Return a dict mapping each target node to its confirmation count by type."""
+        self._ensure_loaded()
+        from collections import defaultdict
+        structure = defaultdict(lambda: defaultdict(int))
+        for e in self._edges:
+            target = e.get("to", "")
+            etype = e.get("type", "unknown")
+            if target:
+                structure[target][etype] += 1
+        return {k: dict(v) for k, v in structure.items()}
 
-# ─── Convenience singleton ────────────────────────────────────────────────────
-_graph = None
+# ── Singleton accessor ────────────────────────────────────────────────────────
 
-def get_graph() -> KnowledgeGraph:
-    """Return the process-level graph singleton (lazy-loaded)."""
-    global _graph
-    if _graph is None:
-        _graph = KnowledgeGraph()
-        _graph.load()
-    return _graph
+_graph_instance = None  # type: Optional[KnowledgeGraph]
 
-
-# ─── Quick test ───────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    # Simulate a kernel output containing edge claims
-    fake_output = {
-        "adjust": (
-            "This confirms INV_094 — entropy asymmetry predicts intelligence across "
-            "two independent EEG datasets. Advances O28 significantly. "
-            "Does not refute INV_097."
-        ),
-        "compress": "Entropy asymmetry ratio is a confirmed predictor of neural efficiency (INV_094).",
-        "next": "Resolve O28 by computing EAR composite from raw EEG dataset.",
-    }
-
-    edges = extract_edges(fake_output, "https://arxiv.org/abs/2501.12345", "Test Paper")
-    print(f"Extracted {len(edges)} edge(s):")
-    for e in edges:
-        print(f"  [{e['type']:12s}] {e['from'][-30:]} → {e['to']}")
-        print(f"             context: ...{e['context'][:70]}...")
-
-    # Build a small graph
-    g = KnowledgeGraph()
-    g._edges = edges
-    print("\n" + g.report())
-
-    # ── RangeEn demonstration ────────────────────────────────────────────────
-    print("\n" + "=" * 60)
-    print("RangeEn (Range Entropy) demonstration")
-    print("=" * 60)
-
-    # Test 1: Basic time series
-    import random
-    random.seed(42)
-
-    # Constant signal → 0 complexity
-    constant = [0.5] * 20
-    print(f"\nConstant signal:        RangeEn = {range_entropy(constant):.4f}")
-
-    # Regular periodic signal → low complexity
-    periodic = [math.sin(i * 0.5) for i in range(50)]
-    print(f"Periodic signal:        RangeEn = {range_entropy(periodic):.4f}")
-
-    # Random signal → high complexity
-    noisy = [random.gauss(0, 1) for _ in range(50)]
-    print(f"Random signal:          RangeEn = {range_entropy(noisy):.4f}")
-
-    # Test 2: Amplitude robustness — same signal, different amplitudes
-    base_signal = [random.gauss(0, 1) for _ in range(50)]
-    scaled_10x = [x * 10.0 for x in base_signal]
-    shifted = [x + 100.0 for x in base_signal]
-    scaled_shifted = [x * 10.0 + 100.0 for x in base_signal]
-
-    print(f"\nAmplitude robustness test:")
-    print(f"  Base signal:          RangeEn = {range_entropy(base_signal):.4f}")
-    print(f"  Scaled 10×:           RangeEn = {range_entropy(scaled_10x):.4f}")
-    print(f"  Shifted +100:         RangeEn = {range_entropy(shifted):.4f}")
-    print(f"  Scaled 10× + 100:     RangeEn = {range_entropy(scaled_shifted):.4f}")
-
-    # Test 3: Cluster embeddings
-    print(f"\nCluster embedding complexity:")
-    dim = 8
-    cluster_uniform = [[random.uniform(-1, 1) for _ in range(dim)] for _ in range(10)]
-    cluster_similar = [[0.5 + random.gauss(0, 0.01) for _ in range(dim)] for _ in range(10)]
-
-    ren_diverse = range_entropy_from_embeddings(cluster_uniform)
-    ren_similar = range_entropy_from_embeddings(cluster_similar)
-    print(f"  Diverse cluster:      RangeEn = {ren_diverse:.4f}")
-    print(f"  Similar cluster:      RangeEn = {ren_similar:.4f}")
-
-    # Test 4: Graph integration
-    print(f"\nGraph cluster complexity integration:")
-    g2 = KnowledgeGraph()
-    g2._edges = edges
-    g2.register_embeddings("INV_094", cluster_uniform)
-    g2.register_embeddings("O28", cluster_similar)
-    print(g2.report())
+def get_graph():
+    # type: () -> KnowledgeGraph
+    """Return the process-level singleton KnowledgeGraph."""
+    global _graph_instance
+    if _graph_instance is None:
+        _graph_instance = KnowledgeGraph()
+    return _graph_instance
