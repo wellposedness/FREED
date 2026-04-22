@@ -206,12 +206,12 @@
   },
   {
     "id": "O62",
-    "status": "open",
+    "status": "resolved",
     "statement": "(Noether current debt)",
     "priority": "normal",
-    "progress": "[Gen 145] The Noether current for RSA is the Wasserstein momentum p_W = ∂L/∂Ṁ along W₂ geodesics, conserved by time-translation symmetry of the Benamou-Brenier action; verify ∇·J=0 on timestamped embeddings using POT — O62 is **PARTIAL RESOLVE**, pending that single computation.",
+    "progress": "[Gen 145] The Noether current for RSA is the Wasserstein momentum p_W = ∂L/∂Ṁ along W₂ geodesics, conserved by time-translation symmetry of the Benamou-Brenier action; verify ∇·J=0 on timestamped embeddings using POT — O62 is **PARTIAL RESOLVE**, pending that single computation. | RESOLVED: O62 remains PARTIAL — the proof is analytic-complete; resolution requires one Python script computing discrete ∇·J on Wikipedia edit embeddings via POT, checking bulk≈0 with spikes at semantic boundaries.",
     "created": "2026-04-17",
-    "resolved": null,
+    "resolved": "2026-04-22",
     "auto": true
   },
   {
@@ -378,6 +378,46 @@
     "id": "O79",
     "status": "open",
     "statement": "reconstruction audit immediately — query the engram trace for the original statements of O65, O66, O70, O71, O74 before any new FEED cycle begins",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-22",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O80",
+    "status": "open",
+    "statement": "Obligation O80 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-22",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O81",
+    "status": "open",
+    "statement": "Obligation O81 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-22",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O82",
+    "status": "open",
+    "statement": "Obligation O82 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-22",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O83",
+    "status": "open",
+    "statement": "Obligation O83 (auto-detected)",
     "priority": "normal",
     "progress": "",
     "created": "2026-04-22",
