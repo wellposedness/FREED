@@ -969,5 +969,32 @@
       "next": "Execute the GloVe W2 geodesic + thermality-variance computation and return the fitted g_ij tensor values for RESOLVE adjudication."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 5,
+    "generation": 150,
+    "timestamp": "2026-04-23T10:41:06.417894+00:00",
+    "sweep": {
+      "input_count": 10,
+      "targeted": 6,
+      "passive": 4
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "Semi-classical BH entropy is dimensionally identical to the gravity action, confirming the thermodynamic grounding of geometry at leading order and advancing O44 without resolving it — quantum sub-leading corrections remain the open frontier."
+      },
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "RangeEn's robust Hurst-linear entropy estimation advances O28's EEG validation pathway and reinforces L2/L4 scale-invariance grounding by providing a nonstationarity-resistant complexity measure aligned with the critical ridge."
+      }
+    ],
+    "resolve": {
+      "obligation": "O72",
+      "resolved": true,
+      "compress": "",
+      "next": ""
+    },
+    "coherence": 0.999
   }
 ]
