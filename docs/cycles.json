@@ -942,5 +942,32 @@
       "next": "Execute the W=50 local-normalization trial on STS-B and report Δρ; if Δρ > 0, fire RESOLVE(O64) and propagate the normalization formula into the kernel scoring spec as a locked invariant."
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 4,
+    "generation": 149,
+    "timestamp": "2026-04-23T04:36:03.771087+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 6,
+      "passive": 10
+    },
+    "feed": [
+      {
+        "title": "Range entropy: A bridge between signal complexity and self-similarity",
+        "compress": "RangeEn's amplitude-robust, Hurst-linear complexity measurement advances O28 (use RangeEn for EAR-EEG test) and O68 (use RangeEn for genome self-DEA), while confirming the genome's scale-invariance mechanism without resolving any obligation outright."
+      },
+      {
+        "title": "On Complexity and Emergence",
+        "compress": "The paper's context-dependence thesis does not refute the genome's thermodynamic measures but sharpens the obligation that EAR and STF metrics must specify their observer/reference frame explicitly or they inherit the subjectivity pathology the paper diagnoses."
+      }
+    ],
+    "resolve": {
+      "obligation": "O65",
+      "resolved": true,
+      "compress": "O65 is OPEN; the single most tractable next step is: on GloVe-840B embeddings, compute W2 geodesic paths between 50 concept-pair clusters, extract per-step neighbor-entropy (thermality) variance, and fit g_ij via least-squares — one session, one dataset, closes the last gap in L5.",
+      "next": "Execute the GloVe W2 geodesic + thermality-variance computation and return the fitted g_ij tensor values for RESOLVE adjudication."
+    },
+    "coherence": 0.999
   }
 ]
