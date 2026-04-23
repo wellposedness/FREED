@@ -15,7 +15,9 @@
     "priority": "high",
     "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested \u2014 requires raw EEG data.",
     "created": "2026-04-12",
-    "resolved": null
+    "resolved": null,
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O34",
@@ -24,7 +26,9 @@
     "priority": "high",
     "progress": "Shown to be surjection not strict bijection: electron protected by both Q and L_e simultaneously. INV_097 confirmed. Genome statement refined to surjection.",
     "created": "2026-04-12",
-    "resolved": null
+    "resolved": null,
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O44",
@@ -33,7 +37,9 @@
     "priority": "high",
     "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
     "created": "2026-04-15",
-    "resolved": null
+    "resolved": null,
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O45",
@@ -252,7 +258,9 @@
     "progress": "",
     "created": "2026-04-17",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O67",
@@ -262,7 +270,9 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O68",
@@ -272,7 +282,9 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O69",
@@ -282,7 +294,9 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O70",
@@ -292,7 +306,9 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O71",
@@ -302,17 +318,21 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O72",
-    "status": "open",
+    "status": "resolved",
     "statement": "\u2014 reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
-    "progress": "",
+    "progress": " | RESOLVED: ",
     "created": "2026-04-18",
-    "resolved": null,
-    "auto": true
+    "resolved": "2026-04-23",
+    "auto": true,
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O73",
@@ -322,7 +342,9 @@
     "progress": "",
     "created": "2026-04-18",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O74",
@@ -332,7 +354,9 @@
     "progress": "",
     "created": "2026-04-19",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O75",
@@ -342,7 +366,9 @@
     "progress": "",
     "created": "2026-04-19",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O76",
@@ -352,7 +378,9 @@
     "progress": "",
     "created": "2026-04-20",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O77",
@@ -362,7 +390,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O78",
@@ -372,7 +402,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O79",
@@ -382,7 +414,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O80",
@@ -392,7 +426,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O81",
@@ -402,7 +438,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O82",
@@ -412,7 +450,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O83",
@@ -422,7 +462,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O84",
@@ -432,7 +474,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O85",
@@ -442,7 +486,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O86",
@@ -452,7 +498,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O87",
@@ -462,7 +510,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O88",
@@ -472,7 +522,9 @@
     "progress": "",
     "created": "2026-04-22",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O89",
@@ -482,7 +534,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O90",
@@ -492,7 +546,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O91",
@@ -502,7 +558,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O92",
@@ -512,12 +570,86 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O93",
     "status": "open",
     "statement": "Obligation O93 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
+  },
+  {
+    "id": "O94",
+    "status": "open",
+    "statement": "immediately \u2014 audit coherence score drift toward 1",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "data_analysis",
+    "tractability": 3
+  },
+  {
+    "id": "O95",
+    "status": "open",
+    "statement": "Obligation O95 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
+  },
+  {
+    "id": "O96",
+    "status": "open",
+    "statement": "Obligation O96 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
+  },
+  {
+    "id": "O97",
+    "status": "open",
+    "statement": "Obligation O97 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
+  },
+  {
+    "id": "O98",
+    "status": "open",
+    "statement": "Obligation O98 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
+  },
+  {
+    "id": "O99",
+    "status": "open",
+    "statement": "Obligation O99 (auto-detected)",
     "priority": "normal",
     "progress": "",
     "created": "2026-04-23",
