@@ -1063,6 +1063,7 @@ function renderCycles(cycles) {
 // ── Speak digest ─────────────────────────────────────────────────────────────
 
 let _speaking = false;
+let _resumeInterval = null;
 let _loadedState = null, _loadedObligs = null, _loadedProjects = [], _loadedSymbols = null;
 
 function cleanText(s) {
@@ -1246,13 +1247,14 @@ function _getRate() {
 }
 
 function speakWithVoice(voiceKey) {
-  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids')
+  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids').
+  // These voices don't exist on iOS — fall back to default voice so the button
+  // still triggers speech on mobile rather than silently doing nothing.
   const voice = _voices.find(v => v.name === voiceKey)
              || _voices.find(v => v.name.toLowerCase().includes(voiceKey.toLowerCase()));
-  if (!voice) return;
   stopSpeak();
-  _charVoiceOverride = voice.name;
-  localStorage.setItem('freed_voice', voice.name);
+  _charVoiceOverride = voice ? voice.name : null;
+  if (voice) localStorage.setItem('freed_voice', voice.name);
   document.querySelectorAll('.char-btn').forEach(b => {
     b.classList.toggle('char-active', b.dataset.voice === voiceKey);
   });
@@ -1308,13 +1310,22 @@ function startSpeak() {
   btn.textContent = '■ STOP';
   btn.classList.add('speaking');
 
-  // Small delay after cancel() — mobile browsers need a tick to flush the queue
-  _unlockAudio().then(() => setTimeout(() => speakChunks(chunks, 0, thisGen), 120));
+  // iOS Safari requires speechSynthesis.speak() to be called synchronously
+  // within the user gesture handler — Promise chains and setTimeout break it.
+  // Fire the audio unlock in parallel (Bluetooth routing) but don't wait for it.
+  _unlockAudio();
+  speakChunks(chunks, 0, thisGen);
+
+  // iOS Safari silently pauses speechSynthesis after ~15s and never resumes.
+  _resumeInterval = setInterval(() => {
+    if (_speaking && window.speechSynthesis.paused) window.speechSynthesis.resume();
+  }, 10000);
 }
 
 function stopSpeak() {
   _speakGen++;          // invalidate any callbacks still in flight
   _speaking = false;
+  clearInterval(_resumeInterval); _resumeInterval = null;
   window.speechSynthesis.cancel();
   const btn = document.getElementById('speak-btn');
   btn.textContent = '▶ SPEAK DIGEST';
