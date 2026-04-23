@@ -23,6 +23,7 @@ New edge types (none existed before — all prior edges are 'shares_invariant'):
   substrate_of        A is the physical substrate instantiation of B's abstract pattern
 
 Logs every DMN run to FREED_log/dmn_{date}.jsonl.
+Audit results go to FREED_log/dmn_audit_{date}.jsonl after each run.
 """
 
 import json
@@ -182,6 +183,163 @@ def _parse_obligations(text):
     return obligs[:MAX_OBLIGS]
 
 
+class DMNAuditor:
+    """
+    Post-run quality checks for a DMN cycle. No API calls — all deterministic.
+
+    Check 1 — cross_connect_quality:
+        Pairs analyzed must have avg topical-word overlap < 0.30.
+        Fails if no pairs were found or pairs were not genuinely distant.
+
+    Check 2 — internal_obligation_origin:
+        At least one new obligation's rationale must reference internal graph
+        structure — an O-number (O44), a node ID (long snake_case), or a
+        genome symbol word. Fails if obligations look like free-floating claims
+        with no traceable internal anchor.
+
+    Check 3 — genome_coherence:
+        Every new obligation must share at least one non-trivial word with the
+        genome symbol lexicon. Fails if an obligation drifts outside the
+        genome's conceptual space entirely.
+    """
+
+    OVERLAP_THRESHOLD = 0.30   # pairs above this aren't genuinely distant
+
+    def __init__(self, genome_symbols):
+        self._symbols = genome_symbols  # list of raw symbol key strings
+
+    # ── Internal helpers ──────────────────────────────────────────────────────
+
+    def _sym_words(self):
+        """Flat set of meaningful words extracted from all genome symbol keys."""
+        stop = {"the","a","an","of","in","and","to","is","are","as","by","for"}
+        words = set()
+        for sym in self._symbols:
+            for w in re.split(r'[_\s]+', sym.lower()):
+                if len(w) > 3 and w not in stop:
+                    words.add(w)
+        return words
+
+    def _text_words(self, text):
+        stop = {"the","a","an","of","in","and","to","is","are","as","by","for"}
+        return {w for w in re.split(r'\W+', text.lower()) if len(w) > 3 and w not in stop}
+
+    # ── Three checks ─────────────────────────────────────────────────────────
+
+    def _check_cross_connect(self, result, candidates):
+        if not candidates:
+            return {
+                "passed":   False,
+                "note":     "no candidate pairs — graph may lack shares_invariant edges",
+                "pairs":    0,
+                "avg_overlap": None,
+                "min_overlap": None,
+                "edges_produced": len(result.get("new_edges", [])),
+            }
+        overlaps = [c[0] for c in candidates]
+        avg_ov   = sum(overlaps) / len(overlaps)
+        min_ov   = min(overlaps)
+        edges    = len(result.get("new_edges", []))
+        passed   = avg_ov < self.OVERLAP_THRESHOLD
+        return {
+            "passed":        passed,
+            "note":          "OK" if passed else
+                             f"avg overlap {avg_ov:.2f} ≥ {self.OVERLAP_THRESHOLD} — pairs not distant enough",
+            "pairs":         len(candidates),
+            "avg_overlap":   round(avg_ov, 3),
+            "min_overlap":   round(min_ov, 3),
+            "edges_produced": edges,
+        }
+
+    def _check_internal_origin(self, result):
+        obligs = result.get("new_obligations", [])
+        if not obligs:
+            return {
+                "passed":          False,
+                "note":            "no obligations generated",
+                "grounded_count":  0,
+                "ungrounded":      [],
+            }
+        sym_w = self._sym_words()
+        grounded   = []
+        ungrounded = []
+        for ob in obligs:
+            rat = ob.get("rationale", "")
+            # O-number reference (O44, O62…)
+            has_o    = bool(re.search(r"\bO\d+\b", rat))
+            # Long snake_case token likely to be a node ID
+            has_node = bool(re.search(r"\b[a-z][a-z_]{10,}\b", rat))
+            # Genome symbol word overlap
+            has_sym  = bool(sym_w & self._text_words(rat))
+            label    = ob.get("statement", "")[:70]
+            if has_o or has_node or has_sym:
+                grounded.append(label)
+            else:
+                ungrounded.append(label)
+        passed = len(grounded) >= 1
+        return {
+            "passed":         passed,
+            "note":           "OK" if passed else
+                              "no obligation rationale references internal structure (O-numbers, nodes, symbols)",
+            "grounded_count": len(grounded),
+            "ungrounded":     ungrounded,
+        }
+
+    def _check_genome_coherence(self, result):
+        obligs = result.get("new_obligations", [])
+        if not obligs:
+            return {
+                "passed":           True,
+                "note":             "no obligations to check",
+                "coherent_count":   0,
+                "incoherent":       [],
+            }
+        sym_w      = self._sym_words()
+        coherent   = []
+        incoherent = []
+        for ob in obligs:
+            combined = ob.get("statement", "") + " " + ob.get("rationale", "")
+            label    = ob.get("statement", "")[:70]
+            if sym_w & self._text_words(combined):
+                coherent.append(label)
+            else:
+                incoherent.append(label)
+        passed = len(incoherent) == 0
+        return {
+            "passed":          passed,
+            "note":            "OK" if passed else
+                               f"{len(incoherent)} obligation(s) share no words with genome symbol lexicon",
+            "coherent_count":  len(coherent),
+            "incoherent":      incoherent,
+        }
+
+    # ── Public entry point ────────────────────────────────────────────────────
+
+    def audit(self, result, candidates):
+        """
+        Run all three checks. Returns audit dict ready for jsonl logging.
+        candidates: list of (overlap, a_id, b_id, pa, pb, shared_inv)
+        """
+        checks = {
+            "cross_connect_quality":     self._check_cross_connect(result, candidates),
+            "internal_obligation_origin": self._check_internal_origin(result),
+            "genome_coherence":          self._check_genome_coherence(result),
+        }
+        flags  = [name for name, c in checks.items() if not c["passed"]]
+        passed = len(flags) == 0
+        return {
+            "ts":      result.get("ts"),
+            "passed":  passed,
+            "flags":   flags,
+            "checks":  checks,
+            "summary": {
+                "edges":       len(result.get("new_edges", [])),
+                "obligations": len(result.get("new_obligations", [])),
+                "pairs":       result.get("pairs_analyzed", 0),
+            },
+        }
+
+
 class DMNAgent:
     """Runs the dead-zone Default Mode Network consolidation."""
 
@@ -264,6 +422,8 @@ class DMNAgent:
                     edge["type"],
                     invariant_text=edge["reason"],
                 )
+                # Store overlap on the edge so the auditor has it
+                edge["pair_overlap"] = round(overlap, 3)
                 result["new_edges"].append(edge)
                 print(f"[DMN]   {edge['from'][:25]} --{edge['type']}--> {edge['to'][:25]}")
 
@@ -333,4 +493,23 @@ class DMNAgent:
 
         print(f"\n[DMN] Complete. {len(result['new_edges'])} edge(s), "
               f"{len(result['new_obligations'])} obligation(s).")
+
+        # ── AUDIT ────────────────────────────────────────────────────────────
+        audit_path = LOG_DIR / f"dmn_audit_{date_str}.jsonl"
+        auditor    = DMNAuditor(genome_symbols)
+        audit      = auditor.audit(result, candidates)
+        result["audit"] = audit
+
+        with open(audit_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(audit) + "\n")
+
+        if audit["passed"]:
+            print("[DMN AUDIT] All checks passed.")
+        else:
+            print(f"[DMN AUDIT] *** FAILED — {len(audit['flags'])} flag(s): "
+                  f"{', '.join(audit['flags'])} ***")
+            for flag in audit["flags"]:
+                note = audit["checks"][flag].get("note", "")
+                print(f"[DMN AUDIT]   {flag}: {note}")
+
         return result
