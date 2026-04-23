@@ -1120,32 +1120,28 @@ function buildDigest() {
   return chunks;
 }
 
-// Generation counter — incremented on every start/stop.
-// Each speakChunks callback carries the gen it was born into.
-// If gen no longer matches _speakGen, the chain is stale and exits.
-let _speakGen = 0;
+// Speech queue — the only utterance ever in-flight is the one currently
+// being spoken. stopSpeak() empties _speakQueue so any stale onend callback
+// finds nothing and exits, preventing overlap even on Safari's buggy cancel().
+let _speakQueue = [];   // { text, statusText }[]
+let _speakToken = 0;    // incremented on every start/stop; callbacks check this
 
-function speakChunks(chunks, idx, gen) {
-  // Stale chain from a previous run — bail out silently
-  if (gen !== _speakGen) return;
-
-  if (!_speaking || idx >= chunks.length) {
-    stopSpeak();
+function _drainQueue(token) {
+  if (token !== _speakToken || !_speaking || !_speakQueue.length) {
+    if (!_speakQueue.length && _speaking) stopSpeak();
     return;
   }
-  const section = idx === 0 ? 'state' :
-    idx <= (_loadedObligs || []).filter(o => o.status !== 'resolved').length * 2 ? 'obligations' :
-    idx <= (_loadedProjects.length * 1 + 2) ? 'nodes' : 'symbols';
-  document.getElementById('speak-status').textContent =
-    `${idx + 1} / ${chunks.length}  ·  ${section}`;
+  const item = _speakQueue.shift();
+  document.getElementById('speak-status').textContent = item.statusText;
 
-  const u = new SpeechSynthesisUtterance(chunks[idx]);
+  const u = new SpeechSynthesisUtterance(item.text);
   const voice = _getVoice();
   if (voice) u.voice = voice;
   u.rate  = _getRate();
   u.pitch = 1.0;
-  u.onend   = () => speakChunks(chunks, idx + 1, gen);
-  u.onerror = () => speakChunks(chunks, idx + 1, gen);
+  const next = () => _drainQueue(token);
+  u.onend   = next;
+  u.onerror = next;
   window.speechSynthesis.speak(u);
 }
 
@@ -1293,28 +1289,40 @@ function startSpeak() {
     alert('Speech synthesis not available in this browser.');
     return;
   }
-  // Cancel any in-flight speech and invalidate stale callbacks
+  // Stop everything and wipe the queue before rebuilding it.
+  // Clearing _speakQueue here means any onend callback still in flight from the
+  // previous session finds an empty queue and exits without speaking.
+  _speakToken++;
   _speaking = false;
-  _speakGen++;
+  _speakQueue = [];
+  clearInterval(_resumeInterval);
   window.speechSynthesis.cancel();
 
-  const thisGen = _speakGen;
-  const chunks  = buildDigest();
+  const token  = _speakToken;
+  const chunks = buildDigest();
   if (!chunks.length) {
     document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
     return;
   }
+
+  const openCount = (_loadedObligs || []).filter(o => o.status !== 'resolved').length;
+  _speakQueue = chunks.map((text, i) => ({
+    text,
+    statusText: `${i + 1} / ${chunks.length}  ·  ${
+      i === 0                              ? 'state'       :
+      i <= openCount * 2                   ? 'obligations' :
+      i <= openCount * 2 + (_loadedProjects.length + 1) ? 'nodes' : 'symbols'
+    }`,
+  }));
 
   _speaking = true;
   const btn = document.getElementById('speak-btn');
   btn.textContent = '■ STOP';
   btn.classList.add('speaking');
 
-  // iOS Safari requires speechSynthesis.speak() to be called synchronously
-  // within the user gesture handler — Promise chains and setTimeout break it.
-  // Fire the audio unlock in parallel (Bluetooth routing) but don't wait for it.
+  // iOS Safari: speak() must be called synchronously within the user gesture.
   _unlockAudio();
-  speakChunks(chunks, 0, thisGen);
+  _drainQueue(token);
 
   // iOS Safari silently pauses speechSynthesis after ~15s and never resumes.
   _resumeInterval = setInterval(() => {
@@ -1323,8 +1331,9 @@ function startSpeak() {
 }
 
 function stopSpeak() {
-  _speakGen++;          // invalidate any callbacks still in flight
+  _speakToken++;        // invalidate any _drainQueue callbacks still in flight
   _speaking = false;
+  _speakQueue = [];     // empty queue — stale onend callbacks find nothing to speak
   clearInterval(_resumeInterval); _resumeInterval = null;
   window.speechSynthesis.cancel();
   const btn = document.getElementById('speak-btn');
