@@ -75,7 +75,11 @@ python3 backfill.py                    # process Tamura archive
 ```
 
 Rollback a self-modification: `python3 -c "from self_engineer import rollback; rollback('filename.py')"`  
-`ANTHROPIC_API_KEY` is in `~/.zshrc`. Keep Mac awake: `sudo pmset -a sleep 0 disksleep 0`
+`ANTHROPIC_API_KEY` is in `~/.zshrc`.  
+**Keep Mac awake**: `start_freed.sh` wraps the daemon in `caffeinate -i` — sleep prevention lives and dies with the process. Use `start_freed.sh` not `freed.py` directly.
+```bash
+cd ~/FREED && source ~/.zshrc && bash start_freed.sh
+```
 
 ---
 
@@ -92,6 +96,9 @@ Rollback a self-modification: `python3 -c "from self_engineer import rollback; r
 - **knowledge_graph singleton** — `get_graph()` loaded once per process, flushed after each write.
 - **consolidate.py prompt capping** — compress capped at 500 chars, invariants list capped at 15 in renorm calls (prevents runaway latency on large nodes).
 - **Wall-clock timeout** — `_api_call()` in consolidate.py wraps `messages.create()` in daemon thread, 120s wall-clock timeout. Fixes httpx per-byte timeout blind spot.
+- **graph._ensure_loaded() required** — KnowledgeGraph singleton is created empty and loads from file only on first method call via `_ensure_loaded()`. Any code accessing `graph._node_edges` or `graph._edges` directly must call `graph._ensure_loaded()` first. Bug in dmn.py caused 0 edges — fixed Apr 2026.
+- **TTS speech queue** — site_builder.py uses an explicit JS-side `_speakQueue[]` + `_speakToken` counter. `stopSpeak()` increments token and empties queue; stale `onend` callbacks abandon immediately. Safari `cancel()` doesn't synchronously stop mid-utterance so the old recursive-chain approach caused overlapping voices. Do not revert to recursive chain.
+- **caffeinate -i in start_freed.sh** — daemon sleep prevention tied to process lifetime. `pmset` changes alone didn't work (screen saver still ran). The correct fix is `exec caffeinate -i python3 -u freed.py "$@"` in start_freed.sh.
 
 ---
 
@@ -113,6 +120,16 @@ SACRED = {
 ```
 
 Safety pipeline: MODIFIABLE check → SACRED check → `ast.parse()` syntax check → `.bak` backup → write → subprocess import check → restore on failure.
+
+---
+
+## docs/dashboard.html — Operator working memory aid
+
+New page (Apr 2026). Live at `wellposedness.github.io/FREED/dashboard.html`. NOT SACRED — site_builder.py does not touch it.
+
+- Dark terminal aesthetic. Fetches `state.json`, `status.json`, `obligations.json` via `fetch()`.
+- Daemon status indicator: green (< 1hr), amber (< 12hr), grey (older) based on status.json timestamp.
+- Shows: three project cards, daemon state panel (gen/coherence/hygiene), 11-component module map with SACRED/MOD tags, 5-item engineering priority queue, open+partial obligations list (DMN-sourced shown in blue).
 
 ---
 
