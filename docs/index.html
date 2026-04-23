@@ -852,7 +852,6 @@ function renderCycles(cycles) {
 // ── Speak digest ─────────────────────────────────────────────────────────────
 
 let _speaking = false;
-let _resumeInterval = null;
 let _loadedState = null, _loadedObligs = null, _loadedProjects = [], _loadedSymbols = null;
 
 function cleanText(s) {
@@ -909,28 +908,32 @@ function buildDigest() {
   return chunks;
 }
 
-// Speech queue — the only utterance ever in-flight is the one currently
-// being spoken. stopSpeak() empties _speakQueue so any stale onend callback
-// finds nothing and exits, preventing overlap even on Safari's buggy cancel().
-let _speakQueue = [];   // { text, statusText }[]
-let _speakToken = 0;    // incremented on every start/stop; callbacks check this
+// Generation counter — incremented on every start/stop.
+// Each speakChunks callback carries the gen it was born into.
+// If gen no longer matches _speakGen, the chain is stale and exits.
+let _speakGen = 0;
 
-function _drainQueue(token) {
-  if (token !== _speakToken || !_speaking || !_speakQueue.length) {
-    if (!_speakQueue.length && _speaking) stopSpeak();
+function speakChunks(chunks, idx, gen) {
+  // Stale chain from a previous run — bail out silently
+  if (gen !== _speakGen) return;
+
+  if (!_speaking || idx >= chunks.length) {
+    stopSpeak();
     return;
   }
-  const item = _speakQueue.shift();
-  document.getElementById('speak-status').textContent = item.statusText;
+  const section = idx === 0 ? 'state' :
+    idx <= (_loadedObligs || []).filter(o => o.status !== 'resolved').length * 2 ? 'obligations' :
+    idx <= (_loadedProjects.length * 1 + 2) ? 'nodes' : 'symbols';
+  document.getElementById('speak-status').textContent =
+    `${idx + 1} / ${chunks.length}  ·  ${section}`;
 
-  const u = new SpeechSynthesisUtterance(item.text);
+  const u = new SpeechSynthesisUtterance(chunks[idx]);
   const voice = _getVoice();
   if (voice) u.voice = voice;
   u.rate  = _getRate();
   u.pitch = 1.0;
-  const next = () => _drainQueue(token);
-  u.onend   = next;
-  u.onerror = next;
+  u.onend   = () => speakChunks(chunks, idx + 1, gen);
+  u.onerror = () => speakChunks(chunks, idx + 1, gen);
   window.speechSynthesis.speak(u);
 }
 
@@ -1032,14 +1035,13 @@ function _getRate() {
 }
 
 function speakWithVoice(voiceKey) {
-  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids').
-  // These voices don't exist on iOS — fall back to default voice so the button
-  // still triggers speech on mobile rather than silently doing nothing.
+  // voiceKey is the macOS system name (e.g. 'Fred', 'Trinoids')
   const voice = _voices.find(v => v.name === voiceKey)
              || _voices.find(v => v.name.toLowerCase().includes(voiceKey.toLowerCase()));
+  if (!voice) return;
   stopSpeak();
-  _charVoiceOverride = voice ? voice.name : null;
-  if (voice) localStorage.setItem('freed_voice', voice.name);
+  _charVoiceOverride = voice.name;
+  localStorage.setItem('freed_voice', voice.name);
   document.querySelectorAll('.char-btn').forEach(b => {
     b.classList.toggle('char-active', b.dataset.voice === voiceKey);
   });
@@ -1078,52 +1080,30 @@ function startSpeak() {
     alert('Speech synthesis not available in this browser.');
     return;
   }
-  // Stop everything and wipe the queue before rebuilding it.
-  // Clearing _speakQueue here means any onend callback still in flight from the
-  // previous session finds an empty queue and exits without speaking.
-  _speakToken++;
+  // Cancel any in-flight speech and invalidate stale callbacks
   _speaking = false;
-  _speakQueue = [];
-  clearInterval(_resumeInterval);
+  _speakGen++;
   window.speechSynthesis.cancel();
 
-  const token  = _speakToken;
-  const chunks = buildDigest();
+  const thisGen = _speakGen;
+  const chunks  = buildDigest();
   if (!chunks.length) {
     document.getElementById('speak-status').textContent = 'Nothing loaded yet.';
     return;
   }
-
-  const openCount = (_loadedObligs || []).filter(o => o.status !== 'resolved').length;
-  _speakQueue = chunks.map((text, i) => ({
-    text,
-    statusText: `${i + 1} / ${chunks.length}  ·  ${
-      i === 0                              ? 'state'       :
-      i <= openCount * 2                   ? 'obligations' :
-      i <= openCount * 2 + (_loadedProjects.length + 1) ? 'nodes' : 'symbols'
-    }`,
-  }));
 
   _speaking = true;
   const btn = document.getElementById('speak-btn');
   btn.textContent = '■ STOP';
   btn.classList.add('speaking');
 
-  // iOS Safari: speak() must be called synchronously within the user gesture.
-  _unlockAudio();
-  _drainQueue(token);
-
-  // iOS Safari silently pauses speechSynthesis after ~15s and never resumes.
-  _resumeInterval = setInterval(() => {
-    if (_speaking && window.speechSynthesis.paused) window.speechSynthesis.resume();
-  }, 10000);
+  // Small delay after cancel() — mobile browsers need a tick to flush the queue
+  _unlockAudio().then(() => setTimeout(() => speakChunks(chunks, 0, thisGen), 120));
 }
 
 function stopSpeak() {
-  _speakToken++;        // invalidate any _drainQueue callbacks still in flight
+  _speakGen++;          // invalidate any callbacks still in flight
   _speaking = false;
-  _speakQueue = [];     // empty queue — stale onend callbacks find nothing to speak
-  clearInterval(_resumeInterval); _resumeInterval = null;
   window.speechSynthesis.cancel();
   const btn = document.getElementById('speak-btn');
   btn.textContent = '▶ SPEAK DIGEST';

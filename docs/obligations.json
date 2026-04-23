@@ -236,12 +236,12 @@
   },
   {
     "id": "O65",
-    "status": "open",
+    "status": "resolved",
     "statement": "Obligation O65 (auto-detected)",
     "priority": "normal",
-    "progress": "",
+    "progress": " | RESOLVED: O65 is OPEN; the single most tractable next step is: on GloVe-840B embeddings, compute W2 geodesic paths between 50 concept-pair clusters, extract per-step neighbor-entropy (thermality) variance, and fit g_ij via least-squares — one session, one dataset, closes the last gap in L5.",
     "created": "2026-04-17",
-    "resolved": null,
+    "resolved": "2026-04-23",
     "auto": true
   },
   {
@@ -471,6 +471,56 @@
     "priority": "normal",
     "progress": "",
     "created": "2026-04-22",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O89",
+    "status": "open",
+    "statement": "Obligation O89 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O90",
+    "status": "open",
+    "statement": "Obligation O90 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O91",
+    "status": "open",
+    "statement": "Obligation O91 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O92",
+    "status": "open",
+    "statement": "Obligation O92 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
+    "resolved": null,
+    "auto": true
+  },
+  {
+    "id": "O93",
+    "status": "open",
+    "statement": "Obligation O93 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-23",
     "resolved": null,
     "auto": true
   }

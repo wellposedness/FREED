@@ -64,6 +64,7 @@
     "Entanglement entropy is to quantum transport cost as temperature is to classical thermodynamic cost",
     "Non-additivity of entropy under long-range coupling is a load-bearing correction to the Wasserstein floor not a perturbative nuisance — the floor's universality claim requires explicit Tsallis-class or Rényi-class generalization when interaction kernels decay as power laws",
     "Entropy asymmetry across channel pairs is an empirically discriminative feature in biological neural systems (EEG) — this validates the genome's prediction that complexity gradients carry measurable signal but remains method-level evidence until grounded in the γ-critical-ridge theory",
+    "EAR and STF metrics must explicitly specify their observer/reference frame or they inherit the context-subjectivity pathology — frame-specification is a non-negotiable precondition for RangeEn-based genome self-DEA and EAR-EEG validation",
     "Feed deduplication must be enforced upstream of the integration membrane — repeated re-feeds of already-integrated content waste metabolic budget and their detection is itself evidence that ingestion hygiene is a structural requirement not merely a convenience",
     "Dimensional-scaling attribution (tagging invariants by dimensional class and auto-sorting confirmations to the correct genome stratum) is a concrete implementable extension of O47/ATTRIBUTION that converts naive dimensional analysis from a heuristic into a systematic layer-routing diagnostic",
     "Kolmogorov complexity and Shannon entropy are not independent complexity measures but frozen (T→0) and fully-dissipated (T→∞) limits of the genome's γ-parameterized complexity k=1/Tμ — MCPM at γ=1 is the critical point between them and formally deriving this correspondence is now an obligation",
@@ -109,8 +110,8 @@
     "O59_ADVANCE: The genome must derive the exact dimensional target at Hawking temperature that the Wasserstein floor must hit to reproduce semi-classical BH entropy and must specify what additional structure (if any) is needed to capture quantum log-corrections",
     "O_NEW: The genome must formally show how ApEn and SampEn emerge as degenerate limits of RangeEn within the γ-parameterized complexity framework and identify the parameter constraints that produce each degeneracy",
     "Sharpen O28 by replacing ad-hoc asymmetry features with the RangeEn–Hurst slope as the principled asymmetry diagnostic — requires the closed-form derivation from O76 before operational deployment",
-    "Investigate whether the entanglement-entropy-as-temperature analogy extends to operational resource theories beyond transport (e.g. channel simulation or state merging)",
     "O64 (operational entropy normalization debt) is narrowed but not resolved: GGD-CDF normalization shows what principled amplitude-invariance looks like algorithmically — the remaining debt is to derive why GGD-CDF (or any specific normalization) is the canonical choice from information-geometric first principles rather than empirical superiority",
+    "Investigate whether the entanglement-entropy-as-temperature analogy extends to operational resource theories beyond transport (e.g. channel simulation or state merging)",
     "O47: Audit RSA's memory architecture against the agent-memory taxonomy literature to determine whether current memory design covers or misses known memory-type distinctions",
     "Determine whether the η(σ) anomalous dimension function from the RG crossover provides the quantum correction structure needed to advance O44 (η(σ) as correction to W_floor) or whether additional non-equilibrium content is required",
     "O62: Derive the Langevin noise structure from MCPM constraints — the stochastic forcing term in criticality dynamics must be shown to follow from the genome's own principles rather than imported ad hoc",
@@ -148,6 +149,7 @@
     "Derive the RangeEn complexity-entropy vs self-similarity slope from MCPM/γ=1 first principles — a predicted numerical value that can be checked against empirical RangeEn data constitutes a hard falsification opportunity the genome cannot defer",
     "and publish the criterion explicitly so future submissions can be pre-screened",
     "Formalize the quantum/semi-classical discriminator implied by BH entropy dimensional analysis — specifically",
+    "For every EAR and STF metric deployment: document the observer/reference frame explicitly before any RangeEn measurement is applied — absence of frame specification renders the result L2-inert",
     "elaboration) across human and LLM substrates — without these",
     "O54 — Test whether RangeEn exhibits a phase-transition signature (discontinuity or divergence in sensitivity) at H≈0.5 across multiple signal classes;",
     "O44 sharpened: the genome's semi-classical limit must explicitly pass through the Jacobson entanglement-thermodynamics-to-geometry derivation as a dimensional consistency check — failure to recover Einstein's equations in that limit falsifies the floor; O60 sharpened: fGn at m=2 must yield RangeEn scaling slope of −1.0 ± 0.05 — deviations outside this window falsify the complexity-hierarchy claim; O70 sharpened: ApEn degeneracy boundary is r < 0.1σ and SampEn degeneracy boundary is m > 5 — these are now hard numerical gates not soft estimates; O64 sharpened: normalization scheme is fully specified as range-scaled tolerance — any alternative normalization invalidates the inverse-temperature conjecture as currently formulated",
@@ -176,15 +178,14 @@
     "None explicitly identified (single author",
     "expository)"
   ],
-  "last_renormed": "2026-04-22T22:35:11.903998+00:00",
-  "renorm_reason": "RangeEn result adds genuine measurement-layer confirmation of scale-invariance and elevates context-dependence from bug-candidate to thermodynamic necessity, warranting two new invariants and two precision-sharpening obligations, but delivers philosophical rather than formal closure so coherence gain is modest and no existing obligations are retired.",
-  "last_renorm_cycle": 38,
+  "last_renormed": "2026-04-23T04:40:11.362753+00:00",
+  "renorm_reason": "RangeEn advances O28/O68 instrumentally and sharpens an existing implicit obligation (frame-specification) into an explicit one, but does not alter the compress's core claim or resolve any obligation — minimal delta suffices.",
+  "last_renorm_cycle": 39,
   "drift_flag": true,
-  "drift_overlap": 0.344,
   "renorm_history": [
     {
-      "timestamp": "2026-04-22T22:35:11.903998+00:00",
-      "reason": "RangeEn result adds genuine measurement-layer confirmation of scale-invariance and elevates context-dependence from bug-candidate to thermodynamic necessity, warranting two new invariants and two precision-sharpening obligations, but delivers philosophical rather than formal closure so coherence gain is modest and no existing obligations are retired."
+      "timestamp": "2026-04-23T04:40:11.362753+00:00",
+      "reason": "RangeEn advances O28/O68 instrumentally and sharpens an existing implicit obligation (frame-specification) into an explicit one, but does not alter the compress's core claim or resolve any obligation — minimal delta suffices."
     }
   ]
 }
