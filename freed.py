@@ -66,6 +66,7 @@ EST_TOKENS_RESOLVE      = 4000  # resolution queries are deep — more tokens
 EST_TOKENS_TRIAGE       = 800   # Haiku triage — cheap classification pass
 EST_TOKENS_CEREBELLUM   = 200   # per Haiku pre-score call (only fires on ambiguous band)
 EST_TOKENS_DMN          = 8000  # DMN cross-connect + internal-oblige (Opus, once per dead zone)
+EST_TOKENS_COMMIT       = 100   # Haiku commit check — fires on unresolved RESOLVE attempts
 
 # ─── Active hours (local time) ────────────────────────────────────────────────
 ACTIVE_HOUR_START = 6.25   # 6:15am
@@ -146,6 +147,7 @@ class FREEDDaemon:
         self.engineer      = SelfEngineer(api_key=api_key)
         self.cerebellum    = Cerebellum(api_key=api_key)
         self.dmn           = DMNAgent(api_key=api_key)
+        self.haiku_client  = anthropic.Anthropic(api_key=api_key)
         self._dmn_fired_today = False  # prevents DMN from firing more than once per dead zone
 
         # Load or initialize living state
@@ -517,7 +519,7 @@ class FREEDDaemon:
     def _phase_preaudit(self, cycle_log: dict) -> bool:
         """
         Verify genome integrity before doing anything.
-        Seed Integrity Rules 1-4.
+        Seed Integrity Rules 1-4. Also surfaces recent self-engineer audit verdicts.
         """
         print("\n[PRE-AUDIT]", end=" ")
         issues = []
@@ -535,15 +537,67 @@ class FREEDDaemon:
         if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="normal"):
             issues.append("Budget insufficient for a full cycle.")
 
+        # Rumination detection — obligations where last 3+ RESOLVE attempts didn't commit
+        ruminating = []
+        for ob in self.obligations:
+            if ob.get("status") != "open":
+                continue
+            progress = ob.get("progress", "")
+            # Count trailing COMMIT:NO tags
+            entries = [p.strip() for p in progress.split("|") if "COMMIT:" in p]
+            streak = 0
+            for entry in reversed(entries):
+                if "COMMIT:NO" in entry:
+                    streak += 1
+                else:
+                    break
+            if streak >= 3:
+                ruminating.append((ob["id"], streak))
+        if ruminating:
+            print()
+            for ob_id, streak in ruminating:
+                print(f"  [RUMINATION] {ob_id} — {streak} consecutive non-commit attempts")
+
+        # Self-engineer audit verdicts since last cycle
+        mod_log = LOG_DIR / "self_modifications.jsonl"
+        recent_mods = []
+        if mod_log.exists():
+            last_cycle_ts = self.state.get("last_cycle", "")
+            for line in mod_log.read_text(encoding="utf-8").splitlines():
+                try:
+                    entry = json.loads(line)
+                    if entry.get("timestamp", "") > last_cycle_ts:
+                        verdict = entry.get("audit_verdict", "")
+                        if verdict in ("NEUTRAL", "LOOSENS") or entry.get("status") == "audit_reverted":
+                            recent_mods.append(entry)
+                except Exception:
+                    pass
+        if recent_mods:
+            print()
+            for m in recent_mods:
+                verdict  = m.get("audit_verdict", m.get("status", "?"))
+                filename = m.get("file", "?")
+                reason   = m.get("audit_reason", "")
+                ts_short = m.get("timestamp", "")[:19]
+                tag = "⚠ REVERTED" if m.get("status") == "audit_reverted" else f"AUDIT:{verdict}"
+                print(f"  [{tag}] {filename} {ts_short} — {reason}")
+
         if issues:
             for issue in issues:
                 print(f"FAIL — {issue}")
-            cycle_log["phases"]["pre_audit"] = {"status": "FAIL", "issues": issues}
+            cycle_log["phases"]["pre_audit"] = {
+                "status": "FAIL", "issues": issues,
+                "audit_flags": len(recent_mods),
+            }
             return False
 
         print(f"OK — coherence {self.state['coherence']}, "
               f"{len(open_obligs)} open obligations, budget healthy.")
-        cycle_log["phases"]["pre_audit"] = {"status": "OK", "open_obligations": len(open_obligs)}
+        cycle_log["phases"]["pre_audit"] = {
+            "status": "OK",
+            "open_obligations": len(open_obligs),
+            "audit_flags": len(recent_mods),
+        }
         return True
 
     # ── ARCHITECT ────────────────────────────────────────────────────────────
@@ -847,8 +901,30 @@ class FREEDDaemon:
                 paper_url=inp.get("url", ""),
             )
             if eng_report.get("applied"):
-                print(f"[ENGINEER] Self-modification applied: "
+                verdict = eng_report.get("audit_verdict", "")
+                verdict_tag = f" [{verdict}]" if verdict else ""
+                print(f"[ENGINEER] Self-modification applied{verdict_tag}: "
                       f"{eng_report['what'][:80]} → {eng_report['file']}")
+            elif eng_report.get("needs_obligation"):
+                # AUDIT flagged LOOSENS — patch was reverted, create an obligation
+                ob_stmt = eng_report.get("ob_statement", "Review flagged self-engineer patch.")
+                existing_ids = {o["id"] for o in self.obligations}
+                existing_nums = [int(re.search(r'\d+', i).group()) for i in existing_ids
+                                 if re.search(r'\d+', i)]
+                next_num = max(existing_nums) + 1 if existing_nums else 74
+                new_ob = {
+                    "id":        f"O{next_num}",
+                    "status":    "open",
+                    "statement": ob_stmt,
+                    "priority":  "high",
+                    "progress":  "",
+                    "created":   datetime.now(timezone.utc).date().isoformat(),
+                    "resolved":  None,
+                    "source":    "audit",
+                }
+                self.obligations.append(new_ob)
+                self._save_obligations()
+                print(f"[ENGINEER] AUDIT obligation created: {new_ob['id']}")
 
             compress_text = result.get("compress", "")
             if compress_text:
@@ -1071,6 +1147,46 @@ class FREEDDaemon:
             print(f"[OBLIGATE] closes_when generation failed: {e}")
             return ""
 
+    # ── COMMIT signal ────────────────────────────────────────────────────────
+
+    def _commit_check(self, phase: str, summary: str) -> tuple:
+        """
+        Ask Haiku whether a phase produced a genuine state change or cycled
+        without landing. The thermodynamic tax made legible.
+
+        Used only for RESOLVE non-resolutions — the site where rumination
+        (loop running without state change) is most likely and hardest to detect.
+
+        Returns (commit: bool, reason: str).
+        Fails open to True so a broken audit call never silences real work.
+        """
+        prompt = (
+            f"A reasoning daemon just ran its {phase} phase.\n"
+            f"What happened: {summary}\n\n"
+            f"Did this phase produce a genuine state change — did it update "
+            f"something real (graph, obligation status, model), or did it produce "
+            f"output that cycled without landing?\n\n"
+            f"COMMIT: [YES/NO]\n"
+            f"REASON: [≤15 words — what specifically changed or failed to change]"
+        )
+        try:
+            resp = self.haiku_client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=80,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = resp.content[0].text.strip()
+            m_c = re.search(r'COMMIT\s*:\s*(YES|NO)', raw, re.I)
+            m_r = re.search(r'REASON\s*:\s*(.+)', raw, re.I)
+            commit = (m_c.group(1).upper() == "YES") if m_c else True
+            reason = m_r.group(1).strip()[:120] if m_r else raw[:80]
+            self.astrocyte.record_usage(
+                input_tokens=EST_TOKENS_COMMIT, output_tokens=20
+            )
+            return commit, reason
+        except Exception as e:
+            return True, f"commit-check error: {e}"
+
     # ── TRIAGE ───────────────────────────────────────────────────────────────
 
     def _phase_triage(self):
@@ -1289,6 +1405,7 @@ Output only the classification lines, nothing else."""
         print(f"     {compress[:100]}")
 
         resolved = "RESOLVED" in raw.upper()
+        commit   = True  # resolved attempts always commit
         if resolved:
             target["status"]   = "resolved"
             target["resolved"] = datetime.now(timezone.utc).date().isoformat()
@@ -1296,11 +1413,20 @@ Output only the classification lines, nothing else."""
             print(f"  [RESOLVED] {target['id']}")
             voice.obligation_resolved(target["id"])
         else:
-            progress_note = f"[Gen {self.state['generation']}] {compress}"
+            # COMMIT check — did this attempt land, or did the loop run without changing state?
+            commit, commit_reason = self._commit_check(
+                "RESOLVE",
+                f"Obligation {target['id']}: {target['statement'][:80]}. "
+                f"Attempt result: {compress[:120]}. Not resolved.",
+            )
+            commit_tag = f"[COMMIT:{'YES' if commit else 'NO'} — {commit_reason}]"
+            progress_note = f"[Gen {self.state['generation']}] {compress} {commit_tag}"
             target["progress"] = (target.get("progress", "") + " | " + progress_note).strip(" | ")
+            if not commit:
+                print(f"     {commit_tag}")
 
         return {"obligation": target["id"], "resolved": resolved,
-                "compress": compress, "next": next_step}
+                "compress": compress, "next": next_step, "commit": commit}
 
     def _phase_resolve(self, cycle_log: dict):
         """
@@ -1336,6 +1462,7 @@ Output only the classification lines, nothing else."""
         cycle_log["phases"]["resolve"] = {
             "attempts":       len(attempt_results),
             "resolved_count": sum(1 for r in attempt_results if r["resolved"]),
+            "commit_count":   sum(1 for r in attempt_results if r.get("commit", True)),
             "obligations":    [r["obligation"] for r in attempt_results],
         }
 

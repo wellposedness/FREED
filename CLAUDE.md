@@ -212,6 +212,39 @@ Auto-obligations O67–O73 generated from node NEXT fields. O71 (completeness pr
 
 ---
 
+## SESSION 2026-04-24 SUMMARY
+
+### What was built
+
+**Self-engineer truncation guard** (`self_engineer.py` `_apply_patch`): rejects whole-file rewrites for files >400 lines that shrink by >20%. Fires between syntax check and backup. Root cause: model runs out of tokens mid-generation and produces truncated file. Previously wiped `tamura_sweep.py` tail — restored from git d7f0ff3.
+
+**OBLIGATE parser fix** (`freed.py` `_parse_new_obligations`): replaced greedy O-number scan with `NEW_OBLIGATIONS_BEGIN / NEW_OBLIGATIONS_END` block parser. Root cause: L7 naming existing stubs in OBLIGATE analysis ("O80 is an auto-detected placeholder") caused parser to instantiate new stubs for each referenced ID — self-inflating loop. Dry-run confirmed zero false positives against 9 historical entries. Prompt updated to require block format and suppress forward-referencing IDs in reasoning.
+
+**35 null obligations purged** from `FREED_obligations.json`. All matched `^Obligation O\d+ \(auto-detected\)$`. Nothing recoverable — these were parser artifacts, never real obligations. Gaps left intentionally (O46–O107 range reserved). O73, O94, O103 marked resolved (all executed by the cleanup). O105 and O106 statements reconstructed from cycle logs.
+
+**Final obligation table**: 32 entries — 27 resolved / 3 partial / 2 open. Every number means something.
+
+**AUDIT phase** (`self_engineer.py` `_audit_patch`, `_make_diff_summary`): fires after every successful self-engineer patch (after import check, before success log). Single Haiku call sees diff summary only — not full file. Verdicts: TIGHTENS (log + accept), NEUTRAL (log + surface in next PRE-AUDIT), LOOSENS (auto-revert via .bak + generate `source: "audit"` obligation). Fails open to NEUTRAL so audit errors never block valid patches. `audit_verdict` field added to `self_modifications.jsonl`. Wired in freed.py feed loop: `needs_obligation: True` triggers immediate obligation creation.
+
+**COMMIT signal** (`freed.py` `_commit_check`): fires after each RESOLVE non-resolution. Single Haiku call (80 tokens), prompt shows phase + summary only. Appends `[COMMIT:YES/NO — reason]` to obligation progress note. `commit_count` added to resolve phase cycle log. `haiku_client` added to `FREEDDaemon.__init__` (shared, not per-call). Fails open to True.
+
+**Rumination detection** (`freed.py` `_phase_preaudit`): scans open obligations for trailing `COMMIT:NO` streaks. 3+ consecutive non-commits → `[RUMINATION] O105 — N consecutive non-commit attempts` printed at top of next cycle before any FEED runs.
+
+**PRE-AUDIT also surfaces NEUTRAL self-engineer verdicts**: scans `self_modifications.jsonl` for entries newer than `last_cycle` with `audit_verdict == NEUTRAL` or `status == audit_reverted`.
+
+**Dashboard updated**: component map shows AUDIT and COMMIT as sub-entries under self_engineer.py. Achievements section updated with today's work. Honest framing updated.
+
+### Watch for
+
+**Kim test-time compute paper** (Joongwon Kim, "Scaling Test-Time Compute for Agentic Coding", arXiv): shows representation → selection → reuse across multiple iterations before committing. In RSA terms: running the kernel loop N times, selecting the path that commits most cleanly. Freed's Law is the constraint — iterations earn their thermodynamic tax only if they produce a state change a single pass wouldn't. The self-engineer implication: on high-priority obligations, RESOLVE should run multiple representations and select the one that commits, rather than one attempt and stop. **Let this feed through the daemon naturally.** If cerebellum passes it and L7 scores it correctly against O105/O106, the IMPLEMENT signal should fire on `_do_resolve_attempt()` without being pushed. Watch `self_modifications.jsonl`.
+
+### Current genuine open obligations
+
+- **O105**: Audit the 139 `shares_invariant` edges (93% of all node-edges) for degeneracy — partition into at least 3 typed sub-relations so no sub-type exceeds 50% density, or collapse to a single stated axiom and prune. `closes when: shares_invariant sub-types defined and no single sub-type exceeds 50% of node-edges`
+- **O106** (HIGH): Run a causal audit of coherence drift toward 1.000 — identify which invariants or FEED cycles are suppressing variance, introduce one deliberate falsification candidate, confirm coherence returns to ≤0.997. `closes when: coherence confirmed at ≤0.997 after perturbation`
+
+---
+
 ## Active agenda for next session
 
 ### 1. SUBSTRATE-TYPED EVIDENCE (highest priority)

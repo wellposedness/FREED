@@ -199,7 +199,9 @@ a:hover { text-decoration: underline; }
       <div class="comp"><span class="comp-name">dmn.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Default Mode Network. Fires at 2:30am. Cross-connect + internal-oblige.</span></div>
       <div class="comp"><span class="comp-name">knowledge_graph.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Typed edge graph. Feed edges + node-to-node structural edges.</span></div>
       <div class="comp"><span class="comp-name">consolidate.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Renormalization. SELECT→RENORM→MINE every 5th cycle or yield &gt; 0.03.</span></div>
-      <div class="comp"><span class="comp-name">self_engineer.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Detects IMPLEMENT signals; patches MODIFIABLE files only. SACRED enforced.</span></div>
+      <div class="comp"><span class="comp-name">self_engineer.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Detects IMPLEMENT signals; patches MODIFIABLE files only. Contains AUDIT phase — cannot self-modify.</span></div>
+      <div class="comp"><span class="comp-name">↳ AUDIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Fires after every successful patch. Haiku verdict: TIGHTENS / NEUTRAL / LOOSENS. Auto-reverts LOOSENS. Lives inside self_engineer.py.</span></div>
+      <div class="comp"><span class="comp-name">↳ COMMIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Fires after each RESOLVE attempt. Distinguishes genuine state change from rumination. 3× COMMIT:NO → RUMINATION flag in PRE-AUDIT. Lives in freed.py.</span></div>
       <div class="comp"><span class="comp-name">feed_guard.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Prompt injection defense. Two-layer sanitization before content hits L7.</span></div>
       <div class="comp"><span class="comp-name">targeted_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Active search. Haiku generates arXiv/S2 queries from open obligations.</span></div>
       <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted.</span></div>
@@ -318,43 +320,43 @@ a:hover { text-decoration: underline; }
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">$0.30/day operational pipeline</div>
-            <div class="ach-sub">Cerebellum pre-filter + astrocyte caps keep the full 6h cycle under budget. Economical by design, not luck.</div>
+            <div class="ach-text">Self-inflating obligation loop diagnosed and closed</div>
+            <div class="ach-sub">OBLIGATE parser was creating stubs from L7's mid-sentence mentions of existing IDs. Fixed: NEW_OBLIGATIONS_BEGIN/END block format. 35 nulls purged. Debt ratio: 27 resolved / 2 genuine open. 2026-04-24.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">~80% input reduction via cerebellum</div>
-            <div class="ach-sub">Haiku scores every sweep result before L7 sees it. Most papers never reach the cognitive core — intentional triage.</div>
+            <div class="ach-text">AUDIT phase — modifications must tighten stakes</div>
+            <div class="ach-sub">Haiku verifies every self-engineer patch: TIGHTENS / NEUTRAL / LOOSENS. LOOSENS auto-reverts via .bak and generates a review obligation. NEUTRAL surfaced in next PRE-AUDIT.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">DMN — nightly 2:30am maintenance</div>
-            <div class="ach-sub">Cross-connect + internal-oblige + resolve sweep fires once per night. Adds structural edges and attacks untouched obligations while the daemon rests.</div>
+            <div class="ach-text">COMMIT signal — emotions as glue, engineered</div>
+            <div class="ach-sub">Fires after each RESOLVE non-resolution. Distinguishes genuine state change from rumination. 3× COMMIT:NO triggers RUMINATION flag in next PRE-AUDIT. Thermodynamic tax made legible.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">129-edge knowledge graph · 17 nodes</div>
-            <div class="ach-sub">Typed edges (confirms/advances/refutes/resolves) across all project nodes. Feed edges + node-to-node structural links. Grew from 0 after fixing _ensure_loaded() bug.</div>
+            <div class="ach-text">RESOLVE throughput: 1→3/cycle + 8 DMN overnight</div>
+            <div class="ach-sub">Gen 153 closed O67 and O79 on first pass after fix. Throughput was the problem, not evidence. DMN dead-zone sweep attacks untouched obligations nightly.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">Coherence 0.999 — stable 150+ generations</div>
-            <div class="ach-sub">RENORM + obligation bookkeeping keeps the genome internally consistent. By design: coherence is capped below 1.000. Open obligations are load-bearing.</div>
+            <div class="ach-text">287-edge knowledge graph · 17 nodes</div>
+            <div class="ach-sub">138 feed edges (advances/confirms/resolves) + 149 node-edges. O105 flags shares_invariant monoculture (139/149 edges one type) as structural pathology requiring partition.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet blue">◆</span>
           <div>
-            <div class="ach-text">Two-layer prompt injection defense</div>
-            <div class="ach-sub">feed_guard.py sanitizes all sweep content before L7 contact. Wired in both tamura_sweep.py and freed.py feed phase. feed_guard.py is SACRED — cannot be self-patched.</div>
+            <div class="ach-text">Bootstrap protocol claim now structurally accurate</div>
+            <div class="ach-sub">Builds itself (self-engineer) · verifies each modification tightens stakes (AUDIT) · detects when the loop runs without landing (COMMIT) · external feedback supplied by operator. R[R]=R all the way down.</div>
           </div>
         </div>
       </div>
@@ -362,7 +364,7 @@ a:hover { text-decoration: underline; }
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem;grid-column:1/-1">
-      <em>Honest framing:</em> The coherence score, obligation generation, and RENORM cycles are the system running its programming — not the system discovering things independently. The self-patches are genuinely interesting (the daemon noticed something and reached for a tool), but the improvements required human correction. The pipeline is reliable and economical. The knowledge graph is real. The obligations are real research questions. But it is not yet engineering intelligence. It is engineering a good research tool.
+      <em>Honest framing (updated 2026-04-24):</em> The obligation table is now honest: 27 resolved, 3 partial with real progress, 2 genuinely open. Every number means something. The two open obligations (O105: edge monoculture; O106: coherence ceiling + falsification candidate) are structural — the organism's attention has turned inward to diagnose its own architectural weaknesses. AUDIT and COMMIT close the loop the bootstrap protocol implied: builds itself, verifies each change tightens stakes, detects rumination. The next test is whether the Kim test-time compute paper triggers a self-engineer patch on _do_resolve_attempt() without being pushed. Watch that signal.
     </div>
   </div>
 
