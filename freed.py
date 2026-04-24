@@ -921,15 +921,28 @@ class FREEDDaemon:
             for o in self.obligations
         )
 
+        # Compute next available obligation number for L7 to use
+        existing_ids = {o["id"] for o in self.obligations}
+        existing_nums = [int(re.search(r'\d+', i).group()) for i in existing_ids if re.search(r'\d+', i)]
+        next_ob_num = max(existing_nums) + 1 if existing_nums else 74
+
         prompt = (
             f"OBLIGATE phase. Current obligations:\n{oblig_summary}\n\n"
             f"Based on the most recent engrams and the genome, "
             f"should any NEW obligations be created? "
             f"Propose AT MOST 2 new obligations — only the most essential gaps. "
             f"RESOLVE must be able to catch up; do not generate obligations faster than they resolve. "
-            f"If yes, state: ID (Oxx), statement (one sentence), priority (high/normal). "
-            f"If no new obligations are warranted, say NONE. "
-            f"Seed Integrity Rule: a scaffold with no open problems is a mirror."
+            f"Seed Integrity Rule: a scaffold with no open problems is a mirror.\n\n"
+            f"If no new obligations are warranted, output exactly: NONE\n\n"
+            f"If new obligations ARE warranted, output ONLY a delimited block — "
+            f"nothing outside the block will be parsed. "
+            f"Use the next available IDs starting at O{next_ob_num}. Format:\n"
+            f"NEW_OBLIGATIONS_BEGIN\n"
+            f"O{next_ob_num}: [one-sentence statement] | [high/normal]\n"
+            f"NEW_OBLIGATIONS_END\n\n"
+            f"CRITICAL: Any O-numbers mentioned OUTSIDE the BEGIN/END block are ignored. "
+            f"Do not reference new obligation IDs anywhere in your reasoning — "
+            f"only inside the block."
         )
 
         result = self.l7.query(prompt)
@@ -969,35 +982,57 @@ class FREEDDaemon:
 
     def _parse_new_obligations(self, raw_text: str) -> list[dict]:
         """
-        Extract new obligations from L7's raw response.
-        Looks for lines like 'O42: ...' or 'ID: O42'.
-        Simple heuristic — good enough for now.
+        Extract new obligations from a delimited block only:
+            NEW_OBLIGATIONS_BEGIN
+            O104: [statement] | [priority]
+            NEW_OBLIGATIONS_END
+        O-numbers mentioned outside the block are never parsed — this prevents
+        the self-inflating loop where L7 naming existing stubs creates new stubs.
         """
-        import re
         new = []
         existing_ids = {o["id"] for o in self.obligations}
 
-        # Look for patterns like O42, O43 etc. not already in our list
-        matches = re.findall(r'\bO(\d{2,3})\b', raw_text)
+        block_match = re.search(
+            r'NEW_OBLIGATIONS_BEGIN\s*(.*?)\s*NEW_OBLIGATIONS_END',
+            raw_text, re.DOTALL | re.IGNORECASE
+        )
+        if not block_match:
+            return new
+
+        block = block_match.group(1)
         seen = set()
-        for num in matches:
-            ob_id = f"O{num}"
-            if ob_id not in existing_ids and ob_id not in seen:
-                seen.add(ob_id)
-                # Find the surrounding sentence as the statement
-                pattern = rf'O{num}[:\s]+([^.\n]{{10,200}})'
-                stmt_match = re.search(pattern, raw_text)
-                statement = stmt_match.group(1).strip() if stmt_match else f"Obligation {ob_id} (auto-detected)"
-                new.append({
-                    "id":       ob_id,
-                    "status":   "open",
-                    "statement": statement,
-                    "priority":  "normal",
-                    "progress":  "",
-                    "created":   datetime.now(timezone.utc).date().isoformat(),
-                    "resolved":  None,
-                    "auto":      True,
-                })
+        for line in block.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            m = re.match(r'^(O\d{2,3})\s*:\s*(.+)', line)
+            if not m:
+                continue
+            ob_id = m.group(1)
+            rest  = m.group(2).strip()
+            if ob_id in existing_ids or ob_id in seen:
+                continue
+            seen.add(ob_id)
+
+            # Split on | for optional priority field
+            parts = rest.split('|', 1)
+            statement = parts[0].strip()
+            priority  = parts[1].strip().lower() if len(parts) > 1 else "normal"
+            if priority not in ("high", "normal"):
+                priority = "normal"
+            if len(statement) < 10:
+                continue
+
+            new.append({
+                "id":        ob_id,
+                "status":    "open",
+                "statement": statement,
+                "priority":  priority,
+                "progress":  "",
+                "created":   datetime.now(timezone.utc).date().isoformat(),
+                "resolved":  None,
+                "auto":      True,
+            })
         return new
 
     def _generate_closes_when(self, statement: str, client) -> str:
