@@ -104,6 +104,23 @@ a:hover { text-decoration: underline; }
 /* ── Footer ── */
 .footer { font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; display: flex; justify-content: space-between; }
 
+/* ── Achievements ── */
+.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.ach-col { }
+.ach-heading { font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+.ach-heading.green { color: var(--green); border-color: var(--green); }
+.ach-heading.blue  { color: #60a5fa;     border-color: #1d4ed8; }
+.ach-heading.muted { color: var(--muted); }
+.ach-item { display: flex; gap: 0.5rem; padding: 0.22rem 0; align-items: baseline; }
+.ach-bullet { font-size: 0.62rem; flex-shrink: 0; }
+.ach-bullet.green { color: var(--green); }
+.ach-bullet.blue  { color: #60a5fa; }
+.ach-text { font-size: 0.68rem; color: var(--text); line-height: 1.5; }
+.ach-sub  { font-size: 0.61rem; color: var(--dim); margin-top: 0.05rem; }
+.ach-honest { font-size: 0.68rem; color: var(--dim); line-height: 1.7; padding: 0.5rem 0.75rem; border-left: 2px solid var(--border); margin-top: 0.4rem; }
+.ach-honest em { color: var(--muted); font-style: normal; }
+@media (max-width: 900px) { .ach-grid { grid-template-columns: 1fr; } }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -176,7 +193,7 @@ a:hover { text-decoration: underline; }
     <div class="panel">
       <div class="panel-label">Component Map</div>
       <div class="comp"><span class="comp-name">freed.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Main daemon loop. Orchestrates all phases. Never auto-patched.</span></div>
-      <div class="comp"><span class="comp-name">l7_agent.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Cognitive core. Claude Opus 4.6. Engram retrieval. max_tokens 2048.</span></div>
+      <div class="comp"><span class="comp-name">l7_agent.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Cognitive core. Claude Sonnet 4.6. Engram retrieval. max_tokens 2048.</span></div>
       <div class="comp"><span class="comp-name">astrocyte.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Token budget governor. 100k in / 40k out daily. Blocks over-spend.</span></div>
       <div class="comp"><span class="comp-name">cerebellum.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Input gate. Scores sweep results; drops low-relevance inputs before L7.</span></div>
       <div class="comp"><span class="comp-name">dmn.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Default Mode Network. Fires at 2:30am. Cross-connect + internal-oblige.</span></div>
@@ -201,29 +218,29 @@ a:hover { text-decoration: underline; }
           <div class="agenda-note">Add methodology_type field (theoretical / computational / experimental / physical). Classify by URL domain + title keywords. Surface type_diversity per invariant in consolidate.py.</div>
         </div>
       </div>
+      <div class="agenda-item" style="opacity:0.5">
+        <span class="agenda-num" style="color:var(--green)">✓</span>
+        <div>
+          <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Explicit resolution criteria on obligations</div>
+          <div class="agenda-note">closes_when field added at creation time via Haiku in _phase_obligate. ≤20 words enforced. DONE.</div>
+        </div>
+      </div>
+      <div class="agenda-item" style="opacity:0.5">
+        <span class="agenda-num" style="color:var(--green)">✓</span>
+        <div>
+          <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Wire links_queue.json into daemon cycle</div>
+          <div class="agenda-note">_drain_links_queue() added to _phase_sweep. MAX_QUEUE_DRAIN=1, human-first sort, marks fed_to_daemon. DONE.</div>
+        </div>
+      </div>
       <div class="agenda-item">
         <span class="agenda-num">2</span>
         <div>
-          <div class="agenda-text">Explicit resolution criteria on obligations</div>
-          <div class="agenda-note">Add resolution_criterion field at creation time (second Haiku call in _phase_obligate). Backfill O28, O34, O44. Display "CLOSES WHEN:" in site obligation cards.</div>
+          <div class="agenda-text">Recover 109 skipped papers</div>
+          <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
         </div>
       </div>
       <div class="agenda-item">
         <span class="agenda-num">3</span>
-        <div>
-          <div class="agenda-text">Wire links_queue.json into daemon cycle</div>
-          <div class="agenda-note">Drain MAX_QUEUE_DRAIN=1 human-submitted paper per cycle in _phase_sweep. Mark entry fed_to_daemon after fetch. 165 papers queued waiting.</div>
-        </div>
-      </div>
-      <div class="agenda-item">
-        <span class="agenda-num">4</span>
-        <div>
-          <div class="agenda-text">Recover 109 skipped papers</div>
-          <div class="agenda-note">links_queue.json has 109 status:"skipped" entries with dead Scholar URLs. Script: extract title → Semantic Scholar search → re-queue if &gt;80% word match.</div>
-        </div>
-      </div>
-      <div class="agenda-item">
-        <span class="agenda-num">5</span>
         <div>
           <div class="agenda-text">Daemon proposes experiments (stretch)</div>
           <div class="agenda-note">After failed RESOLVE attempt, Haiku generates one actionable Python/Claude API experiment. Store as ob.experiment_proposal. Display on site.</div>
@@ -243,6 +260,110 @@ a:hover { text-decoration: underline; }
       </div>
     </div>
 
+  </div>
+
+  <!-- ── ACHIEVEMENTS ── -->
+  <div class="panel">
+    <div class="panel-label">System Achievements — Honest Accounting</div>
+    <div class="ach-grid">
+
+      <div class="ach-col">
+        <div class="ach-heading green">Autonomous Behaviors</div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">Self-patched tamura_sweep.py</div>
+            <div class="ach-sub">Added RangeEn metrics + NonHermitianEntropyScorer unprompted. (Also introduced truncation bug — fixed by adding guard to self_engineer.py.)</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">Internal obligation generation</div>
+            <div class="ach-sub">O67–O73 auto-generated from project node NEXT fields via Haiku. New papers produce new obligations without operator input.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">DRIFT flagging</div>
+            <div class="ach-sub">Detects coherence drops and labels cycle output. Fires without operator prompting.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">Quiescence on budget zero</div>
+            <div class="ach-sub">Astrocyte blocks L7/Haiku calls when daily cap depleted. Daemon idles politely rather than erroring.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">GitHub Pages auto-publish</div>
+            <div class="ach-sub">Every PUBLISH phase commits and pushes docs/ without operator intervention. Site is always current at end of each cycle.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">Cerebellum paper dropping</div>
+            <div class="ach-sub">Cerebellum independently rejects low-relevance sweep results before they consume L7 tokens. Drop decision is autonomous at runtime.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ach-col">
+        <div class="ach-heading blue">Deliberately Engineered</div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">$0.30/day operational pipeline</div>
+            <div class="ach-sub">Cerebellum pre-filter + astrocyte caps keep the full 6h cycle under budget. Economical by design, not luck.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">~80% input reduction via cerebellum</div>
+            <div class="ach-sub">Haiku scores every sweep result before L7 sees it. Most papers never reach the cognitive core — intentional triage.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">DMN — nightly 2:30am maintenance</div>
+            <div class="ach-sub">Cross-connect + internal-oblige + resolve sweep fires once per night. Adds structural edges and attacks untouched obligations while the daemon rests.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">129-edge knowledge graph · 17 nodes</div>
+            <div class="ach-sub">Typed edges (confirms/advances/refutes/resolves) across all project nodes. Feed edges + node-to-node structural links. Grew from 0 after fixing _ensure_loaded() bug.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">Coherence 0.999 — stable 150+ generations</div>
+            <div class="ach-sub">RENORM + obligation bookkeeping keeps the genome internally consistent. By design: coherence is capped below 1.000. Open obligations are load-bearing.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet blue">◆</span>
+          <div>
+            <div class="ach-text">Two-layer prompt injection defense</div>
+            <div class="ach-sub">feed_guard.py sanitizes all sweep content before L7 contact. Wired in both tamura_sweep.py and freed.py feed phase. feed_guard.py is SACRED — cannot be self-patched.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ach-honest" style="margin-top:0.8rem;grid-column:1/-1">
+      <em>Honest framing:</em> The coherence score, obligation generation, and RENORM cycles are the system running its programming — not the system discovering things independently. The self-patches are genuinely interesting (the daemon noticed something and reached for a tool), but the improvements required human correction. The pipeline is reliable and economical. The knowledge graph is real. The obligations are real research questions. But it is not yet engineering intelligence. It is engineering a good research tool.
+    </div>
   </div>
 
   <!-- ── FOOTER ── -->

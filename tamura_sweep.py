@@ -14,14 +14,25 @@ The sweep:
   5. Returns structured inputs ready for FEED
 
 Seen URLs are tracked in tamura_seen.json — FREED never feeds the same article twice.
+
+Complexity scoring:
+  - RangeEn (Range Entropy) — a modification of SampEn that normalizes
+    template-matching tolerance by signal range (max−min) rather than
+    standard deviation. More robust under nonstationarity; linear
+    relationship with Hurst exponent. Used for O68: DEA on genome's
+    coherence time-series.
+    Ref: Omidvarnia et al., "Range Entropy: A Bridge between Signal
+    Complexity and Self-Similarity" (Entropy, 2018).
 """
 
 import json
+import math
 import time
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -172,13 +183,267 @@ REQUEST_TIMEOUT = 20    # seconds
 POLITENESS_DELAY = 2.0  # seconds between requests — be a good citizen
 
 
+# ─── RangeEn: Range Entropy ──────────────────────────────────────────────────
+# A modification of ApEn/SampEn that normalizes template-matching tolerance
+# by signal range (max−min) rather than standard deviation. This makes the
+# measure robust to nonstationary amplitude changes and yields a more linear
+# relationship with the Hurst exponent.
+#
+# Used for O68: DEA on genome's coherence time-series.
+#
+# Reference:
+#   Omidvarnia, A., Mesbah, M., Pedersen, M., & Jackson, G. (2018).
+#   "Range Entropy: A Bridge between Signal Complexity and Self-Similarity."
+#   Entropy, 20(12), 962.
+
+def _maxdist(x_i, x_j):
+    # type: (List[float], List[float]) -> float
+    """Chebyshev (L-infinity) distance between two vectors of equal length."""
+    return max(abs(a - b) for a, b in zip(x_i, x_j))
+
+
+def _build_templates(data, m):
+    # type: (List[float], int) -> List[List[float]]
+    """Build length-m template vectors from data using delay embedding."""
+    n = len(data)
+    return [data[i:i + m] for i in range(n - m + 1)]
+
+
+def _signal_range(data):
+    # type: (List[float],) -> float
+    """Compute range (max − min) of a data series."""
+    if not data:
+        return 0.0
+    return max(data) - min(data)
+
+
+def range_entropy(
+    data,          # type: List[float]
+    m=2,           # type: int
+    r=0.3,         # type: float
+    method="sampen" # type: str
+):
+    # type: (...) -> float
+    """
+    Compute Range Entropy (RangeEn) of a time series.
+
+    RangeEn modifies ApEn/SampEn by normalizing the tolerance parameter
+    by the signal range (max − min) instead of standard deviation.
+    This makes the measure more robust to nonstationary amplitude changes
+    and gives a more linear relationship with the Hurst exponent.
+
+    Parameters
+    ----------
+    data : list of float
+        The input time series (coherence scores over time).
+    m : int
+        Embedding dimension (template length). Default: 2.
+    r : float
+        Tolerance fraction (0 < r < 1). The absolute tolerance is
+        r * range(data). Default: 0.3.
+    method : str
+        "sampen" for Range Sample Entropy (RangeSampEn), or
+        "apen" for Range Approximate Entropy (RangeApEn).
+        Default: "sampen".
+
+    Returns
+    -------
+    float
+        The RangeEn value. Higher → more complex/irregular.
+        Returns 0.0 for degenerate inputs (constant signal, too short).
+
+    Notes
+    -----
+    - For a constant signal, range is 0 → returns 0.0 (no complexity).
+    - Minimum data length: m + 2 points.
+    - Pure Python, no external dependencies beyond stdlib.
+    - O(N^2) in data length — fine for FREED's coherence series (typically
+      tens to low hundreds of points per cycle).
+    """
+    n = len(data)
+    if n < m + 2:
+        return 0.0
+
+    sig_range = _signal_range(data)
+    if sig_range == 0.0:
+        # Constant signal — zero complexity
+        return 0.0
+
+    # Absolute tolerance: r fraction of the signal range
+    tol = r * sig_range
+
+    if method == "sampen":
+        return _range_sampen(data, m, tol, n)
+    elif method == "apen":
+        return _range_apen(data, m, tol, n)
+    else:
+        raise ValueError("method must be 'sampen' or 'apen', got: %r" % method)
+
+
+def _range_sampen(data, m, tol, n):
+    # type: (List[float], int, float, int) -> float
+    """
+    Range Sample Entropy — SampEn variant with range-normalized tolerance.
+
+    Counts template matches (excluding self-matches) for dimensions m and m+1,
+    using Chebyshev distance < tol (where tol = r * range).
+    """
+    # Count matches for dimension m
+    templates_m = _build_templates(data, m)
+    nm = len(templates_m)
+    count_m = 0
+
+    for i in range(nm):
+        for j in range(i + 1, nm):
+            if _maxdist(templates_m[i], templates_m[j]) < tol:
+                count_m += 1
+
+    # Count matches for dimension m+1
+    templates_m1 = _build_templates(data, m + 1)
+    nm1 = len(templates_m1)
+    count_m1 = 0
+
+    for i in range(nm1):
+        for j in range(i + 1, nm1):
+            if _maxdist(templates_m1[i], templates_m1[j]) < tol:
+                count_m1 += 1
+
+    # SampEn = -ln(count_m1 / count_m)
+    if count_m == 0 or count_m1 == 0:
+        # No matches — maximum complexity (return a large but finite value)
+        # Convention: use ln(count_m) as fallback, or a sentinel
+        if count_m == 0:
+            return 0.0  # can't compute — degenerate
+        # count_m1 == 0 but count_m > 0 → very high complexity
+        # Use -ln(1 / count_m) = ln(count_m) as a finite upper bound
+        return math.log(float(count_m)) if count_m > 1 else 0.0
+
+    return -math.log(float(count_m1) / float(count_m))
+
+
+def _range_apen(data, m, tol, n):
+    # type: (List[float], int, float, int) -> float
+    """
+    Range Approximate Entropy — ApEn variant with range-normalized tolerance.
+
+    Like ApEn, includes self-matches in the count (avoids log(0)).
+    """
+    def _phi(dim):
+        # type: (int) -> float
+        templates = _build_templates(data, dim)
+        nt = len(templates)
+        if nt == 0:
+            return 0.0
+        total = 0.0
+        for i in range(nt):
+            count_i = 0
+            for j in range(nt):
+                if _maxdist(templates[i], templates[j]) < tol:
+                    count_i += 1
+            # count_i >= 1 always (self-match), so log is safe
+            total += math.log(float(count_i) / float(nt))
+        return total / float(nt)
+
+    phi_m  = _phi(m)
+    phi_m1 = _phi(m + 1)
+
+    return phi_m - phi_m1
+
+
+def sampen_classic(data, m=2, r=0.2):
+    # type: (List[float], int, float) -> float
+    """
+    Classic Sample Entropy (SampEn) with standard-deviation normalization.
+
+    Provided for comparison with RangeEn. The tolerance is r * std(data).
+    """
+    n = len(data)
+    if n < m + 2:
+        return 0.0
+
+    mean = sum(data) / float(n)
+    var = sum((x - mean) ** 2 for x in data) / float(n)
+    std = math.sqrt(var) if var > 0 else 0.0
+
+    if std == 0.0:
+        return 0.0
+
+    tol = r * std
+    return _range_sampen(data, m, tol, n)
+
+
+def coherence_complexity(
+    coherence_series,   # type: List[float]
+    m=2,                # type: int
+    r=0.3,              # type: float
+    method="sampen"     # type: str
+):
+    # type: (...) -> dict
+    """
+    Compute complexity metrics for a coherence time-series.
+
+    Returns both RangeEn and classic SampEn for comparison,
+    plus diagnostic metadata. This is the primary interface for
+    O68: DEA on genome's coherence series.
+
+    Parameters
+    ----------
+    coherence_series : list of float
+        Coherence scores over time (e.g., one per FEED cycle).
+    m : int
+        Embedding dimension. Default: 2.
+    r : float
+        Tolerance fraction for RangeEn. Default: 0.3.
+    method : str
+        "sampen" or "apen" for the RangeEn variant. Default: "sampen".
+
+    Returns
+    -------
+    dict with keys:
+        range_en : float     — RangeEn value (primary metric)
+        sampen   : float     — Classic SampEn for comparison
+        signal_range : float — max−min of the series
+        signal_std   : float — standard deviation of the series
+        n_points     : int   — length of the input series
+        method       : str   — which RangeEn variant was used
+        m            : int   — embedding dimension used
+        r            : float — tolerance fraction used
+    """
+    n = len(coherence_series)
+
+    # Signal statistics
+    sig_range = _signal_range(coherence_series) if n > 0 else 0.0
+    if n > 0:
+        mean = sum(coherence_series) / float(n)
+        var = sum((x - mean) ** 2 for x in coherence_series) / float(n)
+        sig_std = math.sqrt(var) if var > 0 else 0.0
+    else:
+        sig_std = 0.0
+
+    # Compute both entropy measures
+    ren = range_entropy(coherence_series, m=m, r=r, method=method)
+    sen = sampen_classic(coherence_series, m=m, r=0.2)
+
+    return {
+        "range_en":     ren,
+        "sampen":       sen,
+        "signal_range": sig_range,
+        "signal_std":   sig_std,
+        "n_points":     n,
+        "method":       method,
+        "m":            m,
+        "r":            r,
+    }
+
+
 class TamuraSweep:
     """
     Fetches new articles from all configured sources.
     Returns a list of input dicts ready for FREED's FEED phase.
     """
 
-    def __init__(self, max_new_per_source: int = 3):
+    def __init__(self, max_new_per_source=3):
+        # type: (int) -> None
         """
         max_new_per_source: how many new articles to return per source per cycle.
         Keeps FEED bounded — the daemon won't choke on a busy day.
@@ -199,13 +464,15 @@ class TamuraSweep:
         with open(SEEN_FILE, "w") as f:
             json.dump(sorted(self.seen), f, indent=2)
 
-    def _mark_seen(self, url: str):
+    def _mark_seen(self, url):
+        # type: (str) -> None
         self.seen.add(url)
         self._save_seen()
 
     # ── Main entry point ─────────────────────────────────────────────────────
 
-    def sweep(self) -> list[dict]:
+    def sweep(self):
+        # type: () -> list
         """
         Run the full sweep across all sources.
         Returns a flat list of new article dicts for FEED.
@@ -228,7 +495,8 @@ class TamuraSweep:
 
         return all_inputs
 
-    def _sweep_source(self, source: dict) -> list[dict]:
+    def _sweep_source(self, source):
+        # type: (dict) -> list
         """Dispatch to the right parser based on source type."""
         parsers = {
             "lifeboat_author": self._parse_lifeboat_author,
@@ -243,7 +511,8 @@ class TamuraSweep:
 
     # ── Lifeboat author page parser ───────────────────────────────────────────
 
-    def _parse_lifeboat_author(self, source: dict) -> list[dict]:
+    def _parse_lifeboat_author(self, source):
+        # type: (dict) -> list
         """
         Parse an author page on lifeboat.com.
         Extracts article cards: title, URL, excerpt, date.
@@ -290,7 +559,8 @@ class TamuraSweep:
 
         return new_articles
 
-    def _extract_lifeboat_card(self, card, base_url: str):
+    def _extract_lifeboat_card(self, card, base_url):
+        # type: (object, str) -> Optional[dict]
         """Extract title, URL, excerpt, date from one article card."""
         # Title + URL
         link_tag = card.find("a", href=True)
@@ -332,7 +602,8 @@ class TamuraSweep:
             "fetched":  datetime.now(timezone.utc).isoformat(),
         }
 
-    def _fallback_link_extraction(self, soup: BeautifulSoup, base_url: str) -> list:
+    def _fallback_link_extraction(self, soup, base_url):
+        # type: (BeautifulSoup, str) -> list
         """
         When article cards aren't found, extract all blog-post-like links
         and wrap them in minimal dicts so the main loop can still process them.
@@ -355,6 +626,7 @@ class TamuraSweep:
     # ── bioRxiv RSS parser (RDF/RSS 1.0) ─────────────────────────────────────
 
     def _parse_biorxiv_rss(self, source):
+        # type: (dict) -> list
         """
         Parse a bioRxiv subject feed from connect.biorxiv.org.
 
@@ -425,7 +697,8 @@ class TamuraSweep:
 
     # ── arXiv RSS parser ─────────────────────────────────────────────────────
 
-    def _parse_arxiv_rss(self, source: dict) -> list[dict]:
+    def _parse_arxiv_rss(self, source):
+        # type: (dict) -> list
         """
         Parse an arXiv RSS feed.
         Extracts title, abstract, URL, authors.
@@ -573,16 +846,6 @@ class TamuraSweep:
         except requests.RequestException as e:
             print(f"[SWEEP]   Fetch error for {url}: {e}")
             return None
-
-
-# ─── Wire into freed.py ───────────────────────────────────────────────────────
-# Replace _tamura_sweep_placeholder() in freed.py with:
-#
-#   from tamura_sweep import TamuraSweep
-#   self._sweep = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
-#
-# Then in _phase_sweep():
-#   inputs = self._sweep.sweep()
 
 
 # ─── Quick test ───────────────────────────────────────────────────────────────

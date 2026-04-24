@@ -26,7 +26,7 @@ Full theoretical seed: `FREED_genome.md` (v20 canonical, ~35k chars). Core claim
 
 ```
 freed.py            — Main daemon. 6h cycle: PRE-AUDIT → SWEEP → FEED → ENGINEER → CONSOLIDATE → OBLIGATE → RESOLVE → UPDATE → PUBLISH
-l7_agent.py         — Cognitive core. Claude Opus 4.6. Engram bank with semantic (relevance-based) retrieval. max_tokens=2048.
+l7_agent.py         — Cognitive core. Claude Sonnet 4.6. Engram bank with semantic (relevance-based) retrieval. max_tokens=2048.
 astrocyte.py        — Metabolic governor. Daily token budget (100k in / 40k out).
 tamura_sweep.py     — Passive sensory surface. Tamura/Lifeboat + arXiv biophysics RSS feeds.
 targeted_sweep.py   — Active search. Haiku generates arXiv/S2 queries from open obligations. Runs before Tamura.
@@ -65,6 +65,7 @@ FREED_log/self_modifications.jsonl — Every self-modification: applied/failed/r
 ```bash
 cd ~/FREED && source ~/.zshrc
 python3 -u freed.py                     # daemon (MUST use -u: unbuffered stdout)
+python3 -u freed.py --dev               # DEV MODE — bypasses budget caps (use for testing)
 python3 batch_feed.py --n 5            # process 5 links from queue
 python3 batch_feed.py --academic --n 5 # academic only (score >= 6)
 python3 batch_feed.py --stats          # queue status
@@ -72,6 +73,8 @@ python3 targeted_sweep.py              # standalone active search test
 python3 consolidate.py                 # manual renormalization pass
 python3 node_builder.py /path/to.md    # ingest local document
 python3 backfill.py                    # process Tamura archive
+python3 recover_skipped.py             # dry-run: find recoverable skipped papers
+python3 recover_skipped.py --apply     # write recovered URLs back to links_queue.json
 ```
 
 Rollback a self-modification: `python3 -c "from self_engineer import rollback; rollback('filename.py')"`  
@@ -85,6 +88,8 @@ cd ~/FREED && source ~/.zshrc && bash start_freed.sh
 
 ## Key architectural decisions (don't undo)
 
+- **NEVER run `python3 freed.py` for testing** — always use `python3 freed.py --dev`. Direct invocation burns the daemon's operational budget. Dev work during a Claude Code session exhausted the full daily cap on 2026-04-23. The `--dev` flag sets caps to 10M tokens (effectively unlimited) without touching the persisted state in astrocyte_state.json.
+- **Budget lives in `astrocyte_state.json`**, not `FREED_state.json`. To manually reset: zero `used_input_tokens` and `used_output_tokens` in that file. All-time totals (`total_input_tokens`, `total_cost_usd`) are cumulative — never zero those.
 - **No adaptive thinking in L7** — consumes all tokens before producing text.
 - **max_tokens=2048 in L7** — 1024 was too small.
 - **Independence filter in MINE** — `ORIGIN: INDEPENDENT vs SHARED_SOURCE`. Recurrence in text ≠ independent confirmation.
@@ -209,24 +214,25 @@ Auto-obligations O67–O73 generated from node NEXT fields. O71 (completeness pr
 
 ## Active agenda for next session
 
-### 0. FIX KNOWLEDGE GRAPH WIRING (blocks item 1)
-Graph shows no edges despite many FEED cycles. Debug: read `freed.py _phase_feed()` — verify `get_graph().record_feed(feed_result, url, title)` is called. Check if `extract_edges()` regex patterns are too restrictive.  
-Quick test: `python3 -c "from knowledge_graph import get_graph, extract_edges; r={'raw':'This confirms INV_094 and advances O44'}; print(extract_edges(r,'test','test'))"`
-
-### 1. SUBSTRATE-TYPED EVIDENCE (highest priority after graph fix)
+### 1. SUBSTRATE-TYPED EVIDENCE (highest priority)
 Add `methodology_type` field to graph edges: `theoretical / computational / experimental / physical`. Classify by source URL domain + title keywords. Add `type_diversity` score per invariant. Surface in consolidate.py report and site.
 
-### 2. EXPLICIT RESOLUTION CRITERIA ON OBLIGATIONS
-Each new obligation should have a `resolution_criterion` field ("closes when [specific condition]"). Add second Haiku call in `freed.py _phase_obligate()`. Manually backfill O28/O34/O44. Display in site obligation cards as "CLOSES WHEN:".
+### 2. RUN recover_skipped.py
+`recover_skipped.py` is built and ready. Run: `python3 recover_skipped.py` (dry-run), then `python3 recover_skipped.py --apply`. Recovers 109 skipped Scholar URLs via Semantic Scholar title search.
 
-### 3. RECOVER 109 SKIPPED PHONE PAPERS
-`links_queue.json` has 109 entries with `status: "skipped"` — named papers with dead Google Scholar URLs. New script `recover_skipped.py`: extract title from Scholar URL query param → Semantic Scholar title search → if >80% word match, update to `status: "queued"` with real URL. Use `targeted_sweep.py _search_semantic_scholar()` as reference.
-
-### 4. WIRE links_queue.json INTO DAEMON CYCLE
-In `freed.py _phase_sweep()`, after targeted/Tamura, drain `MAX_QUEUE_DRAIN=1` entry from curated queue each cycle. Human-submitted papers first, then score-desc. Mark entry `fed_to_daemon` after fetch.
-
-### 5. DAEMON PROPOSES EXPERIMENTS (stretch)
+### 3. DAEMON PROPOSES EXPERIMENTS (stretch)
 After failed RESOLVE attempt, Haiku generates one concrete actionable experiment for Dave (Python/Claude API, no lab). Store as `ob['experiment_proposal']`, display on site.
+
+### DONE (this session)
+- `closes_when` field added to obligations via Haiku in `_phase_obligate` (≤20 words)
+- `_drain_links_queue()` wired into `_phase_sweep` (MAX_QUEUE_DRAIN=1, human-first)
+- Self-engineer truncation guard (rejects >400-line files that shrink >20%)
+- RESOLVE throughput: 3 active + 8 DMN sweep per night
+- `--dev` flag on freed.py (sets caps to 10M, safe for testing)
+- `recover_skipped.py` script built (Semantic Scholar title search + genome scoring)
+- `astrocyte.py` actual token tracking via `stream.get_final_message().usage`
+- `tamura_sweep.py` truncation restored from git
+- Dashboard achievements section added
 
 ---
 

@@ -32,6 +32,7 @@ from knowledge_graph import get_graph
 from self_engineer   import SelfEngineer
 from cerebellum      import Cerebellum
 from dmn             import DMNAgent
+from batch_feed      import fetch_url
 import voice
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
@@ -41,12 +42,16 @@ OBLIG_FILE      = FREED_DIR / "FREED_obligations.json"
 LOG_DIR         = FREED_DIR / "FREED_log"
 ARCHITECT_FILE  = FREED_DIR / "architect_input.md"
 ARCHITECT_ARCHIVE = LOG_DIR / "architect_inputs"
+LINKS_QUEUE_FILE  = FREED_DIR / "links_queue.json"
+SEEN_FILE         = FREED_DIR / "tamura_seen.json"
 
 # ─── Cycle configuration ──────────────────────────────────────────────────────
 CYCLE_INTERVAL_SECONDS = 6 * 60 * 60   # 6 hours between cycles
 MAX_FEEDS_PER_CYCLE    = 2             # max SWEEP inputs to process per cycle
 MAX_TARGETED_PER_CYCLE = 2             # max targeted-sweep results per cycle
-MAX_RESOLVES_PER_CYCLE = 1             # max obligations to attempt per cycle
+MAX_RESOLVES_PER_CYCLE = 3             # max obligations to attempt per active cycle
+MAX_DMN_RESOLVES       = 8             # max obligations to attempt in DMN dead-zone sweep
+MAX_QUEUE_DRAIN        = 1             # max curated-queue entries per cycle
 YIELD_THRESHOLD        = 0.03          # feed yield above this triggers consolidation
 CONSOLIDATE_EVERY      = 5            # also consolidate every N daemon cycles
 TRIAGE_EVERY           = 10           # classify obligation methods every N cycles
@@ -116,7 +121,7 @@ class FREEDDaemon:
     The FREED daemon. Instantiates L7 and Astrocyte, then runs the main cycle.
     """
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, dev_mode: bool = False):
         print("\n╔══════════════════════════════════════════╗")
         print("║  FREED — Booting                         ║")
         print("║  Freed Recursive Engine                  ║")
@@ -129,6 +134,11 @@ class FREEDDaemon:
 
         # Wire up the organism
         self.astrocyte  = Astrocyte()
+        if dev_mode:
+            # Bypass budget enforcement — dev/test runs must not drain operational budget
+            self.astrocyte.daily_input_cap  = 10_000_000
+            self.astrocyte.daily_output_cap = 10_000_000
+            print("[DEV] Budget caps disabled for this session.")
         self.l7         = L7Agent(api_key=api_key)
         self.sweep_pipe    = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
         self.targeted_sweep = TargetedSweep(api_key=api_key,
@@ -333,6 +343,9 @@ class FREEDDaemon:
                 "error": str(e),
                 "traceback": traceback.format_exc(),
             })
+
+        # Dead-zone resolve sweep — burn through untouched obligations
+        self._dmn_resolve_sweep()
 
     def _git_backup(self):
         """Commit and push all tracked changes to GitHub. Runs once per dead zone after DMN."""
@@ -614,12 +627,71 @@ class FREEDDaemon:
 
     # ── SWEEP ────────────────────────────────────────────────────────────────
 
+    def _drain_links_queue(self) -> list:
+        """
+        Drain up to MAX_QUEUE_DRAIN entries from links_queue.json.
+        Human-submitted entries first, then by score descending.
+        Fetches content and returns sweep-compatible input dicts.
+        Marks drained entries fed_to_daemon; failed entries failed.
+        """
+        if not LINKS_QUEUE_FILE.exists():
+            return []
+
+        with open(LINKS_QUEUE_FILE) as f:
+            queue = json.load(f)
+
+        available = [e for e in queue if e.get("status") == "queued"]
+        available.sort(key=lambda e: (
+            0 if e.get("from") == "human" else 1,
+            -(e.get("score") or 0),
+        ))
+
+        seen = json.loads(SEEN_FILE.read_text()) if SEEN_FILE.exists() else []
+        seen_set = set(seen)
+
+        drained = []
+        for entry in available[:MAX_QUEUE_DRAIN]:
+            url = entry.get("url", "")
+            if not url or url in seen_set:
+                entry["status"] = "skipped_seen"
+                continue
+
+            print(f"[SWEEP] Curated queue: {url}")
+            try:
+                data = fetch_url(url)
+                if data.get("error"):
+                    print(f"[SWEEP] Queue fetch failed: {data['error']}")
+                    entry["status"] = "failed"
+                    continue
+
+                drained.append({
+                    "url":      url,
+                    "title":    data.get("title", entry.get("conv", "")),
+                    "abstract": (data.get("abstract") or data.get("content", ""))[:1500],
+                    "score":    entry.get("score", 5),
+                    "source":   "curated_queue",
+                })
+                entry["status"] = "fed_to_daemon"
+                seen_set.add(url)
+                seen.append(url)
+                SEEN_FILE.write_text(json.dumps(seen))
+
+            except Exception as e:
+                print(f"[SWEEP] Queue fetch error for {url}: {e}")
+                entry["status"] = "failed"
+
+        with open(LINKS_QUEUE_FILE, "w") as f:
+            json.dump(queue, f, indent=2)
+
+        return drained
+
     def _phase_sweep(self, cycle_log: dict):
         """
         Collect new inputs for this cycle.
-        Two sources:
-          1. TargetedSweep — active search driven by open obligations (runs first)
-          2. TamuraSweep   — passive surface: Tamura + arXiv biophysics RSS
+        Three sources:
+          1. TargetedSweep  — active search driven by open obligations (runs first)
+          2. TamuraSweep    — passive surface: Tamura + arXiv biophysics RSS
+          3. Curated queue  — human-submitted links_queue.json entries
 
         Returns (targeted, passive_dedup) separately so _phase_cerebellum can
         bypass targeted inputs (already obligation-driven) and only score passive.
@@ -640,15 +712,25 @@ class FREEDDaemon:
         except Exception as e:
             print(f"[SWEEP] TamuraSweep error: {e}")
 
+        # 3. Curated queue drain — human-submitted links
+        curated = []
+        try:
+            curated = self._drain_links_queue()
+        except Exception as e:
+            print(f"[SWEEP] Queue drain error: {e}")
+
         # Deduplicate passive by URL (targeted already marked seen)
-        seen_urls = {i["url"] for i in targeted}
+        seen_urls = {i["url"] for i in targeted} | {i["url"] for i in curated}
         passive_dedup = [i for i in passive if i["url"] not in seen_urls]
         passive_dedup.sort(key=lambda x: x.get("score", 0), reverse=True)
 
+        # Curated entries go at front of passive (high-priority, human-vetted)
+        passive_dedup = curated + passive_dedup
+
         total = len(targeted) + len(passive_dedup)
         if total:
-            print(f"[SWEEP] {len(targeted)} targeted + {len(passive_dedup)} passive = "
-                  f"{total} input(s) total.")
+            print(f"[SWEEP] {len(targeted)} targeted + {len(passive_dedup)} passive "
+                  f"({len(curated)} curated) = {total} input(s) total.")
         else:
             print("[SWEEP] No new inputs this cycle.")
 
@@ -656,6 +738,7 @@ class FREEDDaemon:
             "input_count": total,
             "targeted":    len(targeted),
             "passive":     len(passive_dedup),
+            "curated":     len(curated),
         }
         return targeted, passive_dedup
 
@@ -741,11 +824,10 @@ class FREEDDaemon:
                 )
 
             result = self.l7.query(prompt)
-            # Record actual token usage
-            # (L7 uses streaming — we estimate; Piece 4 will wire actual usage)
+            _u = result.get("usage", {})
             self.astrocyte.record_usage(
-                input_tokens=EST_TOKENS_FEED,
-                output_tokens=400,
+                input_tokens=_u.get("input_tokens", EST_TOKENS_FEED),
+                output_tokens=_u.get("output_tokens", 400),
             )
 
             # Record typed edges (confirms/advances/refutes) to knowledge graph
@@ -843,19 +925,35 @@ class FREEDDaemon:
             f"OBLIGATE phase. Current obligations:\n{oblig_summary}\n\n"
             f"Based on the most recent engrams and the genome, "
             f"should any NEW obligations be created? "
+            f"Propose AT MOST 2 new obligations — only the most essential gaps. "
+            f"RESOLVE must be able to catch up; do not generate obligations faster than they resolve. "
             f"If yes, state: ID (Oxx), statement (one sentence), priority (high/normal). "
             f"If no new obligations are warranted, say NONE. "
             f"Seed Integrity Rule: a scaffold with no open problems is a mirror."
         )
 
         result = self.l7.query(prompt)
-        self.astrocyte.record_usage(input_tokens=EST_TOKENS_OBLIGATE, output_tokens=200)
+        _u = result.get("usage", {})
+        self.astrocyte.record_usage(
+            input_tokens=_u.get("input_tokens", EST_TOKENS_OBLIGATE),
+            output_tokens=_u.get("output_tokens", 200),
+        )
 
         compress = result.get("compress", "")
         print(f"→ {compress[:100]}")
 
         # Parse new obligations from the response (simple heuristic)
-        new_obligs = self._parse_new_obligations(result.get("raw", ""))
+        new_obligs = self._parse_new_obligations(result.get("raw", ""))[:2]
+
+        # Generate resolution criteria for each new obligation via Haiku
+        if new_obligs:
+            import anthropic as _anthropic
+            _haiku = _anthropic.Anthropic(api_key=self.api_key)
+            for ob in new_obligs:
+                ob["closes_when"] = self._generate_closes_when(ob["statement"], _haiku)
+                if ob["closes_when"] == "MALFORMED":
+                    print(f"[OBLIGATE] {ob['id']} flagged MALFORMED — criterion cannot be stated.")
+
         for ob in new_obligs:
             self.obligations.append(ob)
         if new_obligs:
@@ -901,6 +999,42 @@ class FREEDDaemon:
                     "auto":      True,
                 })
         return new
+
+    def _generate_closes_when(self, statement: str, client) -> str:
+        """
+        Generate a ≤20-word falsifiable resolution criterion via Haiku.
+        Returns 'closes when: <condition>', 'MALFORMED', or '' on failure.
+        """
+        prompt = (
+            "You generate resolution criteria for research obligations in the RSA/FREED framework.\n\n"
+            "Given an obligation statement, produce a single falsifiable closing condition "
+            "in at most 20 words.\n"
+            "Format your entire response as: closes when: [condition]\n\n"
+            "If the statement is too vague or is a placeholder (e.g. contains 'auto-detected'), "
+            "output exactly: MALFORMED\n\n"
+            f"Obligation: {statement}"
+        )
+        try:
+            resp = client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=60,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = resp.content[0].text.strip()
+            if raw == "MALFORMED":
+                return "MALFORMED"
+            # Normalize prefix
+            lower = raw.lower()
+            if lower.startswith("closes when:"):
+                raw = raw[len("closes when:"):].strip()
+            # Enforce 20-word limit
+            words = raw.split()
+            if len(words) > 20:
+                raw = " ".join(words[:20])
+            return "closes when: " + raw
+        except Exception as e:
+            print(f"[OBLIGATE] closes_when generation failed: {e}")
+            return ""
 
     # ── TRIAGE ───────────────────────────────────────────────────────────────
 
@@ -1044,45 +1178,22 @@ Output only the classification lines, nothing else."""
 
     # ── RESOLVE ──────────────────────────────────────────────────────────────
 
-    def _phase_resolve(self, cycle_log: dict):
-        """
-        Attempt to advance the top open obligation.
-        One per cycle. Deep query — high token budget.
-        """
-        print("\n[RESOLVE]", end=" ")
+    def _resolve_rank(self, o):
+        """Rank open obligations for RESOLVE priority. Lower = attempt first."""
+        t = o.get("tractability", 3)
+        p = 0 if o.get("priority") == "high" else 1
+        return (t, p)
 
-        open_obligs = [o for o in self.obligations if o["status"] == "open"]
-        if not open_obligs:
-            print("No open obligations — genome is a mirror (check Rule 4).")
-            cycle_log["phases"]["resolve"] = {"status": "none_open"}
-            return
-
-        if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="high"):
-            print("Skipped — budget.")
-            cycle_log["phases"]["resolve"] = {"status": "skipped"}
-            return
-
-        # Prefer: tractability=1 (closeable now) > high priority > first open
-        # Tractable + high-priority obligations get resolved first
-        def _resolve_rank(o):
-            t = o.get("tractability", 3)
-            p = 0 if o.get("priority") == "high" else 1
-            return (t, p)
-
-        target = min(open_obligs, key=_resolve_rank)
-
-        method = target.get("method", "mixed")
-        tractability = target.get("tractability", 3)
-        print(f"Targeting {target['id']} [{method}/t{tractability}]: {target['statement'][:55]}...")
-
+    def _build_resolve_prompt(self, target):
+        """Build the RESOLVE prompt for a given obligation dict."""
         header = (
             f"RESOLVE: {target['id']}\n"
             f"Statement: {target['statement']}\n"
             f"Current progress: {target.get('progress', 'none')}\n\n"
         )
-
+        method = target.get("method", "mixed")
         if method == "math_only":
-            prompt = header + (
+            return header + (
                 "METHOD: MATHEMATICAL REASONING\n"
                 "This obligation is closeable by formal reasoning alone — no external paper or "
                 "dataset is required. Apply the RSA Kernel as your reasoning scaffold. "
@@ -1094,7 +1205,7 @@ Output only the classification lines, nothing else."""
                 "mathematician would need to supply it."
             )
         elif method == "data_analysis":
-            prompt = header + (
+            return header + (
                 "METHOD: DATA ANALYSIS\n"
                 "This obligation requires analysis of an existing dataset. "
                 "Identify: (1) the exact dataset and its public access URL, "
@@ -1105,7 +1216,7 @@ Output only the classification lines, nothing else."""
                 "If data access is the only blocker, state the exact query to run."
             )
         elif method == "experimental":
-            prompt = header + (
+            return header + (
                 "METHOD: EXPERIMENTAL\n"
                 "This obligation requires new data that does not yet exist. "
                 "Propose ONE concrete experiment the researcher (mail carrier, Olney MD; "
@@ -1115,7 +1226,7 @@ Output only the classification lines, nothing else."""
                 "and what result would falsify the underlying claim."
             )
         else:
-            prompt = header + (
+            return header + (
                 "Apply the RSA Kernel fully. What is the single most tractable next step "
                 "to advance or resolve this obligation? "
                 "Be specific: name a dataset, a computation, a formula, or a proof step. "
@@ -1123,36 +1234,107 @@ Output only the classification lines, nothing else."""
                 "the complete argument."
             )
 
-        result = self.l7.query(prompt)
-        self.astrocyte.record_usage(input_tokens=EST_TOKENS_RESOLVE, output_tokens=600)
+    def _do_resolve_attempt(self, target):
+        """Run one L7 resolve attempt on target obligation. Mutates target in place."""
+        method = target.get("method", "mixed")
+        tractability = target.get("tractability", 3)
+        print(f"  → {target['id']} [{method}/t{tractability}]: {target['statement'][:55]}...")
+
+        result = self.l7.query(self._build_resolve_prompt(target))
+        _u = result.get("usage", {})
+        self.astrocyte.record_usage(
+            input_tokens=_u.get("input_tokens", EST_TOKENS_RESOLVE),
+            output_tokens=_u.get("output_tokens", 600),
+        )
 
         compress  = result.get("compress", "")
         next_step = result.get("next", "")
         raw       = result.get("raw", "")
 
-        print(f"→ {compress[:100]}")
+        print(f"     {compress[:100]}")
 
-        # Check if L7 declared resolution
         resolved = "RESOLVED" in raw.upper()
         if resolved:
             target["status"]   = "resolved"
             target["resolved"] = datetime.now(timezone.utc).date().isoformat()
-            target["progress"] += f" | RESOLVED: {compress}"
-            print(f"[RESOLVE] {target['id']} marked RESOLVED.")
-            voice.obligation_resolved(target['id'])
+            target["progress"] = (target.get("progress", "") + f" | RESOLVED: {compress}").strip(" | ")
+            print(f"  [RESOLVED] {target['id']}")
+            voice.obligation_resolved(target["id"])
         else:
-            # Append progress note
             progress_note = f"[Gen {self.state['generation']}] {compress}"
             target["progress"] = (target.get("progress", "") + " | " + progress_note).strip(" | ")
 
-        self._save_obligations()
+        return {"obligation": target["id"], "resolved": resolved,
+                "compress": compress, "next": next_step}
+
+    def _phase_resolve(self, cycle_log: dict):
+        """
+        Attempt up to MAX_RESOLVES_PER_CYCLE open obligations per cycle.
+        Highest-tractability / highest-priority first.
+        """
+        print("\n[RESOLVE]")
+
+        open_obligs = [o for o in self.obligations if o["status"] == "open"]
+        if not open_obligs:
+            print("  No open obligations — genome is a mirror (check Rule 4).")
+            cycle_log["phases"]["resolve"] = {"status": "none_open"}
+            return
+
+        attempted = set()
+        attempt_results = []
+
+        for _ in range(MAX_RESOLVES_PER_CYCLE):
+            candidates = [o for o in open_obligs if o["id"] not in attempted]
+            if not candidates:
+                break
+            if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="high"):
+                print("  [RESOLVE] Budget exhausted.")
+                break
+
+            target = min(candidates, key=self._resolve_rank)
+            attempted.add(target["id"])
+            attempt_results.append(self._do_resolve_attempt(target))
+
+        if attempt_results:
+            self._save_obligations()
 
         cycle_log["phases"]["resolve"] = {
-            "obligation": target["id"],
-            "resolved":   resolved,
-            "compress":   compress,
-            "next":       next_step,
+            "attempts":       len(attempt_results),
+            "resolved_count": sum(1 for r in attempt_results if r["resolved"]),
+            "obligations":    [r["obligation"] for r in attempt_results],
         }
+
+    def _dmn_resolve_sweep(self):
+        """
+        Dead-zone RESOLVE sweep — works through untouched obligations using idle
+        DMN time. Lower priority than active-cycle RESOLVE; budget-gated.
+        """
+        untouched = [
+            o for o in self.obligations
+            if o["status"] == "open" and not o.get("progress", "").strip()
+        ]
+        if not untouched:
+            print("[DMN] No untouched obligations to sweep.")
+            return
+
+        print(f"[DMN] Resolve sweep: {len(untouched)} untouched obligation(s).")
+        attempted = set()
+
+        for _ in range(MAX_DMN_RESOLVES):
+            candidates = [o for o in untouched if o["id"] not in attempted]
+            if not candidates:
+                break
+            if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="normal"):
+                print("[DMN] Budget exhausted — stopping resolve sweep.")
+                break
+
+            target = min(candidates, key=self._resolve_rank)
+            attempted.add(target["id"])
+            self._do_resolve_attempt(target)
+
+        if attempted:
+            self._save_obligations()
+            print(f"[DMN] Resolve sweep complete — attempted {len(attempted)} obligation(s).")
 
     # ── UPDATE ───────────────────────────────────────────────────────────────
 
@@ -1238,6 +1420,14 @@ def _release_pid_lock():
         pass
 
 if __name__ == "__main__":
+    import argparse as _argparse
+    _parser = _argparse.ArgumentParser(description="FREED daemon")
+    _parser.add_argument(
+        "--dev", action="store_true",
+        help="Dev mode: bypass budget caps so test runs don't drain operational budget"
+    )
+    _args = _parser.parse_args()
+
     _acquire_pid_lock()
     try:
         api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -1245,7 +1435,7 @@ if __name__ == "__main__":
             print("[FREED] ANTHROPIC_API_KEY not set. Add it to ~/.zshrc and source it.")
             import sys; sys.exit(1)
 
-        daemon = FREEDDaemon(api_key=api_key)
+        daemon = FREEDDaemon(api_key=api_key, dev_mode=_args.dev)
         daemon.run()
     finally:
         _release_pid_lock()

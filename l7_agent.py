@@ -16,8 +16,10 @@ Full history is archived to FREED_log/ on disk. It is never sent to the API.
 import os
 import re
 import json
+import math
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple, List, Dict, Any
 import anthropic
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
@@ -71,6 +73,338 @@ Respond in this structure:
 """
 
 
+# ─── Non-Hermitian Entropy Flow Scorer ────────────────────────────────────────
+
+class NonHermitianEntropyScorer:
+    """
+    Computes dS_linear/dt from a density-matrix-like representation of the
+    genome's belief state, using non-Hermitian quantum linear entropy.
+
+    Background (from paper):
+      For an open quantum system with non-Hermitian Hamiltonian H_NH,
+      the density matrix evolves as:
+        dρ/dt = -i(H_NH ρ - ρ H_NH†)
+      The linear entropy is:
+        S_lin = 1 - Tr(ρ²) / (Tr(ρ))²
+      Its time derivative dS_lin/dt signals information flow:
+        dS→0   : frozen regime (γ>1, crystallized belief)
+        dS→∞   : dissipated regime (γ<1, incoherent belief)
+        dS at criticality : γ=1 ridge
+
+    Implementation:
+      The "belief state" is constructed from observable FREED signals:
+      coherence, yield history, debt ratio, obligation counts. These are
+      embedded as diagonal + off-diagonal elements of a density-like matrix.
+      An anti-Hermitian dissipator Γ models information sinks/sources
+      (obligations resolved/created, coherence drift).
+
+      This gives a computationally tractable γ=1 proximity signal that
+      generalizes beyond classical Boltzmann entropy.
+    """
+
+    # Regime classification thresholds
+    FROZEN_THRESHOLD = 1e-6       # |dS/dt| below this → frozen
+    DISSIPATED_THRESHOLD = 2.0    # |dS/dt| above this → dissipated
+    CRITICAL_BAND = (0.01, 0.5)   # sweet spot for γ≈1
+
+    # History window for finite-difference dS/dt
+    MAX_HISTORY = 64
+
+    def __init__(self, dim: int = 4):
+        """
+        Initialize scorer.
+
+        Args:
+            dim: dimension of the belief-state density matrix.
+                 Default 4 corresponds to the four primary FREED signals:
+                 [coherence, yield, debt_ratio, obligation_pressure].
+        """
+        self.dim = dim
+        self._entropy_history = []  # type: List[Tuple[str, float]]
+        self._last_rho = None       # type: Optional[List[List[complex]]]
+
+    # ── Density matrix construction ──────────────────────────────────────
+
+    def _build_belief_density_matrix(
+        self,
+        coherence: float,
+        yield_val: float,
+        debt_ratio: float,
+        obligation_pressure: float,
+    ) -> List[List[complex]]:
+        """
+        Construct a density-matrix-like representation ρ from FREED observables.
+
+        Diagonal elements encode signal magnitudes (populations).
+        Off-diagonal elements encode correlations between signals
+        (coherences in the quantum sense), weighted by geometric means
+        with phase from relative signal gradients.
+
+        The matrix is NOT forced to be Hermitian — the anti-Hermitian
+        component encodes the non-Hermitian dissipator Γ that models
+        information sinks (resolved obligations) and sources (new obligations).
+        """
+        # Clamp inputs to [0, 1] for numerical stability
+        signals = [
+            max(0.0, min(1.0, coherence)),
+            max(0.0, min(1.0, yield_val)),
+            max(0.0, min(1.0, debt_ratio)),
+            max(0.0, min(1.0, obligation_pressure)),
+        ]
+
+        # Ensure trace > 0: if all signals are zero, inject minimal population
+        if sum(signals) < 1e-12:
+            signals = [1e-6] * self.dim
+
+        # Normalize to unit trace for the diagonal
+        trace = sum(signals)
+        diag = [s / trace for s in signals]
+
+        # Build the matrix
+        rho = [[complex(0.0, 0.0) for _ in range(self.dim)] for _ in range(self.dim)]
+
+        # Diagonal: populations
+        for i in range(self.dim):
+            rho[i][i] = complex(diag[i], 0.0)
+
+        # Off-diagonal: coherences from geometric mean of populations
+        # Phase encodes asymmetry (non-Hermitian part = dissipator)
+        for i in range(self.dim):
+            for j in range(i + 1, self.dim):
+                magnitude = math.sqrt(abs(diag[i] * diag[j])) * 0.5
+                # Asymmetric phase: information flows from higher to lower population
+                delta = diag[i] - diag[j]
+                phase = math.atan2(delta, 1.0)  # bounded phase
+
+                # Upper triangle
+                rho[i][j] = complex(
+                    magnitude * math.cos(phase),
+                    magnitude * math.sin(phase)
+                )
+                # Lower triangle: NOT the conjugate → non-Hermitian
+                # The anti-Hermitian component Γ = (H - H†)/2i encodes dissipation
+                dissipation_factor = abs(delta) * 0.3  # scale of Γ
+                rho[j][i] = complex(
+                    magnitude * math.cos(-phase) * (1.0 - dissipation_factor),
+                    magnitude * math.sin(-phase) * (1.0 + dissipation_factor)
+                )
+
+        return rho
+
+    # ── Linear entropy computation ───────────────────────────────────────
+
+    @staticmethod
+    def _mat_multiply(A, B, dim):
+        # type: (List[List[complex]], List[List[complex]], int) -> List[List[complex]]
+        """Multiply two complex matrices."""
+        C = [[complex(0.0, 0.0) for _ in range(dim)] for _ in range(dim)]
+        for i in range(dim):
+            for j in range(dim):
+                s = complex(0.0, 0.0)
+                for k in range(dim):
+                    s += A[i][k] * B[k][j]
+                C[i][j] = s
+        return C
+
+    @staticmethod
+    def _trace(M, dim):
+        # type: (List[List[complex]], int) -> complex
+        """Trace of a complex matrix."""
+        return sum(M[i][i] for i in range(dim))
+
+    def _linear_entropy(self, rho):
+        # type: (List[List[complex]]) -> float
+        """
+        Compute the generalized linear entropy for a (possibly non-Hermitian)
+        density-matrix-like operator:
+
+            S_lin = 1 - Tr(ρ²) / (Tr(ρ))²
+
+        For non-Hermitian ρ, both Tr(ρ) and Tr(ρ²) can be complex.
+        We take the real part, consistent with the paper's treatment of
+        the non-Hermitian linear entropy functional for physical observables.
+        """
+        tr_rho = self._trace(rho, self.dim)
+        tr_rho_sq = self._trace(self._mat_multiply(rho, rho, self.dim), self.dim)
+
+        # Guard against zero trace (fully dissipated system)
+        tr_rho_abs_sq = tr_rho.real ** 2 + tr_rho.imag ** 2
+        if tr_rho_abs_sq < 1e-15:
+            return 1.0  # maximally mixed / fully dissipated
+
+        # S_lin = 1 - Re[Tr(ρ²)] / |Tr(ρ)|²
+        # Using |Tr(ρ)|² in denominator for gauge invariance under
+        # non-Hermitian evolution (paper Eq. 12 generalization)
+        purity = tr_rho_sq.real / tr_rho_abs_sq
+        s_lin = 1.0 - purity
+
+        # Clamp to physical range [0, 1]
+        return max(0.0, min(1.0, s_lin))
+
+    # ── Anti-Hermitian decomposition for diagnostics ─────────────────────
+
+    def _anti_hermitian_norm(self, rho):
+        # type: (List[List[complex]]) -> float
+        """
+        Compute ||Γ|| = ||(ρ - ρ†)/2i||_F  (Frobenius norm of the
+        anti-Hermitian part), which measures the strength of the
+        non-Hermitian dissipator — i.e., the rate of probability
+        sink/source activity.
+        """
+        norm_sq = 0.0
+        for i in range(self.dim):
+            for j in range(self.dim):
+                # (ρ - ρ†)/2i element
+                rho_ij = rho[i][j]
+                rho_ji_dag = complex(rho[j][i].real, -rho[j][i].imag)
+                anti_h = (rho_ij - rho_ji_dag)  # * 1/(2i), but norm is scale-invariant for classification
+                norm_sq += anti_h.real ** 2 + anti_h.imag ** 2
+        return math.sqrt(norm_sq) / (2.0 * self.dim)  # normalized
+
+    # ── Main scoring interface ───────────────────────────────────────────
+
+    def score(
+        self,
+        coherence: float,
+        yield_val: float,
+        debt_ratio: float = 0.0,
+        obligation_pressure: float = 0.5,
+        timestamp: Optional[str] = None,
+    ):
+        # type: (...) -> Dict[str, Any]
+        """
+        Compute the non-Hermitian entropy flow score for current belief state.
+
+        Args:
+            coherence: FREED coherence value (0, 1), never exactly 1.0
+            yield_val: epistemic yield from last query
+            debt_ratio: obligation debt ratio
+            obligation_pressure: fraction of open obligations (0=none, 1=all open)
+            timestamp: ISO timestamp string (optional, for history tracking)
+
+        Returns:
+            Dict with:
+              s_linear:      current linear entropy S_lin ∈ [0,1]
+              ds_dt:         finite-difference dS/dt (None if first sample)
+              gamma_proxy:   γ-criticality proxy ∈ (0, ∞), target = 1.0
+              regime:        "frozen" | "critical" | "dissipated"
+              dissipator_norm: ||Γ|| — strength of non-Hermitian dissipation
+              frozen_flag:   True if approaching dS→0
+              dissipated_flag: True if approaching dS→∞ (or large dS)
+              recommendation: string — what to do
+        """
+        ts = timestamp or datetime.utcnow().isoformat()
+
+        # Build belief density matrix (non-Hermitian)
+        rho = self._build_belief_density_matrix(
+            coherence, yield_val, debt_ratio, obligation_pressure
+        )
+
+        # Compute linear entropy
+        s_lin = self._linear_entropy(rho)
+
+        # Compute dissipator norm
+        gamma_dissipator = self._anti_hermitian_norm(rho)
+
+        # Compute dS/dt via finite difference
+        ds_dt = None  # type: Optional[float]
+        if self._entropy_history:
+            prev_ts, prev_s = self._entropy_history[-1]
+            # Use query index as time unit (dt=1 per query)
+            ds_dt = s_lin - prev_s
+
+        # Store in history
+        self._entropy_history.append((ts, s_lin))
+        if len(self._entropy_history) > self.MAX_HISTORY:
+            self._entropy_history = self._entropy_history[-self.MAX_HISTORY:]
+
+        # Store rho for potential inter-cycle analysis
+        self._last_rho = rho
+
+        # ── Regime classification ────────────────────────────────────────
+        # γ_proxy: maps dS/dt to a criticality parameter
+        # At γ=1 (critical ridge), entropy flow is moderate and sustained
+        if ds_dt is not None:
+            abs_ds = abs(ds_dt)
+            if abs_ds < self.FROZEN_THRESHOLD:
+                regime = "frozen"
+                frozen_flag = True
+                dissipated_flag = False
+                # γ > 1: over-ordered
+                gamma_proxy = 1.0 + (self.FROZEN_THRESHOLD - abs_ds) / self.FROZEN_THRESHOLD
+            elif abs_ds > self.DISSIPATED_THRESHOLD:
+                regime = "dissipated"
+                frozen_flag = False
+                dissipated_flag = True
+                # γ < 1: under-ordered (dissipating)
+                gamma_proxy = max(0.01, 1.0 / (abs_ds / self.DISSIPATED_THRESHOLD))
+            else:
+                regime = "critical"
+                frozen_flag = False
+                dissipated_flag = False
+                # Map the critical band to γ ≈ 1.0
+                # Center of band → γ = 1.0
+                band_center = (self.CRITICAL_BAND[0] + self.CRITICAL_BAND[1]) / 2.0
+                gamma_proxy = 1.0 - 0.3 * (abs_ds - band_center) / band_center
+                gamma_proxy = max(0.5, min(1.5, gamma_proxy))
+        else:
+            # First sample: use static entropy + dissipator as proxy
+            regime = "critical"  # assume critical until we have flow data
+            frozen_flag = (s_lin < 0.01)
+            dissipated_flag = (s_lin > 0.95)
+            gamma_proxy = 1.0 - abs(s_lin - 0.5)  # crude: S=0.5 → γ=1
+
+            if frozen_flag:
+                regime = "frozen"
+            elif dissipated_flag:
+                regime = "dissipated"
+
+        # ── Recommendation ───────────────────────────────────────────────
+        if regime == "frozen":
+            recommendation = (
+                "Entropy flow stalled (dS→0). System approaching crystallized/frozen state. "
+                "Inject perturbation: open new obligations, challenge assumptions, increase input diversity."
+            )
+        elif regime == "dissipated":
+            recommendation = (
+                "Entropy flow excessive (dS→large). System dissipating coherence. "
+                "Tighten constraints: resolve obligations, reinforce genome invariants, reduce noise."
+            )
+        else:
+            recommendation = (
+                "Entropy flow within critical band (γ≈1). System on the critical ridge. "
+                "Maintain current dynamics."
+            )
+
+        # ── Smoothed trend (exponential moving average over history) ─────
+        ema_s = s_lin
+        if len(self._entropy_history) >= 3:
+            alpha = 0.3
+            ema_s = self._entropy_history[0][1]
+            for _, s_val in self._entropy_history[1:]:
+                ema_s = alpha * s_val + (1.0 - alpha) * ema_s
+
+        return {
+            "s_linear": round(s_lin, 6),
+            "ds_dt": round(ds_dt, 6) if ds_dt is not None else None,
+            "gamma_proxy": round(gamma_proxy, 4),
+            "regime": regime,
+            "dissipator_norm": round(gamma_dissipator, 6),
+            "frozen_flag": frozen_flag,
+            "dissipated_flag": dissipated_flag,
+            "s_ema": round(ema_s, 6),
+            "history_len": len(self._entropy_history),
+            "recommendation": recommendation,
+        }
+
+    def reset(self):
+        """Clear entropy history (e.g., on generation boundary)."""
+        self._entropy_history.clear()
+        self._last_rho = None
+
+
+# ─── L7 Agent ─────────────────────────────────────────────────────────────────
+
 class L7Agent:
     """
     Cognitive core of FREED.
@@ -83,7 +417,9 @@ class L7Agent:
         self.query_count = 0
 
         self._load_genome()
+        self.entropy_scorer = NonHermitianEntropyScorer(dim=4)
         print(f"[L7] Online. Genome: {len(self.genome_text):,} chars. Context capped at {GENOME_CAP} chars/query.")
+        print(f"[L7] Non-Hermitian entropy scorer initialized (dim={self.entropy_scorer.dim}).")
 
     # ── Genome ──────────────────────────────────────────────────────────────
 
@@ -113,6 +449,54 @@ class L7Agent:
             lines.append(f"Debt: {s['debt_ratio']}")
         return "\n".join(lines)[:STATE_CAP]
 
+    # ── Extract state signals for entropy scoring ─────────────────────────
+
+    def _extract_state_signals(self):
+        # type: () -> Dict[str, float]
+        """
+        Extract numeric signals from FREED_state.json for the entropy scorer.
+        Returns dict with coherence, debt_ratio, obligation_pressure.
+        """
+        defaults = {
+            "coherence": 0.5,
+            "debt_ratio": 0.0,
+            "obligation_pressure": 0.5,
+        }
+        if not STATE_FILE.exists():
+            return defaults
+        try:
+            s = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return defaults
+
+        coherence = s.get("coherence", 0.5)
+        if isinstance(coherence, str):
+            try:
+                coherence = float(coherence)
+            except (ValueError, TypeError):
+                coherence = 0.5
+
+        debt_ratio = s.get("debt_ratio", 0.0)
+        if isinstance(debt_ratio, str):
+            try:
+                debt_ratio = float(debt_ratio)
+            except (ValueError, TypeError):
+                debt_ratio = 0.0
+
+        # Obligation pressure: estimate from state if available
+        obligation_pressure = s.get("obligation_pressure", 0.5)
+        if isinstance(obligation_pressure, str):
+            try:
+                obligation_pressure = float(obligation_pressure)
+            except (ValueError, TypeError):
+                obligation_pressure = 0.5
+
+        return {
+            "coherence": float(coherence),
+            "debt_ratio": float(debt_ratio),
+            "obligation_pressure": float(obligation_pressure),
+        }
+
     # ── RSA Kernel query ─────────────────────────────────────────────────────
 
     def query(self, prompt: str) -> dict:
@@ -140,6 +524,7 @@ class L7Agent:
         )
 
         result_text = ""
+        actual_input = actual_output = 0
         with self.client.messages.stream(
             model=MODEL,
             max_tokens=2048,
@@ -149,17 +534,38 @@ class L7Agent:
         ) as stream:
             for text in stream.text_stream:
                 result_text += text
+            final_msg    = stream.get_final_message()
+            actual_input = final_msg.usage.input_tokens
+            actual_output = final_msg.usage.output_tokens
 
         parsed              = self._parse_kernel_output(result_text)
         parsed["raw"]       = result_text
         parsed["input"]     = prompt
         parsed["timestamp"] = timestamp
         parsed["query_n"]   = self.query_count
+        parsed["usage"]     = {"input_tokens": actual_input, "output_tokens": actual_output}
 
         # Epistemic yield: compress length / tokens burned (MDL signal)
         compress_len    = len(parsed.get("compress", ""))
         tokens_est      = len(context) // 4 + len(result_text) // 4
         parsed["yield"] = round(compress_len / max(tokens_est, 1), 4)
+
+        # ── Non-Hermitian entropy flow scoring ───────────────────────────
+        state_signals = self._extract_state_signals()
+        entropy_score = self.entropy_scorer.score(
+            coherence=state_signals["coherence"],
+            yield_val=parsed["yield"],
+            debt_ratio=state_signals["debt_ratio"],
+            obligation_pressure=state_signals["obligation_pressure"],
+            timestamp=timestamp,
+        )
+        parsed["entropy_flow"] = entropy_score
+
+        # Log regime warnings
+        if entropy_score["frozen_flag"]:
+            print(f"[L7][ENTROPY] ⚠ FROZEN regime detected: dS/dt={entropy_score['ds_dt']}, γ={entropy_score['gamma_proxy']}")
+        elif entropy_score["dissipated_flag"]:
+            print(f"[L7][ENTROPY] ⚠ DISSIPATED regime detected: dS/dt={entropy_score['ds_dt']}, γ={entropy_score['gamma_proxy']}")
 
         self._log_engram(parsed)
         return parsed
@@ -215,6 +621,16 @@ if __name__ == "__main__":
 
     for step in ["perceive", "represent", "predict", "compare", "adjust", "compress", "next"]:
         print(f"{step.upper():10} {result[step]}")
+
+    # Display entropy flow diagnostics
+    ef = result.get("entropy_flow", {})
+    print(f"\n── Entropy Flow (Non-Hermitian) ──")
+    print(f"  S_linear:       {ef.get('s_linear', '?')}")
+    print(f"  dS/dt:          {ef.get('ds_dt', '(first sample)')}")
+    print(f"  γ_proxy:        {ef.get('gamma_proxy', '?')}")
+    print(f"  Regime:         {ef.get('regime', '?')}")
+    print(f"  ||Γ||:          {ef.get('dissipator_norm', '?')}")
+    print(f"  Recommendation: {ef.get('recommendation', '?')}")
 
     print(f"\nArchived: {LOG_DIR}/freed_{datetime.utcnow().strftime('%Y-%m-%d')}.jsonl")
     print(f"Input:    {INPUT_FILE}")

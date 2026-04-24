@@ -264,6 +264,23 @@ class SelfEngineer:
                        "what": what, "error": str(e), "timestamp": ts})
             return {"failed": True, "reason": f"syntax error: {e}"}
 
+        # Step 1b — truncation guard
+        # If the target is large and the patch shrinks it by >20%, the model
+        # likely ran out of tokens mid-generation. Reject to prevent data loss.
+        original_lines = len(target_path.read_text(encoding="utf-8").splitlines())
+        new_lines = len(new_content.splitlines())
+        if original_lines > 400 and new_lines < original_lines * 0.80:
+            msg = (
+                f"TRUNCATION GUARD: {target_path.name} has {original_lines} lines; "
+                f"patch produces only {new_lines} ({new_lines * 100 // original_lines}%). "
+                f"Whole-file rewrite rejected for files >400 lines — use str_replace patches."
+            )
+            print(f"[ENGINEER]   {msg}")
+            self._log({"status": "truncation_rejected", "file": target_path.name,
+                       "original_lines": original_lines, "new_lines": new_lines,
+                       "what": what, "timestamp": ts})
+            return {"failed": True, "reason": msg}
+
         # Step 2 — backup
         bak_path = target_path.with_suffix(".py.bak")
         shutil.copy2(target_path, bak_path)

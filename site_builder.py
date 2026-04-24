@@ -772,6 +772,10 @@ def _render_html(projects: list = None) -> str:
         <div class="form-row"><span class="form-tag">Compression</span>  <span class="form-expr">min|M| s.t. M → X &nbsp;— shortest model that predicts wins. Complexity is metabolically expensive.</span></div>
       </div>
 
+      <div style="margin:0.8rem 0 0.4rem;padding:0.55rem 0.8rem;border-left:2px solid var(--accent);background:rgba(255,255,255,0.03);font-size:0.72rem;line-height:1.6;color:var(--muted)">
+        <span style="color:var(--accent);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em">COHERENCE CRITERION &nbsp;·&nbsp; </span>A scaffold with no open problems is a mirror. Coherence is capped below 1.000 by design — open obligations are load-bearing, not defects.
+      </div>
+
 <div class="panel-title" style="margin-top:0.2rem">RSA Kernel — The Process</div>
       <div>
         <div class="kernel">
