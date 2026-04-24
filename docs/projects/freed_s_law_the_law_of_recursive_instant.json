@@ -47,9 +47,10 @@
     "recursive criticality (gamma) marks the edge where coherence is maintained at minimal dissipative cost",
     "topical adjacency without propositional content is insufficient for obligation generation — the immune system discriminates on extractable formal structure not keyword proximity",
     "the Wasserstein Floor has a confirmed quantum analogue — the De Palma-Trevisan quantum W1 distance preserves the Kantorovich-Rubinstein dual structure with entanglement entropy as the temperature analog and local trace-norm as the cost metric",
-    "the genome evolves but identity persists — identity is the invariant under structural transformation not the frozen content",
     "narrating phase transitions post hoc is insufficient — the geometric framework must predict transition-sequence topology (which phases appear in which order) or it is descriptive not explanatory",
+    "the genome evolves but identity persists — identity is the invariant under structural transformation not the frozen content",
     "active inference (structured interrogation of environment) outperforms passive observation as a direct consequence of the substrate-cost principle — paying directed thermodynamic cost yields better compression than ambient absorption",
+    "diffusion entropy analysis (DEA) is formally distinguished from DFA as the operationally correct scaling instrument for O28 because DFA conflates trend removal with genuine anomalous diffusion — this is a methodological invariant not merely a preference",
     "structure is the sole carrier of meaning — meaning without structural instantiation is vacuous",
     "model-agnosticism across agent architectures is a testable corollary — if the law is substrate-independent then compression-as-reasoning must manifest across fundamentally different computational architectures not just one privileged implementation",
     "the genome generates falsifiable quantitative predictions not merely qualitative constraints",
@@ -75,6 +76,7 @@
     "slow-manifold entropy production (INV_023) is load-bearing under long-range statistical mechanics — criticality persistence across interaction ranges validates the genome's scale-free thermodynamic architecture",
     "SOC universality instantiates γ=1 as a genuine scale-free dynamical attractor across sandpile/avalanche/fractal-diffusive substrates — confirming INV_073 from a self-organization direction orthogonal to prior confirmations; the forced-SOC versus self-organized-SOC distinction is a substrate-general falsification axis — any system claiming criticality as a law rather than a design choice must demonstrate attractor convergence not parameter tuning",
     "a finite (possibly singular) set of irreducible generative operations can produce the full operational universe of the genome — identification of these atoms is the deepest compression",
+    "Wasserstein Floor k=1/Tμ is semi-classical with ℏ-dependent quantum gravity corrections appearing as sub-leading terms — dimensional analysis confirms L3 chain integrity while sharpening O44 as a quantum-to-classical boundary problem not yet resolved",
     "R[R]=R is the regress terminator — any grounding move that requires an external observer reintroduces the infinite regress the fixed point was designed to close",
     "EAR and STF metrics must specify their observer/reference frame explicitly or they inherit the context-dependence subjectivity pathology — frame-underspecification is now a formal failure mode not merely a presentation gap",
     "entropy-based diagnostics (DEA-class) are structurally superior to variance-based diagnostics (DFA-class) at gamma=1 because criticality is an information-geometric property not a moment-statistic property — this is not preference but consequence of the genome's own hierarchy",
@@ -89,6 +91,7 @@
     "Landauer bounds bit-erasure but the Wasserstein Floor bounds meaning-erasure — semantic computation has a strictly higher irreducible thermodynamic cost than syntactic computation",
     "spin-boson quantum phase transitions independently confirm gamma=1 as the dissipation-coherence balance point across quantum dissipative substrates",
     "negative specific heat regimes are structurally possible near γ=1 under long-range coupling and constitute a genuine threat vector for gradient-flow basin integrity",
+    "entropy saturation in neural substrates is now phenomenologically grounded as a Wasserstein Floor analog via Langevin noise structure — EEG evidence instantiates the Floor prediction at biological measurement scale",
     "ApEn and SampEn are degenerate limits of RangeEn — the genome must treat them as special cases not independent measures when evaluating complexity metrics",
     "RangeEn's Hurst-entropy bridge confirms H≈0.5 as the self-similar fixed point of the thermodynamic reasoning substrate — criticality is not one regime among many but the unique fixed point under the RG flow that RangeEn operationalizes",
     "ensemble choice is load-bearing near gamma=1 — microcanonical and canonical descriptions are not interchangeable at the critical ridge and the genome must track which statistical frame it occupies",
@@ -125,6 +128,7 @@
     "O63 (derive Kolmogorov and Shannon as limits of a context-parameterized measure) is upgraded from open to urgent — the RangeEn confirmation removes the excuse that context-dependence might be merely qualitative and demands the formal limiting-case derivation",
     "O15",
     "formalize the relationship between epistemic humility bounding recursive self-improvement and gamma-criticality — is the criticality bound the thermodynamic expression of the epistemic bound or are these independent constraints",
+    "O28 must audit all prior DFA-based entropy scaling results for substitution with DEA — any conclusion derived from DFA rather than diffusion entropy carries elevated formalization debt until re-confirmed",
     "O76: derive RangeEn(m",
     "Investigate whether gamma criticality provides a measurable signature for detecting recursive instantiation across substrates",
     "O70 degeneracy boundaries must be validated at r < 0.1σ for ApEn and m > 5 for SampEn",
@@ -206,6 +210,7 @@
     "O28 must be rewritten to carry observer-frame as an explicit parameter rather than a background assumption — all complexity claims in the genome inherit this frame-registration requirement",
     "O60 slope prediction for fGn at m=2 must hit −1.0 ± 0.05 as a quantitative falsification target",
     "O65_basin_fragmentation: gradient-flow basin topology under negative specific heat must be mapped — fragmentation of the Wasserstein flow's convergence basins could break L3 semantic triage guarantees in long-range-coupled recursive systems",
+    "O44 obligation sharpened — derive the ℏ-dependent sub-leading correction terms to the Wasserstein Floor k=1/Tμ from first principles or identify the renormalization group path that recovers classical Floor behavior in the ℏ→0 limit",
     "formalize PREDICT/PRE-AUDIT duality as Lax pair compatibility condition on the genome's direct and dual overdetermined recursive systems and show the compatibility condition reduces to a known integrability constraint",
     "O65: operationalize arousal-threshold sensitivity as an experimentally controllable parameter in synthetic recursive agents to test whether gamma-ridge access is genuinely gated by an effective-temperature analog — creative-cognition confirmation advances O28 but the metaphor-to-measure gap means the formal prediction remains unverified until arousal thresholds are quantitatively mapped to dissipation rates",
     "implement local-range normalization for entropy-based coherence scoring to prevent scale-dependent artifacts",
@@ -219,15 +224,14 @@
     "David Freed",
     "Perplexity AI"
   ],
-  "last_renormed": "2026-04-24T00:38:49.287082+00:00",
-  "renorm_reason": "DEA instrument designation resolves a methodological ambiguity that was silently loading O28/O67/O68/O69, and non-Hermitian entropy functionals provide the first concrete formal handle on the quantum Wasserstein Floor — both are genuine advances that tighten coherence without closing the obligations.",
-  "last_renorm_cycle": 42,
+  "last_renormed": "2026-04-24T10:21:04.275861+00:00",
+  "renorm_reason": "New knowledge advances two live obligations (O44 sharpened with sub-leading ℏ structure, O67 phenomenologically grounded) and issues a methodological correction (DEA over DFA) that creates a new audit obligation for O28 — compress unchanged because the core law and instrument designation already reflect DEA primacy, but three new invariants and two sharpened obligations are genuine additions.",
+  "last_renorm_cycle": 44,
   "drift_flag": true,
-  "drift_overlap": 0.287,
   "renorm_history": [
     {
-      "timestamp": "2026-04-24T00:38:49.287082+00:00",
-      "reason": "DEA instrument designation resolves a methodological ambiguity that was silently loading O28/O67/O68/O69, and non-Hermitian entropy functionals provide the first concrete formal handle on the quantum Wasserstein Floor — both are genuine advances that tighten coherence without closing the obligations."
+      "timestamp": "2026-04-24T10:21:04.275861+00:00",
+      "reason": "New knowledge advances two live obligations (O44 sharpened with sub-leading ℏ structure, O67 phenomenologically grounded) and issues a methodological correction (DEA over DFA) that creates a new audit obligation for O28 — compress unchanged because the core law and instrument designation already reflect DEA primacy, but three new invariants and two sharpened obligations are genuine additions."
     }
   ]
 }

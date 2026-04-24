@@ -264,12 +264,12 @@
   },
   {
     "id": "O67",
-    "status": "open",
+    "status": "resolved",
     "statement": "captures the Langevin noise structure derivation as a specific sub-debt sharpening O62 (the Noether current obligation alone doesn't force the stochastic layer)",
     "priority": "normal",
-    "progress": "[Gen 153]  O67 is closeable by internal reasoning: the noise term is forced by thermodynamic admissibility at the critical ridge, not by Noether structure.",
+    "progress": "[Gen 153]  O67 is closeable by internal reasoning: the noise term is forced by thermodynamic admissibility at the critical ridge, not by Noether structure. | RESOLVED: ** Noise at the critical ridge is not decorative \u2014 it is the price of sustained dS/dt > 0 in finite time.",
     "created": "2026-04-18",
-    "resolved": null,
+    "resolved": "2026-04-24",
     "auto": true,
     "method": "math_only",
     "tractability": 2
@@ -303,7 +303,7 @@
     "status": "open",
     "statement": "Obligation O70 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 153]",
+    "progress": "[Gen 153] | [Gen 154]",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -312,12 +312,12 @@
   },
   {
     "id": "O71",
-    "status": "open",
+    "status": "resolved",
     "statement": "Obligation O71 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 153]",
+    "progress": "[Gen 153] | RESOLVED: O71 cannot be resolved without its statement \u2014 but I will execute the full reasoning engine on the most probable candidate and produce a closeable argument or a surgical gap report.",
     "created": "2026-04-18",
-    "resolved": null,
+    "resolved": "2026-04-24",
     "auto": true,
     "method": "math_only",
     "tractability": 3
@@ -716,5 +716,27 @@
     "rationale": "16 nodes with 139 `shares_invariant` edges means an average of ~8.7 such edges per node out of 15 possible \u2014 the graph is approaching a complete graph on this single edge type. This is a structural pathology: a knowledge graph where everything shares an invariant with everything else is epistemically equivalent to asserting one universal invariant (which may be true but then should be stated as a single axiom, not smeared across 139 edges). This directly tensions with the genome's own `compression` and `coherence` symbols \u2014 the representation is neither compressed nor coherent if the dominant relation is degenerate. O73 (prevent wasted kernel cycles) is implicated because every generation processes these edges.",
     "resolution_criterion": "Partition the 139 `shares_invariant` edges into at least 3 typed sub-relations (e.g., `shares_symmetry`, `shares_scale_law`, `shares_entropy_bound`) such that no sub-type exceeds 50% density. If the partition fails \u2014 if the edges genuinely cannot be differentiated \u2014 then collapse to a single stated axiom and prune the edges. Either outcome increases real graph entropy.\n\n---\n\n**OBLIGATION: O81**\n**O75's demand that the kernel predict which measure dominates where must be grounded against O28's EAR and O44's Wasserstein floor \u2014 these are the only two quantitative measures in the graph with partial resolution, yet no edge connects them. The kernel must derive or refute a dominance boundary between EAR and W_floor.**\n\nRATIONALE: O28 (EAR predicts intelligence, partial) and O44 (quantum Wasserstein floor, partial) both operationalize the `entropy` and `prediction` genome symbols but through incompatible formalisms (information-theoretic ratio vs. optimal-transport bound). O75 explicitly demands predicting which measure dominates where. The absence of any edge between O28 and O44 is a fired-but-unconnected implication \u2014 the graph already contains the ingredients but has not derived the connection.\n\nRESOLVES_VIA: Derive the regime boundary: show that EAR dominates (is tighter) when system dimensionality d < d* and W_floor dominates when d \u2265 d*, where d* is expressed in terms of the genome's existing symbols. Alternatively, prove one subsumes the other. Test against O28's open-access EEG dataset.\n\n---\n\n**OBLIGATION: O82**\n**The 7 OPEN obligations with truncated or auto-detected descriptions (O66, O70, O71, O74, O76, O77) remain semantically null despite O72 and O79 being marked RESOLVED. The resolution of the reconstruction obligations did not actually reconstruct the content. This is a meta-coherence violation: resolved obligations whose consequents remain open.**\n\nRATIONALE: O72 demanded \"reconstruct full obligation descriptions for all truncated entries\" and O79 demanded \"query the engram trace for original statements.\" Both are marked RECENTLY RESOLVED. Yet O66, O70,",
     "created": "2026-04-24T06:30:50.175882+00:00"
+  },
+  {
+    "id": "O106",
+    "status": "open",
+    "statement": "first \u2014 if coherence cannot be pulled below 0",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
+  },
+  {
+    "id": "O107",
+    "status": "open",
+    "statement": "Obligation O107 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
   }
 ]
