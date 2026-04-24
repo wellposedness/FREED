@@ -267,7 +267,7 @@
     "status": "open",
     "statement": "captures the Langevin noise structure derivation as a specific sub-debt sharpening O62 (the Noether current obligation alone doesn't force the stochastic layer)",
     "priority": "normal",
-    "progress": "",
+    "progress": "[Gen 153]  O67 is closeable by internal reasoning: the noise term is forced by thermodynamic admissibility at the critical ridge, not by Noether structure.",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -288,12 +288,12 @@
   },
   {
     "id": "O69",
-    "status": "open",
+    "status": "resolved",
     "statement": "\u2014 predict the most likely failure mode before attempting the coefficient derivation, since it is the sharpest new falsification target",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED: O69 is NOT YET RESOLVED but is one concrete step from resolution: write down the co-determination test \u2014 fit T and \u03bc independently on held-out data splits, then check whether k=1/T\u03bc holds out-of-sample; if k varies across splits, the floor is real; if k is constant by construction, it is a tautology.",
     "created": "2026-04-18",
-    "resolved": null,
+    "resolved": "2026-04-24",
     "auto": true,
     "method": "mixed",
     "tractability": 2
@@ -408,12 +408,12 @@
   },
   {
     "id": "O79",
-    "status": "open",
+    "status": "resolved",
     "statement": "reconstruction audit immediately \u2014 query the engram trace for the original statements of O65, O66, O70, O71, O74 before any new FEED cycle begins",
     "priority": "normal",
-    "progress": "[Gen 151] ** The audit succeeds only as rational reconstruction, not true engram recovery.",
+    "progress": "[Gen 151] ** The audit succeeds only as rational reconstruction, not true engram recovery. | RESOLVED:",
     "created": "2026-04-22",
-    "resolved": null,
+    "resolved": "2026-04-24",
     "auto": true,
     "method": "math_only",
     "tractability": 1
@@ -685,5 +685,27 @@
     "created": "2026-04-23",
     "resolved": null,
     "auto": true
+  },
+  {
+    "id": "O103",
+    "status": "open",
+    "statement": "first \u2014 reconstruct or void the null obligations, then run the coherence audit (O104), so the table becomes legible before any further FEED",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
+  },
+  {
+    "id": "O104",
+    "status": "open",
+    "statement": "Obligation O104 (auto-detected)",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
   }
 ]
