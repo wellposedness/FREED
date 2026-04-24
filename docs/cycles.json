@@ -1055,5 +1055,36 @@
       ]
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 2,
+    "generation": 154,
+    "timestamp": "2026-04-24T10:14:59.974654+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 6,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "The paper's dimensional argument confirms the semi-classical status of the Wasserstein Floor k=1/Tμ and sharpens O44 by predicting that quantum gravity corrections would appear as ℏ-dependent sub-leading terms — advances O44, confirms L3 chain, does not resolve."
+      },
+      {
+        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
+        "compress": "This paper advances O67 (Langevin noise structure now phenomenologically grounded in EEG), warns O28 to use diffusion entropy not DFA, and provides empirical support for entropy saturation as a Wasserstein Floor analog in neural substrates."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "obligations": [
+        "O67",
+        "O70",
+        "O71"
+      ]
+    },
+    "coherence": 0.999
   }
 ]
