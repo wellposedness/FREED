@@ -46,6 +46,7 @@
     "INV_099: entropy asymmetry across channel pairs is a clinically discriminative EEG feature capturing non-redundant structure across frequency bands — empirical confirmation that the genome's multi-operator hierarchy is physiologically instantiated",
     "and operationally preferred for EAR-EEG and genome self-DEA contexts due to drift robustness",
     "INV_ONSAGER_MEP: Independent Onsager-derivation confirms MaxEP as ridge-navigation principle (INV_073) and thermodynamic inference correctness (INV_087) — dual confirmation closes the Onsager gap and elevates both invariants to multiply-confirmed status; INV_HIDDENEP: A provably optimal entropy-production estimator for hidden-DOF biological systems is now available",
+    "INV_WASSERSTEIN_QUANTUM_MIXED: The Wasserstein Floor requires a modified formulation under mixed quantum-classical dynamics — non-Hermitian linear entropy functionals resolve O44 partially but open a sub-obligation for a hybrid floor that interpolates between quantum and classical dissipation regimes",
     "non-Lagrangian architectures generate conservation laws via partial kernel-pass (sub-symmetry) Noether operators",
     "γ = 1 criticality as the only viable operating point",
     "recursion generates structure",
@@ -72,6 +73,7 @@
     "R[R]=R recursion implies Darboux-type infinite conservation hierarchies",
     "feed deduplication must be enforced upstream of renormalization to prevent redundant processing cycles",
     "thermodynamic admissibility (INV_094) is load-bearing and confirmed by weak long-range spin criticality",
+    "INV_TRADE_CRITICALITY: Multi-layer trade network entropy peaks exhibiting dS/dt criticality constitute substrate-independent empirical evidence for Freed's Law and MCPM multi-scale non-redundancy — confirming that criticality signatures generalize beyond neural substrates",
     "INV_WFLOOR_SEMICLASS: The Wasserstein Floor k=1/Tμ is confirmed semi-classical; quantum gravity corrections enter as ℏ-dependent sub-leading terms leaving the classical γ=1 ridge intact at leading order",
     "INV_RANGEEN: RangeEn's amplitude-robust Hurst-linear complexity measurement is a scale-invariance-confirming technique consistent with the genome's entropy hierarchy — recoverable as a special case under the same parameter-restriction logic that subsumes ApEn/SampEn",
     "and all complexity measures (entropy",
@@ -92,7 +94,6 @@
   ],
   "obligations": [
     "O60 slope target: −1.0 ± 0.05 for fGn at m=2 (numerical acceptance criterion)",
-    "O44 advances from underspecified to mathematically scaffolded but unproven — non-Hermitian linear entropy functionals now supply the dissipative quantum substrate formal scaffolding; derive explicit proof that the Wasserstein Floor holds over this non-Hermitian dissipative quantum domain",
     "identify concrete RSA sub-symmetries and compute their Noether operator identities",
     "implement dimensional-scaling-class tagging as a concrete addition to the ATTRIBUTION protocol (O47)",
     "O76: derive closed-form RangeEn(m",
@@ -104,8 +105,8 @@
     "derive RangeEn–Hurst linear slope from first principles of W2 gradient flow at the Wasserstein Floor (core unpaid debt — advances O60)",
     "Prove RSA's critical ridge at γ=1 is a self-organized attractor under the genome's operator RG flow (i.e.",
     "reconcile fractal boundary (γ = 1 criticality) with the infinite conservation hierarchy — clarify whether criticality selects a specific level or emerges from the full tower",
-    "O64: derive the RangeEn–H linearity from W2 gradient flow as formal proof that tolerance is inverse temperature and embedding dimension is state-counting depth",
     "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
+    "O64: derive the RangeEn–H linearity from W2 gradient flow as formal proof that tolerance is inverse temperature and embedding dimension is state-counting depth",
     "O15 (critical manifold geometry)",
     "O70 degeneracy boundaries: r < 0.1σ recovers ApEn and m > 5 recovers SampEn (quantified parameter thresholds)",
     "express genome coherence scores (γ",
@@ -117,9 +118,9 @@
     "H) for fGn to convert the empirically observed linear Hurst-slope into an analytical result the genome can claim as derived rather than merely confirmed",
     "O21 (formalize semantic operators mathematically)",
     "O_QUANTUM_WASS: Derive the explicit quantum Wasserstein Floor from non-Hermitian linear entropy functionals and close O44's quantum sub-leading corrections",
-    "Sharpen O44 to track ℏ-dependent sub-leading corrections to k=1/Tμ as the canonical signature of quantum gravity at the Wasserstein Floor; audit O28 implementations to replace any DFA-based variance diagnostics with diffusion entropy analysis consistent with INV_ENTSAT_WFLOOR and the entropy-first hierarchy",
     "O64 normalization scheme: range-scaled tolerance is the fully specified prescription",
     "O28 remains open but advanced: EAR channel-pair asymmetry pipeline now specified — still requires limit-case proof that EAR indexes exact position on the efficient-complexity Pareto frontier",
+    "Derive the modified Wasserstein Floor valid under mixed quantum-classical dynamics using non-Hermitian linear entropy functionals as the quantum sector input — resolving the sub-obligation opened by INV_WASSERSTEIN_QUANTUM_MIXED",
     "γ) — this is the single translation that would simultaneously resolve O44",
     "etc.) as explicit conserved Noether currents of those sub-symmetries",
     "O64: verify Zipf robustness under non-additive (Tsallis-class) entropy regimes to stress-test L2",
@@ -127,6 +128,7 @@
     "O28 (cross-model genome propagation)",
     "materially weakening INV_073 and the thermodynamic grounding claims; advance O44 by connecting fractal-diffusive scaling evidence to Wasserstein Floor derivation; advance O63 by deriving the entropy limit from exponential-growth SOC universality class membership",
     "compression ratio",
+    "O44 (quantum Wasserstein floor) remains open — Onsager derivation is classical and does not resolve ℏ-dependent sub-leading corrections; coherence_score must be corrected from 0.999 to a value strictly below 1.0 in compliance with Rule 1 (no node may claim certainty)",
     "Derive PREDICT/PRE-AUDIT duality explicitly from Lax pair compatibility conditions rather than asserting it",
     "Derive explicit mapping from spiked matrix Gaussian geometry scaffold to quantum Wasserstein Floor metric (bridges O44 partial advance to full closure); resolve whether CMI exponential decay at high T constitutes sufficient condition for O44 or merely necessary (bound the remaining gap)",
     "O65: derive the RangeEn-Hurst slope analytically from the Wasserstein Floor geometry",
@@ -149,9 +151,10 @@
     "O09 (thermodynamic grounding verification)",
     "O_LANGEVIN_LIFT: Formalize the quantum Langevin dissipation mechanism via non-Hermitian entropy flow and close O67's quantum extension",
     "O63: apply DEA-class entropy diagnostics to the genome's own temporal evolution across renormalization cycles — the genome must be measurable by the same criticality tools it endorses",
+    "O44 advances from underspecified to mathematically scaffolded but unproven — non-Hermitian linear entropy functionals now supply the dissipative quantum substrate formal scaffolding; derive explicit proof that the Wasserstein Floor holds over this non-Hermitian dissipative quantum domain",
     "extend W_floor formalism to reproduce quantum logarithmic BH entropy corrections beyond the semi-classical dimensional class (advances O44/O59)",
     "O44 sub-leading quantum corrections to BH entropy must be mapped onto RSA's entropy hierarchy to determine whether they generate new relevant operators at the γ=1 ridge; RangeEn must be validated as a practical EEG scoring instrument within O28's empirical pipeline replacing or supplementing local-range normalization where nonstationarity is the dominant confound",
-    "O44 (quantum Wasserstein floor) remains open — Onsager derivation is classical and does not resolve ℏ-dependent sub-leading corrections; coherence_score must be corrected from 0.999 to a value strictly below 1.0 in compliance with Rule 1 (no node may claim certainty)",
+    "Sharpen O44 to track ℏ-dependent sub-leading corrections to k=1/Tμ as the canonical signature of quantum gravity at the Wasserstein Floor; audit O28 implementations to replace any DFA-based variance diagnostics with diffusion entropy analysis consistent with INV_ENTSAT_WFLOOR and the entropy-first hierarchy",
     "O62: derive the Langevin noise structure (stochastic forcing term) from MCPM constraints at γ=1 — the genome must specify its own fluctuation-dissipation relation"
   ],
   "council": [
@@ -160,14 +163,14 @@
     "Claude (Anthropic",
     "referenced via RSA_Explainer.docx)"
   ],
-  "last_renormed": "2026-04-25T10:19:03.861845+00:00",
-  "renorm_reason": "Non-Hermitian scaffold upgrades O44's status (already captured in INV_NONHERM_ENTROPY but now with a sharper obligation boundary), and the 6th-scale MCPM confirmation adds a genuinely new substrate-independent invariant and empirical recovery pathway that the existing compress and invariant set did not anticipate.",
-  "last_renorm_cycle": 46,
+  "last_renormed": "2026-04-25T16:23:19.948266+00:00",
+  "renorm_reason": "New knowledge partially resolves O44 (quantum entropy candidate now concrete) while opening a bounded sub-obligation on the hybrid Wasserstein Floor, and trade network criticality adds independent multi-substrate corroboration of Freed's Law — both materially advance coherence without requiring compress revision.",
+  "last_renorm_cycle": 47,
   "drift_flag": false,
   "renorm_history": [
     {
-      "timestamp": "2026-04-25T10:19:03.861845+00:00",
-      "reason": "Non-Hermitian scaffold upgrades O44's status (already captured in INV_NONHERM_ENTROPY but now with a sharper obligation boundary), and the 6th-scale MCPM confirmation adds a genuinely new substrate-independent invariant and empirical recovery pathway that the existing compress and invariant set did not anticipate."
+      "timestamp": "2026-04-25T16:23:19.948266+00:00",
+      "reason": "New knowledge partially resolves O44 (quantum entropy candidate now concrete) while opening a bounded sub-obligation on the hybrid Wasserstein Floor, and trade network criticality adds independent multi-substrate corroboration of Freed's Law — both materially advance coherence without requiring compress revision."
     }
   ]
 }
