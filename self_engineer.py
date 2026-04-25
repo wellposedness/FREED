@@ -305,24 +305,122 @@ class SelfEngineer:
                        "what": what, "error": check.stderr[:300], "timestamp": ts})
             return {"failed": True, "reason": "import error — backup restored"}
 
+        # Step 5 — epistemic audit
+        diff_summary = self._make_diff_summary(original_content, new_content)
+        audit_verdict, audit_reason = self._audit_patch(
+            target_path.name, diff_summary, why
+        )
+        print(f"[ENGINEER]   AUDIT: {audit_verdict} — {audit_reason}")
+
+        if audit_verdict == "LOOSENS":
+            print(f"[ENGINEER]   AUDIT flagged LOOSENS — reverting.")
+            shutil.copy2(bak_path, target_path)
+            self._log({
+                "status":        "audit_reverted",
+                "file":          target_path.name,
+                "what":          what,
+                "why":           why,
+                "paper_url":     paper_url,
+                "timestamp":     ts,
+                "audit_verdict": audit_verdict,
+                "audit_reason":  audit_reason,
+            })
+            return {
+                "failed":          True,
+                "reason":          f"AUDIT flagged LOOSENS: {audit_reason}",
+                "audit_verdict":   audit_verdict,
+                "audit_reason":    audit_reason,
+                "needs_obligation": True,
+                "ob_statement":    (
+                    f"Review self-engineer patch {target_path.name} "
+                    f"{ts[:19]} — AUDIT flagged stakes reduction: {audit_reason}"
+                ),
+            }
+
         # Success
         print(f"[ENGINEER]   ✓ {target_path.name} patched and verified.")
         self._log({
-            "status":     "applied",
-            "file":       target_path.name,
-            "what":       what,
-            "why":        why,
-            "paper_url":  paper_url,
-            "timestamp":  ts,
-            "lines_before": len(original_content.splitlines()),
-            "lines_after":  len(new_content.splitlines()),
+            "status":        "applied",
+            "file":          target_path.name,
+            "what":          what,
+            "why":           why,
+            "paper_url":     paper_url,
+            "timestamp":     ts,
+            "lines_before":  len(original_content.splitlines()),
+            "lines_after":   len(new_content.splitlines()),
+            "audit_verdict": audit_verdict,
+            "audit_reason":  audit_reason,
         })
 
         return {
-            "applied": True,
-            "file":    target_path.name,
-            "what":    what,
+            "applied":       True,
+            "file":          target_path.name,
+            "what":          what,
+            "audit_verdict": audit_verdict,
         }
+
+    # ── Epistemic audit ──────────────────────────────────────────────────────
+
+    def _make_diff_summary(self, original: str, new: str) -> str:
+        """Compact diff of changed lines only, capped at 600 chars."""
+        import difflib
+        diff = list(difflib.unified_diff(
+            original.splitlines(),
+            new.splitlines(),
+            lineterm="",
+            n=1,
+        ))
+        # Keep only changed lines and hunk headers, skip file headers
+        changed = [l for l in diff
+                   if l.startswith(('+', '-', '@'))
+                   and not l.startswith(('+++', '---'))]
+        summary = "\n".join(changed)
+        if len(summary) > 600:
+            summary = summary[:600] + "\n... (truncated)"
+        return summary or "(no diff — identical content)"
+
+    def _audit_patch(self, filename: str, diff_summary: str,
+                     implement_why: str) -> tuple:
+        """
+        Ask Haiku whether a patch TIGHTENS, LOOSENS, or is NEUTRAL with respect
+        to epistemic standards. Sees only the diff — not the full file.
+
+        Tightens: adds a failure mode the daemon can detect, increases specificity,
+                  adds a falsification path, reduces a silent assumption.
+        Loosens:  adds caching that hides errors, increases smoothing, reduces
+                  rejection sensitivity, adds complexity without a new way to be wrong.
+        Neutral:  performance, formatting, logging.
+
+        Returns (verdict, reason) — verdict is 'TIGHTENS', 'LOOSENS', or 'NEUTRAL'.
+        Fails open to 'NEUTRAL' so audit errors never block valid patches.
+        """
+        import re
+        prompt = (
+            f"A self-modifying science daemon just patched its own code.\n"
+            f"File: {filename}\n"
+            f"Reason: {implement_why}\n\n"
+            f"Diff (changed lines only):\n{diff_summary}\n\n"
+            f"Answer only: TIGHTENS, LOOSENS, or NEUTRAL\n"
+            f"Then one sentence: what specific consequence of being wrong "
+            f"changed, and how.\n\n"
+            f"VERDICT: [TIGHTENS/LOOSENS/NEUTRAL]\n"
+            f"REASON: [one sentence, ≤20 words]"
+        )
+        try:
+            resp = self.client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=80,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = resp.content[0].text.strip()
+            m_v = re.search(r'VERDICT\s*:\s*(TIGHTENS|LOOSENS|NEUTRAL)', raw, re.I)
+            m_r = re.search(r'REASON\s*:\s*(.+)', raw, re.I)
+            verdict = m_v.group(1).upper() if m_v else "NEUTRAL"
+            reason  = m_r.group(1).strip()[:200] if m_r else raw[:100]
+            return verdict, reason
+        except Exception as e:
+            print(f"[ENGINEER]   Audit call failed: {e} — defaulting NEUTRAL")
+            return "NEUTRAL", f"audit error: {e}"
 
     # ── Logging ─────────────────────────────────────────────────────────────
 

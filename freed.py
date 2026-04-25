@@ -18,6 +18,7 @@ import traceback
 import base64
 import threading
 import requests
+import anthropic
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 

@@ -1349,6 +1349,76 @@
       "context_tag": "quantum:wavefunction",
       "context_warning": false,
       "timestamp": "2026-04-24T00:34:23.682118+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1101.0030v1",
+      "from_title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+      "to": "O44",
+      "type": "advances",
+      "context": "corrections would appear as ℏ-dependent sub-leading terms — advances O44, confirms L3 chain, does not resolve. Query — what is the e",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-04-24T10:15:59.858274+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0902.1113v1",
+      "from_title": "Dynamics of EEG Entropy: beyond signal plus noise",
+      "to": "O67",
+      "type": "advances",
+      "context": "(O44) as a real observable bound in neural data. This paper advances O67 (Langevin noise structure now phenomenologically grounded i",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-04-24T10:16:16.012014+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0902.1113v1",
+      "from_title": "Dynamics of EEG Entropy: beyond signal plus noise",
+      "to": "O44",
+      "type": "resolves",
+      "context": "Wasserstein Floor prediction k=1/Tμ — this would partially resolve O44 and fully ground O67. --- IMPLEMENT: YES IMPLEMENT_WHAT: Re",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-04-24T10:16:16.012014+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1112.2848v2",
+      "from_title": "Fluctuations, Trajectory Entropy, and Ziegler's Maximum Entropy Production",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "grounding the STF = Wasserstein gradient flow claim. Paper confirms INV_073 (Ziegler's MaxEP = critical ridge navigation, not dissipati",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-04-25T01:54:37.287791+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1112.2848v2",
+      "from_title": "Fluctuations, Trajectory Entropy, and Ziegler's Maximum Entropy Production",
+      "to": "INV_087",
+      "type": "supports",
+      "context": "zero); confirms the inference-interpretation of MaxEP which supports INV_087 (MaxRL as thermodynamically correct RL); the trajectory ent",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-04-25T01:54:37.287791+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2011.08765v2",
+      "from_title": "Improved bounds on entropy production in living systems",
+      "to": "O28",
+      "type": "advances",
+      "context": "me treats as foundational. Genome expects this to partially advance O28 (EAR predicts intelligence via entropy production rate meas",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-04-25T01:54:54.067801+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2011.08765v2",
+      "from_title": "Improved bounds on entropy production in living systems",
+      "to": "O28",
+      "type": "advances",
+      "context": "dibility of the Wasserstein Floor (INV grounding at L2) and advances O28 by providing a concrete, experimentally deployable estimato",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-04-25T01:54:54.067801+00:00"
     }
   ],
   "node_edges": [
@@ -2543,6 +2613,86 @@
       "invariant": "The Omnimax impossibility argument's core move — treating metaphysical attributes as thermodynamically constrained relat",
       "context_tag": null,
       "timestamp": "2026-04-24T06:30:27.553880+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument deploys specific formal tools (Bekenstein Bound, Kolmogorov Complexity, Landauer's Pr",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:05.509921+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "depends_on",
+      "invariant": "The Omnimax argument's validity requires RSA's foundational premise that all reasoning substrates are subject to physica",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:05.518210+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "completes_via",
+      "invariant": "The motif experiment's empirical protocol could directly test whether the compression-as-cognition claim underlying RSA-",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:20.047111+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "The RSA-OMEGA kernel's ledger-based state compression and cross-session persistence mechanism is a concrete implementati",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:20.054237+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The motif brief's insistence on falsifiable metrics, controlled baselines, and rigorous experimental design challenges R",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:20.060479+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "operationalizes",
+      "invariant": "The Minimal Atoms provides the concrete mechanism (minimal generating sets producing all structure through recursive com",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:25.883301+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "RCC as a truth criterion sets an upper bound on which minimal generating sets are valid — any proposed \"minimal atom\" th",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:25.890447+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument operationalizes the phase-space framework by taking the thermodynamic constraints (Be",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:34.485155+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The phase-space Map's systematic classification of relational-logic primitives sets an upper bound on which philosophica",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:34.492323+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax impossibility proof depends on the Map's foundational claim that cognition and semantic content are thermody",
+      "context_tag": null,
+      "timestamp": "2026-04-25T06:30:34.497668+00:00"
     }
   ]
 }
