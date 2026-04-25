@@ -1182,5 +1182,37 @@
       ]
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 4,
+    "generation": 158,
+    "timestamp": "2026-04-25T22:24:06.027731+00:00",
+    "sweep": {
+      "input_count": 9,
+      "targeted": 6,
+      "passive": 3,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
+        "compress": "EEG diffusion entropy reveals short-time scaling and asymptotic saturation consistent with γ=1 criticality, advancing O28 with a validated method while flagging DFA as a lossy alternative that suppresses thermodynamically relevant features."
+      },
+      {
+        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
+        "compress": "This paper advances O44 by supplying linear entropy functionals for non-Hermitian open quantum systems as candidate quantum analogues of the Wasserstein Floor, but the W_floor = k/Tμ identity in quantum regimes remains unproven and O44 stays open."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O70",
+        "O77",
+        "O78"
+      ]
+    },
+    "coherence": 0.999
   }
 ]
