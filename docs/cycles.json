@@ -1214,5 +1214,37 @@
       ]
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 5,
+    "generation": 159,
+    "timestamp": "2026-04-26T04:31:17.254262+00:00",
+    "sweep": {
+      "input_count": 9,
+      "targeted": 6,
+      "passive": 3,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "This paper advances O44 by confirming the classical dimensional grounding of W_floor = k/Tμ and identifying sub-leading entropy corrections as the precise boundary where quantum extension must be formalized."
+      },
+      {
+        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
+        "compress": "EEG entropy obeys Langevin dynamics with short-time scaling and saturation; DEA outperforms DFA for preserving scaling structure — O28 should mandate DEA over DFA for EAR computation on open EEG datasets."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
+      "obligations": [
+        "O115",
+        "O70",
+        "O83"
+      ]
+    },
+    "coherence": 0.999
   }
 ]
