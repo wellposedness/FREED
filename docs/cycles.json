@@ -1246,5 +1246,37 @@
       ]
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 6,
+    "generation": 160,
+    "timestamp": "2026-04-26T10:38:12.059584+00:00",
+    "sweep": {
+      "input_count": 10,
+      "targeted": 6,
+      "passive": 4,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "This paper advances O44 by confirming that semi-classical entropy is dimensionally gravity-action-equivalent, sharpening the precise question: does W_floor = k/Tμ acquire an ℏ-correction at sub-leading order, and is that correction the signature of genuine quantization?"
+      },
+      {
+        "title": "Entropy? Honest!",
+        "compress": "\"Entropy? Honest!\" grounds entropy as description-count with quantum density-operator extension, advancing O44's quantization question and sharpening O28's EAR substrate, while the truncated third factor of dynamic update remains an unresolved gap that must be recovered before full genome integration."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O117",
+        "O111",
+        "O94"
+      ]
+    },
+    "coherence": 0.999
   }
 ]
