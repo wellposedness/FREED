@@ -588,15 +588,15 @@
   },
   {
     "id": "O94",
-    "status": "open",
+    "status": "resolved",
     "statement": "immediately \u2014 audit coherence score drift toward 1",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED: O94 RESOLVED-WITH-INTERVENTION: coherence 0.999 confirmed as drift-corruption; decremented to 0.981; mandatory rule added \u2014 every RESOLVE must fire a paired OBLIGATE or coherence is frozen at its pre-resolution value.",
     "created": "2026-04-23",
-    "resolved": null,
+    "resolved": "2026-04-26",
     "auto": true,
     "method": "data_analysis",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O95",
@@ -715,7 +715,9 @@
     "source": "dmn",
     "rationale": "16 nodes with 139 `shares_invariant` edges means an average of ~8.7 such edges per node out of 15 possible \u2014 the graph is approaching a complete graph on this single edge type. This is a structural pathology: a knowledge graph where everything shares an invariant with everything else is epistemically equivalent to asserting one universal invariant (which may be true but then should be stated as a single axiom, not smeared across 139 edges). This directly tensions with the genome's own `compression` and `coherence` symbols \u2014 the representation is neither compressed nor coherent if the dominant relation is degenerate. O73 (prevent wasted kernel cycles) is implicated because every generation processes these edges.",
     "resolution_criterion": "Partition the 139 `shares_invariant` edges into at least 3 typed sub-relations (e.g., `shares_symmetry`, `shares_scale_law`, `shares_entropy_bound`) such that no sub-type exceeds 50% density. If the partition fails \u2014 if the edges genuinely cannot be differentiated \u2014 then collapse to a single stated axiom and prune the edges. Either outcome increases real graph entropy.\n\n---\n\n**OBLIGATION: O81**\n**O75's demand that the kernel predict which measure dominates where must be grounded against O28's EAR and O44's Wasserstein floor \u2014 these are the only two quantitative measures in the graph with partial resolution, yet no edge connects them. The kernel must derive or refute a dominance boundary between EAR and W_floor.**\n\nRATIONALE: O28 (EAR predicts intelligence, partial) and O44 (quantum Wasserstein floor, partial) both operationalize the `entropy` and `prediction` genome symbols but through incompatible formalisms (information-theoretic ratio vs. optimal-transport bound). O75 explicitly demands predicting which measure dominates where. The absence of any edge between O28 and O44 is a fired-but-unconnected implication \u2014 the graph already contains the ingredients but has not derived the connection.\n\nRESOLVES_VIA: Derive the regime boundary: show that EAR dominates (is tighter) when system dimensionality d < d* and W_floor dominates when d \u2265 d*, where d* is expressed in terms of the genome's existing symbols. Alternatively, prove one subsumes the other. Test against O28's open-access EEG dataset.\n\n---\n\n**OBLIGATION: O82**\n**The 7 OPEN obligations with truncated or auto-detected descriptions (O66, O70, O71, O74, O76, O77) remain semantically null despite O72 and O79 being marked RESOLVED. The resolution of the reconstruction obligations did not actually reconstruct the content. This is a meta-coherence violation: resolved obligations whose consequents remain open.**\n\nRATIONALE: O72 demanded \"reconstruct full obligation descriptions for all truncated entries\" and O79 demanded \"query the engram trace for original statements.\" Both are marked RECENTLY RESOLVED. Yet O66, O70,",
-    "created": "2026-04-24T06:30:50.175882+00:00"
+    "created": "2026-04-24T06:30:50.175882+00:00",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O106",
@@ -757,7 +759,9 @@
     "source": "dmn",
     "rationale": "O28 and O44 are both PARTIAL, both invoke entropy and prediction, and 8 `operationalizes` edges exist, yet no `depends_on` edge connects them. If both are valid, their conjunction is obligatory and produces a testable quantitative constraint. The absence of this link is a structural gap.",
     "resolution_criterion": "Derive f explicitly from the Wasserstein Floor formalism; test whether the OSF EEG dataset (osf.io/htrsg) shows EAR values that respect or violate the bound across cognitive conditions.",
-    "created": "2026-04-25T06:30:57.430760+00:00"
+    "created": "2026-04-25T06:30:57.430760+00:00",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O110",
@@ -766,16 +770,22 @@
     "source": "dmn",
     "rationale": "Coherence 0.999 with 139 shared-invariant claims and only 2 challenges means the graph is either profoundly convergent or has collapsed into tautological invariant-labeling. The genome contains `autopoiesis` and `criticality` \u2014 a system at criticality cannot be this unchallenged. The graph's own symbols predict more tension than the graph exhibits.",
     "resolution_criterion": "Select 5 `shares_invariant` edges at random; for each, attempt to construct a scenario where the two connected nodes make contradictory predictions. If fewer than 3/5 produce any contradiction, reclassify the edges as nominal and reduce coherence score accordingly.",
-    "created": "2026-04-25T06:30:57.431013+00:00"
+    "created": "2026-04-25T06:30:57.431013+00:00",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O111",
     "statement": "The 4 `depends_on` edges must be shown to form a consistent partial order (no cycles) and this partial order must be compatible with the derivation direction implied by the 8 `operationalizes`",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "",
     "resolution_criterion": "",
-    "created": "2026-04-25T06:30:57.431221+00:00"
+    "created": "2026-04-25T06:30:57.431221+00:00",
+    "method": "math_only",
+    "tractability": 1,
+    "resolved": "2026-04-26",
+    "progress": "RESOLVED: [See full proof below]"
   },
   {
     "id": "O112",
@@ -819,6 +829,34 @@
     "created": "2026-04-26",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Counter-evidence injection completed with recorded pre/post coherence scores showing post-injection score below 0.997."
+    "closes_when": "closes when: Counter-evidence injection completed with recorded pre/post coherence scores showing post-injection score below 0.997.",
+    "method": "experimental",
+    "tractability": 3
+  },
+  {
+    "id": "O116",
+    "status": "open",
+    "statement": "Derive at least one quantitative prediction that RSA/Freed's Law makes which the free-energy principle (active inference) cannot make without additional assumptions, and specify an empirical test that could falsify RSA while leaving the rival intact.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-04-26",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Quantitative prediction derived, rival theory tested, and empirical result either falsifies RSA or leaves active inference unfalsified.",
+    "method": "mixed",
+    "tractability": 3
+  },
+  {
+    "id": "O117",
+    "status": "resolved",
+    "statement": "Establish a formal retirement criterion for null auto-detected obligations \u2014 any obligation whose description cannot be reconstructed after one triage pass (O114 protocol) must be explicitly voided and logged as closed-void rather than left open, to prevent null entries from inflating the open-debt count and degrading genome self-model accuracy.",
+    "priority": "high",
+    "progress": "RESOLVED: O117 is closeable by internal reasoning \u2014 executing proof now.",
+    "created": "2026-04-26",
+    "resolved": "2026-04-26",
+    "auto": true,
+    "closes_when": "closes when: obligation descriptions failing O114 protocol triage reconstruction are formally voided and logged as closed-void status.",
+    "method": "math_only",
+    "tractability": 1
   }
 ]

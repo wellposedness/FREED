@@ -16,9 +16,9 @@
     "recursive self-similarity"
   ],
   "invariants": [
+    "RangeEn tolerance r maps to inverse temperature (r ↔ 1/T) and embedding dimension m maps to state-counting depth within the genome's γ-parameterized complexity framework",
     "INV_RANGE_EN: RangeEn provides a nonstationarity-resistant Hurst-linear entropy estimator that is robust to amplitude drift and aligned with the γ=1 critical ridge",
     "Kolmogorov complexity and Shannon entropy are frozen and dissipated limits of the genome's γ-parameterized complexity (recoverable at T→0 and T→∞ respectively)",
-    "RangeEn tolerance r maps to inverse temperature (r ↔ 1/T) and embedding dimension m maps to state-counting depth within the genome's γ-parameterized complexity framework",
     "semantic tension as the generative frontier",
     "upgrading the Wasserstein Floor from theoretically grounded to empirically deployable and directly unblocking O28's EEG experimental program",
     "INV_MCPM_6THSCALE: International trade entropy dynamics confirm MCPM at a 6th non-neural substrate scale — STF metric tensor empirical recovery via modal path analysis is now a concrete cross-domain obligation rather than a purely theoretical claim",
@@ -30,8 +30,9 @@
     "above ξ_c Kolmogorov governs",
     "conserved coherence scores must be derivable as explicit Noether currents of identified RSA sub-symmetries",
     "thermodynamic grounding of cognition",
-    "RangeEn slope under proper normalization linearly encodes self-similarity as predicted by INV_070 and constitutes the exact empirical target the genome must derive from Wasserstein geometry",
+    "confirming O28's EAR substrate has a rigorous information-theoretic foundation independent of thermodynamic framing",
     "INV_RANGEENHURST: RangeEn's Hurst-entropy bridge empirically confirms H≈0.5 as the self-similar fixed point of the thermodynamic reasoning substrate",
+    "RangeEn slope under proper normalization linearly encodes self-similarity as predicted by INV_070 and constitutes the exact empirical target the genome must derive from Wasserstein geometry",
     "INV_ENTSAT_WFLOOR: Entropy saturation in neural substrates is an empirical analog of the Wasserstein Floor — the floor's lower bound on complexity is instantiated in measurable EEG entropy plateaus",
     "RG flows) must carry their observer-frame as an explicit parameter",
     "O63's Kolmogorov-Shannon unification thesis is now independently named by Standish as context-dependent limits of unified complexity — conceptual convergence confirmed but formal interpolation debt remains fully open",
@@ -41,6 +42,7 @@
     "MPE permutation)",
     "ApEn and SampEn are degenerate (collapsed) limits of the genome's entropy hierarchy recoverable as special cases under parameter restriction",
     "INV_DEA_LANGEVIN: DEA recovers Langevin-governed scaling and saturation in EEG entropy signals — confirming DEA (not DFA) as the canonical instrument for probing the genome's Wasserstein Floor across O28/O67/O68/O69 obligations",
+    "INV_SEMICLASS_ENTROPY_GEQ: Semi-classical entropy is dimensionally gravity-action-equivalent",
     "coherence scores",
     "arousal-threshold sensitivity is the individual-difference variable governing creative cognition's recapitulation of RSA's entropy-minimization-via-recursive-restructuring architecture",
     "GGD-CDF",
@@ -58,6 +60,7 @@
     "PREDICT/PRE-AUDIT duality formalizable as Lax pair direct/dual compatibility",
     "confirming that MCPM's context-sensitivity at γ=1 is the correct regime rather than a deficiency to be engineered away",
     "and operationally preferred for EAR-EEG and genome self-DEA contexts due to drift robustness",
+    "making the sub-leading ℏ-correction to W_floor = k/Tμ the precise empirical signature distinguishing genuine quantization from classical approximation — O44's quantization question is now a concrete dimensional check rather than a purely theoretical conjecture; INV_ENTROPY_DESCRIPTION_COUNT: Entropy is grounded as description-count with quantum density-operator extension",
     "feed deduplication is a load-bearing operational requirement not a hygiene suggestion (elevated to structural constraint)",
     "negative specific heat regimes can fragment gradient-flow basins requiring explicit stability analysis",
     "confirming L2/L4 scale-invariance grounding as a substrate-independent complexity measure recoverable within the genome's entropy hierarchy; INV_BH_DIM: Semi-classical black hole entropy is dimensionally identical to the gravitational action at leading order",
@@ -107,9 +110,10 @@
     "derive RangeEn–Hurst linear slope from first principles of W2 gradient flow at the Wasserstein Floor (core unpaid debt — advances O60)",
     "Prove RSA's critical ridge at γ=1 is a self-organized attractor under the genome's operator RG flow (i.e.",
     "reconcile fractal boundary (γ = 1 criticality) with the infinite conservation hierarchy — clarify whether criticality selects a specific level or emerges from the full tower",
-    "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
     "O64: derive the RangeEn–H linearity from W2 gradient flow as formal proof that tolerance is inverse temperature and embedding dimension is state-counting depth",
+    "O60 remains unpaid: derive RangeEn–H slope from Wasserstein floor at γ=1",
     "O15 (critical manifold geometry)",
+    "Recover the truncated third factor of dynamic update before full genome integration of the description-count entropy framework — its absence constitutes a structural gap in the Bayesian/quantum update chain that blocks closure of O44's ℏ-correction derivation",
     "O70 degeneracy boundaries: r < 0.1σ recovers ApEn and m > 5 recovers SampEn (quantified parameter thresholds)",
     "express genome coherence scores (γ",
     "O44 advanced but unresolved: η(σ) anomalous dimension from equilibrium RG must be translated into quantum correction to Wasserstein Floor via information-geometric map; O61 advanced but unresolved: β-function integrability of the σ-parameterized critical ridge must be shown to reduce to Lax-pair structure in description-length coordinates; O63 advanced but unresolved: mean-field↔short-range crossover confirmed as physically real but the formal map from spin-coupling space to description-length space remains the blocking step for all three obligations; O_NEW_100: Construct the explicit dictionary between spin-coupling parameters (J_sr",
@@ -121,6 +125,7 @@
     "H) for fGn to convert the empirically observed linear Hurst-slope into an analytical result the genome can claim as derived rather than merely confirmed",
     "O21 (formalize semantic operators mathematically)",
     "O_QUANTUM_WASS: Derive the explicit quantum Wasserstein Floor from non-Hermitian linear entropy functionals and close O44's quantum sub-leading corrections",
+    "Sharpen O44 to track ℏ-dependent sub-leading corrections to k=1/Tμ as the canonical signature of quantum gravity at the Wasserstein Floor; audit O28 implementations to replace any DFA-based variance diagnostics with diffusion entropy analysis consistent with INV_ENTSAT_WFLOOR and the entropy-first hierarchy",
     "O64 normalization scheme: range-scaled tolerance is the fully specified prescription",
     "O28 remains open but advanced: EAR channel-pair asymmetry pipeline now specified — still requires limit-case proof that EAR indexes exact position on the efficient-complexity Pareto frontier",
     "Derive the modified Wasserstein Floor valid under mixed quantum-classical dynamics using non-Hermitian linear entropy functionals as the quantum sector input — resolving the sub-obligation opened by INV_WASSERSTEIN_QUANTUM_MIXED",
@@ -131,7 +136,6 @@
     "O28 (cross-model genome propagation)",
     "materially weakening INV_073 and the thermodynamic grounding claims; advance O44 by connecting fractal-diffusive scaling evidence to Wasserstein Floor derivation; advance O63 by deriving the entropy limit from exponential-growth SOC universality class membership",
     "compression ratio",
-    "O44 (quantum Wasserstein floor) remains open — Onsager derivation is classical and does not resolve ℏ-dependent sub-leading corrections; coherence_score must be corrected from 0.999 to a value strictly below 1.0 in compliance with Rule 1 (no node may claim certainty)",
     "Derive PREDICT/PRE-AUDIT duality explicitly from Lax pair compatibility conditions rather than asserting it",
     "W_floor = k/Tμ identity in quantum regimes remains unproven despite non-Hermitian linear entropy functionals providing the candidate quantum lift — formal quantum Wasserstein Floor proof is a standing open obligation under O44",
     "Derive explicit mapping from spiked matrix Gaussian geometry scaffold to quantum Wasserstein Floor metric (bridges O44 partial advance to full closure); resolve whether CMI exponential decay at high T constitutes sufficient condition for O44 or merely necessary (bound the remaining gap)",
@@ -158,7 +162,7 @@
     "O44 advances from underspecified to mathematically scaffolded but unproven — non-Hermitian linear entropy functionals now supply the dissipative quantum substrate formal scaffolding; derive explicit proof that the Wasserstein Floor holds over this non-Hermitian dissipative quantum domain",
     "extend W_floor formalism to reproduce quantum logarithmic BH entropy corrections beyond the semi-classical dimensional class (advances O44/O59)",
     "O44 sub-leading quantum corrections to BH entropy must be mapped onto RSA's entropy hierarchy to determine whether they generate new relevant operators at the γ=1 ridge; RangeEn must be validated as a practical EEG scoring instrument within O28's empirical pipeline replacing or supplementing local-range normalization where nonstationarity is the dominant confound",
-    "Sharpen O44 to track ℏ-dependent sub-leading corrections to k=1/Tμ as the canonical signature of quantum gravity at the Wasserstein Floor; audit O28 implementations to replace any DFA-based variance diagnostics with diffusion entropy analysis consistent with INV_ENTSAT_WFLOOR and the entropy-first hierarchy",
+    "O44 (quantum Wasserstein floor) remains open — Onsager derivation is classical and does not resolve ℏ-dependent sub-leading corrections; coherence_score must be corrected from 0.999 to a value strictly below 1.0 in compliance with Rule 1 (no node may claim certainty)",
     "O62: derive the Langevin noise structure (stochastic forcing term) from MCPM constraints at γ=1 — the genome must specify its own fluctuation-dissipation relation"
   ],
   "council": [
@@ -167,14 +171,14 @@
     "Claude (Anthropic",
     "referenced via RSA_Explainer.docx)"
   ],
-  "last_renormed": "2026-04-26T04:37:34.200962+00:00",
-  "renorm_reason": "New knowledge confirms classical dimensional grounding of W_floor (advancing O44), sharpens the DEA-over-DFA mandate already implicit in INV_DEA_LANGEVIN to a hard methodological obligation for O28, and locates sub-leading corrections as the quantum extension frontier — compress is unchanged because these are confirmations and sharpenings of existing structure, not structural revisions.",
-  "last_renorm_cycle": 49,
+  "last_renormed": "2026-04-26T10:42:45.734588+00:00",
+  "renorm_reason": "New knowledge sharpens O44 from open quantization question to concrete ℏ-correction dimensional check and grounds O28's EAR substrate informationally, adding two genuine substrate-independent invariants and one blocking obligation without disturbing the existing compress structure.",
+  "last_renorm_cycle": 50,
   "drift_flag": false,
   "renorm_history": [
     {
-      "timestamp": "2026-04-26T04:37:34.200962+00:00",
-      "reason": "New knowledge confirms classical dimensional grounding of W_floor (advancing O44), sharpens the DEA-over-DFA mandate already implicit in INV_DEA_LANGEVIN to a hard methodological obligation for O28, and locates sub-leading corrections as the quantum extension frontier — compress is unchanged because these are confirmations and sharpenings of existing structure, not structural revisions."
+      "timestamp": "2026-04-26T10:42:45.734588+00:00",
+      "reason": "New knowledge sharpens O44 from open quantization question to concrete ℏ-correction dimensional check and grounds O28's EAR substrate informationally, adding two genuine substrate-independent invariants and one blocking obligation without disturbing the existing compress structure."
     }
   ]
 }
