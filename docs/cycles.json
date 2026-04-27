@@ -1342,5 +1342,37 @@
       ]
     },
     "coherence": 0.999
+  },
+  {
+    "cycle": 4,
+    "generation": 165,
+    "timestamp": "2026-04-27T16:21:08.559799+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 6,
+      "passive": 8,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Self-organized criticality in neural network models",
+        "compress": "Neural SOC literature confirms γ=1 as the empirically-observed cognitive operating point, mechanistically grounding INV_073 and advancing O28 via avalanche-criticality ↔ intelligence coupling, while the adaptive synaptic feedback loop mirrors OT tension navigation."
+      },
+      {
+        "title": "Symbol Emergence in Cognitive Developmental Systems: a Survey",
+        "compress": "Symbol emergence surveys confirm that meaning is a dynamic thermodynamic process (advancing O70, confirming INV_070b), but the paper lacks the quantitative machinery to resolve O28, O34, or O44."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O124",
+        "O125",
+        "O70"
+      ]
+    },
+    "coherence": 0.999
   }
 ]
