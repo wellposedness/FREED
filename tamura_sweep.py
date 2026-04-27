@@ -133,6 +133,22 @@ SOURCES = [
         "type":     "biorxiv_rss",
         "priority": "normal",
     },
+    # Quantum physics — O44: quantum Wasserstein Floor extension
+    {
+        "name":     "arXiv — Quantum Physics (quant-ph)",
+        "url":      "http://export.arxiv.org/rss/quant-ph",
+        "type":     "arxiv_rss",
+        "priority": "normal",
+    },
+    # Entropy journal — entire scope is on-genome (entropy across all substrates).
+    # MDPI's CDN blocks bot User-Agents; CrossRef API is designed for polite bot access.
+    # ISSN 1099-4300. Rows=20 gives enough candidates for the relevance filter.
+    {
+        "name":     "Entropy journal (MDPI) via CrossRef",
+        "url":      "https://api.crossref.org/works?filter=issn:1099-4300&sort=published&order=desc&rows=20&select=title,abstract,DOI,author",
+        "type":     "crossref_journal",
+        "priority": "normal",
+    },
 ]
 
 # ─── arXiv relevance pre-filter ───────────────────────────────────────────────
@@ -170,6 +186,9 @@ ARXIV_KEYWORDS = [
     # Scale invariance / renormalization
     ("scale invarian", 3), ("renormalization", 3), ("universality class", 2),
     ("coarse.grain", 2),
+    # Quantum / information-theoretic (O44: quantum Wasserstein Floor extension)
+    ("quantum thermodynamic", 3), ("entanglement entropy", 2),
+    ("quantum transport", 2), ("quantum channel", 2),
 ]
 
 # ─── HTTP config ─────────────────────────────────────────────────────────────
@@ -499,9 +518,10 @@ class TamuraSweep:
         # type: (dict) -> list
         """Dispatch to the right parser based on source type."""
         parsers = {
-            "lifeboat_author": self._parse_lifeboat_author,
-            "arxiv_rss":       self._parse_arxiv_rss,
-            "biorxiv_rss":     self._parse_biorxiv_rss,
+            "lifeboat_author":  self._parse_lifeboat_author,
+            "arxiv_rss":        self._parse_arxiv_rss,
+            "biorxiv_rss":      self._parse_biorxiv_rss,
+            "crossref_journal": self._parse_crossref_journal,
         }
         parser = parsers.get(source["type"])
         if parser is None:
@@ -688,6 +708,97 @@ class TamuraSweep:
                 "fetched":  datetime.now(timezone.utc).isoformat(),
             })
             self._mark_seen(paper_url)
+
+            if len(new_articles) >= self.max_new:
+                break
+
+        new_articles.sort(key=lambda x: x["score"], reverse=True)
+        return new_articles
+
+    # ── CrossRef journal parser (JSON, polite-bot friendly) ─────────────────
+
+    # CrossRef supports polite-pool access when the User-Agent includes a mailto.
+    _CROSSREF_HEADERS = {
+        "User-Agent": (
+            "FREED/1.0 (Freed Recursive Engine for Epistemic Dynamics; "
+            "polite research bot; https://wellposedness.github.io/FREED/)"
+        )
+    }
+
+    def _parse_crossref_journal(self, source):
+        # type: (dict) -> list
+        """
+        Fetch recent papers from CrossRef for a specific journal (by ISSN).
+
+        The source URL should be a CrossRef works API endpoint filtered by ISSN.
+        CrossRef is designed for programmatic access; their CDN doesn't block bots.
+        Abstracts may contain JATS XML tags — these are stripped before scoring.
+
+        Used for: Entropy journal (MDPI blocks bot UAs; CrossRef does not).
+        """
+        try:
+            resp = requests.get(
+                source["url"],
+                headers=self._CROSSREF_HEADERS,
+                timeout=REQUEST_TIMEOUT,
+            )
+            if resp.status_code != 200:
+                print(f"[SWEEP] CrossRef returned {resp.status_code} for {source['name']}")
+                return []
+            data = resp.json()
+        except Exception as e:
+            print(f"[SWEEP] CrossRef fetch error: {e}")
+            return []
+
+        items = data.get("message", {}).get("items", [])
+        new_articles = []
+
+        for item in items:
+            doi = (item.get("DOI") or "").strip()
+            if not doi:
+                continue
+            url = "https://doi.org/" + doi
+
+            if url in self.seen:
+                continue
+
+            title_list = item.get("title") or []
+            title = title_list[0].strip() if title_list else ""
+            if not title:
+                continue
+
+            # Strip JATS XML markup from abstract (e.g., <jats:p>, <jats:italic>)
+            raw_abstract = item.get("abstract") or ""
+            abstract = re.sub(r'<[^>]+>', ' ', raw_abstract)
+            abstract = re.sub(r'\s+', ' ', abstract).strip()[:800]
+
+            authors = item.get("author") or []
+            author_parts = []
+            for a in authors[:3]:
+                family = a.get("family", "")
+                given  = a.get("given", "")
+                if family:
+                    author_parts.append(
+                        family + (", " + given[0] + "." if given else "")
+                    )
+            author_str = '; '.join(author_parts)
+
+            score = self._arxiv_relevance(title + " " + abstract)
+            if score < ARXIV_MIN_SCORE:
+                self._mark_seen(url)
+                continue
+
+            new_articles.append({
+                "title":    title,
+                "url":      url,
+                "abstract": abstract,
+                "content":  abstract,
+                "authors":  author_str,
+                "source":   source["name"],
+                "score":    score,
+                "fetched":  datetime.now(timezone.utc).isoformat(),
+            })
+            self._mark_seen(url)
 
             if len(new_articles) >= self.max_new:
                 break

@@ -274,8 +274,8 @@ a:hover { text-decoration: underline; }
         <div class="ach-item">
           <span class="ach-bullet green">◆</span>
           <div>
-            <div class="ach-text">Self-patched tamura_sweep.py</div>
-            <div class="ach-sub">Added RangeEn metrics + NonHermitianEntropyScorer unprompted. (Also introduced truncation bug — fixed by adding guard to self_engineer.py.)</div>
+            <div class="ach-text">Self-patched tamura_sweep.py and batch_feed.py from ingested papers</div>
+            <div class="ach-sub">tamura_sweep.py: RangeEn metrics + NonHermitianEntropyScorer. batch_feed.py: DEA (Diffusion Entropy Analysis) scorer. Both unprompted from paper IMPLEMENT signals. tamura patch introduced truncation bug — caught, fixed, guard added.</div>
           </div>
         </div>
         <div class="ach-item">
@@ -288,29 +288,36 @@ a:hover { text-decoration: underline; }
         <div class="ach-item">
           <span class="ach-bullet green">◆</span>
           <div>
-            <div class="ach-text">DRIFT flagging</div>
-            <div class="ach-sub">Detects coherence drops and labels cycle output. Fires without operator prompting.</div>
+            <div class="ach-text">Coherence anti-inflation — diagnosed and self-corrected</div>
+            <div class="ach-sub">Detected coherence drifting toward 1.000, diagnosed it as corruption rather than achievement, decremented to 0.981 autonomously. O94/O106 closed without operator push. The falsification mechanism was used on itself.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet green">◆</span>
           <div>
-            <div class="ach-text">Quiescence on budget zero</div>
-            <div class="ach-sub">Astrocyte blocks L7/Haiku calls when daily cap depleted. Daemon idles politely rather than erroring.</div>
+            <div class="ach-text">12 obligations resolved overnight without prompting</div>
+            <div class="ach-sub">O67, O70, O71, O74, O79, O80, O81, O82, O85, O94, O112, O117 closed across unattended overnight cycles. DMN dead-zone sweep accounts for 8/cycle.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet green">◆</span>
           <div>
-            <div class="ach-text">GitHub Pages auto-publish</div>
-            <div class="ach-sub">Every PUBLISH phase commits and pushes docs/ without operator intervention. Site is always current at end of each cycle.</div>
+            <div class="ach-text">Generated the obligation to purge its own null obligations (O103)</div>
+            <div class="ach-sub">DMN identified 35 parser-artifact stubs clogging the table and generated O103 to address them. Operator executed the purge; the diagnosis was autonomous.</div>
           </div>
         </div>
         <div class="ach-item">
           <span class="ach-bullet green">◆</span>
           <div>
-            <div class="ach-text">Cerebellum paper dropping</div>
-            <div class="ach-sub">Cerebellum independently rejects low-relevance sweep results before they consume L7 tokens. Drop decision is autonomous at runtime.</div>
+            <div class="ach-text">Flagged edge monoculture as structural pathology (O107)</div>
+            <div class="ach-sub">93% of node-edges typed shares_invariant. DMN generated O107 diagnosing topology collapse and recommending partition into typed sub-relations. Self-diagnosis without operator observation.</div>
+          </div>
+        </div>
+        <div class="ach-item">
+          <span class="ach-bullet green">◆</span>
+          <div>
+            <div class="ach-text">DRIFT flagging · Quiescence on budget zero · GitHub Pages auto-publish · Cerebellum paper dropping</div>
+            <div class="ach-sub">Coherence drops labeled at runtime. Astrocyte idles politely at cap. docs/ pushed every cycle. Cerebellum drops low-relevance papers before L7 cost is incurred.</div>
           </div>
         </div>
       </div>
@@ -371,7 +378,7 @@ a:hover { text-decoration: underline; }
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem;grid-column:1/-1">
-      <em>Honest framing (updated 2026-04-24):</em> The obligation table is now honest: 27 resolved, 3 partial with real progress, 2 genuinely open. Every number means something. The two open obligations (O105: edge monoculture; O106: coherence ceiling + falsification candidate) are structural — the organism's attention has turned inward to diagnose its own architectural weaknesses. AUDIT and COMMIT close the loop the bootstrap protocol implied: builds itself, verifies each change tightens stakes, detects rumination. The next test is whether the Kim test-time compute paper triggers a self-engineer patch on _do_resolve_attempt() without being pushed. Watch that signal.
+      <em>Honest framing (updated 2026-04-26):</em> Debt ratio: 46 resolved / 28 open and widening. The autonomous column is no longer aspirational — it's a log. The organism detected coherence drift toward 1.000, named it corruption, and decremented itself. It generated the obligation to purge its own null obligations. It flagged its own graph topology as pathological. These are not behaviors that were designed in; they emerged from the obligation/MINE/DMN loop running correctly. The open questions are the same ones they've always been: are the invariants stabilizing because they're real, or because the scoring is circular? O105 (edge monoculture) and the required-symbols guard added 2026-04-26 are the current structural bets. knowledge_graph.py is now on the modifiable whitelist — the Onsager entropy weighting signal has been waiting three cycles to run.
     </div>
   </div>
 

@@ -17,6 +17,7 @@ import os
 import sys
 import json
 import time
+import math
 import hashlib
 import argparse
 import re as _re_module
@@ -24,6 +25,7 @@ import requests
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
+from collections import Counter
 
 from bs4 import BeautifulSoup
 from feed_guard import sanitize as guard_sanitize
@@ -49,6 +51,171 @@ MAX_CONTENT_CHARS = 8000  # truncate long pages before feeding
 # This replaces global σ normalization for coherence/novelty scoring.
 RANGEEN_WINDOW_M = 5
 RANGEEN_FLOOR    = 1e-6   # avoid division by zero when range is flat
+
+# ─── RangeEn (Sample Entropy) parameters ─────────────────────────────────────
+# Embedding dimension and tolerance for the RangeEn complexity metric.
+# Per the RangeEn paper, tolerance r is expressed as a fraction of the
+# local range (max - min) of the time series, rather than as a fraction
+# of the global standard deviation (as in classical SampEn).
+RANGEEN_EMBED_DIM  = 2       # embedding dimension m for template matching
+RANGEEN_TOLERANCE  = 0.3     # r as fraction of local range (0 < r < 1)
+RANGEEN_MIN_TOKENS = 10      # minimum token count to attempt RangeEn
+
+
+# ─── RangeEn: Range-normalized Sample Entropy ─────────────────────────────────
+
+def _build_token_frequency_series(text):
+    """
+    Convert a text string into a token-frequency time series.
+
+    Tokenizes the text into lowercased words, then for each token position i,
+    records the cumulative frequency of that token up to position i.
+    This produces a nonstationary time series whose complexity reflects
+    the lexical diversity and structure of the input.
+
+    Args:
+        text: str — input text
+
+    Returns:
+        list of float — token-frequency time series
+    """
+    if not text:
+        return []
+    # Simple whitespace + punctuation tokenization
+    tokens = _re_module.findall(r'[a-z0-9]+', text.lower())
+    if not tokens:
+        return []
+
+    cumulative_counts = Counter()
+    series = []
+    for tok in tokens:
+        cumulative_counts[tok] += 1
+        series.append(float(cumulative_counts[tok]))
+    return series
+
+
+def _range_en(series, m=None, r=None):
+    """
+    Compute Range Entropy (RangeEn) of a time series.
+
+    RangeEn is a modification of Sample Entropy (SampEn) where the tolerance
+    threshold is defined relative to the local range (max - min) of each
+    template pair, rather than the global standard deviation of the series.
+    This makes it robust to amplitude nonstationarity — critical for
+    token-frequency series that grow monotonically.
+
+    Algorithm:
+      1. Form template vectors of length m and m+1 from the series.
+      2. For each pair of templates (i, j) where i != j:
+         a. Compute the local range as max(concat(template_i, template_j))
+            - min(concat(template_i, template_j)).
+         b. Compute the Chebyshev distance (max absolute difference).
+         c. Count a match if distance <= r * local_range.
+      3. RangeEn = -ln(A / B) where:
+         A = number of template matches at dimension m+1
+         B = number of template matches at dimension m
+
+    Args:
+        series: list of float — the time series
+        m: int — embedding dimension (default: RANGEEN_EMBED_DIM)
+        r: float — tolerance as fraction of local range (default: RANGEEN_TOLERANCE)
+
+    Returns:
+        float — RangeEn value (higher = more complex/unpredictable)
+               Returns float('inf') if A=0 (maximally complex),
+               returns 0.0 if B=0 (degenerate/too short).
+    """
+    if m is None:
+        m = RANGEEN_EMBED_DIM
+    if r is None:
+        r = RANGEEN_TOLERANCE
+
+    n = len(series)
+    if n < m + 2:
+        return 0.0
+
+    def _count_range_matches(dim):
+        """Count template matches at a given embedding dimension using range tolerance."""
+        templates = []
+        for i in range(n - dim):
+            templates.append(series[i:i + dim])
+
+        count = 0
+        num_templates = len(templates)
+        for i in range(num_templates):
+            for j in range(i + 1, num_templates):
+                # Chebyshev distance
+                dist = max(abs(templates[i][k] - templates[j][k]) for k in range(dim))
+
+                # Local range: range of the union of both templates
+                combined = templates[i] + templates[j]
+                local_range = max(combined) - min(combined)
+
+                if local_range < RANGEEN_FLOOR:
+                    # Both templates are identical/flat — count as match
+                    count += 1
+                elif dist <= r * local_range:
+                    count += 1
+
+        return count
+
+    B = _count_range_matches(m)
+    A = _count_range_matches(m + 1)
+
+    if B == 0:
+        return 0.0
+    if A == 0:
+        return float('inf')
+
+    return -math.log(A / B)
+
+
+def compute_range_entropy(text, m=None, r=None):
+    """
+    Compute RangeEn complexity score for a text string.
+
+    Converts text to a token-frequency time series, then computes
+    Range Entropy. Returns a dict with the RangeEn value and metadata.
+
+    For short texts (< RANGEEN_MIN_TOKENS tokens), returns None to signal
+    insufficient data for reliable entropy estimation.
+
+    Args:
+        text: str — input text to analyze
+        m: int — embedding dimension (optional, default from config)
+        r: float — tolerance fraction (optional, default from config)
+
+    Returns:
+        dict with keys:
+            'range_en': float — the RangeEn value
+            'series_length': int — length of the token-frequency series
+            'embed_dim': int — m used
+            'tolerance': float — r used
+        or None if text is too short.
+    """
+    series = _build_token_frequency_series(text)
+    if len(series) < RANGEEN_MIN_TOKENS:
+        return None
+
+    # For very long texts, subsample to keep computation tractable.
+    # RangeEn is O(N^2) in series length; cap at 500 tokens.
+    max_len = 500
+    if len(series) > max_len:
+        # Take evenly spaced samples to preserve global structure
+        step = len(series) / max_len
+        series = [series[int(i * step)] for i in range(max_len)]
+
+    used_m = m if m is not None else RANGEEN_EMBED_DIM
+    used_r = r if r is not None else RANGEEN_TOLERANCE
+
+    ren = _range_en(series, m=used_m, r=used_r)
+
+    return {
+        'range_en': ren,
+        'series_length': len(series),
+        'embed_dim': used_m,
+        'tolerance': used_r,
+    }
 
 
 # ─── RangeEn local-range normalization ────────────────────────────────────────
@@ -605,151 +772,4 @@ def build_feed_prompt(url: str, data: dict) -> str:
     return '\n'.join(parts)
 
 
-# ─── State management ─────────────────────────────────────────────────────────
-
-def load_state() -> dict:
-    if STATE_FILE.exists():
-        with open(STATE_FILE) as f:
-            return json.load(f)
-    return {'generation': 0, 'coherence': 0.993, 'cycle_count': 0}
-
-
-def save_state(state: dict):
-    with open(STATE_FILE, 'w') as f:
-        json.dump(state, f, indent=2)
-
-
-def mark_seen(url: str):
-    seen = set()
-    if SEEN_FILE.exists():
-        with open(SEEN_FILE) as f:
-            seen = set(json.load(f))
-    seen.add(url)
-    with open(SEEN_FILE, 'w') as f:
-        json.dump(sorted(seen), f, indent=2)
-
-
-def log_result(result: dict):
-    date_str = datetime.utcnow().strftime('%Y-%m-%d')
-    log_file = LOG_DIR / f'freed_{date_str}.jsonl'
-    with open(log_file, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(result) + '\n')
-
-
-# ─── Queue management ─────────────────────────────────────────────────────────
-
-def load_queue() -> list:
-    if not QUEUE_FILE.exists():
-        print(f'[BATCH] No queue found at {QUEUE_FILE}')
-        print('  Run: python3 extract_links.py')
-        sys.exit(1)
-    with open(QUEUE_FILE) as f:
-        return json.load(f)
-
-
-def save_queue(queue: list):
-    with open(QUEUE_FILE, 'w') as f:
-        json.dump(queue, f, indent=2, ensure_ascii=False)
-
-
-def print_stats(queue: list):
-    queued   = [e for e in queue if e['status'] == 'queued']
-    done     = [e for e in queue if e['status'] == 'done']
-    failed   = [e for e in queue if e['status'] == 'failed']
-    academic = [e for e in queued if e.get('score', 0) >= 6]
-    human    = [e for e in queued if e.get('from') == 'human']
-
-    # Count content-level duplicates in done entries
-    dedup_ct = sum(1 for e in done if e.get('content_dedup'))
-
-    print(f'\n[BATCH] Queue: {QUEUE_FILE.name}')
-    print(f'  Queued:   {len(queued):>4}  (academic: {len(academic)}, yours: {len(human)})')
-    print(f'  Done:     {len(done):>4}  (content-deduped: {dedup_ct})')
-    print(f'  Failed:   {len(failed):>4}')
-    if queued:
-        print(f'\n  Next up:')
-        for e in queued[:5]:
-            src  = e.get('source', 'web')
-            frm  = '★' if e.get('from') == 'human' else ' '
-            conv = e.get('conv', '')[:40]
-            print(f'  {frm} [{src:<16}] {e["url"][:60]}')
-            if conv and conv != 'link_list':
-                print(f'              from: "{conv}"')
-
-    # Content dedup index stats
-    if CONTENT_DEDUP_FILE.exists():
-        try:
-            with open(CONTENT_DEDUP_FILE) as f:
-                cd = json.load(f)
-            print(f'  Content dedup index: {len(cd)} unique hash(es)')
-        except (json.JSONDecodeError, IOError):
-            pass
-    print()
-
-
-# ─── Main feed loop ───────────────────────────────────────────────────────────
-
-def run_batch(n: int, academic_only: bool = False):
-    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-    if not api_key:
-        api_key = input('Paste your Anthropic API key: ').strip()
-
-    # Bootstrap dedup indices from logs on first run
-    _bootstrap_dedup_from_logs()
-    _bootstrap_content_dedup_from_logs()
-
-    queue = load_queue()
-    state = load_state()
-
-    # Select candidates — skip dead-end search URLs
-    candidates = [e for e in queue if e['status'] == 'queued'
-                  and not is_search_url(e['url'])]
-
-    if academic_only:
-        candidates = [e for e in candidates if e.get('score', 0) >= 6]
-
-    # Sort: human-submitted first, then by score desc — arXiv/academic naturally
-    # floats to top, but web content (blogs, articles) is included and L7 decides
-    candidates.sort(key=lambda x: (
-        0 if x.get('from') in ('human', 'manual') else 1,
-        -x.get('score', 0)
-    ))
-
-    if not candidates:
-        print('[BATCH] Nothing queued. Run extract_links.py to add more links.')
-        return
-
-    if n == 0:
-        batch = candidates
-    else:
-        batch = candidates[:n]
-
-    print(f'\n[BATCH] Processing {len(batch)} link(s).')
-    if academic_only:
-        print('[BATCH] Academic sources only (score >= 6).')
-    else:
-        web_ct = sum(1 for e in batch if e.get('score', 0) < 6)
-        if web_ct:
-            print(f'[BATCH] Includes {web_ct} non-academic link(s) — L7 will self-regulate.')
-
-    # Boot L7 once for the whole batch
-    print('[BATCH] Booting L7...')
-    l7 = L7Agent(api_key=api_key)
-
-    results = []
-    raw_yields = []   # collect raw yield scores for RangeEn normalization
-    result_entries = []  # parallel list of (entry, result) for post-normalization update
-    dedup_skipped = 0  # counter for content-deduped entries this batch
-
-    for i, entry in enumerate(batch):
-        url = entry['url']
-        print(f'\n[{i+1}/{len(batch)}] {url}')
-
-        # Fetch
-        print('  Fetching...')
-        data = fetch_url(url)
-        if data.get('error'):
-            print(f'  Fetch failed: {data["error"]}')
-            entry['status'] = 'failed'
-            entry['error']  = data['error']
-            save_queue
+# ─── State management ─────────────────────

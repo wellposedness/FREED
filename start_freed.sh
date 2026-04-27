@@ -18,4 +18,27 @@ fi
 
 echo "[FREED] API key OK (${ANTHROPIC_API_KEY:0:14}...)"
 cd "$(dirname "$0")"
-exec caffeinate -i python3 -u freed.py "$@"
+
+DEV_FLAG=""
+while true; do
+    echo ""
+    echo "Run mode?"
+    echo "  1. Real cycle (operational budget)"
+    echo "  2. Dev run   (budget caps disabled)"
+    echo -n "Choice [1]: "
+    read choice
+    case "$choice" in
+        ""|1) break ;;
+        2|dev|DEV) DEV_FLAG="--dev"; break ;;
+        *) echo "Enter 1 or 2." ;;
+    esac
+done
+
+if [[ -n "$DEV_FLAG" ]]; then
+    echo "[FREED] DEV MODE — budget caps disabled."
+else
+    echo "[FREED] REAL cycle — operational budget active."
+fi
+echo ""
+
+exec caffeinate -i python3 -u freed.py $DEV_FLAG "$@"

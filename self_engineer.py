@@ -48,6 +48,7 @@ MODIFIABLE = {
     "site_builder.py",
     "batch_feed.py",
     "voice.py",
+    "knowledge_graph.py",  # authorized 2026-04-25; graph_integrity audit criterion enforced
 }
 
 # These are never touched, no matter what
@@ -57,8 +58,18 @@ SACRED = {
     "freed.py",            # the daemon itself cannot self-modify its own heartbeat
     "self_engineer.py",    # the engineer cannot rewrite itself
     "astrocyte.py",        # budget governor stays stable
-    "knowledge_graph.py",  # graph schema is load-bearing — patch wiped KnowledgeGraph class (Apr 2026)
     "docs/noethers_table.html", # hand-edited Noether's Table page — never overwrite
+}
+
+# Public symbols that must survive any patch to a given file.
+# A module that imports cleanly but drops these breaks the daemon silently.
+REQUIRED_SYMBOLS = {
+    "batch_feed.py":      ["fetch_url"],
+    "knowledge_graph.py": ["get_graph", "KnowledgeGraph"],
+    "l7_agent.py":        ["L7Agent"],
+    "consolidate.py":     ["Consolidator"],
+    "tamura_sweep.py":    ["TamuraSweep"],
+    "targeted_sweep.py":  ["TargetedSweep"],
 }
 
 
@@ -188,56 +199,150 @@ class SelfEngineer:
     def _generate_patch(self, what: str, why: str, paper_content: str,
                         target_path: Path) -> str:
         """
-        Ask Claude Opus to generate the code addition/modification.
-        Returns the new complete file content, or empty string on failure.
+        Ask Claude Opus to generate a surgical str_replace patch.
+
+        The model sees the full file for orientation but outputs only a
+        <<<SEARCH>>>/<<<REPLACE>>>/<<<END>>> block — the exact lines to
+        change and their replacements. We apply it programmatically and
+        return the resulting complete file, which flows into the existing
+        safety checks (syntax, truncation, import, symbol, audit).
+
+        Previously this method asked for the complete file rewrite, which
+        caused 71% syntax errors: files >400 lines exhausted the token
+        budget mid-generation, producing truncated or malformed output.
+        Surgical patches cap output at ~50-100 lines regardless of file size.
         """
         current_code = target_path.read_text(encoding="utf-8")
+        lines = current_code.splitlines()
+
+        # Build a structure map: module header + all def/class signatures with
+        # line numbers. The model uses this to locate the right insertion point
+        # without reading every line of implementation.
+        header = "\n".join(f"{i+1:4d}  {l}" for i, l in enumerate(lines[:40]))
+        sigs = []
+        for i, line in enumerate(lines):
+            stripped = line.lstrip()
+            if stripped.startswith(("def ", "class ", "async def ")):
+                start = max(0, i - 1)
+                for j in range(start, min(len(lines), i + 2)):
+                    sigs.append(f"{j+1:4d}  {lines[j]}")
+                sigs.append("      ...")
+        structure_map = (
+            f"=== MODULE HEADER (lines 1–{min(40, len(lines))}) ===\n{header}\n\n"
+            f"=== FUNCTION/CLASS SIGNATURES ===\n" + "\n".join(sigs)
+        )
 
         system = textwrap.dedent("""
-            You are the self-engineer for FREED — the Freed Recursive Engine for Epistemic Dynamics.
-            Your job: given a description of what to implement and the current source file,
-            produce the COMPLETE updated file with the modification applied.
+            You are the self-engineer for FREED (Freed Recursive Engine for Epistemic Dynamics).
+            Generate a SURGICAL str_replace patch — NOT a whole-file rewrite.
+
+            Output format (use exactly these delimiters, nothing else):
+            <<<SEARCH>>>
+            [verbatim lines from the current file — include 3–5 lines of context
+             before/after the change point, enough to be unique in the file]
+            <<<REPLACE>>>
+            [replacement lines — same indentation as the original]
+            <<<END>>>
 
             Rules:
-            - Preserve all existing functionality exactly
-            - Add the new capability as cleanly as possible — minimal footprint
-            - Python 3.9 compatible — no dict|None unions, no list[dict] annotations
-            - No new external dependencies unless already imported in the file
-            - The output must be the complete file, ready to write to disk
-            - Do NOT wrap in markdown fences — output raw Python only
-            - If the modification is unsafe or nonsensical, output exactly: REFUSE
+            - The SEARCH block must appear VERBATIM in the file (whitespace matters)
+            - Include enough surrounding context that the block appears exactly once
+            - Python 3.9: no dict|None type unions, no list[dict] annotations
+            - No new imports unless that import already exists at the top of the file
+            - Preserve all existing functionality — touch only what is needed
+            - For a new method on a class: SEARCH for the last few lines of the
+              preceding method + first line of the next, splice in the new method
+            - If the change is unsafe or nonsensical, output exactly: REFUSE
         """).strip()
 
         prompt = (
-            f"PAPER EXCERPT (source of the technique):\n{paper_content[:1500]}\n\n"
+            f"FILE: {target_path.name} ({len(lines)} lines)\n"
             f"WHAT TO IMPLEMENT: {what}\n"
             f"WHY: {why}\n\n"
-            f"CURRENT FILE ({target_path.name}):\n{current_code}\n\n"
-            f"Output the complete updated file."
+            f"PAPER EXCERPT (technique source):\n{paper_content[:800]}\n\n"
+            f"FILE STRUCTURE (use to locate your patch):\n{structure_map[:2500]}\n\n"
+            f"FULL FILE:\n{current_code}\n\n"
+            f"Output the <<<SEARCH>>>/<<<REPLACE>>>/<<<END>>> patch only."
         )
 
         try:
             resp = self.client.messages.create(
                 model=OPUS_MODEL,
-                max_tokens=8000,
+                max_tokens=4000,
                 system=system,
                 messages=[{"role": "user", "content": prompt}],
             )
-            result = resp.content[0].text.strip()
-            if result == "REFUSE":
-                print(f"[ENGINEER]   Claude refused the modification.")
-                return ""
-            # Strip any accidental markdown fences
-            if result.startswith("```"):
-                lines = result.splitlines()
-                result = "\n".join(
-                    l for l in lines
-                    if not l.strip().startswith("```")
-                ).strip()
-            return result
+            raw = resp.content[0].text.strip()
         except Exception as e:
             print(f"[ENGINEER]   Patch generation error: {e}")
             return ""
+
+        if raw.upper() == "REFUSE":
+            print(f"[ENGINEER]   Claude refused the modification.")
+            return ""
+
+        # Apply the surgical patch — returns complete file content or ""
+        return self._apply_str_replace(current_code, raw, target_path.name)
+
+    def _apply_str_replace(self, current_code: str, patch_text: str,
+                           filename: str = "?") -> str:
+        """
+        Parse and apply a <<<SEARCH>>>/<<<REPLACE>>>/<<<END>>> patch.
+
+        Returns the modified complete file content, or empty string if the
+        patch cannot be applied (format error, SEARCH not found, ambiguous).
+        Failing open to "" means the existing file is never touched.
+        """
+        import re
+
+        # Strip accidental markdown fences around the patch
+        if "<<<SEARCH>>>" not in patch_text and patch_text.startswith("```"):
+            inner = "\n".join(
+                l for l in patch_text.splitlines()
+                if not l.strip().startswith("```")
+            )
+            patch_text = inner
+
+        m = re.search(
+            r'<<<SEARCH>>>\s*\n(.*?)<<<REPLACE>>>\s*\n(.*?)<<<END>>>',
+            patch_text,
+            re.DOTALL,
+        )
+        if not m:
+            print(f"[ENGINEER]   Patch format error in {filename} — no SEARCH/REPLACE/END blocks.")
+            print(f"[ENGINEER]   Raw output head: {patch_text[:200]!r}")
+            return ""
+
+        search_text  = m.group(1).rstrip("\n")
+        replace_text = m.group(2).rstrip("\n")
+
+        # Exact match
+        if search_text in current_code:
+            count = current_code.count(search_text)
+            if count > 1:
+                print(f"[ENGINEER]   SEARCH block in {filename} is not unique ({count} matches) — add more context.")
+                return ""
+            return current_code.replace(search_text, replace_text, 1)
+
+        # Fallback: normalize trailing whitespace per line (handles editor-introduced spaces)
+        def _rstrip_lines(text):
+            # type: (str) -> str
+            return "\n".join(line.rstrip() for line in text.splitlines())
+
+        norm_code   = _rstrip_lines(current_code)
+        norm_search = _rstrip_lines(search_text)
+
+        if norm_search in norm_code:
+            count = norm_code.count(norm_search)
+            if count > 1:
+                print(f"[ENGINEER]   SEARCH block (normalized) in {filename} not unique ({count} matches).")
+                return ""
+            print(f"[ENGINEER]   Patch applied with trailing-whitespace normalization.")
+            return norm_code.replace(norm_search, _rstrip_lines(replace_text), 1)
+
+        print(f"[ENGINEER]   SEARCH block not found in {filename} — patch cannot apply.")
+        print(f"[ENGINEER]   SEARCH was:\n{search_text[:250]!r}")
+        return ""
 
     # ── Patch application ─────────────────────────────────────────────────────
 
@@ -286,6 +391,13 @@ class SelfEngineer:
         shutil.copy2(target_path, bak_path)
         original_content = target_path.read_text(encoding="utf-8")
 
+        # Extra data backup for knowledge_graph.py — a bad patch could corrupt the graph
+        # before the import check catches it; the .json is not recoverable from .bak
+        if target_path.name == "knowledge_graph.py":
+            graph_path = FREED_DIR / "FREED_graph.json"
+            if graph_path.exists():
+                shutil.copy2(graph_path, graph_path.with_suffix(".json.bak"))
+
         # Step 3 — write
         target_path.write_text(new_content, encoding="utf-8")
         print(f"[ENGINEER]   Written to {target_path.name}.")
@@ -304,6 +416,29 @@ class SelfEngineer:
             self._log({"status": "import_error", "file": target_path.name,
                        "what": what, "error": check.stderr[:300], "timestamp": ts})
             return {"failed": True, "reason": "import error — backup restored"}
+
+        # Step 4b — required-symbol check
+        # A patch can break the daemon without a syntax error if it renames or removes
+        # a public function that freed.py imports. The import check above only verifies
+        # the module loads; this verifies the contract is intact.
+        required = REQUIRED_SYMBOLS.get(target_path.name, [])
+        for sym in required:
+            sym_check = subprocess.run(
+                [sys.executable, "-c",
+                 f"import importlib.util; "
+                 f"spec = importlib.util.spec_from_file_location('m', '{target_path}'); "
+                 f"mod = importlib.util.module_from_spec(spec); "
+                 f"spec.loader.exec_module(mod); "
+                 f"assert hasattr(mod, '{sym}'), '{sym} missing'"],
+                capture_output=True, text=True, timeout=15,
+            )
+            if sym_check.returncode != 0:
+                print(f"[ENGINEER]   Symbol check FAILED — '{sym}' missing from {target_path.name}. Restoring backup.")
+                shutil.copy2(bak_path, target_path)
+                self._log({"status": "symbol_error", "file": target_path.name,
+                           "what": what, "missing_symbol": sym,
+                           "error": sym_check.stderr[:300], "timestamp": ts})
+                return {"failed": True, "reason": f"symbol check — '{sym}' removed or renamed, backup restored"}
 
         # Step 5 — epistemic audit
         diff_summary = self._make_diff_summary(original_content, new_content)
@@ -395,6 +530,16 @@ class SelfEngineer:
         Fails open to 'NEUTRAL' so audit errors never block valid patches.
         """
         import re
+        graph_criterion = ""
+        if filename == "knowledge_graph.py":
+            graph_criterion = (
+                "\n\nEXTRA CRITERION — knowledge_graph.py patches only:\n"
+                "Does this change make high-coherence edges HARDER to generate (raises the bar "
+                "— e.g. Onsager weighting, entropy cost, stricter edge scoring)? If so, lean TIGHTENS.\n"
+                "Does it make coherence EASIER TO FAKE (smooths scores, caches away low-quality "
+                "edges, reduces drift penalty)? If so, it MUST be LOOSENS regardless of intent.\n"
+                "Mirroring in code form is the failure mode. Coherence must be earned, not smoothed."
+            )
         prompt = (
             f"A self-modifying science daemon just patched its own code.\n"
             f"File: {filename}\n"
@@ -402,7 +547,8 @@ class SelfEngineer:
             f"Diff (changed lines only):\n{diff_summary}\n\n"
             f"Answer only: TIGHTENS, LOOSENS, or NEUTRAL\n"
             f"Then one sentence: what specific consequence of being wrong "
-            f"changed, and how.\n\n"
+            f"changed, and how.\n"
+            f"{graph_criterion}\n"
             f"VERDICT: [TIGHTENS/LOOSENS/NEUTRAL]\n"
             f"REASON: [one sentence, ≤20 words]"
         )
