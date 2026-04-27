@@ -1,31 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 115,
-    "timestamp": "2026-04-13T23:51:44.337241+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "The 2022 JEPA is essentially the 1992 PMAX",
-        "compress": ""
-      },
-      {
-        "title": "An integrated microwave neural network for broadband computation and communication",
-        "compress": ""
-      }
-    ],
-    "resolve": {
-      "obligation": "O21",
-      "resolved": false,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.9924
-  },
-  {
-    "cycle": 1,
     "generation": 116,
     "timestamp": "2026-04-13T23:52:08.690103+00:00",
     "sweep": {
@@ -1371,6 +1346,38 @@
         "O124",
         "O125",
         "O70"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 5,
+    "generation": 166,
+    "timestamp": "2026-04-27T22:29:06.064849+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 6,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Human brain distinctiveness based on EEG spectral coherence connectivity",
+        "compress": "EEG spectral coherence biometrics (N=108) confirms inter-regional coupling as stable individual signature, providing a concrete pipeline that advances O28's empirical path and implicitly supports INV_063's preference for dynamic over static neural measures."
+      },
+      {
+        "title": "Differentiating resting brain states using ordinal symbolic analysis",
+        "compress": "Ordinal asymmetry coefficients robustly discriminate resting brain states across datasets, advancing O28's EAR operationalization and confirming INV_063's dynamic entropy framing, while stopping short of the intelligence-prediction closure O28 requires."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O126",
+        "O84",
+        "O86"
       ]
     },
     "coherence": 0.999
