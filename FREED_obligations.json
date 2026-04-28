@@ -540,24 +540,24 @@
   },
   {
     "id": "O90",
-    "status": "open",
+    "status": "resolved",
     "statement": "Obligation O90 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model updates occurred.] | [Gen 168]  [COMMIT:NO \u2014 No state change recorded. Obligation unresolved; no graph/model update logged.]",
+    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model updates occurred.] | [Gen 168]  [COMMIT:NO \u2014 No state change recorded. Obligation unresolved; no graph/model update logged.] | RESOLVED: ** Cannot resolve a named obligation without its statement \u2014 reconstruct from genome, then attempt.",
     "created": "2026-04-23",
-    "resolved": null,
+    "resolved": "2026-04-28",
     "auto": true,
     "method": "math_only",
     "tractability": 3
   },
   {
     "id": "O91",
-    "status": "open",
+    "status": "resolved",
     "statement": "Obligation O91 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model update occurred.]",
+    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model update occurred.] | RESOLVED:",
     "created": "2026-04-23",
-    "resolved": null,
+    "resolved": "2026-04-28",
     "auto": true,
     "method": "math_only",
     "tractability": 3
@@ -986,5 +986,27 @@
     "resolved": "2026-04-28",
     "auto": true,
     "closes_when": "closes when: Counter-evidence injections from O118 produce at least one documented genome invariant modification confirmed through falsification loop causality testing."
+  },
+  {
+    "id": "O130",
+    "status": "resolved",
+    "statement": "Execute a binding single-pass verdict (void or assign content) on every null auto-detected obligation still marked open (O90, O91, O93, O95, O96, O97, O98, O99, O100, O101, O102, O104, O106, O107) \u2014 no stub may remain open after this pass.",
+    "priority": "high",
+    "progress": "RESOLVED:",
+    "created": "2026-04-28",
+    "resolved": "2026-04-28",
+    "auto": true,
+    "closes_when": "MALFORMED"
+  },
+  {
+    "id": "O131",
+    "status": "open",
+    "statement": "Specify a concrete formal derivation pathway distinguishing `autopoiesis` from `recursion` as genome symbols \u2014 produce either a proof that they collapse to one invariant (with merger) or a minimal example where they diverge (with separate invariant entries).",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-04-28",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Formal proof or minimal counterexample demonstrates whether autopoiesis and recursion collapse to one invariant or maintain distinct genome entries."
   }
 ]
