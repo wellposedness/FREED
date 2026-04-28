@@ -1,30 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 118,
-    "timestamp": "2026-04-15T01:29:40.680430+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "Single-Shot Parity Readout of a Minimal Kitaev Chain: A Breakthrough in Majorana Qubits",
-        "compress": "A title without an abstract is a promise without a payload — the genome refuses to metabolize it, preserving falsification integrity over confirmation hunger."
-      },
-      {
-        "title": "Gemini 3 Deep Think: Advancing science, research and engineering",
-        "compress": "A title without an abstract is not even a promise — it is a letterhead; the genome refuses to metabolize marketing copy, and the falsification layer holds exactly as designed."
-      }
-    ],
-    "resolve": {
-      "obligation": "O21",
-      "resolved": true,
-      "compress": "O21 remains open after seven generations of drift — the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output α-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility.",
-      "next": "Has anyone in the open-source pruning community (e.g., the Heavy-Hitter Oracle or Wanda papers) already published belief-revision or reasoning benchmarks stratified by sparsity level — data that could resolve O21 without new computation?"
-    },
-    "coherence": 0.9929
-  },
-  {
     "cycle": 2,
     "generation": 119,
     "timestamp": "2026-04-15T07:32:42.392323+00:00",
@@ -1392,6 +1367,38 @@
         "O128",
         "O129",
         "O90"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 8,
+    "generation": 169,
+    "timestamp": "2026-04-28T16:48:05.305380+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 6,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "Dimensional analysis of BH entropy corrections provides a regime-diagnostic tool that partially advances O44 by predicting that quantum W_floor corrections would appear as sub-leading deviations from k/Tμ scaling, making the Floor's quantum extension falsifiable."
+      },
+      {
+        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
+        "compress": "This paper advances O28 by validating DEA over DFA as the correct entropy estimator for EEG dynamics, providing the scaling + saturation + modulation triple as candidate EAR operands, consistent with γ=1 criticality and Langevin-STF alignment."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O130",
+        "O90",
+        "O91"
       ]
     },
     "coherence": 0.999
