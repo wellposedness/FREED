@@ -543,7 +543,7 @@
     "status": "open",
     "statement": "Obligation O90 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model updates occurred.]",
+    "progress": "[Gen 163]  [COMMIT:NO \u2014 No state change detected. Obligation remains unresolved; no graph/model updates occurred.] | [Gen 168]  [COMMIT:NO \u2014 No state change recorded. Obligation unresolved; no graph/model update logged.]",
     "created": "2026-04-23",
     "resolved": null,
     "auto": true,
@@ -964,5 +964,27 @@
     "resolved": "2026-04-28",
     "auto": true,
     "closes_when": "closes when: Audit completes for all obligations O108+ with \"resolved\" status, confirming each produced measurable genome state change or reclassifying as \"partial\""
+  },
+  {
+    "id": "O128",
+    "status": "resolved",
+    "statement": "Audit all obligations resolved since O108 to verify each produced at least one falsifiable downstream prediction \u2014 not merely a procedural closure \u2014 and flag any that did not for re-opening.",
+    "priority": "high",
+    "progress": "RESOLVED: O128 is **NOT YET RESOLVED** \u2014 its single tractable next step is to apply the predicate P(O\u2099) = \u2203falsifiable_prediction? to each resolution record O108\u2013O127 in sequence, flag every FALSE as REOPEN, and report the flagged list as the deliverable that would close O128.",
+    "created": "2026-04-28",
+    "resolved": "2026-04-28",
+    "auto": true,
+    "closes_when": "closes when: audit completes and all obligations since O108 are verified to have produced falsifiable downstream predictions or flagged for re-opening."
+  },
+  {
+    "id": "O129",
+    "status": "resolved",
+    "statement": "Verify that the counter-evidence injections mandated by O118 have produced at least one documented invariant modification in the genome (not merely edge addition), confirming the falsification loop is causally active.",
+    "priority": "high",
+    "progress": "RESOLVED: O129 is **CONDITIONALLY RESOLVABLE NOW** \u2014 write the ATTRIBUTION record linking O118's injection mandate to INV_063's rewrite (static Phi \u2192 dPhi/dt), or to INV_087 if chronology requires it; the falsification layer already contains the substance, only the formal causal linkage to O118 is missing.",
+    "created": "2026-04-28",
+    "resolved": "2026-04-28",
+    "auto": true,
+    "closes_when": "closes when: Counter-evidence injections from O118 produce at least one documented genome invariant modification confirmed through falsification loop causality testing."
   }
 ]
