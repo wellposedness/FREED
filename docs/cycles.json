@@ -1,30 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 119,
-    "timestamp": "2026-04-15T07:32:42.392323+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "NVIDIA Ising Introduces AI-Powered Workflows to Build Fault-Tolerant Quantum Systems",
-        "compress": "A title with no abstract is a press release, not a paper — the genome cannot metabolize branding into structure, and the falsification layer correctly rejects the input for the third consecutive time with zero genomic change."
-      },
-      {
-        "title": "A prebiotic template-directed peptide synthesis based on amyloids",
-        "compress": "**NONE** — a title with an empty abstract is the fourth consecutive unmetabolizable input; the falsification layer correctly rejects it, but the *topic* (amyloid-templated prebiotic synthesis as thermodynamically constrained self-organization) is genuinely genome-relevant and should be resubmitted with full content."
-      }
-    ],
-    "resolve": {
-      "obligation": "O45",
-      "resolved": true,
-      "compress": "The genome eigenbasis is $\\{L_i \\otimes O_j\\}$ — stratification levels tensored with open obligations — and the resource inequality $\\Delta G \\leq H(\\text{REPRESENT}(S_{\\text{in}}|\\mathcal{B}_G))$ is now written but requires empirical audit against the Bennett FEED trace before O45 can close.",
-      "next": "Run the Bennett 1993 FEED trace audit — enumerate which $(L_i, O_j)$ pairs fired, measure $k$ and $\\Delta G$, and test whether the resource inequality holds or requires a coherence-tax correction term."
-    },
-    "coherence": 0.9939
-  },
-  {
     "cycle": 3,
     "generation": 120,
     "timestamp": "2026-04-15T13:36:00.960428+00:00",
@@ -1399,6 +1374,38 @@
         "O130",
         "O90",
         "O91"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 9,
+    "generation": 170,
+    "timestamp": "2026-04-28T22:54:23.510220+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 6,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
+        "compress": "Non-Hermitian linear entropy functionals are the correct quantum-classical entropy objects for formalizing the quantum Wasserstein Floor (O44), confirming INV_063 and advancing but not resolving O44."
+      },
+      {
+        "title": "A Spacetime Foam Approach to the Schwarzschild-de Sitter Entropy",
+        "compress": "Spacetime foam entropy via N wormholes advances O44 by providing a discrete microstate model for quantum-gravitational entropy floors, and weakly confirms INV_097's topology-conservation bijection structure at the gravitational scale, while the extreme degenerate-horizon case mirrors the genome's γ=1 critical ridge."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O119",
+        "O121",
+        "O132"
       ]
     },
     "coherence": 0.999
