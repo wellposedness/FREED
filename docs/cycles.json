@@ -1,31 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 117,
-    "timestamp": "2026-04-13T23:52:47.479451+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "Starcloud raises $170 million Series A to build data centers in space",
-        "compress": ""
-      },
-      {
-        "title": "14 JEPA Milestones as a Map of AI Progress",
-        "compress": ""
-      }
-    ],
-    "resolve": {
-      "obligation": "O21",
-      "resolved": false,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.9924
-  },
-  {
-    "cycle": 1,
     "generation": 118,
     "timestamp": "2026-04-15T01:29:40.680430+00:00",
     "sweep": {
@@ -1385,6 +1360,38 @@
         "O127",
         "O87",
         "O88"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 7,
+    "generation": 168,
+    "timestamp": "2026-04-28T10:42:52.401855+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 6,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
+        "compress": "This paper advances O44 by supplying a dimensional-analysis test that could classify W_floor = k/Tμ as semi-classical or quantum, without yet resolving the obligation."
+      },
+      {
+        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
+        "compress": "EEG diffusion entropy shows Langevin-governed scaling with asymptotic saturation (advances O28, weak-confirms Wasserstein Floor), and establishes DEA as strictly superior to DFA for thermodynamic neural signal analysis."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O128",
+        "O129",
+        "O90"
       ]
     },
     "coherence": 0.999
