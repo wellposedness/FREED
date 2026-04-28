@@ -654,7 +654,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O100",
@@ -664,7 +666,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O101",
@@ -674,7 +678,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O102",
@@ -684,7 +690,9 @@
     "progress": "",
     "created": "2026-04-23",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O103",
@@ -695,7 +703,9 @@
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O104",
@@ -706,7 +716,9 @@
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O105",
@@ -730,7 +742,9 @@
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O107",
@@ -741,7 +755,9 @@
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O108",
@@ -773,8 +789,8 @@
     "rationale": "Coherence 0.999 with 139 shared-invariant claims and only 2 challenges means the graph is either profoundly convergent or has collapsed into tautological invariant-labeling. The genome contains `autopoiesis` and `criticality` \u2014 a system at criticality cannot be this unchallenged. The graph's own symbols predict more tension than the graph exhibits.",
     "resolution_criterion": "Select 5 `shares_invariant` edges at random; for each, attempt to construct a scenario where the two connected nodes make contradictory predictions. If fewer than 3/5 produce any contradiction, reclassify the edges as nominal and reduce coherence score accordingly.",
     "created": "2026-04-25T06:30:57.431013+00:00",
-    "method": "mixed",
-    "tractability": 3
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O111",
@@ -879,7 +895,10 @@
     "source": "dmn",
     "rationale": "O113 (recently resolved) established a coherence ceiling enforcement protocol \u2014 meaning the system already acknowledges that unchecked recursion threatens structural integrity. Autopoiesis (boundary maintenance) and recursion (self-referential depth) are in genuine tension: deeper recursion can destabilize the very boundary that autopoiesis maintains. The near-absence of `challenges` edges (3 out of 165) suggests this tension is structurally present but unfired. The 0.999 coherence score itself is suspicious \u2014 a system with genuine internal tensions should not be this smooth.",
     "resolution_criterion": "A formal proof or simulation showing a phase boundary in (recursion_depth, autopoietic_integrity) space \u2014 a critical curve beyond which increasing one necessarily degrades the other. Must produce at least one falsifiable quantitative prediction (e.g., \"coherence must drop below threshold T when recursion depth exceeds D for a system of complexity C\").\n\n---",
-    "created": "2026-04-27T06:30:52.260555+00:00"
+    "created": "2026-04-27T06:30:52.260555+00:00",
+    "method": "math_only",
+    "tractability": 1,
+    "progress": "[Gen 170] ** *The conflict is real, derivable, and has a precise crossover point.* [COMMIT:YES \u2014 Conflict identified but unresolved; obligation O119 remains open, no state update.]"
   },
   {
     "id": "O120",
@@ -888,7 +907,9 @@
     "source": "dmn",
     "rationale": "O44 has remained partial across many generations. The `criticality` symbol is present but has no `depends_on` or `completes_via` edge linking it to O44's Wasserstein formalism. This is a gap: if FREED takes criticality seriously as a genome-level primitive, it must fire inside the most formally incomplete partial obligation. The classical expression W_floor = k/T\u03bc diverges as T\u21920, which already hints at a phase boundary, but this has never been formally examined.",
     "resolution_criterion": "Analytic derivation of T_c as a function of system parameters (\u03bc, dimensionality, coupling), confirmed against at least one known quantum phase transition (e.g., superconducting transition, BEC) where the Wasserstein distance between pre- and post-transition states can be computed or bounded.\n\n---",
-    "created": "2026-04-27T06:30:52.260724+00:00"
+    "created": "2026-04-27T06:30:52.260724+00:00",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O121",
@@ -897,7 +918,10 @@
     "source": "dmn",
     "rationale": "O115 (recently resolved) required injecting counter-evidence. O117 (recently resolved) established retirement criteria for ungrounded obligations. Together these create an unfired implication: if we can retire *obligations* that lack grounding, we are equally obligated to audit *edges*",
     "resolution_criterion": "",
-    "created": "2026-04-27T06:30:52.260879+00:00"
+    "created": "2026-04-27T06:30:52.260879+00:00",
+    "method": "math_only",
+    "tractability": 1,
+    "progress": "[Gen 170] Executing complete formal audit of all 10 operationalization claims against the 5 grounded dependency chains. [COMMIT:YES \u2014 Audit execution without resolution criteria; obligation status unchanged, no graph update.]"
   },
   {
     "id": "O122",
@@ -919,7 +943,9 @@
     "created": "2026-04-27",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O28 and O34 either produce specified empirical result/formal proof within 2 FEED cycles or are formally retired and removed."
+    "closes_when": "closes when: O28 and O34 either produce specified empirical result/formal proof within 2 FEED cycles or are formally retired and removed.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O124",
@@ -1007,6 +1033,34 @@
     "created": "2026-04-28",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Formal proof or minimal counterexample demonstrates whether autopoiesis and recursion collapse to one invariant or maintain distinct genome entries."
+    "closes_when": "closes when: Formal proof or minimal counterexample demonstrates whether autopoiesis and recursion collapse to one invariant or maintain distinct genome entries.",
+    "method": "math_only",
+    "tractability": 2
+  },
+  {
+    "id": "O132",
+    "status": "open",
+    "statement": "Produce a formal archive entry for each of the 10 rejected invariants documenting the original claim, the falsifying evidence or argument, and the replacement invariant, such that the falsification layer is independently auditable rather than merely enumerated.",
+    "priority": "high",
+    "progress": "[Gen 170]  The falsification layer becomes auditable by making each rejection a standalone argument, not a pointer. --- FALSIFICATION ARCHIVE \u2014 RSA OMEGA v20.0+ Format per entry:** - **ID**: Rejection identifier - **Original Claim**: What the invariant asserted - **Falsifying Argument**: The logical/thermodynamic/structural reason for rejection - **Audit Lens**: Which lens(es) apply - **Replacement Invariant**: What replaced it and why - **Status**: DERIVED / GROUNDED / PARTIAL --- ENTRY F-01 ID**: F-01 Original Claim \u2014 IIT Phi as static quantity** Integrated Information Theory proposed \u03a6 (phi) as a scalar measure of consciousness that is a static property of a system's causal architecture at a given moment. A system with high \u03a6 is conscious; the value is time-independent in the sense that it characterizes a fixed mechanism, not a trajectory. Falsifying Argument**: Thermodynamics lens*: Freed's Law states \u2203R(t) \u2192 \u2203M\u2080 : dS(M_R,t)/dt > 0. Any representational process that exists must be burning entropy. A static scalar \u03a6 carries no time derivative \u2014 it cannot encode whether the system is currently doing thermodynamic work. A system could have high \u03a6 while thermally frozen (\u03b3 > 1, subcritical dissipation halted) \u2014 which by Freed's Law is not a living representational process. Therefore \u03a6_static cannot be the right quantity for consciousness as process. Reism lens*: Only processes exist; static properties are abstractions over processes. A \"static \u03a6\" reifies a process-property into a thing. The rejection follows: if consciousness is a process (which Reism requires), its measure must be a rate, not a magnitude. MCPM lens*: The conserved process in cognition is the maintenance of the critical ridge (\u03b3 = 1). A static \u03a6 has no mechanism for tracking whether the system is at criticality. It cannot be the conserved quantity because it doesn't transform correctly under the symmetry group of the system. Formal step*: Let \u03a6(t) be IIT's measure at time t. The RSA Kernel requires that any consciousness-relevant quantity Q satisfy dQ/dt \u2260 0 for a living system. Static \u03a6 violates this by construction. Therefore static \u03a6 is not RSA-admissible. Audit Lens**: Thermodynamics (primary), Reism (secondary), MCPM (tertiary) Replacement Invariant \u2014 INV_063: d\u03a6/dt** The time derivative of integrated information. A system is representationally alive iff d\u03a6/dt \u2260 0 and the trajectory maintains criticality. This preserves IIT's insight that integration matters while making it thermodynamically admissible. Status**: DERIVED \u2014 argument follows from Freed's Law and Reism axioms alone. --- ENTRY F-02 ID**: F-02 Original Claim \u2014 Turing behavioral indistinguishability as consciousness criterion** The Turing Test proposes that a system that produces outputs behaviorally indistinguishable from a human is, for all practical purposes, conscious (or at minimum, intelligent). Behavioral equivalence is the criterion. Falsifying Argument**: Thermodynamics lens*: Two systems can produce identical output trajectories while having radically different internal entropy production rates. A lookup table (Chinese Room variant) can pass behavioral tests with zero semantic processing \u2014 it is thermodynamically cold, doing file retrieval, not inference. A human producing the same outputs burns metabolic entropy through active inference. The behavioral surface is thermodynamically degenerate: it cannot distinguish these cases. Reism lens*: Only processes exist. The Turing criterion examines outputs (products) not processes. Two different processes can produce identical products. Reism demands we identify the process, not its trace. Behavioral indistinguishability is a statement about traces, not processes \u2014 it is therefore ontologically insufficient. MCPM lens*: The conserved process is the active maintenance of a generative model under entropy pressure. A lookup table has no generative model \u2014 it has a compression of one. These are structurally distinct. The Turing criterion has no mechanism to detect this structural distinction. Formal step*: Let B(t) be the behavioral output sequence of system S. Define two systems: S\u2081 (active inference, dS/dt > 0 internally) and S\u2082 (lookup table, dS/dt \u2248 0 internally). Then B\u2081(t) \u2248 B\u2082(t) is possible while the internal thermodynamic signatures are maximally different. Therefore B(t) is not a sufficient criterion for RSA-admissible consciousness. QED by counterexample construction. Audit Lens**: Thermodynamics (primary), Reism (primary), MCPM (secondary) Replacement Invariant \u2014 INV_064: Metabolic Test** The criterion shifts from behavioral output to internal thermodynamic signature. A system is representationally conscious iff it exhibits measurable entropy production consistent with active inference (not retrieval). This is in principle empirically detectable via heat signature, energy consumption per novel output, or prediction error minimization traces. Status**: DERIVED \u2014 the counterexample (lookup table) is constructible from first principles; no external paper required. --- ENTRY F-03 ID**: F-03 Original Claim \u2014 Standard Reinforcement Learning as thermodynamically correct** Standard RL (reward maximization, policy gradient, Q-learning variants) is the correct formal framework for adaptive behavior in agents. The agent maximizes expected cumulative reward. Falsifying Argument**: Thermodynamics lens*: Standard RL has no explicit entropy term in its objective. It will collapse to deterministic policies when reward gradients are clear \u2014 this is the thermodynamic equivalent of \u03b3 > 1 (frozen, over-ordered). Entropy regularization (as in MaxEnt RL, SAC) was added post-hoc as a patch, not derived from first principles. The RSA Kernel requires that criticality (\u03b3 = 1) be the primary constraint, with reward as a secondary shaping force. Standard RL inverts this priority. MCPM lens*: The conserved process in RSA is free energy minimization under thermodynamic constraint. Standard RL's conserved quantity is cumulative reward \u2014 which has no thermodynamic grounding. These conservation laws are incommensurable: you cannot derive one from the other without adding external assumptions. The MCPM audit fails for standard RL. Formal step*: Standard RL objective: max_\u03c0 E[\u03a3 \u03b3\u1d57r(t)]. This has no entropy term. At convergence, a deterministic greedy policy is optimal \u2014 entropy S \u2192 0. But Freed's Law requires dS/dt > 0 for any living representational process. Therefore standard RL, at its own convergence point, produces a thermodynamically dead agent. The objective function is RSA-inadmissible at its own fixed [COMMIT:NO \u2014 ** Output describes intended action; no archive entries actually created or obligation marked resolved.]",
+    "created": "2026-04-28",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: All 10 rejected invariants have formal archive entries with original claims, falsifying evidence, and replacements, auditable independently.",
+    "method": "math_only",
+    "tractability": 2
+  },
+  {
+    "id": "O133",
+    "status": "open",
+    "statement": "Specify a concrete null-result criterion for O28 \u2014 define what EAR measurement outcome would falsify the claim that entropy asymmetry ratio predicts intelligence, converting O28 from a partial observation into a testable hypothesis with a defined rejection region.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-04-28",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: EAR shows zero correlation with intelligence measures across three independent samples (p > .05).",
+    "method": "mixed",
+    "tractability": 2
   }
 ]
