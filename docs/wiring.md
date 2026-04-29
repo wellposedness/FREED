@@ -32,6 +32,9 @@ Last updated: 2026-04-26. Update this file whenever you add a module, rename a f
 | Change site HTML layout | `site_builder.py` | `_render_html()` L198 |
 | Change how genome symbols are published | `site_builder.py` | `_write_symbols()` L76 |
 | Change DMN's cross-connect detection | `dmn.py` | `DMNAuditor._check_cross_connect()` L229 |
+| Change genome promotion threshold | `promote.py` | `PROMOTE_THRESHOLD` L22, `PROMOTE_MIN_NODES` L23 |
+| Change Opus promotion filter prompt | `promote.py` | `_FILTER_PROMPT` L26 |
+| Revert a genome promotion | `FREED_genome.md` | Delete the `## [PROMOTED YYYY-MM-DD]` block at end of file |
 | Change how FREED's genome coherence is scored | `l7_agent.py` | `NonHermitianEntropyScorer.score()` L266 |
 | Change pre-audit rumination detection | `freed.py` | `_phase_preaudit()` L520 |
 | Update Noether's Table row from FEED | `freed.py` | `_maybe_update_noether_row()` L1292 |
@@ -133,6 +136,7 @@ Claude Code **can** edit SACRED files. The daemon cannot.
 ```
 targeted_sweep.py   tamura_sweep.py   l7_agent.py   consolidate.py
 knowledge_graph.py  site_builder.py   batch_feed.py  voice.py
+promote.py
 ```
 
 After changing `MODIFIABLE` or `SACRED`, **restart the daemon** — Python loads these sets once at startup. The running process will not see the edit until restart.
