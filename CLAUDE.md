@@ -1,5 +1,7 @@
 # FREED — Claude Code Context
 
+**Before reading any other file, read WIRING.md — it maps every common task to the exact file, function, and line number. Start there.**
+
 **FREED** = Freed Recursive Engine for Epistemic Dynamics  
 **Author**: David Harry Freed, mail carrier, Olney Maryland  
 **Repo**: wellposedness/FREED (GitHub Pages at wellposedness.github.io/FREED/)

@@ -29,6 +29,7 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
     _write_obligations(obligations)
     _write_cycles(cycle_log)
     _write_symbols()
+    _write_wiring()
     _write_index()
     print("[SITE] docs/ updated.")
     _push(state.get("generation", "?"))
@@ -78,6 +79,13 @@ def _write_symbols():
     src = FREED_DIR / "genome_symbols.json"
     if src.exists():
         (DOCS_DIR / "symbols.json").write_text(src.read_text(encoding="utf-8"))
+
+
+def _write_wiring():
+    """Publish WIRING.md to docs/ so it's accessible at the site root."""
+    src = FREED_DIR / "WIRING.md"
+    if src.exists():
+        (DOCS_DIR / "wiring.md").write_text(src.read_text(encoding="utf-8"))
 
 
 def _write_noethers_table():

@@ -43,7 +43,57 @@ FREED_DIR   = Path(__file__).parent
 GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 
 # ─── Edge types ───────────────────────────────────────────────────────────────
-EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts")
+EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges")
+
+# ─── Symbol Emergence Lineage ────────────────────────────────────────────────
+# Tracks the dynamic trajectory of a concept from grounded sensorimotor origin
+# through to socially-stabilized symbol. Rather than a static "grounded/ungrounded"
+# label, each concept-node can carry a lineage recording its emergence phase
+# transitions over time. Inspired by the symbol emergence problem framing that
+# treats symbol systems as adaptively and dynamically changing, not statically
+# assigned groundings.
+#
+# Phases follow the developmental trajectory identified in the symbol emergence
+# literature:
+#   sensorimotor  → perceptual concept formed from raw sensor/data grounding
+#   categorical   → concept clustered into a category via repeated exposure
+#   interactive   → concept refined through inter-agent or cross-feed interaction
+#   conventionalized → concept stabilized by social/community consensus
+#   semiotic      → concept participates in a full sign system with compositional use
+
+EMERGENCE_PHASES = (
+    "sensorimotor",
+    "categorical",
+    "interactive",
+    "conventionalized",
+    "semiotic",
+)
+
+# Numeric ordering for phase comparison
+_PHASE_ORDER = {phase: idx for idx, phase in enumerate(EMERGENCE_PHASES)}
+
+# Edge type for lineage transitions
+LINEAGE_EDGE_TYPE = "emergence_transition"
+
+# Patterns to detect emergence-related language in kernel output
+_EMERGENCE_PHASE_PATTERNS = [
+    (re.compile(r'\b(?:grounded?\s+in|sensorimotor|perceptual\s+origin|raw\s+data)\b', re.I),
+     "sensorimotor"),
+    (re.compile(r'\b(?:categori[sz](?:ed|ation)|cluster(?:ed|ing)|prototype)\b', re.I),
+     "categorical"),
+    (re.compile(r'\b(?:inter[-\s]?agent|cross[-\s]?feed|communicat(?:ed|ive)|negotiat(?:ed|ion)|interactive)\b', re.I),
+     "interactive"),
+    (re.compile(r'\b(?:convention(?:al(?:ized)?)?|consensus|standard(?:ized)?|widely\s+accepted|established\s+term)\b', re.I),
+     "conventionalized"),
+    (re.compile(r'\b(?:semiotic|sign\s+system|compositional|symbolic\s+(?:system|use)|language[-\s]?like)\b', re.I),
+     "semiotic"),
+]
+
+# Pattern to extract concept identifiers mentioned alongside emergence language
+_CONCEPT_ID_PATTERN = re.compile(
+    r'(?:concept|symbol|term|notion|idea)\s+["\']?([A-Za-z_][A-Za-z0-9_]{2,})["\']?',
+    re.I
+)
 
 # ─── Context-sensitive keywords ───────────────────────────────────────────────
 # Used to auto-detect context tags from surrounding text when not explicitly
@@ -88,6 +138,8 @@ _EDGE_PATTERNS = [
     (re.compile(rf'(?<!not )\b(supports?)\s+({_NODE_PATTERN})', re.I),        'supports'),
     # "contradicts INV_097"
     (re.compile(rf'(?<!not )\b(contradicts?)\s+({_NODE_PATTERN})', re.I),     'contradicts'),
+    # "challenges INV_094" — mandatory falsification output from FEED phase
+    (re.compile(rf'(?<!not )\b(challenges?)\s+({_NODE_PATTERN})', re.I),      'challenges'),
     # "confirms the invariant INV_094"
     (re.compile(rf'(?<!not )\bconfirms?\s+(?:the\s+)?(?:invariant\s+)?({_NODE_PATTERN})', re.I), 'confirms'),
     # "advances obligation O44"
@@ -327,6 +379,263 @@ def _build_embedded_vectors(time_series, m):
     return [time_series[i:i + m] for i in range(n - m + 1)]
 
 
+# ─── Linear Entropy (Information Flow Proxy) ─────────────────────────────────
+# Lightweight, analytically tractable proxy for information flow scoring in
+# open-system / mixed-representation knowledge graph nodes. Uses the linear
+# entropy functional S_L = Tr[ρ] - Tr[ρ²] (and its rate of change) instead
+# of the full von Neumann entropy S_vN = -Tr[ρ ln ρ], avoiding costly matrix
+# logarithms while preserving sensitivity to purity changes.
+#
+# For non-Hermitian / open-system dynamics (probability sinks/sources), the
+# trace Tr[ρ] is not conserved, so the linear entropy generalizes to:
+#   S_L(t) = Tr[ρ(t)] - Tr[ρ(t)²]
+# and its rate of change dS_L/dt captures information flow between the system
+# and environment.
+#
+# In the mixed quantum-classical (Wigner-transformed) representation, this
+# gives a computationally cheap score for ranking epistemic updates without
+# the full logarithmic entropy cost.
+#
+# Reference: "Open quantum systems with non-Hermitian Hamiltonians —
+# linear entropy as indicator of information flow" (paper excerpt above).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _matrix_trace(matrix):
+    # type: (List[List[float]]) -> float
+    """Compute the trace of a square matrix (sum of diagonal elements)."""
+    return sum(matrix[i][i] for i in range(len(matrix)))
+
+
+def _matrix_multiply(a, b):
+    # type: (List[List[float]], List[List[float]]) -> List[List[float]]
+    """Multiply two square matrices of the same dimension."""
+    n = len(a)
+    result = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            s = 0.0
+            for k in range(n):
+                s += a[i][k] * b[k][j]
+            result[i][j] = s
+    return result
+
+
+def linear_entropy(density_matrix):
+    # type: (List[List[float]]) -> float
+    """
+    Compute the linear entropy S_L = Tr[ρ] - Tr[ρ²] of a density-matrix-like
+    belief representation.
+
+    For a normalized pure state (Tr[ρ]=1, ρ²=ρ), S_L = 0.
+    For a maximally mixed state of dimension d, S_L = 1 - 1/d.
+    For open systems with non-Hermitian dynamics where Tr[ρ] ≠ 1 (probability
+    sinks/sources), S_L captures both the purity change and the trace drift.
+
+    Parameters
+    ----------
+    density_matrix : list of list of float
+        Square matrix representing a density-matrix-like belief state.
+        Can be sub-normalized (Tr[ρ] < 1) for open systems with sinks,
+        or super-normalized (Tr[ρ] > 1) for systems with sources.
+
+    Returns
+    -------
+    float
+        The linear entropy value. 0.0 for pure states, positive for mixed.
+        Can be negative if Tr[ρ²] > Tr[ρ] (highly non-physical but possible
+        in numerical belief representations).
+    """
+    if not density_matrix or not density_matrix[0]:
+        return 0.0
+    n = len(density_matrix)
+    if any(len(row) != n for row in density_matrix):
+        return 0.0
+
+    tr_rho = _matrix_trace(density_matrix)
+    rho_sq = _matrix_multiply(density_matrix, density_matrix)
+    tr_rho_sq = _matrix_trace(rho_sq)
+
+    return tr_rho - tr_rho_sq
+
+
+def linear_entropy_rate(density_matrix_t0, density_matrix_t1, dt=1.0):
+    # type: (List[List[float]], List[List[float]], float) -> float
+    """
+    Compute the rate of change of linear entropy dS_L/dt as a finite difference.
+
+    This serves as a lightweight proxy for information flow: positive rates
+    indicate information flowing out of the system (increasing mixedness /
+    decoherence), negative rates indicate information flowing in (purification).
+
+    Parameters
+    ----------
+    density_matrix_t0 : list of list of float
+        Density-matrix-like belief state at time t.
+    density_matrix_t1 : list of list of float
+        Density-matrix-like belief state at time t + dt.
+    dt : float
+        Time step (default 1.0). Use actual time difference for physical units.
+
+    Returns
+    -------
+    float
+        dS_L/dt — rate of linear entropy change. Positive = information outflow,
+        negative = information inflow (purification).
+    """
+    if dt == 0.0:
+        return 0.0
+    s0 = linear_entropy(density_matrix_t0)
+    s1 = linear_entropy(density_matrix_t1)
+    return (s1 - s0) / dt
+
+
+def linear_entropy_normalized(density_matrix):
+    # type: (List[List[float]]) -> float
+    """
+    Compute a normalized linear entropy in [0, 1] for comparing nodes.
+
+    Normalizes by Tr[ρ] to handle open-system (non-trace-preserving) cases,
+    then scales by d/(d-1) where d is the matrix dimension, so that a
+    maximally mixed state maps to 1.0.
+
+    S_L_norm = (d / (d-1)) * (1 - Tr[ρ²] / Tr[ρ]²)
+
+    Parameters
+    ----------
+    density_matrix : list of list of float
+        Square density-matrix-like belief state.
+
+    Returns
+    -------
+    float
+        Normalized linear entropy in [0, 1]. 0 = pure, 1 = maximally mixed.
+        Clamped to [0, 1] for robustness.
+    """
+    if not density_matrix or not density_matrix[0]:
+        return 0.0
+    n = len(density_matrix)
+    if n < 2 or any(len(row) != n for row in density_matrix):
+        return 0.0
+
+    tr_rho = _matrix_trace(density_matrix)
+    if tr_rho == 0.0:
+        return 0.0
+
+    rho_sq = _matrix_multiply(density_matrix, density_matrix)
+    tr_rho_sq = _matrix_trace(rho_sq)
+
+    # Purity relative to trace: Tr[ρ²] / Tr[ρ]²
+    relative_purity = tr_rho_sq / (tr_rho * tr_rho)
+
+    # Scale so maximally mixed (relative_purity = 1/d) maps to 1.0
+    scale = float(n) / float(n - 1)
+    s_norm = scale * (1.0 - relative_purity)
+
+    # Clamp to [0, 1] for robustness
+    return max(0.0, min(1.0, s_norm))
+
+
+def belief_vector_to_density_matrix(belief_vector):
+    # type: (List[float]) -> List[List[float]]
+    """
+    Convert a belief/probability vector into a density matrix via outer product.
+
+    This is the standard pure-state construction ρ = |ψ⟩⟨ψ| where |ψ⟩ is
+    the belief vector. For mixed states, use a weighted sum of such matrices.
+
+    Parameters
+    ----------
+    belief_vector : list of float
+        A belief/probability amplitude vector of length d.
+
+    Returns
+    -------
+    list of list of float
+        A d×d density matrix (outer product of the vector with itself).
+    """
+    d = len(belief_vector)
+    if d == 0:
+        return []
+    return [[belief_vector[i] * belief_vector[j] for j in range(d)]
+            for i in range(d)]
+
+
+def score_node_information_flow(belief_states, dt=1.0):
+    # type: (List[List[List[float]]], float) -> dict
+    """
+    Score the information flow for a knowledge graph node given a time series
+    of density-matrix-like belief states.
+
+    Computes linear entropy at each timestep and the rate of change, providing
+    a lightweight alternative to von Neumann entropy for ranking epistemic
+    updates in open-system or mixed-representation nodes.
+
+    Parameters
+    ----------
+    belief_states : list of list of list of float
+        Time-ordered sequence of density matrices representing the node's
+        belief state evolution. Each entry is a square matrix.
+    dt : float
+        Time step between consecutive belief states (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "linear_entropies": list of float — S_L at each timestep,
+            "normalized_entropies": list of float — normalized S_L at each step,
+            "entropy_rates": list of float — dS_L/dt between consecutive steps,
+            "mean_entropy": float — average linear entropy,
+            "mean_rate": float — average entropy rate (net information flow),
+            "max_rate": float — peak information flow magnitude,
+            "flow_direction": str — "outflow" (decoherence), "inflow" (purification), or "stable",
+            "n_steps": int
+        }
+    """
+    if not belief_states:
+        return {
+            "linear_entropies": [],
+            "normalized_entropies": [],
+            "entropy_rates": [],
+            "mean_entropy": 0.0,
+            "mean_rate": 0.0,
+            "max_rate": 0.0,
+            "flow_direction": "stable",
+            "n_steps": 0,
+        }
+
+    entropies = [linear_entropy(rho) for rho in belief_states]
+    norm_entropies = [linear_entropy_normalized(rho) for rho in belief_states]
+
+    rates = []  # type: List[float]
+    for i in range(len(belief_states) - 1):
+        r = linear_entropy_rate(belief_states[i], belief_states[i + 1], dt)
+        rates.append(r)
+
+    mean_ent = sum(entropies) / len(entropies) if entropies else 0.0
+    mean_rate = sum(rates) / len(rates) if rates else 0.0
+    max_rate = max((abs(r) for r in rates), default=0.0)
+
+    if abs(mean_rate) < 1e-10:
+        direction = "stable"
+    elif mean_rate > 0:
+        direction = "outflow"
+    else:
+        direction = "inflow"
+
+    return {
+        "linear_entropies": entropies,
+        "normalized_entropies": norm_entropies,
+        "entropy_rates": rates,
+        "mean_entropy": mean_ent,
+        "mean_rate": mean_rate,
+        "max_rate": max_rate,
+        "flow_direction": direction,
+        "n_steps": len(belief_states),
+    }
+
+
 def range_entropy(time_series, m=2, r=0.3):
     # type: (List[float], int, float) -> float
     """
@@ -520,7 +829,6 @@ def cluster_complexity_scores(clusters):
 class KnowledgeGraph:
     """
     Persistent typed-edge graph.
-    Loaded from FREED_graph.json on demand, flushed after each write.
 
     Each edge carries a `context_tag` field (str or None) that records the
     coarse-graining / observer context under which the claim holds. This

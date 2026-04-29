@@ -218,6 +218,452 @@ def compute_range_entropy(text, m=None, r=None):
     }
 
 
+# ─── Permutation-Entropy Asymmetry Scorer ────────────────────────────────────
+# Implements ordinal asymmetry analysis inspired by symbolic EEG methods.
+# For each sliding window of the token-frequency time series, we compute:
+#   1. Permutation entropy (H_pe) — Shannon entropy of ordinal patterns
+#   2. Transition entropy (H_tr) — entropy of symbol-to-symbol transitions
+#   3. Asymmetry coefficient (A) — measures irreversibility of symbolic
+#      transition probabilities: A = sum |P(pi_i -> pi_j) - P(pi_j -> pi_i)|
+# Inputs with high asymmetry are thermodynamically non-equilibrium signals,
+# i.e., genuinely dynamic/novel rather than near-equilibrium/redundant.
+
+# Configuration
+PE_ORDER = 3              # ordinal pattern embedding dimension (3! = 6 symbols)
+PE_DELAY = 1              # embedding delay (tau)
+PE_WINDOW_SIZE = 50       # sliding window length for local PE/asymmetry
+PE_WINDOW_STEP = 25       # step between successive windows
+PE_ASYM_THRESHOLD = 0.15  # asymmetry above this flags non-equilibrium novelty
+PE_MIN_SERIES_LEN = 20    # minimum series length to attempt analysis
+
+
+def _ordinal_pattern(window, order, delay):
+    """
+    Extract ordinal patterns from a time series segment.
+
+    For each position i, form the vector
+        (x[i], x[i+delay], x[i+2*delay], ..., x[i+(order-1)*delay])
+    and record the rank-order permutation as a tuple.
+
+    Args:
+        window: list of float — time series segment
+        order: int — pattern length (d)
+        delay: int — embedding delay (tau)
+
+    Returns:
+        list of tuple — sequence of ordinal patterns
+    """
+    n = len(window)
+    patterns = []
+    for i in range(n - (order - 1) * delay):
+        motif = [window[i + k * delay] for k in range(order)]
+        # Rank the motif: argsort of argsort gives ranks
+        indexed = sorted(range(order), key=lambda k: (motif[k], k))
+        rank = [0] * order
+        for r_val, idx in enumerate(indexed):
+            rank[idx] = r_val
+        patterns.append(tuple(rank))
+    return patterns
+
+
+def _permutation_entropy(patterns, order):
+    """
+    Compute the permutation entropy (Shannon entropy of ordinal pattern distribution).
+
+    Args:
+        patterns: list of tuple — ordinal pattern sequence
+        order: int — pattern length (for normalization)
+
+    Returns:
+        float — normalized permutation entropy in [0, 1]
+    """
+    if not patterns:
+        return 0.0
+    counts = Counter(patterns)
+    total = len(patterns)
+    h = 0.0
+    for c in counts.values():
+        p = c / total
+        if p > 0:
+            h -= p * math.log(p)
+    # Normalize by log(order!) — maximum possible entropy
+    max_h = math.log(math.factorial(order))
+    if max_h < 1e-12:
+        return 0.0
+    return h / max_h
+
+
+def _transition_entropy(patterns):
+    """
+    Compute the transition entropy from a sequence of ordinal patterns.
+
+    Builds a first-order transition matrix P(pi_i -> pi_j) and computes
+    the Shannon entropy of the full transition probability distribution.
+
+    Args:
+        patterns: list of tuple — ordinal pattern sequence
+
+    Returns:
+        float — transition entropy (unnormalized, in nats)
+    """
+    if len(patterns) < 2:
+        return 0.0
+    transitions = Counter()
+    for i in range(len(patterns) - 1):
+        transitions[(patterns[i], patterns[i + 1])] += 1
+    total = sum(transitions.values())
+    if total == 0:
+        return 0.0
+    h = 0.0
+    for c in transitions.values():
+        p = c / total
+        if p > 0:
+            h -= p * math.log(p)
+    return h
+
+
+def _asymmetry_coefficient(patterns):
+    """
+    Compute the ordinal asymmetry coefficient.
+
+    Measures the irreversibility of symbolic transition probabilities:
+        A = (1/2) * sum_{i,j} |P(pi_i -> pi_j) - P(pi_j -> pi_i)|
+
+    A = 0 indicates a reversible (equilibrium) process.
+    A > 0 indicates time-irreversibility (non-equilibrium dynamics).
+
+    Args:
+        patterns: list of tuple — ordinal pattern sequence
+
+    Returns:
+        float — asymmetry coefficient in [0, 1]
+    """
+    if len(patterns) < 2:
+        return 0.0
+
+    transitions = Counter()
+    for i in range(len(patterns) - 1):
+        transitions[(patterns[i], patterns[i + 1])] += 1
+    total = sum(transitions.values())
+    if total == 0:
+        return 0.0
+
+    # Build probability dict
+    prob = {}
+    for key, count in transitions.items():
+        prob[key] = count / total
+
+    # Collect all unique (unordered) pairs
+    seen_pairs = set()
+    asym_sum = 0.0
+    for (pi_i, pi_j) in prob:
+        pair = (min(pi_i, pi_j), max(pi_i, pi_j)) if pi_i != pi_j else (pi_i, pi_j)
+        if pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+        p_fwd = prob.get((pi_i, pi_j), 0.0)
+        p_rev = prob.get((pi_j, pi_i), 0.0)
+        if pi_i == pi_j:
+            # Self-transitions: symmetric by definition, contribute 0
+            continue
+        # For ordered pair, also check the other direction assignment
+        p_ab = prob.get((pair[0], pair[1]), 0.0)
+        p_ba = prob.get((pair[1], pair[0]), 0.0)
+        asym_sum += abs(p_ab - p_ba)
+
+    return 0.5 * asym_sum
+
+
+def compute_ordinal_asymmetry(text, order=None, delay=None, window_size=None,
+                               window_step=None, threshold=None):
+    """
+    Compute the permutation-entropy asymmetry score for a text input.
+
+    Converts text to a token-frequency time series, then slides windows
+    across the series computing ordinal patterns, permutation entropy,
+    transition entropy, and the asymmetry coefficient per window.
+    Aggregates across windows to produce a single novelty triage signal.
+
+    Inputs whose mean asymmetry exceeds the threshold are flagged as
+    non-equilibrium (genuinely dynamic/novel) — these should receive
+    priority in the genome-mapping pipeline.
+
+    Args:
+        text: str — input text to analyze
+        order: int — ordinal pattern length (default: PE_ORDER)
+        delay: int — embedding delay (default: PE_DELAY)
+        window_size: int — sliding window length (default: PE_WINDOW_SIZE)
+        window_step: int — window step size (default: PE_WINDOW_STEP)
+        threshold: float — asymmetry threshold for non-equilibrium flag
+                          (default: PE_ASYM_THRESHOLD)
+
+    Returns:
+        dict with keys:
+            'mean_pe': float — mean normalized permutation entropy across windows
+            'mean_transition_entropy': float — mean transition entropy
+            'mean_asymmetry': float — mean asymmetry coefficient
+            'max_asymmetry': float — peak asymmetry across windows
+            'num_windows': int — number of windows analyzed
+            'is_non_equilibrium': bool — True if mean_asymmetry > threshold
+            'series_length': int — length of underlying token-frequency series
+            'order': int — ordinal pattern order used
+            'threshold': float — asymmetry threshold used
+        or None if text is too short for analysis.
+    """
+    used_order = order if order is not None else PE_ORDER
+    used_delay = delay if delay is not None else PE_DELAY
+    used_wsize = window_size if window_size is not None else PE_WINDOW_SIZE
+    used_wstep = window_step if window_step is not None else PE_WINDOW_STEP
+    used_thresh = threshold if threshold is not None else PE_ASYM_THRESHOLD
+
+    series = _build_token_frequency_series(text)
+    if len(series) < max(PE_MIN_SERIES_LEN, used_order * used_delay + 1):
+        return None
+
+    # For very long series, subsample to keep O(N) manageable
+    max_len = 1000
+    if len(series) > max_len:
+        step = len(series) / max_len
+        series = [series[int(i * step)] for i in range(max_len)]
+
+    # Slide windows across the series
+    pe_values = []
+    te_values = []
+    asym_values = []
+
+    start = 0
+    while start + used_wsize <= len(series):
+        win = series[start:start + used_wsize]
+        patterns = _ordinal_pattern(win, used_order, used_delay)
+
+        if patterns:
+            pe_values.append(_permutation_entropy(patterns, used_order))
+            te_values.append(_transition_entropy(patterns))
+            asym_values.append(_asymmetry_coefficient(patterns))
+
+        start += used_wstep
+
+    # Handle case where series is shorter than window but long enough for patterns
+    if not pe_values and len(series) >= used_order * used_delay + 1:
+        patterns = _ordinal_pattern(series, used_order, used_delay)
+        if patterns:
+            pe_values.append(_permutation_entropy(patterns, used_order))
+            te_values.append(_transition_entropy(patterns))
+            asym_values.append(_asymmetry_coefficient(patterns))
+
+    if not pe_values:
+        return None
+
+    mean_asym = sum(asym_values) / len(asym_values)
+
+    return {
+        'mean_pe': sum(pe_values) / len(pe_values),
+        'mean_transition_entropy': sum(te_values) / len(te_values),
+        'mean_asymmetry': mean_asym,
+        'max_asymmetry': max(asym_values),
+        'num_windows': len(pe_values),
+        'is_non_equilibrium': mean_asym > used_thresh,
+        'series_length': len(series),
+        'order': used_order,
+        'threshold': used_thresh,
+    }
+
+
+def compute_epistemic_triage(text):
+    """
+    Combined epistemic triage scorer: RangeEn complexity + ordinal asymmetry.
+
+    Runs both compute_range_entropy and compute_ordinal_asymmetry on the input,
+    returning a unified triage dict. Inputs flagged as non-equilibrium by the
+    asymmetry scorer AND showing high RangeEn complexity are highest-priority
+    for full genome mapping.
+
+    Args:
+        text: str — input text to triage
+
+    Returns:
+        dict with keys:
+            'range_en_result': dict or None — from compute_range_entropy
+            'asymmetry_result': dict or None — from compute_ordinal_asymmetry
+            'priority': str — 'high', 'medium', or 'low'
+            'triage_score': float — combined score in [0, 1]
+    """
+    ren_result = compute_range_entropy(text)
+    asym_result = compute_ordinal_asymmetry(text)
+
+    # Compute combined triage score
+    score = 0.0
+    components = 0
+
+    if ren_result is not None:
+        ren_val = ren_result['range_en']
+        if ren_val == float('inf'):
+            ren_norm = 1.0
+        elif ren_val <= 0.0:
+            ren_norm = 0.0
+        else:
+            # Sigmoid-like normalization: map typical RangeEn [0, 3] to [0, 1]
+            ren_norm = min(1.0, ren_val / 3.0)
+        score += ren_norm
+        components += 1
+
+    if asym_result is not None:
+        # Asymmetry contribution: scale mean_asymmetry (typically [0, 0.5])
+        asym_norm = min(1.0, asym_result['mean_asymmetry'] / 0.5)
+        score += asym_norm
+        components += 1
+
+    if components > 0:
+        score /= components
+    else:
+        score = 0.5  # insufficient data — default medium
+
+    # Determine priority
+    is_non_eq = asym_result is not None and asym_result['is_non_equilibrium']
+    if score >= 0.6 and is_non_eq:
+        priority = 'high'
+    elif score >= 0.35 or is_non_eq:
+        priority = 'medium'
+    else:
+        priority = 'low'
+
+    return {
+        'range_en_result': ren_result,
+        'asymmetry_result': asym_result,
+        'priority': priority,
+        'triage_score': round(score, 4),
+    }
+
+
+# ─── Open-System Redefinition Detector ────────────────────────────────────────
+# Papers that *redefine* standard quantities (entropy, distance, norm, etc.)
+# for open or non-conservative systems carry obligation-advancing content that
+# keyword matching misses.  They don't name the target construct directly;
+# instead they introduce "novel definitions of X" where X is a well-known
+# quantity, in the context of non-Hermitian / open / dissipative dynamics.
+#
+# This detector looks for co-occurrence of:
+#   (a) redefinition language  ("novel definition", "generalize", "redefine", …)
+#   (b) standard quantity names ("entropy", "distance", "norm", "metric", …)
+#   (c) open-system markers     ("non-Hermitian", "open quantum", "dissipative", …)
+#
+# When all three layers co-occur, the paper is flagged as an obligation-
+# advancement candidate with a boost score proportional to signal density.
+
+# Compiled patterns (module-level for reuse)
+_REDEF_PATTERNS = _re_module.compile(
+    r'(?:novel|new|modified|generalize[ds]?|redefine[ds]?|alternative|'
+    r'extended|non[- ]?standard|revised|reformulat|introduce[ds]?)\b',
+    _re_module.IGNORECASE,
+)
+
+_STANDARD_QUANTITIES = _re_module.compile(
+    r'\b(?:entropy|entropies|distance|metric|norm|inner[- ]product|'
+    r'probability|density\s+matrix|trace|fidelity|divergence|'
+    r'free\s+energy|partition\s+function|observable|expectation\s+value|'
+    r'purity|coherence|mutual\s+information|relative\s+entropy)\b',
+    _re_module.IGNORECASE,
+)
+
+_OPEN_SYSTEM_MARKERS = _re_module.compile(
+    r'\b(?:non[- ]?[Hh]ermitian|open\s+(?:quantum\s+)?system|dissipat|'
+    r'non[- ]?conservative|probability\s+sink|probability\s+source|'
+    r'Lindblad|master\s+equation|decay|gain[- ]loss|'
+    r'PT[- ]?symmetr|pseudo[- ]?Hermitian|bi[- ]?orthogonal|'
+    r'non[- ]?unitary|Wigner[- ]?transform|mixed\s+quantum[- ]classical|'
+    r'environment\s+coupling|decoherence|Markov\w*\s+bath|'
+    r'classical\s+bath)\b',
+    _re_module.IGNORECASE,
+)
+
+
+def detect_quantity_redefinition(text):
+    """
+    Detect whether a text redefines standard physical/information-theoretic
+    quantities in the context of open or non-conservative systems.
+
+    This catches papers that carry obligation-advancing content (e.g. for
+    obligations like O44 concerning entropy in non-Hermitian regimes) but
+    would be missed by direct keyword matching because they *redefine*
+    rather than *name* the target construct.
+
+    Args:
+        text: str — paper title + abstract (or full content)
+
+    Returns:
+        dict with keys:
+            'is_redefinition': bool — True if all three signal layers co-occur
+            'redefinition_score': float — density score in [0.0, 1.0]
+            'redef_hits': int — count of redefinition-language matches
+            'quantity_hits': int — count of standard-quantity matches
+            'open_system_hits': int — count of open-system marker matches
+            'matched_quantities': list of str — which quantities were found
+            'matched_markers': list of str — which open-system markers were found
+            'obligation_hint': str or None — suggested obligation category
+        or None if text is empty / too short for analysis.
+    """
+    if not text or len(text) < 40:
+        return None
+
+    text_lower = text.lower()
+
+    # Layer (a): redefinition language
+    redef_matches = _REDEF_PATTERNS.findall(text_lower)
+    redef_count = len(redef_matches)
+
+    # Layer (b): standard quantities
+    quantity_matches = _STANDARD_QUANTITIES.findall(text_lower)
+    quantity_count = len(quantity_matches)
+    unique_quantities = list(set(q.lower().strip() for q in quantity_matches))
+
+    # Layer (c): open-system markers
+    marker_matches = _OPEN_SYSTEM_MARKERS.findall(text_lower)
+    marker_count = len(marker_matches)
+    unique_markers = list(set(m.lower().strip() for m in marker_matches))
+
+    # All three layers must be present for a positive detection
+    is_redef = redef_count > 0 and quantity_count > 0 and marker_count > 0
+
+    # Compute density score: geometric mean of capped per-layer densities
+    # Each layer is capped at 5 hits to avoid runaway scores from repetition
+    cap = 5.0
+    r_density = min(redef_count, cap) / cap
+    q_density = min(quantity_count, cap) / cap
+    m_density = min(marker_count, cap) / cap
+
+    if is_redef:
+        # Geometric mean ensures all three layers must contribute
+        score = (r_density * q_density * m_density) ** (1.0 / 3.0)
+    else:
+        score = 0.0
+
+    # Heuristic obligation hint based on which quantities are redefined
+    obligation_hint = None
+    if is_redef:
+        q_lower = ' '.join(unique_quantities)
+        if 'entropy' in q_lower or 'purity' in q_lower or 'mutual information' in q_lower:
+            obligation_hint = 'entropy/information-flow in open systems'
+        elif 'distance' in q_lower or 'metric' in q_lower or 'fidelity' in q_lower:
+            obligation_hint = 'geometric/metric structure in non-Hermitian spaces'
+        elif 'norm' in q_lower or 'inner product' in q_lower:
+            obligation_hint = 'inner-product redefinition for non-Hermitian operators'
+        elif 'probability' in q_lower or 'density matrix' in q_lower:
+            obligation_hint = 'probability/state-space structure in open dynamics'
+        else:
+            obligation_hint = 'quantity redefinition in open/non-conservative context'
+
+    return {
+        'is_redefinition': is_redef,
+        'redefinition_score': round(score, 4),
+        'redef_hits': redef_count,
+        'quantity_hits': quantity_count,
+        'open_system_hits': marker_count,
+        'matched_quantities': unique_quantities[:10],
+        'matched_markers': unique_markers[:10],
+        'obligation_hint': obligation_hint,
+    }
+
+
 # ─── RangeEn local-range normalization ────────────────────────────────────────
 
 def _range_normalize(scores):

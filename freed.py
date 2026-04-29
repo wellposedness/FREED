@@ -34,6 +34,7 @@ from self_engineer   import SelfEngineer
 from cerebellum      import Cerebellum
 from dmn             import DMNAgent
 from batch_feed      import fetch_url
+from promote         import PromotePhase
 import voice
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@ class FREEDDaemon:
         self.cerebellum    = Cerebellum(api_key=api_key)
         self.dmn           = DMNAgent(api_key=api_key)
         self.haiku_client  = anthropic.Anthropic(api_key=api_key)
+        self.promote       = PromotePhase(api_key=api_key)
         self._dmn_fired_today = False  # prevents DMN from firing more than once per dead zone
 
         # Load or initialize living state
@@ -503,6 +505,10 @@ class FREEDDaemon:
         _push_status("COMPRESS", "Renormalizing & compressing knowledge graph")
         self._phase_consolidate(feed_results, cycle_log)
 
+        # 8b. PROMOTE — Opus reviews high-recurrence candidates for genome promotion
+        _push_status("PROMOTE", "Reviewing genome promotion candidates")
+        self._phase_promote(cycle_log)
+
         # 9. PUBLISH → REPEAT
         _push_status("REPEAT", f"Writing site — Gen {self.state['generation']}")
         build_site(self.state, self.obligations, cycle_log)
@@ -582,6 +588,17 @@ class FREEDDaemon:
                 ts_short = m.get("timestamp", "")[:19]
                 tag = "⚠ REVERTED" if m.get("status") == "audit_reverted" else f"AUDIT:{verdict}"
                 print(f"  [{tag}] {filename} {ts_short} — {reason}")
+
+        # Genome promotions since last cycle
+        promote_decisions = PromotePhase.recent_decisions(self.state.get("last_cycle", ""))
+        if promote_decisions:
+            print()
+            for d in promote_decisions:
+                verb   = d.get("verdict", "?")
+                stmt   = d.get("statement", "?")[:60]
+                reason = d.get("reason", "")
+                tag    = "[PROMOTED]" if verb == "PROMOTE" else f"[PROMOTE:{verb}]"
+                print(f"  {tag} {stmt}... — {reason}")
 
         if issues:
             for issue in issues:
@@ -851,7 +868,7 @@ class FREEDDaemon:
                 f"OPEN OBLIGATIONS:\n{ob_ref}\n\n"
                 f"Map this input against the genome. "
                 f"When you identify a relationship, cite the EXACT ID — e.g., "
-                f"'confirms INV_094', 'advances O28', 'refutes INV_097', 'resolves O44'. "
+                f"'confirms INV_094', 'advances O28', 'refutes INV_097', 'resolves O44', 'challenges INV_023'. "
                 f"Invariant IDs are in the genome (INV_023 through INV_108). "
                 f"Obligation IDs are listed above (O28, O34, O44, etc.).\n\n"
                 f"SECOND: Does this paper describe a concrete algorithm, technique, or "
@@ -863,7 +880,15 @@ class FREEDDaemon:
                 f"IMPLEMENT_WHAT: [one sentence — the specific thing to add or change]\n"
                 f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','batch_feed.py','voice.py']))}]\n"
                 f"IMPLEMENT_WHY: [one sentence — why this improves FREED's epistemic loop]\n"
-                f"If no clear implementation, omit the IMPLEMENT block entirely."
+                f"If no clear implementation, omit the IMPLEMENT block entirely.\n\n"
+                f"THIRD — MANDATORY FALSIFICATION (Seed Integrity Rule 2): "
+                f"Find the genome invariant or obligation most at risk from this paper's "
+                f"evidence — the claim this paper strains, limits, or contradicts most directly. "
+                f"Output exactly one line:\n"
+                f"CHALLENGE: challenges [INVXXX or OXX] — [one sentence: how this paper stresses that claim]\n"
+                f"If the paper genuinely poses no challenge to any genome claim, output:\n"
+                f"CHALLENGE: challenges NONE — [one sentence: why not]\n"
+                f"Omitting CHALLENGE entirely violates Seed Integrity Rule 2. There is no opt-out."
             )
 
             # O76 — if Noether's Table obligation is open, ask L7 to tag relevant rows
@@ -977,6 +1002,22 @@ class FREEDDaemon:
         )
 
         cycle_log["phases"]["consolidate"] = report
+
+    # ── PROMOTE ──────────────────────────────────────────────────────────────
+
+    def _phase_promote(self, cycle_log: dict):
+        """
+        Autonomous genome promotion: Opus reviews high-recurrence invariants
+        and appends approved ones to FREED_genome.md.
+        Only fires when promotion_candidates in state exceed threshold.
+        """
+        result = self.promote.run(cycle_log)
+        cycle_log["phases"]["promote"] = result
+        if result.get("skipped"):
+            print(f"[PROMOTE] Skipped — {result['skipped']}")
+        else:
+            p, h, r = result["promoted"], result["held"], result["rejected"]
+            print(f"[PROMOTE] Done — promoted={p}  held={h}  rejected={r}")
 
     # ── OBLIGATE ─────────────────────────────────────────────────────────────
 

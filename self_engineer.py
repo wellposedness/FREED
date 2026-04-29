@@ -49,6 +49,7 @@ MODIFIABLE = {
     "batch_feed.py",
     "voice.py",
     "knowledge_graph.py",  # authorized 2026-04-25; graph_integrity audit criterion enforced
+    "promote.py",          # autonomous genome promotion; criteria and filter prompt may improve
 }
 
 # These are never touched, no matter what
@@ -545,12 +546,17 @@ class SelfEngineer:
             f"File: {filename}\n"
             f"Reason: {implement_why}\n\n"
             f"Diff (changed lines only):\n{diff_summary}\n\n"
-            f"Answer only: TIGHTENS, LOOSENS, or NEUTRAL\n"
-            f"Then one sentence: what specific consequence of being wrong "
-            f"changed, and how.\n"
+            f"TIGHTENS: adds a detectable failure mode, increases specificity, "
+            f"adds a falsification path, reduces a silent assumption.\n"
+            f"LOOSENS:  adds caching that hides errors, smooths scores, reduces "
+            f"rejection sensitivity, or adds complexity without a new way to be wrong.\n"
+            f"NEUTRAL:  performance, formatting, logging — no change to epistemic stakes.\n"
             f"{graph_criterion}\n"
-            f"VERDICT: [TIGHTENS/LOOSENS/NEUTRAL]\n"
-            f"REASON: [one sentence, ≤20 words]"
+            f"Respond with EXACTLY these two lines and nothing else:\n"
+            f"VERDICT: TIGHTENS\n"
+            f"REASON: one sentence ≤20 words\n"
+            f"(Replace TIGHTENS with LOOSENS or NEUTRAL as appropriate. "
+            f"Do NOT start the REASON line with a verdict word.)"
         )
         try:
             resp = self.client.messages.create(
@@ -563,6 +569,26 @@ class SelfEngineer:
             m_r = re.search(r'REASON\s*:\s*(.+)', raw, re.I)
             verdict = m_v.group(1).upper() if m_v else "NEUTRAL"
             reason  = m_r.group(1).strip()[:200] if m_r else raw[:100]
+
+            # Haiku sometimes skips the VERDICT:/REASON: structure and outputs
+            # the verdict as a bare word. Detect a verdict keyword at the start
+            # of reason or raw output and override accordingly.
+            check = (reason if reason else raw).strip()
+            head_m = re.match(r'^(TIGHTENS|LOOSENS|NEUTRAL)\b', check, re.I)
+            if head_m:
+                detected = head_m.group(1).upper()
+                if not m_v:
+                    verdict = detected
+                    print(f"[ENGINEER]   Audit: no VERDICT: field — parsed '{detected}' from raw output.")
+                elif detected != verdict:
+                    print(f"[ENGINEER]   Audit verdict corrected: {verdict} → {detected} "
+                          f"(reason started with verdict word).")
+                    verdict = detected
+                # Strip the verdict word from reason for clean logging
+                tail = check[head_m.end():].lstrip('.\n\r\t :').strip()
+                if tail:
+                    reason = tail[:200]
+
             return verdict, reason
         except Exception as e:
             print(f"[ENGINEER]   Audit call failed: {e} — defaulting NEUTRAL")
