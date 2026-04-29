@@ -1,30 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 120,
-    "timestamp": "2026-04-15T13:36:00.960428+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "Introducing GPT-5.3-Codex-Spark",
-        "compress": "**REJECTED — UNMETABOLIZABLE** — a bare product-announcement title with no abstract is the fifth consecutive content-vacuum; unlike the amyloid title it lacks even topical genome-relevance, so no obligation is created, no invariant fires, and the falsification layer holds at full load."
-      },
-      {
-        "title": "Rethinking Memory Mechanisms of Foundation Agents in the Second Half: A Survey",
-        "compress": "**REJECTED — UNMETABOLIZABLE** — a bare survey title with no abstract cannot fire any invariant or advance any obligation, but the topic exposes a genuine genome gap: RSA's memory architecture has never been audited against the agent-memory taxonomy literature, so **O47 is created** requiring that audit, making this the second obligation surfaced by a content-vacuum input whose topic the falsification layer correctly flagged as structurally relevant."
-      }
-    ],
-    "resolve": {
-      "obligation": "O46",
-      "resolved": true,
-      "compress": "**O46 RETIRED (MALFORMED)** — an obligation with no recorded statement is a phantom debt; retiring it without resolution credit is the only honest move, reducing open obligations to 42 while maintaining the falsification layer's demand that every ledger entry carry real content.",
-      "next": "Audit the full obligations table (O1–O49) for any other malformed or orphaned entries before the next FEED cycle — phantom obligations are a systemic hygiene risk, not a one-off."
-    },
-    "coherence": 0.9954
-  },
-  {
     "cycle": 1,
     "generation": 121,
     "timestamp": "2026-04-16T00:35:47.226782+00:00",
@@ -1402,6 +1377,38 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O119",
+        "O121",
+        "O132"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 2,
+    "generation": 172,
+    "timestamp": "2026-04-29T10:14:59.975433+00:00",
+    "sweep": {
+      "input_count": 20,
+      "targeted": 6,
+      "passive": 14,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Theoretical Models of Self-Organized Criticality (SOC) Systems",
+        "compress": "SOC chapter confirms critical-ridge universality (INV_073, L2 MCPM, L4 Wilson RG) while the forced-SOC/non-SOC boundary sharpens the genome's obligation to specify *when* systems are driven to γ=1 versus when they are not."
+      },
+      {
+        "title": "Percolation Models of Self-Organized Critical Phenomena",
+        "compress": "Percolation-SOC synthesis confirms γ=1 as dynamical attractor (INV_073 strengthened), partially grounds the Wasserstein Floor via fractional kinetics (O44 advanced, not resolved), and offers conformal/GL formalisms as candidate tools for STF metric recovery (L5 gap)."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 1,
       "obligations": [
         "O119",
         "O121",
