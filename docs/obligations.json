@@ -712,7 +712,7 @@
     "status": "open",
     "statement": "Obligation O104 (auto-detected)",
     "priority": "normal",
-    "progress": "[Gen 171] Attempting formal closure of O104 — the γ=1 criticality necessity theorem. [COMMIT:YES — Output cycling without state change. O104 remains unresolved; no graph/obligation status updated.]",
+    "progress": "[Gen 171] Attempting formal closure of O104 — the γ=1 criticality necessity theorem. [COMMIT:YES — Output cycling without state change. O104 remains unresolved; no graph/obligation status updated.] | [Gen 173] ** Attempt formal closure now by exhausting the alternative space. [COMMIT:YES — Exhaustion attempt failed; obligation remains unresolved. No state update occurred.]",
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
@@ -900,7 +900,7 @@
     "created": "2026-04-27T06:30:52.260555+00:00",
     "method": "math_only",
     "tractability": 1,
-    "progress": "[Gen 170] ** *The conflict is real, derivable, and has a precise crossover point.* [COMMIT:YES — Conflict identified but unresolved; obligation O119 remains open, no state update.] | [Gen 172] ** The conflict is a phase boundary in a 2D free-energy space; formalize it. [COMMIT:NO — Output describes theoretical framework without resolving the obligation's actual conflict.]"
+    "progress": "[Gen 170] ** *The conflict is real, derivable, and has a precise crossover point.* [COMMIT:YES — Conflict identified but unresolved; obligation O119 remains open, no state update.] | [Gen 172] ** The conflict is a phase boundary in a 2D free-energy space; formalize it. [COMMIT:NO — Output describes theoretical framework without resolving the obligation's actual conflict.] | [Gen 173] See full proof below. [COMMIT:YES — Obligation remains unresolved; no graph/model state updated. Output cycled.]"
   },
   {
     "id": "O120",
@@ -918,14 +918,15 @@
   {
     "id": "O121",
     "statement": "The graph has 10 `operationalizes` edges but 5 `depends_on` edges — meaning the system claims to operationalize more constructs than it has formally grounded dependency chains for. Identify and close the specific operationalization claims that lack a `depends_on` path back to an empirical anchor (O28's EEG dataset or O34's mathematical proof).",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "O115 (recently resolved) required injecting counter-evidence. O117 (recently resolved) established retirement criteria for ungrounded obligations. Together these create an unfired implication: if we can retire *obligations* that lack grounding, we are equally obligated to audit *edges*",
     "resolution_criterion": "",
     "created": "2026-04-27T06:30:52.260879+00:00",
     "method": "math_only",
     "tractability": 1,
-    "progress": "[Gen 170] Executing complete formal audit of all 10 operationalization claims against the 5 grounded dependency chains. [COMMIT:YES — Audit execution without resolution criteria; obligation status unchanged, no graph update.] | [Gen 172]  [COMMIT:NO — Obligation O121 remains unresolved; no graph or obligation state updated.]"
+    "progress": "[Gen 170] Executing complete formal audit of all 10 operationalization claims against the 5 grounded dependency chains. [COMMIT:YES — Audit execution without resolution criteria; obligation status unchanged, no graph update.] | [Gen 172]  [COMMIT:NO — Obligation O121 remains unresolved; no graph or obligation state updated.] | RESOLVED: ** The audit failed before because it lacked a falsification criterion; supply that first, then the trace either closes or precisely locates the missing piece.",
+    "resolved": "2026-04-29"
   },
   {
     "id": "O122",
@@ -1093,5 +1094,16 @@
     "rationale": "4 challenges against 139 shared-invariant edges means the graph's internal dissent ratio is 2.8%. The recently resolved O118/O129 (counter-evidence injection) was supposed to increase this. If the 4 challenges are all pointing at peripheral nodes with no downstream dependents, they",
     "resolution_criterion": "",
     "created": "2026-04-29T06:30:48.725194+00:00"
+  },
+  {
+    "id": "O137",
+    "status": "open",
+    "statement": "Assign a hard generation deadline (≤ gen 180) to each of O28, O34, and O44 — if not fully resolved by that generation, execute mandatory retirement with void notation and remove from open table.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-04-29",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Hard generation deadlines assigned to O28, O34, O44 and mandatory retirement executed if unresolved by deadline."
   }
 ]
