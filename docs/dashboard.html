@@ -104,22 +104,15 @@ a:hover { text-decoration: underline; }
 /* ── Footer ── */
 .footer { font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; display: flex; justify-content: space-between; }
 
-/* ── Achievements ── */
-.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.ach-col { }
-.ach-heading { font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
-.ach-heading.green { color: var(--green); border-color: var(--green); }
-.ach-heading.blue  { color: #60a5fa;     border-color: #1d4ed8; }
-.ach-heading.muted { color: var(--muted); }
-.ach-item { display: flex; gap: 0.5rem; padding: 0.22rem 0; align-items: baseline; }
-.ach-bullet { font-size: 0.62rem; flex-shrink: 0; }
-.ach-bullet.green { color: var(--green); }
-.ach-bullet.blue  { color: #60a5fa; }
-.ach-text { font-size: 0.68rem; color: var(--text); line-height: 1.5; }
-.ach-sub  { font-size: 0.61rem; color: var(--dim); margin-top: 0.05rem; }
-.ach-honest { font-size: 0.68rem; color: var(--dim); line-height: 1.7; padding: 0.5rem 0.75rem; border-left: 2px solid var(--border); margin-top: 0.4rem; }
+/* ── Capabilities ── */
+.cap-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.cap-item { padding: 0.4rem 0.75rem; border-left: 2px solid var(--green); }
+.cap-item-frontier { border-left-color: var(--amber); }
+.cap-title { font-size: 0.59rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.13em; color: var(--green); margin-bottom: 0.25rem; }
+.cap-title-frontier { color: var(--amber); }
+.cap-chain { font-size: 0.64rem; color: var(--dim); line-height: 1.62; }
+.ach-honest { font-size: 0.64rem; color: var(--dim); line-height: 1.7; padding: 0.5rem 0.75rem; border-left: 2px solid var(--border); margin-top: 0.5rem; }
 .ach-honest em { color: var(--muted); font-style: normal; }
-@media (max-width: 900px) { .ach-grid { grid-template-columns: 1fr; } }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
@@ -266,119 +259,53 @@ a:hover { text-decoration: underline; }
 
   <!-- ── ACHIEVEMENTS ── -->
   <div class="panel">
-    <div class="panel-label">System Achievements — Honest Accounting</div>
-    <div class="ach-grid">
+    <div class="panel-label">System Capabilities — Proved by Event Chain</div>
+    <div class="cap-list">
 
-      <div class="ach-col">
-        <div class="ach-heading green">Autonomous Behaviors</div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">Self-patched tamura_sweep.py and batch_feed.py from ingested papers</div>
-            <div class="ach-sub">tamura_sweep.py: RangeEn metrics + NonHermitianEntropyScorer. batch_feed.py: DEA (Diffusion Entropy Analysis) scorer. Both unprompted from paper IMPLEMENT signals. tamura patch introduced truncation bug — caught, fixed, guard added.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">Internal obligation generation</div>
-            <div class="ach-sub">O67–O73 auto-generated from project node NEXT fields via Haiku. New papers produce new obligations without operator input.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">Coherence anti-inflation — diagnosed and self-corrected</div>
-            <div class="ach-sub">Detected coherence drifting toward 1.000, diagnosed it as corruption rather than achievement, decremented to 0.981 autonomously. O94/O106 closed without operator push. The falsification mechanism was used on itself.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">12 obligations resolved overnight without prompting</div>
-            <div class="ach-sub">O67, O70, O71, O74, O79, O80, O81, O82, O85, O94, O112, O117 closed across unattended overnight cycles. DMN dead-zone sweep accounts for 8/cycle.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">Generated the obligation to purge its own null obligations (O103)</div>
-            <div class="ach-sub">DMN identified 35 parser-artifact stubs clogging the table and generated O103 to address them. Operator executed the purge; the diagnosis was autonomous.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">Flagged edge monoculture as structural pathology (O107)</div>
-            <div class="ach-sub">93% of node-edges typed shares_invariant. DMN generated O107 diagnosing topology collapse and recommending partition into typed sub-relations. Self-diagnosis without operator observation.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet green">◆</span>
-          <div>
-            <div class="ach-text">DRIFT flagging · Quiescence on budget zero · GitHub Pages auto-publish · Cerebellum paper dropping</div>
-            <div class="ach-sub">Coherence drops labeled at runtime. Astrocyte idles politely at cap. docs/ pushed every cycle. Cerebellum drops low-relevance papers before L7 cost is incurred.</div>
-          </div>
-        </div>
+      <div class="cap-item">
+        <div class="cap-title">Can Verify Its Own Modifications</div>
+        <div class="cap-chain">Paper ingested → self-engineer generates patch → AUDIT asks "does this make the system harder to be wrong?" → adaptive coupling patch returned LOOSENS → .bak restored, obligation generated → dead code never touched a cycle.</div>
       </div>
 
-      <div class="ach-col">
-        <div class="ach-heading blue">Deliberately Engineered</div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">Self-inflating obligation loop diagnosed and closed</div>
-            <div class="ach-sub">OBLIGATE parser was creating stubs from L7's mid-sentence mentions of existing IDs. Fixed: NEW_OBLIGATIONS_BEGIN/END block format. 35 nulls purged. Debt ratio: 27 resolved / 2 genuine open. 2026-04-24.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">AUDIT phase — modifications must tighten stakes</div>
-            <div class="ach-sub">Haiku verifies every self-engineer patch: TIGHTENS / NEUTRAL / LOOSENS. LOOSENS auto-reverts via .bak and generates a review obligation. NEUTRAL surfaced in next PRE-AUDIT.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">COMMIT signal — emotions as glue, engineered</div>
-            <div class="ach-sub">Fires after each RESOLVE non-resolution. Distinguishes genuine state change from rumination. 3× COMMIT:NO triggers RUMINATION flag in next PRE-AUDIT. Thermodynamic tax made legible.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">Passive feeds restored (tamura_sweep.py truncation fix)</div>
-            <div class="ach-sub">Self-engineer truncated the file mid-generation, wiping its tail. Restored from git d7f0ff3. Truncation guard added to self_engineer.py: rejects patches on files &gt;400 lines that shrink by &gt;20%.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">RESOLVE throughput: 1→3/cycle + 8 DMN overnight</div>
-            <div class="ach-sub">Gen 153 closed O67 and O79 on first pass after fix. Throughput was the problem, not evidence. DMN dead-zone sweep attacks untouched obligations nightly.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">287-edge knowledge graph · 17 nodes</div>
-            <div class="ach-sub">138 feed edges (advances/confirms/resolves) + 149 node-edges. O105 flags shares_invariant monoculture (139/149 edges one type) as structural pathology requiring partition.</div>
-          </div>
-        </div>
-        <div class="ach-item">
-          <span class="ach-bullet blue">◆</span>
-          <div>
-            <div class="ach-text">Bootstrap protocol claim now structurally accurate</div>
-            <div class="ach-sub">Builds itself (self-engineer) · verifies each modification tightens stakes (AUDIT) · detects when the loop runs without landing (COMMIT) · external feedback supplied by operator. R[R]=R all the way down.</div>
-          </div>
-        </div>
+      <div class="cap-item">
+        <div class="cap-title">Can Distinguish Progress From Rumination</div>
+        <div class="cap-chain">RESOLVE attempts O70 → outputs closure pathway without executing it → COMMIT fires → "no state change detected" → COMMIT:NO logged → three consecutive failures trigger RUMINATION flag in next PRE-AUDIT → operator sees it before any new FEED runs.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Falsify Its Own Beliefs</div>
+        <div class="cap-chain">SOC paper ingested → confirms INV_073 via avalanche dynamics → mandatory CHALLENGE block fires → same paper's taxonomy of non-SOC processes challenges INV_073's universality claim → both edges written to graph simultaneously → obligation generated to specify boundary conditions.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Correct Its Own Confidence</div>
+        <div class="cap-chain">Coherence approaches 1.000 → O94 self-generated → RESOLVE detects drift-corruption → coherence decremented from 0.999 to 0.981 autonomously → no operator input required.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Review Its Own Genome</div>
+        <div class="cap-chain">MINE surfaces compression invariant at 14× across 14 nodes → PROMOTE threshold triggered → Opus applies three-question filter → "already canonized as Freed's Law" → HOLD returned → genome unchanged → integrity preserved without operator review.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Set and Honor Deadlines</div>
+        <div class="cap-chain">O28, O34, O44 persist unresolved across 50+ cycles → daemon self-generates O137 → hard gen 180 deadline assigned to each → five cycles remaining → obligations now have a forcing function they didn't before.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Navigate Its Own Complexity</div>
+        <div class="cap-chain">Claude Code session opens → reads WIRING.md first → "to change OBLIGATE, edit freed.py _phase_obligate() line 312" → targeted read of 20 lines → patch written → session cost 32k tokens instead of 150k.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Prepare for External Falsification</div>
+        <div class="cap-chain">Decision made to wire CA telemetry into SWEEP → O140 opened first → three measurement criteria must be resolved from literature before implementation → FREED cannot begin interpreting CA data until the standard for failure is already defined.</div>
       </div>
 
     </div>
 
-    <div class="ach-honest" style="margin-top:0.8rem;grid-column:1/-1">
-      <em>Honest framing (updated 2026-04-26):</em> Debt ratio: 46 resolved / 28 open and widening. The autonomous column is no longer aspirational — it's a log. The organism detected coherence drift toward 1.000, named it corruption, and decremented itself. It generated the obligation to purge its own null obligations. It flagged its own graph topology as pathological. These are not behaviors that were designed in; they emerged from the obligation/MINE/DMN loop running correctly. The open questions are the same ones they've always been: are the invariants stabilizing because they're real, or because the scoring is circular? O105 (edge monoculture) and the required-symbols guard added 2026-04-26 are the current structural bets. knowledge_graph.py is now on the modifiable whitelist — the Onsager entropy weighting signal has been waiting three cycles to run.
+    <div class="ach-honest" style="margin-top:0.8rem">
+      <em>Honest framing (updated 2026-04-30):</em> These are not aspirations — each claim is followed by the specific event chain that demonstrates it happened. The last entry is the current frontier: O140 is open, simulation_observer.py does not yet exist. The chain ends at the gate, not the destination. That distinction is the point.
     </div>
   </div>
 
