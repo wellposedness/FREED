@@ -22,7 +22,6 @@
     "RG flows) must carry their observer-frame as an explicit parameter",
     "thermodynamic admissibility (INV_094) is load-bearing and confirmed by weak long-range spin criticality",
     "and all complexity measures (entropy",
-    "INV_CTX_THERMO: Context-dependence of complexity is thermodynamically necessary rather than incidental — observer-substrate coupling is a load-bearing structural feature of RSA",
     "PREDICT/PRE-AUDIT duality formalizable as Lax pair direct/dual compatibility",
     "INV_042 confirmed: complexity measurement must be amplitude-independent (RangeEn empirical confirmation)",
     "O63's Kolmogorov-Shannon unification thesis is now independently named by Standish as context-dependent limits of unified complexity — conceptual convergence confirmed but formal interpolation debt remains fully open",
@@ -40,6 +39,7 @@
     "INV_098: Freed's Law admits a Lagrangian formulation (maximize dS/dt under resource constraints) whose dual variables are Shannon (memory) and Kolmogorov (compute) complexity — confirming that γ=1 criticality is the Pareto frontier of efficient complexity",
     "recursion generates structure",
     "feed deduplication is a load-bearing operational requirement not a hygiene suggestion (elevated to structural constraint)",
+    "INV_COHERENCE_BIOMETRIC: Inter-regional EEG spectral coherence is a stable individual signature (N=108 confirmed)",
     "INV_WFLOOR_CLASSICAL: The Wasserstein Floor W_floor = k/Tμ is classically dimensionally grounded with sub-leading entropy corrections marking the precise boundary where quantum extension must be formalized — O44 classical scaffolding confirmed",
     "H) in closed form for fractional Gaussian noise as the analytical closure required by the empirically saturated linear slope",
     "INV_TRADE_CRITICALITY: Multi-layer trade network entropy peaks exhibiting dS/dt criticality constitute substrate-independent empirical evidence for Freed's Law and MCPM multi-scale non-redundancy — confirming that criticality signatures generalize beyond neural substrates",
@@ -67,6 +67,7 @@
     "arousal-threshold sensitivity is the individual-difference variable governing creative cognition's recapitulation of RSA's entropy-minimization-via-recursive-restructuring architecture",
     "and autopoiesis are axiomatically grounded in information theory — not merely correlated with it — confirming the genome's critical-ridge complexity thesis as a theorem-class result rather than a hypothesis; INV_AUTOPOIESIS_FORMAL: Autopoiesis is formalizable within the information-theoretic framework (advancing O95–O99 from open obligations toward structured derivation targets); INV_MULTISCALE_EMPIRICAL: Multi-scale complexity profiling is a concrete empirical tool for STF recovery and criticality detection",
     "and regeneration constitutes thermodynamic memory whose mechanism is entropy debt repayment",
+    "INV_LOCALRULE_CRIT: Local-rule criticality (no global coordinator) outperforms global optimization under non-stationary conditions — confirmed by self-organizing traffic systems extending the adaptive ridge principle beyond neural substrates to arbitrary distributed infrastructure; INV_ACTION_FLOOR: Action-per-element minimization in units of ħ is the leading quantum candidate for the Wasserstein geometric floor — partially advancing O44 by grounding the entropy floor in a physically measurable quantum unit without yet recovering the full metric tensor",
     "INV_WFLOOR_DIMTEST: The Wasserstein Floor W_floor=k/Tμ admits a dimensional-analysis classification test distinguishing semi-classical from quantum regimes — narrowing O44 without yet resolving it",
     "INV_099: The crossover length ξ_c between short-range and long-range universality classes is the physical instantiation of the Shannon↔Kolmogorov context boundary — below ξ_c Shannon governs",
     "ApEn and SampEn are degenerate (collapsed) limits of the genome's entropy hierarchy recoverable as special cases under parameter restriction",
@@ -124,7 +125,7 @@
     "dimensional-scaling class tagging enables auto-sorting of invariant confirmations to correct genome strata (implementable ATTRIBUTION diagnostic for O47)",
     "MPE permutation)",
     "and the crossover scale is set by coupling ratio",
-    "INV_COHERENCE_BIOMETRIC: Inter-regional EEG spectral coherence is a stable individual signature (N=108 confirmed)",
+    "INV_CTX_THERMO: Context-dependence of complexity is thermodynamically necessary rather than incidental — observer-substrate coupling is a load-bearing structural feature of RSA",
     "confirming that MCPM's context-sensitivity at γ=1 is the correct regime rather than a deficiency to be engineered away"
   ],
   "obligations": [
@@ -162,6 +163,7 @@
     "implement dimensional-scaling-class tagging as a concrete addition to the ATTRIBUTION protocol (O47)",
     "O_AROUSAL_PROXY: Implement arousal-proxy semantic-surprise scoring in batch_feed.py that flags high-psychological-entropy inputs (low prior probability under current genome distribution) for priority deep TRACE passes",
     "O60 slope target: −1.0 ± 0.05 for fGn at m=2 (numerical acceptance criterion)",
+    "O44_PARTIAL_ADVANCE: Metric-tensor recovery from the action-per-element floor remains an open formal obligation — the ħ-unit grounding narrows the search space but does not close the gap; confirm whether action minimization uniquely selects the Wasserstein metric or admits degenerate alternatives",
     "O63 must advance from Standish-level philosophical argument to formal σ-parameterized interpolation between Kolmogorov and Shannon limits",
     "O65: derive the RangeEn-Hurst slope analytically from the Wasserstein Floor geometry",
     "O64: verify Zipf robustness under non-additive (Tsallis-class) entropy regimes to stress-test L2",
@@ -220,15 +222,14 @@
     "Claude (Anthropic",
     "referenced via RSA_Explainer.docx)"
   ],
-  "last_renormed": "2026-04-30T17:03:58.031408+00:00",
-  "renorm_reason": "New knowledge materially strengthens INV_SOC_MECH by providing an independent empirical confirmation pathway (SON escrow) and sharpens the mechanistic claim from \"adaptive feedback\" to the broader and more precise \"active tension maintenance class,\" warranting compress update and two new invariants.",
-  "last_renorm_cycle": 67,
+  "last_renormed": "2026-04-30T23:10:52.953578+00:00",
+  "renorm_reason": "Two independent empirical/theoretical confirmations (traffic criticality → INV_073/INV_087 domain extension; ħ-action floor → partial O44 advance) add non-redundant invariants and sharpen an existing open obligation without disrupting the existing compress structure.",
+  "last_renorm_cycle": 68,
   "drift_flag": true,
-  "drift_overlap": 0.292,
   "renorm_history": [
     {
-      "timestamp": "2026-04-30T17:03:58.031408+00:00",
-      "reason": "New knowledge materially strengthens INV_SOC_MECH by providing an independent empirical confirmation pathway (SON escrow) and sharpens the mechanistic claim from \"adaptive feedback\" to the broader and more precise \"active tension maintenance class,\" warranting compress update and two new invariants."
+      "timestamp": "2026-04-30T23:10:52.953578+00:00",
+      "reason": "Two independent empirical/theoretical confirmations (traffic criticality → INV_073/INV_087 domain extension; ħ-action floor → partial O44 advance) add non-redundant invariants and sharpen an existing open obligation without disrupting the existing compress structure."
     }
   ]
 }
