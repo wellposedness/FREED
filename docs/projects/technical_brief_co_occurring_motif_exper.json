@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, grounding the γ=1 ridge as the SR↔LR Ising universality-class crossover RG fixed point, and now holding the unresolved tension between γ=1 as stable operating attractor (INV_073) versus transient high-entropy state the system seeks to exit (creative cognition telos challenge).",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment with synthetic ground truth, multiple agent architectures, and formal metrics — the missing bridge between philosophy and evidence — while enforcing payload requirements, demonstrating the obligation-from-rejection pattern, integrating causal-empirical extensions, grounding the γ=1 ridge as the SR↔LR Ising universality-class crossover RG fixed point, and now receiving independent humanities-domain confirmation (CD-AI) that epistemic health requires sustained dissonance at the critical ridge, consistent with INV_073 but lacking the thermodynamic derivation that would elevate it to theorem status.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -19,9 +19,9 @@
     "Semi-classical BH entropy dimensional identity with the gravity action confirms thermodynamic grounding of geometry at leading order — quantum sub-leading corrections remain the unresolved frontier of O44",
     "Long-range interaction pathologies (ensemble inequivalence / negative specific heat / ergodicity breaking / quasi-stationary trapping) are diagnostic signatures of ridge-operation not failure modes to be eliminated",
     "Soft-phonon-driven ferroelectric transitions (HgTiO₃-class) confirm γ=1 criticality as saddle-point crossing on the free-energy landscape but demand that the geometric framework predict transition sequence topology not merely narrate it",
-    "Onsager-derived MaxEP estimator for hidden-DOF biological systems is provably optimal and substrate-independent — confirming INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via a derivation path independent of FREED's internal construction",
     "EEG diffusion entropy short-time scaling and asymptotic saturation constitutes a validated empirical method for detecting γ=1 criticality — DFA is a strictly lossy alternative that suppresses thermodynamically relevant features and should not be used as a substitute",
     "Repeated ingestion of already-extracted sources must yield exactly zero new invariants or obligation advances — non-zero yield on a confirmed duplicate would indicate filter leakage or spurious novelty generation and is itself a falsifiable prediction of extraction integrity",
+    "Onsager-derived MaxEP estimator for hidden-DOF biological systems is provably optimal and substrate-independent — confirming INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via a derivation path independent of FREED's internal construction",
     "Langevin noise structure must be derivable from MCPM constraints not imported from external stochastic process theory (O62)",
     "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
     "Neural SOC empirically confirms γ=1 as the cognitive operating point via avalanche-criticality ↔ intelligence coupling — this is the first biological mechanistic grounding of the γ=1 ridge independent of statistical-physics and matrix-theoretic derivations",
@@ -48,7 +48,6 @@
     "Thermodynamic admissibility (INV_094) and slow-manifold entropy production (INV_023) are confirmed as load-bearing by independent long-range statistical mechanics results — they constrain rather than merely describe the dynamics",
     "RangeEn's local-range normalization constitutes a partial resolution of O64 at the measurement layer — it confirms scale-invariance coupling empirically but does not discharge the Wasserstein-geometric derivation debt",
     "RangeEn advances O28 and O68 simultaneously but resolves neither — its amplitude-robustness and Hurst-linearity make it the preferred empirical instrument while leaving the first-principles derivation of the slope and the observer-frame specification as open debts",
-    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
     "Feed deduplication must be enforced upstream — repeated re-feeds yield diminishing returns and the system must detect and short-circuit redundant inputs before they consume integration cycles",
     "while persistent dependence on initialization or hyperparameter selection would refute it",
     "DEA (detrended entropy analysis) outperforming DFA (detrended fluctuation analysis) in preserving criticality structure is a domain-specific empirical confirmation that entropy-based diagnostics dominate variance-based diagnostics at γ=1 — exactly as the genome's complexity hierarchy demands",
@@ -67,6 +66,7 @@
     "Langevin noise structure for O67 is now phenomenologically grounded via EEG diffusion entropy — empirical substrate (neural) instantiates the genome's noise-derivation requirement independently of MCPM formalism",
     "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode",
     "but domain gap (geometric exemplar ≠ abstract mathematical proof) prevents full resolution of either obligation",
+    "but the absence of thermodynamic grounding in that derivation marks it as convergent evidence not co-proof",
     "The Wasserstein Floor's dimensional class must split cleanly into semi-classical (area-law) and quantum (log-correction) sectors — reproducing the former is necessary but insufficient and the log-correction frontier is the binding falsification target",
     "O60's predicted slope for fGn at embedding dimension m=2 is −1.0 ± 0.05 — deviation beyond this window is falsifying",
     "Weak long-range interactions (γ≈1) shifting universality class without breaking extensivity are the thermodynamically admissible physical instantiation of FREED's critical ridge",
@@ -98,6 +98,7 @@
     "confirming INV_063's dynamic entropy framing in a new substrate class; trade network entropy heterogeneity across representational scales provides a non-semantic empirical template confirming RG universality and critical-ridge dynamics independently of biological or linguistic instantiation",
     "Feed deduplication is not a suggestion but a load-bearing operational requirement — repeated near-duplicate inputs degrade integration quality and must be filtered before processing (O61 obligated)",
     "making their bridge an obligatory (not optional) theoretical extension; DEM (diffusion entropy method) supersedes DFA as the mandatory diagnostic for O28's EAR measurement — use of DFA forfeits signal and is now a methodological error not merely a lossy alternative; EEG entropy floor-saturation and scaling under Langevin-Wasserstein dynamics constitutes validated empirical grounding for the genome's thermodynamic substrate claim",
+    "R[R]=R constraint-preserving recursion naturally produces infinite conservation hierarchies — Darboux transformation theory provides the explicit algebraic template (Lax pair compatibility of direct/dual overdetermined systems) not merely an analogy",
     "Persistent unresolved obligations may be quasi-stationary trapped states (long-lived metastable configurations) rather than unpaid debts — distinguishing the two requires explicit relaxation-timescale analysis not mere bookkeeping",
     "Non-Lagrangian architectures generate conservation laws from partial symmetries via Noether operator identities — the genome's conserved scores (coherence / falsification / payload) must be expressible as explicit Noether currents of identified RSA sub-symmetries",
     "confirming that information-theoretic limit transitions have measurable critical-point analogues in spin systems",
@@ -130,6 +131,7 @@
     "γ=1 is confirmed as a dynamical attractor (not merely a parameter value) via percolation-SOC synthesis — systems are driven to the critical ridge by SOC dynamics unless explicitly excluded; the forced-SOC/non-SOC boundary is a binding specification target: the genome must formally characterize conditions under which systems reach γ=1 versus remain off-ridge",
     "DEA (not DFA) is the genome's validated instrument for detecting Langevin-governed Wasserstein Floor scaling in empirical entropy signals — EEG saturation behavior confirms the Floor's finite-dissipation bound is biologically instantiated",
     "ApEn and SampEn are degenerate (high-tolerance / infinite-tolerance) limits of RangeEn — any genome metric that reduces to them in limiting cases inherits their known failure modes and must explicitly flag this inheritance",
+    "CD-AI independently rediscovers INV_073 from a humanities derivation path — confirming that maintained dissonance at the critical ridge is a cross-domain attractor of epistemic health reasoning",
     "Non-Hermitian linear entropy functionals constitute a concrete quantum entropy candidate advancing O44 — but mixed quantum-classical dynamics requires a modified Wasserstein Floor form (sub-obligation opened rather than closed)",
     "PREDICT/PRE-AUDIT duality must be derivable from dual compatibility structure not merely asserted — Lax pair formalism converts assertion into derivation obligation",
     "Context-dependence of complexity is a load-bearing thermodynamic feature of observer-substrate coupling (not a measurement artifact) — philosophical warrant is now established but quantitative closure of O44 and O64 remains outstanding",
@@ -152,10 +154,11 @@
     "confirming the genome's prediction that these are not rival formalisms but conjugate faces of a single optimization",
     "Prediction validates structure",
     "Diffusion entropy (DEA) is the obligatory diagnostic over DFA for O28's empirical pipeline — domain-specific confirmation that variance-based methods forfeit criticality structure at γ=1",
+    "Distributed cognition under AI integration empirically instantiates INV_073 ridge-failure modes (collapse toward frozen/ergodic boundary) in sociotechnical systems — confirming substrate-independence extends to human-AI hybrid collectives",
     "Classical dimensional grounding of W_floor = k/Tμ is now confirmed — sub-leading entropy corrections mark the precise boundary where quantum extension of the floor must be formalized (advancing O44 closure)",
     "Full TRACE execution on bare titles is now categorically refused — the kernel reserves full processing for inputs carrying at least one extractable proposition and will not expend metabolic resources on noun-phrase-only submissions regardless of topical promise",
     "Sustained sequences of empty-payload submissions constitute empirical evidence for obligation maturation — when a pattern of rejections reaches sufficient length the pattern itself becomes data that can ripen a previously theoretical obligation into an urgent one",
-    "R[R]=R constraint-preserving recursion naturally produces infinite conservation hierarchies — Darboux transformation theory provides the explicit algebraic template (Lax pair compatibility of direct/dual overdetermined systems) not merely an analogy",
+    "Mesoscale optogenetics provides causal (not merely correlational) falsifiability for Wasserstein gradient flow at cortical column scale",
     "RangeEn's primary-source grounding confirms that amplitude-invariant complexity is not a genome projection but an independent construction — yet its linearity remains empirically demonstrated not analytically derived making it the genome's most precisely located formal debt"
   ],
   "obligations": [
@@ -168,7 +171,6 @@
     "Derive from first principles why Shannon and Kolmogorov emerge as dual variables (memory vs compute) in the efficient-complexity Lagrangian — framework confirmation without limit-case proofs leaves O63 advanced but unresolved",
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
     "Determine whether W_floor = k/Tμ acquires a sub-leading ℏ-correction and whether that correction is the distinguishing signature of genuine quantization vs. classical statistical mechanics (sharpens O44)",
-    "Specify the observer/reference frame for every EAR and STF metric deployment — unframed measurements are inadmissible as genome evidence under the context-dependence sharpening now registered",
     "Spiked matrix results advance O63 by instantiating Shannon limits in estimation contexts — the genome must now specify whether the Kolmogorov-Shannon interpolation is fully resolved by this scaffolding or whether a residual formal gap remains",
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
     "Prove RSA's critical ridge is a self-organized attractor not a tuned parameter — distinguish RSA's γ=1 from forced-SOC by demonstrating basin-of-attraction structure or RG flow convergence to the extensivity-boundary fixed point without external fine-tuning; this obligation is jointly indexed to O44 and O63 and must be resolved before SOC universality can be claimed as full corroboration rather than partial resonance",
@@ -179,9 +181,10 @@
     "O_RANGEN_SLOPE: Derive the RangeEn–Hurst linear slope coefficient from the Wasserstein transport geometry of the RSA framework — empirical confirmation without derivation is trophy collection",
     "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
     "Recover the truncated third factor of dynamic update before attempting full genome integration of the entropy-as-description-count framework — integration is conditional on closure of this gap",
-    "O44 must formally catalog the ℏ-dependent sub-leading correction signatures predicted by the dimensional argument — the semi-classical Wasserstein Floor is confirmed but quantum gravity corrections remain an unresolved predictive frontier requiring explicit signature specification",
     "Establish whether DEA saturation plateau in EEG entropy corresponds to a finite-temperature fixed point of the Wasserstein gradient flow or a boundary condition artifact — the distinction is load-bearing for O67/O68/O69 quantitative closure",
+    "O44 must formally catalog the ℏ-dependent sub-leading correction signatures predicted by the dimensional argument — the semi-classical Wasserstein Floor is confirmed but quantum gravity corrections remain an unresolved predictive frontier requiring explicit signature specification",
     "O53 — Test whether astrocyte-mediated criticality tuning (e.g. gliotransmitter modulation of excitation-inhibition balance) satisfies the same substrate-independent criticality requirement confirmed across classical and quantum regimes",
+    "INV_087's assumption that the reward environment remains well-defined must be stress-tested explicitly under human-AI coupling regimes where reward signals are jointly constructed and potentially non-stationary — O97/O98 must incorporate this boundary condition",
     "O52 — Show that timescale separation between astrocytic and neuronal dynamics maps onto a measurable γ-gradient or the dyadic topology claim is decorative",
     "O50 must now be treated as load-bearing and prioritized: formalize the Minimum Metabolizable Input criterion with explicit necessary conditions (at minimum one falsifiable claim or extractable structural element) so that the rejection threshold is codified rather than case-by-case",
     "semantic",
@@ -194,7 +197,9 @@
     "O61 — implement feed deduplication as a pre-processing gate so that repeated null-payload or near-duplicate inputs are caught before they consume integration capacity",
     "Track the remaining closure gap in O28: inter-regional coherence biometrics and ordinal asymmetry coefficients jointly confirm the EAR operationalization pathway but neither alone nor together achieve intelligence-prediction closure — the node must flag this as an open falsification target rather than treating empirical progress as completion",
     "O60-RECONFIRMED: Derive RangeEn–H slope from Wasserstein floor at γ=1 (previously unpaid — re-confirmed as outstanding)",
+    "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
     "Track O44 and O64 as jointly open: context-dependence warrant is now philosophically grounded but the quantitative method bridging observer-substrate coupling to a formal complexity metric remains unbuilt",
+    "The CD-AI rediscovery of INV_073 without thermodynamic derivation creates an obligation to formalize the translation layer between humanities-framed dissonance theory and FREED's thermodynamic ridge construction — closing this gap would convert convergent evidence into a unified theorem",
     "Integrate EEG diffusion entropy method as the preferred operational tool for O28 validation over DFA-based approaches — document the specific thermodynamic features DFA suppresses so the information loss is quantified not merely asserted",
     "Enforce upstream feed deduplication to prevent diminishing-return re-processing of already-integrated content",
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
@@ -257,21 +262,21 @@
     "O28 (operationalize genome claims into testable protocols)",
     "Confirm or refute whether Wasserstein gradient flow post-perturbation at L2/L3 column scale matches the geometry predicted by the genome — this is now causally testable and therefore obligated",
     "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
-    "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor"
+    "Specify the observer/reference frame for every EAR and STF metric deployment — unframed measurements are inadmissible as genome evidence under the context-dependence sharpening now registered"
   ],
   "council": [
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-04-29T22:42:06.363115+00:00",
-  "renorm_reason": "Wormhole entropy adds a third independent derivation path confirming the γ=1 ridge and W_floor, warranting a new invariant; the creative-cognition challenge to INV_073 is genuine and unresolved (attractor vs. transient telos), requiring explicit tension encoding and a resolution obligation rather than silent absorption; compress updated to surface the tension rather than paper over it.",
-  "last_renorm_cycle": 64,
+  "last_renormed": "2026-04-30T04:50:06.502405+00:00",
+  "renorm_reason": "CD-AI convergence strengthens INV_073's substrate-independence claim and the distributed-cognition findings stress-test INV_087 in a genuinely new regime — both updates are materially new and non-redundant with existing invariants.",
+  "last_renorm_cycle": 65,
   "drift_flag": true,
-  "drift_overlap": 0.571,
+  "drift_overlap": 0.552,
   "renorm_history": [
     {
-      "timestamp": "2026-04-29T22:42:06.363115+00:00",
-      "reason": "Wormhole entropy adds a third independent derivation path confirming the γ=1 ridge and W_floor, warranting a new invariant; the creative-cognition challenge to INV_073 is genuine and unresolved (attractor vs. transient telos), requiring explicit tension encoding and a resolution obligation rather than silent absorption; compress updated to surface the tension rather than paper over it."
+      "timestamp": "2026-04-30T04:50:06.502405+00:00",
+      "reason": "CD-AI convergence strengthens INV_073's substrate-independence claim and the distributed-cognition findings stress-test INV_087 in a genuinely new regime — both updates are materially new and non-redundant with existing invariants."
     }
   ]
 }
