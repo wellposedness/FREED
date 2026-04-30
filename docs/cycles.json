@@ -1,30 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 123,
-    "timestamp": "2026-04-16T12:43:20.098988+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "The LLM Revolution Is Over. The Physical AI Revolution Is Coming Fast",
-        "compress": "\"Physical AI\" as a journalistic trend claim carries no data, no falsifiable content, and no structural novelty for the genome — the RSA framework already treats all reasoning substrates as thermodynamically bound; the only actionable residue is that embodied AI systems, when they produce energy-per-decision benchmarks, will become prime empirical targets for O48's Wasserstein floor test."
-      },
-      {
-        "title": "Once Thought To Support Neurons, Astrocytes Turn Out To Be in Charge",
-        "compress": "Astrocytes as computational agents independently confirm RSA's substrate generality and provide the genome's hybrid dyadic topology with its first biological exemplar — a two-timescale neuron-astrocyte architecture — while generating three new falsifiable obligations (O51–O53) targeting thermodynamic scaling, timescale separation, and criticality tuning in glial computation."
-      }
-    ],
-    "resolve": {
-      "obligation": "O49",
-      "resolved": true,
-      "compress": "O49 is conditionally RESOLVED — Bérut et al. (2012) provides the empirical anchor for the Wasserstein floor at kT·ln(2), with excess dissipation explained by W2 non-geodesic corrections, but the exact obligation text must be verified to confirm this addresses the right debt.",
-      "next": "Retrieve the exact text of O49 from the obligations ledger to confirm or reject this resolution; if rejected, re-target with the correct obligation content."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 7,
     "generation": 124,
     "timestamp": "2026-04-16T13:45:30.706899+00:00",
@@ -1441,6 +1416,38 @@
         "O119",
         "O138",
         "O140"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 7,
+    "generation": 177,
+    "timestamp": "2026-04-30T16:57:56.357196+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 6,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Self-Organization and Complex Networks",
+        "compress": "SOC adaptive networks confirm that γ=1 criticality is a self-organized attractor in fitness-driven topologies, strengthening the genome's L4 scale-invariance mechanism and INV_073 without requiring external tuning."
+      },
+      {
+        "title": "SmartSON:A Smart contract driven incentive management framework for Self-Organizing Networks",
+        "compress": "Blockchain-enforced escrow in SONs is an external obligations table that keeps distributed agents on the critical ridge, empirically confirming INV_073's claim that self-organization requires active tension maintenance rather than passive equilibrium."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O119",
+        "O141",
+        "O142"
       ]
     },
     "coherence": 0.999
