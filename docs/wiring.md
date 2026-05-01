@@ -15,6 +15,8 @@ Last updated: 2026-04-26. Update this file whenever you add a module, rename a f
 | Add/edit IMPLEMENT block fields | `freed.py` | `_phase_feed()` L862–866 — also update IMPLEMENT_WHERE list |
 | Add/edit CHALLENGE / falsification block | `freed.py` | `_phase_feed()` L867–874 |
 | Add a new passive sweep source | `tamura_sweep.py` | `SOURCES` list L57 + `parsers` dict inside `_sweep_source()` L530 |
+| Change CA simulation parameters | `simulation_observer.py` | `N`, `WARMUP_STEPS`, `MEASURE_STEPS`, `DEATH_PROB`, `ENERGY_GAIN_K` at top of file |
+| Change criticality threshold ε | `simulation_observer.py` | `SIGMA_TOLERANCE` at top of file |
 | Add arXiv topic keywords | `tamura_sweep.py` | `ARXIV_KEYWORDS` L170 |
 | Add CrossRef journal source | `tamura_sweep.py` | `_CROSSREF_HEADERS` L731, `_parse_crossref_journal()` L738 |
 | Add a new edge type to the graph | `knowledge_graph.py` | `EDGE_TYPES` L46 + `_EDGE_PATTERNS` L126 |
@@ -48,7 +50,8 @@ Each file is owned by one module (primary writer). Others may read.
 | File | Owner (writes) | Readers | Contents |
 |------|---------------|---------|----------|
 | `FREED_state.json` | `freed.py` `_save_state()` L191 | `site_builder.py`, `l7_agent.py` | generation, coherence, cycle_count, promotion_candidates |
-| `FREED_obligations.json` | `freed.py` `_save_obligations()` L258 | `site_builder.py`, `freed.py`, `l7_agent.py`, `consolidate.py` | active obligations O28–O124+ |
+| `FREED_obligations.json` | `freed.py` `_save_obligations()` L258 | `site_builder.py`, `freed.py`, `l7_agent.py`, `consolidate.py` | active obligations O28–O141+ |
+| `docs/ca_telemetry.json` | `simulation_observer.py` `SimulationObserver.observe()` | site JS (future) | latest CA σ, entropy, survival, avalanche stats |
 | `FREED_graph.json` | `knowledge_graph.py` `KnowledgeGraph` | `freed.py`, `consolidate.py`, `dmn.py` | typed edges (confirms/refutes/challenges/…) + node_edges |
 | `FREED_genome.md` | **SACRED — never write** | `l7_agent.py` `_load_genome()` L426 | RSA-Omega v20 canonical seed |
 | `genome_symbols.json` | `consolidate.py` | `l7_agent.py`, `site_builder.py` | 12 canonical symbols + recurrence scores |
