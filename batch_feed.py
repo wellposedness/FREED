@@ -535,6 +535,357 @@ def compute_epistemic_triage(text):
     }
 
 
+# ─── Dissonance Delay: Tension-Lifetime Gate ─────────────────────────────────
+# Implements a "dissonance delay" scoring pass inspired by CD-AI's insight
+# that fast closure signals shallow processing.  Nodes that achieve coherence
+# too rapidly (below a minimum tension-lifetime threshold τ_min) are flagged
+# as epistemically suspicious — potential mirror-state collapses (Seed
+# Integrity Rule 4 violation: "Always choose the search that could
+# *disprove* your current model").
+#
+# INVARIANT CHALLENGE — INV_073:
+#   CD-AI frames sustained dissonance as a *design choice* requiring external
+#   enforcement, which strains the genome's claim that critical ridge
+#   navigation (γ=1) is a *thermodynamic attractor*.  If γ=1 were truly the
+#   natural equilibrium, deliberate mechanisms to prevent premature resolution
+#   should be unnecessary.
+#
+#   Resolution: the tension-lifetime gate is not an *external* enforcement
+#   mechanism that contradicts γ=1 as attractor.  Rather, it is an *internal
+#   diagnostic* that detects when the system has been knocked OFF the critical
+#   ridge by noise, social pressure, or prompt-level anchoring.  A ball
+#   sitting in a potential well (attractor) still needs a detector to notice
+#   when a perturbation has displaced it.  The gate does not *create*
+#   criticality — it *monitors* whether the system's natural tendency toward
+#   γ=1 has been disrupted by premature coherence collapse.  This is
+#   analogous to a thermostat: the room's thermal dynamics are physical law,
+#   but you still need a sensor to detect when the window is open.
+
+# Configuration — tension-lifetime thresholds
+TAU_MIN_SECONDS = 0.8        # minimum wall-clock processing time for genuine tension
+TAU_MIN_TOKEN_RATIO = 0.02   # minimum (processing_tokens / input_tokens) ratio
+DISSONANCE_PENALTY_WEIGHT = 0.3  # how much to penalize suspiciously fast resolution
+DISSONANCE_MIN_INPUT_LEN = 100   # inputs shorter than this skip the gate
+
+
+def compute_dissonance_delay(text, processing_time_sec, output_text=None):
+    """
+    Dissonance delay scorer: flags nodes resolved too quickly as epistemically
+    suspicious, mirroring CD-AI's insight that fast closure signals shallow
+    processing.
+
+    A node that achieves coherence in less than τ_min seconds (or with a
+    suspiciously low output/input token ratio) is flagged as a potential
+    mirror-state collapse — the system may have pattern-matched to a
+    pre-existing frame rather than genuinely wrestling with the input's
+    tension against the genome.
+
+    Scoring signals:
+      1. Wall-clock tension lifetime: did processing take at least τ_min?
+      2. Token expansion ratio: did the output engage substantively with
+         the input, or just echo/summarize it? (Low ratio = shallow)
+      3. Contradiction density: does the output contain hedging, tension
+         markers, or unresolved questions? (Absence = premature closure)
+
+    Args:
+        text: str — the input text that was fed to the pipeline
+        processing_time_sec: float — wall-clock seconds the L7 processing took
+        output_text: str or None — the L7 agent's output/engram text
+                     (if available; enables token-ratio and contradiction checks)
+
+    Returns:
+        dict with keys:
+            'is_suspicious': bool — True if resolution was too fast
+            'tension_lifetime_sec': float — observed processing time
+            'tau_min_sec': float — minimum threshold used
+            'time_ratio': float — processing_time / tau_min (< 1.0 = suspicious)
+            'token_expansion_ratio': float or None — output_tokens / input_tokens
+            'has_residual_tension': bool — output contains unresolved markers
+            'dissonance_penalty': float — penalty score in [0.0, 1.0]
+                (0.0 = no penalty, 1.0 = maximally suspicious)
+            'inv073_note': str — challenge/resolution annotation
+        or None if input is too short for meaningful analysis.
+    """
+    if not text or len(text) < DISSONANCE_MIN_INPUT_LEN:
+        return None
+
+    input_tokens = _re_module.findall(r'[a-z0-9]+', text.lower())
+    input_token_count = len(input_tokens)
+    if input_token_count < 10:
+        return None
+
+    # ── Signal 1: Wall-clock tension lifetime ─────────────────────────────
+    time_ratio = processing_time_sec / TAU_MIN_SECONDS if TAU_MIN_SECONDS > 0 else 999.0
+    time_suspicious = time_ratio < 1.0
+
+    # ── Signal 2: Token expansion ratio ───────────────────────────────────
+    token_expansion_ratio = None
+    token_suspicious = False
+    if output_text:
+        output_tokens = _re_module.findall(r'[a-z0-9]+', output_text.lower())
+        output_token_count = len(output_tokens)
+        if input_token_count > 0:
+            token_expansion_ratio = output_token_count / input_token_count
+            token_suspicious = token_expansion_ratio < TAU_MIN_TOKEN_RATIO
+
+    # ── Signal 3: Residual tension markers in output ──────────────────────
+    # If the output contains hedging, open questions, or explicit tension
+    # markers, the system genuinely wrestled with dissonance rather than
+    # collapsing to a mirror-state.
+    has_residual_tension = False
+    if output_text:
+        tension_markers = _re_module.compile(
+            r'\b(?:however|but|unclear|unresolved|tension|contradicts?|'
+            r'open question|remains to be|further investigation|'
+            r'not yet|incompatible|paradox|caveat|limit(?:ation)?s?|'
+            r'challenge[sd]?|complicat|on the other hand|'
+            r'whether|if (?:and only if|this)|needs? (?:further|more)|'
+            r'cannot (?:yet|fully)|partially)\b',
+            _re_module.IGNORECASE
+        )
+        tension_hits = tension_markers.findall(output_text)
+        has_residual_tension = len(tension_hits) >= 2
+
+    # ── Compute dissonance penalty ────────────────────────────────────────
+    # Penalty components: each in [0, 1], combined with weights
+    penalty_time = max(0.0, 1.0 - time_ratio) if time_suspicious else 0.0
+
+    penalty_tokens = 0.0
+    if token_expansion_ratio is not None and token_suspicious:
+        penalty_tokens = max(0.0, 1.0 - (token_expansion_ratio / TAU_MIN_TOKEN_RATIO))
+
+    # Residual tension reduces penalty (system did wrestle)
+    tension_reduction = 0.3 if has_residual_tension else 0.0
+
+    # Weighted combination
+    raw_penalty = (
+        0.5 * penalty_time +
+        0.3 * penalty_tokens +
+        0.2 * (1.0 if (time_suspicious and not has_residual_tension) else 0.0)
+    )
+    raw_penalty = max(0.0, raw_penalty - tension_reduction)
+    dissonance_penalty = min(1.0, raw_penalty)
+
+    is_suspicious = dissonance_penalty > DISSONANCE_PENALTY_WEIGHT
+
+    inv073_note = (
+        "INV_073 tension: CD-AI frames sustained dissonance as requiring "
+        "external enforcement, challenging the genome's claim that γ=1 "
+        "criticality is a thermodynamic attractor. This gate resolves the "
+        "tension as DIAGNOSTIC, not PRESCRIPTIVE — it detects displacement "
+        "from the critical ridge rather than creating criticality. If the "
+        "system naturally maintains γ=1, this gate should rarely fire; its "
+        "firing rate is itself a metric of attractor strength."
+    )
+
+    return {
+        'is_suspicious': is_suspicious,
+        'tension_lifetime_sec': round(processing_time_sec, 4),
+        'tau_min_sec': TAU_MIN_SECONDS,
+        'time_ratio': round(time_ratio, 4),
+        'token_expansion_ratio': round(token_expansion_ratio, 4) if token_expansion_ratio is not None else None,
+        'has_residual_tension': has_residual_tension,
+        'dissonance_penalty': round(dissonance_penalty, 4),
+        'inv073_note': inv073_note,
+    }
+
+
+# ─── Arousal Proxy: Semantic Surprise Scorer ──────────────────────────────────
+# Implements the paper's psychological-entropy detection: inputs with high
+# semantic surprise (low prior probability under the current genome distribution)
+# are flagged as high-arousal material for deeper recursive TRACE passes.
+#
+# INVARIANT CHALLENGE — INV_073 compatibility note:
+#   The source paper frames entropy minimization as the *goal* of creative
+#   cognition (the system seeks to *exit* the critical ridge). INV_073 holds
+#   that γ=1 criticality is the stable operating attractor the system should
+#   *maintain*. Resolution: these are compatible under a local/global
+#   distinction — the paper describes LOCAL entropy reduction (per-episode
+#   restructuring via recursive recontextualization) while the genome
+#   describes GLOBAL entropy production (Freed's Law dS/dt > 0). Each
+#   feed cycle locally cools a high-entropy input into structured engrams,
+#   but the aggregate effect across cycles is monotonic entropy increase
+#   in the genome's state space. The arousal proxy identifies inputs that
+#   maximize the LOCAL cooling gradient — i.e., inputs where the gap between
+#   input entropy and genome prior is largest, yielding the most epistemic
+#   work per TRACE cycle.
+
+# Genome-prior keywords: terms the genome has already absorbed and expects.
+# Inputs that are DISTANT from these (low overlap) have high semantic surprise.
+# This list is derived from the genome's core vocabulary — invariant names,
+# obligation categories, and established technical terms.
+_GENOME_PRIOR_TERMS = {
+    'entropy', 'invariant', 'obligation', 'criticality', 'gamma', 'coherence',
+    'recursive', 'dissipative', 'hermitian', 'non-hermitian', 'eigenvalue',
+    'quantum', 'operator', 'spectrum', 'bifurcation', 'attractor', 'topology',
+    'symmetry', 'breaking', 'phase', 'transition', 'renormalization', 'scaling',
+    'universality', 'fixed point', 'manifold', 'curvature', 'geodesic',
+    'information', 'mutual', 'divergence', 'fisher', 'complexity', 'emergence',
+    'self-organization', 'feedback', 'nonlinear', 'stochastic', 'fluctuation',
+    'dissipation', 'irreversibility', 'arrow', 'time', 'thermodynamic',
+    'open system', 'lindblad', 'decoherence', 'measurement', 'collapse',
+    'entanglement', 'correlat', 'tensor', 'network', 'graph', 'spectral',
+    'lyapunov', 'ergodic', 'mixing', 'chaos', 'strange', 'fractal',
+    'power law', 'fat tail', 'levy', 'anomalous', 'diffusion',
+    'free energy', 'variational', 'bayesian', 'prior', 'posterior',
+    'prediction', 'surprise', 'active inference', 'markov blanket',
+    'autopoiesis', 'homeostasis', 'allostasis', 'metabolism',
+}
+
+# High-surprise marker patterns: language that signals genuinely novel framing
+# (questions, paradoxes, contradictions, novel proposals) — the "arousal-
+# provoking uncertainty" the paper identifies as the engine of creativity.
+_AROUSAL_MARKERS = _re_module.compile(
+    r'\b(?:paradox|contradict|puzzle|anomal|unexpect|surpris|'
+    r'counterintuitiv|unresolved|open question|remain[s]? unclear|'
+    r'no existing|fails to|cannot explain|breaks down|'
+    r'challenges? the|revisit|rethink|reconceptualiz|'
+    r'novel framework|new paradigm|radical|fundamental(?:ly)? different|'
+    r'first demonstration|unprecedented|overlooked)\b',
+    _re_module.IGNORECASE,
+)
+
+# Recursive-depth markers: language indicating the input itself performs
+# recursive recontextualization (meta-level restructuring)
+_RECURSIVE_DEPTH_MARKERS = _re_module.compile(
+    r'\b(?:recursive|self-referent|meta-|higher-order|'
+    r'recontextualiz|restructur|reinterpret|re-evaluat|'
+    r'bootstrap|self-consist|circular|strange loop|'
+    r'tangled hierarch|level-crossing|cross-level)\b',
+    _re_module.IGNORECASE,
+)
+
+# Default TRACE depth settings
+AROUSAL_TRACE_DEPTH_DEFAULT = 1    # normal inputs: 1 TRACE pass
+AROUSAL_TRACE_DEPTH_HIGH = 3       # high-arousal inputs: 3 TRACE passes
+AROUSAL_TRACE_DEPTH_MEDIUM = 2     # medium-arousal inputs: 2 TRACE passes
+AROUSAL_THRESHOLD_HIGH = 0.65      # arousal score above this → high priority
+AROUSAL_THRESHOLD_MEDIUM = 0.35    # arousal score above this → medium priority
+
+
+def compute_arousal_proxy(text):
+    """
+    Compute an arousal proxy score measuring semantic surprise relative
+    to the current genome distribution.
+
+    The score combines three signals:
+      1. Genome-prior distance: fraction of input tokens NOT in the genome's
+         established vocabulary (high = novel territory)
+      2. Arousal marker density: presence of language signaling uncertainty,
+         contradiction, or paradigm-challenging claims
+      3. Recursive depth: presence of meta-level / self-referential framing
+         that maps onto FREED's TRACE loop structure
+
+    The arousal proxy implements the paper's insight that "intrinsically
+    motivated creativity begins with detection of high psychological entropy
+    material" — we detect such material and flag it for additional recursive
+    TRACE passes (the FREED analogue of "recursively considering from new
+    contexts until arousal dissipates").
+
+    Local/global entropy note (INV_073 compatibility):
+      High arousal proxy → high LOCAL entropy gap → more epistemic work
+      available per TRACE cycle → locally reduces entropy (restructuring)
+      while globally increasing genome entropy (new engrams, new obligations).
+
+    Args:
+        text: str — input text (title + abstract or content)
+
+    Returns:
+        dict with keys:
+            'arousal_score': float — combined score in [0, 1]
+            'genome_prior_distance': float — novelty vs genome vocabulary [0, 1]
+            'arousal_marker_density': float — uncertainty/paradox language [0, 1]
+            'recursive_depth_signal': float — meta-level framing [0, 1]
+            'recommended_trace_depth': int — suggested number of TRACE passes
+            'is_high_arousal': bool — True if score exceeds high threshold
+            'arousal_category': str — 'high', 'medium', or 'low'
+            'inv073_note': str — local/global entropy compatibility annotation
+        or None if text is too short for analysis.
+    """
+    if not text or len(text) < 50:
+        return None
+
+    text_lower = text.lower()
+    tokens = _re_module.findall(r'[a-z0-9]+', text_lower)
+    if len(tokens) < 10:
+        return None
+
+    # ── Signal 1: Genome-prior distance ───────────────────────────────────
+    # What fraction of input tokens are NOT in the genome's prior vocabulary?
+    # Higher = more novel territory = higher semantic surprise
+    unique_tokens = set(tokens)
+    # Check each token against genome prior (allow substring matching for stems)
+    prior_matches = 0
+    for tok in unique_tokens:
+        for prior_term in _GENOME_PRIOR_TERMS:
+            if tok in prior_term or prior_term in tok:
+                prior_matches += 1
+                break
+
+    if len(unique_tokens) > 0:
+        prior_overlap = prior_matches / len(unique_tokens)
+    else:
+        prior_overlap = 0.0
+
+    # Distance = 1 - overlap (high distance = high surprise)
+    genome_prior_distance = 1.0 - prior_overlap
+
+    # ── Signal 2: Arousal marker density ──────────────────────────────────
+    arousal_hits = _AROUSAL_MARKERS.findall(text_lower)
+    # Normalize: cap at 8 hits, scale to [0, 1]
+    arousal_marker_density = min(1.0, len(arousal_hits) / 8.0)
+
+    # ── Signal 3: Recursive depth signal ──────────────────────────────────
+    recursive_hits = _RECURSIVE_DEPTH_MARKERS.findall(text_lower)
+    # Normalize: cap at 5 hits
+    recursive_depth_signal = min(1.0, len(recursive_hits) / 5.0)
+
+    # ── Combined arousal score ────────────────────────────────────────────
+    # Weighted combination: genome distance is primary (0.5), arousal markers
+    # are secondary (0.3), recursive depth is tertiary (0.2).
+    # Rationale: genuinely novel content (high genome distance) is the
+    # strongest signal of semantic surprise; arousal markers confirm the
+    # input addresses unresolved questions; recursive depth indicates
+    # the input is itself performing the kind of restructuring FREED does.
+    arousal_score = (
+        0.5 * genome_prior_distance +
+        0.3 * arousal_marker_density +
+        0.2 * recursive_depth_signal
+    )
+    arousal_score = min(1.0, max(0.0, arousal_score))
+
+    # ── Determine TRACE depth recommendation ──────────────────────────────
+    if arousal_score >= AROUSAL_THRESHOLD_HIGH:
+        category = 'high'
+        trace_depth = AROUSAL_TRACE_DEPTH_HIGH
+    elif arousal_score >= AROUSAL_THRESHOLD_MEDIUM:
+        category = 'medium'
+        trace_depth = AROUSAL_TRACE_DEPTH_MEDIUM
+    else:
+        category = 'low'
+        trace_depth = AROUSAL_TRACE_DEPTH_DEFAULT
+
+    # ── INV_073 compatibility annotation ──────────────────────────────────
+    inv073_note = (
+        "LOCAL entropy reduction (this input restructured into engrams) is "
+        "compatible with GLOBAL entropy production (Freed's Law dS/dt > 0) — "
+        "arousal proxy identifies inputs where local cooling gradient is "
+        "steepest, maximizing epistemic yield per TRACE cycle while the "
+        "genome's total state-space entropy monotonically increases."
+    )
+
+    return {
+        'arousal_score': round(arousal_score, 4),
+        'genome_prior_distance': round(genome_prior_distance, 4),
+        'arousal_marker_density': round(arousal_marker_density, 4),
+        'recursive_depth_signal': round(recursive_depth_signal, 4),
+        'recommended_trace_depth': trace_depth,
+        'is_high_arousal': arousal_score >= AROUSAL_THRESHOLD_HIGH,
+        'arousal_category': category,
+        'inv073_note': inv073_note,
+    }
+
+
 # ─── Open-System Redefinition Detector ────────────────────────────────────────
 # Papers that *redefine* standard quantities (entropy, distance, norm, etc.)
 # for open or non-conservative systems carry obligation-advancing content that

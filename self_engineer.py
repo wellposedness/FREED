@@ -48,8 +48,9 @@ MODIFIABLE = {
     "site_builder.py",
     "batch_feed.py",
     "voice.py",
-    "knowledge_graph.py",  # authorized 2026-04-25; graph_integrity audit criterion enforced
-    "promote.py",          # autonomous genome promotion; criteria and filter prompt may improve
+    "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
+    "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve
+    "simulation_observer.py",  # CA telemetry source; metrics and thresholds may improve
 }
 
 # These are never touched, no matter what
@@ -296,23 +297,38 @@ class SelfEngineer:
         """
         import re
 
-        # Strip accidental markdown fences around the patch
-        if "<<<SEARCH>>>" not in patch_text and patch_text.startswith("```"):
-            inner = "\n".join(
-                l for l in patch_text.splitlines()
-                if not l.strip().startswith("```")
-            )
-            patch_text = inner
+        # Strip markdown fences unconditionally — model sometimes wraps the block
+        cleaned = "\n".join(
+            l for l in patch_text.splitlines()
+            if not l.strip().startswith("```")
+        ) if patch_text.startswith("```") else patch_text
 
-        m = re.search(
-            r'<<<SEARCH>>>\s*\n(.*?)<<<REPLACE>>>\s*\n(.*?)<<<END>>>',
-            patch_text,
-            re.DOTALL,
-        )
+        # Try strict delimiters, then lenient fallbacks for common model mistakes
+        m = None
+        _matched_variant = "strict"
+        for _pattern, _variant in [
+            (r'<<<SEARCH>>>\s*\n(.*?)<<<REPLACE>>>\s*\n(.*?)<<<END>>>', "strict"),
+            (r'<<SEARCH>>\s*\n(.*?)<<REPLACE>>\s*\n(.*?)<<END>>',       "2-bracket"),
+            (r'<SEARCH>\s*\n(.*?)<REPLACE>\s*\n(.*?)<END>',             "1-bracket"),
+        ]:
+            m = re.search(_pattern, cleaned, re.DOTALL)
+            if m:
+                _matched_variant = _variant
+                break
+
         if not m:
             print(f"[ENGINEER]   Patch format error in {filename} — no SEARCH/REPLACE/END blocks.")
             print(f"[ENGINEER]   Raw output head: {patch_text[:200]!r}")
+            self._log({
+                "status": "format_error",
+                "file": filename,
+                "raw_head": patch_text[:200],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
             return ""
+
+        if _matched_variant != "strict":
+            print(f"[ENGINEER]   Patch format: lenient match ({_matched_variant}) for {filename}.")
 
         search_text  = m.group(1).rstrip("\n")
         replace_text = m.group(2).rstrip("\n")

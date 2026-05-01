@@ -105,10 +105,161 @@ Only output clusters with recurrence >= 2. No preamble."""
 
 # ═══════════════════════════════════════════════════════════════════════════════
 
+ESCROW_LEDGER_PATH = FREED_DIR / "FREED_log" / "escrow_ledger.json"
+
+
+class EscrowLedger:
+    """
+    Escrow-style obligation tracker.
+
+    Obligations incurred during FEED are registered as escrowed entries.
+    They cannot be closed, dropped, or auto-resolved without an explicit
+    RESOLVE call that supplies falsifiable evidence. This enforces
+    Seed Integrity Rule 3: open obligations are debts, not suggestions.
+
+    Isomorphic to SmartSON's escrow release condition — the "funds" here
+    are epistemic commitments, and the "smart contract" is the evidence
+    gate that must be satisfied before release.
+    """
+
+    def __init__(self):
+        self._ledger = self._load()
+
+    def _load(self):
+        # type: () -> list
+        if ESCROW_LEDGER_PATH.exists():
+            try:
+                return json.loads(ESCROW_LEDGER_PATH.read_text())
+            except (json.JSONDecodeError, OSError):
+                return []
+        return []
+
+    def _save(self):
+        ESCROW_LEDGER_PATH.parent.mkdir(exist_ok=True)
+        ESCROW_LEDGER_PATH.write_text(
+            json.dumps(self._ledger, indent=2, ensure_ascii=False))
+
+    def escrow(self, obligation_id, obligation_text, source_phase="feed",
+               node_id=None, cycle=None):
+        # type: (str, str, str, str, int) -> dict
+        """Register an obligation into escrow. Returns the escrow entry."""
+        entry = {
+            "escrow_id":       f"esc_{obligation_id}_{int(time.time())}",
+            "obligation_id":   obligation_id,
+            "obligation_text": obligation_text,
+            "source_phase":    source_phase,
+            "node_id":         node_id,
+            "cycle":           cycle,
+            "status":          "escrowed",       # escrowed | resolved | contested
+            "escrowed_at":     datetime.now(timezone.utc).isoformat(),
+            "resolved_at":     None,
+            "evidence":        None,
+            "resolve_source":  None,
+        }
+        self._ledger.append(entry)
+        self._save()
+        return entry
+
+    def resolve(self, obligation_id, evidence, resolve_source="consolidate"):
+        # type: (str, str, str) -> dict
+        """
+        Release an obligation from escrow IF evidence is provided.
+        Evidence must be a non-empty string describing the falsifiable
+        basis for resolution. Returns the updated entry or raises.
+        """
+        if not evidence or not evidence.strip():
+            raise ValueError(
+                f"Escrow release DENIED for '{obligation_id}': "
+                f"no evidence provided. Obligations cannot be silently closed."
+            )
+
+        for entry in self._ledger:
+            if (entry["obligation_id"] == obligation_id
+                    and entry["status"] == "escrowed"):
+                entry["status"]         = "resolved"
+                entry["resolved_at"]    = datetime.now(timezone.utc).isoformat()
+                entry["evidence"]       = evidence.strip()
+                entry["resolve_source"] = resolve_source
+                self._save()
+                return entry
+
+        raise KeyError(
+            f"No escrowed obligation found with id '{obligation_id}'. "
+            f"It may have already been resolved or was never escrowed."
+        )
+
+    def contest(self, obligation_id, reason):
+        # type: (str, str) -> dict
+        """Mark an escrowed obligation as contested (not resolved — still open)."""
+        for entry in self._ledger:
+            if (entry["obligation_id"] == obligation_id
+                    and entry["status"] == "escrowed"):
+                entry["status"] = "contested"
+                entry["evidence"] = f"CONTESTED: {reason}"
+                self._save()
+                return entry
+        raise KeyError(f"No escrowed obligation '{obligation_id}' to contest.")
+
+    def open_escrows(self):
+        # type: () -> list
+        """Return all obligations still in escrow (not yet resolved)."""
+        return [e for e in self._ledger if e["status"] == "escrowed"]
+
+    def stale_escrows(self, max_age_cycles=10, current_cycle=0):
+        # type: (int, int) -> list
+        """Return escrowed obligations that have been open too long."""
+        stale = []
+        for e in self._ledger:
+            if e["status"] != "escrowed":
+                continue
+            entry_cycle = e.get("cycle") or 0
+            if current_cycle - entry_cycle >= max_age_cycles:
+                stale.append(e)
+        return stale
+
+    def audit_report(self):
+        # type: () -> dict
+        """Summary statistics for the escrow ledger."""
+        total     = len(self._ledger)
+        escrowed  = sum(1 for e in self._ledger if e["status"] == "escrowed")
+        resolved  = sum(1 for e in self._ledger if e["status"] == "resolved")
+        contested = sum(1 for e in self._ledger if e["status"] == "contested")
+        return {
+            "total":     total,
+            "escrowed":  escrowed,
+            "resolved":  resolved,
+            "contested": contested,
+            "integrity": "CLEAN" if escrowed == 0 else f"OPEN_DEBT({escrowed})",
+        }
+
+    def enforce_no_silent_close(self, obligations_list):
+        # type: (list) -> list
+        """
+        Cross-check: given the system's obligations list, find any that were
+        marked 'resolved' externally but are still escrowed here (i.e., someone
+        tried to close them without going through the escrow gate).
+        Returns list of violation descriptions.
+        """
+        escrowed_ids = {e["obligation_id"] for e in self._ledger
+                        if e["status"] == "escrowed"}
+        violations = []
+        for ob in obligations_list:
+            ob_id = ob.get("id", "")
+            ob_status = ob.get("status", "")
+            if ob_id in escrowed_ids and ob_status in ("resolved", "closed"):
+                violations.append(
+                    f"ESCROW VIOLATION: obligation '{ob_id}' marked "
+                    f"'{ob_status}' externally but still escrowed — "
+                    f"no evidence was provided through the escrow gate."
+                )
+        return violations
+
+
 class Consolidator:
     def __init__(self, api_key: str):
         self.client    = anthropic.Anthropic(api_key=api_key)
         self.astrocyte = Astrocyte()
+        self.escrow    = EscrowLedger()
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 

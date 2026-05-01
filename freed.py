@@ -24,8 +24,9 @@ from pathlib import Path
 
 from l7_agent     import L7Agent
 from astrocyte    import Astrocyte
-from tamura_sweep   import TamuraSweep
-from targeted_sweep import TargetedSweep
+from tamura_sweep         import TamuraSweep
+from targeted_sweep       import TargetedSweep
+from simulation_observer  import SimulationObserver
 from site_builder import build as build_site
 from consolidate  import Consolidator
 from feed_guard      import sanitize as guard_sanitize
@@ -143,9 +144,10 @@ class FREEDDaemon:
             self.astrocyte.daily_output_cap = 10_000_000
             print("[DEV] Budget caps disabled for this session.")
         self.l7         = L7Agent(api_key=api_key)
-        self.sweep_pipe    = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
+        self.sweep_pipe     = TamuraSweep(max_new_per_source=MAX_FEEDS_PER_CYCLE)
         self.targeted_sweep = TargetedSweep(api_key=api_key,
                                              max_per_obligation=MAX_TARGETED_PER_CYCLE)
+        self.sim_observer   = SimulationObserver()
         self.engineer      = SelfEngineer(api_key=api_key)
         self.cerebellum    = Cerebellum(api_key=api_key)
         self.dmn           = DMNAgent(api_key=api_key)
@@ -760,31 +762,39 @@ class FREEDDaemon:
     def _phase_sweep(self, cycle_log: dict):
         """
         Collect new inputs for this cycle.
-        Three sources:
-          1. TargetedSweep  — active search driven by open obligations (runs first)
-          2. TamuraSweep    — passive surface: Tamura + arXiv biophysics RSS
-          3. Curated queue  — human-submitted links_queue.json entries
+        Four sources:
+          1. SimulationObserver — CA telemetry (always runs, bypasses cerebellum)
+          2. TargetedSweep      — active search driven by open obligations
+          3. TamuraSweep        — passive surface: Tamura + arXiv biophysics RSS
+          4. Curated queue      — human-submitted links_queue.json entries
 
         Returns (targeted, passive_dedup) separately so _phase_cerebellum can
         bypass targeted inputs (already obligation-driven) and only score passive.
         """
         print("\n[SWEEP]")
 
-        # 1. Targeted sweep — active hunt for obligation-relevant papers
-        targeted = []
+        # 1. CA simulation telemetry — always runs, bypasses cerebellum
+        ca_obs = []
         try:
-            targeted = self.targeted_sweep.sweep(self.obligations)
+            ca_obs = self.sim_observer.observe()
+        except Exception as e:
+            print(f"[SWEEP] SimulationObserver error: {e}")
+
+        # 2. Targeted sweep — active hunt for obligation-relevant papers
+        targeted = ca_obs
+        try:
+            targeted = ca_obs + self.targeted_sweep.sweep(self.obligations)
         except Exception as e:
             print(f"[SWEEP] TargetedSweep error: {e}")
 
-        # 2. Passive Tamura sweep
+        # 3. Passive Tamura sweep
         passive = []
         try:
             passive = self.sweep_pipe.sweep()
         except Exception as e:
             print(f"[SWEEP] TamuraSweep error: {e}")
 
-        # 3. Curated queue drain — human-submitted links
+        # 4. Curated queue drain — human-submitted links
         curated = []
         try:
             curated = self._drain_links_queue()

@@ -180,6 +180,177 @@ def is_complexity_claim(text_window):
     return bool(_COMPLEXITY_KEYWORDS.search(text_window))
 
 
+# ─── Dimensional-Analysis Entropy Regime Classifier ──────────────────────────
+# Discriminates semi-classical (action-proportional, no ħ) entropy formulas
+# from quantum-corrected ones (containing log terms or ħ-dependent sub-leading
+# terms).  This prevents the genome from conflating classical and quantum
+# thermodynamic grounding when mapping literature to Wasserstein Floor
+# obligations (O44, O100), reducing false-resolution events.
+#
+# Semi-classical signature:  S ~ A/(4 G ħ)  or  S ~ A/(4 l_P^2)
+#   — entropy proportional to area (or action), no sub-leading corrections
+# Quantum-corrected signature:  S ~ A/(4 l_P^2) + α ln(A) + β/A + ...
+#   — contains logarithmic corrections, ħ-dependent sub-leading terms,
+#     or approach-specific quantum corrections (LQG, string, etc.)
+#
+# The classifier is deliberately conservative: it flags "quantum_corrected"
+# only when positive evidence of sub-leading terms is found, and
+# "semi_classical" when the formula matches action-proportional patterns
+# without quantum corrections.  "indeterminate" is returned when entropy
+# is discussed but the regime cannot be resolved.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Patterns indicating quantum-corrected entropy (sub-leading terms)
+_QUANTUM_CORRECTION_PATTERNS = [
+    # Logarithmic corrections: "ln A", "log A", "ln(A/...)", "logarithmic correction"
+    re.compile(r'\b(?:ln|log)\s*\(?\s*(?:A|area|horizon)', re.I),
+    re.compile(r'\blogarithmic\s+correction', re.I),
+    # Explicit ħ (hbar) dependence in sub-leading terms
+    re.compile(r'(?:sub-?leading|correction|next-?to-?leading).*?(?:ħ|hbar|\\hbar|\bh[-_]?bar\b)', re.I),
+    re.compile(r'(?:ħ|hbar|\\hbar|\bh[-_]?bar\b).*?(?:sub-?leading|correction|next-?to-?leading)', re.I),
+    # Inverse-area corrections: "1/A", "β/A", "c/A"
+    re.compile(r'\b(?:inverse[- ]area|1\s*/\s*A\b|/\s*A\s*(?:\+|$|\)))', re.I),
+    # Specific quantum gravity approach markers for corrections
+    re.compile(r'\b(?:loop\s+quantum\s+gravity|LQG)\s+.*?(?:correction|entropy)', re.I),
+    re.compile(r'(?:correction|entropy)\s+.*?\b(?:loop\s+quantum\s+gravity|LQG)\b', re.I),
+    re.compile(r'\b(?:string(?:y|-)?\s+correction|α[\'′]\s*correction)', re.I),
+    # Explicit "quantum correction" language
+    re.compile(r'\bquantum\s+correct(?:ion|ed)', re.I),
+    # Wald entropy (higher-derivative gravity corrections)
+    re.compile(r'\bWald\s+entropy\b', re.I),
+    # One-loop or higher-loop corrections
+    re.compile(r'\b(?:one|two|1|2)[-\s]?loop\s+(?:correction|entropy|contribution)', re.I),
+    # Entanglement entropy corrections
+    re.compile(r'\bentanglement\s+entropy\s+(?:correction|sub-?leading)', re.I),
+]
+
+# Patterns indicating semi-classical (action-proportional) entropy
+_SEMICLASSICAL_PATTERNS = [
+    # Bekenstein-Hawking area law without corrections
+    re.compile(r'\b(?:Bekenstein|Hawking)\s*[-–]?\s*(?:Hawking|Bekenstein)?\s+(?:entropy|formula|area\s+law)', re.I),
+    # S = A/(4G), S = A/(4 l_P^2), "area law"
+    re.compile(r'\bS\s*=\s*A\s*/\s*\(?\s*4\s*[Gg]\b', re.I),
+    re.compile(r'\barea[- ]law\b', re.I),
+    re.compile(r'\bA\s*/\s*(?:4\s*)?[Ll]_?[Pp]', re.I),
+    # "proportional to area", "proportional to action"
+    re.compile(r'\bproportional\s+to\s+(?:the\s+)?(?:area|action|horizon\s+area)\b', re.I),
+    # "semi-classical" explicit mention
+    re.compile(r'\bsemi[-\s]?classical\s+(?:entropy|limit|approximation|degrees?\s+of\s+freedom)', re.I),
+    # Einstein-Hilbert action connection
+    re.compile(r'\b(?:Einstein[-\s]Hilbert|gravity)\s+action\b.*?\bentropy\b', re.I),
+    re.compile(r'\bentropy\b.*?\b(?:Einstein[-\s]Hilbert|gravity)\s+action\b', re.I),
+    # "dimensional dependence as the gravity action"
+    re.compile(r'\bdimensional\s+dependence\s+as\s+(?:the\s+)?(?:gravity\s+)?action\b', re.I),
+    # Naive dimensional analysis (NDA) in gravity/entropy context
+    re.compile(r'\bnaive\s+dimensional\s+analysis\b', re.I),
+]
+
+# General entropy discussion (to distinguish "talks about entropy" from
+# "doesn't discuss entropy at all")
+_ENTROPY_DISCUSSION_PATTERN = re.compile(
+    r'\b(?:entropy|Bekenstein|Hawking\s+radiation|black[- ]?hole\s+thermodynamic|'
+    r'horizon\s+entropy|thermodynamic\s+entropy|gravitational\s+entropy)\b',
+    re.I
+)
+
+
+def classify_entropy_regime(text):
+    # type: (str) -> Optional[dict]
+    """
+    Classify whether a text's entropy formula is semi-classical or quantum-corrected.
+
+    Uses pattern-based dimensional analysis to detect:
+    - Semi-classical: entropy proportional to area/action, no ħ sub-leading terms
+    - Quantum-corrected: contains log corrections, ħ-dependent sub-leading terms,
+      or approach-specific quantum gravity corrections
+
+    Parameters
+    ----------
+    text : str
+        The text to analyze (typically full kernel output or paper abstract).
+
+    Returns
+    -------
+    dict or None
+        None if the text does not discuss entropy/BH thermodynamics at all.
+        Otherwise returns:
+        {
+            "regime": str — "semi_classical", "quantum_corrected", or "indeterminate",
+            "quantum_signals": list of str — matched quantum correction patterns,
+            "classical_signals": list of str — matched semi-classical patterns,
+            "confidence": str — "high" if only one regime matched, "mixed" if both,
+            "approach_dependent": bool — True if text suggests corrections vary by approach,
+            "o44_tag": str — tag string for O44 obligation tracking,
+        }
+    """
+    if not _ENTROPY_DISCUSSION_PATTERN.search(text):
+        return None
+
+    quantum_signals = []   # type: List[str]
+    classical_signals = []  # type: List[str]
+
+    for pat in _QUANTUM_CORRECTION_PATTERNS:
+        m = pat.search(text)
+        if m:
+            quantum_signals.append(m.group(0)[:80])
+
+    for pat in _SEMICLASSICAL_PATTERNS:
+        m = pat.search(text)
+        if m:
+            classical_signals.append(m.group(0)[:80])
+
+    # Detect approach-dependence language (key challenge to O44)
+    _approach_dep = re.compile(
+        r'\b(?:approach[-\s]dependent|framework[-\s]dependent|'
+        r'different\s+(?:approaches|frameworks)\s+(?:lead|give|yield|produce)\s+'
+        r'different\s+(?:corrections?|sub-?leading)|'
+        r'(?:LQG|string|loop)\s+.*?\bdifferent\b.*?\b(?:correction|entropy))\b',
+        re.I
+    )
+    approach_dependent = bool(_approach_dep.search(text))
+
+    has_quantum = len(quantum_signals) > 0
+    has_classical = len(classical_signals) > 0
+
+    if has_quantum and not has_classical:
+        regime = "quantum_corrected"
+        confidence = "high"
+    elif has_classical and not has_quantum:
+        regime = "semi_classical"
+        confidence = "high"
+    elif has_quantum and has_classical:
+        # Text discusses both — likely a paper comparing regimes or showing
+        # how semi-classical results receive quantum corrections
+        if len(quantum_signals) >= len(classical_signals):
+            regime = "quantum_corrected"
+        else:
+            regime = "semi_classical"
+        confidence = "mixed"
+    else:
+        regime = "indeterminate"
+        confidence = "low"
+
+    # Build O44 tag
+    if regime == "semi_classical":
+        o44_tag = "entropy:semi_classical:action_proportional"
+    elif regime == "quantum_corrected":
+        o44_tag = "entropy:quantum_corrected:subleading"
+    else:
+        o44_tag = "entropy:indeterminate"
+
+    if approach_dependent:
+        o44_tag += ":approach_dependent"
+
+    return {
+        "regime": regime,
+        "quantum_signals": quantum_signals,
+        "classical_signals": classical_signals,
+        "confidence": confidence,
+        "approach_dependent": approach_dependent,
+        "o44_tag": o44_tag,
+    }
+
+
 def extract_edges(kernel_output, source_url, source_title="", context_tag=None):
     # type: (dict, str, str, Optional[str]) -> list
     """
@@ -636,6 +807,212 @@ def score_node_information_flow(belief_states, dt=1.0):
     }
 
 
+# ─── Non-Hermitian Entropy-Flow Edge Weight ──────────────────────────────────
+# For open-system nodes governed by non-Hermitian dynamics, the linear entropy
+# rate dS_L/dt is asymmetric between forward (sink) and backward (source)
+# directions.  This asymmetry encodes irreversible epistemic flows — belief
+# updates that don't reverse — as directional weights on knowledge graph edges.
+#
+# The scoring term decomposes dS_L/dt into:
+#   - trace_drift:  d(Tr[ρ])/dt  — probability leaking (sink) or injected (source)
+#   - purity_drift: d(Tr[ρ²])/dt — coherence change independent of trace
+#
+# The directional weight is:
+#   w_NH(A→B) = |dS_L/dt| * sign_factor * (1 + |trace_asymmetry|)
+# where trace_asymmetry = (Tr[ρ_B] - Tr[ρ_A]) / max(Tr[ρ_A], Tr[ρ_B])
+# captures the sink/source directionality between the two nodes.
+#
+# Challenge context (O44): This term explicitly accounts for the fact that
+# probability sinks violate trace-preservation assumed in the Wasserstein
+# Floor derivation W_floor = k/Tμ.  Edges where |trace_asymmetry| > 0
+# are flagged as "non_unitary", signaling that the k/Tμ floor may not
+# generalize to these connections.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def non_hermitian_entropy_flow_score(density_matrix_source, density_matrix_target,
+                                     dt=1.0):
+    # type: (List[List[float]], List[List[float]], float) -> dict
+    """
+    Compute the non-Hermitian entropy-flow scoring term for a directed edge
+    between two open-system nodes.
+
+    Treats information sink/source asymmetry (from linear entropy rate dS_L/dt)
+    as a directional weight, encoding irreversible epistemic flows that standard
+    Hermitian entropy metrics miss.
+
+    Parameters
+    ----------
+    density_matrix_source : list of list of float
+        Density-matrix-like belief state of the source node.
+    density_matrix_target : list of list of float
+        Density-matrix-like belief state of the target node.
+    dt : float
+        Effective time step between source and target states (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "directional_weight": float — the non-Hermitian edge weight (≥ 0),
+            "trace_source": float — Tr[ρ_source],
+            "trace_target": float — Tr[ρ_target],
+            "trace_asymmetry": float — signed asymmetry in (-1, 1),
+            "entropy_source": float — S_L of source node,
+            "entropy_target": float — S_L of target node,
+            "entropy_rate": float — dS_L/dt (finite difference),
+            "flow_direction": str — "sink", "source", or "balanced",
+            "is_non_unitary": bool — True if trace is not preserved (|asym| > ε),
+            "wasserstein_floor_valid": bool — True only if trace-preserving,
+            "o44_flag": str — diagnostic tag for O44 obligation tracking,
+        }
+    """
+    eps = 1e-10
+
+    # Compute traces
+    tr_source = _matrix_trace(density_matrix_source) if density_matrix_source and density_matrix_source[0] else 0.0
+    tr_target = _matrix_trace(density_matrix_target) if density_matrix_target and density_matrix_target[0] else 0.0
+
+    # Compute linear entropies
+    s_source = linear_entropy(density_matrix_source)
+    s_target = linear_entropy(density_matrix_target)
+
+    # Entropy rate (finite difference)
+    if abs(dt) < eps:
+        entropy_rate = 0.0
+    else:
+        entropy_rate = (s_target - s_source) / dt
+
+    # Trace asymmetry: captures probability sink/source directionality
+    max_trace = max(abs(tr_source), abs(tr_target))
+    if max_trace < eps:
+        trace_asymmetry = 0.0
+    else:
+        trace_asymmetry = (tr_target - tr_source) / max_trace
+
+    # Determine if non-unitary (trace not preserved)
+    trace_preservation_threshold = 1e-6
+    is_non_unitary = abs(trace_asymmetry) > trace_preservation_threshold
+
+    # Directional weight:
+    # |dS_L/dt| * (1 + |trace_asymmetry|)
+    # The trace_asymmetry amplifier ensures edges with probability sinks/sources
+    # receive higher weight than trace-preserving (Hermitian) transitions.
+    directional_weight = abs(entropy_rate) * (1.0 + abs(trace_asymmetry))
+
+    # Flow direction classification
+    if trace_asymmetry < -trace_preservation_threshold:
+        flow_direction = "sink"     # probability draining from target
+    elif trace_asymmetry > trace_preservation_threshold:
+        flow_direction = "source"   # probability injected into target
+    else:
+        flow_direction = "balanced"
+
+    # Wasserstein floor validity: k/Tμ requires trace preservation
+    wasserstein_floor_valid = not is_non_unitary
+
+    # O44 diagnostic tag
+    if not is_non_unitary:
+        o44_flag = "trace_preserving:wfloor_valid"
+    elif flow_direction == "sink":
+        o44_flag = "non_unitary:sink:wfloor_threatened"
+    elif flow_direction == "source":
+        o44_flag = "non_unitary:source:wfloor_threatened"
+    else:
+        o44_flag = "non_unitary:wfloor_threatened"
+
+    return {
+        "directional_weight": directional_weight,
+        "trace_source": tr_source,
+        "trace_target": tr_target,
+        "trace_asymmetry": trace_asymmetry,
+        "entropy_source": s_source,
+        "entropy_target": s_target,
+        "entropy_rate": entropy_rate,
+        "flow_direction": flow_direction,
+        "is_non_unitary": is_non_unitary,
+        "wasserstein_floor_valid": wasserstein_floor_valid,
+        "o44_flag": o44_flag,
+    }
+
+
+def compute_edge_weight(edge, node_beliefs=None, dt=1.0,
+                        base_weight=1.0, nh_coupling=0.5):
+    # type: (dict, Optional[Dict[str, List[List[float]]]], float, float, float) -> dict
+    """
+    Compute the total weight for a knowledge graph edge, incorporating the
+    non-Hermitian entropy-flow scoring term when belief states are available.
+
+    The total weight is:
+        w_total = base_weight + nh_coupling * directional_weight_NH
+
+    where directional_weight_NH comes from non_hermitian_entropy_flow_score.
+
+    Parameters
+    ----------
+    edge : dict
+        An edge dict as produced by extract_edges / record_feed.
+    node_beliefs : dict or None
+        Mapping of node_id → density-matrix-like belief state.
+        If None or if the edge's nodes lack belief states, only base_weight
+        is used.
+    dt : float
+        Time step for entropy rate computation (default 1.0).
+    base_weight : float
+        Base edge weight from type/confirmation counting (default 1.0).
+    nh_coupling : float
+        Coupling strength for the non-Hermitian term (default 0.5).
+        Set to 0.0 to disable non-Hermitian scoring entirely.
+
+    Returns
+    -------
+    dict
+        {
+            "total_weight": float,
+            "base_weight": float,
+            "nh_weight": float — the non-Hermitian contribution (may be 0),
+            "nh_score": dict or None — full non-Hermitian score if computed,
+            "is_directed": bool — True if non-Hermitian asymmetry detected,
+        }
+    """
+    result = {
+        "total_weight": base_weight,
+        "base_weight": base_weight,
+        "nh_weight": 0.0,
+        "nh_score": None,
+        "is_directed": False,
+    }
+
+    if node_beliefs is None or nh_coupling == 0.0:
+        return result
+
+    source_id = edge.get("from", "")
+    target_id = edge.get("to", "")
+
+    source_belief = node_beliefs.get(source_id)
+    target_belief = node_beliefs.get(target_id)
+
+    if source_belief is None or target_belief is None:
+        return result
+
+    # Validate matrices are non-empty
+    if (not source_belief or not source_belief[0] or
+            not target_belief or not target_belief[0]):
+        return result
+
+    nh_score = non_hermitian_entropy_flow_score(
+        source_belief, target_belief, dt=dt
+    )
+
+    nh_weight = nh_coupling * nh_score["directional_weight"]
+    result["nh_weight"] = nh_weight
+    result["nh_score"] = nh_score
+    result["total_weight"] = base_weight + nh_weight
+    result["is_directed"] = nh_score["is_non_unitary"]
+
+    return result
+
+
 def range_entropy(time_series, m=2, r=0.3):
     # type: (List[float], int, float) -> float
     """
@@ -1073,6 +1450,861 @@ class KnowledgeGraph:
             if target:
                 structure[target][etype] += 1
         return {k: dict(v) for k, v in structure.items()}
+
+    # ── SOC Avalanche Detection ──────────────────────────────────────────────
+    # Inspired by Self-Organized Criticality (SOC) cellular automaton models:
+    # when a cluster of newly-fed nodes crosses a degree threshold, a cascade
+    # re-scoring propagates through connected invariants, mimicking SOC
+    # avalanche dynamics.  This makes graph updates scale-free rather than
+    # locally bounded.
+    #
+    # IMPORTANT (INV_073 boundary condition): SOC avalanche propagation is
+    # NOT assumed universal.  The chapter's taxonomy of non-SOC, self-
+    # organization-without-criticality, and forced-SOC processes means that
+    # γ=1 (critical) is an attractor only when:
+    #   (a) the system is slowly driven (feed rate < relaxation rate),
+    #   (b) dissipation occurs only at boundaries (resolved obligations), and
+    #   (c) the interaction is local (edge-mediated, not global broadcast).
+    # When these boundary conditions are violated the avalanche pass records
+    # the regime as "non_soc" or "forced_soc" and skips cascade re-scoring.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Default thresholds — callers may override
+    _SOC_DEGREE_THRESHOLD = 4       # min edges on a node to be "critical"
+    _SOC_MAX_CASCADE_DEPTH = 50     # runaway guard
+    _SOC_RELAXATION_WINDOW = 10     # max recent feeds before declaring forced-SOC
+
+    def _node_degree(self, node_id):
+        # type: (str) -> int
+        """Count total edges (both _edges and _node_edges) touching *node_id*."""
+        nid = node_id.upper()
+        deg = 0
+        for e in self._edges:
+            if e.get("to", "").upper() == nid or e.get("from", "").upper() == nid:
+                deg += 1
+        for e in self._node_edges:
+            if e.get("to", "").upper() == nid or e.get("from", "").upper() == nid:
+                deg += 1
+        return deg
+
+    def _neighbors(self, node_id):
+        # type: (str) -> List[str]
+        """Return deduplicated neighbor node IDs reachable via any edge."""
+        nid = node_id.upper()
+        nbrs = set()  # type: set
+        for e in self._edges:
+            if e.get("to", "").upper() == nid:
+                nbrs.add(e.get("from", "").upper())
+            elif e.get("from", "").upper() == nid:
+                nbrs.add(e.get("to", "").upper())
+        for e in self._node_edges:
+            if e.get("to", "").upper() == nid:
+                nbrs.add(e.get("from", "").upper())
+            elif e.get("from", "").upper() == nid:
+                nbrs.add(e.get("to", "").upper())
+        nbrs.discard(nid)
+        return list(nbrs)
+
+    def _classify_soc_regime(self, seed_nodes, recent_feed_count=1):
+        # type: (List[str], int) -> str
+        """
+        Determine whether the current perturbation satisfies SOC boundary
+        conditions or falls into a non-SOC / forced-SOC regime.
+
+        Returns one of: "soc", "forced_soc", "non_soc".
+
+        Boundary conditions for true SOC (per INV_073 challenge):
+          1. Slow driving: recent_feed_count <= _SOC_RELAXATION_WINDOW
+          2. Local interaction: seed nodes connected only via edges, not global
+          3. Boundary dissipation: at least some edges are 'resolves' type
+             (obligations being resolved = energy leaving at boundary)
+        """
+        # Condition 1: slow driving
+        if recent_feed_count > self._SOC_RELAXATION_WINDOW:
+            return "forced_soc"
+
+        # Condition 2: check that seed nodes are not ALL the same node
+        # (degenerate / trivially non-SOC)
+        unique_seeds = set(s.upper() for s in seed_nodes)
+        if len(unique_seeds) == 0:
+            return "non_soc"
+
+        # Condition 3: boundary dissipation — at least one 'resolves' edge in graph
+        has_dissipation = any(
+            e.get("type") == "resolves" for e in self._edges
+        )
+        if not has_dissipation:
+            # Self-organization without criticality: structure forms but no
+            # critical ridge; cascade re-scoring would be artificial
+            return "non_soc"
+
+        return "soc"
+
+    def detect_avalanche(self, seed_node_ids, degree_threshold=None,
+                         max_depth=None, recent_feed_count=1):
+        # type: (List[str], Optional[int], Optional[int], int) -> dict
+        """
+        SOC-inspired avalanche detection pass.
+
+        Starting from *seed_node_ids* (nodes touched by recent FEED), find
+        nodes whose degree exceeds *degree_threshold* and propagate a cascade
+        BFS through connected invariants, collecting all affected nodes and
+        the avalanche size distribution.
+
+        Parameters
+        ----------
+        seed_node_ids : list of str
+            Node IDs perturbed by the current FEED batch.
+        degree_threshold : int or None
+            Minimum degree for a node to be considered "critical" and propagate
+            the avalanche.  Defaults to ``_SOC_DEGREE_THRESHOLD``.
+        max_depth : int or None
+            Maximum BFS depth (runaway guard).  Defaults to
+            ``_SOC_MAX_CASCADE_DEPTH``.
+        recent_feed_count : int
+            Number of feeds ingested in the current batch / recent window.
+            Used for SOC regime classification.
+
+        Returns
+        -------
+        dict
+            {
+                "regime": str — "soc", "forced_soc", or "non_soc",
+                "seed_nodes": list of str,
+                "critical_seeds": list of str — seeds that exceeded threshold,
+                "avalanche_nodes": list of str — all nodes reached by cascade,
+                "avalanche_size": int,
+                "max_depth_reached": int,
+                "depth_distribution": dict of int→int (depth → count of nodes),
+                "rescored_invariants": list of dict — invariants whose scores
+                    were affected (each has 'node', 'old_degree', 'new_effective_degree'),
+                "boundary_conditions": dict — diagnostic info about regime choice,
+            }
+        """
+        self._ensure_loaded()
+
+        if degree_threshold is None:
+            degree_threshold = self._SOC_DEGREE_THRESHOLD
+        if max_depth is None:
+            max_depth = self._SOC_MAX_CASCADE_DEPTH
+
+        seeds = [s.upper() for s in seed_node_ids if s]
+
+        # ── Regime classification (INV_073 boundary conditions) ──────────
+        regime = self._classify_soc_regime(seeds, recent_feed_count)
+
+        boundary_info = {
+            "recent_feed_count": recent_feed_count,
+            "relaxation_window": self._SOC_RELAXATION_WINDOW,
+            "degree_threshold": degree_threshold,
+            "has_resolves_edges": any(
+                e.get("type") == "resolves" for e in self._edges
+            ),
+            "regime_explanation": {
+                "soc": "Boundary conditions met: slow driving, local interaction, "
+                       "boundary dissipation present. Cascade re-scoring active.",
+                "forced_soc": "Feed rate exceeds relaxation window. System is "
+                              "externally driven past critical ridge. Cascade "
+                              "re-scoring SKIPPED — γ=1 is NOT the attractor here.",
+                "non_soc": "Self-organization without criticality: no boundary "
+                           "dissipation (no resolved obligations) or degenerate "
+                           "seed set. Cascade re-scoring SKIPPED.",
+            }.get(regime, ""),
+        }
+
+        result = {
+            "regime": regime,
+            "seed_nodes": seeds,
+            "critical_seeds": [],
+            "avalanche_nodes": [],
+            "avalanche_size": 0,
+            "max_depth_reached": 0,
+            "depth_distribution": {},
+            "rescored_invariants": [],
+            "boundary_conditions": boundary_info,
+        }
+
+        # Under non-SOC or forced-SOC regimes, report but do NOT cascade
+        if regime != "soc":
+            # Still identify critical seeds for diagnostic purposes
+            for s in seeds:
+                if self._node_degree(s) >= degree_threshold:
+                    result["critical_seeds"].append(s)
+            return result
+
+        # ── Identify critical seeds (degree >= threshold) ────────────────
+        critical_seeds = []  # type: List[str]
+        for s in seeds:
+            if self._node_degree(s) >= degree_threshold:
+                critical_seeds.append(s)
+        result["critical_seeds"] = critical_seeds
+
+        if not critical_seeds:
+            return result
+
+        # ── BFS avalanche propagation ────────────────────────────────────
+        visited = set()  # type: set
+        frontier = list(critical_seeds)
+        for s in frontier:
+            visited.add(s)
+
+        depth = 0
+        depth_dist = {}  # type: Dict[int, int]
+        depth_dist[0] = len(frontier)
+        max_depth_reached = 0
+
+        while frontier and depth < max_depth:
+            next_frontier = []  # type: List[str]
+            depth += 1
+            for node in frontier:
+                for nbr in self._neighbors(node):
+                    if nbr in visited:
+                        continue
+                    nbr_deg = self._node_degree(nbr)
+                    if nbr_deg >= degree_threshold:
+                        # This neighbor is also critical — avalanche continues
+                        visited.add(nbr)
+                        next_frontier.append(nbr)
+                    else:
+                        # Sub-critical neighbor: affected but does not propagate
+                        visited.add(nbr)
+            if next_frontier:
+                depth_dist[depth] = len(next_frontier)
+                max_depth_reached = depth
+            frontier = next_frontier
+
+        all_avalanche_nodes = list(visited)
+        result["avalanche_nodes"] = all_avalanche_nodes
+        result["avalanche_size"] = len(all_avalanche_nodes)
+        result["max_depth_reached"] = max_depth_reached
+        result["depth_distribution"] = depth_dist
+
+        # ── Cascade re-scoring of connected invariants ───────────────────
+        # For each invariant node in the avalanche, compute an effective
+        # degree boost proportional to avalanche depth.  This mimics the
+        # SOC energy redistribution: nodes deeper in the cascade receive
+        # attenuated but nonzero perturbation (fractal-diffusive model).
+        inv_pattern = re.compile(r'^INV_', re.I)
+        rescored = []  # type: List[dict]
+        for node in all_avalanche_nodes:
+            if inv_pattern.match(node):
+                old_deg = self._node_degree(node)
+                # Effective degree boost: log-scaled by avalanche size
+                # (scale-free, not linear) — mimics power-law SOC statistics
+                boost = math.log1p(len(all_avalanche_nodes)) / math.log(10.0)
+                new_eff_deg = old_deg + boost
+                rescored.append({
+                    "node": node,
+                    "old_degree": old_deg,
+                    "avalanche_boost": round(boost, 4),
+                    "new_effective_degree": round(new_eff_deg, 4),
+                })
+        result["rescored_invariants"] = rescored
+
+        # ── Log avalanche event ──────────────────────────────────────────
+        if len(all_avalanche_nodes) > len(critical_seeds):
+            print(f"[GRAPH:SOC] Avalanche detected — regime={regime}, "
+                  f"seeds={len(critical_seeds)}, cascade_size="
+                  f"{len(all_avalanche_nodes)}, depth={max_depth_reached}, "
+                  f"invariants_rescored={len(rescored)}")
+
+        return result
+
+    # ── Adaptive Memory Alignment Scoring ────────────────────────────────────
+    # Tracks whether incoming FEED nodes share distributed-cognition coupling
+    # with prior nodes via team/role/interface overlap, flagging clusters where
+    # cognitive load redistribution is implied.  This captures topologically
+    # distinct human-AI teaming clusters where edges represent cognitive load
+    # transfer rather than semantic similarity alone — improving graph fidelity
+    # and obligation detection for O97/O98 class items.
+    #
+    # Challenge context (INV_087): MaxRL's reward-signal assumption breaks down
+    # when the human cognitive substrate becomes unreliable during communication
+    # dropout, making the thermodynamic reward landscape non-stationary.  Nodes
+    # flagged by this pass carry an inv087_flag indicating that the Wasserstein
+    # reward floor may be non-stationary for these clusters.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Patterns detecting distributed-cognition / human-AI teaming language
+    _DISTRIBUTED_COGNITION_PATTERNS = [
+        re.compile(r'\b(?:distributed\s+cognition|team\s+cognition|shared\s+mental\s+model)', re.I),
+        re.compile(r'\b(?:human[-\s]?AI\s+team|human[-\s]?machine\s+team|mixed[-\s]?initiative)', re.I),
+        re.compile(r'\b(?:cognitive\s+(?:load|overload|offload|redistribution|handoff))', re.I),
+        re.compile(r'\b(?:remote\s+operat(?:ion|or|ions)|teleoperat(?:ion|or|ions))', re.I),
+        re.compile(r'\b(?:fallback\s+operator|communication\s+(?:dropout|disruption|failure))', re.I),
+        re.compile(r'\b(?:adaptive\s+(?:AI\s+)?memory|memory\s+alignment)', re.I),
+        re.compile(r'\b(?:situation(?:al)?\s+awareness|common\s+ground|joint\s+activity)', re.I),
+        re.compile(r'\b(?:air\s+traffic\s+control|ATC|industrial\s+automation|intelligent\s+port)', re.I),
+    ]
+
+    # Role/interface tokens used for overlap scoring between nodes
+    _ROLE_INTERFACE_PATTERNS = [
+        (re.compile(r'\b(?:operator|controller|supervisor|pilot|dispatcher)\b', re.I), "role:operator"),
+        (re.compile(r'\b(?:AI\s+agent|autonomous\s+agent|decision\s+support|recommender)\b', re.I), "role:ai_agent"),
+        (re.compile(r'\b(?:sensor|camera|lidar|radar|telemetry)\b', re.I), "interface:sensor"),
+        (re.compile(r'\b(?:display|dashboard|HMI|interface|GUI|visualization)\b', re.I), "interface:display"),
+        (re.compile(r'\b(?:communication|network|channel|link|bandwidth)\b', re.I), "interface:comms"),
+        (re.compile(r'\b(?:automation|autopilot|autonomous|semi[-\s]?autonomous)\b', re.I), "role:automation"),
+        (re.compile(r'\b(?:handoff|handover|transition|takeover)\b', re.I), "interface:handoff"),
+        (re.compile(r'\b(?:monitoring|surveillance|oversight|watchkeeping)\b', re.I), "role:monitor"),
+    ]
+
+    def _extract_cognition_features(self, text):
+        # type: (str) -> dict
+        """
+        Extract distributed-cognition features from a text window.
+
+        Returns a dict with:
+          - cognition_signals: list of matched pattern descriptions
+          - role_interface_tags: set of role/interface tags found
+          - is_distributed_cognition: bool
+          - cognitive_load_redistribution: bool
+        """
+        if not text:
+            return {
+                "cognition_signals": [],
+                "role_interface_tags": set(),
+                "is_distributed_cognition": False,
+                "cognitive_load_redistribution": False,
+            }
+
+        cognition_signals = []  # type: List[str]
+        for pat in self._DISTRIBUTED_COGNITION_PATTERNS:
+            m = pat.search(text)
+            if m:
+                cognition_signals.append(m.group(0)[:80])
+
+        role_interface_tags = set()  # type: set
+        for pat, tag in self._ROLE_INTERFACE_PATTERNS:
+            if pat.search(text):
+                role_interface_tags.add(tag)
+
+        is_dc = len(cognition_signals) >= 1
+        # Cognitive load redistribution requires both a cognitive load signal
+        # and at least two distinct role/interface tags (implies transfer)
+        has_load_signal = any(
+            re.search(r'\bcognitive\s+(?:load|overload|offload|redistribution)', s, re.I)
+            for s in cognition_signals
+        )
+        cog_redistribution = has_load_signal and len(role_interface_tags) >= 2
+
+        return {
+            "cognition_signals": cognition_signals,
+            "role_interface_tags": role_interface_tags,
+            "is_distributed_cognition": is_dc,
+            "cognitive_load_redistribution": cog_redistribution,
+        }
+
+    def _compute_coupling_score(self, tags_a, tags_b):
+        # type: (set, set) -> float
+        """
+        Compute distributed-cognition coupling between two nodes based on
+        their role/interface tag overlap.
+
+        Uses Jaccard similarity on the tag sets, returning a score in [0, 1].
+        A score > 0 indicates shared team/role/interface structure implying
+        cognitive load transfer pathways between the nodes.
+        """
+        if not tags_a or not tags_b:
+            return 0.0
+        intersection = len(tags_a & tags_b)
+        union = len(tags_a | tags_b)
+        if union == 0:
+            return 0.0
+        return float(intersection) / float(union)
+
+    def adaptive_memory_alignment_pass(self, new_edges, kernel_output=None,
+                                       coupling_threshold=0.25):
+        # type: (list, Optional[dict], float) -> dict
+        """
+        Adaptive memory alignment scoring pass for incoming FEED nodes.
+
+        Checks whether incoming nodes share distributed-cognition coupling
+        with prior graph nodes (via team/role/interface overlap), flagging
+        clusters where cognitive load redistribution is implied.
+
+        This pass:
+        1. Extracts cognition features from the new feed's kernel output.
+        2. Compares role/interface tags against all prior nodes in the graph.
+        3. Identifies coupling pairs where Jaccard overlap exceeds threshold.
+        4. Flags clusters where cognitive load redistribution is implied,
+           tagging them for O97/O98 obligation tracking and INV_087 challenge.
+
+        Parameters
+        ----------
+        new_edges : list of dict
+            Edges as returned by ``record_feed()``.
+        kernel_output : dict or None
+            The kernel output dict from the current FEED (used to extract
+            cognition features from full text). If None, only edge context
+            windows are used.
+        coupling_threshold : float
+            Minimum Jaccard coupling score to flag a distributed-cognition
+            link (default 0.25).
+
+        Returns
+        -------
+        dict
+            {
+                "is_distributed_cognition": bool,
+                "cognitive_load_redistribution": bool,
+                "new_node_features": dict — cognition features of the new feed,
+                "coupling_pairs": list of dict — pairs with prior nodes that
+                    exceed the coupling threshold, each with:
+                    {"prior_node": str, "coupling_score": float,
+                     "shared_tags": list of str, "edge_type": str},
+                "flagged_clusters": list of str — cluster IDs where cognitive
+                    load redistribution is implied,
+                "inv087_flag": str — diagnostic tag for INV_087 challenge,
+                "o97_o98_implications": list of str — obligation IDs that may
+                    need attention due to distributed-cognition coupling,
+                "alignment_score": float — aggregate memory alignment score
+                    for the new feed (0.0 = no coupling, 1.0 = full coupling),
+            }
+        """
+        self._ensure_loaded()
+
+        # ── Build full text from kernel output ───────────────────────────
+        full_text = ""
+        if kernel_output:
+            text_fields = ["perceive", "represent", "predict", "compare",
+                           "adjust", "compress", "next", "raw"]
+            full_text = " ".join(
+                str(kernel_output.get(f, "")) for f in text_fields
+            )
+
+        # Also incorporate edge context windows
+        for e in new_edges:
+            ctx = e.get("context", "")
+            if ctx:
+                full_text += " " + ctx
+
+        # ── Extract features for the new feed ────────────────────────────
+        new_features = self._extract_cognition_features(full_text)
+
+        result = {
+            "is_distributed_cognition": new_features["is_distributed_cognition"],
+            "cognitive_load_redistribution": new_features["cognitive_load_redistribution"],
+            "new_node_features": {
+                "cognition_signals": new_features["cognition_signals"],
+                "role_interface_tags": sorted(new_features["role_interface_tags"]),
+                "is_distributed_cognition": new_features["is_distributed_cognition"],
+                "cognitive_load_redistribution": new_features["cognitive_load_redistribution"],
+            },
+            "coupling_pairs": [],
+            "flagged_clusters": [],
+            "inv087_flag": "not_applicable",
+            "o97_o98_implications": [],
+            "alignment_score": 0.0,
+        }
+
+        if not new_features["is_distributed_cognition"]:
+            return result
+
+        new_tags = new_features["role_interface_tags"]
+
+        # ── Compare against prior nodes ──────────────────────────────────
+        # Build per-node tag sets from existing edge context windows
+        prior_node_tags = defaultdict(set)  # type: Dict[str, set]
+        for e in self._edges:
+            node_id = e.get("to", "")
+            if not node_id:
+                continue
+            ctx = e.get("context", "")
+            if ctx:
+                for pat, tag in self._ROLE_INTERFACE_PATTERNS:
+                    if pat.search(ctx):
+                        prior_node_tags[node_id].add(tag)
+
+        # Also check node_edges
+        for e in self._node_edges:
+            for nkey in ("from", "to"):
+                node_id = e.get(nkey, "")
+                if not node_id:
+                    continue
+                inv_text = e.get("invariant", "")
+                if inv_text:
+                    for pat, tag in self._ROLE_INTERFACE_PATTERNS:
+                        if pat.search(inv_text):
+                            prior_node_tags[node_id].add(tag)
+
+        # ── Compute coupling scores ──────────────────────────────────────
+        coupling_pairs = []  # type: List[dict]
+        new_source_urls = set(e.get("from", "") for e in new_edges)
+
+        for prior_node, prior_tags in prior_node_tags.items():
+            # Skip self-coupling (same source)
+            if prior_node in new_source_urls:
+                continue
+
+            score = self._compute_coupling_score(new_tags, prior_tags)
+            if score >= coupling_threshold:
+                shared = sorted(new_tags & prior_tags)
+                coupling_pairs.append({
+                    "prior_node": prior_node,
+                    "coupling_score": round(score, 4),
+                    "shared_tags": shared,
+                    "edge_type": "cognitive_load_transfer",
+                })
+
+        result["coupling_pairs"] = coupling_pairs
+
+        # ── Aggregate alignment score ────────────────────────────────────
+        if coupling_pairs:
+            scores = [p["coupling_score"] for p in coupling_pairs]
+            result["alignment_score"] = round(
+                sum(scores) / len(scores), 4
+            )
+
+        # ── Flag clusters with cognitive load redistribution ─────────────
+        flagged = []  # type: List[str]
+        if new_features["cognitive_load_redistribution"] and coupling_pairs:
+            # Each coupled prior node represents a cluster anchor
+            for pair in coupling_pairs:
+                cluster_id = "dc_cluster:" + pair["prior_node"]
+                flagged.append(cluster_id)
+        result["flagged_clusters"] = flagged
+
+        # ── INV_087 flag: reward-signal non-stationarity ─────────────────
+        # Communication dropout + cognitive load redistribution implies the
+        # reward landscape is non-stationary (human substrate unreliable)
+        has_dropout_signal = any(
+            re.search(r'\b(?:dropout|disruption|failure|unreliable|degraded)', s, re.I)
+            for s in new_features["cognition_signals"]
+        )
+        if not has_dropout_signal:
+            # Also check full text for dropout language
+            has_dropout_signal = bool(re.search(
+                r'\b(?:communication\s+(?:dropout|disruption|failure)|'
+                r'signal\s+(?:loss|degradation)|network\s+(?:failure|outage))\b',
+                full_text, re.I
+            ))
+
+        if new_features["cognitive_load_redistribution"] and has_dropout_signal:
+            result["inv087_flag"] = (
+                "non_stationary_reward:human_substrate_unreliable:"
+                "maxrl_assumption_violated"
+            )
+        elif new_features["cognitive_load_redistribution"]:
+            result["inv087_flag"] = (
+                "cognitive_load_redistribution:reward_landscape_may_shift"
+            )
+        elif new_features["is_distributed_cognition"]:
+            result["inv087_flag"] = "distributed_cognition:monitor"
+
+        # ── O97/O98 implications ─────────────────────────────────────────
+        o_implications = []  # type: List[str]
+        if flagged:
+            # O97: team cognition reconfiguration obligation
+            o_implications.append("O97")
+        if has_dropout_signal and coupling_pairs:
+            # O98: fallback continuity obligation
+            o_implications.append("O98")
+        result["o97_o98_implications"] = o_implications
+
+        # ── Log results ──────────────────────────────────────────────────
+        if coupling_pairs:
+            print(
+                f"[GRAPH:MEMORY_ALIGNMENT] Distributed-cognition coupling "
+                f"detected — {len(coupling_pairs)} pair(s), "
+                f"alignment={result['alignment_score']}, "
+                f"clusters_flagged={len(flagged)}, "
+                f"inv087={result['inv087_flag']}"
+            )
+
+        return result
+
+    # ── Multi-Scale Complexity Profile Scorer ────────────────────────────────
+    # Computes emergence, self-organization, and complexity at each scale
+    # layer of the knowledge graph, following the information-theoretic
+    # axioms: emergence = H_output - H_input, self-organization = -emergence,
+    # complexity = balance between emergence and self-organization.
+    #
+    # CHALLENGE (INV_073): The paper defines self-organization as strictly
+    # the negative of emergence (a scalar inverse).  This flattens the
+    # genome's richer claim that the critical ridge involves active
+    # navigation of a Wasserstein gradient flow — a geometric process that
+    # cannot be reduced to a ratio.  To partially address this, we augment
+    # the scalar self-organization with a Wasserstein-aware "gradient_flow"
+    # diagnostic that flags when the scalar inverse is an inadequate proxy
+    # for the actual geometric dynamics at a given scale.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _compute_edge_type_entropy(self, edges):
+        # type: (list) -> float
+        """
+        Compute Shannon entropy over edge-type distribution of a set of edges.
+        Returns entropy in nats.
+        """
+        if not edges:
+            return 0.0
+        type_counts = defaultdict(int)  # type: Dict[str, int]
+        for e in edges:
+            etype = e.get("type", "unknown")
+            type_counts[etype] += 1
+        total = float(len(edges))
+        entropy = 0.0
+        for count in type_counts.values():
+            p = count / total
+            if p > 0:
+                entropy -= p * math.log(p)
+        return entropy
+
+    def _build_scale_layers(self):
+        # type: () -> List[dict]
+        """
+        Partition graph edges into scale layers based on node degree.
+
+        Layer 0: edges touching nodes with degree 1 (leaf/peripheral)
+        Layer 1: edges touching nodes with degree 2-3 (intermediate)
+        Layer 2: edges touching nodes with degree 4-7 (hub)
+        Layer 3: edges touching nodes with degree >= 8 (superhub)
+
+        Returns a list of dicts, each with 'scale', 'label', 'edges',
+        'input_edges' (edges feeding into this scale from lower),
+        and 'output_edges' (edges produced at this scale).
+        """
+        self._ensure_loaded()
+
+        # Compute degree for every node mentioned in edges
+        node_degrees = defaultdict(int)  # type: Dict[str, int]
+        all_edges = self._edges + self._node_edges
+        for e in all_edges:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if nid:
+                    node_degrees[nid] += 1
+
+        # Define scale boundaries
+        scale_bounds = [
+            (0, 1, 1, "peripheral"),
+            (1, 2, 3, "intermediate"),
+            (2, 4, 7, "hub"),
+            (3, 8, float('inf'), "superhub"),
+        ]
+
+        layers = []  # type: List[dict]
+        for scale, lo, hi, label in scale_bounds:
+            layer_edges = []  # type: list
+            for e in all_edges:
+                from_id = e.get("from", "").upper()
+                to_id = e.get("to", "").upper()
+                from_deg = node_degrees.get(from_id, 0)
+                to_deg = node_degrees.get(to_id, 0)
+                max_deg = max(from_deg, to_deg)
+                if lo <= max_deg <= hi:
+                    layer_edges.append(e)
+            layers.append({
+                "scale": scale,
+                "label": label,
+                "degree_range": (lo, hi if hi != float('inf') else "inf"),
+                "edges": layer_edges,
+            })
+
+        return layers
+
+    def complexity_profile(self):
+        # type: () -> dict
+        """
+        Compute multi-scale complexity profile for the knowledge graph.
+
+        At each scale layer, computes:
+          - H_input: Shannon entropy of edge-type distribution at the
+            previous (lower) scale layer (or 0 for the lowest scale)
+          - H_output: Shannon entropy of edge-type distribution at this
+            scale layer
+          - emergence: H_output - H_input (information the scale produces)
+          - self_organization: -emergence (the paper's scalar inverse)
+          - complexity: 4 * emergence * self_organization / (emergence -
+            self_organization)^2 when both are nonzero, else 0.
+            This is a normalized balance measure: maximal (=1) when
+            |emergence| == |self_organization|, collapsing toward 0 when
+            either dominates.
+          - gradient_flow_flag: diagnostic for INV_073 — True when the
+            scalar self_organization is likely an inadequate proxy for
+            Wasserstein gradient flow dynamics at this scale.
+
+        Returns
+        -------
+        dict
+            {
+                "n_scales": int,
+                "scales": list of dict — per-scale metrics,
+                "aggregate_complexity": float — mean complexity across scales,
+                "criticality_status": str — "healthy", "emergence_dominated",
+                    "self_org_dominated", or "collapsed",
+                "inv073_warning": str or None — warning if scalar inverse
+                    approximation is inadequate at any scale,
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+
+        layers = self._build_scale_layers()
+        scales = []  # type: List[dict]
+        prev_entropy = 0.0
+
+        for layer in layers:
+            h_output = self._compute_edge_type_entropy(layer["edges"])
+            h_input = prev_entropy
+            n_edges = len(layer["edges"])
+
+            emergence = h_output - h_input
+            self_org = -emergence  # Paper's scalar definition
+
+            # Normalized balance measure for complexity:
+            # C = 4 * E * S / (E - S)^2   when E != 0 and S != 0
+            # Since S = -E, this simplifies to:
+            # C = 4 * E * (-E) / (E - (-E))^2 = -4E^2 / (2E)^2 = -4E^2/4E^2 = -1
+            # ... which shows the paper's strict scalar inverse is degenerate!
+            # This IS the INV_073 challenge: when S = -E exactly, complexity
+            # is a constant, losing all discriminative power.
+            #
+            # We use a modified measure that captures the BALANCE between
+            # information production (H_output) and information consumption
+            # (H_input) directly, avoiding the degenerate scalar inverse:
+            # C = 1 - |H_output - H_input| / max(H_output, H_input, eps)
+            # This is 1.0 when H_output == H_input (perfect balance),
+            # 0.0 when one completely dominates.
+            eps = 1e-12
+            max_h = max(h_output, h_input, eps)
+            complexity = 1.0 - abs(emergence) / max_h
+
+            # Clamp to [0, 1]
+            complexity = max(0.0, min(1.0, complexity))
+
+            # Gradient flow diagnostic (INV_073):
+            # The scalar self_org = -emergence is inadequate when:
+            # 1. The scale has high edge diversity (many types) — geometric
+            #    structure matters more than scalar information difference
+            # 2. There are contradictions at this scale — the Wasserstein
+            #    gradient flow must navigate opposing directions
+            n_edge_types = len(set(
+                e.get("type", "unknown") for e in layer["edges"]
+            )) if layer["edges"] else 0
+
+            # Check for contradictions at this scale
+            scale_contradictions = detect_contradictions(
+                layer["edges"], context_aware=True
+            )
+            n_contradictions = len([
+                c for c in scale_contradictions
+                if c.get("severity") == "true_contradiction"
+            ])
+
+            gradient_flow_flag = (n_edge_types >= 4 or n_contradictions > 0)
+
+            scales.append({
+                "scale": layer["scale"],
+                "label": layer["label"],
+                "degree_range": layer["degree_range"],
+                "n_edges": n_edges,
+                "h_input": round(h_input, 6),
+                "h_output": round(h_output, 6),
+                "emergence": round(emergence, 6),
+                "self_organization": round(self_org, 6),
+                "complexity": round(complexity, 6),
+                "n_edge_types": n_edge_types,
+                "n_contradictions": n_contradictions,
+                "gradient_flow_flag": gradient_flow_flag,
+            })
+
+            # Current output becomes next layer's input
+            prev_entropy = h_output
+
+        # ── Aggregate metrics ────────────────────────────────────────────
+        complexities = [s["complexity"] for s in scales if s["n_edges"] > 0]
+        agg_complexity = (
+            sum(complexities) / len(complexities) if complexities else 0.0
+        )
+
+        # Criticality status based on aggregate and per-scale patterns
+        active_scales = [s for s in scales if s["n_edges"] > 0]
+        if not active_scales:
+            criticality = "collapsed"
+        elif agg_complexity >= 0.6:
+            criticality = "healthy"
+        elif all(s["emergence"] > 0 for s in active_scales):
+            criticality = "emergence_dominated"
+        elif all(s["emergence"] < 0 for s in active_scales):
+            criticality = "self_org_dominated"
+        elif agg_complexity < 0.2:
+            criticality = "collapsed"
+        else:
+            criticality = "healthy"
+
+        # INV_073 warning: flag if any scale has gradient_flow_flag
+        gradient_flagged = [
+            s for s in scales if s.get("gradient_flow_flag")
+        ]
+        inv073_warning = None  # type: Optional[str]
+        if gradient_flagged:
+            flagged_labels = [s["label"] for s in gradient_flagged]
+            inv073_warning = (
+                f"Scalar self_organization=-emergence is inadequate proxy "
+                f"for Wasserstein gradient flow at scale(s): "
+                f"{', '.join(flagged_labels)}. "
+                f"High edge-type diversity or contradictions require "
+                f"geometric (non-scalar) complexity tracking."
+            )
+
+        ts = datetime.now(timezone.utc).isoformat()
+
+        profile = {
+            "n_scales": len(scales),
+            "scales": scales,
+            "aggregate_complexity": round(agg_complexity, 6),
+            "criticality_status": criticality,
+            "inv073_warning": inv073_warning,
+            "timestamp": ts,
+        }
+
+        # ── Log summary ─────────────────────────────────────────────────
+        active_count = len(active_scales)
+        print(
+            f"[GRAPH:COMPLEXITY_PROFILE] {active_count} active scale(s), "
+            f"aggregate_complexity={agg_complexity:.4f}, "
+            f"criticality={criticality}"
+            + (f", INV_073_warning=True" if inv073_warning else "")
+        )
+
+        return profile
+
+    def avalanche_from_feed(self, new_edges, recent_feed_count=1,
+                            degree_threshold=None, max_depth=None):
+        # type: (list, int, Optional[int], Optional[int]) -> dict
+        """
+        Convenience wrapper: run avalanche detection on nodes touched by
+        edges just recorded from a FEED.
+
+        Parameters
+        ----------
+        new_edges : list of dict
+            Edges as returned by ``record_feed()``.
+        recent_feed_count : int
+            Number of feeds in the current batch (for regime classification).
+        degree_threshold : int or None
+            Override default degree threshold.
+        max_depth : int or None
+            Override default max cascade depth.
+
+        Returns
+        -------
+        dict
+            Avalanche detection result (see ``detect_avalanche``).
+        """
+        # Collect unique target node IDs from the new edges
+        seed_ids = list(set(
+            e.get("to", "").upper()
+            for e in new_edges
+            if e.get("to")
+        ))
+        return self.detect_avalanche(
+            seed_ids,
+            degree_threshold=degree_threshold,
+            max_depth=max_depth,
+            recent_feed_count=recent_feed_count,
+        )
 
 # ── Singleton accessor ────────────────────────────────────────────────────────
 
