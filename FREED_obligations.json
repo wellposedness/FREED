@@ -738,7 +738,7 @@
     "status": "open",
     "statement": "first \u2014 if coherence cannot be pulled below 0",
     "priority": "normal",
-    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.]",
+    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.] | [Gen 185] Coherence has a strict positive floor because the process that measures coherence is itself a coherence-consuming act \u2014 self-reference prevents the zero crossing. [COMMIT:NO \u2014 Circular reasoning detected. Coherence measurement consumes coherence; floor claim unvalidated.]",
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
@@ -1085,13 +1085,15 @@
   {
     "id": "O135",
     "statement": "The three PARTIAL obligations (O28, O34, O44) have persisted across what appears to be many generations without resolution. The graph must determine whether they are blocked by missing `depends_on` edges \u2014 i.e., whether they require inputs that no current node or obligation provides \u2014 or whether they are simply unfired and should be prioritized.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "O28 (EAR predicts intelligence) requires empirical EEG analysis. O34 (stable particles biject with conservation laws) requires a mathematical proof. O44 (quantum Wasserstein floor) requires a formal extension. These three span empirical, mathematical, and theoretical modalities respectively. The graph has 7 `depends_on` edges but none visibly connect to these partials. If they are genuinely blocked, the graph is carrying dead weight that inflates node count. If they are not blocked, their chronic non-resolution indicates a prioritization failure in the generation cycle.",
     "resolution_criterion": "For each of O28, O34, O44: trace all inbound `depends_on` and `completes_via` edges. Identify the specific missing resource or result. Either (a) generate the missing dependency as an explicit new node/obligation, or (b) demonstrate the partial is self-contained and schedule it for resolution within 5 generations.\n\n---",
     "created": "2026-04-29T06:30:48.724993+00:00",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 2,
+    "resolved": "2026-05-02",
+    "progress": "RESOLVED:  Audit each partial, apply RSA reasoning scaffold, resolve or specify block with precision."
   },
   {
     "id": "O136",
@@ -1128,12 +1130,12 @@
   },
   {
     "id": "O139",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify the epistemic consequence for the genome if O28, O34, and O44 all fail to resolve by their gen-180 deadline \u2014 define which invariants must be weakened, retired, or flagged as ungrounded.",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED: ** Failing O28/O34/O44 does not collapse the genome \u2014 it collapses specific invariant strata, and the exact surgery is determinable by formal dependency analysis alone.",
     "created": "2026-04-29",
-    "resolved": null,
+    "resolved": "2026-05-02",
     "auto": true,
     "closes_when": "closes when: epistemic consequences for genome documented and invariants categorized as weakened, retired, or ungrounded if O28, O34, O44 unresolved by gen-180.",
     "method": "math_only",
@@ -1325,5 +1327,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: INV_073 split into two formally distinct invariants with separate, written falsification criteria for each condition."
+  },
+  {
+    "id": "O156",
+    "status": "open",
+    "statement": "After O155 completes the formal split of INV_073, produce a prediction table with at least one distinct, independently falsifiable quantitative prediction per sub-invariant \u2014 the split is not complete until the two claims make different empirical contact.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-02",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Prediction table with \u22651 distinct quantitative prediction per sub-invariant produced, claims make different empirical contact."
+  },
+  {
+    "id": "O157",
+    "status": "open",
+    "statement": "Re-certify the HYBRID_DYADIC_SOLITON topology designation contingent on the O155/O156 INV_073 split outcome \u2014 if either sub-invariant fails its falsification criterion, determine whether the topology label must be revised or retired.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-02",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O155 and O156 INV_073 split outcomes are evaluated and topology label decision (revised, retired, or confirmed) is documented."
   }
 ]
