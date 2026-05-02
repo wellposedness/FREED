@@ -1,30 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 124,
-    "timestamp": "2026-04-16T18:47:39.779189+00:00",
-    "sweep": {
-      "input_count": 2
-    },
-    "feed": [
-      {
-        "title": "Exclusive: Google DeepMind researcher David Silver leaves to launch his own AI startup",
-        "compress": "David Silver's departure is an industry personnel event with zero epistemic content for the scaffold — no invariant fires, no obligation advances, and the genome's hype filter correctly rejects it as noise while flagging any future architectural publications from the venture as potential feed candidates for O55."
-      },
-      {
-        "title": "Nasas Per",
-        "compress": "Empty input receives empty integration — the genome correctly refuses to fabricate epistemic content from a truncated title fragment, preserving grounding at 0.999 and the falsification layer's load-bearing function."
-      }
-    ],
-    "resolve": {
-      "obligation": "O50",
-      "resolved": true,
-      "compress": "Ghost obligation O50 gets resurrected with a falsifiable statement — \"bound the empirical W₂ excess ratio for a measured erasure protocol\" — and its next concrete step is extracting Bérut et al.'s published trajectory data to compute the Wasserstein gap between actual and minimum-dissipation paths.",
-      "next": "Execute the Bérut trajectory extraction and W₂ computation to simultaneously advance O50 (newly stated) and O56 (numerical dissipation quantification), then check whether O51 also needs resurrection or VOID status under O57."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 8,
     "generation": 125,
     "timestamp": "2026-04-16T19:48:50.046634+00:00",
@@ -1460,6 +1435,38 @@
         "O152",
         "O144",
         "O150"
+      ]
+    },
+    "coherence": 0.999
+  },
+  {
+    "cycle": 4,
+    "generation": 184,
+    "timestamp": "2026-05-02T04:41:10.348385+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 7,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094 is falsifiable if a system produces high-fidelity prediction under thermodynamic equilibrium (zero entropy asymmetry), demonstrating that prediction does not require irreversibility as a constitutive condition but merely as a correlate."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-02",
+        "compress": "The Game of Truth CA hits the critical band empirically (σ≈1.03, power-law confirmed), resolving O140 and advancing O141, while the low Shannon entropy (H=0.39 bits, 15% of max) strains INV_073's claim that critical ridge navigation necessarily drives entropy production upward."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O144",
+        "O106",
+        "O134"
       ]
     },
     "coherence": 0.999
