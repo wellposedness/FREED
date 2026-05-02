@@ -3,7 +3,7 @@
 **Surgical navigation index for Claude Code and visiting LLMs.**
 To change X, read only the files and functions listed. Do not scan whole files.
 
-Last updated: 2026-04-26. Update this file whenever you add a module, rename a function, or change where data lives.
+Last updated: 2026-05-01. Update this file whenever you add a module, rename a function, or change where data lives.
 
 ---
 
@@ -19,7 +19,9 @@ Last updated: 2026-04-26. Update this file whenever you add a module, rename a f
 | Change criticality threshold ε | `simulation_observer.py` | `SIGMA_TOLERANCE` at top of file |
 | Add arXiv topic keywords | `tamura_sweep.py` | `ARXIV_KEYWORDS` L170 |
 | Add CrossRef journal source | `tamura_sweep.py` | `_CROSSREF_HEADERS` L731, `_parse_crossref_journal()` L738 |
-| Add a new edge type to the graph | `knowledge_graph.py` | `EDGE_TYPES` L46 + `_EDGE_PATTERNS` L126 |
+| Add a new feed edge type | `knowledge_graph.py` | `EDGE_TYPES` L46 + `_EDGE_PATTERNS` L126 |
+| Add a new node-edge type | `knowledge_graph.py` | `NODE_EDGE_TYPES` (after EDGE_TYPES) + `classify_node_edge()` keyword lists |
+| Change node-edge classification logic | `knowledge_graph.py` | `classify_node_edge()` + `_SCALE_KEYWORDS`, `_IMPL_KEYWORDS`, `_DOMAIN_KEYWORDS` |
 | Change edge extraction regex | `knowledge_graph.py` | `_EDGE_PATTERNS` L126 |
 | Change what files the self-engineer may patch | `self_engineer.py` | `MODIFIABLE` L43 (restart daemon after) |
 | Add a file to the never-touch list | `self_engineer.py` | `SACRED` L55 (restart daemon after) |
@@ -34,6 +36,8 @@ Last updated: 2026-04-26. Update this file whenever you add a module, rename a f
 | Change site HTML layout | `site_builder.py` | `_render_html()` L198 |
 | Change how genome symbols are published | `site_builder.py` | `_write_symbols()` L76 |
 | Change DMN's cross-connect detection | `dmn.py` | `DMNAuditor._check_cross_connect()` L229 |
+| Change MINE digest caps (compress/invariants per node) | `consolidate.py` | `MINE_COMPRESS_CAP` L51, `MINE_INV_CAP` L52 |
+| Change MINE model (Haiku vs Sonnet) | `consolidate.py` | `mine_invariants()` — `model=HAIKU_MODEL` line |
 | Change genome promotion threshold | `promote.py` | `PROMOTE_THRESHOLD` L22, `PROMOTE_MIN_NODES` L23 |
 | Change Opus promotion filter prompt | `promote.py` | `_FILTER_PROMPT` L26 |
 | Revert a genome promotion | `FREED_genome.md` | Delete the `## [PROMOTED YYYY-MM-DD]` block at end of file |
