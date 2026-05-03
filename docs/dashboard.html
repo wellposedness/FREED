@@ -30,7 +30,6 @@ a:hover { text-decoration: underline; }
 .row    { display: grid; gap: 1rem; }
 .row-3  { grid-template-columns: repeat(3, 1fr); }
 .row-2  { grid-template-columns: 1fr 1fr; }
-.row-4  { grid-template-columns: repeat(4, 1fr); }
 
 /* ── Header ── */
 .hdr { display: flex; align-items: baseline; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.7rem; }
@@ -55,26 +54,11 @@ a:hover { text-decoration: underline; }
 .badge-static  { border-color: var(--muted);  color: var(--muted); }
 .badge-concept { border-color: var(--amber);  color: var(--amber); }
 
-/* ── State grid ── */
-.kv { display: flex; justify-content: space-between; padding: 0.22rem 0; border-bottom: 1px solid var(--border); }
-.kv:last-child { border-bottom: none; }
-.kv .k { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-.kv .v { font-size: 0.76rem; color: var(--text); }
-.v.green  { color: var(--green); }
-.v.amber  { color: var(--amber); }
-.v.red    { color: var(--accent); }
-
-/* ── Phase banner ── */
-.phase-banner { font-size: 0.72rem; padding: 0.4rem 0.7rem; background: var(--bg); border: 1px solid var(--border); margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.6rem; }
-.phase-label { color: var(--muted); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; }
-.phase-val   { color: var(--green); font-weight: 500; }
-.phase-detail { color: var(--dim); font-size: 0.65rem; flex: 1; }
-.phase-ts    { color: var(--muted); font-size: 0.6rem; }
-
 /* ── Component map ── */
+.comp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 2rem; }
 .comp { padding: 0.5rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.5rem; }
 .comp:last-child { border-bottom: none; }
-.comp-name { font-size: 0.72rem; font-weight: 500; color: var(--text); min-width: 130px; }
+.comp-name { font-size: 0.72rem; font-weight: 500; color: var(--text); min-width: 160px; }
 .comp-tag  { font-size: 0.56rem; padding: 0.05rem 0.3rem; border: 1px solid; flex-shrink: 0; }
 .tag-sacred   { border-color: var(--accent); color: var(--accent); }
 .tag-mod      { border-color: var(--blue);   color: #60a5fa; }
@@ -89,22 +73,6 @@ a:hover { text-decoration: underline; }
 .agenda-text { font-size: 0.7rem; color: var(--text); line-height: 1.5; }
 .agenda-note { font-size: 0.62rem; color: var(--dim); margin-top: 0.1rem; }
 
-/* ── Obligations ── */
-.ob-bar { display: flex; gap: 0.5rem; margin-bottom: 0.7rem; }
-.ob-count { font-size: 0.68rem; padding: 0.15rem 0.5rem; border: 1px solid; }
-.ob-count.open     { border-color: var(--amber); color: var(--amber); }
-.ob-count.partial  { border-color: var(--blue);  color: #60a5fa; }
-.ob-count.resolved { border-color: var(--green); color: var(--green); }
-.ob-list { display: flex; flex-direction: column; gap: 0; max-height: 340px; overflow-y: auto; }
-.ob-row  { display: grid; grid-template-columns: 40px 1fr; gap: 0.4rem; padding: 0.28rem 0; border-bottom: 1px solid var(--border); align-items: baseline; }
-.ob-row:last-child { border-bottom: none; }
-.ob-id   { font-size: 0.62rem; color: var(--muted); }
-.ob-stmt { font-size: 0.66rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ob-row.dmn .ob-id { color: #60a5fa; }
-
-/* ── Footer ── */
-.footer { font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; display: flex; justify-content: space-between; }
-
 /* ── Capabilities ── */
 .cap-list { display: flex; flex-direction: column; gap: 0.7rem; }
 .cap-item { padding: 0.4rem 0.75rem; border-left: 2px solid var(--green); }
@@ -115,14 +83,37 @@ a:hover { text-decoration: underline; }
 .ach-honest { font-size: 0.64rem; color: var(--dim); line-height: 1.7; padding: 0.5rem 0.75rem; border-left: 2px solid var(--border); margin-top: 0.5rem; }
 .ach-honest em { color: var(--muted); font-style: normal; }
 
+/* ── Wiring diagram ── */
+.wiring-body { font-size: 0.68rem; color: var(--dim); line-height: 1.7; }
+.wiring-body h2 { font-size: 0.72rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.1em; margin: 1.1rem 0 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+.wiring-body h2:first-child { margin-top: 0; }
+.wiring-body h3 { font-size: 0.68rem; font-weight: 600; color: var(--dim); margin: 0.7rem 0 0.3rem; }
+.wiring-body p  { margin-bottom: 0.4rem; }
+.wiring-body ul { padding-left: 1.1rem; margin-bottom: 0.4rem; }
+.wiring-body li { margin-bottom: 0.15rem; }
+.wiring-body pre { background: var(--bg); border: 1px solid var(--border); padding: 0.5rem 0.75rem; overflow-x: auto; margin: 0.4rem 0 0.8rem; white-space: pre; font-size: 0.65rem; color: var(--dim); }
+.wiring-body code { background: var(--bg); padding: 0.05rem 0.25rem; font-size: 0.65rem; color: var(--dim); }
+.wiring-body pre code { background: none; padding: 0; }
+.wiring-body table { border-collapse: collapse; width: 100%; margin: 0.4rem 0 0.8rem; font-size: 0.64rem; }
+.wiring-body th { color: var(--muted); text-transform: uppercase; font-size: 0.58rem; letter-spacing: 0.06em; text-align: left; padding: 0.25rem 0.6rem; border-bottom: 1px solid var(--border); }
+.wiring-body td { padding: 0.2rem 0.6rem; border-bottom: 1px solid #1e1e1e; vertical-align: top; }
+.wiring-body td code { white-space: nowrap; }
+.wiring-body hr { border: none; border-top: 1px solid var(--border); margin: 0.8rem 0; }
+.wiring-body strong { color: var(--text); font-weight: 600; }
+#wiring-loading { color: var(--muted); font-size: 0.65rem; }
+
+/* ── Footer ── */
+.footer { font-size: 0.6rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; display: flex; justify-content: space-between; }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); }
 
 @media (max-width: 900px) {
-  .row-3, .row-4 { grid-template-columns: 1fr; }
-  .row-2          { grid-template-columns: 1fr; }
+  .row-3 { grid-template-columns: 1fr; }
+  .row-2 { grid-template-columns: 1fr; }
+  .comp-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -165,102 +156,75 @@ a:hover { text-decoration: underline; }
     </div>
   </div>
 
-  <!-- ── DAEMON STATE + PHASE ── -->
-  <div class="row row-2">
-    <div class="panel">
-      <div class="panel-label">Daemon State</div>
-      <div class="phase-banner">
-        <span class="phase-label">phase</span>
-        <span class="phase-val" id="phase-val">—</span>
-        <span class="phase-detail" id="phase-detail"></span>
-        <span class="phase-ts" id="phase-ts"></span>
-      </div>
-      <div class="kv"><span class="k">Generation</span><span class="v green" id="s-gen">—</span></div>
-      <div class="kv"><span class="k">Coherence</span><span class="v" id="s-coh">—</span></div>
-      <div class="kv"><span class="k">Hygiene / Grounding</span><span class="v" id="s-hg">—</span></div>
-      <div class="kv"><span class="k">Topology</span><span class="v" id="s-top">—</span></div>
-      <div class="kv"><span class="k">Cycles completed</span><span class="v" id="s-cyc">—</span></div>
-      <div class="kv"><span class="k">Obligations</span><span class="v" id="s-debt">—</span></div>
-      <div class="kv"><span class="k">Last cycle</span><span class="v" id="s-last">—</span></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-label">Component Map</div>
+  <!-- ── COMPONENT MAP ── -->
+  <div class="panel">
+    <div class="panel-label">Component Map</div>
+    <div class="comp-grid">
       <div class="comp"><span class="comp-name">freed.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Main daemon loop. Orchestrates all phases. Never auto-patched.</span></div>
       <div class="comp"><span class="comp-name">l7_agent.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Cognitive core. Claude Sonnet 4.6. Engram retrieval. max_tokens 2048.</span></div>
       <div class="comp"><span class="comp-name">astrocyte.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Token budget governor. 100k in / 40k out daily. Blocks over-spend.</span></div>
-      <div class="comp"><span class="comp-name">cerebellum.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Input gate. Scores sweep results; drops low-relevance inputs before L7.</span></div>
-      <div class="comp"><span class="comp-name">dmn.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Default Mode Network. Fires at 2:30am. Cross-connect + internal-oblige.</span></div>
       <div class="comp"><span class="comp-name">knowledge_graph.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Typed edge graph. Feed edges + node-to-node structural edges.</span></div>
-      <div class="comp"><span class="comp-name">consolidate.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Renormalization. SELECT→RENORM→MINE every 5th cycle or yield &gt; 0.03.</span></div>
-      <div class="comp"><span class="comp-name">self_engineer.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Detects IMPLEMENT signals; patches MODIFIABLE files only. Contains AUDIT phase — cannot self-modify.</span></div>
-      <div class="comp"><span class="comp-name">↳ AUDIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Fires after every successful patch. Haiku verdict: TIGHTENS / NEUTRAL / LOOSENS. Auto-reverts LOOSENS. Lives inside self_engineer.py.</span></div>
-      <div class="comp"><span class="comp-name">↳ COMMIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Fires after each RESOLVE attempt. Distinguishes genuine state change from rumination. 3× COMMIT:NO → RUMINATION flag in PRE-AUDIT. Lives in freed.py.</span></div>
       <div class="comp"><span class="comp-name">feed_guard.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Prompt injection defense. Two-layer sanitization before content hits L7.</span></div>
+      <div class="comp"><span class="comp-name">self_engineer.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Detects IMPLEMENT signals; patches MODIFIABLE files only. Contains AUDIT — cannot self-modify.</span></div>
+      <div class="comp"><span class="comp-name">↳ AUDIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">After every patch: Haiku verdict TIGHTENS / NEUTRAL / LOOSENS. Auto-reverts LOOSENS.</span></div>
+      <div class="comp"><span class="comp-name">↳ COMMIT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">After each RESOLVE: distinguishes state change from rumination. 3× NO → RUMINATION flag.</span></div>
+      <div class="comp"><span class="comp-name">dmn.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Default Mode Network. Fires at 2:30am. Cross-connect + internal-oblige.</span></div>
+      <div class="comp"><span class="comp-name">consolidate.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Renormalization. SELECT→RENORM→MINE. MINE runs on Haiku (504× cheaper than Sonnet).</span></div>
       <div class="comp"><span class="comp-name">targeted_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Active search. Haiku generates arXiv/S2 queries from open obligations.</span></div>
       <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted.</span></div>
-      <div class="comp"><span class="comp-name">simulation_observer.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">CA perceptual source. N=32 grid → σ/H/survival → ca_telemetry.json → SWEEP source #1, bypasses cerebellum.</span></div>
-      <div class="comp"><span class="comp-name">bootstrap_derive.py</span><span class="comp-tag tag-probe">PROBE</span><span class="comp-desc">Standalone genome-free probe. No kernel prompt, no genome. Anchors: Landauer + CA results. Output → obligations only.</span></div>
+      <div class="comp"><span class="comp-name">simulation_observer.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">CA telemetry. N=32 grid → σ/H/survival → ca_telemetry.json → SWEEP source #1.</span></div>
+      <div class="comp"><span class="comp-name">bootstrap_derive.py</span><span class="comp-tag tag-probe">PROBE</span><span class="comp-desc">Genome-free derivation. No kernel prompt. Anchors: Landauer + CA. Output → obligations.</span></div>
     </div>
   </div>
 
-  <!-- ── AGENDA + OBLIGATIONS ── -->
-  <div class="row row-2">
-
-    <div class="panel">
-      <div class="panel-label">Engineering Priority Queue</div>
-      <div class="agenda-item">
-        <span class="agenda-num">1</span>
-        <div>
-          <div class="agenda-text">Substrate-typed evidence on graph edges</div>
-          <div class="agenda-note">Add methodology_type field (theoretical / computational / experimental / physical). Classify by URL domain + title keywords. Surface type_diversity per invariant in consolidate.py.</div>
-        </div>
-      </div>
-      <div class="agenda-item" style="opacity:0.5">
-        <span class="agenda-num" style="color:var(--green)">✓</span>
-        <div>
-          <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Explicit resolution criteria on obligations</div>
-          <div class="agenda-note">closes_when field added at creation time via Haiku in _phase_obligate. ≤20 words enforced. DONE.</div>
-        </div>
-      </div>
-      <div class="agenda-item" style="opacity:0.5">
-        <span class="agenda-num" style="color:var(--green)">✓</span>
-        <div>
-          <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Wire links_queue.json into daemon cycle</div>
-          <div class="agenda-note">_drain_links_queue() added to _phase_sweep. MAX_QUEUE_DRAIN=1, human-first sort, marks fed_to_daemon. DONE.</div>
-        </div>
-      </div>
-      <div class="agenda-item">
-        <span class="agenda-num">2</span>
-        <div>
-          <div class="agenda-text">Recover 109 skipped papers</div>
-          <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
-        </div>
-      </div>
-      <div class="agenda-item">
-        <span class="agenda-num">3</span>
-        <div>
-          <div class="agenda-text">Daemon proposes experiments (stretch)</div>
-          <div class="agenda-note">After failed RESOLVE attempt, Haiku generates one actionable Python/Claude API experiment. Store as ob.experiment_proposal. Display on site.</div>
-        </div>
+  <!-- ── ENGINEERING PRIORITY QUEUE ── -->
+  <div class="panel">
+    <div class="panel-label">Engineering Priority Queue</div>
+    <div class="agenda-item">
+      <span class="agenda-num">1</span>
+      <div>
+        <div class="agenda-text">O156 — MIRROR_SUSPECT audit</div>
+        <div class="agenda-note">Find independent derivation for σ=1.03, Wasserstein metric, Zipf=1 exponent, or explicitly downgrade each from universal law to substrate-specific observation. Bootstrap run 2026-05-02 flagged all three.</div>
       </div>
     </div>
-
-    <div class="panel">
-      <div class="panel-label">Open Obligations</div>
-      <div class="ob-bar">
-        <span class="ob-count open"   id="ob-open">— open</span>
-        <span class="ob-count partial" id="ob-partial">— partial</span>
-        <span class="ob-count resolved" id="ob-resolved">— resolved</span>
-      </div>
-      <div class="ob-list" id="ob-list">
-        <div style="color:var(--muted);font-size:0.65rem">loading…</div>
+    <div class="agenda-item">
+      <span class="agenda-num">2</span>
+      <div>
+        <div class="agenda-text">O157 — Integrate bootstrap SEEDS into genome</div>
+        <div class="agenda-note">SEED_1: asymmetric Landauer commitment rule (defer commitment until gain ≥ kT·ln2 per bit). SEED_2: topological restatement filter (any thermodynamic invariant must have equivalent topological form to be substrate-independent). Apply SEED_2 retroactively to all genome invariants.</div>
       </div>
     </div>
-
+    <div class="agenda-item">
+      <span class="agenda-num">3</span>
+      <div>
+        <div class="agenda-text">Substrate-typed evidence on graph edges</div>
+        <div class="agenda-note">Add methodology_type field (theoretical / computational / experimental / physical). Classify by URL domain + title keywords. Surface type_diversity per invariant in consolidate.py report.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">4</span>
+      <div>
+        <div class="agenda-text">Recover 109 skipped papers</div>
+        <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
+      </div>
+    </div>
+    <div class="agenda-item" style="opacity:0.5">
+      <span class="agenda-num" style="color:var(--green)">✓</span>
+      <div>
+        <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">O106 — coherence floor (closed 2026-05-03)</div>
+        <div class="agenda-note">Formula fixed: cycle-local resolutions + challenge drag. Coherence 0.999→0.9971. IMPLEMENTATION_CLASS classifier fired. Closed by Claude Code.</div>
+      </div>
+    </div>
+    <div class="agenda-item" style="opacity:0.5">
+      <span class="agenda-num" style="color:var(--green)">✓</span>
+      <div>
+        <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Edge monoculture (resolved 2026-05-01)</div>
+        <div class="agenda-note">NODE_EDGE_TYPES + classify_node_edge() added. First consolidation: 56 typed edges. shares_invariant no longer dominates at 93%.</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ── ACHIEVEMENTS ── -->
+  <!-- ── CAPABILITIES ── -->
   <div class="panel">
     <div class="panel-label">System Capabilities — Proved by Event Chain</div>
     <div class="cap-list">
@@ -307,12 +271,12 @@ a:hover { text-decoration: underline; }
 
       <div class="cap-item">
         <div class="cap-title">Can Measure Its Own Physical Substrate</div>
-        <div class="cap-chain">simulation_observer.py built as Python CA port → wired into _phase_sweep() as source #1, before targeted_sweep and Tamura → N=32 grid, WARMUP_STEPS=100, MEASURE_STEPS=200 → outputs activity branching ratio σ, power-law exponent α, Shannon entropy H, survival rate, avalanche stats to docs/ca_telemetry.json → first run: σ=1.024 (AT_CRITICAL) → daemon ingests measurements of its own simulation layer as perceptual feed data each cycle. The physical substrate is now a sensory surface.</div>
+        <div class="cap-chain">simulation_observer.py built as Python CA port → wired into _phase_sweep() as source #1 → N=32 grid, WARMUP_STEPS=100, MEASURE_STEPS=200 → outputs σ, α, H, survival, avalanche stats to docs/ca_telemetry.json → first run: σ=1.024 (AT_CRITICAL) → daemon ingests measurements of its own simulation layer as perceptual feed data each cycle. The physical substrate is now a sensory surface.</div>
       </div>
 
       <div class="cap-item">
         <div class="cap-title">Can Type Its Own Knowledge</div>
-        <div class="cap-chain">93% of all node-edges labelled shares_invariant — one bucket, no internal structure → knowledge_graph.py NODE_EDGE_TYPES added: operationalizes, scales_with, independent_confirmation, challenges → classify_node_edge() routes MINE output to correct sub-type by invariant text → first consolidation after fix: 56 typed edges with real structural distinctions. The graph can now distinguish a claim that operationalizes an invariant from one that independently confirms it.</div>
+        <div class="cap-chain">93% of all node-edges labelled shares_invariant — one bucket, no internal structure → knowledge_graph.py NODE_EDGE_TYPES added: operationalizes, scales_with, independent_confirmation, challenges → classify_node_edge() routes MINE output to correct sub-type → first consolidation after fix: 56 typed edges with real structural distinctions. The graph can now distinguish a claim that operationalizes an invariant from one that independently confirms it.</div>
       </div>
 
       <div class="cap-item">
@@ -320,25 +284,33 @@ a:hover { text-decoration: underline; }
         <div class="cap-chain">_select_falsification_target() scans graph for highest-confirms zero-challenge invariant → INV_094 identified: 15 confirms, 0 challenges → _make_falsification_probe() generates adversarial feed item prepended to FEED inputs each cycle → challenge count 19 → 22 across two cycles → INV_078 immediately took two challenge hits → system now applies adversarial pressure against its most trusted claims before reading any new paper.</div>
       </div>
 
-      <div class="cap-item cap-item-frontier">
-        <div class="cap-title cap-title-frontier">Can Audit Its Own Foundations Without Genome Access</div>
-        <div class="cap-chain">bootstrap_derive.py runs Sonnet with no FREED_genome.md, no RSA_KERNEL_PROMPT — anchored only to Landauer's principle and 3 empirical CA results → 3 MIRROR_SUSPECT flags: Freed's Law constants, Wasserstein metric, Zipf=1 exponent match genome values exactly with no independent derivation chain → 2 SEEDS absent from genome: asymmetric Landauer commitment rule + topological restatement filter → O156 + O157 filed. The genome has suspected mirrors. O156 closes when independent derivations are found or claims explicitly downgraded.</div>
-      </div>
-
       <div class="cap-item">
         <div class="cap-title">Can Repair Its Own Epistemic Odometer</div>
-        <div class="cap-chain">resolved_count all-time (101+) replaced with cycle_resolved (today only, capped at 3) → challenge drag added: challenge_ratio × 0.02/cycle → at 16% challenge pressure, net_delta = −0.003/cycle → coherence pinned at 0.999 for 185 generations; now responsive to adversarial pressure → formula: net_delta = 0.0005 × min(cycle_resolved,3) − challenge_ratio × 0.02. Floor 0.970, ceiling 0.999. The constraint holds: coherence NEVER 1.000.</div>
+        <div class="cap-chain">resolved_count all-time (101+) replaced with cycle_resolved (today only, capped at 3) → challenge drag added: challenge_ratio × 0.02/cycle → at 16% challenge pressure, net_delta = −0.003/cycle → coherence pinned at 0.999 for 185 generations; now responsive to adversarial pressure → coherence 0.999 → 0.9971 on first honest cycle. The constraint holds: coherence NEVER 1.000.</div>
       </div>
 
       <div class="cap-item">
         <div class="cap-title">Can Route Obligations by Type</div>
-        <div class="cap-chain">_classify_obligation_type() fires on each RESOLVE attempt → detects FREED-internal keywords (coherence score, astrocyte, patch format, token budget) AND 2+ COMMIT:NOs → returns IMPLEMENTATION class → [ROUTE:CLAUDE_CODE] appended to obligation progress note → obligation exits L7's jurisdiction → O106 stopped cycling through philosophical analysis of an arithmetic bug. The system distinguishes between obligations that require reasoning and obligations that require code.</div>
+        <div class="cap-chain">_classify_obligation_type() fires on each RESOLVE attempt → detects FREED-internal keywords AND 2+ COMMIT:NOs → returns IMPLEMENTATION class → [ROUTE:CLAUDE_CODE] appended to progress → O106 stopped cycling philosophical analysis of an arithmetic bug. The system distinguishes obligations that require reasoning from obligations that require code. First firing confirmed in overnight logs 2026-05-03.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Audit Its Own Foundations Without Genome Access</div>
+        <div class="cap-chain">bootstrap_derive.py runs Sonnet with no FREED_genome.md, no RSA_KERNEL_PROMPT — anchored only to Landauer's principle and 3 empirical CA results → 3 MIRROR_SUSPECT flags: Freed's Law constants, Wasserstein metric, Zipf=1 exponent match genome values with no independent derivation chain → 2 SEEDS absent from genome: asymmetric Landauer commitment rule + topological restatement filter → O156 + O157 filed. The genome has suspected mirrors. The frontier: O156 closes when independent derivations are found or claims explicitly downgraded.</div>
       </div>
 
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-05-03):</em> These are not aspirations — each claim is followed by the specific event chain that demonstrates it happened. The previous frontier (simulation_observer.py does not yet exist) is crossed — it has run, produced AT_CRITICAL telemetry, and is wired into SWEEP. The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims in the genome (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
+      <em>Honest framing (updated 2026-05-03):</em> Each claim is followed by the specific event chain that demonstrates it happened. The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
+    </div>
+  </div>
+
+  <!-- ── WIRING DIAGRAM ── -->
+  <div class="panel">
+    <div class="panel-label">Wiring Diagram — <span style="font-weight:400;text-transform:none;letter-spacing:0">published each cycle · source: WIRING.md</span></div>
+    <div class="wiring-body" id="wiring-body">
+      <span id="wiring-loading">loading…</span>
     </div>
   </div>
 
@@ -355,53 +327,128 @@ a:hover { text-decoration: underline; }
 function reltime(iso) {
   if (!iso) return '—';
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60)     return 'just now';
-  if (diff < 3600)   return `${Math.round(diff/60)}m ago`;
-  if (diff < 86400)  return `${Math.round(diff/3600)}h ago`;
+  if (diff < 60)    return 'just now';
+  if (diff < 3600)  return `${Math.round(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.round(diff/3600)}h ago`;
   return `${Math.round(diff/86400)}d ago`;
 }
 
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-
-function setClass(id, cls) {
-  const el = document.getElementById(id);
-  if (el) { el.className = el.className.replace(/\b(green|amber|red)\b/g,''); el.classList.add(cls); }
-}
-
-// ── Fetch and render ──────────────────────────────────────────────────────────
-async function fetchJSON(path) {
+async function fetchText(path) {
   try {
     const r = await fetch(path + '?v=' + Date.now());
-    if (!r.ok) return null;
-    return r.json();
+    return r.ok ? r.text() : null;
   } catch { return null; }
 }
 
+async function fetchJSON(path) {
+  try {
+    const r = await fetch(path + '?v=' + Date.now());
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+// ── Minimal markdown → HTML ───────────────────────────────────────────────────
+function renderMarkdown(md) {
+  const lines = md.split('\n');
+  let html = '';
+  let inCode = false, codeLang = '', codeLines = [];
+  let inTable = false, tableRows = [];
+
+  function flushTable() {
+    if (!tableRows.length) return;
+    let t = '<table>';
+    tableRows.forEach((row, i) => {
+      // skip separator rows (all dashes)
+      if (/^[\|\s\-:]+$/.test(row)) return;
+      const cells = row.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+      const tag = (i === 0) ? 'th' : 'td';
+      t += '<tr>' + cells.map(c => `<${tag}>${inlineMarkdown(c)}</${tag}>`).join('') + '</tr>';
+    });
+    t += '</table>';
+    html += t;
+    tableRows = [];
+    inTable = false;
+  }
+
+  function inlineMarkdown(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+
+  for (const line of lines) {
+    // code fences
+    if (line.startsWith('```')) {
+      if (!inCode) {
+        if (inTable) flushTable();
+        inCode = true;
+        codeLang = line.slice(3).trim();
+        codeLines = [];
+      } else {
+        html += `<pre><code>${codeLines.join('\n').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`;
+        inCode = false;
+      }
+      continue;
+    }
+    if (inCode) { codeLines.push(line); continue; }
+
+    // tables
+    if (line.startsWith('|')) {
+      inTable = true;
+      tableRows.push(line);
+      continue;
+    }
+    if (inTable) flushTable();
+
+    // headings
+    if (line.startsWith('## '))       { html += `<h2>${inlineMarkdown(line.slice(3))}</h2>`; continue; }
+    if (line.startsWith('### '))      { html += `<h3>${inlineMarkdown(line.slice(4))}</h3>`; continue; }
+    if (line.startsWith('# '))        { html += `<h2>${inlineMarkdown(line.slice(2))}</h2>`; continue; }
+
+    // hr
+    if (/^---+$/.test(line.trim()))   { html += '<hr>'; continue; }
+
+    // list items
+    if (/^[-*] /.test(line))          { html += `<ul><li>${inlineMarkdown(line.slice(2))}</li></ul>`; continue; }
+    if (/^\s{2,}[-*] /.test(line))    { html += `<ul style="margin-left:1.2rem"><li>${inlineMarkdown(line.replace(/^\s+[-*] /,''))}</li></ul>`; continue; }
+
+    // blank line
+    if (!line.trim())                 { continue; }
+
+    // paragraph
+    html += `<p>${inlineMarkdown(line)}</p>`;
+  }
+  if (inTable) flushTable();
+
+  // merge consecutive <ul> items
+  html = html.replace(/<\/ul>\s*<ul[^>]*>/g, '');
+
+  return html;
+}
+
+// ── Load ─────────────────────────────────────────────────────────────────────
 async function loadDashboard() {
-  const [state, status, obligations] = await Promise.all([
-    fetchJSON('state.json'),
+  const [status, wiring] = await Promise.all([
     fetchJSON('status.json'),
-    fetchJSON('obligations.json'),  // served by site_builder
+    fetchText('wiring.md'),
   ]);
 
-  // ── Live indicator (status.json timestamp freshness) ──
+  // ── Live indicator ──
   const dot   = document.getElementById('live-dot');
   const label = document.getElementById('live-label');
   if (status && status.ts) {
     const age = (Date.now() - new Date(status.ts).getTime()) / 1000;
-    if (age < 3600) {          // updated within 1 hour → live
-      dot.className   = 'live-dot on';
+    if (age < 3600) {
+      dot.className = 'live-dot on';
       label.textContent = 'daemon live · ' + reltime(status.ts);
-    } else if (age < 43200) { // 12 hours → sleeping (dead zone or between cycles)
-      dot.className   = 'live-dot on';
-      dot.style.background = 'var(--amber)';
-      dot.style.boxShadow  = '0 0 6px var(--amber)';
+    } else if (age < 43200) {
+      dot.className = 'live-dot on';
+      dot.style.background   = 'var(--amber)';
+      dot.style.boxShadow    = '0 0 6px var(--amber)';
       label.textContent = 'daemon sleeping · ' + reltime(status.ts);
     } else {
-      dot.className   = 'live-dot off';
+      dot.className = 'live-dot off';
       label.textContent = 'daemon offline · last seen ' + reltime(status.ts);
     }
   } else {
@@ -409,65 +456,15 @@ async function loadDashboard() {
     label.textContent = 'status unknown';
   }
 
-  // ── Phase banner ──
-  if (status) {
-    setText('phase-val',    status.phase || '—');
-    setText('phase-detail', status.detail || '');
-    setText('phase-ts',     status.ts ? reltime(status.ts) : '');
+  // ── Wiring diagram ──
+  const wiringEl = document.getElementById('wiring-body');
+  if (wiring) {
+    wiringEl.innerHTML = renderMarkdown(wiring);
+  } else {
+    wiringEl.innerHTML = '<span style="color:var(--muted)">wiring.md not found — run a daemon cycle to publish it.</span>';
   }
 
-  // ── State ──
-  if (state) {
-    setText('s-gen',  state.generation || '—');
-    setText('s-coh',  state.coherence  || '—');
-    setText('s-hg',   `${state.hygiene || '—'} / ${state.grounding || '—'}`);
-    setText('s-top',  (state.topology || '—').replace(/_/g,' ').toLowerCase());
-    setText('s-cyc',  state.cycle_count || '—');
-    setText('s-debt', state.debt_ratio  || '—');
-    setText('s-last', state.last_cycle  ? reltime(state.last_cycle) : '—');
-
-    const coh = parseFloat(state.coherence);
-    if      (coh >= 0.99) setClass('s-coh', 'green');
-    else if (coh >= 0.97) setClass('s-coh', 'amber');
-    else                  setClass('s-coh', 'red');
-  }
-
-  // ── Obligations ──
-  if (obligations) {
-    const obs = Array.isArray(obligations) ? obligations : Object.values(obligations);
-    const open     = obs.filter(o => o.status === 'open');
-    const partial  = obs.filter(o => o.status === 'partial');
-    const resolved = obs.filter(o => o.status === 'resolved');
-
-    setText('ob-open',     `${open.length} open`);
-    setText('ob-partial',  `${partial.length} partial`);
-    setText('ob-resolved', `${resolved.length} resolved`);
-
-    const list = document.getElementById('ob-list');
-    list.innerHTML = '';
-
-    // Show open first, then partial
-    const toShow = [...open, ...partial];
-    toShow.forEach(ob => {
-      const row  = document.createElement('div');
-      row.className = 'ob-row' + (ob.source === 'dmn' ? ' dmn' : '');
-      const id   = document.createElement('span');
-      id.className = 'ob-id';
-      id.textContent = ob.id || '?';
-      const stmt = document.createElement('span');
-      stmt.className = 'ob-stmt';
-      stmt.title     = ob.statement || '';
-      stmt.textContent = ob.statement || '(no statement)';
-      row.appendChild(id); row.appendChild(stmt);
-      list.appendChild(row);
-    });
-
-    if (toShow.length === 0) {
-      list.innerHTML = '<div style="color:var(--green);font-size:0.65rem;padding:0.4rem 0">All obligations resolved.</div>';
-    }
-  }
-
-  setText('footer-ts', 'loaded ' + new Date().toLocaleTimeString());
+  document.getElementById('footer-ts').textContent = 'loaded ' + new Date().toLocaleTimeString();
 }
 
 loadDashboard();
