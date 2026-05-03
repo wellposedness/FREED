@@ -19,7 +19,7 @@ import base64
 import threading
 import requests
 import anthropic
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 
 from l7_agent     import L7Agent
@@ -61,6 +61,26 @@ TRIAGE_EVERY           = 10           # classify obligation methods every N cycl
 DMN_HOUR               = 2.5          # 2:30am — DMN fires once per dead zone
 
 HAIKU_MODEL = "claude-haiku-4-5-20251001"
+
+# ─── IMPLEMENTATION_CLASS classifier ─────────────────────────────────────────
+# Obligations that contain these phrases are about FREED's own code/state/metrics.
+# L7 reasoning cannot fix arithmetic or implementation bugs.
+# When one of these cycles COMMIT:NO, route to Claude Code instead of continuing.
+_IMPL_CLASS_KEYWORDS = frozenset([
+    # Metrics about FREED itself
+    "coherence score", "coherence drift", "coherence floor", "coherence climb",
+    "coherence measurement", "coherence cannot", "coherence is ",
+    # Token/budget internals
+    "token count", "token budget", "token cost", "daily budget", "budget cap",
+    "astrocyte",
+    # Self-engineer internals
+    "patch format", "patch fail", "self_engineer", "self-engineer",
+    "self_modifications", "modifiable",
+    # State/counter internals
+    "freed_state", "freed state", "freed's own", "daemon's own",
+    "counter never", "cycle count",
+])
+IMPL_CLASS_MIN_COMMITS = 2   # prior COMMIT:NO streak before routing fires
 
 # ─── Estimated token costs for authorization ──────────────────────────────────
 EST_TOKENS_FEED         = 3000  # generous estimate per FEED query
@@ -845,9 +865,75 @@ class FREEDDaemon:
 
     # ── FEED ─────────────────────────────────────────────────────────────────
 
+    def _select_falsification_target(self):
+        # type: () -> str
+        """
+        Return the INV node with the highest challenge-deficit (confirms - challenges)
+        and at least 2 confirms. This is the genome claim most in need of adversarial
+        pressure: well-confirmed but least contested.
+        """
+        from collections import defaultdict
+        graph = get_graph()
+        graph._ensure_loaded()
+        confirms   = defaultdict(int)
+        challenges = defaultdict(int)
+        for e in graph._edges:
+            t   = e.get('type', '')
+            tgt = e.get('to',   '')
+            if t == 'confirms'   and tgt.startswith('INV'): confirms[tgt]   += 1
+            if t == 'challenges' and tgt.startswith('INV'): challenges[tgt] += 1
+        # Prefer nodes never challenged (0 challenges) sorted by confirms desc.
+        # Only fall back to raw deficit if every significant node has been challenged.
+        never = [(c, nd) for nd, c in confirms.items()
+                 if nd.startswith('INV') and c >= 2 and challenges.get(nd, 0) == 0]
+        if never:
+            return max(never)[1]  # highest confirms among unchallenged
+        best, best_deficit = 'INV_094', -1
+        for node, c in confirms.items():
+            if c < 2:
+                continue
+            deficit = c - challenges.get(node, 0)
+            if deficit > best_deficit:
+                best_deficit, best = deficit, node
+        return best
+
+    def _make_falsification_probe(self, target_inv):
+        # type: (str) -> dict
+        """
+        Synthetic feed item that forces L7 to challenge `target_inv` directly.
+        Goes through the normal FEED path — creates a real challenges edge.
+        """
+        return {
+            'url':   f'local://adversarial_probe/{target_inv}/{self.cycle_num}',
+            'title': f'Adversarial Probe: Challenge {target_inv}',
+            'abstract': (
+                f'DELIBERATE FALSIFICATION PROBE — cycle {self.cycle_num}. '
+                f'{target_inv} is the genome invariant with the highest confirmation surplus '
+                f'and fewest direct challenges. It has accumulated confirmations without being '
+                f'seriously contested. This probe requires FREED to confront it directly. '
+                f'Task: What empirical result, theoretical argument, or observation would '
+                f'falsify {target_inv}? What are the boundary conditions under which it breaks? '
+                f'What alternative mechanism could produce the same observables without requiring '
+                f'the claim in {target_inv} to be true? '
+                f'Do not confirm or extend — challenge. '
+                f'The mandatory CHALLENGE block must target {target_inv} specifically.'
+            ),
+            'score':  10,
+            'source': 'falsification_probe',
+        }
+
     def _phase_feed(self, inputs: list[dict], cycle_log: dict):
         """Run L7 on each SWEEP input. PRE-AUDIT runs inside the genome before each FEED."""
-        print(f"\n[FEED] Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} input(s).")
+        # Prepend one adversarial probe targeting the highest-deficit invariant
+        try:
+            target = self._select_falsification_target()
+            probe  = self._make_falsification_probe(target)
+            inputs = [probe] + list(inputs)
+            print(f"[FEED] Falsification probe targeting {target} prepended.")
+        except Exception as e:
+            print(f"[FEED] Falsification probe error (skipping): {e}")
+
+        print(f"[FEED] Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} input(s).")
 
         feed_results = []
         for inp in inputs[:MAX_FEEDS_PER_CYCLE]:
@@ -1381,6 +1467,22 @@ Output only the classification lines, nothing else."""
 
     # ── RESOLVE ──────────────────────────────────────────────────────────────
 
+    def _classify_obligation_type(self, ob):
+        """
+        Return 'IMPLEMENTATION' if this obligation is about FREED's own code,
+        state, or metrics — meaning L7 reasoning cannot fix it and it needs
+        code inspection.  Return 'REASONING' otherwise.
+
+        Requires BOTH a keyword hit AND a prior COMMIT:NO streak, so new
+        obligations still get a fair L7 attempt before the router fires.
+        """
+        text      = (ob.get("statement", "") + " " + ob.get("progress", "")).lower()
+        impl_hit  = any(kw in text for kw in _IMPL_CLASS_KEYWORDS)
+        commit_nos = ob.get("progress", "").count("COMMIT:NO")
+        if impl_hit and commit_nos >= IMPL_CLASS_MIN_COMMITS:
+            return "IMPLEMENTATION"
+        return "REASONING"
+
     def _resolve_rank(self, o):
         """Rank open obligations for RESOLVE priority. Lower = attempt first."""
         t = o.get("tractability", 3)
@@ -1476,6 +1578,15 @@ Output only the classification lines, nothing else."""
             target["progress"] = (target.get("progress", "") + " | " + progress_note).strip(" | ")
             if not commit:
                 print(f"     {commit_tag}")
+                # If this looks like an implementation/measurement problem, stop
+                # cycling L7 and surface it for Claude Code inspection instead.
+                if self._classify_obligation_type(target) == "IMPLEMENTATION":
+                    route_note = (
+                        " [ROUTE:CLAUDE_CODE — repeated COMMIT:NO on FREED-internal claim; "
+                        "requires code inspection, not argument]"
+                    )
+                    target["progress"] = target.get("progress", "") + route_note
+                    print(f"     [IMPL_CLASS] {target['id']} routed to Claude Code")
 
         return {"obligation": target["id"], "resolved": resolved,
                 "compress": compress, "next": next_step, "commit": commit}
@@ -1559,25 +1670,43 @@ Output only the classification lines, nothing else."""
         """
         print("\n[UPDATE]", end=" ")
 
-        # Coherence nudge: small decay toward center, never reaches 1.000
-        resolved_count = sum(1 for o in self.obligations if o["status"] == "resolved")
+        # Coherence nudge: rises with today's resolutions, falls with challenge pressure.
+        # Uses cycle-local resolutions (not all-time) to avoid pinning at 0.999.
+        today_str      = str(date.today())
+        cycle_resolved = sum(1 for o in self.obligations
+                             if o["status"] == "resolved"
+                             and o.get("resolved") == today_str)
+        all_resolved   = sum(1 for o in self.obligations if o["status"] == "resolved")
         open_count     = sum(1 for o in self.obligations if o["status"] == "open")
 
-        # Coherence rises slightly with resolutions, never reaches 1.000
-        if resolved_count > 0:
-            delta = 0.0005 * resolved_count
-            new_coherence = min(0.999, self.state["coherence"] + delta)
-        else:
-            # Slight decay without resolutions (tension is healthy)
-            new_coherence = max(0.970, self.state["coherence"] - 0.0001)
+        # Challenge drag: fraction of INV-targeted edges that are challenges.
+        # More challenge pressure → lower coherence target.
+        try:
+            _g = get_graph()
+            _g._ensure_loaded()
+            _inv_edges    = [e for e in _g._edges if e.get('to', '').startswith('INV')]
+            _confirms     = sum(1 for e in _inv_edges if e.get('type') == 'confirms')
+            _challenges   = sum(1 for e in _inv_edges if e.get('type') == 'challenges')
+            _total_ev     = _confirms + _challenges
+            challenge_ratio = _challenges / _total_ev if _total_ev > 0 else 0.0
+        except Exception:
+            challenge_ratio = 0.0
 
-        self.state["coherence"] = round(new_coherence, 4)
-        self.state["debt_ratio"] = f"{resolved_count} resolved / {open_count} open"
+        resolution_boost = 0.0005 * min(cycle_resolved, 3)   # cap boost at 3 resolutions/cycle
+        challenge_drag   = challenge_ratio * 0.02             # 10% challenges → −0.002/cycle
+        net_delta        = resolution_boost - challenge_drag
+
+        new_coherence = self.state["coherence"] + net_delta
+        new_coherence = max(0.970, min(0.999, round(new_coherence, 4)))
+
+        self.state["coherence"] = new_coherence
+        self.state["debt_ratio"] = f"{all_resolved} resolved / {open_count} open"
 
         self._save_state()
         self.astrocyte.print_status()
 
-        print(f"State saved. Coherence: {self.state['coherence']}. "
+        print(f"State saved. Coherence: {self.state['coherence']} "
+              f"(+{resolution_boost:.4f} res / -{challenge_drag:.4f} chal). "
               f"Debt: {self.state['debt_ratio']}.")
         cycle_log["phases"]["update"] = {
             "coherence":   self.state["coherence"],

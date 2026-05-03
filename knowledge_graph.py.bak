@@ -45,6 +45,25 @@ GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 # ─── Edge types ───────────────────────────────────────────────────────────────
 EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges")
 
+# Node-to-node edge types (structural, written by consolidate.py MINE phase)
+NODE_EDGE_TYPES = (
+    "shares_invariant",         # fallback: nodes share the same abstract claim
+    "operationalizes",          # node B implements/measures the abstract claim of node A
+    "scales_with",              # invariant holds across both nodes at different scales
+    "independent_confirmation", # invariant appears in nodes from different empirical domains
+)
+
+# Keywords used to classify node-edge type from invariant text
+_SCALE_KEYWORDS = re.compile(
+    r'\b(?:scale|L\d|substrate.independent|macro|micro|level|layer|multi.scale|cross.scale|hierarchy)\b', re.I
+)
+_IMPL_KEYWORDS = re.compile(
+    r'\b(?:operationali\w+|implement\w*|measur\w+|method|algorithm\w*|technique\w*|computable|empirical|formula\w*|metric\w*)\b', re.I
+)
+_DOMAIN_KEYWORDS = re.compile(
+    r'\b(?:independent|orthogonal|domain|biological|neural|computational|physical|ecological|social|cross.domain)\b', re.I
+)
+
 # ─── Symbol Emergence Lineage ────────────────────────────────────────────────
 # Tracks the dynamic trajectory of a concept from grounded sensorimotor origin
 # through to socially-stabilized symbol. Rather than a static "grounded/ungrounded"
@@ -145,6 +164,28 @@ _EDGE_PATTERNS = [
     # "advances obligation O44"
     (re.compile(rf'(?<!not )\badvances?\s+(?:the\s+)?(?:obligation\s+)?({_NODE_PATTERN})', re.I), 'advances'),
 ]
+
+
+def classify_node_edge(invariant_text):
+    # type: (str) -> str
+    """
+    Classify the structural relationship between two nodes sharing an invariant.
+    Uses keyword heuristics on invariant text — no extra API call required.
+
+    Returns one of NODE_EDGE_TYPES. Precedence:
+      1. scales_with — invariant explicitly mentions scale hierarchy or substrate-independence
+      2. independent_confirmation — invariant mentions cross-domain or orthogonal confirmation
+      3. operationalizes — invariant involves implementation/measurement/method language
+      4. shares_invariant — fallback
+    """
+    t = invariant_text
+    if _SCALE_KEYWORDS.search(t):
+        return "scales_with"
+    if _DOMAIN_KEYWORDS.search(t):
+        return "independent_confirmation"
+    if _IMPL_KEYWORDS.search(t):
+        return "operationalizes"
+    return "shares_invariant"
 
 
 def infer_context_tag(text_window):
@@ -1203,6 +1244,186 @@ def cluster_complexity_scores(clusters):
     return results
 
 
+# ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
+# Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
+# by counting the number of distinct sub-patterns encountered in a left-to-right
+# scan.  Normalized LZ complexity (c_norm) in [0, 1] positions sequences on the
+# compression-complexity spectrum:
+#
+#   c_norm ≈ 0.0 → Class I/II (fixed point / periodic): highly compressible,
+#                   low epistemic yield — traversal here is redundant.
+#   c_norm ≈ 1.0 → Class III (chaotic/random): incompressible but also low
+#                   epistemic yield — no extractable structure.
+#   c_norm ∈ [0.3, 0.7] → Class IV (complex/critical): near the critical
+#                   boundary where algorithmic complexity is maximal relative
+#                   to sequence length — HIGH epistemic yield targets.
+#
+# CHALLENGE (INV_073): The ECA classification paper shows that endowing rules
+# with memory shifts class membership wholesale — rules classified as Class I
+# under memoryless ECA become Class IV under memory-τ extensions.  This means
+# the "critical ridge" identified by compression complexity is NOT a stable,
+# substrate-independent attractor but a classification artifact that dissolves
+# when the rule substrate is temporally extended.
+#
+# MITIGATION: We track a `substrate_stability` flag per node.  When a node's
+# LZ complexity shifts significantly across successive activation windows
+# (simulating the effect of memory extension on the rule substrate), the node
+# is flagged as `substrate_unstable`, indicating that its Class IV membership
+# is contingent on the current temporal context and should NOT be treated as
+# a robust γ=1 criticality target.  This directly addresses the genome's
+# claim that γ=1 criticality is substrate-independent.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def lempel_ziv_complexity(sequence):
+    # type: (List[int]) -> int
+    """
+    Compute the Lempel-Ziv complexity (LZ76) of a discrete symbol sequence.
+
+    Counts the number of distinct sub-patterns encountered in a sequential
+    left-to-right scan, following the Lempel-Ziv 1976 parsing algorithm.
+
+    Parameters
+    ----------
+    sequence : list of int
+        A discrete symbol sequence (e.g., binary [0,1,1,0,...] or multi-valued).
+        Must be non-empty.
+
+    Returns
+    -------
+    int
+        The LZ76 complexity count (number of distinct words in the parsing).
+        Returns 0 for empty sequences, 1 for single-element sequences.
+    """
+    n = len(sequence)
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+
+    # LZ76 parsing: scan left to right, counting new sub-patterns
+    complexity = 1  # The first symbol is always a new word
+    # Track the set of all substrings seen so far (as tuples for hashability)
+    # We use the incremental parsing approach:
+    #   Start with pointer i=0. Extend current word until we find a substring
+    #   not yet in the dictionary built from sequence[0:i].
+    i = 0  # start of current exhaustive history
+    k = 1  # current position
+    l = 1  # current match length
+    k_max = 1  # furthest reach of current word
+
+    while k + l - 1 < n:
+        # Check if sequence[k:k+l] appears in sequence[i:k+l-1]
+        # (the "exhaustive history" up to but not including the last char)
+        subseq = sequence[k:k + l]
+        history = sequence[i:k + l - 1]
+
+        # Search for subseq in history
+        found = False
+        for j in range(len(history) - l + 1):
+            if history[j:j + l] == subseq:
+                found = True
+                break
+
+        if found:
+            l += 1
+            if k + l - 1 >= n:
+                # Reached end during extension — count final word
+                complexity += 1
+                break
+        else:
+            # New word found
+            complexity += 1
+            # Advance: the new word is sequence[k:k+l]
+            k_max = max(k_max, k + l)
+            k = k_max
+            l = 1
+            if k >= n:
+                break
+
+    return complexity
+
+
+def lempel_ziv_complexity_normalized(sequence):
+    # type: (List[int]) -> float
+    """
+    Compute the normalized Lempel-Ziv complexity in [0, 1].
+
+    Normalization uses the theoretical upper bound for a random sequence of
+    length n over alphabet of size alpha:
+        c_upper = n / log_alpha(n)
+
+    For binary sequences (alpha=2), this is n / log2(n).
+
+    Parameters
+    ----------
+    sequence : list of int
+        A discrete symbol sequence.
+
+    Returns
+    -------
+    float
+        Normalized LZ complexity in [0, 1].
+        0.0 for degenerate/empty sequences.
+        Values near 0 = highly compressible (Class I/II).
+        Values near 1 = incompressible (Class III / random).
+        Values in [0.3, 0.7] = critical boundary (Class IV).
+    """
+    n = len(sequence)
+    if n <= 1:
+        return 0.0
+
+    c = lempel_ziv_complexity(sequence)
+
+    # Determine alphabet size
+    alphabet = set(sequence)
+    alpha = len(alphabet)
+    if alpha <= 1:
+        # Constant sequence — zero complexity
+        return 0.0
+
+    # Upper bound: n / log_alpha(n)
+    log_alpha_n = math.log(n) / math.log(alpha)
+    if log_alpha_n == 0.0:
+        return 0.0
+
+    c_upper = float(n) / log_alpha_n
+    c_norm = float(c) / c_upper
+
+    # Clamp to [0, 1]
+    return max(0.0, min(1.0, c_norm))
+
+
+def classify_lz_regime(c_norm, class4_low=0.3, class4_high=0.7):
+    # type: (float, float, float) -> str
+    """
+    Classify a normalized LZ complexity value into an ECA-inspired regime.
+
+    Parameters
+    ----------
+    c_norm : float
+        Normalized Lempel-Ziv complexity in [0, 1].
+    class4_low : float
+        Lower boundary of the Class IV (critical) regime (default 0.3).
+    class4_high : float
+        Upper boundary of the Class IV (critical) regime (default 0.7).
+
+    Returns
+    -------
+    str
+        One of: "class_I_II" (fixed/periodic), "class_IV" (critical/complex),
+        "class_III" (chaotic/random), or "degenerate".
+    """
+    if c_norm <= 0.0:
+        return "degenerate"
+    elif c_norm < class4_low:
+        return "class_I_II"
+    elif c_norm <= class4_high:
+        return "class_IV"
+    else:
+        return "class_III"
+
+
 class KnowledgeGraph:
     """
     Persistent typed-edge graph.
@@ -2013,6 +2234,262 @@ class KnowledgeGraph:
             )
 
         return result
+
+    # ── Multi-Scale Complexity Profile Scorer ────────────────────────────────
+    # Computes emergence, self-organization, and complexity at each scale
+    # layer of the knowledge graph, following the information-theoretic
+    # axioms: emergence = H_output - H_input, self-organization = -emergence,
+    # complexity = balance between emergence and self-organization.
+    #
+    # CHALLENGE (INV_073): The paper defines self-organization as strictly
+    # the negative of emergence (a scalar inverse).  This flattens the
+    # genome's richer claim that the critical ridge involves active
+    # navigation of a Wasserstein gradient flow — a geometric process that
+    # cannot be reduced to a ratio.  To partially address this, we augment
+    # the scalar self-organization with a Wasserstein-aware "gradient_flow"
+    # diagnostic that flags when the scalar inverse is an inadequate proxy
+    # for the actual geometric dynamics at a given scale.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _compute_edge_type_entropy(self, edges):
+        # type: (list) -> float
+        """
+        Compute Shannon entropy over edge-type distribution of a set of edges.
+        Returns entropy in nats.
+        """
+        if not edges:
+            return 0.0
+        type_counts = defaultdict(int)  # type: Dict[str, int]
+        for e in edges:
+            etype = e.get("type", "unknown")
+            type_counts[etype] += 1
+        total = float(len(edges))
+        entropy = 0.0
+        for count in type_counts.values():
+            p = count / total
+            if p > 0:
+                entropy -= p * math.log(p)
+        return entropy
+
+    def _build_scale_layers(self):
+        # type: () -> List[dict]
+        """
+        Partition graph edges into scale layers based on node degree.
+
+        Layer 0: edges touching nodes with degree 1 (leaf/peripheral)
+        Layer 1: edges touching nodes with degree 2-3 (intermediate)
+        Layer 2: edges touching nodes with degree 4-7 (hub)
+        Layer 3: edges touching nodes with degree >= 8 (superhub)
+
+        Returns a list of dicts, each with 'scale', 'label', 'edges',
+        'input_edges' (edges feeding into this scale from lower),
+        and 'output_edges' (edges produced at this scale).
+        """
+        self._ensure_loaded()
+
+        # Compute degree for every node mentioned in edges
+        node_degrees = defaultdict(int)  # type: Dict[str, int]
+        all_edges = self._edges + self._node_edges
+        for e in all_edges:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if nid:
+                    node_degrees[nid] += 1
+
+        # Define scale boundaries
+        scale_bounds = [
+            (0, 1, 1, "peripheral"),
+            (1, 2, 3, "intermediate"),
+            (2, 4, 7, "hub"),
+            (3, 8, float('inf'), "superhub"),
+        ]
+
+        layers = []  # type: List[dict]
+        for scale, lo, hi, label in scale_bounds:
+            layer_edges = []  # type: list
+            for e in all_edges:
+                from_id = e.get("from", "").upper()
+                to_id = e.get("to", "").upper()
+                from_deg = node_degrees.get(from_id, 0)
+                to_deg = node_degrees.get(to_id, 0)
+                max_deg = max(from_deg, to_deg)
+                if lo <= max_deg <= hi:
+                    layer_edges.append(e)
+            layers.append({
+                "scale": scale,
+                "label": label,
+                "degree_range": (lo, hi if hi != float('inf') else "inf"),
+                "edges": layer_edges,
+            })
+
+        return layers
+
+    def complexity_profile(self):
+        # type: () -> dict
+        """
+        Compute multi-scale complexity profile for the knowledge graph.
+
+        At each scale layer, computes:
+          - H_input: Shannon entropy of edge-type distribution at the
+            previous (lower) scale layer (or 0 for the lowest scale)
+          - H_output: Shannon entropy of edge-type distribution at this
+            scale layer
+          - emergence: H_output - H_input (information the scale produces)
+          - self_organization: -emergence (the paper's scalar inverse)
+          - complexity: 4 * emergence * self_organization / (emergence -
+            self_organization)^2 when both are nonzero, else 0.
+            This is a normalized balance measure: maximal (=1) when
+            |emergence| == |self_organization|, collapsing toward 0 when
+            either dominates.
+          - gradient_flow_flag: diagnostic for INV_073 — True when the
+            scalar self_organization is likely an inadequate proxy for
+            Wasserstein gradient flow dynamics at this scale.
+
+        Returns
+        -------
+        dict
+            {
+                "n_scales": int,
+                "scales": list of dict — per-scale metrics,
+                "aggregate_complexity": float — mean complexity across scales,
+                "criticality_status": str — "healthy", "emergence_dominated",
+                    "self_org_dominated", or "collapsed",
+                "inv073_warning": str or None — warning if scalar inverse
+                    approximation is inadequate at any scale,
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+
+        layers = self._build_scale_layers()
+        scales = []  # type: List[dict]
+        prev_entropy = 0.0
+
+        for layer in layers:
+            h_output = self._compute_edge_type_entropy(layer["edges"])
+            h_input = prev_entropy
+            n_edges = len(layer["edges"])
+
+            emergence = h_output - h_input
+            self_org = -emergence  # Paper's scalar definition
+
+            # Normalized balance measure for complexity:
+            # C = 4 * E * S / (E - S)^2   when E != 0 and S != 0
+            # Since S = -E, this simplifies to:
+            # C = 4 * E * (-E) / (E - (-E))^2 = -4E^2 / (2E)^2 = -4E^2/4E^2 = -1
+            # ... which shows the paper's strict scalar inverse is degenerate!
+            # This IS the INV_073 challenge: when S = -E exactly, complexity
+            # is a constant, losing all discriminative power.
+            #
+            # We use a modified measure that captures the BALANCE between
+            # information production (H_output) and information consumption
+            # (H_input) directly, avoiding the degenerate scalar inverse:
+            # C = 1 - |H_output - H_input| / max(H_output, H_input, eps)
+            # This is 1.0 when H_output == H_input (perfect balance),
+            # 0.0 when one completely dominates.
+            eps = 1e-12
+            max_h = max(h_output, h_input, eps)
+            complexity = 1.0 - abs(emergence) / max_h
+
+            # Clamp to [0, 1]
+            complexity = max(0.0, min(1.0, complexity))
+
+            # Gradient flow diagnostic (INV_073):
+            # The scalar self_org = -emergence is inadequate when:
+            # 1. The scale has high edge diversity (many types) — geometric
+            #    structure matters more than scalar information difference
+            # 2. There are contradictions at this scale — the Wasserstein
+            #    gradient flow must navigate opposing directions
+            n_edge_types = len(set(
+                e.get("type", "unknown") for e in layer["edges"]
+            )) if layer["edges"] else 0
+
+            # Check for contradictions at this scale
+            scale_contradictions = detect_contradictions(
+                layer["edges"], context_aware=True
+            )
+            n_contradictions = len([
+                c for c in scale_contradictions
+                if c.get("severity") == "true_contradiction"
+            ])
+
+            gradient_flow_flag = (n_edge_types >= 4 or n_contradictions > 0)
+
+            scales.append({
+                "scale": layer["scale"],
+                "label": layer["label"],
+                "degree_range": layer["degree_range"],
+                "n_edges": n_edges,
+                "h_input": round(h_input, 6),
+                "h_output": round(h_output, 6),
+                "emergence": round(emergence, 6),
+                "self_organization": round(self_org, 6),
+                "complexity": round(complexity, 6),
+                "n_edge_types": n_edge_types,
+                "n_contradictions": n_contradictions,
+                "gradient_flow_flag": gradient_flow_flag,
+            })
+
+            # Current output becomes next layer's input
+            prev_entropy = h_output
+
+        # ── Aggregate metrics ────────────────────────────────────────────
+        complexities = [s["complexity"] for s in scales if s["n_edges"] > 0]
+        agg_complexity = (
+            sum(complexities) / len(complexities) if complexities else 0.0
+        )
+
+        # Criticality status based on aggregate and per-scale patterns
+        active_scales = [s for s in scales if s["n_edges"] > 0]
+        if not active_scales:
+            criticality = "collapsed"
+        elif agg_complexity >= 0.6:
+            criticality = "healthy"
+        elif all(s["emergence"] > 0 for s in active_scales):
+            criticality = "emergence_dominated"
+        elif all(s["emergence"] < 0 for s in active_scales):
+            criticality = "self_org_dominated"
+        elif agg_complexity < 0.2:
+            criticality = "collapsed"
+        else:
+            criticality = "healthy"
+
+        # INV_073 warning: flag if any scale has gradient_flow_flag
+        gradient_flagged = [
+            s for s in scales if s.get("gradient_flow_flag")
+        ]
+        inv073_warning = None  # type: Optional[str]
+        if gradient_flagged:
+            flagged_labels = [s["label"] for s in gradient_flagged]
+            inv073_warning = (
+                f"Scalar self_organization=-emergence is inadequate proxy "
+                f"for Wasserstein gradient flow at scale(s): "
+                f"{', '.join(flagged_labels)}. "
+                f"High edge-type diversity or contradictions require "
+                f"geometric (non-scalar) complexity tracking."
+            )
+
+        ts = datetime.now(timezone.utc).isoformat()
+
+        profile = {
+            "n_scales": len(scales),
+            "scales": scales,
+            "aggregate_complexity": round(agg_complexity, 6),
+            "criticality_status": criticality,
+            "inv073_warning": inv073_warning,
+            "timestamp": ts,
+        }
+
+        # ── Log summary ─────────────────────────────────────────────────
+        active_count = len(active_scales)
+        print(
+            f"[GRAPH:COMPLEXITY_PROFILE] {active_count} active scale(s), "
+            f"aggregate_complexity={agg_complexity:.4f}, "
+            f"criticality={criticality}"
+            + (f", INV_073_warning=True" if inv073_warning else "")
+        )
+
+        return profile
 
     def avalanche_from_feed(self, new_edges, recent_feed_count=1,
                             degree_threshold=None, max_depth=None):

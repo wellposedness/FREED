@@ -45,6 +45,25 @@ GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 # ─── Edge types ───────────────────────────────────────────────────────────────
 EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges")
 
+# Node-to-node edge types (structural, written by consolidate.py MINE phase)
+NODE_EDGE_TYPES = (
+    "shares_invariant",         # fallback: nodes share the same abstract claim
+    "operationalizes",          # node B implements/measures the abstract claim of node A
+    "scales_with",              # invariant holds across both nodes at different scales
+    "independent_confirmation", # invariant appears in nodes from different empirical domains
+)
+
+# Keywords used to classify node-edge type from invariant text
+_SCALE_KEYWORDS = re.compile(
+    r'\b(?:scale|L\d|substrate.independent|macro|micro|level|layer|multi.scale|cross.scale|hierarchy)\b', re.I
+)
+_IMPL_KEYWORDS = re.compile(
+    r'\b(?:operationali\w+|implement\w*|measur\w+|method|algorithm\w*|technique\w*|computable|empirical|formula\w*|metric\w*)\b', re.I
+)
+_DOMAIN_KEYWORDS = re.compile(
+    r'\b(?:independent|orthogonal|domain|biological|neural|computational|physical|ecological|social|cross.domain)\b', re.I
+)
+
 # ─── Symbol Emergence Lineage ────────────────────────────────────────────────
 # Tracks the dynamic trajectory of a concept from grounded sensorimotor origin
 # through to socially-stabilized symbol. Rather than a static "grounded/ungrounded"
@@ -145,6 +164,28 @@ _EDGE_PATTERNS = [
     # "advances obligation O44"
     (re.compile(rf'(?<!not )\badvances?\s+(?:the\s+)?(?:obligation\s+)?({_NODE_PATTERN})', re.I), 'advances'),
 ]
+
+
+def classify_node_edge(invariant_text):
+    # type: (str) -> str
+    """
+    Classify the structural relationship between two nodes sharing an invariant.
+    Uses keyword heuristics on invariant text — no extra API call required.
+
+    Returns one of NODE_EDGE_TYPES. Precedence:
+      1. scales_with — invariant explicitly mentions scale hierarchy or substrate-independence
+      2. independent_confirmation — invariant mentions cross-domain or orthogonal confirmation
+      3. operationalizes — invariant involves implementation/measurement/method language
+      4. shares_invariant — fallback
+    """
+    t = invariant_text
+    if _SCALE_KEYWORDS.search(t):
+        return "scales_with"
+    if _DOMAIN_KEYWORDS.search(t):
+        return "independent_confirmation"
+    if _IMPL_KEYWORDS.search(t):
+        return "operationalizes"
+    return "shares_invariant"
 
 
 def infer_context_tag(text_window):
@@ -1203,6 +1244,186 @@ def cluster_complexity_scores(clusters):
     return results
 
 
+# ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
+# Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
+# by counting the number of distinct sub-patterns encountered in a left-to-right
+# scan.  Normalized LZ complexity (c_norm) in [0, 1] positions sequences on the
+# compression-complexity spectrum:
+#
+#   c_norm ≈ 0.0 → Class I/II (fixed point / periodic): highly compressible,
+#                   low epistemic yield — traversal here is redundant.
+#   c_norm ≈ 1.0 → Class III (chaotic/random): incompressible but also low
+#                   epistemic yield — no extractable structure.
+#   c_norm ∈ [0.3, 0.7] → Class IV (complex/critical): near the critical
+#                   boundary where algorithmic complexity is maximal relative
+#                   to sequence length — HIGH epistemic yield targets.
+#
+# CHALLENGE (INV_073): The ECA classification paper shows that endowing rules
+# with memory shifts class membership wholesale — rules classified as Class I
+# under memoryless ECA become Class IV under memory-τ extensions.  This means
+# the "critical ridge" identified by compression complexity is NOT a stable,
+# substrate-independent attractor but a classification artifact that dissolves
+# when the rule substrate is temporally extended.
+#
+# MITIGATION: We track a `substrate_stability` flag per node.  When a node's
+# LZ complexity shifts significantly across successive activation windows
+# (simulating the effect of memory extension on the rule substrate), the node
+# is flagged as `substrate_unstable`, indicating that its Class IV membership
+# is contingent on the current temporal context and should NOT be treated as
+# a robust γ=1 criticality target.  This directly addresses the genome's
+# claim that γ=1 criticality is substrate-independent.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def lempel_ziv_complexity(sequence):
+    # type: (List[int]) -> int
+    """
+    Compute the Lempel-Ziv complexity (LZ76) of a discrete symbol sequence.
+
+    Counts the number of distinct sub-patterns encountered in a sequential
+    left-to-right scan, following the Lempel-Ziv 1976 parsing algorithm.
+
+    Parameters
+    ----------
+    sequence : list of int
+        A discrete symbol sequence (e.g., binary [0,1,1,0,...] or multi-valued).
+        Must be non-empty.
+
+    Returns
+    -------
+    int
+        The LZ76 complexity count (number of distinct words in the parsing).
+        Returns 0 for empty sequences, 1 for single-element sequences.
+    """
+    n = len(sequence)
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+
+    # LZ76 parsing: scan left to right, counting new sub-patterns
+    complexity = 1  # The first symbol is always a new word
+    # Track the set of all substrings seen so far (as tuples for hashability)
+    # We use the incremental parsing approach:
+    #   Start with pointer i=0. Extend current word until we find a substring
+    #   not yet in the dictionary built from sequence[0:i].
+    i = 0  # start of current exhaustive history
+    k = 1  # current position
+    l = 1  # current match length
+    k_max = 1  # furthest reach of current word
+
+    while k + l - 1 < n:
+        # Check if sequence[k:k+l] appears in sequence[i:k+l-1]
+        # (the "exhaustive history" up to but not including the last char)
+        subseq = sequence[k:k + l]
+        history = sequence[i:k + l - 1]
+
+        # Search for subseq in history
+        found = False
+        for j in range(len(history) - l + 1):
+            if history[j:j + l] == subseq:
+                found = True
+                break
+
+        if found:
+            l += 1
+            if k + l - 1 >= n:
+                # Reached end during extension — count final word
+                complexity += 1
+                break
+        else:
+            # New word found
+            complexity += 1
+            # Advance: the new word is sequence[k:k+l]
+            k_max = max(k_max, k + l)
+            k = k_max
+            l = 1
+            if k >= n:
+                break
+
+    return complexity
+
+
+def lempel_ziv_complexity_normalized(sequence):
+    # type: (List[int]) -> float
+    """
+    Compute the normalized Lempel-Ziv complexity in [0, 1].
+
+    Normalization uses the theoretical upper bound for a random sequence of
+    length n over alphabet of size alpha:
+        c_upper = n / log_alpha(n)
+
+    For binary sequences (alpha=2), this is n / log2(n).
+
+    Parameters
+    ----------
+    sequence : list of int
+        A discrete symbol sequence.
+
+    Returns
+    -------
+    float
+        Normalized LZ complexity in [0, 1].
+        0.0 for degenerate/empty sequences.
+        Values near 0 = highly compressible (Class I/II).
+        Values near 1 = incompressible (Class III / random).
+        Values in [0.3, 0.7] = critical boundary (Class IV).
+    """
+    n = len(sequence)
+    if n <= 1:
+        return 0.0
+
+    c = lempel_ziv_complexity(sequence)
+
+    # Determine alphabet size
+    alphabet = set(sequence)
+    alpha = len(alphabet)
+    if alpha <= 1:
+        # Constant sequence — zero complexity
+        return 0.0
+
+    # Upper bound: n / log_alpha(n)
+    log_alpha_n = math.log(n) / math.log(alpha)
+    if log_alpha_n == 0.0:
+        return 0.0
+
+    c_upper = float(n) / log_alpha_n
+    c_norm = float(c) / c_upper
+
+    # Clamp to [0, 1]
+    return max(0.0, min(1.0, c_norm))
+
+
+def classify_lz_regime(c_norm, class4_low=0.3, class4_high=0.7):
+    # type: (float, float, float) -> str
+    """
+    Classify a normalized LZ complexity value into an ECA-inspired regime.
+
+    Parameters
+    ----------
+    c_norm : float
+        Normalized Lempel-Ziv complexity in [0, 1].
+    class4_low : float
+        Lower boundary of the Class IV (critical) regime (default 0.3).
+    class4_high : float
+        Upper boundary of the Class IV (critical) regime (default 0.7).
+
+    Returns
+    -------
+    str
+        One of: "class_I_II" (fixed/periodic), "class_IV" (critical/complex),
+        "class_III" (chaotic/random), or "degenerate".
+    """
+    if c_norm <= 0.0:
+        return "degenerate"
+    elif c_norm < class4_low:
+        return "class_I_II"
+    elif c_norm <= class4_high:
+        return "class_IV"
+    else:
+        return "class_III"
+
+
 class KnowledgeGraph:
     """
     Persistent typed-edge graph.
@@ -1450,6 +1671,262 @@ class KnowledgeGraph:
             if target:
                 structure[target][etype] += 1
         return {k: dict(v) for k, v in structure.items()}
+
+    # ── Confirmation Independence Audit ──────────────────────────────────────
+    # Tracks whether confirmations of an invariant share upstream assumptions
+    # (structurally correlated experimental paradigms). Flags invariants where
+    # all N confirmations are drawn from the same paradigm cluster, preventing
+    # high confirmation-surplus invariants from accruing false robustness when
+    # all confirmations share a common confound.
+    #
+    # Independence is assessed via three orthogonal signals:
+    #   1. Source diversity: distinct source URLs (same lab/paper = correlated)
+    #   2. Context diversity: distinct context_tags (same coarse-graining = correlated)
+    #   3. Paradigm diversity: distinct paradigm clusters inferred from edge
+    #      context windows via keyword-based paradigm classification
+    #
+    # An invariant is flagged as "independence_compromised" when:
+    #   - It has >= 2 confirmations (surplus exists to audit)
+    #   - AND all confirmations share a single paradigm cluster
+    #   - OR all confirmations share a single context_tag
+    #   - OR all confirmations originate from a single source URL domain
+    #
+    # This makes the falsification layer genuinely load-bearing: an invariant
+    # with 10 confirmations from the same paradigm is epistemically weaker than
+    # one with 3 confirmations from independent paradigms.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Paradigm classification patterns: map edge context windows to paradigm clusters
+    _PARADIGM_PATTERNS = [
+        (re.compile(r'\b(?:thermodynamic|statistical\s+mechanic|Boltzmann|partition\s+function|heat|temperature)\b', re.I),
+         "paradigm:thermodynamic"),
+        (re.compile(r'\b(?:information[- ]theoretic|Shannon|mutual\s+information|channel\s+capacity|coding)\b', re.I),
+         "paradigm:information_theoretic"),
+        (re.compile(r'\b(?:neural|brain|cortical|EEG|fMRI|cognitive|neurosci)\b', re.I),
+         "paradigm:neuroscience"),
+        (re.compile(r'\b(?:computational|algorithm|Turing|halting|computable|simulat)\b', re.I),
+         "paradigm:computational"),
+        (re.compile(r'\b(?:quantum|wave[-\s]?function|density\s+matrix|entangle|decoher)\b', re.I),
+         "paradigm:quantum"),
+        (re.compile(r'\b(?:biological|evolution|genetic|organism|ecological|metabol)\b', re.I),
+         "paradigm:biological"),
+        (re.compile(r'\b(?:social|economic|market|agent[-\s]based|game\s+theor)\b', re.I),
+         "paradigm:social"),
+        (re.compile(r'\b(?:black[- ]?hole|gravitational|cosmolog|spacetime|horizon|Bekenstein|Hawking)\b', re.I),
+         "paradigm:gravitational"),
+        (re.compile(r'\b(?:chemical|reaction|catalyst|molecular\s+dynamic|kinetic)\b', re.I),
+         "paradigm:chemical"),
+        (re.compile(r'\b(?:cellular\s+automat|lattice|Ising|spin|percolat|critical\s+phenom)\b', re.I),
+         "paradigm:statistical_physics"),
+    ]
+
+    def _classify_paradigms(self, text):
+        # type: (str) -> List[str]
+        """
+        Classify a text window into zero or more paradigm clusters.
+
+        Returns a sorted list of paradigm tags found in the text.
+        """
+        if not text:
+            return []
+        paradigms = []  # type: List[str]
+        for pat, tag in self._PARADIGM_PATTERNS:
+            if pat.search(text):
+                paradigms.append(tag)
+        return sorted(set(paradigms))
+
+    def _extract_source_domain(self, url):
+        # type: (str) -> str
+        """
+        Extract a coarse domain identifier from a source URL.
+
+        Strips protocol and www prefix, returns the domain or a normalized
+        form. For non-URL sources, returns the source string itself (truncated).
+        """
+        if not url:
+            return "unknown"
+        # Strip protocol
+        domain = re.sub(r'^https?://', '', url)
+        # Strip www
+        domain = re.sub(r'^www\.', '', domain)
+        # Take only the domain part (before first /)
+        domain = domain.split('/')[0]
+        # Normalize: strip port
+        domain = domain.split(':')[0]
+        return domain.lower()[:80] if domain else "unknown"
+
+    def confirmation_independence_audit(self):
+        # type: () -> Dict[str, dict]
+        """
+        Audit each invariant's confirmations for structural independence.
+
+        Checks whether the confirmations of each invariant are drawn from
+        independent experimental paradigms, distinct source domains, and
+        diverse observer contexts — or whether they all share upstream
+        assumptions that make the confirmation surplus illusory.
+
+        Returns
+        -------
+        dict
+            Mapping of invariant_id → {
+                "n_confirmations": int,
+                "n_sources": int — distinct source URL domains,
+                "n_context_tags": int — distinct context_tags,
+                "n_paradigms": int — distinct paradigm clusters,
+                "source_domains": list of str,
+                "context_tags": list of str,
+                "paradigms": list of str,
+                "independence_compromised": bool — True if all confirmations
+                    share a single paradigm, context, or source domain,
+                "compromise_reasons": list of str — which independence axes
+                    are collapsed (e.g. "single_paradigm", "single_context",
+                    "single_source_domain"),
+                "independence_score": float — in [0, 1], where 0 = fully
+                    correlated confirmations, 1 = maximally independent.
+                    Computed as geometric mean of normalized diversity across
+                    the three axes (source, context, paradigm).
+                "audit_severity": str — "none" (< 2 confirmations),
+                    "healthy" (independent), "warning" (partially correlated),
+                    "critical" (fully correlated),
+                "false_robustness_risk": bool — True when n_confirmations >= 3
+                    AND independence_compromised, meaning the invariant looks
+                    robust but is epistemically fragile,
+            }
+        """
+        self._ensure_loaded()
+
+        # Collect confirmation edges per invariant
+        inv_confirmations = defaultdict(list)  # type: Dict[str, list]
+        for e in self._edges:
+            target = e.get("to", "")
+            etype = e.get("type", "")
+            if target and etype in ("confirms", "supports"):
+                inv_confirmations[target].append(e)
+
+        results = {}  # type: Dict[str, dict]
+
+        for inv_id, conf_edges in inv_confirmations.items():
+            n_conf = len(conf_edges)
+
+            # Extract diversity axes
+            source_domains = set()  # type: set
+            context_tags = set()    # type: set
+            paradigms = set()       # type: set
+
+            for e in conf_edges:
+                # Source domain
+                src_url = e.get("from", "")
+                domain = self._extract_source_domain(src_url)
+                source_domains.add(domain)
+
+                # Context tag
+                ctx_tag = e.get("context_tag")
+                if ctx_tag:
+                    context_tags.add(ctx_tag)
+                else:
+                    context_tags.add("unspecified")
+
+                # Paradigm classification from edge context window
+                ctx_text = e.get("context", "")
+                edge_paradigms = self._classify_paradigms(ctx_text)
+                if edge_paradigms:
+                    for p in edge_paradigms:
+                        paradigms.add(p)
+                else:
+                    paradigms.add("paradigm:unclassified")
+
+            n_sources = len(source_domains)
+            n_contexts = len(context_tags)
+            n_paradigms = len(paradigms)
+
+            # Determine independence compromise
+            compromise_reasons = []  # type: List[str]
+
+            if n_conf >= 2:
+                if n_paradigms <= 1:
+                    compromise_reasons.append("single_paradigm")
+                if n_contexts <= 1:
+                    compromise_reasons.append("single_context")
+                if n_sources <= 1:
+                    compromise_reasons.append("single_source_domain")
+
+            independence_compromised = len(compromise_reasons) > 0 and n_conf >= 2
+
+            # Independence score: geometric mean of normalized diversity
+            # Each axis: (n_distinct - 1) / (n_confirmations - 1), clamped to [0, 1]
+            # This is 0 when all confirmations collapse to one value on that axis,
+            # and 1 when every confirmation is distinct on that axis.
+            if n_conf <= 1:
+                independence_score = 1.0  # trivially independent (nothing to compare)
+            else:
+                denom = float(n_conf - 1)
+                div_source = min(1.0, (n_sources - 1) / denom) if denom > 0 else 0.0
+                div_context = min(1.0, (n_contexts - 1) / denom) if denom > 0 else 0.0
+                div_paradigm = min(1.0, (n_paradigms - 1) / denom) if denom > 0 else 0.0
+
+                # Geometric mean (gives 0 if any axis is fully collapsed)
+                product = div_source * div_context * div_paradigm
+                if product > 0:
+                    independence_score = product ** (1.0 / 3.0)
+                else:
+                    independence_score = 0.0
+
+            independence_score = round(independence_score, 4)
+
+            # Audit severity classification
+            if n_conf < 2:
+                audit_severity = "none"
+            elif not independence_compromised:
+                audit_severity = "healthy"
+            elif len(compromise_reasons) >= 2:
+                audit_severity = "critical"
+            else:
+                audit_severity = "warning"
+
+            # False robustness risk: looks confirmed but isn't independently so
+            false_robustness_risk = (
+                n_conf >= 3 and independence_compromised
+            )
+
+            results[inv_id] = {
+                "n_confirmations": n_conf,
+                "n_sources": n_sources,
+                "n_context_tags": n_contexts,
+                "n_paradigms": n_paradigms,
+                "source_domains": sorted(source_domains),
+                "context_tags": sorted(context_tags),
+                "paradigms": sorted(paradigms),
+                "independence_compromised": independence_compromised,
+                "compromise_reasons": compromise_reasons,
+                "independence_score": independence_score,
+                "audit_severity": audit_severity,
+                "false_robustness_risk": false_robustness_risk,
+            }
+
+        # ── Log audit summary ────────────────────────────────────────────
+        critical = [k for k, v in results.items()
+                    if v["audit_severity"] == "critical"]
+        warning = [k for k, v in results.items()
+                   if v["audit_severity"] == "warning"]
+        false_robust = [k for k, v in results.items()
+                        if v["false_robustness_risk"]]
+
+        if critical or warning or false_robust:
+            print(
+                f"[GRAPH:INDEPENDENCE_AUDIT] "
+                f"{len(results)} invariant(s) audited — "
+                f"critical={len(critical)}, warning={len(warning)}, "
+                f"false_robustness_risk={len(false_robust)}"
+            )
+            for inv_id in critical:
+                r = results[inv_id]
+                print(
+                    f"  ⚠ {inv_id}: {r['n_confirmations']} confirmations, "
+                    f"independence_score={r['independence_score']}, "
+                    f"reasons={r['compromise_reasons']}"
+                )
+
+        return results
 
     # ── SOC Avalanche Detection ──────────────────────────────────────────────
     # Inspired by Self-Organized Criticality (SOC) cellular automaton models:

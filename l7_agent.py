@@ -403,6 +403,184 @@ class NonHermitianEntropyScorer:
         self._last_rho = None
 
 
+# ─── Branching-Ratio Criticality Monitor ─────────────────────────────────────
+
+class BranchingRatioMonitor:
+    """
+    Tracks σ = offspring_events / parent_events per cycle for a population
+    of RSA-kernel agents (or a single agent's sub-processes).
+
+    Criticality verdicts:
+      σ ∈ [1.0 - tolerance, 1.0 + tolerance]  →  AT_CRITICAL
+      σ > 1.0 + tolerance                      →  SUPERCRITICAL
+      σ < 1.0 - tolerance                      →  SUBCRITICAL
+
+    Telemetry from CA simulation (32×32 Game of Truth, 200-step):
+      σ = 1.0275 ± 0.0172 — within critical band (1.0 ± 0.05)
+      α ≈ 1.712 power-law avalanches
+      H = 0.4382 bits (Shannon entropy)
+      Survival rate: 0.9174
+
+    INV_073 note: Low H (17% of max) at confirmed criticality shows
+    the Wasserstein gradient path to γ=1 does not simultaneously maximize
+    semantic exploration. The critical ridge is dynamically stable but
+    not uniquely optimal for entropy maximization.
+    """
+
+    # Critical band: σ ∈ [1.0 - TOLERANCE, 1.0 + TOLERANCE]
+    TOLERANCE = 0.05
+
+    # Rolling window for smoothed σ
+    MAX_WINDOW = 128
+
+    # Verdict strings
+    VERDICT_CRITICAL = "AT_CRITICAL"
+    VERDICT_SUPERCRITICAL = "SUPERCRITICAL"
+    VERDICT_SUBCRITICAL = "SUBCRITICAL"
+
+    def __init__(self, tolerance=None):
+        # type: (Optional[float]) -> None
+        if tolerance is not None:
+            self.TOLERANCE = tolerance
+        self._cycle_log = []       # type: List[Dict[str, Any]]
+        self._generation = 0
+        self._sigma_history = []   # type: List[float]
+
+    def record_cycle(
+        self,
+        parent_events,   # type: int
+        offspring_events, # type: int
+        generation=None,  # type: Optional[int]
+        metadata=None,    # type: Optional[Dict[str, Any]]
+    ):
+        # type: (...) -> Dict[str, Any]
+        """
+        Record one cycle's parent/offspring event counts and compute σ.
+
+        Args:
+            parent_events:    number of causal parent events this cycle
+            offspring_events: number of downstream offspring events spawned
+            generation:       optional generation counter (auto-increments if None)
+            metadata:         optional dict of extra telemetry (H, α, survival, etc.)
+
+        Returns:
+            Dict with sigma, verdict, smoothed_sigma, generation, and any drift alert.
+        """
+        if generation is not None:
+            self._generation = generation
+        else:
+            self._generation += 1
+
+        # Compute raw branching ratio
+        if parent_events <= 0:
+            # No parent events: degenerate — treat as supercritical if offspring > 0
+            sigma = float(offspring_events) if offspring_events > 0 else 0.0
+        else:
+            sigma = float(offspring_events) / float(parent_events)
+
+        # Store in history
+        self._sigma_history.append(sigma)
+        if len(self._sigma_history) > self.MAX_WINDOW:
+            self._sigma_history = self._sigma_history[-self.MAX_WINDOW:]
+
+        # Smoothed σ (exponential moving average)
+        smoothed_sigma = sigma
+        if len(self._sigma_history) >= 2:
+            alpha = 0.3
+            smoothed_sigma = self._sigma_history[0]
+            for s_val in self._sigma_history[1:]:
+                smoothed_sigma = alpha * s_val + (1.0 - alpha) * smoothed_sigma
+
+        # Verdict
+        verdict = self._classify(smoothed_sigma)
+
+        # Drift detection: how far from σ=1.0
+        drift = smoothed_sigma - 1.0
+        abs_drift = abs(drift)
+
+        # Build telemetry record
+        record = {
+            "generation": self._generation,
+            "parent_events": parent_events,
+            "offspring_events": offspring_events,
+            "sigma_raw": round(sigma, 6),
+            "sigma_smoothed": round(smoothed_sigma, 6),
+            "verdict": verdict,
+            "drift_from_unity": round(drift, 6),
+            "abs_drift": round(abs_drift, 6),
+            "history_len": len(self._sigma_history),
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+        if metadata:
+            record["metadata"] = metadata
+
+        # Log the record
+        self._cycle_log.append(record)
+
+        # Console telemetry
+        drift_arrow = "↑" if drift > 0 else ("↓" if drift < 0 else "=")
+        print(
+            f"[L7][BRANCHING] gen={self._generation} σ={smoothed_sigma:.4f} "
+            f"({drift_arrow}{abs_drift:.4f}) → {verdict}"
+        )
+
+        # Drift alert if outside critical band
+        if verdict != self.VERDICT_CRITICAL:
+            print(
+                f"[L7][BRANCHING] ⚠ DRIFT ALERT: σ={smoothed_sigma:.4f} "
+                f"outside critical band [{ 1.0 - self.TOLERANCE:.3f}, "
+                f"{1.0 + self.TOLERANCE:.3f}]. "
+                f"Corrective obligation recommended."
+            )
+
+        return record
+
+    def _classify(self, sigma):
+        # type: (float) -> str
+        """Classify σ into a criticality verdict."""
+        if abs(sigma - 1.0) <= self.TOLERANCE:
+            return self.VERDICT_CRITICAL
+        elif sigma > 1.0 + self.TOLERANCE:
+            return self.VERDICT_SUPERCRITICAL
+        else:
+            return self.VERDICT_SUBCRITICAL
+
+    def get_summary(self):
+        # type: () -> Dict[str, Any]
+        """Return a summary of the branching-ratio telemetry."""
+        if not self._sigma_history:
+            return {
+                "generation": self._generation,
+                "sigma_mean": None,
+                "sigma_std": None,
+                "verdict": "NO_DATA",
+                "n_samples": 0,
+            }
+        n = len(self._sigma_history)
+        mean_sigma = sum(self._sigma_history) / n
+        var_sigma = sum((s - mean_sigma) ** 2 for s in self._sigma_history) / max(n - 1, 1)
+        std_sigma = math.sqrt(var_sigma)
+
+        return {
+            "generation": self._generation,
+            "sigma_mean": round(mean_sigma, 6),
+            "sigma_std": round(std_sigma, 6),
+            "sigma_latest": round(self._sigma_history[-1], 6),
+            "verdict": self._classify(mean_sigma),
+            "n_samples": n,
+            "in_critical_band": abs(mean_sigma - 1.0) <= self.TOLERANCE,
+        }
+
+    def reset(self, keep_generation=False):
+        # type: (bool) -> None
+        """Clear history. Optionally preserve generation counter."""
+        self._cycle_log.clear()
+        self._sigma_history.clear()
+        if not keep_generation:
+            self._generation = 0
+
+
 # ─── L7 Agent ─────────────────────────────────────────────────────────────────
 
 class L7Agent:

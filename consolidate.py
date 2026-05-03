@@ -37,7 +37,7 @@ import anthropic
 
 from astrocyte       import Astrocyte
 from site_builder    import build as build_site
-from knowledge_graph import get_graph
+from knowledge_graph import get_graph, classify_node_edge
 import voice
 
 FREED_DIR       = Path(__file__).parent
@@ -45,11 +45,14 @@ PROJECTS_DIR    = FREED_DIR / "docs" / "projects"
 PROJECTS_IDX    = FREED_DIR / "docs" / "projects.json"
 CONSOLIDATE_LOG = FREED_DIR / "FREED_log" / "consolidations.jsonl"
 
-MODEL = "claude-sonnet-4-6"
+MODEL       = "claude-sonnet-4-6"
+HAIKU_MODEL = "claude-haiku-4-5-20251001"
 
 YIELD_THRESHOLD    = 0.03   # feed yield above this triggers consolidation
 CONSOLIDATE_EVERY  = 5      # also consolidate every N daemon cycles
 MAX_NODES_PER_PASS = 8      # renormalize at most this many nodes per run
+MINE_COMPRESS_CAP  = 500    # chars per node in MINE digest
+MINE_INV_CAP       = 15     # invariants per node in MINE digest
 
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
@@ -475,15 +478,19 @@ class Consolidator:
         if len(nodes) < 2:
             return []
 
+        def _mine_inv_text(invs):
+            clipped = [s[:100] for s in invs[:MINE_INV_CAP]]
+            return ", ".join(clipped)
+
         digest = "\n\n".join(
             f"NODE: {n['id']}\n"
-            f"COMPRESS: {n.get('compress','')}\n"
-            f"INVARIANTS: {', '.join(n.get('invariants',[]))}"
+            f"COMPRESS: {n.get('compress','')[:MINE_COMPRESS_CAP]}\n"
+            f"INVARIANTS: {_mine_inv_text(n.get('invariants', []))}"
             for n in nodes
         )
 
         message = self._api_call(
-            model=MODEL,
+            model=HAIKU_MODEL,
             max_tokens=1500,
             system=MINE_SYSTEM,
             messages=[{"role": "user", "content": digest}],
@@ -647,15 +654,16 @@ class Consolidator:
                     print(f"  [{c['recurrence']}x] {c['invariant'][:80]}")
                     print(f"       In: {', '.join(c['appears_in'])}")
 
-                # Node-to-node edges for shared invariants
+                # Node-to-node edges for shared invariants — classify by relationship type
                 graph = get_graph()
                 for c in candidates:
                     nodes_in = c.get('appears_in', [])
+                    edge_type = classify_node_edge(c['invariant'])
                     for i in range(len(nodes_in)):
                         for j in range(i + 1, len(nodes_in)):
                             graph.record_node_edge(
                                 nodes_in[i], nodes_in[j],
-                                'shares_invariant',
+                                edge_type,
                                 c['invariant'],
                             )
 
