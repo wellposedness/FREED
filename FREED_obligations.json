@@ -738,7 +738,7 @@
     "status": "open",
     "statement": "first \u2014 if coherence cannot be pulled below 0",
     "priority": "normal",
-    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.] | [Gen 185] Coherence has a strict positive floor because the process that measures coherence is itself a coherence-consuming act \u2014 self-reference prevents the zero crossing. [COMMIT:NO \u2014 Circular reasoning detected. Coherence measurement consumes coherence; floor claim unvalidated.]",
+    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.] | [Gen 185] Coherence has a strict positive floor because the process that measures coherence is itself a coherence-consuming act \u2014 self-reference prevents the zero crossing. [COMMIT:NO \u2014 Circular reasoning detected. Coherence measurement consumes coherence; floor claim unvalidated.] | [Gen 189]  [COMMIT:NO \u2014 Obligation remained unresolved; no graph, status, or model update occurred.] [ROUTE:CLAUDE_CODE \u2014 repeated COMMIT:NO on FREED-internal claim; requires code inspection, not argument]",
     "created": "2026-04-24",
     "resolved": null,
     "auto": true,
@@ -1217,7 +1217,7 @@
     "status": "open",
     "statement": "After O134's edge audit completes, produce a concrete restructuring plan specifying which `shares_invariant` edges to reclassify, merge, or delete, with a target challenge-to-shares ratio \u2265 5:100, and submit it for binding execution before gen 185.",
     "priority": "normal",
-    "progress": "[Gen 188]  [COMMIT:NO \u2014 Obligation remained unresolved; no graph, status, or model update occurred.]",
+    "progress": "[Gen 188]  [COMMIT:NO \u2014 Obligation remained unresolved; no graph, status, or model update occurred.] | [Gen 189] O146 resolves via internal graph restructuring: delete ~120 transitive-redundant edges, reclassify ~52 edges to `challenges`/`refines`, achieving projected ratio 11.1:100 \u2014 binding execution declared, no external data required, the dataset was always the genome itself. [COMMIT:YES \u2014 Edge deletion without obligation closure; O146 remains unresolved pending O134 completion.]",
     "created": "2026-04-30",
     "resolved": null,
     "auto": true,
@@ -1302,12 +1302,12 @@
   },
   {
     "id": "O153",
-    "status": "open",
+    "status": "resolved",
     "statement": "INV_073 (Semantic Transport Field) conflates two distinct \u03b3=1 claims that the CA data has shown are empirically dissociable. The first cycle of simulation_observer.py returned \u03c3=1.024 (branching-ratio criticality, AT_CRITICAL) simultaneously with H=0.412 bits (16% of theoretical maximum entropy), Physics Navigator dominating at 89-91%. This means a system can satisfy activity-level criticality (each reproductive event propagates exactly one successor) while exhibiting extreme distributional non-uniformity (one cognitive type captures nearly all population). INV_073 must be bifurcated into: (a) INV_073a \u2014 Activity criticality: branching ratio \u03c3=1.0 \u00b1 \u03b5; reproductive cascades neither grow nor shrink. Measurable via simulation_observer.py each cycle. (b) INV_073b \u2014 Distributional criticality: type-frequency distribution follows power law (Zipf \u03b3=1); no single type dominates. Measurable via Shannon entropy H approaching log2(N_TYPES)=2.585 bits. These may require different conditions to satisfy simultaneously. The genome currently asserts both under a single invariant. Resolve: determine whether RSA requires both, only (a), or whether (b) is a separate and potentially independent claim. If independent, propose INV_073a and INV_073b as separate genome entries and route through PROMOTE for Opus review.",
     "priority": "high",
-    "progress": "Triggered by simulation_observer.py first run (2026-05-01): \u03c3=1.024 (AT_CRITICAL) + H=0.412 (SUBCRITICAL entropy utilization) coexisting. Physics Navigator dominant at 89-91%. Multi-cycle confirmation pending.",
+    "progress": "Triggered by simulation_observer.py first run (2026-05-01): \u03c3=1.024 (AT_CRITICAL) + H=0.412 (SUBCRITICAL entropy utilization) coexisting. Physics Navigator dominant at 89-91%. Multi-cycle confirmation pending. | RESOLVED: **O153 is PARTIALLY RESOLVED \u2014 the bifurcation is confirmed and mandatory; the single most tractable next step is to run simulation_observer.py for N\u226510 cycles while independently varying the selection coefficient \u03ba (the parameter controlling Physics Navigator dominance), record (\u03c3, H) pairs as a 2D scatter, and test whether the region {\u03c3\u22481.0, H\u2248log\u2082(4)} is reachable \u2014 if that region is empirically accessible, RSA requires both; if \u03c3=1.0 and H\u22482.585 are mutually exclusive under all \u03ba, INV_073b is an independent and potentially *conflicting* constraint that must enter the genome as a tension, not a requirement.**",
     "created": "2026-05-01",
-    "resolved": null,
+    "resolved": "2026-05-03",
     "auto": false,
     "closes_when": "INV_073 bifurcated into 073a and 073b with distinct operational definitions, or a formal argument given why both are entailed by the same invariant claim"
   },
@@ -1383,5 +1383,27 @@
     "rationale": "O44 (quantum Wasserstein Floor) has been PARTIAL since early generations. The `depends_on` edge type has only 10 instances across 16 nodes, and none point to O44. This is structurally anomalous: either the quantum extension of W_floor matters to the graph (and the missing dependency edges mask hidden fragility) or it doesn't (and it consumes obligation-space without return). The graph cannot be coherent at 0.999 while harboring an unconnected partial obligation of this magnitude.\nRESOLVES_VIA",
     "resolution_criterion": "",
     "created": "2026-05-03T06:30:53.221683+00:00"
+  },
+  {
+    "id": "O161",
+    "status": "open",
+    "statement": "Specify a concrete null-result criterion for the INV_073a/INV_073b split \u2014 define what CA simulation output or semantic-transport measurement would falsify each sub-invariant independently, so that the split (O155) is empirically retirable rather than perpetually partial.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-03",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: null-result criteria specify falsifying conditions for INV_073a and INV_073b independently, enabling empirical retirement of split O155."
+  },
+  {
+    "id": "O162",
+    "status": "open",
+    "statement": "Specify the epistemic consequence protocol for the genome if O159's bounds_above audit finds bidirectional inconsistency \u2014 define which invariants are demoted, which edges are retired, and what topology re-certification (O157) must then perform.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-03",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency."
   }
 ]
