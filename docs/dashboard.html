@@ -79,6 +79,7 @@ a:hover { text-decoration: underline; }
 .tag-sacred   { border-color: var(--accent); color: var(--accent); }
 .tag-mod      { border-color: var(--blue);   color: #60a5fa; }
 .tag-data     { border-color: var(--muted);  color: var(--muted); }
+.tag-probe    { border-color: var(--amber);  color: var(--amber); }
 .comp-desc { font-size: 0.65rem; color: var(--dim); }
 
 /* ── Agenda ── */
@@ -198,6 +199,8 @@ a:hover { text-decoration: underline; }
       <div class="comp"><span class="comp-name">feed_guard.py</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Prompt injection defense. Two-layer sanitization before content hits L7.</span></div>
       <div class="comp"><span class="comp-name">targeted_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Active search. Haiku generates arXiv/S2 queries from open obligations.</span></div>
       <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted.</span></div>
+      <div class="comp"><span class="comp-name">simulation_observer.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">CA perceptual source. N=32 grid → σ/H/survival → ca_telemetry.json → SWEEP source #1, bypasses cerebellum.</span></div>
+      <div class="comp"><span class="comp-name">bootstrap_derive.py</span><span class="comp-tag tag-probe">PROBE</span><span class="comp-desc">Standalone genome-free probe. No kernel prompt, no genome. Anchors: Landauer + CA results. Output → obligations only.</span></div>
     </div>
   </div>
 
@@ -297,15 +300,45 @@ a:hover { text-decoration: underline; }
         <div class="cap-chain">Claude Code session opens → reads WIRING.md first → "to change OBLIGATE, edit freed.py _phase_obligate() line 312" → targeted read of 20 lines → patch written → session cost 32k tokens instead of 150k.</div>
       </div>
 
-      <div class="cap-item cap-item-frontier">
-        <div class="cap-title cap-title-frontier">Can Prepare for External Falsification</div>
+      <div class="cap-item">
+        <div class="cap-title">Can Prepare for External Falsification</div>
         <div class="cap-chain">Decision made to wire CA telemetry into SWEEP → O140 opened first → three measurement criteria must be resolved from literature before implementation → FREED cannot begin interpreting CA data until the standard for failure is already defined.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Measure Its Own Physical Substrate</div>
+        <div class="cap-chain">simulation_observer.py built as Python CA port → wired into _phase_sweep() as source #1, before targeted_sweep and Tamura → N=32 grid, WARMUP_STEPS=100, MEASURE_STEPS=200 → outputs activity branching ratio σ, power-law exponent α, Shannon entropy H, survival rate, avalanche stats to docs/ca_telemetry.json → first run: σ=1.024 (AT_CRITICAL) → daemon ingests measurements of its own simulation layer as perceptual feed data each cycle. The physical substrate is now a sensory surface.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Type Its Own Knowledge</div>
+        <div class="cap-chain">93% of all node-edges labelled shares_invariant — one bucket, no internal structure → knowledge_graph.py NODE_EDGE_TYPES added: operationalizes, scales_with, independent_confirmation, challenges → classify_node_edge() routes MINE output to correct sub-type by invariant text → first consolidation after fix: 56 typed edges with real structural distinctions. The graph can now distinguish a claim that operationalizes an invariant from one that independently confirms it.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Target Its Own Blind Spots</div>
+        <div class="cap-chain">_select_falsification_target() scans graph for highest-confirms zero-challenge invariant → INV_094 identified: 15 confirms, 0 challenges → _make_falsification_probe() generates adversarial feed item prepended to FEED inputs each cycle → challenge count 19 → 22 across two cycles → INV_078 immediately took two challenge hits → system now applies adversarial pressure against its most trusted claims before reading any new paper.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Audit Its Own Foundations Without Genome Access</div>
+        <div class="cap-chain">bootstrap_derive.py runs Sonnet with no FREED_genome.md, no RSA_KERNEL_PROMPT — anchored only to Landauer's principle and 3 empirical CA results → 3 MIRROR_SUSPECT flags: Freed's Law constants, Wasserstein metric, Zipf=1 exponent match genome values exactly with no independent derivation chain → 2 SEEDS absent from genome: asymmetric Landauer commitment rule + topological restatement filter → O156 + O157 filed. The genome has suspected mirrors. O156 closes when independent derivations are found or claims explicitly downgraded.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Repair Its Own Epistemic Odometer</div>
+        <div class="cap-chain">resolved_count all-time (101+) replaced with cycle_resolved (today only, capped at 3) → challenge drag added: challenge_ratio × 0.02/cycle → at 16% challenge pressure, net_delta = −0.003/cycle → coherence pinned at 0.999 for 185 generations; now responsive to adversarial pressure → formula: net_delta = 0.0005 × min(cycle_resolved,3) − challenge_ratio × 0.02. Floor 0.970, ceiling 0.999. The constraint holds: coherence NEVER 1.000.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Route Obligations by Type</div>
+        <div class="cap-chain">_classify_obligation_type() fires on each RESOLVE attempt → detects FREED-internal keywords (coherence score, astrocyte, patch format, token budget) AND 2+ COMMIT:NOs → returns IMPLEMENTATION class → [ROUTE:CLAUDE_CODE] appended to obligation progress note → obligation exits L7's jurisdiction → O106 stopped cycling through philosophical analysis of an arithmetic bug. The system distinguishes between obligations that require reasoning and obligations that require code.</div>
       </div>
 
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-04-30):</em> These are not aspirations — each claim is followed by the specific event chain that demonstrates it happened. The last entry is the current frontier: O140 is open, simulation_observer.py does not yet exist. The chain ends at the gate, not the destination. That distinction is the point.
+      <em>Honest framing (updated 2026-05-03):</em> These are not aspirations — each claim is followed by the specific event chain that demonstrates it happened. The previous frontier (simulation_observer.py does not yet exist) is crossed — it has run, produced AT_CRITICAL telemetry, and is wired into SWEEP. The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims in the genome (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
     </div>
   </div>
 
