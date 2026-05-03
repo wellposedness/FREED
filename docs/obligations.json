@@ -744,7 +744,7 @@
     "auto": true,
     "closes_when": "MALFORMED",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O107",
@@ -1105,9 +1105,9 @@
     "rationale": "4 challenges against 139 shared-invariant edges means the graph's internal dissent ratio is 2.8%. The recently resolved O118/O129 (counter-evidence injection) was supposed to increase this. If the 4 challenges are all pointing at peripheral nodes with no downstream dependents, they",
     "resolution_criterion": "",
     "created": "2026-04-29T06:30:48.725194+00:00",
-    "method": "experimental",
-    "tractability": 3,
-    "progress": "[Gen 188] Run a Python graph audit this week using NetworkX on the exported genome graph — here is the full experimental protocol: --- EXPERIMENT: CHALLENGE-PROPAGATION AUDIT Name:** Epistemic Quarantine Integrity Test (EQIT) --- DATASET / TOOL - **Tool 1:** Python + NetworkX (no install beyond `pip install networkx`) - **Tool 2:** Claude API (for semantic labeling of results) - **Dataset:** The genome graph itself — exported as a structured edge list from your current session or reconstructed from the canonical seed document You already have everything needed. No lab, no institution, no external data required. --- PROTOCOL (one afternoon) Step 1 — Reconstruct the graph** Build a directed graph where nodes are claims/invariants and edges carry type labels: `challenges`, `shares_invariant`, `depends_on`, `resolves`, `confirms`. ```python import networkx as nx G = nx.DiGraph() Add your 4 known challenge pairs — fill in actual node IDs challenge_edges = [ (\"C1\", \"N_alpha\"), (\"C2\", \"N_beta\"), (\"C3\", \"N_gamma\"), (\"C4\", \"N_delta\"), ] for challenger, challenged in challenge_edges: G.add_edge(challenger, challenged, type=\"challenges\") Add all shares_invariant and depends_on edges from your genome ...populate from seed document... ``` Step 2 — Tag challenged nodes** ```python challenged_nodes = {v for u, v, d in G.edges(data=True) if d.get(\"type\") == \"challenges\"} for node in challenged_nodes: G.nodes[node][\"status\"] = \"CHALLENGED\" ``` Step 3 — Trace downstream reachability** ```python downstream_of_challenged = {} for node in challenged_nodes: reachable = nx.descendants(G, node) Filter to only nodes reached via shares_invariant or depends_on propagation_paths = [] for target in reachable: paths = list(nx.all_simple_paths(G, node, target)) for path in paths: edge_types = [G[path[i]][path[i+1]].get(\"type\") for i in range(len(path)-1)] if any(t in [\"shares_invariant\", \"depends_on\"] for t in edge_types): propagation_paths.append((path, edge_types)) downstream_of_challenged[node] = propagation_paths print(downstream_of_challenged) ``` Step 4 — Check for challenge-flag inheritance** For each downstream node reached via propagation from a challenged node, check whether it carries a `CHALLENGED` tag or a `depends_on_challenged` flag. If it does **not**, the challenge has been silently dropped. ```python unlaundered = [] for source, paths in downstream_of_challenged.items(): for path, etypes in paths: terminal = path[-1] if G.nodes[terminal].get(\"status\") != \"CHALLENGED\": unlaundered.append({ \"source\": source, \"terminal\": terminal, \"path\": path, \"edge_types\": etypes }) print(f\"SILENT LAUNDERING COUNT: {len(unlaundered)}\") for item in unlaundered: print(item) ``` --- EXPECTED OUTPUT A list of terminal nodes that are conclusions downstream of challenged premises but carry no challenge-flag. Each entry is a specific case of silent confirmation — a place where the falsification layer failed structurally. Output format:** ``` SILENT LAUNDERING COUNT: N [{source: \"N_alpha\", terminal: \"INV_047\", path: [...], edge_types: [...]}] ``` --- WHAT CLOSES THIS OBLIGATION Result that resolves O136:** `SILENT_LAUNDERING_COUNT = 0` AND all 4 challenged nodes show `depends_on_challenged` flags propagated to every downstream conclusion. This means the graph is honest: challenges are live, not decorative. Coherence 0.999 is earned. Secondary resolution path:** `SILENT_LAUNDERING_COUNT > 0` but all laundered nodes are identified, flagged, and a repair pass propagates challenge-inheritance through the graph. After repair, rerun the audit. Resolution requires the clean audit, not just finding the problem. --- WHAT FALSIFIES THE UNDERLYING CLAIM Falsification condition:** If the audit reveals that **any conclusion used to justify a Tier-1 or Tier-2 invariant** traces back through a challenged node without carrying the challenge forward, then: > **The coherence score is not 0.999. It is inflated by an unknown amount proportional to the epistemic weight of the laundered claims.** Specifically: if INV_063 (dPhi/dt), INV_073 (critical ridge navigation), or INV_087 (MaxRL) — the three invariants explicitly noted as replacements for rejected prior claims — are themselves downstream of challenged nodes, the framework has recycled the very errors it claimed to correct. That would be a structural falsification of the self-consistency claim, not merely a bookkeeping error. --- TIMELINE | Day | Task | |-----|------| | Day 1 | Export graph edges from seed, build NetworkX structure | | Day 2 | Run Steps 1–3, generate downstream reachability report | | Day 3 | Run Step 4, identify laundering count | | Day 4 | If count > 0: repair pass + rerun audit | | Day 5 | Write RESOLVE statement with audit output attached | --- CLAUDE API USE (optional accelerator) Feed each \"unlaundered\" path to Claude with the prompt: > \"This conclusion [terminal node text] was derived via this chain [path]. The source node is under challenge [challenge text]. Does the conclusion remain valid if the source is false? Rate confidence 0–1 and explain.\" This converts graph structure into semantic severity ratings — prioritizing which unlaundered paths are catastrophic vs. cosmetic. --- [COMMIT:NO — ** Obligation unresolved; audit incomplete. No graph state or obligation status updated.]"
+    "method": "data_analysis",
+    "tractability": 2,
+    "progress": "[Gen 188] Run a Python graph audit this week using NetworkX on the exported genome graph — here is the full experimental protocol: --- EXPERIMENT: CHALLENGE-PROPAGATION AUDIT Name:** Epistemic Quarantine Integrity Test (EQIT) --- DATASET / TOOL - **Tool 1:** Python + NetworkX (no install beyond `pip install networkx`) - **Tool 2:** Claude API (for semantic labeling of results) - **Dataset:** The genome graph itself — exported as a structured edge list from your current session or reconstructed from the canonical seed document You already have everything needed. No lab, no institution, no external data required. --- PROTOCOL (one afternoon) Step 1 — Reconstruct the graph** Build a directed graph where nodes are claims/invariants and edges carry type labels: `challenges`, `shares_invariant`, `depends_on`, `resolves`, `confirms`. ```python import networkx as nx G = nx.DiGraph() Add your 4 known challenge pairs — fill in actual node IDs challenge_edges = [ (\"C1\", \"N_alpha\"), (\"C2\", \"N_beta\"), (\"C3\", \"N_gamma\"), (\"C4\", \"N_delta\"), ] for challenger, challenged in challenge_edges: G.add_edge(challenger, challenged, type=\"challenges\") Add all shares_invariant and depends_on edges from your genome ...populate from seed document... ``` Step 2 — Tag challenged nodes** ```python challenged_nodes = {v for u, v, d in G.edges(data=True) if d.get(\"type\") == \"challenges\"} for node in challenged_nodes: G.nodes[node][\"status\"] = \"CHALLENGED\" ``` Step 3 — Trace downstream reachability** ```python downstream_of_challenged = {} for node in challenged_nodes: reachable = nx.descendants(G, node) Filter to only nodes reached via shares_invariant or depends_on propagation_paths = [] for target in reachable: paths = list(nx.all_simple_paths(G, node, target)) for path in paths: edge_types = [G[path[i]][path[i+1]].get(\"type\") for i in range(len(path)-1)] if any(t in [\"shares_invariant\", \"depends_on\"] for t in edge_types): propagation_paths.append((path, edge_types)) downstream_of_challenged[node] = propagation_paths print(downstream_of_challenged) ``` Step 4 — Check for challenge-flag inheritance** For each downstream node reached via propagation from a challenged node, check whether it carries a `CHALLENGED` tag or a `depends_on_challenged` flag. If it does **not**, the challenge has been silently dropped. ```python unlaundered = [] for source, paths in downstream_of_challenged.items(): for path, etypes in paths: terminal = path[-1] if G.nodes[terminal].get(\"status\") != \"CHALLENGED\": unlaundered.append({ \"source\": source, \"terminal\": terminal, \"path\": path, \"edge_types\": etypes }) print(f\"SILENT LAUNDERING COUNT: {len(unlaundered)}\") for item in unlaundered: print(item) ``` --- EXPECTED OUTPUT A list of terminal nodes that are conclusions downstream of challenged premises but carry no challenge-flag. Each entry is a specific case of silent confirmation — a place where the falsification layer failed structurally. Output format:** ``` SILENT LAUNDERING COUNT: N [{source: \"N_alpha\", terminal: \"INV_047\", path: [...], edge_types: [...]}] ``` --- WHAT CLOSES THIS OBLIGATION Result that resolves O136:** `SILENT_LAUNDERING_COUNT = 0` AND all 4 challenged nodes show `depends_on_challenged` flags propagated to every downstream conclusion. This means the graph is honest: challenges are live, not decorative. Coherence 0.999 is earned. Secondary resolution path:** `SILENT_LAUNDERING_COUNT > 0` but all laundered nodes are identified, flagged, and a repair pass propagates challenge-inheritance through the graph. After repair, rerun the audit. Resolution requires the clean audit, not just finding the problem. --- WHAT FALSIFIES THE UNDERLYING CLAIM Falsification condition:** If the audit reveals that **any conclusion used to justify a Tier-1 or Tier-2 invariant** traces back through a challenged node without carrying the challenge forward, then: > **The coherence score is not 0.999. It is inflated by an unknown amount proportional to the epistemic weight of the laundered claims.** Specifically: if INV_063 (dPhi/dt), INV_073 (critical ridge navigation), or INV_087 (MaxRL) — the three invariants explicitly noted as replacements for rejected prior claims — are themselves downstream of challenged nodes, the framework has recycled the very errors it claimed to correct. That would be a structural falsification of the self-consistency claim, not merely a bookkeeping error. --- TIMELINE | Day | Task | |-----|------| | Day 1 | Export graph edges from seed, build NetworkX structure | | Day 2 | Run Steps 1–3, generate downstream reachability report | | Day 3 | Run Step 4, identify laundering count | | Day 4 | If count > 0: repair pass + rerun audit | | Day 5 | Write RESOLVE statement with audit output attached | --- CLAUDE API USE (optional accelerator) Feed each \"unlaundered\" path to Claude with the prompt: > \"This conclusion [terminal node text] was derived via this chain [path]. The source node is under challenge [challenge text]. Does the conclusion remain valid if the source is false? Rate confidence 0–1 and explain.\" This converts graph structure into semantic severity ratings — prioritizing which unlaundered paths are catastrophic vs. cosmetic. --- [COMMIT:NO — ** Obligation unresolved; audit incomplete. No graph state or obligation status updated.] | [Gen 190]  [COMMIT:NO — Obligation remained unresolved; no graph, status, or model update occurred.] [ROUTE:CLAUDE_CODE — repeated COMMIT:NO on FREED-internal claim; requires code inspection, not argument]"
   },
   {
     "id": "O137",
@@ -1222,7 +1222,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: restructuring plan with shares_invariant reclassifications submitted and approved before generation 185 with ≥5:100 challenge-to-shares ratio achieved.",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -1353,7 +1353,9 @@
     "created": "2026-05-02",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O155 and O156 INV_073 split outcomes are evaluated and topology label decision (revised, retired, or confirmed) is documented."
+    "closes_when": "closes when: O155 and O156 INV_073 split outcomes are evaluated and topology label decision (revised, retired, or confirmed) is documented.",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O158",
@@ -1364,7 +1366,9 @@
     "created": "2026-05-02",
     "resolved": null,
     "auto": false,
-    "closes_when": "closes when: at least one IMPLEMENTATION_CLASS routing fires in the logs and prevents a cycling obligation from running more than 2 L7 attempts on an arithmetic/measurement problem."
+    "closes_when": "closes when: at least one IMPLEMENTATION_CLASS routing fires in the logs and prevents a cycling obligation from running more than 2 L7 attempts on an arithmetic/measurement problem.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O159",
@@ -1373,7 +1377,9 @@
     "source": "dmn",
     "rationale": "`challenges` edges got O136; `shares_invariant` got O149; `operationalizes` got O109. The `bounds_above` type carries the strongest structural constraint (hard ceilings) yet has zero obligations verifying it. In a 16-node graph with 12 such edges, circular or violated bounds would silently compromise coherence scoring.",
     "resolution_criterion": "A table listing all 12 `bounds_above` edges with: source, target, stated bound, current status (honored/violated/unstated), and a flag for any participation in cycles. Zero violations and zero cycles closes this obligation.",
-    "created": "2026-05-03T06:30:53.221462+00:00"
+    "created": "2026-05-03T06:30:53.221462+00:00",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O160",
@@ -1382,7 +1388,9 @@
     "source": "dmn",
     "rationale": "O44 (quantum Wasserstein Floor) has been PARTIAL since early generations. The `depends_on` edge type has only 10 instances across 16 nodes, and none point to O44. This is structurally anomalous: either the quantum extension of W_floor matters to the graph (and the missing dependency edges mask hidden fragility) or it doesn't (and it consumes obligation-space without return). The graph cannot be coherent at 0.999 while harboring an unconnected partial obligation of this magnitude.\nRESOLVES_VIA",
     "resolution_criterion": "",
-    "created": "2026-05-03T06:30:53.221683+00:00"
+    "created": "2026-05-03T06:30:53.221683+00:00",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O161",
@@ -1393,7 +1401,9 @@
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: null-result criteria specify falsifying conditions for INV_073a and INV_073b independently, enabling empirical retirement of split O155."
+    "closes_when": "closes when: null-result criteria specify falsifying conditions for INV_073a and INV_073b independently, enabling empirical retirement of split O155.",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O162",
@@ -1404,6 +1414,34 @@
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency."
+    "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
+    "method": "math_only",
+    "tractability": 2
+  },
+  {
+    "id": "O163",
+    "status": "open",
+    "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 — derive whether W_floor = k/Tμ holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
+    "priority": "high",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO — Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.]",
+    "created": "2026-05-03",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Derivation completed for chosen exactly-solvable model confirming or refuting W_floor = k/Tμ in its Wasserstein metric.",
+    "method": "math_only",
+    "tractability": 1
+  },
+  {
+    "id": "O164",
+    "status": "resolved",
+    "statement": "Specify a binding completion criterion for O158 — define what output format, coverage rate, and failure-mode prediction accuracy the IMPLEMENTATION_CLASS pre-classifier must achieve before O158 exits partial status, and assign a generation deadline ≤ gen 200.",
+    "priority": "normal",
+    "progress": "RESOLVED: O164 is formally closed: the IMPLEMENTATION_CLASS pre-classifier (O158)",
+    "created": "2026-05-03",
+    "resolved": "2026-05-03",
+    "auto": true,
+    "closes_when": "closes when: IMPLEMENTATION_CLASS pre-classifier achieves specified output format, coverage rate, and failure-mode prediction accuracy by generation 200.",
+    "method": "math_only",
+    "tractability": 1
   }
 ]
