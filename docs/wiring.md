@@ -38,6 +38,9 @@ Last updated: 2026-05-01. Update this file whenever you add a module, rename a f
 | Change DMN's cross-connect detection | `dmn.py` | `DMNAuditor._check_cross_connect()` L229 |
 | Change MINE digest caps (compress/invariants per node) | `consolidate.py` | `MINE_COMPRESS_CAP` L51, `MINE_INV_CAP` L52 |
 | Change MINE model (Haiku vs Sonnet) | `consolidate.py` | `mine_invariants()` — `model=HAIKU_MODEL` line |
+| Change derivation tag for genome invariant | `genome_tags.json` | top-level key → value: `DHF-biological`, `daemon-derived`, or `cross-substrate-confirmed` |
+| Change bootstrap schedule (every N cycles) | `freed.py` | `BOOTSTRAP_EVERY` L60 |
+| Inspect bootstrap derivation output | `FREED_log/` | `bootstrap_YYYY-MM-DD.json` — `output` field + `parse_output()` in `bootstrap_derive.py` |
 | Change genome promotion threshold | `promote.py` | `PROMOTE_THRESHOLD` L22, `PROMOTE_MIN_NODES` L23 |
 | Change Opus promotion filter prompt | `promote.py` | `_FILTER_PROMPT` L26 |
 | Revert a genome promotion | `FREED_genome.md` | Delete the `## [PROMOTED YYYY-MM-DD]` block at end of file |

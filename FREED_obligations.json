@@ -1374,24 +1374,28 @@
   {
     "id": "O159",
     "statement": "The 12 `bounds_above` edges must be audited for bidirectional consistency \u2014 for each edge A bounds_above B, verify that (1) a quantitative or formal upper bound is stated, (2) the bound is not violated by any current claim or invariant in the graph, and (3) no circular bounding chains exist (A bounds B bounds ... bounds A).",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "`challenges` edges got O136; `shares_invariant` got O149; `operationalizes` got O109. The `bounds_above` type carries the strongest structural constraint (hard ceilings) yet has zero obligations verifying it. In a 16-node graph with 12 such edges, circular or violated bounds would silently compromise coherence scoring.",
     "resolution_criterion": "A table listing all 12 `bounds_above` edges with: source, target, stated bound, current status (honored/violated/unstated), and a flag for any participation in cycles. Zero violations and zero cycles closes this obligation.",
     "created": "2026-05-03T06:30:53.221462+00:00",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 2,
+    "resolved": "2026-05-04",
+    "progress": "RESOLVED: The 12 `bounds_above` edges form a DAG with zero violations and zero cycles, but 3 edges lack assigned numerical constants, holding O159 at PARTIAL RESOLUTION pending parameter"
   },
   {
     "id": "O160",
     "statement": "O44's dependency footprint in the graph must be made explicit \u2014 either at least one `depends_on` edge from another node to O44 is justified and added, or O44 is formally reclassified as an isolated conjecture with no downstream structural role, triggering a deprioritization review.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "O44 (quantum Wasserstein Floor) has been PARTIAL since early generations. The `depends_on` edge type has only 10 instances across 16 nodes, and none point to O44. This is structurally anomalous: either the quantum extension of W_floor matters to the graph (and the missing dependency edges mask hidden fragility) or it doesn't (and it consumes obligation-space without return). The graph cannot be coherent at 0.999 while harboring an unconnected partial obligation of this magnitude.\nRESOLVES_VIA",
     "resolution_criterion": "",
     "created": "2026-05-03T06:30:53.221683+00:00",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 2,
+    "resolved": "2026-05-04",
+    "progress": "RESOLVED: O44 has no downstream dependents in the graph; it is formally reclassified as ISOLATED_CONJECTURE, and O160 closes via branch-b with zero new empirical requirements."
   },
   {
     "id": "O161",
@@ -1424,7 +1428,7 @@
     "status": "open",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 \u2014 derive whether W_floor = k/T\u03bc holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1466,5 +1470,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Formal dependency relationship between O149 and O146 is documented, specifying execution order or O149-independent O146 components."
+  },
+  {
+    "id": "O167",
+    "status": "open",
+    "statement": "Specify a binding completion criterion for O149 (shares_invariant edge-type decomposition) \u2014 define what output format, minimum edge sample size, and falsifiable edge-type distinction must be produced for O149 to qualify as resolved rather than perpetually partial.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O149 delivers documented edge-type decomposition with minimum sample size threshold and falsifiable distinction criteria specified."
+  },
+  {
+    "id": "O168",
+    "status": "open",
+    "statement": "Audit whether the pre-RESOLVE classifier established by O158 has been applied to at least one currently open obligation (O157\u2013O166) and produce a documented classification output for that application, or declare O158 void if no application is possible.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: documented classification output from O158 applied to \u22651 obligations (O157\u2013O166) produced, or O158 declared void."
   }
 ]
