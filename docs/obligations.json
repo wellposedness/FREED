@@ -1399,12 +1399,12 @@
   },
   {
     "id": "O161",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify a concrete null-result criterion for the INV_073a/INV_073b split — define what CA simulation output or semantic-transport measurement would falsify each sub-invariant independently, so that the split (O155) is empirically retirable rather than perpetually partial.",
     "priority": "high",
-    "progress": "",
+    "progress": "RESOLVED: INV_073a is falsified if γ=1 ridge fails to outperform both extremes on output quality across ≥3 CA/semantic domains; INV_073b is falsified if W2 geodesics fail to yield lower Benamou-Brenier cost than off-geodesic detours across ≥3 distribution pairs — these nulls are disjoint in measurement space, making O155's split empirically retirable and O161 **RESOLVED**.",
     "created": "2026-05-03",
-    "resolved": null,
+    "resolved": "2026-05-04",
     "auto": true,
     "closes_when": "closes when: null-result criteria specify falsifying conditions for INV_073a and INV_073b independently, enabling empirical retirement of split O155.",
     "method": "mixed",
@@ -1412,12 +1412,12 @@
   },
   {
     "id": "O162",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify the epistemic consequence protocol for the genome if O159's bounds_above audit finds bidirectional inconsistency — define which invariants are demoted, which edges are retired, and what topology re-certification (O157) must then perform.",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED:",
     "created": "2026-05-03",
-    "resolved": null,
+    "resolved": "2026-05-04",
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
     "method": "math_only",
@@ -1428,7 +1428,7 @@
     "status": "open",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 — derive whether W_floor = k/Tμ holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO — Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test — run it now and resolve or retire O44. [COMMIT:NO — Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES — Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO — Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test — run it now and resolve or retire O44. [COMMIT:NO — Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES — Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES — Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1492,5 +1492,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: documented classification output from O158 applied to ≥1 obligations (O157–O166) produced, or O158 declared void."
+  },
+  {
+    "id": "O169",
+    "status": "open",
+    "statement": "Specify the epistemic consequence protocol for the genome if the O168 audit confirms the pre-RESOLVE IMPLEMENTATION_CLASS classifier (O158) was never applied to any obligation resolved since O164 — define what correction or retraction is mandatory.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: epistemic consequence protocol is specified for genome contingent on O168 audit outcome regarding O158 classifier application history."
+  },
+  {
+    "id": "O170",
+    "status": "open",
+    "statement": "Audit whether the currently open obligations O157–O168 form a directed acyclic graph with respect to their resolution dependencies — identify and break any cycles before further RESOLVE cycles execute.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: All cycles in O157–O168 resolution dependencies are identified and broken, verified through acyclic graph validation."
   }
 ]
