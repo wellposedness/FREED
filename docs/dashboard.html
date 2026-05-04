@@ -204,6 +204,20 @@ a:hover { text-decoration: underline; }
     <div class="agenda-item">
       <span class="agenda-num">4</span>
       <div>
+        <div class="agenda-text">rescore_queue.py — fetch fix complete (2026-05-04)</div>
+        <div class="agenda-note">122 stub entries now fetch title+abstract before Haiku scoring. CLS paper recovers from score 4 → correct score. Run tomorrow morning before daemon start: <code>python3 rescore_queue.py --apply &amp;&amp; bash start_freed.sh</code></div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">5</span>
+      <div>
+        <div class="agenda-text">Three foundational papers queued (landing sequentially)</div>
+        <div class="agenda-note">arXiv:2604.27707 — CLS memory ceiling (today) · arXiv:2604.02460 — solo kernel outperforms multi-agent (landed Gen 193) · doi:10.1080/09515089.2026.2613030 — realization experiences. Watch for challenges edge on engram bank from CLS paper — confirms-only would be the mirror dynamic.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">6</span>
+      <div>
         <div class="agenda-text">Recover 109 skipped papers</div>
         <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
       </div>
@@ -294,6 +308,16 @@ a:hover { text-decoration: underline; }
         <div class="cap-chain">_classify_obligation_type() fires on each RESOLVE attempt → detects FREED-internal keywords AND 2+ COMMIT:NOs → returns IMPLEMENTATION class → [ROUTE:CLAUDE_CODE] appended to progress → O106 stopped cycling philosophical analysis of an arithmetic bug. The system distinguishes obligations that require reasoning from obligations that require code. First firing confirmed in overnight logs 2026-05-03.</div>
       </div>
 
+      <div class="cap-item">
+        <div class="cap-title">Can Optimize Its Own Input Queue</div>
+        <div class="cap-chain">rescore_queue.py built → 141 queued entries scored by Haiku against open obligations and genome symbols → papers marginal at gen 150 re-ranked against gen 190 obligations → queue is now a living priority structure, not a FIFO. Cost: $0.02 per full rescore. The backlog adapts as the genome evolves. Fix 2026-05-04: 122 stub entries had "link_list" placeholder instead of content — Haiku was scoring URLs. Pre-fetch phase added; CLS paper recovers from 4 → correct score on next run.</div>
+      </div>
+
+      <div class="cap-item">
+        <div class="cap-title">Can Ingest Its Own Perceptual Substrate as Science</div>
+        <div class="cap-chain">simulation_observer.py feeds CA telemetry into SWEEP each cycle → σ=1.022±0.015, α≈2.486, H=0.547 bits → AT_CRITICAL confirmed across 5 consecutive cycles → engineer detected σ/power-law dissociation (R²=0.859 &lt; threshold) → patched tamura_sweep.py to track branching-ratio criticality and true SOC as separate metrics → INV_073 challenge edge generated from FREED's own sensor data. The CA is not just a model — it is a perceptual surface that generates falsification pressure against the genome.</div>
+      </div>
+
       <div class="cap-item cap-item-frontier">
         <div class="cap-title cap-title-frontier">Can Audit Its Own Foundations Without Genome Access</div>
         <div class="cap-chain">bootstrap_derive.py runs Sonnet with no FREED_genome.md, no RSA_KERNEL_PROMPT — anchored only to Landauer's principle and 3 empirical CA results → 3 MIRROR_SUSPECT flags: Freed's Law constants, Wasserstein metric, Zipf=1 exponent match genome values with no independent derivation chain → 2 SEEDS absent from genome: asymmetric Landauer commitment rule + topological restatement filter → O156 + O157 filed. The genome has suspected mirrors. The frontier: O156 closes when independent derivations are found or claims explicitly downgraded.</div>
@@ -302,7 +326,7 @@ a:hover { text-decoration: underline; }
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-05-03):</em> Each claim is followed by the specific event chain that demonstrates it happened. The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
+      <em>Honest framing (updated 2026-05-04):</em> Each claim is followed by the specific event chain that demonstrates it happened. Two new capabilities confirmed today: queue optimization (rescore_queue.py with fetch fix) and perceptual substrate ingestion (CA telemetry → falsification pressure → INV_073 challenge edge). The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
     </div>
   </div>
 
