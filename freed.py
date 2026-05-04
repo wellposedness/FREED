@@ -58,6 +58,7 @@ MAX_QUEUE_DRAIN        = 1             # max curated-queue entries per cycle
 YIELD_THRESHOLD        = 0.03          # feed yield above this triggers consolidation
 CONSOLIDATE_EVERY      = 5            # also consolidate every N daemon cycles
 TRIAGE_EVERY           = 10           # classify obligation methods every N cycles
+BOOTSTRAP_EVERY        = 10           # genome-free derivation every N cycles (raise to 20 after 3 clean runs)
 DMN_HOUR               = 2.5          # 2:30am — DMN fires once per dead zone
 
 HAIKU_MODEL = "claude-haiku-4-5-20251001"
@@ -527,7 +528,12 @@ class FREEDDaemon:
         _push_status("COMPRESS", "Renormalizing & compressing knowledge graph")
         self._phase_consolidate(feed_results, cycle_log)
 
-        # 8b. PROMOTE — Opus reviews high-recurrence candidates for genome promotion
+        # 8b. BOOTSTRAP — genome-free derivation (every BOOTSTRAP_EVERY cycles)
+        if self.cycle_num % BOOTSTRAP_EVERY == 0:
+            _push_status("BOOTSTRAP", "Running genome-free first-principles derivation")
+            self._phase_bootstrap(cycle_log)
+
+        # 8c. PROMOTE — Opus reviews high-recurrence candidates for genome promotion
         _push_status("PROMOTE", "Reviewing genome promotion candidates")
         self._phase_promote(cycle_log)
 
@@ -962,14 +968,25 @@ class FREEDDaemon:
                 f"Title: {inp.get('title', 'unknown')}\n"
                 f"Abstract: {safe_content}\n\n"
                 f"OPEN OBLIGATIONS:\n{ob_ref}\n\n"
-                f"Map this input against the genome. "
-                f"When you identify a relationship, cite the EXACT ID — e.g., "
+                f"PART 1 — DERIVE (no genome reference):\n"
+                f"What does this paper independently establish? State the invariants or "
+                f"findings as if encountering them for the first time, without reference "
+                f"to the genome. What recurring pattern, law, or mechanism does this "
+                f"paper demonstrate? Be precise and falsifiable. One to three sentences.\n\n"
+                f"PART 2 — COMPARE against DHF-biological reference:\n"
+                f"Now check your derived findings against the genome reference. "
+                f"Cite the EXACT ID for each relationship — e.g., "
+                f"'CONVERGE INV_094', 'EXTEND O28', 'CONFLICT INV_097', 'ABSENT (no genome match)', "
                 f"'confirms INV_094', 'advances O28', 'refutes INV_097', 'resolves O44', 'challenges INV_023'. "
-                f"Invariant IDs are in the genome (INV_023 through INV_108). "
-                f"Obligation IDs are listed above (O28, O34, O44, etc.).\n\n"
-                f"SECOND: Does this paper describe a concrete algorithm, technique, or "
-                f"method that FREED could implement in its own codebase to improve its "
-                f"epistemic capabilities (better search, memory, scoring, representation, "
+                f"CONVERGE = independent derivation confirms a reference claim. "
+                f"EXTEND = derivation goes beyond the reference. "
+                f"CONFLICT = derivation contradicts a reference claim. "
+                f"ABSENT = derivation found something the reference lacks. "
+                f"Invariant IDs: INV_023 through INV_108. Obligation IDs listed above.\n\n"
+                f"PART 3 — IMPLEMENT (optional):\n"
+                f"Does this paper describe a concrete algorithm, technique, or method "
+                f"that FREED could implement in its own codebase to improve its epistemic "
+                f"capabilities (better search, memory, scoring, representation, "
                 f"deduplication, graph structure, etc)? "
                 f"If yes, emit exactly:\n"
                 f"IMPLEMENT: YES\n"
@@ -977,14 +994,14 @@ class FREEDDaemon:
                 f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','batch_feed.py','voice.py']))}]\n"
                 f"IMPLEMENT_WHY: [one sentence — why this improves FREED's epistemic loop]\n"
                 f"If no clear implementation, omit the IMPLEMENT block entirely.\n\n"
-                f"THIRD — MANDATORY FALSIFICATION (Seed Integrity Rule 2): "
+                f"PART 4 — MANDATORY FALSIFICATION (Seed Integrity Rule 2):\n"
                 f"Find the genome invariant or obligation most at risk from this paper's "
                 f"evidence — the claim this paper strains, limits, or contradicts most directly. "
                 f"Output exactly one line:\n"
                 f"CHALLENGE: challenges [INVXXX or OXX] — [one sentence: how this paper stresses that claim]\n"
-                f"If the paper genuinely poses no challenge to any genome claim, output:\n"
+                f"If the paper genuinely poses no challenge: "
                 f"CHALLENGE: challenges NONE — [one sentence: why not]\n"
-                f"Omitting CHALLENGE entirely violates Seed Integrity Rule 2. There is no opt-out."
+                f"Omitting CHALLENGE violates Seed Integrity Rule 2. There is no opt-out."
             )
 
             # O76 — if Noether's Table obligation is open, ask L7 to tag relevant rows
@@ -1098,6 +1115,118 @@ class FREEDDaemon:
         )
 
         cycle_log["phases"]["consolidate"] = report
+
+    # ── BOOTSTRAP ────────────────────────────────────────────────────────────
+
+    def _phase_bootstrap(self, cycle_log):
+        # type: (dict) -> None
+        """
+        Genome-free first-principles derivation (every BOOTSTRAP_EVERY cycles).
+        Runs bootstrap_derive.py with no genome in context, parses output for
+        CONVERGE/MIRROR_SUSPECT/ABSENT/SEED signals, updates genome_tags.json,
+        and opens obligations automatically.
+
+        ID-matching is intentionally approximate — exact genome claim matching
+        is handled through the OBLIGATE phase, not here. Tag upgrades are
+        recorded as pending and resolved by Claude Code or L7.
+        """
+        import json as _json
+        from datetime import datetime as _dt, timezone as _tz
+
+        TAGS_FILE = FREED_DIR / "genome_tags.json"
+        print("\n[BOOTSTRAP] Running genome-free derivation...")
+
+        try:
+            from bootstrap_derive import main as _bootstrap_main, parse_output as _parse_bootstrap
+        except ImportError as e:
+            print(f"[BOOTSTRAP] Import failed: {e}")
+            cycle_log["phases"]["bootstrap"] = {"skipped": "import_error"}
+            return
+
+        date_str = _dt.now(_tz.utc).strftime("%Y-%m-%d")
+        log_path = FREED_DIR / "FREED_log" / f"bootstrap_{date_str}.json"
+
+        try:
+            _bootstrap_main()
+        except Exception as e:
+            print(f"[BOOTSTRAP] Run failed: {e}")
+            cycle_log["phases"]["bootstrap"] = {"skipped": str(e)}
+            return
+
+        if not log_path.exists():
+            print("[BOOTSTRAP] Log not found after run.")
+            cycle_log["phases"]["bootstrap"] = {"skipped": "log_missing"}
+            return
+
+        record = _json.loads(log_path.read_text())
+        parsed = _parse_bootstrap(record.get("output", ""))
+
+        # Load current tags
+        tags = {}
+        if TAGS_FILE.exists():
+            tags = _json.loads(TAGS_FILE.read_text())
+
+        converge_count = sum(1 for c in parsed.get("comparisons", []) if c["verdict"] == "CONVERGE")
+        new_obligations = []
+
+        def _next_ob_id():
+            nums = [int(o["id"][1:]) for o in self.obligations if o["id"][1:].isdigit()]
+            return f"O{max(nums, default=100) + 1}"
+
+        # MIRROR_SUSPECT → open obligation if not already tracked
+        for flag in parsed.get("audit_flags", []):
+            if flag["flag"] != "MIRROR_SUSPECT":
+                continue
+            claim_key = flag["claim"][:60].lower()
+            already = any(claim_key in (o.get("statement") or "").lower() for o in self.obligations)
+            if not already:
+                new_obligations.append({
+                    "id":          _next_ob_id(),
+                    "statement":   f"MIRROR_SUSPECT (bootstrap cycle {self.cycle_num}): {flag['claim'][:200]}",
+                    "closes_when": "Independent derivation found for this claim, or claim explicitly downgraded to DHF-biological with scope narrowing.",
+                    "status":      "open",
+                    "priority":    "high",
+                    "source":      "bootstrap_derive",
+                    "created":     _dt.now(_tz.utc).isoformat(),
+                })
+
+        # SEEDS → open obligation if novel
+        for seed in parsed.get("seeds", []):
+            if len(seed) < 20:
+                continue
+            already = any(seed[:40].lower() in (o.get("statement") or "").lower() for o in self.obligations)
+            if not already:
+                new_obligations.append({
+                    "id":          _next_ob_id(),
+                    "statement":   f"BOOTSTRAP_SEED (cycle {self.cycle_num}): {seed[:300]}",
+                    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+                    "status":      "open",
+                    "priority":    "normal",
+                    "source":      "bootstrap_derive",
+                    "created":     _dt.now(_tz.utc).isoformat(),
+                })
+
+        if new_obligations:
+            self.obligations.extend(new_obligations)
+            self._save_obligations()
+
+        # Save tags (unchanged this cycle — ID matching deferred to OBLIGATE)
+        tags["_meta"] = tags.get("_meta", {})
+        TAGS_FILE.write_text(_json.dumps(tags, indent=2))
+
+        result = {
+            "bootstrap_invs":  len(parsed.get("bootstrap_invs", [])),
+            "converge_count":  converge_count,
+            "mirror_suspects": sum(1 for f in parsed.get("audit_flags", []) if f["flag"] == "MIRROR_SUSPECT"),
+            "seeds_found":     len(parsed.get("seeds", [])),
+            "new_obligations": len(new_obligations),
+            "log":             str(log_path.name),
+        }
+        cycle_log["phases"]["bootstrap"] = result
+        print(f"[BOOTSTRAP] {converge_count} CONVERGE, "
+              f"{result['mirror_suspects']} MIRROR_SUSPECT, "
+              f"{result['seeds_found']} seeds, "
+              f"{len(new_obligations)} new obligation(s).")
 
     # ── PROMOTE ──────────────────────────────────────────────────────────────
 

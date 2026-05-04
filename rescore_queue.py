@@ -16,10 +16,13 @@ import sys
 import json
 import time
 import argparse
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
 import anthropic
+from bs4 import BeautifulSoup
 
 FREED_DIR    = Path(__file__).parent
 QUEUE_FILE   = FREED_DIR / "links_queue.json"
@@ -29,10 +32,20 @@ SYMBOLS_FILE = FREED_DIR / "genome_symbols.json"
 HAIKU_MODEL    = "claude-haiku-4-5-20251001"
 DEFAULT_BATCH  = 8
 POLITENESS     = 0.4   # seconds between API calls
+FETCH_POLITENESS = 1.0  # seconds between web fetches
+REQUEST_TIMEOUT  = 15
 
 MAX_OB_CONTEXT  = 14   # open obligations included in prompt
 MAX_SYM_CONTEXT = 10   # genome symbols included in prompt
 BLURB_CAP       = 220  # chars of title+abstract per paper in prompt
+
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+}
 
 
 # ── Context loaders ───────────────────────────────────────────────────────────
@@ -100,6 +113,103 @@ def _blurb(entry):
     return combined[:BLURB_CAP]
 
 
+# ── Content fetching ─────────────────────────────────────────────────────────
+
+def _needs_fetch(entry):
+    """True if the entry lacks both title and abstract (nothing real to score)."""
+    return not ((entry.get("title") or "").strip() or
+                (entry.get("abstract") or "").strip())
+
+
+def _extract_arxiv_id(url):
+    m = re.search(r'arxiv\.org/(?:abs|pdf)/([0-9]+\.[0-9v]+)', url)
+    return m.group(1) if m else None
+
+
+def _is_search_url(url):
+    return 'scholar.google.com/scholar?q=' in url or 'google.com/search?q=' in url
+
+
+def _fetch_arxiv(arxiv_id):
+    """Fetch title + abstract for an arXiv paper. Atom API first, HTML fallback."""
+    try:
+        r = requests.get(
+            f"https://export.arxiv.org/api/query?id_list={arxiv_id}",
+            headers=_HEADERS, timeout=REQUEST_TIMEOUT
+        )
+        if r.status_code == 200:
+            ns = {'atom': 'http://www.w3.org/2005/Atom'}
+            root = ET.fromstring(r.text)
+            entry = root.find('atom:entry', ns)
+            if entry is not None:
+                title    = (entry.findtext('atom:title', '', ns) or '').strip().replace('\n', ' ')
+                abstract = (entry.findtext('atom:summary', '', ns) or '').strip().replace('\n', ' ')
+                if title and abstract:
+                    return {'title': title, 'abstract': abstract}
+    except Exception:
+        pass
+    try:
+        r = requests.get(
+            f"https://arxiv.org/abs/{arxiv_id}",
+            headers=_HEADERS, timeout=REQUEST_TIMEOUT, allow_redirects=True
+        )
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+            title_tag = soup.find('h1', class_='title') or soup.find('title')
+            title = title_tag.get_text(strip=True).replace('Title:', '').strip() if title_tag else ''
+            abs_tag = soup.find('blockquote', class_='abstract')
+            abstract = abs_tag.get_text(strip=True).replace('Abstract:', '').strip() if abs_tag else ''
+            if title or abstract:
+                return {'title': title, 'abstract': abstract}
+    except Exception:
+        pass
+    return {}
+
+
+def _fetch_generic(url):
+    """Fetch title + body text from a generic web page."""
+    try:
+        r = requests.get(url, headers=_HEADERS, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+        if r.status_code != 200:
+            return {}
+        soup = BeautifulSoup(r.text, 'html.parser')
+        title_tag = soup.find('title')
+        title = title_tag.get_text(strip=True) if title_tag else ''
+        for tag in soup(['nav', 'header', 'footer', 'aside', 'script', 'style']):
+            tag.decompose()
+        content_tag = (
+            soup.find('article') or soup.find('main') or
+            soup.find('div', class_=lambda c: c and any(
+                x in c.lower() for x in ['content', 'article', 'post', 'entry']
+            )) or soup.find('body')
+        )
+        text = content_tag.get_text(separator=' ', strip=True) if content_tag else ''
+        text = re.sub(r'\s+', ' ', text).strip()
+        return {'title': title, 'content': text[:4000]}
+    except Exception:
+        return {}
+
+
+def _fetch_entry(entry):
+    """Fetch title+abstract for an entry and update it in-place. Returns True if enriched."""
+    url = entry.get("url", "")
+    if not url or _is_search_url(url):
+        return False
+    arxiv_id = _extract_arxiv_id(url)
+    if arxiv_id:
+        data = _fetch_arxiv(arxiv_id)
+        if data.get('title') or data.get('abstract'):
+            entry['title']    = data.get('title', '')
+            entry['abstract'] = data.get('abstract', '')
+            return True
+    data = _fetch_generic(url)
+    if data.get('title') or data.get('content'):
+        entry['title']    = data.get('title', '')
+        entry['abstract'] = data.get('content', '')[:600]
+        return True
+    return False
+
+
 # ── Haiku batch scorer ────────────────────────────────────────────────────────
 
 def _score_batch(client, system_prompt, batch):
@@ -141,6 +251,8 @@ def main():
                         help="Write updated scores to links_queue.json")
     parser.add_argument("--batch", type=int, default=DEFAULT_BATCH,
                         help=f"Papers per Haiku call (default {DEFAULT_BATCH})")
+    parser.add_argument("--no-fetch", dest="no_fetch", action="store_true",
+                        help="Skip web fetching — score on existing queue content only")
     args = parser.parse_args()
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -149,6 +261,21 @@ def main():
         sys.exit(1)
 
     queue = json.loads(QUEUE_FILE.read_text())
+
+    # Pre-fetch phase: enrich entries that have no title/abstract
+    all_queued = [(i, e) for i, e in enumerate(queue) if e.get("status") == "queued"]
+    if not args.no_fetch:
+        needs = [(i, e) for i, e in all_queued if _needs_fetch(e)]
+        if needs:
+            print(f"Fetch phase: {len(needs)}/{len(all_queued)} queued entries lack title/abstract — fetching...\n")
+            for fi, (qi, entry) in enumerate(needs):
+                url = entry.get("url", "")
+                print(f"  [{fi+1:3d}/{len(needs)}] {url[:70]}", end=" ... ", flush=True)
+                ok = _fetch_entry(entry)
+                print("OK" if ok else "no content")
+                if fi < len(needs) - 1:
+                    time.sleep(FETCH_POLITENESS)
+            print()
 
     candidates = [
         (i, e) for i, e in enumerate(queue)

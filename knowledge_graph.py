@@ -43,7 +43,7 @@ FREED_DIR   = Path(__file__).parent
 GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 
 # ─── Edge types ───────────────────────────────────────────────────────────────
-EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges")
+EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges", "absent")
 
 # Node-to-node edge types (structural, written by consolidate.py MINE phase)
 NODE_EDGE_TYPES = (
@@ -163,6 +163,15 @@ _EDGE_PATTERNS = [
     (re.compile(rf'(?<!not )\bconfirms?\s+(?:the\s+)?(?:invariant\s+)?({_NODE_PATTERN})', re.I), 'confirms'),
     # "advances obligation O44"
     (re.compile(rf'(?<!not )\badvances?\s+(?:the\s+)?(?:obligation\s+)?({_NODE_PATTERN})', re.I), 'advances'),
+    # Reorientation vocabulary — derive-first signals from new FEED/L7 prompts
+    # "CONVERGE INV_094" → independent derivation confirms a DHF-biological claim
+    (re.compile(rf'(?<!not )\bCONVERGE\s+({_NODE_PATTERN})', re.I), 'confirms'),
+    # "EXTEND INV_094" → derivation goes beyond the reference claim
+    (re.compile(rf'(?<!not )\bEXTEND\s+({_NODE_PATTERN})', re.I), 'advances'),
+    # "CONFLICT INV_097" → independent derivation contradicts a reference claim
+    (re.compile(rf'(?<!not )\bCONFLICT\s+({_NODE_PATTERN})', re.I), 'challenges'),
+    # "ABSENT INV_094" or "ABSENT (no genome match)" — genome lacks this finding
+    (re.compile(rf'(?<!not )\bABSENT\s+({_NODE_PATTERN})', re.I), 'absent'),
 ]
 
 

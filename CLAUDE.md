@@ -248,27 +248,61 @@ Auto-obligations O67–O73 generated from node NEXT fields. O71 (completeness pr
 
 ---
 
-## Active agenda for next session
+## SESSION 2026-05-01 to 2026-05-03 SUMMARY
 
-### 1. SUBSTRATE-TYPED EVIDENCE (highest priority)
-Add `methodology_type` field to graph edges: `theoretical / computational / experimental / physical`. Classify by source URL domain + title keywords. Add `type_diversity` score per invariant. Surface in consolidate.py report and site.
+### What was built
 
-### 2. RUN recover_skipped.py
-`recover_skipped.py` is built and ready. Run: `python3 recover_skipped.py` (dry-run), then `python3 recover_skipped.py --apply`. Recovers 109 skipped Scholar URLs via Semantic Scholar title search.
+**Coherence formula fix** (`freed.py` `_phase_update`, 2026-05-02): The most important bug fix in the project's history. `resolved_count` (all-time, was 101+) replaced with `cycle_resolved` (today's resolutions only, capped at 3). Added challenge drag: `challenge_ratio × 0.02` where `challenge_ratio = challenges/(confirms+challenges)` for INV-targeted edges. At 16% challenge pressure, net delta is −0.003/cycle. Coherence was structurally pinned at 0.999 for 185 generations; now responds to adversarial pressure. Formula: `net_delta = 0.0005 * min(cycle_resolved, 3) - challenge_ratio * 0.02`. Floor 0.970, ceiling 0.999.
 
-### 3. DAEMON PROPOSES EXPERIMENTS (stretch)
-After failed RESOLVE attempt, Haiku generates one concrete actionable experiment for Dave (Python/Claude API, no lab). Store as `ob['experiment_proposal']`, display on site.
+**IMPLEMENTATION_CLASS classifier** (`freed.py`, 2026-05-02): `_classify_obligation_type()` returns 'IMPLEMENTATION' if obligation has FREED-internal keywords (coherence score, astrocyte, patch format, token budget, self_engineer, freed state) AND 2+ COMMIT:NOs. Routing note `[ROUTE:CLAUDE_CODE]` appended to progress. Keywords in `_IMPL_CLASS_KEYWORDS` frozenset. Threshold in `IMPL_CLASS_MIN_COMMITS=2`. Prevents daemon from trying to philosophically resolve arithmetic/code bugs (O106 teaching case).
 
-### DONE (this session)
-- `closes_when` field added to obligations via Haiku in `_phase_obligate` (≤20 words)
-- `_drain_links_queue()` wired into `_phase_sweep` (MAX_QUEUE_DRAIN=1, human-first)
-- Self-engineer truncation guard (rejects >400-line files that shrink >20%)
-- RESOLVE throughput: 3 active + 8 DMN sweep per night
-- `--dev` flag on freed.py (sets caps to 10M, safe for testing)
-- `recover_skipped.py` script built (Semantic Scholar title search + genome scoring)
-- `astrocyte.py` actual token tracking via `stream.get_final_message().usage`
-- `tamura_sweep.py` truncation restored from git
-- Dashboard achievements section added
+**MINE cost fix** (`consolidate.py`, 2026-05-01): MINE digest was 267k chars / 67k tokens because 8 nodes had full doc text in their fields; no caps existed (RENORM had caps, MINE didn't). Fixed: `compress[:500]`, `invariants[:15]`, each invariant `[:100]`. MINE model switched from Sonnet to `HAIKU_MODEL`. Constants: `MINE_COMPRESS_CAP=500`, `MINE_INV_CAP=15`. Cost per call: $0.20 → $0.0004 (504x reduction).
+
+**Edge monoculture fix** (`knowledge_graph.py` + `consolidate.py`, 2026-05-01): Added `NODE_EDGE_TYPES = ("shares_invariant", "operationalizes", "scales_with", "independent_confirmation")`. `classify_node_edge(invariant_text)` routes MINE output to correct sub-type. MINE fired with 56 typed edges in one cycle — graph now has real structure.
+
+**Falsification probe** (`freed.py`, 2026-04-30): `_select_falsification_target()` picks highest-confirms zero-challenge INV (currently INV_094, 15 confirms, 0 challenges). `_make_falsification_probe()` generates adversarial feed item. Prepended to inputs each FEED cycle. Challenges count: 19 → 22 across two cycles. INV_078 took two challenge hits immediately.
+
+**simulation_observer.py** (2026-04-29): Python CA port for telemetry. N=32, WARMUP_STEPS=100, MEASURE_STEPS=200, DEATH_PROB=0.05. Activity branching ratio σ (not births/alive). First run: σ=1.024 (AT_CRITICAL), α=2.455, H=0.554. Outputs to `docs/ca_telemetry.json`. Wired into `_phase_sweep()` as source #1.
+
+**bootstrap_derive.py** (2026-05-02): Standalone genome-free first-principles derivation script. Runs Sonnet with no `RSA_KERNEL_PROMPT`, no genome in context. Anchors: Landauer + 3 empirical CA results. Logs to `FREED_log/bootstrap_YYYY-MM-DD.json`. First run found: 3 MIRROR_SUSPECT flags (Freed's Law constants, Wasserstein metric, Zipf exponent), 2 SEEDS (asymmetric Landauer commitment rule, topological restatement filter). Filed as O156 + O157.
+
+**O_BOOTSTRAP obligations**: O156 (MIRROR_SUSPECT audit), O157 (integrate SEEDS), O158 (IMPLEMENTATION_CLASS classifier, already partial).
+
+### Key decisions not to undo
+
+- **Coherence uses cycle-local resolutions** — all-time count pinned it at 0.999 forever.
+- **MINE runs on Haiku** — sufficient for structured cross-node pattern matching; Sonnet overkill.
+- **IMPLEMENTATION_CLASS routes to Claude Code** — L7 cannot fix arithmetic bugs; routing prevents indefinite cycling.
+- **bootstrap_derive.py runs genome-free** — adding the genome back defeats the entire purpose.
+
+### SESSION 2026-05-04 — What was built
+
+**rescore_queue.py fetch fix**: Entries with no title/abstract (122/140 queued entries were pure `{url, conv: "link_list"}` stubs) were being scored by Haiku on just a URL. Fix: pre-fetch phase using `_fetch_arxiv` / `_fetch_generic` before scoring. `--no-fetch` flag to skip. CLS paper had dropped 12→4; will recover on next rescore run once its abstract is fetched.
+
+### Tomorrow morning startup sequence
+
+```bash
+cd ~/FREED && source ~/.zshrc && python3 rescore_queue.py --apply && bash start_freed.sh
+```
+
+Run rescore BEFORE starting daemon. ~2 min fetch phase for 122 stub entries, then daemon starts with properly ranked queue. CLS paper should recover to ~11-12.
+
+### Watch: CLS paper lands in FEED today (2026-05-04)
+
+CLS = Complementary Learning Systems theory — explicitly about limitations of weight-based memory (exactly what FREED's engram bank is). Two diagnostic signals:
+
+1. **Does FREED generate a `challenges` edge on its own engram architecture?** If only `confirms` edges — that's the mirror dynamic. The paper is a direct structural critique of systems like FREED. Honest mapping requires at least one challenges edge.
+2. **Does the self-engineer propose changes to engram storage/retrieval?** The CLS paper distinction (lookup vs weight-based) maps directly onto how `_relevant_engrams()` works in `l7_agent.py`. Watch `self_modifications.jsonl`.
+
+If FREED produces only confirms on the CLS paper, file a new obligation: *"Audit engram bank architecture against CLS framework — FREED uses weight-like recency+overlap scoring; CLS predicts this fails on rare high-value events. Propose lookup-based alternative."*
+
+### Active agenda for next session
+
+1. **Dashboard update** — bring `docs/dashboard.html`. Add to event chains: bootstrap derivation, coherence formula fix, IMPLEMENTATION_CLASS routing, edge monoculture fix, falsification probe, simulation_observer, the two seeds. Major week.
+2. **Substrate-typed evidence** — `methodology_type` field on graph edges: theoretical/computational/experimental/physical.
+3. **recover_skipped.py** — `python3 recover_skipped.py` (dry-run) then `--apply`. Recovers ~109 skipped Scholar URLs.
+4. **O156 MIRROR_SUSPECT audit** — find independent derivation for σ=1.03, Wasserstein metric, Zipf=1 or explicitly downgrade.
+5. **O157 SEED integration** — asymmetric Landauer commitment rule + topological restatement filter into genome candidates.
 
 ---
 
