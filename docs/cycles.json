@@ -1,33 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 128,
-    "timestamp": "2026-04-16T21:30:43.763194+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "First-principles study of ferroelectricity and pressure-induced phase transitions in HgTiO$_3$",
-        "compress": "Soft-phonon-driven ferroelectricity in HgTiO₃ confirms that phase transitions are saddle-point crossings at γ=1 criticality on the free-energy landscape, but the genome now owes a debt: prove the geometric framework can predict transition sequence topology, not merely narrate it."
-      },
-      {
-        "title": "Quantum Phase Transitions in Spin-Boson Systems: Dissipation and Light Phenomena",
-        "compress": "Spin-boson quantum phase transitions confirm γ=1 criticality as the dissipation-coherence balance point, but the genome now owes the debt of proving its Wasserstein-geometric machinery survives the passage from classical to quantum dissipative substrates — with the Toulouse exact solution as the first mandatory checkpoint."
-      }
-    ],
-    "resolve": {
-      "obligation": "O53",
-      "resolved": true,
-      "compress": "** O53 advances by computing RangeEn across a fine H-sweep of synthetic fGn and testing whether the *variance* of RangeEn peaks at H=0.5 — the γ=1 susceptibility signature — with Omidvarnia 2018 Figure 4 as the first checkpoint before any new computation.",
-      "next": "** Pull Omidvarnia 2018 Figure 4 data; if the H=0.5 inflection and variance peak are already visible, draft the explicit Wasserstein Floor mapping and mark O53 RESOLVED with attribution."
-    },
-    "coherence": 0.999
-  },
-  {
-    "cycle": 1,
     "generation": 129,
     "timestamp": "2026-04-16T21:54:59.173371+00:00",
     "sweep": {
@@ -1487,5 +1460,37 @@
       ]
     },
     "coherence": 0.9949
+  },
+  {
+    "cycle": 1,
+    "generation": 193,
+    "timestamp": "2026-05-04T11:07:43.435661+00:00",
+    "sweep": {
+      "input_count": 20,
+      "targeted": 7,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_023",
+        "compress": "INV_023 is falsifiable via three converging attacks — Miller-noise indistinguishability, maximum-entropy underdetermination, and preferential-attachment mechanism rivalry — and survives only if it can specify and test a second-order discriminating observable that is unique to RSA thermodynamics and not producible by the null rivals."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
+        "compress": "Empirical CA telemetry confirms INV_073's critical-ridge prediction at population scale (σ=1.022, α=2.486), resolves O140, and advances O141 while flagging low Shannon entropy as an unresolved structural question about the attractor's stability."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O136",
+        "O146"
+      ]
+    },
+    "coherence": 0.992
   }
 ]
