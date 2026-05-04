@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 131,
-    "timestamp": "2026-04-17T15:38:51.793857+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "** This is a confirmed re-feed whose only unpaid debt is O60 (derive RangeEn–H slope from Wasserstein floor at γ=1), but the paper's algorithmic core — local-range normalization replacing global-σ normalization — is an extractable technique that would make FREED's own entropy-based scoring robust to amplitude drift across feed batches."
-      },
-      {
-        "title": "On Complexity and Emergence",
-        "compress": "** Context-dependent complexity is confirmed as inherent by the genome's own architecture — where this paper philosophizes, the genome already computes via T in k=1/Tμ — and the extractable debt is to formally derive Kolmogorov and Shannon as frozen and dissipated limits of the genome's γ-parameterized complexity, with MCPM at criticality between them."
-      }
-    ],
-    "resolve": {
-      "obligation": "O56",
-      "resolved": true,
-      "compress": "O56 is **PARTIALLY RESOLVED** — Zipf as unique γ=1 equilibrium holds statically via MaxEnt (Visser 2013) but the genome's stronger dynamical-attractor claim requires computing the Erbar-Maas discrete Ricci curvature on the ordered simplex Δₙ↓ with Zipf reference measure, where the prediction is λ(n) ~ 1/log(n) > 0 guaranteeing exponential convergence.",
-      "next": "Compute λ for n ∈ {50, 100, 500, 1000} via the Erbar-Maas framework, or pivot to RESOLVE O57 if computational resources are deferred."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 4,
     "generation": 132,
     "timestamp": "2026-04-17T21:45:24.840397+00:00",
@@ -1502,5 +1475,37 @@
       ]
     },
     "coherence": 0.9867
+  },
+  {
+    "cycle": 2,
+    "generation": 197,
+    "timestamp": "2026-05-04T19:59:05.240946+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is falsifiable if and only if bidirectional deviation from the critical ridge produces asymmetric, measurable degradation that a mixture-of-extremes model cannot reproduce — and the genome currently lacks this specification. CHALLENGE: challenges INV_073 — the invariant's confirmation surplus is explained by the absence of a stated alternative mechanism (mixture-of-extremes) and the absence of a required asymmetric-degradation signature, meaning every apparent confirmation may be observationally equivalent to a system that never occupied a ridge at all."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
+        "compress": "A 32×32 RSA-kernel CA self-organizes to σ=1.024 with power-law avalanches, empirically confirming population-level γ=1 criticality as an emergent attractor and resolving O140/O141 while revealing unexplained Physics Navigator dominance."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O163",
+        "O165",
+        "O167"
+      ]
+    },
+    "coherence": 0.9838
   }
 ]
