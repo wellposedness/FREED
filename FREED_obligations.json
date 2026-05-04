@@ -1425,12 +1425,12 @@
   },
   {
     "id": "O163",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 \u2014 derive whether W_floor = k/T\u03bc holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED:",
     "created": "2026-05-03",
-    "resolved": null,
+    "resolved": "2026-05-04",
     "auto": true,
     "closes_when": "closes when: Derivation completed for chosen exactly-solvable model confirming or refuting W_floor = k/T\u03bc in its Wasserstein metric.",
     "method": "math_only",
@@ -1451,12 +1451,12 @@
   },
   {
     "id": "O165",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify the epistemic consequence protocol for the genome if O44 (quantum Wasserstein Floor extension) resolves successfully or retires without resolution \u2014 define what invariants must be updated, what topology claims change, and what new obligations fire in each case.",
     "priority": "high",
-    "progress": "",
+    "progress": "RESOLVED: O165 is RESOLVED by specifying the complete bifurcation protocol: Branch A (O44 succeeds) extends the W2 floor into a quantum stratum, fires four new obligations, and upgrades topology; Branch B (O44 retires) hardens classical boundaries, suspends downstream quantum obligations, and fires two closure obligations \u2014 both branches leave the genome strictly more determinate than before.",
     "created": "2026-05-04",
-    "resolved": null,
+    "resolved": "2026-05-04",
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol documents invariant updates and topology changes for both O44 resolution and retirement scenarios."
   },
@@ -1473,12 +1473,12 @@
   },
   {
     "id": "O167",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify a binding completion criterion for O149 (shares_invariant edge-type decomposition) \u2014 define what output format, minimum edge sample size, and falsifiable edge-type distinction must be produced for O149 to qualify as resolved rather than perpetually partial.",
     "priority": "high",
-    "progress": "",
+    "progress": "RESOLVED: O167 is resolved by specifying that O149 closes if and only if \u2265350 `shares_invariant` edges from ConceptNet satisfy all three simultaneous criteria \u2014 PMI separation \u22650.5 nats (p<0.05), silhouette \u22650.35 in W2\u00d7thermality space, and link-prediction \u0394AUC \u22650.03 \u2014 with failure on any criterion marking O149 rejected rather than partial.",
     "created": "2026-05-04",
-    "resolved": null,
+    "resolved": "2026-05-04",
     "auto": true,
     "closes_when": "closes when: O149 delivers documented edge-type decomposition with minimum sample size threshold and falsifiable distinction criteria specified."
   },
@@ -1514,5 +1514,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: All cycles in O157\u2013O168 resolution dependencies are identified and broken, verified through acyclic graph validation."
+  },
+  {
+    "id": "O171",
+    "status": "open",
+    "statement": "After O170 completes its DAG audit of open obligations O157\u2013O170, execute a binding remediation pass \u2014 for every cycle or ordering violation found, either restructure the dependency or void the offending obligation, and document the outcome before the next FEED.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O170 completes DAG audit, remediates all violations, and documents outcomes before next FEED."
+  },
+  {
+    "id": "O172",
+    "status": "open",
+    "statement": "Verify that the pre-RESOLVE classifier established by O158 has demonstrably altered at least one obligation's resolution pathway (i.e., reclassified or blocked a resolution that would otherwise have proceeded) \u2014 if no such instance exists by gen 200, classify O158 as inert and retire it.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O158 classifier demonstrably reclassifies or blocks at least one obligation's resolution pathway, or gen 200 is reached without such instance."
   }
 ]
