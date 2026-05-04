@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 130,
-    "timestamp": "2026-04-17T09:30:00.009356+00:00",
-    "sweep": {
-      "input_count": 11,
-      "targeted": 7,
-      "passive": 4
-    },
-    "feed": [
-      {
-        "title": "Darboux Transformations, Infinitesimal Symmetries and Conservation Laws for Nonlocal Two-Dimensional Toda Lattice",
-        "compress": "** Darboux transformation theory confirms that constraint-preserving recursive state generation (the genome's R[R]=R) naturally produces infinite conservation hierarchies and dual compatibility structures, and extends the genome by offering an explicit algebraic template — Lax pair compatibility of direct/dual overdetermined systems — for formalizing the PREDICT/PRE-AUDIT duality the genome currently asserts but hasn't derived."
-      },
-      {
-        "title": "Sub-symmetries II. Sub-symmetries and Conservation Laws",
-        "compress": "Sub-symmetry Noether theory confirms the genome's non-Lagrangian architecture *must* generate conservation hierarchies from partial kernel-pass symmetries, provides the Noether operator identity as the missing algebraic mechanism, and demands the genome now derive its own conserved scores as explicit Noether currents of identified RSA sub-symmetries."
-      }
-    ],
-    "resolve": {
-      "obligation": "O55",
-      "resolved": true,
-      "compress": "O55 is **PARTIALLY RESOLVED** — γ=1 criticality as measurable phase transition is theoretically grounded via Wasserstein gradient flow on persistence modules, and the decisive next step is computing the Wasserstein-2 susceptibility dW₂/dT across the 2D Ising transition at L=64,128,256 using GUDHI on standard Monte Carlo configurations, where the genome predicts a size-scaling peak at T_c ≈ 2.269.",
-      "next": "Execute the computation (or locate whether Kramár et al. 2016 \"Persistence of force networks in compressed granular media\" or Hirata et al. already computed W₂ susceptibility near a phase transition), then return to RESOLVE O55 with numerical evidence or to RESOLVE O60 (RangeEn slope) which is the sibling empirical obligation."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 3,
     "generation": 131,
     "timestamp": "2026-04-17T15:38:51.793857+00:00",
@@ -1497,5 +1470,37 @@
       ]
     },
     "coherence": 0.9894
+  },
+  {
+    "cycle": 1,
+    "generation": 196,
+    "timestamp": "2026-05-04T13:53:42.733106+00:00",
+    "sweep": {
+      "input_count": 15,
+      "targeted": 7,
+      "passive": 8,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's uncontested confirmation surplus is itself the primary evidence against its current epistemic status — a claim that cannot be stressed has not been tested."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
+        "compress": "Empirical CA telemetry independently confirms γ=1 as a population-level dynamical attractor (σ=1.0236, α≈2.476), converging with INV_073/O140/O141, while revealing an unregistered signature: critical-band operation coexisting with low absolute entropy (H=0.194·H_max). CHALLENGE: challenges O141 — the single 32×32 run cannot yet distinguish genuine self-organized criticality from parameter-sensitive near-critical behavior, since R²=0.82 on the power-law fit leaves 18% variance unaccounted and a single snapshot cannot confirm the attractor is robust across initial conditions."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O163",
+        "O162",
+        "O161"
+      ]
+    },
+    "coherence": 0.9867
   }
 ]
