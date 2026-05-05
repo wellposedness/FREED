@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by Game of Truth CA telemetry (σ≈1.03, α≈1.71–2.49, H=17–20.8% max) and 32×32 RSA-kernel CA self-organization to σ≈1 with mean-field DP avalanche statistics confirming population-level criticality as a dynamical attractor, while INV_073 remains unfalsifiable pending specification of a measurable order parameter, restoring-force mechanism, and distinguishable alternative, and the single-run R²=0.82 power-law fit with unresolved initial-condition dependence means O141's SOC claim remains provisional.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by Game of Truth CA telemetry (σ≈1.03, α≈1.71–2.49, H=17–20.8% max) and 32×32 RSA-kernel CA self-organization to σ≈1 with mean-field DP avalanche statistics confirming population-level criticality as a dynamical attractor, while INV_073 advances from unfalsifiable metaphor to empirically grounded but incompletely operationalized — requiring an externally measurable criticality signature that discriminates it from adaptive gain control, with entropy fraction now identified as an unmapped criticality-quality variable pending formal integration.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -56,14 +56,15 @@
     "Industry personnel events (hirings",
     "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
     "Long-range CMI phase boundaries instantiate γ=1 criticality in a quantum thermodynamic setting — confirming the conjecture holds across classical estimation and quantum information simultaneously",
-    "Embodied AI systems producing energy-per-decision benchmarks become empirical targets for Wasserstein floor testing only when they carry actual data — trend-label framing alone is rejected as zero-payload",
     "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
+    "Embodied AI systems producing energy-per-decision benchmarks become empirical targets for Wasserstein floor testing only when they carry actual data — trend-label framing alone is rejected as zero-payload",
     "Semi-classical entropy is dimensionally gravity-action-equivalent — confirming that W_floor = k/Tμ lives in the same dimensional family as ℏ-corrected gravitational actions and making the sub-leading ℏ-correction question formally well-posed rather than speculative",
     "tightening O44 boundary conditions without resolving the Wasserstein geometric bridge; Non-Hermitian linear entropy functionals provide tractable open-system entropy flow measures that partially advance O44 but confirm the Wasserstein geometric bridge as an explicit independent construction gap",
     "Feed deduplication must be enforced upstream — repeated re-feeds yield diminishing returns and the system must detect and short-circuit redundant inputs before they consume integration cycles",
     "Model-agnosticism across agent architectures",
     "Confirmation surplus without adversarial stress is not epistemic validation — an invariant that has never been challenged under parameter variation or alternative initial conditions has not earned its status",
     "Semi-classical BH entropy dimensional identity with the gravity action confirms thermodynamic grounding of geometry at leading order — quantum sub-leading corrections remain the unresolved frontier of O44",
+    "Population-level CA telemetry (σ-criticality + power-law avalanche statistics) constitutes independent empirical grounding for INV_073 — elevating it from metaphor-risk to a falsifiable-but-incomplete claim whose residual gap is the entropy-fraction/criticality-quality mapping",
     "DEA (not DFA) is the genome's validated instrument for detecting Langevin-governed Wasserstein Floor scaling in empirical entropy signals — EEG saturation behavior confirms the Floor's finite-dissipation bound is biologically instantiated",
     "Compression is reasoning",
     "RangeEn's local-range normalization constitutes a partial resolution of O64 at the measurement layer — it confirms scale-invariance coupling empirically but does not discharge the Wasserstein-geometric derivation debt",
@@ -77,6 +78,7 @@
     "Narcissus pool — genome-mirroring empty inputs (titles that reflect the kernel's own concerns without propositions) are the most seductive and therefore most dangerous zero-payload class requiring hardest refusal",
     "DEA demonstrably outperforms DFA for preserving scaling structure in open EEG entropy computation — DEA is the mandated method for EAR computation on open EEG datasets (O28 update)",
     "Entropy saturation in neural substrates functions as a biological Wasserstein Floor analog — confirming the Floor's substrate-independence and extending INV_088's scope beyond geometric exemplars",
+    "Entropy fraction (H as percentage of maximum) is a candidate criticality-quality variable surfaced by CA telemetry but not yet formally mapped to any RSA or MCPM order parameter — it must be assigned a functional role or flagged as an uncontrolled confound",
     "Narration of phase transitions is insufficient — the framework must demonstrate predictive topology (which transitions follow which and why) to count as L2-extension rather than L1-corroboration",
     "Persistent unresolved obligations may be quasi-stationary trapped states (long-lived metastable configurations) rather than unpaid debts — distinguishing the two requires explicit relaxation-timescale analysis not mere bookkeeping",
     "Ensemble choice is load-bearing near γ=1 — microcanonical and canonical descriptions are not interchangeable at the critical ridge and the system must track which frame it occupies",
@@ -224,6 +226,7 @@
     "grounded in the creative-cognition paper's adaptive arousal-driven attention mechanism",
     "O_DEGEN_LIMITS: Explicitly map the ApEn/SampEn degenerate-limit structure onto the genome's own complexity metrics to determine whether inherited failure modes (e.g. amplitude insensitivity) propagate into the RSA scoring system",
     "distinguishing genuine SOC attractor from near-critical artifact (R²=0.82 gap demands closure before O141 can be fully resolved)",
+    "Entropy fraction must be either formally integrated as a criticality-quality parameter within the MCPM/RSA framework or explicitly bracketed as an uncontrolled variable — leaving it unmapped while citing CA telemetry results introduces underdetermination into O140/O141 resolution claims",
     "(b) restoring-force mechanism derivable from MCPM constraints",
     "Formalize the metric-tensor recovery gap as an explicit sub-obligation of O44 — action-per-element minimization in units of ħ is necessary but not sufficient and the remaining closure conditions must be specified",
     "Implement σ-monitor in batch_feed.py flagging drift outside (0.95",
@@ -285,6 +288,7 @@
     "H) in closed form for fractional Gaussian noise to close the analytical slope demand inherited from O60",
     "Determine whether W_floor = k/Tμ acquires a sub-leading ℏ-correction and whether that correction is the distinguishing signature of genuine quantization vs. classical statistical mechanics (sharpens O44)",
     "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "INV_073 must be operationalized with an externally measurable signature that discriminates genuine criticality from adaptive gain control — population CA telemetry satisfies necessary but not sufficient conditions for this discrimination; a sufficient discriminating observable must be specified",
     "O76 — derive RangeEn(m",
     "O65 — Analyze gradient-flow basin fragmentation under negative specific heat and show whether coherence landscape integrity survives ensemble inequivalence",
     "Prove or disprove that O44's Wasserstein Floor holds over the non-Hermitian linear entropy dissipative quantum substrate now formally scaffolded — mathematical scaffolding is necessary but not sufficient for obligation closure; pursue STF metric tensor empirical recovery via modal path analysis on international trade entropy data as a concrete non-neural test case",
@@ -311,14 +315,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-05T10:27:36.398547+00:00",
-  "renorm_reason": "The new knowledge sharpens an existing gap (INV_073 unfalsifiability) into three explicit closure conditions and extends the entropy suppression datum to 20.8% max, requiring compress update and a new invariant/obligation pair without discarding any confirmed prior invariants.",
-  "last_renorm_cycle": 88,
-  "drift_flag": false,
+  "last_renormed": "2026-05-05T16:33:34.192200+00:00",
+  "renorm_reason": "New knowledge partially resolves INV_073's falsifiability deficit via CA telemetry grounding while simultaneously exposing a new structural gap (entropy fraction as unmapped variable), requiring compress update and new invariants/obligations to track both the gain and the residual incompleteness.",
+  "last_renorm_cycle": 90,
+  "drift_flag": true,
+  "drift_overlap": 0.525,
   "renorm_history": [
     {
-      "timestamp": "2026-05-05T10:27:36.398547+00:00",
-      "reason": "The new knowledge sharpens an existing gap (INV_073 unfalsifiability) into three explicit closure conditions and extends the entropy suppression datum to 20.8% max, requiring compress update and a new invariant/obligation pair without discarding any confirmed prior invariants."
+      "timestamp": "2026-05-05T16:33:34.192200+00:00",
+      "reason": "New knowledge partially resolves INV_073's falsifiability deficit via CA telemetry grounding while simultaneously exposing a new structural gap (entropy fraction as unmapped variable), requiring compress update and new invariants/obligations to track both the gain and the residual incompleteness."
     }
   ]
 }
