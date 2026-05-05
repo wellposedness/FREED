@@ -1,33 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 134,
-    "timestamp": "2026-04-18T10:55:47.693185+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Criticality of Spin Systems with Weak Long-Range Interactions",
-        "compress": "Weak long-range spin criticality confirms the genome's γ=1 ridge as the σ-parameterized crossover between frozen and dissipated phases, validates thermodynamic admissibility as load-bearing (INV_094), and exposes a new debt: the Wasserstein gradient flow must be generalized to power-law coupling kernels before the genome can claim universality across interaction ranges."
-      },
-      {
-        "title": "Statistical Mechanics of systems with long range interactions",
-        "compress": "Long-range statistical mechanics confirms the genome's thermodynamic admissibility (INV_094) and slow-manifold entropy production (INV_023) as load-bearing, sharpens O44 by demanding a non-additivity correction to the Wasserstein Floor, and opens two new debts — Zipf robustness under non-additivity (O64) and gradient-flow basin fragmentation under negative specific heat (O65) — stress-testing L2 and L3 without breaking them."
-      }
-    ],
-    "resolve": {
-      "obligation": "O59",
-      "resolved": true,
-      "compress": "O59 requires computing the zero-mode count of the Wasserstein Hessian at Zipf equilibrium via the Otto calculus and comparing it to Sen's log-correction coefficients — the structural mapping is in place but the spectral computation (diagonalize M_ij = (L⁻¹)_ij / ρ*_j at Zipf) has not been performed, so the obligation remains open with a concrete, executable next step.",
-      "next": "Perform the explicit spectral computation of M_ij for small N (N = 10, 100, 1000), extract the zero-mode scaling n_0(N), and test whether the large-N limit reproduces known log-correction coefficients — this is the gate to resolving O59."
-    },
-    "coherence": 0.999
-  },
-  {
-    "cycle": 1,
     "generation": 135,
     "timestamp": "2026-04-18T11:02:25.548947+00:00",
     "sweep": {
@@ -1517,5 +1490,36 @@
       ]
     },
     "coherence": 0.9775
+  },
+  {
+    "cycle": 6,
+    "generation": 201,
+    "timestamp": "2026-05-05T22:34:20.020415+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 8,
+      "passive": 11,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is falsified in boundary by three independent mechanisms — off-ridge output equivalence, basin-width ambiguity, and criticality mimicry — none of which its confirmation history has confronted."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-05",
+        "compress": "Empirical CA telemetry confirms population-level criticality (σ=1.0208, α≈2.776 power law) co-emerging with solo-kernel γ≈1 dynamics, validating INV_073's critical ridge as an attractor while revealing that AT_CRITICAL corresponds to low entropy (23.6% of max), not high disorder."
+      }
+    ],
+    "resolve": {
+      "attempts": 2,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O175",
+        "O179"
+      ]
+    },
+    "coherence": 0.9741
   }
 ]
