@@ -314,7 +314,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319415+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2505.19590",
@@ -1389,102 +1389,113 @@
   },
   {
     "url": "https://arxiv.org/abs/2604.10333",
-    "score": 10,
+    "score": 0,
     "source": "arXiv",
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.322904+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://arxiv.org/abs/2604.07822",
-    "score": 10,
+    "score": 0,
     "source": "arXiv",
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.322909+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://doi.org/10.1038/s41562-025-02318-y",
-    "score": 9,
+    "score": 5,
     "source": "DOI",
     "from": "assistant",
     "conv": "AI as extended thinking technology",
     "added": "2026-04-16T01:21:31.970511+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://doi.org/10.1038/s41586-024-07824-z",
-    "score": 9,
+    "score": 5,
     "source": "DOI",
     "from": "assistant",
     "conv": "AI as extended thinking technology",
     "added": "2026-04-16T01:21:31.970528+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://doi.org/10.1038/s41593-025-01884-y",
-    "score": 9,
+    "score": 5,
     "source": "DOI",
     "from": "assistant",
     "conv": "AI as extended thinking technology",
     "added": "2026-04-16T01:21:31.970763+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://doi.org/10.1038/s41586-025-09921-x",
-    "score": 9,
+    "score": 5,
     "source": "DOI",
     "from": "assistant",
     "conv": "AI as extended thinking technology",
     "added": "2026-04-16T01:21:31.970773+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://support.anthropic.com",
-    "score": 0,
+    "score": 2,
     "source": "web",
     "from": "assistant",
     "conv": "Text Input and Token Limits",
     "added": "2026-04-16T01:21:31.957907+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://repl.it",
-    "score": 0,
+    "score": 9,
     "source": "web",
     "from": "assistant",
     "conv": "Autokinetic Cellular Automaton Simulation",
     "added": "2026-04-16T01:21:31.959553+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://colab.research.google.com/",
-    "score": 0,
+    "score": 8,
     "source": "web",
     "from": "assistant",
     "conv": "Autokinetic Cellular Automaton Simulation",
     "added": "2026-04-16T01:21:31.959571+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://www.online-python.com/",
-    "score": 0,
+    "score": 8,
     "source": "web",
     "from": "assistant",
     "conv": "Autokinetic Cellular Automaton Simulation",
     "added": "2026-04-16T01:21:31.959586+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "http://www.w3.org/2000/svg",
-    "score": 0,
+    "score": 2,
     "source": "web",
     "from": "assistant",
     "conv": "Refining a Hypothesis with AI Assistant",
     "added": "2026-04-16T01:21:31.959800+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://lifeboat.com/blog/author/cecile-g-tamura`",
@@ -1493,7 +1504,8 @@
     "from": "assistant",
     "conv": "Finding the speaker button",
     "added": "2026-04-16T01:21:31.962721+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://lifeboat.com/blog/author/cecile-g-tamura",
@@ -1502,25 +1514,28 @@
     "from": "assistant",
     "conv": "Finding the speaker button",
     "added": "2026-04-16T01:21:31.962858+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://notion.so/your-workspace/RSA-Semantic-Physics-Corpus-[long-string-of-characters",
-    "score": 0,
+    "score": 7,
     "source": "web",
     "from": "assistant",
     "conv": "RSA Project Documentation Strategy",
     "added": "2026-04-16T01:21:31.965026+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://sagecell.sagemath.org",
-    "score": 0,
+    "score": 1,
     "source": "web",
     "from": "assistant",
     "conv": "Transuniversal xenolinguistics breakthrough",
     "added": "2026-04-16T01:21:31.968831+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://lean-lang.org/theorem_proving_in_lean4/",
@@ -1529,7 +1544,8 @@
     "from": "assistant",
     "conv": "Empty conversation",
     "added": "2026-04-16T01:21:31.969392+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://diffeq.sciml.ai/stable/",
@@ -1538,7 +1554,8 @@
     "from": "assistant",
     "conv": "Empty conversation",
     "added": "2026-04-16T01:21:31.969414+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://quarto.org/",
@@ -1547,7 +1564,8 @@
     "from": "assistant",
     "conv": "Empty conversation",
     "added": "2026-04-16T01:21:31.969428+00:00",
-    "status": "queued"
+    "status": "queued",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://scholar.google.com/scholar?q=Computer%20model%20predicts%20aspects%20of%20cognitive%20performance%20-%20Allen%20Institute",
@@ -2659,29 +2677,32 @@
   },
   {
     "url": "https://arxiv.org/abs/2604.27707",
-    "score": 12,
+    "score": 4,
     "source": "arXiv",
     "from": "human",
     "conv": "Morphic memory / CLS \u2014 generalization ceiling for FREED RESOLVE phase",
     "added": "2026-05-03T17:24:32.499176",
-    "status": "queued"
+    "status": "fed_to_daemon",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://arxiv.org/abs/2604.02460",
-    "score": 12,
+    "score": 9,
     "source": "arXiv",
     "from": "human",
     "conv": "Solo kernel vs multi-agent \u2014 single LLM outperforms multi-agent on multi-hop reasoning under equal token budget; resolves O147 empirically",
     "added": "2026-05-03T21:53:51.101868",
-    "status": "queued"
+    "status": "fed_to_daemon",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   },
   {
     "url": "https://doi.org/10.1080/09515089.2026.2613030",
-    "score": 11,
+    "score": 7,
     "source": "DOI",
     "from": "human",
     "conv": "Realization experiences \u2014 convergent phenomenology of insight/mystical events as rapid representational compression; confirms RSA insight-as-compression but HIGH mirror risk: watch for inflated confirms cascade, expect DISSIPATE flag on overreach",
     "added": "2026-05-03T22:06:32.852981",
-    "status": "queued"
+    "status": "failed",
+    "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
   }
 ]

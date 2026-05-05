@@ -50,7 +50,8 @@ NODE_EDGE_TYPES = (
     "shares_invariant",         # fallback: nodes share the same abstract claim
     "operationalizes",          # node B implements/measures the abstract claim of node A
     "scales_with",              # invariant holds across both nodes at different scales
-    "independent_confirmation", # invariant appears in nodes from different empirical domains
+    "consistent_with",          # invariant text uses independence/domain language but source independence unverified
+    "independent_confirmation", # reserved: bootstrap CONVERGE or verified cross-domain feed edge required
 )
 
 # Keywords used to classify node-edge type from invariant text
@@ -183,7 +184,10 @@ def classify_node_edge(invariant_text):
 
     Returns one of NODE_EDGE_TYPES. Precedence:
       1. scales_with — invariant explicitly mentions scale hierarchy or substrate-independence
-      2. independent_confirmation — invariant mentions cross-domain or orthogonal confirmation
+      2. consistent_with — invariant text uses independence/domain language, but source
+         independence is unverified (nodes may share the same theoretical origin).
+         Use independent_confirmation only when bootstrap CONVERGE or a verified
+         cross-domain feed edge confirms actual source independence.
       3. operationalizes — invariant involves implementation/measurement/method language
       4. shares_invariant — fallback
     """
@@ -191,7 +195,7 @@ def classify_node_edge(invariant_text):
     if _SCALE_KEYWORDS.search(t):
         return "scales_with"
     if _DOMAIN_KEYWORDS.search(t):
-        return "independent_confirmation"
+        return "consistent_with"
     if _IMPL_KEYWORDS.search(t):
         return "operationalizes"
     return "shares_invariant"

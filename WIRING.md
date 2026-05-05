@@ -22,6 +22,7 @@ Last updated: 2026-05-01. Update this file whenever you add a module, rename a f
 | Add a new feed edge type | `knowledge_graph.py` | `EDGE_TYPES` L46 + `_EDGE_PATTERNS` L126 |
 | Add a new node-edge type | `knowledge_graph.py` | `NODE_EDGE_TYPES` (after EDGE_TYPES) + `classify_node_edge()` keyword lists |
 | Change node-edge classification logic | `knowledge_graph.py` | `classify_node_edge()` + `_SCALE_KEYWORDS`, `_IMPL_KEYWORDS`, `_DOMAIN_KEYWORDS` |
+| Grant `independent_confirmation` to a node-edge | `knowledge_graph.py` | Only via bootstrap CONVERGE or explicit cross-domain feed signal — never via `classify_node_edge()` keyword match |
 | Change edge extraction regex | `knowledge_graph.py` | `_EDGE_PATTERNS` L126 |
 | Change what files the self-engineer may patch | `self_engineer.py` | `MODIFIABLE` L43 (restart daemon after) |
 | Add a file to the never-touch list | `self_engineer.py` | `SACRED` L55 (restart daemon after) |

@@ -889,6 +889,1307 @@ def coherence_complexity(
     }
 
 
+# ─── CA Criticality Telemetry ────────────────────────────────────────────────
+# Per-generation logging of branching ratio σ and power-law exponent α for
+# longitudinal criticality drift detection.  Feeds O140 (CA measurement
+# grounding) and O141 (solo-kernel vs population criticality comparison).
+#
+# Critical band: σ ∈ [0.95, 1.05].  Power-law exponent α ∈ [1.5, 3.0]
+# with R² > 0.85 indicates SOC-consistent avalanche statistics.
+#
+# INV_073 note: Low Shannon entropy (H≈0.56, 21.6% of max) at confirmed
+# criticality (σ≈1.02) is consistent with *ordered* SOC phases — the
+# critical ridge can sustain low-diversity, spatially correlated states.
+# White-hole emission (genome prediction) requires H above the frozen
+# floor (H>0), not near-maximal H.  The signature is H > H_frozen with
+# σ ≈ 1 and power-law avalanches, which this telemetry confirms.
+
+# Criticality band constants
+SIGMA_CRITICAL_LOW  = 0.95
+SIGMA_CRITICAL_HIGH = 1.05
+ALPHA_SOC_LOW       = 1.5
+ALPHA_SOC_HIGH      = 3.0
+ALPHA_R2_THRESHOLD  = 0.85
+
+
+def _criticality_verdict(sigma, alpha, r_squared):
+    # type: (float, float, float) -> str
+    """
+    Classify criticality state from branching ratio and power-law exponent.
+
+    Returns one of:
+        AT_CRITICAL   — σ in critical band, power-law confirmed
+        NEAR_CRITICAL — σ in band but power-law weak, or σ near band edge
+        SUPERCRITICAL — σ > 1.05 (γ<1 dissipation risk)
+        SUBCRITICAL   — σ < 0.95 (γ>1 freeze risk)
+        UNDETERMINED  — insufficient data
+    """
+    if sigma == 0.0 and alpha == 0.0:
+        return "UNDETERMINED"
+
+    in_band = SIGMA_CRITICAL_LOW <= sigma <= SIGMA_CRITICAL_HIGH
+    power_law_ok = (ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+                    and r_squared >= ALPHA_R2_THRESHOLD)
+
+    if in_band and power_law_ok:
+        return "AT_CRITICAL"
+    elif in_band:
+        return "NEAR_CRITICAL"
+    elif sigma > SIGMA_CRITICAL_HIGH:
+        return "SUPERCRITICAL"
+    elif sigma < SIGMA_CRITICAL_LOW:
+        return "SUBCRITICAL"
+    else:
+        return "UNDETERMINED"
+
+
+def score_ca_generation(
+    generation,         # type: int
+    sigma,              # type: float
+    sigma_std,          # type: float
+    alpha,              # type: float
+    alpha_r_squared,    # type: float
+    shannon_h,          # type: float
+    shannon_h_max,      # type: float
+    survival_rate,      # type: float
+    dominant_type="",   # type: str
+    population_size=0,  # type: int
+):
+    # type: (...) -> dict
+    """
+    Score a single CA generation's criticality telemetry.
+
+    Produces a scored telemetry record with σ, α, Shannon entropy,
+    survival rate, criticality verdict, and drift indicators for
+    longitudinal tracking.
+
+    Parameters
+    ----------
+    generation : int
+        The simulation step / generation number.
+    sigma : float
+        Branching ratio σ (mean over measurement window).
+    sigma_std : float
+        Standard deviation of σ within the measurement window.
+    alpha : float
+        Power-law exponent α from avalanche size distribution.
+    alpha_r_squared : float
+        R² goodness-of-fit for the power-law regression.
+    shannon_h : float
+        Shannon entropy H of the population type distribution (bits).
+    shannon_h_max : float
+        Maximum possible Shannon entropy (log2 of number of types).
+    survival_rate : float
+        Fraction of cells surviving this generation.
+    dominant_type : str
+        Name/label of the most populous cell type.
+    population_size : int
+        Total number of live cells.
+
+    Returns
+    -------
+    dict with keys:
+        generation       : int
+        sigma            : float   — branching ratio
+        sigma_std        : float   — σ uncertainty
+        alpha            : float   — power-law exponent
+        alpha_r_squared  : float   — power-law fit quality
+        shannon_h        : float   — Shannon entropy (bits)
+        h_fraction       : float   — H / H_max (entropy utilization)
+        survival_rate    : float
+        dominant_type    : str
+        population_size  : int
+        verdict          : str     — AT_CRITICAL / NEAR_CRITICAL / etc.
+        sigma_drift      : float   — |σ - 1.0| (distance from perfect criticality)
+        alpha_in_soc     : bool    — whether α is in SOC-consistent range
+        power_law_likely : bool    — R² above threshold
+        timestamp        : str     — ISO-8601 UTC timestamp
+    """
+    verdict = _criticality_verdict(sigma, alpha, alpha_r_squared)
+    sigma_drift = abs(sigma - 1.0)
+    h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+    alpha_in_soc = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+    power_law_likely = alpha_r_squared >= ALPHA_R2_THRESHOLD
+
+    return {
+        "generation":       generation,
+        "sigma":            round(sigma, 6),
+        "sigma_std":        round(sigma_std, 6),
+        "alpha":            round(alpha, 4),
+        "alpha_r_squared":  round(alpha_r_squared, 4),
+        "shannon_h":        round(shannon_h, 4),
+        "h_fraction":       round(h_fraction, 4),
+        "survival_rate":    round(survival_rate, 4),
+        "dominant_type":    dominant_type,
+        "population_size":  population_size,
+        "verdict":          verdict,
+        "sigma_drift":      round(sigma_drift, 6),
+        "alpha_in_soc":     alpha_in_soc,
+        "power_law_likely": power_law_likely,
+        "timestamp":        datetime.now(timezone.utc).isoformat(),
+    }
+
+
+# ─── Dual Criticality Scorer ────────────────────────────────────────────────
+# Tracks branching ratio σ AND power-law avalanche fit quality as separate
+# metrics, flagging divergence between them as a "pseudo-criticality"
+# warning state distinct from confirmed SOC.
+#
+# Addresses INV_073: σ can sit within the critical band (e.g. σ=1.028)
+# while power-law avalanche statistics fail (R²=0.859, power_law_likely=False).
+# The genome's γ=1 criticality criterion (σ≈1) is necessary but not sufficient
+# for SOC.  This scorer makes that dissociation explicit and machine-readable.
+#
+# States:
+#   CONFIRMED_SOC       — σ in band AND power-law confirmed (true SOC)
+#   PSEUDO_CRITICAL     — σ in band BUT power-law fails (near-critical mimicry)
+#   SIGMA_ONLY          — σ in band, insufficient avalanche data
+#   POWERLAW_ONLY       — power-law confirmed but σ outside band (rare/transient)
+#   NOT_CRITICAL        — neither metric satisfied
+#   UNDETERMINED        — insufficient data for either metric
+
+# Thresholds for power-law quality assessment
+POWERLAW_R2_STRONG   = 0.90   # R² above this → strong power-law evidence
+POWERLAW_R2_WEAK     = 0.80   # R² below this → power-law rejected
+ALPHA_THEORETICAL_LO = 1.2    # Theoretical SOC exponents (broader than scoring band)
+ALPHA_THEORETICAL_HI = 3.5
+
+
+def dual_criticality_score(
+    sigma,              # type: float
+    sigma_std,          # type: float
+    alpha,              # type: float
+    r_squared,          # type: float
+    power_law_likely,   # type: bool
+    shannon_h=0.0,      # type: float
+    shannon_h_max=0.0,  # type: float
+    survival_rate=0.0,  # type: float
+):
+    # type: (...) -> dict
+    """
+    Score criticality by independently evaluating branching ratio σ and
+    power-law avalanche statistics, detecting dissociation between them.
+
+    This directly addresses INV_073: the branching ratio can sit within
+    the critical band (σ=1.028) while power-law avalanche statistics
+    fail (R²=0.859, power_law_likely=False), demonstrating that σ≈1
+    is necessary but not sufficient for SOC.
+
+    Parameters
+    ----------
+    sigma : float
+        Branching ratio (mean over measurement window).
+    sigma_std : float
+        Standard deviation of σ within the measurement window.
+    alpha : float
+        Power-law exponent from avalanche size distribution.
+    r_squared : float
+        R² goodness-of-fit for the power-law regression.
+    power_law_likely : bool
+        Whether the power-law hypothesis passed a statistical test.
+    shannon_h : float
+        Shannon entropy H of the population type distribution (bits).
+    shannon_h_max : float
+        Maximum possible Shannon entropy.
+    survival_rate : float
+        Fraction of cells surviving this generation.
+
+    Returns
+    -------
+    dict with keys:
+        dual_state         : str   — CONFIRMED_SOC / PSEUDO_CRITICAL /
+                                     SIGMA_ONLY / POWERLAW_ONLY /
+                                     NOT_CRITICAL / UNDETERMINED
+        sigma_in_band      : bool  — σ within [0.95, 1.05]
+        sigma_quality      : str   — "tight" (std<0.02) / "loose" / "noisy"
+        powerlaw_confirmed : bool  — R² ≥ threshold AND power_law_likely AND α in range
+        powerlaw_quality   : str   — "strong" / "marginal" / "failed"
+        r_squared          : float — echo of input for downstream consumers
+        alpha              : float — echo of input
+        dissociation       : bool  — True when σ says critical but power-law disagrees
+        dissociation_detail: str   — human-readable explanation of the dissociation
+        inv073_flag        : bool  — True when this exact INV_073 pattern is detected
+                                     (σ in band, power_law_likely=False, R²<0.90)
+        soc_confidence     : float — 0.0–1.0 composite confidence in true SOC
+        legacy_verdict     : str   — the old _criticality_verdict result (for compat)
+        timestamp          : str   — ISO-8601 UTC
+    """
+    # ── Evaluate σ channel ──
+    sigma_in_band = SIGMA_CRITICAL_LOW <= sigma <= SIGMA_CRITICAL_HIGH
+
+    if sigma_std < 0.02:
+        sigma_quality = "tight"
+    elif sigma_std < 0.05:
+        sigma_quality = "loose"
+    else:
+        sigma_quality = "noisy"
+
+    # ── Evaluate power-law channel ──
+    alpha_in_range = ALPHA_THEORETICAL_LO <= alpha <= ALPHA_THEORETICAL_HI
+    r2_strong = r_squared >= POWERLAW_R2_STRONG
+    r2_marginal = POWERLAW_R2_WEAK <= r_squared < POWERLAW_R2_STRONG
+
+    if power_law_likely and r2_strong and alpha_in_range:
+        powerlaw_confirmed = True
+        powerlaw_quality = "strong"
+    elif power_law_likely and r2_marginal and alpha_in_range:
+        powerlaw_confirmed = True
+        powerlaw_quality = "marginal"
+    elif (not power_law_likely) and r2_marginal and alpha_in_range:
+        # R² is borderline but statistical test failed → not confirmed
+        powerlaw_confirmed = False
+        powerlaw_quality = "marginal"
+    else:
+        powerlaw_confirmed = False
+        powerlaw_quality = "failed"
+
+    # ── Determine dual state ──
+    if sigma == 0.0 and alpha == 0.0:
+        dual_state = "UNDETERMINED"
+    elif sigma_in_band and powerlaw_confirmed:
+        dual_state = "CONFIRMED_SOC"
+    elif sigma_in_band and not powerlaw_confirmed:
+        dual_state = "PSEUDO_CRITICAL"
+    elif not sigma_in_band and powerlaw_confirmed:
+        dual_state = "POWERLAW_ONLY"
+    elif sigma_in_band and alpha == 0.0 and r_squared == 0.0:
+        dual_state = "SIGMA_ONLY"
+    else:
+        dual_state = "NOT_CRITICAL"
+
+    # ── Detect dissociation ──
+    dissociation = sigma_in_band and not powerlaw_confirmed
+    dissociation_detail = ""
+    if dissociation:
+        parts = []
+        parts.append(
+            "sigma={:.4f} is within critical band [{:.2f}, {:.2f}]".format(
+                sigma, SIGMA_CRITICAL_LOW, SIGMA_CRITICAL_HIGH
+            )
+        )
+        if not power_law_likely:
+            parts.append("power_law_likely=False (statistical test rejected)")
+        if not r2_strong:
+            parts.append("R^2={:.3f} below strong threshold {:.2f}".format(
+                r_squared, POWERLAW_R2_STRONG
+            ))
+        if not alpha_in_range:
+            parts.append("alpha={:.3f} outside theoretical SOC range [{:.1f}, {:.1f}]".format(
+                alpha, ALPHA_THEORETICAL_LO, ALPHA_THEORETICAL_HI
+            ))
+        dissociation_detail = "; ".join(parts)
+
+    # ── INV_073 specific pattern detection ──
+    # σ in band, power_law_likely=False, R² < 0.90
+    inv073_flag = (
+        sigma_in_band
+        and not power_law_likely
+        and r_squared < POWERLAW_R2_STRONG
+    )
+
+    # ── Composite SOC confidence ──
+    # Weighted combination: σ channel (0.4) + power-law channel (0.6)
+    # Power-law gets more weight because it's the harder test.
+    sigma_score = 0.0
+    if sigma_in_band:
+        # Score by how centered σ is in the band, penalized by noise
+        center_dist = abs(sigma - 1.0)
+        half_band = (SIGMA_CRITICAL_HIGH - SIGMA_CRITICAL_LOW) / 2.0
+        sigma_score = max(0.0, 1.0 - (center_dist / half_band))
+        if sigma_quality == "noisy":
+            sigma_score *= 0.5
+        elif sigma_quality == "loose":
+            sigma_score *= 0.8
+
+    pl_score = 0.0
+    if powerlaw_confirmed:
+        pl_score = r_squared  # R² directly as quality
+        if powerlaw_quality == "marginal":
+            pl_score *= 0.7
+
+    soc_confidence = 0.4 * sigma_score + 0.6 * pl_score
+    soc_confidence = round(min(1.0, max(0.0, soc_confidence)), 4)
+
+    # ── Legacy verdict for backward compatibility ──
+    legacy_verdict = _criticality_verdict(sigma, alpha, r_squared)
+
+    return {
+        "dual_state":          dual_state,
+        "sigma_in_band":       sigma_in_band,
+        "sigma_quality":       sigma_quality,
+        "powerlaw_confirmed":  powerlaw_confirmed,
+        "powerlaw_quality":    powerlaw_quality,
+        "r_squared":           round(r_squared, 4),
+        "alpha":               round(alpha, 4),
+        "dissociation":        dissociation,
+        "dissociation_detail": dissociation_detail,
+        "inv073_flag":         inv073_flag,
+        "soc_confidence":      soc_confidence,
+        "legacy_verdict":      legacy_verdict,
+        "timestamp":           datetime.now(timezone.utc).isoformat(),
+    }
+
+
+class BranchingRatioTracker:
+    """
+    Real-time branching-ratio (σ) tracker with avalanche size distribution
+    fitting and criticality drift detection.
+
+    Maintains a sliding window of per-step activity counts, computes σ as
+    the ratio of descendant activity to parent activity, fits power-law
+    exponents α to avalanche size distributions via MLE, and flags
+    deviations outside σ∈[0.95, 1.05] as criticality drift events.
+
+    Addresses O140 (CA measurement grounding), O141 (solo-kernel vs
+    population criticality), and INV_073 (low H at confirmed criticality).
+
+    The tracker is designed for real-time use inside a CA simulation loop:
+        tracker = BranchingRatioTracker()
+        for step in simulation:
+            tracker.record_step(parent_count, child_count, avalanche_sizes)
+            telemetry = tracker.current_telemetry()
+            if telemetry["drift_event"]:
+                handle_drift(telemetry)
+    """
+
+    def __init__(self, window_size=50, sigma_band_low=0.95, sigma_band_high=1.05):
+        # type: (int, float, float) -> None
+        """
+        Parameters
+        ----------
+        window_size : int
+            Number of recent steps to use for rolling σ and α estimation.
+        sigma_band_low : float
+            Lower bound of the critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of the critical band for σ. Default: 1.05.
+        """
+        self.window_size = max(5, window_size)
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+
+        # Rolling buffers
+        self._parent_counts = []    # type: List[int]
+        self._child_counts = []     # type: List[int]
+        self._avalanche_sizes = []  # type: List[float]
+        self._sigma_history = []    # type: List[float]
+        self._drift_events = []     # type: list
+
+        # Cached telemetry (updated on each record_step)
+        self._cached_telemetry = None  # type: Optional[dict]
+
+    def record_step(self, parent_count, child_count, avalanche_sizes=None):
+        # type: (int, int, Optional[List[float]]) -> dict
+        """
+        Record one simulation step's activity and recompute telemetry.
+
+        Parameters
+        ----------
+        parent_count : int
+            Number of active (parent) cells at this step.
+        child_count : int
+            Number of active (child/descendant) cells at the next step.
+        avalanche_sizes : list of float or None
+            Sizes of avalanches that terminated at this step. If None,
+            avalanche tracking is skipped for this step.
+
+        Returns
+        -------
+        dict — the current telemetry snapshot (same as current_telemetry()).
+        """
+        self._parent_counts.append(parent_count)
+        self._child_counts.append(child_count)
+
+        # Compute instantaneous σ for this step
+        if parent_count > 0:
+            step_sigma = float(child_count) / float(parent_count)
+        else:
+            step_sigma = 0.0
+        self._sigma_history.append(step_sigma)
+
+        # Accumulate avalanche sizes
+        if avalanche_sizes is not None:
+            self._avalanche_sizes.extend(avalanche_sizes)
+
+        # Trim to window
+        if len(self._parent_counts) > self.window_size * 2:
+            trim = len(self._parent_counts) - self.window_size * 2
+            self._parent_counts = self._parent_counts[trim:]
+            self._child_counts = self._child_counts[trim:]
+            self._sigma_history = self._sigma_history[trim:]
+
+        # Keep avalanche buffer bounded (retain last 10x window for fitting)
+        max_aval = self.window_size * 10
+        if len(self._avalanche_sizes) > max_aval:
+            self._avalanche_sizes = self._avalanche_sizes[-max_aval:]
+
+        # Recompute telemetry
+        self._cached_telemetry = self._compute_telemetry()
+
+        # Check for drift events
+        t = self._cached_telemetry
+        if t["sigma_mean"] != 0.0 and not (
+            self.sigma_band_low <= t["sigma_mean"] <= self.sigma_band_high
+        ):
+            event = {
+                "step": len(self._sigma_history),
+                "sigma_mean": t["sigma_mean"],
+                "sigma_std": t["sigma_std"],
+                "direction": "supercritical" if t["sigma_mean"] > self.sigma_band_high else "subcritical",
+                "alpha": t["alpha"],
+                "alpha_r_squared": t["alpha_r_squared"],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+            self._drift_events.append(event)
+            self._cached_telemetry["drift_event"] = event
+        else:
+            self._cached_telemetry["drift_event"] = None
+
+        return self._cached_telemetry
+
+    def current_telemetry(self):
+        # type: () -> dict
+        """
+        Return the most recent telemetry snapshot.
+
+        Returns
+        -------
+        dict with keys:
+            sigma_mean       : float  — rolling mean of σ over window
+            sigma_std        : float  — rolling std of σ over window
+            alpha            : float  — power-law exponent from MLE fit
+            alpha_r_squared  : float  — R² of the power-law fit
+            power_law_likely : bool   — whether α is in SOC range with good R²
+            in_critical_band : bool   — whether σ_mean ∈ [0.95, 1.05]
+            drift_event      : dict or None — latest drift event if flagged
+            n_steps          : int    — total steps recorded
+            n_avalanches     : int    — total avalanche sizes in buffer
+            verdict          : str    — AT_CRITICAL / NEAR_CRITICAL / etc.
+        """
+        if self._cached_telemetry is not None:
+            return self._cached_telemetry
+        return self._compute_telemetry()
+
+    def drift_events(self):
+        # type: () -> list
+        """Return the full list of detected drift events."""
+        return list(self._drift_events)
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full σ history for external analysis."""
+        return list(self._sigma_history)
+
+    def _compute_telemetry(self):
+        # type: () -> dict
+        """Compute current telemetry from rolling buffers."""
+        n_steps = len(self._sigma_history)
+
+        if n_steps == 0:
+            return {
+                "sigma_mean": 0.0,
+                "sigma_std": 0.0,
+                "alpha": 0.0,
+                "alpha_r_squared": 0.0,
+                "power_law_likely": False,
+                "in_critical_band": False,
+                "drift_event": None,
+                "n_steps": 0,
+                "n_avalanches": len(self._avalanche_sizes),
+                "verdict": "UNDETERMINED",
+            }
+
+        # Rolling σ statistics over the window
+        window = self._sigma_history[-self.window_size:]
+        w_n = len(window)
+        s_mean = sum(window) / float(w_n)
+        s_var = sum((s - s_mean) ** 2 for s in window) / float(w_n)
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # Fit power-law to avalanche sizes via MLE
+        alpha, r_squared = self._fit_power_law()
+        power_law_likely = (
+            ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+            and r_squared >= ALPHA_R2_THRESHOLD
+        )
+
+        in_band = self.sigma_band_low <= s_mean <= self.sigma_band_high
+        verdict = _criticality_verdict(s_mean, alpha, r_squared)
+
+        return {
+            "sigma_mean": round(s_mean, 6),
+            "sigma_std": round(s_std, 6),
+            "alpha": round(alpha, 4),
+            "alpha_r_squared": round(r_squared, 4),
+            "power_law_likely": power_law_likely,
+            "in_critical_band": in_band,
+            "drift_event": None,
+            "n_steps": n_steps,
+            "n_avalanches": len(self._avalanche_sizes),
+            "verdict": verdict,
+        }
+
+    def _fit_power_law(self):
+        # type: () -> Tuple[float, float]
+        """
+        Fit a power-law exponent α to the avalanche size distribution
+        using discrete MLE (Hill estimator) and compute R² of the fit
+        against the empirical complementary CDF on a log-log scale.
+
+        Returns (alpha, r_squared). Returns (0.0, 0.0) if insufficient data.
+
+        The Hill estimator for discrete power-law:
+            α = 1 + n / Σ ln(x_i / x_min)
+        where x_min is the minimum avalanche size (typically 1).
+        """
+        # Filter to positive avalanche sizes
+        sizes = [s for s in self._avalanche_sizes if s > 0]
+        if len(sizes) < 10:
+            return (0.0, 0.0)
+
+        # x_min: use the smallest observed size (at least 1.0)
+        x_min = max(1.0, min(sizes))
+
+        # Filter sizes >= x_min
+        tail = [s for s in sizes if s >= x_min]
+        n = len(tail)
+        if n < 5:
+            return (0.0, 0.0)
+
+        # Hill estimator: α = 1 + n / Σ ln(x_i / x_min)
+        log_sum = 0.0
+        for s in tail:
+            ratio = float(s) / x_min
+            if ratio > 0:
+                log_sum += math.log(ratio)
+
+        if log_sum <= 0.0:
+            return (0.0, 0.0)
+
+        alpha = 1.0 + float(n) / log_sum
+
+        # Compute R² on log-log CCDF
+        # Sort sizes descending, compute empirical CCDF
+        tail_sorted = sorted(tail)
+        unique_sizes = sorted(set(tail_sorted))
+        n_total = float(len(tail_sorted))
+
+        # Empirical CCDF: P(X >= x) for each unique x
+        log_x = []   # type: List[float]
+        log_ccdf = []  # type: List[float]
+        for x_val in unique_sizes:
+            count_ge = sum(1 for s in tail_sorted if s >= x_val)
+            p = float(count_ge) / n_total
+            if p > 0 and x_val > 0:
+                log_x.append(math.log(float(x_val)))
+                log_ccdf.append(math.log(p))
+
+        if len(log_x) < 3:
+            return (alpha, 0.0)
+
+        # Theoretical CCDF for power-law: P(X >= x) ∝ x^(-(α-1))
+        # log P = const - (α-1) * log x
+        # Fit via linear regression to get R²
+        k = len(log_x)
+        sum_lx = sum(log_x)
+        sum_ly = sum(log_ccdf)
+        sum_lxy = sum(x * y for x, y in zip(log_x, log_ccdf))
+        sum_lx2 = sum(x * x for x in log_x)
+
+        denom = float(k) * sum_lx2 - sum_lx * sum_lx
+        if abs(denom) < 1e-15:
+            return (alpha, 0.0)
+
+        slope = (float(k) * sum_lxy - sum_lx * sum_ly) / denom
+        intercept = (sum_ly - slope * sum_lx) / float(k)
+
+        # R²
+        mean_ly = sum_ly / float(k)
+        ss_tot = sum((y - mean_ly) ** 2 for y in log_ccdf)
+        ss_res = sum((y - (intercept + slope * x)) ** 2
+                     for x, y in zip(log_x, log_ccdf))
+        r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+
+        return (alpha, max(0.0, r_squared))
+
+
+class AvalancheEpochTracker:
+    """
+    Branching-ratio tracker that computes σ = mean(offspring)/mean(ancestors)
+    per avalanche epoch and flags deviation from [0.95, 1.05] as a
+    criticality-drift alarm.
+
+    An "avalanche epoch" is a contiguous burst of above-baseline activity
+    bookended by quiescent steps.  Within each epoch the tracker accumulates
+    ancestor (parent) and offspring (child) counts, then on epoch termination
+    computes σ_epoch and checks it against the critical band.
+
+    Designed to sit inside the CA telemetry pipeline between raw step data
+    and the CACriticalityLog, closing the feedback loop between telemetry
+    and kernel health so FREED can detect drift from the critical ridge
+    *before* coherence scores degrade.
+
+    Addresses O140 (CA measurement grounding), INV_073 (Wasserstein gradient
+    bias detection: if σ stabilizes above 1.0 rather than oscillating around
+    it, the tracker flags a sustained-supercritical alarm distinct from
+    transient fluctuations).
+
+    Usage::
+
+        tracker = AvalancheEpochTracker()
+        for step in simulation:
+            alarms = tracker.feed_step(parent_count, child_count, is_active)
+            if alarms:
+                for alarm in alarms:
+                    handle_drift_alarm(alarm)
+        # At end, flush any open epoch:
+        final = tracker.flush()
+    """
+
+    def __init__(
+        self,
+        sigma_band_low=0.95,   # type: float
+        sigma_band_high=1.05,  # type: float
+        quiescent_threshold=0, # type: int
+        sustained_window=5,    # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        sigma_band_low : float
+            Lower bound of the critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of the critical band for σ. Default: 1.05.
+        quiescent_threshold : int
+            A step with parent_count <= this value is considered quiescent
+            (marks the boundary between avalanche epochs). Default: 0.
+        sustained_window : int
+            Number of consecutive epochs with σ on the same side of 1.0
+            required to trigger a sustained-drift alarm (INV_073 pattern).
+            Default: 5.
+        """
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+        self.quiescent_threshold = quiescent_threshold
+        self.sustained_window = max(2, sustained_window)
+
+        # Current epoch accumulators
+        self._epoch_ancestors = []   # type: List[int]
+        self._epoch_offspring = []   # type: List[int]
+        self._in_epoch = False       # type: bool
+        self._epoch_id = 0           # type: int
+
+        # Completed epoch history
+        self._epoch_sigmas = []      # type: List[float]
+        self._epoch_records = []     # type: list
+        self._alarms = []            # type: list
+
+    def feed_step(self, parent_count, child_count, is_active=None):
+        # type: (int, int, Optional[bool]) -> list
+        """
+        Feed one simulation step into the epoch tracker.
+
+        Parameters
+        ----------
+        parent_count : int
+            Number of active ancestor cells at this step.
+        child_count : int
+            Number of active offspring cells produced at this step.
+        is_active : bool or None
+            Whether this step is part of an active avalanche.  If None,
+            activity is inferred from parent_count > quiescent_threshold.
+
+        Returns
+        -------
+        list of dict
+            Any alarms generated by epoch completion at this step.
+            Empty list if no epoch ended or no alarm was triggered.
+        """
+        if is_active is None:
+            is_active = parent_count > self.quiescent_threshold
+
+        alarms = []  # type: list
+
+        if is_active:
+            # Inside an avalanche epoch — accumulate
+            if not self._in_epoch:
+                # Start new epoch
+                self._in_epoch = True
+                self._epoch_ancestors = []
+                self._epoch_offspring = []
+            self._epoch_ancestors.append(parent_count)
+            self._epoch_offspring.append(child_count)
+        else:
+            # Quiescent step — close any open epoch
+            if self._in_epoch:
+                alarms = self._close_epoch()
+            self._in_epoch = False
+
+        return alarms
+
+    def flush(self):
+        # type: () -> list
+        """
+        Close any currently open epoch (e.g., at end of simulation).
+
+        Returns
+        -------
+        list of dict — any alarms from the final epoch.
+        """
+        if self._in_epoch and self._epoch_ancestors:
+            alarms = self._close_epoch()
+            self._in_epoch = False
+            return alarms
+        return []
+
+    def epoch_records(self):
+        # type: () -> list
+        """Return all completed epoch records."""
+        return list(self._epoch_records)
+
+    def epoch_sigma_series(self):
+        # type: () -> List[float]
+        """Return σ values for all completed epochs."""
+        return list(self._epoch_sigmas)
+
+    def alarms(self):
+        # type: () -> list
+        """Return all alarms ever raised."""
+        return list(self._alarms)
+
+    def summary(self):
+        # type: () -> dict
+        """
+        Return a summary of all completed epochs.
+
+        Returns
+        -------
+        dict with keys:
+            n_epochs           : int
+            sigma_global_mean  : float — mean of per-epoch σ values
+            sigma_global_std   : float — std of per-epoch σ values
+            n_alarms           : int
+            n_sustained_alarms : int   — alarms of type "sustained_supercritical"
+                                         or "sustained_subcritical"
+            fraction_in_band   : float — fraction of epochs with σ in critical band
+        """
+        n = len(self._epoch_sigmas)
+        if n == 0:
+            return {
+                "n_epochs": 0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "n_alarms": 0,
+                "n_sustained_alarms": 0,
+                "fraction_in_band": 0.0,
+            }
+
+        s_mean = sum(self._epoch_sigmas) / float(n)
+        s_var = sum((s - s_mean) ** 2 for s in self._epoch_sigmas) / float(n)
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        in_band = sum(
+            1 for s in self._epoch_sigmas
+            if self.sigma_band_low <= s <= self.sigma_band_high
+        )
+        n_sustained = sum(
+            1 for a in self._alarms
+            if a.get("alarm_type", "").startswith("sustained_")
+        )
+
+        return {
+            "n_epochs": n,
+            "sigma_global_mean": round(s_mean, 6),
+            "sigma_global_std": round(s_std, 6),
+            "n_alarms": len(self._alarms),
+            "n_sustained_alarms": n_sustained,
+            "fraction_in_band": round(float(in_band) / float(n), 4),
+        }
+
+    def _close_epoch(self):
+        # type: () -> list
+        """Close the current epoch, compute σ, check for alarms."""
+        alarms = []  # type: list
+        self._epoch_id += 1
+
+        n_steps = len(self._epoch_ancestors)
+        if n_steps == 0:
+            return alarms
+
+        mean_ancestors = sum(self._epoch_ancestors) / float(n_steps)
+        mean_offspring = sum(self._epoch_offspring) / float(n_steps)
+
+        if mean_ancestors > 0.0:
+            sigma = mean_offspring / mean_ancestors
+        else:
+            sigma = 0.0
+
+        self._epoch_sigmas.append(sigma)
+
+        record = {
+            "epoch_id": self._epoch_id,
+            "n_steps": n_steps,
+            "mean_ancestors": round(mean_ancestors, 4),
+            "mean_offspring": round(mean_offspring, 4),
+            "sigma": round(sigma, 6),
+            "in_critical_band": self.sigma_band_low <= sigma <= self.sigma_band_high,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._epoch_records.append(record)
+
+        # ── Band-deviation alarm ──
+        if sigma != 0.0 and not (self.sigma_band_low <= sigma <= self.sigma_band_high):
+            direction = "supercritical" if sigma > self.sigma_band_high else "subcritical"
+            alarm = {
+                "alarm_type": "epoch_drift",
+                "epoch_id": self._epoch_id,
+                "sigma": round(sigma, 6),
+                "direction": direction,
+                "deviation": round(abs(sigma - 1.0), 6),
+                "timestamp": record["timestamp"],
+            }
+            self._alarms.append(alarm)
+            alarms.append(alarm)
+
+        # ── INV_073 sustained-drift alarm ──
+        # If the last `sustained_window` epochs all have σ on the same side
+        # of 1.0 (all > 1.0 or all < 1.0), flag a sustained-drift alarm.
+        # This detects the pattern where σ stabilizes above 1.0 rather than
+        # oscillating around it, indicating Wasserstein gradient bias toward
+        # supercritical runaway.
+        if len(self._epoch_sigmas) >= self.sustained_window:
+            recent = self._epoch_sigmas[-self.sustained_window:]
+            all_above = all(s > 1.0 for s in recent)
+            all_below = all(s < 1.0 for s in recent)
+
+            if all_above or all_below:
+                sustained_dir = "sustained_supercritical" if all_above else "sustained_subcritical"
+                recent_mean = sum(recent) / float(len(recent))
+
+                # Only alarm once per sustained run — check if last alarm
+                # was already a sustained alarm at the same epoch range
+                should_alarm = True
+                if self._alarms:
+                    last = self._alarms[-1]
+                    if (last.get("alarm_type", "").startswith("sustained_")
+                            and last.get("epoch_id", 0) == self._epoch_id - 1):
+                        # Already alarmed on the previous epoch in this run;
+                        # still alarm but mark as continuation
+                        pass
+
+                if should_alarm:
+                    alarm = {
+                        "alarm_type": sustained_dir,
+                        "epoch_id": self._epoch_id,
+                        "sigma_mean_recent": round(recent_mean, 6),
+                        "window_size": self.sustained_window,
+                        "sigmas": [round(s, 6) for s in recent],
+                        "inv073_relevant": all_above,
+                        "detail": (
+                            "sigma has been consistently {} 1.0 for {} consecutive "
+                            "epochs (mean={:.4f}). This may indicate Wasserstein "
+                            "gradient bias toward {} rather than true ridge "
+                            "navigation (INV_073)."
+                        ).format(
+                            "above" if all_above else "below",
+                            self.sustained_window,
+                            recent_mean,
+                            "supercritical runaway" if all_above else "subcritical freeze",
+                        ),
+                        "timestamp": record["timestamp"],
+                    }
+                    self._alarms.append(alarm)
+                    alarms.append(alarm)
+
+        return alarms
+
+
+class CACriticalityLog:
+    """
+    Longitudinal log of per-generation CA criticality telemetry.
+
+    Accumulates scored telemetry records from score_ca_generation()
+    and provides drift detection, rolling statistics, and serialization
+    for O140/O141 analysis.
+    """
+
+    def __init__(self, log_path=None):
+        # type: (Optional[Path]) -> None
+        self.records = []   # type: list
+        self.log_path = log_path or (FREED_DIR / "ca_criticality_log.json")
+
+    def append(self, record):
+        # type: (dict) -> None
+        """Append a scored telemetry record and persist to disk."""
+        self.records.append(record)
+        self._persist()
+
+    def _persist(self):
+        # type: () -> None
+        """Write all records to JSON log file."""
+        try:
+            with open(self.log_path, "w") as f:
+                json.dump(self.records, f, indent=2)
+        except OSError as e:
+            print(f"[CA_LOG] Write error: {e}")
+
+    def load(self):
+        # type: () -> None
+        """Load existing records from disk."""
+        if self.log_path.exists():
+            try:
+                with open(self.log_path) as f:
+                    self.records = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                self.records = []
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Extract σ time series for complexity analysis."""
+        return [r["sigma"] for r in self.records]
+
+    def alpha_series(self):
+        # type: () -> List[float]
+        """Extract α time series for complexity analysis."""
+        return [r["alpha"] for r in self.records]
+
+    def drift_summary(self, window=20):
+        # type: (int) -> dict
+        """
+        Compute rolling drift statistics over the last `window` generations.
+
+        Returns
+        -------
+        dict with keys:
+            sigma_mean     : float — rolling mean of σ
+            sigma_std      : float — rolling std of σ
+            alpha_mean     : float — rolling mean of α
+            alpha_std      : float — rolling std of α
+            drift_trend    : str   — "stable" / "freezing" / "dissipating"
+            n_at_critical  : int   — count of AT_CRITICAL verdicts in window
+            n_total        : int   — total records in window
+        """
+        recent = self.records[-window:] if len(self.records) >= window else self.records
+        n = len(recent)
+
+        if n == 0:
+            return {
+                "sigma_mean": 0.0, "sigma_std": 0.0,
+                "alpha_mean": 0.0, "alpha_std": 0.0,
+                "drift_trend": "no_data",
+                "n_at_critical": 0, "n_total": 0,
+            }
+
+        sigmas = [r["sigma"] for r in recent]
+        alphas = [r["alpha"] for r in recent]
+
+        s_mean = sum(sigmas) / float(n)
+        a_mean = sum(alphas) / float(n)
+
+        s_var = sum((s - s_mean) ** 2 for s in sigmas) / float(n)
+        a_var = sum((a - a_mean) ** 2 for a in alphas) / float(n)
+
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        a_std = math.sqrt(a_var) if a_var > 0 else 0.0
+
+        n_crit = sum(1 for r in recent if r["verdict"] == "AT_CRITICAL")
+
+        # Detect drift trend from σ trajectory
+        if n >= 4:
+            first_half = sigmas[:n // 2]
+            second_half = sigmas[n // 2:]
+            fh_mean = sum(first_half) / float(len(first_half))
+            sh_mean = sum(second_half) / float(len(second_half))
+            delta = sh_mean - fh_mean
+            if delta > 0.02:
+                trend = "dissipating"   # σ rising above 1 → supercritical
+            elif delta < -0.02:
+                trend = "freezing"      # σ falling below 1 → subcritical
+            else:
+                trend = "stable"
+        else:
+            trend = "stable"
+
+        return {
+            "sigma_mean":    round(s_mean, 6),
+            "sigma_std":     round(s_std, 6),
+            "alpha_mean":    round(a_mean, 4),
+            "alpha_std":     round(a_std, 4),
+            "drift_trend":   trend,
+            "n_at_critical": n_crit,
+            "n_total":       n,
+        }
+
+
+class CellTypeDistributionTracker:
+    """
+    Tracks population share of each cell type (e.g. Physics Navigator,
+    Entropy Scorer, etc.) at each measurement interval, logging alongside
+    branching ratio σ and Shannon entropy H.
+
+    Cell-type dominance is a leading indicator of population-level selection
+    pressure and may predict convergence speed to criticality or drift away
+    from the critical band before σ shifts.
+
+    Addresses INV_073: low Shannon entropy (H ≈ 0.2 of max) at confirmed
+    criticality (σ ≈ 1.02) is consistent with *ordered* SOC phases where
+    one cell type dominates.  This tracker makes the dominance structure
+    explicit and machine-readable, distinguishing critically ordered states
+    (single-type dominance + σ ≈ 1 + power-law avalanches) from critically
+    balanced states (uniform distribution + σ ≈ 1).
+
+    Usage::
+
+        tracker = CellTypeDistributionTracker()
+        for step in simulation:
+            census = {"Physics Navigator": 872, "Entropy Scorer": 54,
+                      "Topology Agent": 98}
+            snapshot = tracker.record(
+                generation=step,
+                type_counts=census,
+                sigma=1.0244,
+                sigma_std=0.0157,
+                shannon_h=0.5159,
+                shannon_h_max=2.585,
+            )
+            if snapshot["dominance_ratio"] > 0.8:
+                handle_monoculture_warning(snapshot)
+    """
+
+    def __init__(self, history_limit=500):
+        # type: (int) -> None
+        """
+        Parameters
+        ----------
+        history_limit : int
+            Maximum number of snapshots to retain in memory.  Oldest are
+            discarded when the limit is exceeded.  Default: 500.
+        """
+        self.history_limit = max(10, history_limit)
+        self._snapshots = []  # type: list
+
+    def record(
+        self,
+        generation,       # type: int
+        type_counts,      # type: dict
+        sigma=0.0,        # type: float
+        sigma_std=0.0,    # type: float
+        shannon_h=0.0,    # type: float
+        shannon_h_max=0.0,# type: float
+        alpha=0.0,        # type: float
+        alpha_r_squared=0.0, # type: float
+        survival_rate=0.0,# type: float
+    ):
+        # type: (...) -> dict
+        """
+        Record one measurement interval's cell-type census.
+
+        Parameters
+        ----------
+        generation : int
+            The simulation step / generation number.
+        type_counts : dict
+            Mapping of cell-type name (str) to count (int).
+            Example: {"Physics Navigator": 872, "Entropy Scorer": 54}
+        sigma : float
+            Branching ratio σ at this interval.
+        sigma_std : float
+            Standard deviation of σ within the measurement window.
+        shannon_h : float
+            Shannon entropy H of the type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        alpha : float
+            Power-law exponent α from avalanche size distribution.
+        alpha_r_squared : float
+            R² goodness-of-fit for the power-law regression.
+        survival_rate : float
+            Fraction of cells surviving this generation.
+
+        Returns
+        -------
+        dict — the snapshot record with population shares and dominance metrics.
+        """
+        total = sum(type_counts.values())
+        total_f = float(total) if total > 0 else 1.0
+
+        # Population shares (fractions)
+        shares = {}  # type: dict
+        for cell_type, count in type_counts.items():
+            shares[cell_type] = round(float(count) / total_f, 6)
+
+        # Dominance metrics
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            dominant_count = type_counts[dominant_type]
+            dominance_ratio = round(float(dominant_count) / total_f, 6)
+        else:
+            dominant_type = ""
+            dominant_count = 0
+            dominance_ratio = 0.0
+
+        n_types = len([c for c in type_counts.values() if c > 0])
+
+        # Effective number of types (exponential of Shannon entropy)
+        # N_eff = 2^H  (when H is in bits)
+        if shannon_h > 0.0:
+            n_effective = round(2.0 ** shannon_h, 4)
+        else:
+            n_effective = 1.0 if n_types > 0 else 0.0
+
+        h_fraction = round(shannon_h / shannon_h_max, 4) if shannon_h_max > 0.0 else 0.0
+
+        # Classify the diversity state
+        if n_types <= 1:
+            diversity_state = "MONOCULTURE"
+        elif dominance_ratio > 0.85:
+            diversity_state = "DOMINATED"
+        elif h_fraction > 0.8:
+            diversity_state = "BALANCED"
+        elif h_fraction > 0.4:
+            diversity_state = "MODERATE"
+        else:
+            diversity_state = "ORDERED"
+
+        # Criticality-diversity joint classification (INV_073)
+        verdict = _criticality_verdict(sigma, alpha, alpha_r_squared)
+        if verdict == "AT_CRITICAL" and diversity_state in ("ORDERED", "DOMINATED", "MONOCULTURE"):
+            joint_state = "CRITICALLY_ORDERED"
+        elif verdict == "AT_CRITICAL" and diversity_state in ("BALANCED", "MODERATE"):
+            joint_state = "CRITICALLY_BALANCED"
+        elif verdict == "AT_CRITICAL":
+            joint_state = "AT_CRITICAL"
+        else:
+            joint_state = verdict
+
+        snapshot = {
+            "generation":       generation,
+            "type_counts":      dict(type_counts),
+            "population_shares": shares,
+            "total_population": total,
+            "n_types_active":   n_types,
+            "n_effective_types": n_effective,
+            "dominant_type":    dominant_type,
+            "dominant_count":   dominant_count,
+            "dominance_ratio":  dominance_ratio,
+            "diversity_state":  diversity_state,
+            "sigma":            round(sigma, 6),
+            "sigma_std":        round(sigma_std, 6),
+            "shannon_h":        round(shannon_h, 4),
+            "h_fraction":       h_fraction,
+            "shannon_h_max":    round(shannon_h_max, 4),
+            "alpha":            round(alpha, 4),
+            "alpha_r_squared":  round(alpha_r_squared, 4),
+            "survival_rate":    round(survival_rate, 4),
+            "verdict":          verdict,
+            "joint_state":      joint_state,
+            "timestamp":        datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._snapshots.append(snapshot)
+        if len(self._snapshots) > self.history_limit:
+            self._snapshots = self._snapshots[-self.history_limit:]
+
+        return snapshot
+
+    def snapshots(self):
+        # type: () -> list
+        """Return all recorded snapshots."""
+        return list(self._snapshots)
+
+    def dominance_series(self):
+        # type: () -> List[float]
+        """Return the dominance_ratio time series for trend analysis."""
+        return [s["dominance_ratio"] for s in self._snapshots]
+
+    def type_share_series(self, cell_type):
+        # type: (str) -> List[float]
+        """Return the population share time series for a specific cell type."""
+        result = []  # type: List[float]
+        for s in self._snapshots:
+            result.append(s["population_shares"].get(cell_type, 0.0))
+        return result
+
+    def diversity_summary(self, window=20):
+        # type: (int) -> dict
+        """
+        Compute rolling diversity statistics over the last `window` snapshots.
+
+        Returns
+        -------
+        dict with keys:
+            dominance_mean     : float — rolling mean of dominance_ratio
+            dominance_std      : float — rolling std of dominance_ratio
+            h_fraction_mean    : float — rolling mean of h_fraction
+            dominant_type_mode : str   — most frequent dominant type in window
+            diversity_trend    : str   — "diversifying" / "consolidating" / "stable"
+            n_snapshots        : int   — number of snapshots in window
+            joint_state_counts : dict  — count of each joint_state in window
+        """
+        recent = self._snapshots[-window:] if len(self._snapshots) >= window else self._snapshots
+        n = len(recent)
+
+        if n == 0:
+            return {
+                "dominance_mean": 0.0,
+                "dominance_std": 0.0,
+                "h_fraction_mean": 0.0,
+                "dominant_type_mode": "",
+                "diversity_trend": "no_data",
+                "n_snapshots": 0,
+                "joint_state_counts": {},
+            }
+
+        dom_ratios = [s["dominance_ratio"] for s in recent]
+        h_fracs = [s["h_fraction"] for s in recent]
+        dom_types = [s["dominant_type"] for s in recent]
+
+        d_mean = sum(dom_ratios) / float(n)
+        d_var = sum((d - d_mean) ** 2 for d in dom_ratios) / float(n)
+        d_std = math.sqrt(d_var) if d_var > 0 else 0.0
+
+        h_mean = sum(h_fracs) / float(n)
+
+        # Mode of dominant type
+        type_freq = {}  # type: dict
+        for t in dom_types:
+            type_freq[t] = type_freq.get(t, 0) + 1
+        dom_mode = max(type_freq, key=type_freq.get) if type_freq else ""
+
+        # Joint state counts
+        joint_counts = {}  # type: dict
+        for s in recent:
+            js = s["joint_state"]
+            joint_counts[js] = joint_counts.get(js, 0) + 1
+
+        # Diversity trend from dominance_ratio trajectory
+        if n >= 4:
+            first_half = dom_ratios[:n // 2]
+            second_half = dom_ratios[n // 2:]
+            fh_mean = sum(first_half) / float(len(first_half))
+            sh_mean = sum(second_half) / float(len(second_half))
+            delta = sh_mean - fh_mean
+            if delta > 0.03:
+                trend = "consolidating"
+            elif delta < -0.03:
+                trend = "diversifying"
+            else:
+                trend = "stable"
+        else:
+            trend = "stable"
+
+        return {
+            "dominance_mean": round(d_mean, 6),
+            "dominance_std": round(d_std, 6),
+            "h_fraction_mean": round(h_mean, 4),
+            "dominant_type_mode": dom_mode,
+            "diversity_trend": trend,
+            "n_snapshots": n,
+            "joint_state_counts": joint_counts,
+        }
+
+
 class TamuraSweep:
     """
     Fetches new articles from all configured sources.
