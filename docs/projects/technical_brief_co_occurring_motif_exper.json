@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by Game of Truth CA telemetry (σ≈1.03, α≈1.71–2.49, H=17% max) and 32×32 RSA-kernel CA self-organization to σ≈1 with mean-field DP avalanche statistics confirming population-level criticality as a dynamical attractor, while the single-run R²=0.82 power-law fit and unresolved initial-condition dependence mean O141's SOC claim remains provisional — genuine attractor status requires multi-run robustness confirmation distinguishing SOC from parameter-sensitive near-critical behavior.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by Game of Truth CA telemetry (σ≈1.03, α≈1.71–2.49, H=17–20.8% max) and 32×32 RSA-kernel CA self-organization to σ≈1 with mean-field DP avalanche statistics confirming population-level criticality as a dynamical attractor, while INV_073 remains unfalsifiable pending specification of a measurable order parameter, restoring-force mechanism, and distinguishable alternative, and the single-run R²=0.82 power-law fit with unresolved initial-condition dependence means O141's SOC claim remains provisional.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -56,8 +56,8 @@
     "Industry personnel events (hirings",
     "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
     "Long-range CMI phase boundaries instantiate γ=1 criticality in a quantum thermodynamic setting — confirming the conjecture holds across classical estimation and quantum information simultaneously",
-    "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
     "Embodied AI systems producing energy-per-decision benchmarks become empirical targets for Wasserstein floor testing only when they carry actual data — trend-label framing alone is rejected as zero-payload",
+    "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
     "Semi-classical entropy is dimensionally gravity-action-equivalent — confirming that W_floor = k/Tμ lives in the same dimensional family as ℏ-corrected gravitational actions and making the sub-leading ℏ-correction question formally well-posed rather than speculative",
     "tightening O44 boundary conditions without resolving the Wasserstein geometric bridge; Non-Hermitian linear entropy functionals provide tractable open-system entropy flow measures that partially advance O44 but confirm the Wasserstein geometric bridge as an explicit independent construction gap",
     "Feed deduplication must be enforced upstream — repeated re-feeds yield diminishing returns and the system must detect and short-circuit redundant inputs before they consume integration cycles",
@@ -73,6 +73,7 @@
     "RangeEn advances O28 and O68 simultaneously but resolves neither — its amplitude-robustness and Hurst-linearity make it the preferred empirical instrument while leaving the first-principles derivation of the slope and the observer-frame specification as open debts",
     "The Wasserstein Floor's dimensional class must split cleanly into semi-classical (area-law) and quantum (log-correction) sectors — reproducing the former is necessary but insufficient and the log-correction frontier is the binding falsification target",
     "SOC adaptive networks confirm γ=1 criticality is a self-organized attractor in fitness-driven topologies — ridge maintenance requires active tension not passive equilibrium",
+    "INV_073 requires a measurable order parameter + restoring-force mechanism + a distinguishable alternative producing different observables before it can carry theorem weight — all three absences must be closed simultaneously",
     "Narcissus pool — genome-mirroring empty inputs (titles that reflect the kernel's own concerns without propositions) are the most seductive and therefore most dangerous zero-payload class requiring hardest refusal",
     "DEA demonstrably outperforms DFA for preserving scaling structure in open EEG entropy computation — DEA is the mandated method for EAR computation on open EEG datasets (O28 update)",
     "Entropy saturation in neural substrates functions as a biological Wasserstein Floor analog — confirming the Floor's substrate-independence and extending INV_088's scope beyond geometric exemplars",
@@ -200,7 +201,9 @@
     "The CD-AI rediscovery of INV_073 without thermodynamic derivation creates an obligation to formalize the translation layer between humanities-framed dissonance theory and FREED's thermodynamic ridge construction — closing this gap would convert convergent evidence into a unified theorem",
     "O47 — Audit RSA memory architecture against agent-memory taxonomy literature to determine whether current compression-based memory model accounts for or deliberately excludes standard memory categories (episodic",
     "Investigate whether low H at the critical ridge reflects a stable low-entropy attractor or a transient pre-saturation regime — attractor-stability characterization required before O141 can be closed",
+    "Track INV_073 falsifiability closure: specify (a) order parameter with measurement protocol",
     "O-LOCAL-RANGE: Integrate local-range normalization into FREED's entropy scoring pipeline and demonstrate empirically that it eliminates amplitude-drift artifacts across heterogeneous feed batches",
+    "(c) at least one alternative hypothesis whose observables diverge from ridge-navigation predictions",
     "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
     "the Freed's Law-to-creativity mapping remains decorative rather than structural",
@@ -221,6 +224,7 @@
     "grounded in the creative-cognition paper's adaptive arousal-driven attention mechanism",
     "O_DEGEN_LIMITS: Explicitly map the ApEn/SampEn degenerate-limit structure onto the genome's own complexity metrics to determine whether inherited failure modes (e.g. amplitude insensitivity) propagate into the RSA scoring system",
     "distinguishing genuine SOC attractor from near-critical artifact (R²=0.82 gap demands closure before O141 can be fully resolved)",
+    "(b) restoring-force mechanism derivable from MCPM constraints",
     "Formalize the metric-tensor recovery gap as an explicit sub-obligation of O44 — action-per-element minimization in units of ħ is necessary but not sufficient and the remaining closure conditions must be specified",
     "Implement σ-monitor in batch_feed.py flagging drift outside (0.95",
     "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
@@ -307,15 +311,14 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-04T13:58:12.803028+00:00",
-  "renorm_reason": "New knowledge partially challenges O141 by exposing that a single snapshot with R²=0.82 cannot confirm robust SOC attractor status, requiring compress update to register the provisional nature of the SOC claim and a new obligation for multi-run robustness testing, while the confirmation-surplus-as-epistemic-gap point warrants a new invariant about unstressed claims.",
-  "last_renorm_cycle": 86,
-  "drift_flag": true,
-  "drift_overlap": 0.507,
+  "last_renormed": "2026-05-05T10:27:36.398547+00:00",
+  "renorm_reason": "The new knowledge sharpens an existing gap (INV_073 unfalsifiability) into three explicit closure conditions and extends the entropy suppression datum to 20.8% max, requiring compress update and a new invariant/obligation pair without discarding any confirmed prior invariants.",
+  "last_renorm_cycle": 88,
+  "drift_flag": false,
   "renorm_history": [
     {
-      "timestamp": "2026-05-04T13:58:12.803028+00:00",
-      "reason": "New knowledge partially challenges O141 by exposing that a single snapshot with R²=0.82 cannot confirm robust SOC attractor status, requiring compress update to register the provisional nature of the SOC claim and a new obligation for multi-run robustness testing, while the confirmation-surplus-as-epistemic-gap point warrants a new invariant about unstressed claims."
+      "timestamp": "2026-05-05T10:27:36.398547+00:00",
+      "reason": "The new knowledge sharpens an existing gap (INV_073 unfalsifiability) into three explicit closure conditions and extends the entropy suppression datum to 20.8% max, requiring compress update and a new invariant/obligation pair without discarding any confirmed prior invariants."
     }
   ]
 }

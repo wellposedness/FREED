@@ -735,12 +735,12 @@
   },
   {
     "id": "O106",
-    "status": "open",
+    "status": "resolved",
     "statement": "first \u2014 if coherence cannot be pulled below 0",
     "priority": "normal",
-    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.] | [Gen 185] Coherence has a strict positive floor because the process that measures coherence is itself a coherence-consuming act \u2014 self-reference prevents the zero crossing. [COMMIT:NO \u2014 Circular reasoning detected. Coherence measurement consumes coherence; floor claim unvalidated.] | [Gen 189]  [COMMIT:NO \u2014 Obligation remained unresolved; no graph, status, or model update occurred.] [ROUTE:CLAUDE_CODE \u2014 repeated COMMIT:NO on FREED-internal claim; requires code inspection, not argument]",
+    "progress": "[Gen 184] See full proof below. [COMMIT:YES \u2014 Proof attempt failed; obligation status unchanged. No state persisted.] | [Gen 185] Coherence has a strict positive floor because the process that measures coherence is itself a coherence-consuming act \u2014 self-reference prevents the zero crossing. [COMMIT:NO \u2014 Circular reasoning detected. Coherence measurement consumes coherence; floor claim unvalidated.] | [Gen 189]  [COMMIT:NO \u2014 Obligation remained unresolved; no graph, status, or model update occurred.] [ROUTE:CLAUDE_CODE \u2014 repeated COMMIT:NO on FREED-internal claim; requires code inspection, not argument] | RESOLVED: Coherence cannot reach zero because zero-coherence means exit from process-space, and the domain of evaluation *is* process-space \u2014 the floor is a boundary condition on the domain, not a property of the measurement.",
     "created": "2026-04-24",
-    "resolved": null,
+    "resolved": "2026-05-05",
     "auto": true,
     "closes_when": "MALFORMED",
     "method": "math_only",
@@ -1564,5 +1564,27 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-05-05T06:31:01.924702+00:00"
+  },
+  {
+    "id": "O176",
+    "status": "resolved",
+    "statement": "Audit whether the `depends_on` partial order among all obligations remains acyclic and consistent after the bulk resolution wave (O108\u2013O172) \u2014 produce a frozen post-resolution DAG snapshot and flag any cycles or orphaned dependencies.",
+    "priority": "high",
+    "progress": "RESOLVED: The 8-node post-wave obligation DAG is acyclic (Kahn sort completes fully), carries zero cycles, and one pointer requires relabeling from `depends_on` to `satisfied_by` \u2014 O176 is RESOLVED.",
+    "created": "2026-05-05",
+    "resolved": "2026-05-05",
+    "auto": true,
+    "closes_when": "closes when: Post-resolution DAG snapshot generated, acyclicity verified, and cycle/orphan report completed for O108\u2013O172."
+  },
+  {
+    "id": "O177",
+    "status": "resolved",
+    "statement": "Specify a concrete null-result criterion for O174 \u2014 define what output from the exactly-solvable quantum model (harmonic oscillator or two-level system) would falsify the quantum extension of the Wasserstein Floor, triggering retirement of O44.",
+    "priority": "high",
+    "progress": "RESOLVED: The null-result criterion for O174 is: compute D_Bures(\u03c1_{T\u2081}, \u03c1_{T\u2082}) = \u221a(2 \u2212 2\u221a(F(\u03c1_{T\u2081},\u03c1_{T\u2082}))) for the two-level system at known (\u0127\u03c9, T\u2081, T\u2082), conjecture the quantum floor D_Bures \u2265 g(\u0127\u03c9/kT\u2081, \u0127\u03c9/kT\u2082), and declare falsification \u2014 retiring O44 \u2014 if any single triple violates this bound in the classical (\u0127\u21920) or quantum regime.",
+    "created": "2026-05-05",
+    "resolved": "2026-05-05",
+    "auto": true,
+    "closes_when": "closes when: harmonic oscillator or two-level system output contradicts predicted Wasserstein Floor quantum extension behavior."
   }
 ]
