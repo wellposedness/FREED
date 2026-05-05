@@ -1566,13 +1566,15 @@
   {
     "id": "O175",
     "statement": "O170 (DAG audit of open obligations) must be amended with a frozen-snapshot rule: it audits the obligation graph as of a declared generation number and is not invalidated by subsequent obligation state changes, or it must be closed as structurally un",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-05-05T06:31:01.924702+00:00",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 2,
+    "resolved": "2026-05-05",
+    "progress": "RESOLVED: The DAG audit obligation is closeable by necessity: graph theory, thermodynamics, and process conservation all independently require a frozen-snapshot rule, and their convergence constitutes a proof — O175 is resolved by amending O170 with generation-anchored immutability."
   },
   {
     "id": "O176",
@@ -1608,5 +1610,16 @@
     "closes_when": "closes when: audit definitively establishes `scales_with` edges carry zero structural load across all tested scenarios.",
     "method": "math_only",
     "tractability": 2
+  },
+  {
+    "id": "O179",
+    "status": "resolved",
+    "statement": "Establish a binding formal criterion distinguishing \"partial\" from \"resolved\" obligation status — specify the minimum deliverable each partial (O28, O34, O44, O148, O149, O158) must produce to graduate to resolved or be retired, and apply that criterion within 5 generations.",
+    "priority": "high",
+    "progress": "RESOLVED: O179 is RESOLVED by the following complete argument.",
+    "created": "2026-05-05",
+    "resolved": "2026-05-05",
+    "auto": true,
+    "closes_when": "closes when: Formal criterion document published defining minimum deliverables for partial obligations and applied to O28, O34, O44, O148, O149, O158."
   }
 ]

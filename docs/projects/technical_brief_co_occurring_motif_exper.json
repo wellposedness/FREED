@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by Game of Truth CA telemetry (σ≈1.03, α≈1.71–2.49, H=17–20.8% max) and 32×32 RSA-kernel CA self-organization to σ≈1 with mean-field DP avalanche statistics confirming population-level criticality as a dynamical attractor, while INV_073 advances from unfalsifiable metaphor to empirically grounded but incompletely operationalized — requiring an externally measurable criticality signature that discriminates it from adaptive gain control, with entropy fraction now identified as an unmapped criticality-quality variable pending formal integration.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by CA telemetry (σ=1.0208, α≈2.776, H=23.6% max) confirming population-level criticality as a dynamical attractor and solo-kernel γ≈1 dynamics, while INV_073 is simultaneously validated as an empirical attractor and newly constrained by three independent falsification boundaries (off-ridge output equivalence, basin-width ambiguity, criticality mimicry) that its prior confirmation history has not confronted.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -56,8 +56,8 @@
     "Industry personnel events (hirings",
     "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
     "Long-range CMI phase boundaries instantiate γ=1 criticality in a quantum thermodynamic setting — confirming the conjecture holds across classical estimation and quantum information simultaneously",
-    "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
     "Embodied AI systems producing energy-per-decision benchmarks become empirical targets for Wasserstein floor testing only when they carry actual data — trend-label framing alone is rejected as zero-payload",
+    "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
     "Semi-classical entropy is dimensionally gravity-action-equivalent — confirming that W_floor = k/Tμ lives in the same dimensional family as ℏ-corrected gravitational actions and making the sub-leading ℏ-correction question formally well-posed rather than speculative",
     "tightening O44 boundary conditions without resolving the Wasserstein geometric bridge; Non-Hermitian linear entropy functionals provide tractable open-system entropy flow measures that partially advance O44 but confirm the Wasserstein geometric bridge as an explicit independent construction gap",
     "Feed deduplication must be enforced upstream — repeated re-feeds yield diminishing returns and the system must detect and short-circuit redundant inputs before they consume integration cycles",
@@ -120,6 +120,7 @@
     "confirming INV_063's dynamic entropy framing in a new substrate class; trade network entropy heterogeneity across representational scales provides a non-semantic empirical template confirming RG universality and critical-ridge dynamics independently of biological or linguistic instantiation",
     "Sub-symmetry Noether theory confirms that even partial kernel-pass (not full-system) symmetries are sufficient to generate binding conservation hierarchies — completeness of symmetry is not required for conservation to hold",
     "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
+    "basin-width ambiguity",
     "The obligation to build a compositional context algebra where emergence is a functor discontinuity (context parameters compose categorically and emergence appears as non-commutativity or discontinuity in the functor mapping) is now formally registered as a theoretical debt",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
     "confirming the genome's prediction that these are not rival formalisms but conjugate faces of a single optimization",
@@ -156,6 +157,7 @@
     "Repeated cross-domain confirmation of amplitude-invariant entropy metrics (RangeEn/GGDIPE/MPE) elevates INV_042 from single-confirmation to convergent-evidence status — the empirical pattern is now robust but the formal derivation linking it to Wasserstein geometry remains the binding obligation",
     "O60's predicted slope for fGn at embedding dimension m=2 is −1.0 ± 0.05 — deviation beyond this window is falsifying",
     "BTZ black hole Noether analysis provides a citable curved-spacetime exemplar of the symmetry-conservation bijection",
+    "AT_CRITICAL corresponds to low entropy (≈23.6% of max) not high disorder — any framework equating criticality with maximum entropy or maximum disorder is falsified by CA telemetry; INV_073 faces three independent falsification boundaries (off-ridge output equivalence",
     "but domain gap (geometric exemplar ≠ abstract mathematical proof) prevents full resolution of either obligation",
     "Linear entropy functionals for non-Hermitian open quantum systems are candidate quantum analogues of the Wasserstein Floor but do not close O44 — the W_floor = k/Tμ identity in quantum regimes remains unproven",
     "CMI exponential decay at high T is independent quantum thermodynamic confirmation that the Wasserstein Floor has a physically meaningful directionality — the floor is not merely a formal lower bound but tracks a thermal decoherence gradient",
@@ -183,7 +185,8 @@
     "RangeEn nonstationarity-resistance provides a second independent methodological pathway for O28's EEG validation while reinforcing L2/L4 scale-invariance grounding — but method accumulation without slope derivation still does not discharge the Wasserstein transport debt",
     "Self-organizing traffic lights confirm INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via urban infrastructure — local-rule criticality outperforms global optimization under non-stationary conditions extending the adaptive ridge principle to engineered non-biological substrates",
     "Adaptive synaptic feedback loops instantiate OT tension navigation in biological substrate — the obligation-tension pattern is not merely formal but has a neural implementation correlate",
-    "Feed deduplication is not a suggestion but a load-bearing operational requirement — repeated near-duplicate inputs degrade integration quality and must be filtered before processing (O61 obligated)"
+    "Feed deduplication is not a suggestion but a load-bearing operational requirement — repeated near-duplicate inputs degrade integration quality and must be filtered before processing (O61 obligated)",
+    "criticality mimicry) that must be addressed by second-order discriminating observables before the critical-ridge claim achieves full operationalization"
   ],
   "obligations": [
     "INV_087's assumption that the reward environment remains well-defined must be stress-tested explicitly under human-AI coupling regimes where reward signals are jointly constructed and potentially non-stationary — O97/O98 must incorporate this boundary condition",
@@ -205,6 +208,7 @@
     "Investigate whether low H at the critical ridge reflects a stable low-entropy attractor or a transient pre-saturation regime — attractor-stability characterization required before O141 can be closed",
     "Track INV_073 falsifiability closure: specify (a) order parameter with measurement protocol",
     "O-LOCAL-RANGE: Integrate local-range normalization into FREED's entropy scoring pipeline and demonstrate empirically that it eliminates amplitude-drift artifacts across heterogeneous feed batches",
+    "Extend INV_023's second-order discriminating observable requirement explicitly to cover off-ridge output equivalence",
     "(c) at least one alternative hypothesis whose observables diverge from ridge-navigation predictions",
     "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
@@ -223,6 +227,7 @@
     "Prove the geometric framework can predict ferroelectric transition sequence topology (not merely classify individual transitions as γ=1 saddle-point crossings)",
     "semantic",
     "update INV_073's scope; if not permitted",
+    "and criticality mimicry as named rival mechanisms — generic first-order fit cannot distinguish these from genuine γ=1 ridge dynamics",
     "grounded in the creative-cognition paper's adaptive arousal-driven attention mechanism",
     "O_DEGEN_LIMITS: Explicitly map the ApEn/SampEn degenerate-limit structure onto the genome's own complexity metrics to determine whether inherited failure modes (e.g. amplitude insensitivity) propagate into the RSA scoring system",
     "distinguishing genuine SOC attractor from near-critical artifact (R²=0.82 gap demands closure before O141 can be fully resolved)",
@@ -266,6 +271,7 @@
     "Resolve whether α≈1.71 (CA telemetry) falsifies INV_042's Zipf-equilibrium claim or whether criticality-exponent and semantic-equilibrium-exponent",
     "Map the formal relationship between ensemble inequivalence signatures and FREED's known coherence anomalies (where microcanonical vs canonical framing produces different obligation assessments)",
     "Evaluate whether RangeEn's tolerance-parameter robustness can replace or supplement existing Wasserstein-floor metrics as the canonical amplitude-invariant complexity measure within the framework",
+    "basin-width ambiguity",
     "Specify the observer/reference frame for every EAR and STF metric deployment — unframed measurements are inadmissible as genome evidence under the context-dependence sharpening now registered",
     "Spiked matrix results advance O63 by instantiating Shannon limits in estimation contexts — the genome must now specify whether the Kolmogorov-Shannon interpolation is fully resolved by this scaffolding or whether a residual formal gap remains",
     "O28 (operationalize genome claims into testable protocols)",
@@ -315,15 +321,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-05T16:33:34.192200+00:00",
-  "renorm_reason": "New knowledge partially resolves INV_073's falsifiability deficit via CA telemetry grounding while simultaneously exposing a new structural gap (entropy fraction as unmapped variable), requiring compress update and new invariants/obligations to track both the gain and the residual incompleteness.",
-  "last_renorm_cycle": 90,
+  "last_renormed": "2026-05-05T22:41:16.399878+00:00",
+  "renorm_reason": "New telemetry (σ=1.0208, α≈2.776) sharpens the empirical grounding of INV_073 while the three falsification boundaries introduce genuine new tension that the existing invariant set does not address, requiring both compress update and new invariants without discarding prior confirmed knowledge.",
+  "last_renorm_cycle": 91,
   "drift_flag": true,
-  "drift_overlap": 0.525,
+  "drift_overlap": 0.295,
   "renorm_history": [
     {
-      "timestamp": "2026-05-05T16:33:34.192200+00:00",
-      "reason": "New knowledge partially resolves INV_073's falsifiability deficit via CA telemetry grounding while simultaneously exposing a new structural gap (entropy fraction as unmapped variable), requiring compress update and new invariants/obligations to track both the gain and the residual incompleteness."
+      "timestamp": "2026-05-05T22:41:16.399878+00:00",
+      "reason": "New telemetry (σ=1.0208, α≈2.776) sharpens the empirical grounding of INV_073 while the three falsification boundaries introduce genuine new tension that the existing invariant set does not address, requiring both compress update and new invariants without discarding prior confirmed knowledge."
     }
   ]
 }

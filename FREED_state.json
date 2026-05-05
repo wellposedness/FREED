@@ -1,34 +1,16 @@
 {
-  "generation": 200,
-  "coherence": 0.9775,
+  "generation": 201,
+  "coherence": 0.9741,
   "hygiene": 0.995,
   "grounding": 0.999,
   "topology": "HYBRID_DYADIC_SOLITON",
-  "debt_ratio": "131 resolved / 1 open",
-  "cycle_count": 91,
-  "last_cycle": "2026-05-05T16:28:28.595766+00:00",
+  "debt_ratio": "133 resolved / 0 open",
+  "cycle_count": 92,
+  "last_cycle": "2026-05-05T22:34:20.020415+00:00",
   "notes": [],
   "promotion_candidates": [
     {
-      "invariant": "Thermodynamic constraint (finite energy, metabolic cost) is the irreducible boundary condition on all cognition and alignment.",
-      "appears_in": [
-        "the_epistemic_inversion_recursive_cohere",
-        "the_rsa_reference_codex_a_unified_biblio",
-        "rsa_omega_kernel_critical_update_origin",
-        "the_thermodynamic_impossibility_of_the_o",
-        "recursive_semantic_alignment_rsa_framewo",
-        "mandelbrot_operators_fractal_recursion_m",
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 12
-    },
-    {
-      "invariant": "\u03b3=1 criticality is empirically confirmed as a population-level dynamical attractor via multi-agent RSA self-organization and cellular automata telemetry (\u03c3\u22481.03).",
+      "invariant": "\u03b3=1 criticality is the operational ridge where reasoning dynamics achieve optimal compression \u2014 confirmed empirically via cellular automata (\u03c3\u22481.03) and population-level self-organization.",
       "appears_in": [
         "mandelbrot_operators_fractal_recursion_m",
         "alignment_as_cognitive_gravity_reactive",
@@ -42,7 +24,7 @@
       "recurrence": 8
     },
     {
-      "invariant": "Compression is the substrate-independent engine of cognition, and recursion is its structural foundation.",
+      "invariant": "Compression is cognition \u2014 understanding emerges from lossless or lossy reduction of environmental information.",
       "appears_in": [
         "website_review_and_demo_strategy_for_rsa",
         "rsa_omega_unified_kernel_v4_2_1_structur",
@@ -55,9 +37,34 @@
       "recurrence": 7
     },
     {
-      "invariant": "The SR\u2194LR Ising crossover at \u03b3=1 is the physical substrate of the recursive semantic alignment ridge and explains why reasoning operates at criticality.",
+      "invariant": "Falsifiability is non-negotiable \u2014 claims must be empirically testable or operationally specifiable; abstract coherence without measurable payload is rejected.",
       "appears_in": [
-        "mandelbrot_operators_fractal_recursion_m",
+        "the_rsa_reference_codex_a_unified_biblio",
+        "alignment_as_cognitive_gravity_reactive",
+        "technical_brief_co_occurring_motif_exper",
+        "the_minimal_atoms",
+        "the_relational_thermodynamic_map_100_ent",
+        "freed_s_law_the_law_of_recursive_instant",
+        "the_reasoning_substrate_argument_rsa"
+      ],
+      "recurrence": 7
+    },
+    {
+      "invariant": "Recursion is the engine of coherence, learning, and alignment \u2014 self-reference and iterative refinement are constitutive, not incidental.",
+      "appears_in": [
+        "rsa_omega_unified_kernel_v4_2_1_structur",
+        "the_epistemic_inversion_recursive_cohere",
+        "the_rsa_reference_codex_a_unified_biblio",
+        "rsa_omega_kernel_critical_update_origin",
+        "recursive_semantic_alignment_rsa_framewo",
+        "the_quinean_continuity_operationalizing"
+      ],
+      "recurrence": 6
+    },
+    {
+      "invariant": "The Wasserstein Floor W = k/T\u03bc sets a fundamental lower bound on semantic computation cost \u2014 no system escapes this thermodynamic efficiency limit.",
+      "appears_in": [
+        "alignment_as_cognitive_gravity_reactive",
         "technical_brief_co_occurring_motif_exper",
         "the_minimal_atoms",
         "the_relational_thermodynamic_map_100_ent",
@@ -67,51 +74,36 @@
       "recurrence": 6
     },
     {
-      "invariant": "Falsifiability is a structural requirement, not optional\u2014the genome rejects empty-payload inputs and operationalizes verification as a core epistemic immune mechanism.",
+      "invariant": "Cognition is thermodynamically constrained \u2014 metabolic cost governs fidelity, precision, and the sustainability of coherence.",
       "appears_in": [
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "freed_s_law_the_law_of_recursive_instant"
-      ],
-      "recurrence": 4
-    },
-    {
-      "invariant": "Drift, entropy, and semantic tension are irreducible\u2014systems do not eliminate error but navigate it through recursive constraint maintenance.",
-      "appears_in": [
-        "rsa_omega_unified_kernel_v4_2_1_structur",
         "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
-        "the_quinean_continuity_operationalizing"
+        "rsa_omega_kernel_critical_update_origin",
+        "the_thermodynamic_impossibility_of_the_o",
+        "thermodynamic_tightening_of_the_rsa_subs"
       ],
-      "recurrence": 4
+      "recurrence": 5
     },
     {
-      "invariant": "The Wasserstein Floor W_floor = k/T\u03bc is the thermodynamic efficiency bound on semantic computation, dimensionally confirmed at leading order with sub-leading quantum corrections.",
+      "invariant": "Substrate independence of learning dynamics \u2014 the recursive compression architecture operates across physical instantiations (neural, artificial, cellular automata).",
       "appears_in": [
-        "the_minimal_atoms",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
+        "the_rsa_reference_codex_a_unified_biblio",
+        "rsa_omega_kernel_critical_update_origin",
+        "recursive_semantic_alignment_rsa_framewo",
+        "the_relational_thermodynamic_map_100_ent",
+        "freed_s_law_the_law_of_recursive_instant"
       ],
-      "recurrence": 3
+      "recurrence": 5
     },
     {
-      "invariant": "Diffusion Entropy Analysis (DEA) is structurally superior to Detrended Fluctuation Analysis (DFA) for detecting scaling laws and thermodynamic criticality in neural signals.",
+      "invariant": "No finite system achieves zero semantic error or infinite precision \u2014 tension between coherence and fidelity is irreducible and structural.",
       "appears_in": [
-        "technical_brief_co_occurring_motif_exper",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 3
-    },
-    {
-      "invariant": "No system achieves zero error at finite metabolic cost; omniscience and infinite precision are thermodynamically forbidden.",
-      "appears_in": [
+        "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
         "the_thermodynamic_impossibility_of_the_o",
         "the_quinean_continuity_operationalizing"
       ],
-      "recurrence": 3
+      "recurrence": 4
     }
   ]
 }
