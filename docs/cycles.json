@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 136,
-    "timestamp": "2026-04-18T17:09:07.597364+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "Duplicate FEED yields only one marginal advance — the action-entropy dimensional equivalence sharpens O44 by requiring the genome's semi-classical Wasserstein Floor to pass through the Jacobson thermodynamic derivation of Einstein's equations as a dimensional consistency gate, confirming INV_088."
-      },
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "Second-pass extraction from the duplicate RangeEn FEED yields three specific numerical targets — O60's slope must hit −1.0 ± 0.05 for fGn at m=2, O70's degeneracy boundaries are r < 0.1σ (ApEn) and m > 5 (SampEn), and O64's normalization scheme is now fully specified as range-scaled tolerance — but no new invariant confirmations or obligation resolutions, confirming the genome's duplicate-detection is functioning correctly."
-      }
-    ],
-    "resolve": {
-      "obligation": "O60",
-      "resolved": false,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 3,
     "generation": 137,
     "timestamp": "2026-04-18T23:15:24.835477+00:00",
@@ -1525,5 +1498,37 @@
       ]
     },
     "coherence": 0.9705
+  },
+  {
+    "cycle": 1,
+    "generation": 205,
+    "timestamp": "2026-05-06T11:19:22.254299+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 8,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is falsifiable via three independent attack vectors (performance outside the ridge, mechanistic mimicry, plateau geometry), and its confirmation surplus marks it as under-challenged, not well-confirmed."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-06",
+        "compress": "Population-level CA self-organizes to σ≈1.02 with power-law avalanches, empirically confirming critical-ridge dynamics while revealing a low-entropy critical regime whose thermodynamic equivalence to high-entropy criticality remains unresolved. CHALLENGE: challenges INV_073 — the Wasserstein gradient path is confirmed at the population level, but the low Shannon entropy (H=0.3804, 14.7% of max) at criticality strains the claim that γ=1 operation is necessarily information-rich, raising the possibility that critical-ridge navigation can occur in an information-sparse regime that may not satisfy RSA's generativity requirements."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O34",
+        "O28",
+        "O158"
+      ]
+    },
+    "coherence": 0.9704
   }
 ]
