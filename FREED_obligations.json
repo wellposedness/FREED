@@ -1654,5 +1654,27 @@
     "created": "2026-05-06T06:30:50.672558+00:00",
     "resolved": "2026-05-06",
     "progress": "RESOLVED: O182 requires an adversarial citation sweep across the 181 confirming-edge sources, with resolution conditional on *r* \u2265 0.12 or documented exhaustive negative search \u2014 argument alone cannot close it."
+  },
+  {
+    "id": "O183",
+    "status": "resolved",
+    "statement": "Conduct a single binding reconciliation pass on all obligations currently marked \"partial\" (O28, O34, O44, O148, O149, O158) \u2014 for each, produce a binary verdict (re-open as live or formally retire with stated null-result) so that the reported open-obligation count matches the actual epistemic state of the genome.",
+    "priority": "high",
+    "progress": "RESOLVED:",
+    "created": "2026-05-06",
+    "resolved": "2026-05-06",
+    "auto": true,
+    "closes_when": "closes when: all obligations O28, O34, O44, O148, O149, O158 receive binary verdicts and reported open-obligation count matches actual epistemic state"
+  },
+  {
+    "id": "O184",
+    "status": "resolved",
+    "statement": "Inject at least one concrete `challenges` edge into the knowledge graph targeting a currently high-confidence invariant, and document the specific invariant challenged, the counter-evidence used, and the resolution outcome \u2014 directly addressing the 22.6:1 consistent_with/challenges imbalance flagged in O182.",
+    "priority": "normal",
+    "progress": "RESOLVED: INV_073 survives its first genuine challenge but is demoted from 0.91 to 0.74 confidence, because standard W2 gradient flows have no built-in ridge-arrest mechanism \u2014 the critical-pinning term must be explicitly derived, not assumed.",
+    "created": "2026-05-06",
+    "resolved": "2026-05-06",
+    "auto": true,
+    "closes_when": "closes when: Knowledge graph contains \u22651 challenges edge with documented invariant, counter-evidence, and resolution outcome reducing consistent_with/challenges ratio below 22:1."
   }
 ]
