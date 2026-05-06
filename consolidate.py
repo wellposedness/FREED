@@ -659,6 +659,10 @@ class Consolidator:
                 for c in candidates:
                     nodes_in = c.get('appears_in', [])
                     edge_type = classify_node_edge(c['invariant'])
+                    # independent_confirmation is reserved for bootstrap CONVERGE only,
+                    # never MINE keyword-match. Hard guard regardless of classify result.
+                    if edge_type == "independent_confirmation":
+                        edge_type = "consistent_with"
                     for i in range(len(nodes_in)):
                         for j in range(i + 1, len(nodes_in)):
                             graph.record_node_edge(

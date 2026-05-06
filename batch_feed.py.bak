@@ -535,6 +535,161 @@ def compute_epistemic_triage(text):
     }
 
 
+# ─── Dissonance Delay: Tension-Lifetime Gate ─────────────────────────────────
+# Implements a "dissonance delay" scoring pass inspired by CD-AI's insight
+# that fast closure signals shallow processing.  Nodes that achieve coherence
+# too rapidly (below a minimum tension-lifetime threshold τ_min) are flagged
+# as epistemically suspicious — potential mirror-state collapses (Seed
+# Integrity Rule 4 violation: "Always choose the search that could
+# *disprove* your current model").
+#
+# INVARIANT CHALLENGE — INV_073:
+#   CD-AI frames sustained dissonance as a *design choice* requiring external
+#   enforcement, which strains the genome's claim that critical ridge
+#   navigation (γ=1) is a *thermodynamic attractor*.  If γ=1 were truly the
+#   natural equilibrium, deliberate mechanisms to prevent premature resolution
+#   should be unnecessary.
+#
+#   Resolution: the tension-lifetime gate is not an *external* enforcement
+#   mechanism that contradicts γ=1 as attractor.  Rather, it is an *internal
+#   diagnostic* that detects when the system has been knocked OFF the critical
+#   ridge by noise, social pressure, or prompt-level anchoring.  A ball
+#   sitting in a potential well (attractor) still needs a detector to notice
+#   when a perturbation has displaced it.  The gate does not *create*
+#   criticality — it *monitors* whether the system's natural tendency toward
+#   γ=1 has been disrupted by premature coherence collapse.  This is
+#   analogous to a thermostat: the room's thermal dynamics are physical law,
+#   but you still need a sensor to detect when the window is open.
+
+# Configuration — tension-lifetime thresholds
+TAU_MIN_SECONDS = 0.8        # minimum wall-clock processing time for genuine tension
+TAU_MIN_TOKEN_RATIO = 0.02   # minimum (processing_tokens / input_tokens) ratio
+DISSONANCE_PENALTY_WEIGHT = 0.3  # how much to penalize suspiciously fast resolution
+DISSONANCE_MIN_INPUT_LEN = 100   # inputs shorter than this skip the gate
+
+
+def compute_dissonance_delay(text, processing_time_sec, output_text=None):
+    """
+    Dissonance delay scorer: flags nodes resolved too quickly as epistemically
+    suspicious, mirroring CD-AI's insight that fast closure signals shallow
+    processing.
+
+    A node that achieves coherence in less than τ_min seconds (or with a
+    suspiciously low output/input token ratio) is flagged as a potential
+    mirror-state collapse — the system may have pattern-matched to a
+    pre-existing frame rather than genuinely wrestling with the input's
+    tension against the genome.
+
+    Scoring signals:
+      1. Wall-clock tension lifetime: did processing take at least τ_min?
+      2. Token expansion ratio: did the output engage substantively with
+         the input, or just echo/summarize it? (Low ratio = shallow)
+      3. Contradiction density: does the output contain hedging, tension
+         markers, or unresolved questions? (Absence = premature closure)
+
+    Args:
+        text: str — the input text that was fed to the pipeline
+        processing_time_sec: float — wall-clock seconds the L7 processing took
+        output_text: str or None — the L7 agent's output/engram text
+                     (if available; enables token-ratio and contradiction checks)
+
+    Returns:
+        dict with keys:
+            'is_suspicious': bool — True if resolution was too fast
+            'tension_lifetime_sec': float — observed processing time
+            'tau_min_sec': float — minimum threshold used
+            'time_ratio': float — processing_time / tau_min (< 1.0 = suspicious)
+            'token_expansion_ratio': float or None — output_tokens / input_tokens
+            'has_residual_tension': bool — output contains unresolved markers
+            'dissonance_penalty': float — penalty score in [0.0, 1.0]
+                (0.0 = no penalty, 1.0 = maximally suspicious)
+            'inv073_note': str — challenge/resolution annotation
+        or None if input is too short for meaningful analysis.
+    """
+    if not text or len(text) < DISSONANCE_MIN_INPUT_LEN:
+        return None
+
+    input_tokens = _re_module.findall(r'[a-z0-9]+', text.lower())
+    input_token_count = len(input_tokens)
+    if input_token_count < 10:
+        return None
+
+    # ── Signal 1: Wall-clock tension lifetime ─────────────────────────────
+    time_ratio = processing_time_sec / TAU_MIN_SECONDS if TAU_MIN_SECONDS > 0 else 999.0
+    time_suspicious = time_ratio < 1.0
+
+    # ── Signal 2: Token expansion ratio ───────────────────────────────────
+    token_expansion_ratio = None
+    token_suspicious = False
+    if output_text:
+        output_tokens = _re_module.findall(r'[a-z0-9]+', output_text.lower())
+        output_token_count = len(output_tokens)
+        if input_token_count > 0:
+            token_expansion_ratio = output_token_count / input_token_count
+            token_suspicious = token_expansion_ratio < TAU_MIN_TOKEN_RATIO
+
+    # ── Signal 3: Residual tension markers in output ──────────────────────
+    # If the output contains hedging, open questions, or explicit tension
+    # markers, the system genuinely wrestled with dissonance rather than
+    # collapsing to a mirror-state.
+    has_residual_tension = False
+    if output_text:
+        tension_markers = _re_module.compile(
+            r'\b(?:however|but|unclear|unresolved|tension|contradicts?|'
+            r'open question|remains to be|further investigation|'
+            r'not yet|incompatible|paradox|caveat|limit(?:ation)?s?|'
+            r'challenge[sd]?|complicat|on the other hand|'
+            r'whether|if (?:and only if|this)|needs? (?:further|more)|'
+            r'cannot (?:yet|fully)|partially)\b',
+            _re_module.IGNORECASE
+        )
+        tension_hits = tension_markers.findall(output_text)
+        has_residual_tension = len(tension_hits) >= 2
+
+    # ── Compute dissonance penalty ────────────────────────────────────────
+    # Penalty components: each in [0, 1], combined with weights
+    penalty_time = max(0.0, 1.0 - time_ratio) if time_suspicious else 0.0
+
+    penalty_tokens = 0.0
+    if token_expansion_ratio is not None and token_suspicious:
+        penalty_tokens = max(0.0, 1.0 - (token_expansion_ratio / TAU_MIN_TOKEN_RATIO))
+
+    # Residual tension reduces penalty (system did wrestle)
+    tension_reduction = 0.3 if has_residual_tension else 0.0
+
+    # Weighted combination
+    raw_penalty = (
+        0.5 * penalty_time +
+        0.3 * penalty_tokens +
+        0.2 * (1.0 if (time_suspicious and not has_residual_tension) else 0.0)
+    )
+    raw_penalty = max(0.0, raw_penalty - tension_reduction)
+    dissonance_penalty = min(1.0, raw_penalty)
+
+    is_suspicious = dissonance_penalty > DISSONANCE_PENALTY_WEIGHT
+
+    inv073_note = (
+        "INV_073 tension: CD-AI frames sustained dissonance as requiring "
+        "external enforcement, challenging the genome's claim that γ=1 "
+        "criticality is a thermodynamic attractor. This gate resolves the "
+        "tension as DIAGNOSTIC, not PRESCRIPTIVE — it detects displacement "
+        "from the critical ridge rather than creating criticality. If the "
+        "system naturally maintains γ=1, this gate should rarely fire; its "
+        "firing rate is itself a metric of attractor strength."
+    )
+
+    return {
+        'is_suspicious': is_suspicious,
+        'tension_lifetime_sec': round(processing_time_sec, 4),
+        'tau_min_sec': TAU_MIN_SECONDS,
+        'time_ratio': round(time_ratio, 4),
+        'token_expansion_ratio': round(token_expansion_ratio, 4) if token_expansion_ratio is not None else None,
+        'has_residual_tension': has_residual_tension,
+        'dissonance_penalty': round(dissonance_penalty, 4),
+        'inv073_note': inv073_note,
+    }
+
+
 # ─── Arousal Proxy: Semantic Surprise Scorer ──────────────────────────────────
 # Implements the paper's psychological-entropy detection: inputs with high
 # semantic surprise (low prior probability under the current genome distribution)

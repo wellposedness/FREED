@@ -72,6 +72,100 @@ ARXIV_KEYWORDS = [
     ("ear", 1), ("intelligence", 1),
 ]
 
+# ─── σ-decay relevance scorer (O64: long-range stat-mech × optimal transport) ─
+# Papers co-occurring in BOTH vocabularies get a large bonus, surfacing the
+# cross-pollination zone between power-law / fractional-RG systems and
+# Wasserstein / optimal-transport geometry.
+
+# Vocabulary A: long-range / power-law / fractional-dimensional RG
+SIGMA_DECAY_LONG_RANGE = [
+    (r"long.?range\s+interact", 4),
+    (r"power.?law\s+(decay|interact|coupl)", 4),
+    (r"sigma.?(decay|exponent|model)", 4),
+    (r"fractional.?dimension", 4),
+    (r"fractional\s+renormalization", 4),
+    (r"anomalous\s+dimension", 3),
+    (r"weak\s+long.?range", 5),
+    (r"levy\s+flight", 3),
+    (r"levy\s+stable", 3),
+    (r"long.?range\s+(ising|heisenberg|spin)", 4),
+    (r"mean.?field\s+crossover", 3),
+    (r"non.?local\s+(field|action|interaction)", 3),
+    (r"fractional\s+laplacian", 4),
+    (r"riesz\s+(potential|kernel)", 3),
+    (r"dyson\s+hierarchical", 3),
+    (r"extensiv(e|ity)\s.{0,30}long.?range", 4),
+    (r"1/r\^\s*\{?\s*(d\s*\+\s*)?sigma", 4),
+    (r"algebraic\s+decay", 3),
+    (r"power.?law\s+kernel", 3),
+]
+
+# Vocabulary B: Wasserstein / optimal transport
+SIGMA_DECAY_OT = [
+    (r"wasserstein", 5),
+    (r"optimal\s+transport", 5),
+    (r"earth\s+mover", 4),
+    (r"kantorovich", 4),
+    (r"monge.?amp.?re", 4),
+    (r"sinkhorn", 4),
+    (r"transport\s+(metric|distance|cost|plan|map)", 3),
+    (r"displacement\s+convex", 3),
+    (r"otto\s+calculus", 4),
+    (r"gradient\s+flow.{0,20}(wasserstein|probability|measure)", 4),
+    (r"wasserstein\s+(gradient|geometry|space|barycenter)", 5),
+    (r"optimal\s+coupling", 3),
+    (r"entropy.?regularized\s+transport", 4),
+    (r"unbalanced\s+transport", 3),
+    (r"gromov.?wasserstein", 5),
+    (r"transport\s+inequalit", 3),
+]
+
+# Bonus when BOTH vocabularies fire — this is the cross-pollination signal
+SIGMA_DECAY_COOCCUR_BONUS = 12
+# Minimum hits in each vocabulary to count as co-occurrence
+SIGMA_DECAY_MIN_HITS_PER_VOCAB = 1
+
+
+def score_sigma_decay_relevance(text):
+    """
+    Score a paper for σ-decay cross-pollination relevance (O64).
+
+    Returns a dict with:
+        long_range_score: int — total weight from long-range vocabulary hits
+        ot_score:         int — total weight from optimal-transport vocabulary hits
+        bonus:            int — co-occurrence bonus (0 or SIGMA_DECAY_COOCCUR_BONUS)
+        total:            int — sum of all three
+        is_crossover:     bool — True if both vocabularies fired
+    """
+    text_lower = text.lower()
+
+    lr_score = 0
+    lr_hits = 0
+    for pattern, weight in SIGMA_DECAY_LONG_RANGE:
+        if re.search(pattern, text_lower):
+            lr_score += weight
+            lr_hits += 1
+
+    ot_score = 0
+    ot_hits = 0
+    for pattern, weight in SIGMA_DECAY_OT:
+        if re.search(pattern, text_lower):
+            ot_score += weight
+            ot_hits += 1
+
+    is_crossover = (lr_hits >= SIGMA_DECAY_MIN_HITS_PER_VOCAB and
+                    ot_hits >= SIGMA_DECAY_MIN_HITS_PER_VOCAB)
+
+    bonus = SIGMA_DECAY_COOCCUR_BONUS if is_crossover else 0
+
+    return {
+        "long_range_score": lr_score,
+        "ot_score":         ot_score,
+        "bonus":            bonus,
+        "total":            lr_score + ot_score + bonus,
+        "is_crossover":     is_crossover,
+    }
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 class TargetedSweep:
@@ -80,7 +174,8 @@ class TargetedSweep:
     Returns structured input dicts compatible with the FEED pipeline.
     """
 
-    def __init__(self, api_key: str, max_per_obligation: int = MAX_PER_OBLIGATION):
+    def __init__(self, api_key, max_per_obligation=MAX_PER_OBLIGATION):
+        # type: (str, int) -> None
         self.api_key  = api_key
         self.max_per  = max_per_obligation
         self._client  = anthropic.Anthropic(api_key=api_key)
@@ -95,14 +190,16 @@ class TargetedSweep:
         else:
             self.seen = set()
 
-    def _mark_seen(self, url: str):
+    def _mark_seen(self, url):
+        # type: (str) -> None
         self.seen.add(url)
         with open(SEEN_FILE, "w") as f:
             json.dump(sorted(self.seen), f, indent=2)
 
     # ── Main entry point ─────────────────────────────────────────────────────
 
-    def sweep(self, obligations: list) -> list:
+    def sweep(self, obligations):
+        # type: (list) -> list
         """
         Run targeted search against open/partial obligations.
 
@@ -190,7 +287,8 @@ class TargetedSweep:
 
     # ── Query generation (Claude Haiku) ──────────────────────────────────────
 
-    def _generate_queries(self, obligation: dict) -> list:
+    def _generate_queries(self, obligation):
+        # type: (dict) -> list
         """
         Ask Claude Haiku to generate 3 arXiv search queries for this obligation.
         Returns list of query strings. Cheap — Haiku costs ~20x less than Opus.
@@ -229,7 +327,8 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
 
     # ── arXiv search ─────────────────────────────────────────────────────────
 
-    def _search_arxiv(self, query: str) -> list:
+    def _search_arxiv(self, query):
+        # type: (str) -> list
         """
         Search arXiv using the Atom API.
         Returns list of paper dicts scored by RSA relevance.
@@ -273,11 +372,17 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
             authors = [a.findtext('atom:name', '', ns)
                        for a in entry.findall('atom:author', ns)]
 
-            score = self._score_relevance(title + ' ' + abstract)
+            combined_text = title + ' ' + abstract
+            score = self._score_relevance(combined_text)
+
+            # Apply σ-decay cross-pollination bonus
+            sigma_result = score_sigma_decay_relevance(combined_text)
+            score += sigma_result["total"]
+
             if score < RELEVANCE_MIN_SCORE:
                 continue
 
-            papers.append({
+            paper_dict = {
                 "title":    title,
                 "url":      arxiv_url,
                 "abstract": abstract[:800],
@@ -286,7 +391,14 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                 "source":   "targeted_sweep/arxiv",
                 "score":    score,
                 "fetched":  datetime.now(timezone.utc).isoformat(),
-            })
+            }
+
+            # Tag σ-decay crossover papers for downstream visibility
+            if sigma_result["is_crossover"]:
+                paper_dict["sigma_decay_crossover"] = True
+                paper_dict["sigma_decay_detail"] = sigma_result
+
+            papers.append(paper_dict)
 
         # Sort by relevance
         papers.sort(key=lambda x: x["score"], reverse=True)
@@ -294,7 +406,8 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
 
     # ── Semantic Scholar search ───────────────────────────────────────────────
 
-    def _search_semantic_scholar(self, query: str) -> list:
+    def _search_semantic_scholar(self, query):
+        # type: (str) -> list
         """
         Search Semantic Scholar (free, no key required).
         Returns list of paper dicts scored by RSA relevance.
@@ -343,14 +456,20 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                         continue
                     paper_url = f"https://www.semanticscholar.org/paper/{s2_id}"
 
-            score = self._score_relevance(title + ' ' + abstract)
+            combined_text = title + ' ' + abstract
+            score = self._score_relevance(combined_text)
+
+            # Apply σ-decay cross-pollination bonus
+            sigma_result = score_sigma_decay_relevance(combined_text)
+            score += sigma_result["total"]
+
             if score < RELEVANCE_MIN_SCORE:
                 continue
 
             authors_list = item.get("authors") or []
             author_str   = ', '.join(a.get("name", "") for a in authors_list[:3])
 
-            papers.append({
+            paper_dict = {
                 "title":    title,
                 "url":      paper_url,
                 "abstract": abstract[:800],
@@ -359,14 +478,22 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                 "source":   "targeted_sweep/semantic_scholar",
                 "score":    score,
                 "fetched":  datetime.now(timezone.utc).isoformat(),
-            })
+            }
+
+            # Tag σ-decay crossover papers for downstream visibility
+            if sigma_result["is_crossover"]:
+                paper_dict["sigma_decay_crossover"] = True
+                paper_dict["sigma_decay_detail"] = sigma_result
+
+            papers.append(paper_dict)
 
         papers.sort(key=lambda x: x["score"], reverse=True)
         return papers
 
     # ── Relevance scoring ────────────────────────────────────────────────────
 
-    def _score_relevance(self, text: str) -> int:
+    def _score_relevance(self, text):
+        # type: (str) -> int
         """Score text against RSA-adjacent keywords. Pure regex — no API cost."""
         text_lower = text.lower()
         score = 0
@@ -377,7 +504,8 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
 
     # ── Logging ─────────────────────────────────────────────────────────────
 
-    def _log(self, inputs: list):
+    def _log(self, inputs):
+        # type: (list) -> None
         """Append targeted sweep results to a daily log file."""
         if not inputs:
             return
@@ -387,7 +515,7 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
         timestamp = datetime.now(timezone.utc).isoformat()
         with open(log_file, 'a', encoding='utf-8') as f:
             for inp in inputs:
-                f.write(json.dumps({
+                entry = {
                     "timestamp": timestamp,
                     "url":       inp.get("url"),
                     "title":     inp.get("title"),
@@ -395,7 +523,12 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                     "query":     inp.get("query_used"),
                     "score":     inp.get("score"),
                     "source":    inp.get("source"),
-                }) + '\n')
+                }
+                # Log σ-decay crossover flag when present
+                if inp.get("sigma_decay_crossover"):
+                    entry["sigma_decay_crossover"] = True
+                    entry["sigma_decay_detail"] = inp.get("sigma_decay_detail")
+                f.write(json.dumps(entry) + '\n')
 
 
 # ─── Quick test ───────────────────────────────────────────────────────────────
@@ -405,7 +538,46 @@ if __name__ == "__main__":
     if not api_key:
         api_key = input("Anthropic API key: ").strip()
 
-    # Minimal test obligation
+    # ── Test σ-decay scorer directly ─────────────────────────────────────────
+    print("── σ-decay relevance scorer tests ──\n")
+
+    # Pure long-range paper (no OT) — should get LR score but no bonus
+    test_lr = (
+        "Critical properties of the long-range Ising model with power-law "
+        "decay sigma exponent: renormalization group and universality class"
+    )
+    r1 = score_sigma_decay_relevance(test_lr)
+    print(f"Long-range only:  {r1}")
+
+    # Pure OT paper (no LR) — should get OT score but no bonus
+    test_ot = (
+        "Wasserstein gradient flows and Sinkhorn divergences for "
+        "entropy-regularized optimal transport on probability measures"
+    )
+    r2 = score_sigma_decay_relevance(test_ot)
+    print(f"OT only:          {r2}")
+
+    # Crossover paper — should trigger bonus
+    test_cross = (
+        "Wasserstein distance and optimal transport on spin systems with "
+        "long-range interactions: power-law decay and fractional Laplacian "
+        "renormalization group in the weak long-range regime"
+    )
+    r3 = score_sigma_decay_relevance(test_cross)
+    print(f"Crossover (O64):  {r3}")
+    assert r3["is_crossover"], "Crossover paper should be flagged!"
+    assert r3["bonus"] == SIGMA_DECAY_COOCCUR_BONUS, "Bonus should fire!"
+
+    # Irrelevant paper — should get 0
+    test_nil = "Finite element methods for computational fluid dynamics"
+    r4 = score_sigma_decay_relevance(test_nil)
+    print(f"Irrelevant:       {r4}")
+    assert r4["total"] == 0, "Irrelevant paper should score 0."
+
+    print("\n✓ σ-decay scorer tests passed.\n")
+
+    # ── Test full sweep ──────────────────────────────────────────────────────
+    # Minimal test obligations
     test_obligs = [
         {
             "id": "O28",
@@ -416,7 +588,18 @@ if __name__ == "__main__":
                 "Open-access EEG: osf.io/htrsg. EAR as composite predictor not yet tested."
             ),
             "progress": "Thiele et al. 2025 confirmed INV_094 prediction.",
-        }
+        },
+        {
+            "id": "O64",
+            "status": "open",
+            "priority": "high",
+            "statement": (
+                "Cross-pollinate long-range statistical mechanics (sigma-decay, "
+                "fractional-dimensional RG, weak long-range universality) with "
+                "optimal transport / Wasserstein geometry to find shared structure."
+            ),
+            "progress": "",
+        },
     ]
 
     ts = TargetedSweep(api_key=api_key, max_per_obligation=2)
@@ -424,7 +607,11 @@ if __name__ == "__main__":
 
     print(f"\n── {len(results)} result(s) ──")
     for r in results:
-        print(f"\n[{r.get('obligation')}] {r['title'][:70]}")
+        crossover_tag = " ★σ-CROSSOVER★" if r.get("sigma_decay_crossover") else ""
+        print(f"\n[{r.get('obligation')}] {r['title'][:70]}{crossover_tag}")
         print(f"  URL:   {r['url']}")
         print(f"  Score: {r['score']}")
         print(f"  Query: {r.get('query_used')}")
+        if r.get("sigma_decay_detail"):
+            sd = r["sigma_decay_detail"]
+            print(f"  σ-decay: LR={sd['long_range_score']} OT={sd['ot_score']} bonus={sd['bonus']}")

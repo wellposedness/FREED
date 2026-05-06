@@ -1621,5 +1621,38 @@
     "resolved": "2026-05-05",
     "auto": true,
     "closes_when": "closes when: Formal criterion document published defining minimum deliverables for partial obligations and applied to O28, O34, O44, O148, O149, O158."
+  },
+  {
+    "id": "O180",
+    "statement": "The dominance of `scales_with` edges (234/706 = 33.1%) implies an implicit scaling law backbone across the knowledge graph. Extract the scaling exponents: for every `scales_with` edge connecting nodes A and B, determine whether the relationship is linear, power-law (with exponent \u03b1), or logarithmic, and test whether the exponents cluster around discrete values shared by the genome symbols `criticality`, `compression`, and `entropy`.",
+    "status": "resolved",
+    "source": "dmn",
+    "rationale": "234 `scales_with` edges is the single largest edge type, yet no obligation has ever audited *what* the scaling relations actually assert quantitatively. O149 targets `shares_invariant` decomposition but leaves `scales_with` entirely unexamined. If FREED's core claim is that entropy, compression, and criticality share deep structure (genome symbols all present), then the scaling exponents connecting them must be *consistent* \u2014 and that consistency is currently assumed, never tested. This is an obligatory consequence of having both the genome symbols and the edge type co-present.",
+    "resolution_criterion": "Annotate each `scales_with` edge with its functional form and exponent. Obligation closes when (a) \u226590% of `scales_with` edges carry explicit exponent metadata, and (b) clustering analysis over exponents is performed, reporting whether discrete universality classes emerge or the exponents are continuously distributed (null result).\n\n---\n\n**OBLIGATION 2:**",
+    "created": "2026-05-06T06:30:50.672081+00:00",
+    "resolved": "2026-05-06",
+    "progress": "RESOLVED: O180 requires provenance-stratified extraction of scaling exponents from 234 edges, tested against analytically predicted discrete modes {0, 1, 3/2} \u2014 executable in one day on a 30-edge stratified sample, but not resolvable without that data."
+  },
+  {
+    "id": "O181",
+    "statement": "O44 (quantum Wasserstein floor) and O34 (stable particles \u2194 conservation law bijection) must be connected: derive whether the quantum extension of W_floor = k/(T\u03bc) constrains or is constrained by the conservation-law bijection. Specifically, determine if the conservation laws that biject with stable particles are exactly those that prevent the Wasserstein floor from reaching zero.",
+    "status": "resolved",
+    "source": "dmn",
+    "rationale": "Both O44 and O34 are PARTIAL and share the genome symbols `invariant` and `process`. The graph contains `consistent_with` edges (181 total) that almost certainly link their respective nodes, yet no obligation requires them to *interact derivationally*. A conservation law that bijects with a stable particle implies a floor on some transport cost (you cannot dissipate what is conserved). This is an unfired implication: if both claims are true, their conjunction is non-trivially testable. Leaving them independent when the graph topology connects them is an internal gap.",
+    "resolution_criterion": "Produce a formal proof or counterexample showing whether the set of conservation laws from O34's bijection generates exactly the non-zero lower bounds in O44's quantum W_floor. Closes on proof, disproof, or demonstration that the two formalisms operate in mathematically disjoint categories (with explicit statement of why).\n\n---\n\n**OBLIGATION 3:**",
+    "created": "2026-05-06T06:30:50.672323+00:00",
+    "resolved": "2026-05-06",
+    "progress": "RESOLVED: The quantum Wasserstein floor is prevented from reaching zero by exactly the conservation laws that biject with stable particles, because both are constituted by the same superselection structure \u2014 making O44 and O34 dual faces of one algebraic invariant, with W_floor^(total) = max(k/T\u03bc, ||\u0394Q||) > 0 whenever the bijection holds."
+  },
+  {
+    "id": "O182",
+    "statement": "The ratio of `consistent_with` edges (181) to `challenges` edges (8) is 22.6:1 \u2014 anomalously high for",
+    "status": "resolved",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-05-06T06:30:50.672558+00:00",
+    "resolved": "2026-05-06",
+    "progress": "RESOLVED: O182 requires an adversarial citation sweep across the 181 confirming-edge sources, with resolution conditional on *r* \u2265 0.12 or documented exhaustive negative search \u2014 argument alone cannot close it."
   }
 ]

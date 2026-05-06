@@ -125,6 +125,76 @@ SIGMA_DECAY_COOCCUR_BONUS = 12
 # Minimum hits in each vocabulary to count as co-occurrence
 SIGMA_DECAY_MIN_HITS_PER_VOCAB = 1
 
+# ─── INV_073 mimicry-control audit ───────────────────────────────────────────
+# INV_073 claims critical-ridge navigation is *necessary* for cognition.
+# Three independent mechanisms produce the same observables without requiring
+# critical-ridge navigation:
+#   (A) Off-ridge output equivalence — systems away from criticality can
+#       produce identical input-output maps via parameter compensation.
+#   (B) Basin-width ambiguity — wide basins in loss landscapes mimic
+#       critical-point signatures (long correlation, 1/f spectra) without
+#       actual phase transitions.
+#   (C) Criticality mimicry via multiplicative noise / heterogeneous Poisson —
+#       heavy-tailed, scale-free statistics arise from multiplicative
+#       stochastic processes or superpositions of Poisson processes, not
+#       from criticality per se.
+#
+# Any evidence offered as INV_073 confirmation must demonstrably control for
+# at least one of these three; otherwise it is flagged as MIMICRY_UNCONTROLLED.
+
+INV_073_CONFIRM_PATTERNS = [
+    (r"critical.?ridge", 4),
+    (r"criticality\s.{0,30}(necessary|essential|required)", 5),
+    (r"edge\s+of\s+(chaos|criticality)", 3),
+    (r"critical\s+(brain|neural|cortical)", 4),
+    (r"neuronal?\s+avalanche", 3),
+    (r"power.?law.{0,30}(neural|brain|cortex)", 3),
+    (r"self.?organized\s+criticality.{0,30}(brain|neural|cognit)", 4),
+    (r"critical\s+transition.{0,30}cognit", 4),
+    (r"INV.?073", 6),
+]
+INV_073_CONFIRM_THRESHOLD = 5  # cumulative score to count as INV_073-confirming
+
+# Alternative-explanation signatures — presence means the paper *controls*
+# for (or *demonstrates*) a mimicry mechanism, which either (a) strengthens
+# the confirmation if the paper rules the alternative out, or (b) weakens it
+# if the paper shows the alternative suffices.
+INV_073_MIMICRY_PATTERNS = {
+    "multiplicative_noise": [
+        (r"multiplicative\s+(noise|process)", 5),
+        (r"log.?normal.{0,30}(neural|avalanche|power.?law)", 4),
+        (r"multiplicative\s+stochastic", 4),
+        (r"geometric\s+brownian", 3),
+        (r"gibrat", 4),
+        (r"yule.?simon", 3),
+    ],
+    "heterogeneous_poisson": [
+        (r"heterogeneous\s+poisson", 5),
+        (r"superposition.{0,30}poisson", 4),
+        (r"mixture\s+of\s+poisson", 4),
+        (r"apparent\s+(power.?law|scaling).{0,30}(mixture|heterogen)", 5),
+        (r"rate\s+heterogeneity.{0,30}(power|scal)", 4),
+        (r"non.?critical.{0,30}(power.?law|scal)", 4),
+    ],
+    "off_ridge_equivalence": [
+        (r"off.?ridge", 5),
+        (r"(input.?output|functional)\s+equivalen", 4),
+        (r"parameter\s+compensat", 4),
+        (r"(away|far)\s+from\s+critical", 4),
+        (r"non.?critical\s+(regime|phase).{0,30}(same|identical|equivalent)", 5),
+        (r"degeneracy.{0,30}critical", 3),
+    ],
+    "basin_width_ambiguity": [
+        (r"basin.?width", 5),
+        (r"flat\s+(direction|minimum|basin)", 4),
+        (r"loss\s+landscape.{0,30}(wide|flat|broad)", 4),
+        (r"(wide|broad)\s+basin.{0,30}(mimic|resemble|indistinguish)", 5),
+        (r"1/f.{0,20}(non.?critical|without\s+critical)", 5),
+        (r"long.?range\s+correlation.{0,30}(non.?critical|artifact)", 4),
+    ],
+}
+INV_073_MIMICRY_DETECT_THRESHOLD = 3  # per-mechanism score to count as detected
+
 
 def score_sigma_decay_relevance(text):
     """

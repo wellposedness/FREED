@@ -1273,6 +1273,7 @@ class BranchingRatioTracker:
         self._child_counts = []     # type: List[int]
         self._avalanche_sizes = []  # type: List[float]
         self._sigma_history = []    # type: List[float]
+        self._h_fraction_history = []  # type: List[float]
         self._drift_events = []     # type: list
 
         # Cached telemetry (updated on each record_step)
@@ -1805,6 +1806,265 @@ class AvalancheEpochTracker:
         return alarms
 
 
+class SigmaExcursionTracker:
+    """
+    Per-timestep branching-ratio tracker that computes σ and flags when
+    σ exits the critical band (1.0 ± 0.05), logging the dominant agent
+    type at each excursion.
+
+    Designed to sit in the CA telemetry pipeline between raw step data
+    and the CACriticalityLog, providing fine-grained causal evidence
+    for whether Physics Navigator dominance *causes* or *follows*
+    criticality drift — closing the causal ambiguity from the telemetry
+    snapshot (σ=1.0208, dominant=Physics Navigator, 860 cells).
+
+    Addresses INV_073 falsification: if σ drifts consistently above 1.05
+    as Physics Navigator cells accumulate, the system is supercritical
+    (γ>1, frozen), directly contradicting INV_073's claim that the
+    Wasserstein gradient path necessarily converges to and sustains γ=1.
+
+    Usage::
+
+        tracker = SigmaExcursionTracker()
+        for step in simulation:
+            result = tracker.record_step(
+                step=step,
+                parent_count=parents,
+                child_count=children,
+                type_counts={"Physics Navigator": 860, "Entropy Scorer": 54},
+            )
+            if result["excursion"]:
+                log_excursion(result)
+        report = tracker.excursion_report()
+    """
+
+    def __init__(
+        self,
+        sigma_center=1.0,       # type: float
+        sigma_half_band=0.05,   # type: float
+        history_limit=2000,     # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        sigma_center : float
+            Centre of the critical band. Default: 1.0.
+        sigma_half_band : float
+            Half-width of the critical band. Default: 0.05
+            (band = [0.95, 1.05]).
+        history_limit : int
+            Maximum number of per-step records to retain.  Default: 2000.
+        """
+        self.sigma_center = sigma_center
+        self.sigma_half_band = sigma_half_band
+        self.sigma_low = sigma_center - sigma_half_band
+        self.sigma_high = sigma_center + sigma_half_band
+        self.history_limit = max(10, history_limit)
+
+        self._steps = []          # type: list
+        self._sigma_series = []   # type: List[float]
+        self._excursions = []     # type: list
+
+    def record_step(
+        self,
+        step,               # type: int
+        parent_count,       # type: int
+        child_count,        # type: int
+        type_counts=None,   # type: Optional[dict]
+    ):
+        # type: (...) -> dict
+        """
+        Record one simulation step and check for σ excursion.
+
+        Parameters
+        ----------
+        step : int
+            The simulation timestep number.
+        parent_count : int
+            Number of active (parent) cells at this step.
+        child_count : int
+            Number of active (child/descendant) cells at the next step.
+        type_counts : dict or None
+            Mapping of cell-type name (str) to count (int).
+            Example: {"Physics Navigator": 860, "Entropy Scorer": 54}
+
+        Returns
+        -------
+        dict with keys:
+            step             : int
+            sigma            : float   — instantaneous branching ratio
+            in_band          : bool    — whether σ is in [σ_low, σ_high]
+            excursion        : bool    — True if σ exited the critical band
+            excursion_dir    : str     — "supercritical" / "subcritical" / ""
+            dominant_type    : str     — most populous cell type at this step
+            dominant_count   : int     — count of the dominant type
+            dominant_share   : float   — fraction of total population
+            total_population : int
+            timestamp        : str     — ISO-8601 UTC
+        """
+        if type_counts is None:
+            type_counts = {}
+
+        # Compute instantaneous σ
+        if parent_count > 0:
+            sigma = float(child_count) / float(parent_count)
+        else:
+            sigma = 0.0
+
+        self._sigma_series.append(sigma)
+
+        # Determine dominant type
+        total_pop = sum(type_counts.values()) if type_counts else 0
+        total_f = float(total_pop) if total_pop > 0 else 1.0
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            dominant_count = type_counts[dominant_type]
+            dominant_share = round(float(dominant_count) / total_f, 6)
+        else:
+            dominant_type = ""
+            dominant_count = 0
+            dominant_share = 0.0
+
+        # Check band membership
+        in_band = self.sigma_low <= sigma <= self.sigma_high
+        excursion = (sigma != 0.0) and not in_band
+
+        if excursion:
+            excursion_dir = "supercritical" if sigma > self.sigma_high else "subcritical"
+        else:
+            excursion_dir = ""
+
+        record = {
+            "step":             step,
+            "sigma":            round(sigma, 6),
+            "in_band":          in_band,
+            "excursion":        excursion,
+            "excursion_dir":    excursion_dir,
+            "dominant_type":    dominant_type,
+            "dominant_count":   dominant_count,
+            "dominant_share":   dominant_share,
+            "total_population": total_pop,
+            "type_counts":      dict(type_counts),
+            "timestamp":        datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._steps.append(record)
+
+        if excursion:
+            self._excursions.append(record)
+
+        # Trim history
+        if len(self._steps) > self.history_limit:
+            trim = len(self._steps) - self.history_limit
+            self._steps = self._steps[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+
+        return record
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-step σ history."""
+        return list(self._sigma_series)
+
+    def excursions(self):
+        # type: () -> list
+        """Return all excursion records."""
+        return list(self._excursions)
+
+    def excursion_report(self):
+        # type: () -> dict
+        """
+        Generate a summary report of all excursions, including the
+        dominant agent type at each excursion and aggregate statistics
+        for causal analysis (INV_073 falsification).
+
+        Returns
+        -------
+        dict with keys:
+            n_steps              : int   — total steps recorded
+            n_excursions         : int   — total excursion events
+            n_supercritical      : int   — excursions above the band
+            n_subcritical        : int   — excursions below the band
+            excursion_rate       : float — fraction of steps with excursion
+            sigma_mean           : float — overall mean σ
+            sigma_std            : float — overall std σ
+            dominant_at_excursion: dict  — {type_name: count} across all excursions
+            dominant_at_supercrit: dict  — {type_name: count} for supercritical only
+            dominant_at_subcrit  : dict  — {type_name: count} for subcritical only
+            inv073_falsified     : bool  — True if σ mean > 1.05 (sustained
+                                           supercritical, contradicts INV_073)
+            inv073_detail        : str   — human-readable assessment
+            excursion_records    : list  — the raw excursion records
+        """
+        n_steps = len(self._sigma_series)
+        n_exc = len(self._excursions)
+        n_super = sum(1 for e in self._excursions if e["excursion_dir"] == "supercritical")
+        n_sub = sum(1 for e in self._excursions if e["excursion_dir"] == "subcritical")
+
+        exc_rate = round(float(n_exc) / float(n_steps), 6) if n_steps > 0 else 0.0
+
+        # Overall σ statistics
+        if self._sigma_series:
+            s_mean = sum(self._sigma_series) / float(len(self._sigma_series))
+            s_var = sum((s - s_mean) ** 2 for s in self._sigma_series) / float(len(self._sigma_series))
+            s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        else:
+            s_mean = 0.0
+            s_std = 0.0
+
+        # Dominant type tallies at excursions
+        dom_all = {}    # type: dict
+        dom_super = {}  # type: dict
+        dom_sub = {}    # type: dict
+        for e in self._excursions:
+            dt = e["dominant_type"]
+            if dt:
+                dom_all[dt] = dom_all.get(dt, 0) + 1
+                if e["excursion_dir"] == "supercritical":
+                    dom_super[dt] = dom_super.get(dt, 0) + 1
+                elif e["excursion_dir"] == "subcritical":
+                    dom_sub[dt] = dom_sub.get(dt, 0) + 1
+
+        # INV_073 falsification check
+        inv073_falsified = s_mean > self.sigma_high
+        if inv073_falsified:
+            inv073_detail = (
+                "FALSIFIED: mean sigma={:.4f} exceeds critical band upper "
+                "bound {:.2f}. The system is sustained-supercritical, "
+                "contradicting INV_073 claim that Wasserstein gradient "
+                "path necessarily converges to gamma=1."
+            ).format(s_mean, self.sigma_high)
+        elif s_mean < self.sigma_low:
+            inv073_detail = (
+                "WARNING: mean sigma={:.4f} below critical band lower "
+                "bound {:.2f}. System is sustained-subcritical."
+            ).format(s_mean, self.sigma_low)
+        else:
+            inv073_detail = (
+                "CONSISTENT: mean sigma={:.4f} within critical band "
+                "[{:.2f}, {:.2f}]. INV_073 not falsified by sigma drift. "
+                "Excursion rate={:.2%} ({} of {} steps)."
+            ).format(s_mean, self.sigma_low, self.sigma_high, exc_rate, n_exc, n_steps)
+
+        return {
+            "n_steps":               n_steps,
+            "n_excursions":          n_exc,
+            "n_supercritical":       n_super,
+            "n_subcritical":         n_sub,
+            "excursion_rate":        exc_rate,
+            "sigma_mean":            round(s_mean, 6),
+            "sigma_std":             round(s_std, 6),
+            "dominant_at_excursion": dom_all,
+            "dominant_at_supercrit": dom_super,
+            "dominant_at_subcrit":   dom_sub,
+            "inv073_falsified":      inv073_falsified,
+            "inv073_detail":         inv073_detail,
+            "excursion_records":     list(self._excursions),
+        }
+
+
 class CACriticalityLog:
     """
     Longitudinal log of per-generation CA criticality telemetry.
@@ -2188,6 +2448,192 @@ class CellTypeDistributionTracker:
             "n_snapshots": n,
             "joint_state_counts": joint_counts,
         }
+
+
+# ─── Ridge Position Scorer (INV_073 Falsification) ──────────────────────────
+# Converts INV_073 ("critical-ridge navigation") from an unfalsifiable
+# post-hoc label into a live, falsifiable metric.  Computes rolling variance
+# of dC/dt (coherence derivative) over the last N cycles and flags
+# off-ridge excursions when:
+#   1. Variance exceeds a threshold (system is jittering, not navigating)
+#   2. Coherence locks above 0.999 (frozen attractor — no ridge dynamics)
+#   3. Coherence falls below a decay floor (system has left the ridge)
+#
+# If INV_073 is a real dynamical phenomenon, this scorer should:
+#   - Show bounded variance in dC/dt during confirmed ridge navigation
+#   - Trigger off-ridge alerts that correlate with downstream coherence loss
+#   - Distinguish ridge navigation from random-walk-through-coherence-space
+#
+# Falsification condition: if off-ridge alerts show NO correlation with
+# subsequent coherence degradation (i.e., the system performs equally well
+# "on" and "off" ridge), then INV_073 is not doing explanatory work and
+# should be downgraded from invariant to heuristic label.
+#
+# Addresses: adversarial falsification probe cycle 4, INV_073.
+
+def ridge_position_scorer(
+    coherence_series,       # type: List[float]
+    window=10,              # type: int
+    variance_threshold=0.01,# type: float
+    lock_ceiling=0.999,     # type: float
+    decay_floor=0.3,        # type: float
+):
+    # type: (...) -> dict
+    """
+    Compute rolling variance of dC/dt and flag off-ridge excursions.
+
+    This operationalizes INV_073 by defining concrete, falsifiable
+    boundary conditions for "critical-ridge navigation":
+
+    - ON_RIDGE: dC/dt variance is bounded (system is making controlled
+      coherence adjustments), coherence is neither frozen nor collapsed.
+    - OFF_RIDGE_JITTER: dC/dt variance exceeds threshold — system is
+      oscillating erratically rather than navigating.
+    - OFF_RIDGE_FROZEN: coherence locked above lock_ceiling — no
+      meaningful dynamics; the system is stuck, not navigating.
+    - OFF_RIDGE_COLLAPSED: coherence below decay_floor — system has
+      fallen off the ridge entirely.
+    - INSUFFICIENT_DATA: fewer than window+1 data points.
+
+    Parameters
+    ----------
+    coherence_series : list of float
+        Coherence scores over time (one per FEED cycle). Values in [0, 1].
+    window : int
+        Number of recent cycles over which to compute rolling dC/dt
+        variance. Default: 10.
+    variance_threshold : float
+        Maximum dC/dt variance for ON_RIDGE classification. Above this
+        the system is jittering. Default: 0.01.
+    lock_ceiling : float
+        Coherence above this value is considered "frozen" — the system
+        has locked onto an attractor and is no longer navigating.
+        Default: 0.999.
+    decay_floor : float
+        Coherence below this value indicates the system has left the
+        ridge entirely. Default: 0.3.
+
+    Returns
+    -------
+    dict with keys:
+        status              : str   — ON_RIDGE / OFF_RIDGE_JITTER /
+                                      OFF_RIDGE_FROZEN / OFF_RIDGE_COLLAPSED /
+                                      INSUFFICIENT_DATA
+        dc_dt_variance      : float — rolling variance of dC/dt over window
+        dc_dt_mean          : float — rolling mean of dC/dt over window
+        dc_dt_series        : list  — the dC/dt values used (last window)
+        current_coherence   : float — most recent coherence value
+        window_coherences   : list  — coherence values in the window
+        fraction_above_ceil : float — fraction of window coherences above
+                                      lock_ceiling (frozen-detector)
+        fraction_below_floor: float — fraction of window coherences below
+                                      decay_floor (collapse-detector)
+        ridge_score         : float — 0.0 (off-ridge) to 1.0 (on-ridge)
+                                      continuous score for downstream use
+        falsifiable         : bool  — always True (this metric is designed
+                                      to be falsifiable by construction)
+        inv073_testable     : str   — description of the falsification
+                                      condition for INV_073
+        timestamp           : str   — ISO-8601 UTC
+
+    Notes
+    -----
+    Falsification protocol for INV_073:
+      1. Run FREED for N cycles, recording ridge_position_scorer output.
+      2. Partition cycles into ON_RIDGE vs OFF_RIDGE_* episodes.
+      3. Compare downstream coherence (next 5 cycles) after each episode.
+      4. If mean downstream coherence is statistically indistinguishable
+         between ON_RIDGE and OFF_RIDGE episodes (p > 0.05, two-tailed
+         t-test), then INV_073 is not doing explanatory work.
+      5. If OFF_RIDGE episodes show NO subsequent coherence degradation,
+         INV_073 should be downgraded from invariant to heuristic label.
+    """
+    n = len(coherence_series)
+
+    # ── Insufficient data ──
+    if n < window + 1:
+        return {
+            "status":               "INSUFFICIENT_DATA",
+            "dc_dt_variance":       0.0,
+            "dc_dt_mean":           0.0,
+            "dc_dt_series":         [],
+            "current_coherence":    coherence_series[-1] if n > 0 else 0.0,
+            "window_coherences":    list(coherence_series),
+            "fraction_above_ceil":  0.0,
+            "fraction_below_floor": 0.0,
+            "ridge_score":          0.0,
+            "falsifiable":          True,
+            "inv073_testable":      (
+                "Collect at least {} more cycles to enable ridge "
+                "position scoring."
+            ).format(window + 1 - n),
+            "timestamp":            datetime.now(timezone.utc).isoformat(),
+        }
+
+    # ── Compute dC/dt (first differences) over the full series ──
+    dc_dt_full = [
+        coherence_series[i] - coherence_series[i - 1]
+        for i in range(1, n)
+    ]
+
+    # ── Extract the rolling window ──
+    dc_dt_window = dc_dt_full[-window:]
+    coherence_window = coherence_series[-window:]
+    current_coherence = coherence_series[-1]
+
+    # ── Rolling variance and mean of dC/dt ──
+    w = len(dc_dt_window)
+    dc_mean = sum(dc_dt_window) / float(w)
+    dc_var = sum((d - dc_mean) ** 2 for d in dc_dt_window) / float(w)
+
+    # ── Frozen / collapsed detection ──
+    n_above_ceil = sum(1 for c in coherence_window if c > lock_ceiling)
+    n_below_floor = sum(1 for c in coherence_window if c < decay_floor)
+    frac_above = float(n_above_ceil) / float(len(coherence_window))
+    frac_below = float(n_below_floor) / float(len(coherence_window))
+
+    # ── Classify status ──
+    # Priority: frozen > collapsed > jitter > on-ridge
+    # (frozen and collapsed are structural failures; jitter is dynamic)
+    if frac_above > 0.8:
+        status = "OFF_RIDGE_FROZEN"
+    elif frac_below > 0.5:
+        status = "OFF_RIDGE_COLLAPSED"
+    elif dc_var > variance_threshold:
+        status = "OFF_RIDGE_JITTER"
+    else:
+        status = "ON_RIDGE"
+
+    # ── Continuous ridge score ──
+    # 1.0 = perfectly on-ridge; 0.0 = maximally off-ridge
+    # Components: (1) variance penalty, (2) frozen penalty, (3) collapse penalty
+    var_score = max(0.0, 1.0 - (dc_var / variance_threshold)) if variance_threshold > 0 else 0.0
+    frozen_penalty = frac_above
+    collapse_penalty = frac_below
+    ridge_score = max(0.0, min(1.0,
+        var_score * (1.0 - frozen_penalty) * (1.0 - collapse_penalty)
+    ))
+
+    return {
+        "status":               status,
+        "dc_dt_variance":       round(dc_var, 8),
+        "dc_dt_mean":           round(dc_mean, 8),
+        "dc_dt_series":         [round(d, 8) for d in dc_dt_window],
+        "current_coherence":    round(current_coherence, 6),
+        "window_coherences":    [round(c, 6) for c in coherence_window],
+        "fraction_above_ceil":  round(frac_above, 4),
+        "fraction_below_floor": round(frac_below, 4),
+        "ridge_score":          round(ridge_score, 6),
+        "falsifiable":          True,
+        "inv073_testable":      (
+            "Falsification condition: partition cycles into ON_RIDGE vs "
+            "OFF_RIDGE episodes. If downstream coherence (next 5 cycles) "
+            "is statistically indistinguishable between groups (p>0.05, "
+            "two-tailed t-test), INV_073 is not doing explanatory work "
+            "and should be downgraded from invariant to heuristic label."
+        ),
+        "timestamp":            datetime.now(timezone.utc).isoformat(),
+    }
 
 
 class TamuraSweep:

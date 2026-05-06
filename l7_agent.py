@@ -225,8 +225,8 @@ class NonHermitianEntropyScorer:
             S_lin = 1 - Tr(ρ²) / (Tr(ρ))²
 
         For non-Hermitian ρ, both Tr(ρ) and Tr(ρ²) can be complex.
-        We take the real part, consistent with the paper's treatment of
-        the non-Hermitian linear entropy functional for physical observables.
+        We take the real part to keep the result physically interpretable.
+        This is a custom heuristic adaptation — no published derivation.
         """
         tr_rho = self._trace(rho, self.dim)
         tr_rho_sq = self._trace(self._mat_multiply(rho, rho, self.dim), self.dim)
@@ -237,8 +237,9 @@ class NonHermitianEntropyScorer:
             return 1.0  # maximally mixed / fully dissipated
 
         # S_lin = 1 - Re[Tr(ρ²)] / |Tr(ρ)|²
-        # Using |Tr(ρ)|² in denominator for gauge invariance under
-        # non-Hermitian evolution (paper Eq. 12 generalization)
+        # Using |Tr(ρ)|² (modulus-squared) rather than (Tr(ρ))² so the result
+        # stays real and positive when ρ is non-Hermitian. This is a custom
+        # adaptation — no published derivation; treat as heuristic until validated.
         purity = tr_rho_sq.real / tr_rho_abs_sq
         s_lin = 1.0 - purity
 

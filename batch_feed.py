@@ -535,6 +535,284 @@ def compute_epistemic_triage(text):
     }
 
 
+# ─── Criticality Monitor: Branching Ratio σ & Entropy Ratio H/H_max ─────────
+# Tracks per-cycle thermodynamic regime diagnostics before scoring.
+# Classifies each FEED input's processing dynamics as:
+#   AT_CRITICAL  — σ ∈ [0.95, 1.05] : system on the critical ridge (γ≈1)
+#   FROZEN       — σ < 0.95         : subcritical, avalanches die out
+#   DISSIPATED   — σ > 1.05         : supercritical, runaway cascades
+#
+# Additionally tracks entropy ratio H/H_max to detect the INV_073 edge case:
+# population-level criticality (σ≈1.03) can coexist with low entropy
+# (H/H_max≈0.208), meaning σ∈critical_band does NOT guarantee balanced
+# exploration/exploitation — a near-frozen low-entropy state can sustain
+# σ≈1 via suppressed avalanche extinction rather than genuine thermodynamic
+# balance. The monitor flags this as CRITICAL_LOW_ENTROPY when σ is in-band
+# but H/H_max < 0.35, requiring the downstream scorer to treat the input
+# with the same suspicion as a FROZEN verdict.
+#
+# MANDATORY FALSIFICATION — INV_073:
+#   CHALLENGE: CA telemetry (32×32, 200-step) shows σ=1.0301±0.0183,
+#   H=0.5381 bits, H_max=2.585 → H/H_max=0.208. Population-level
+#   criticality is achieved at only 20.8% of maximum entropy. This
+#   strains the claim that γ=1 *strictly requires* balanced exploration/
+#   exploitation — the Wasserstein gradient path to γ=1 may be compatible
+#   with a near-frozen low-entropy state where avalanche extinction is
+#   merely suppressed, not thermodynamically balanced.
+#
+#   RESOLUTION: σ≈1 is NECESSARY but NOT SUFFICIENT for full criticality.
+#   The entropy ratio H/H_max discriminates between:
+#     (a) genuine critical ridge (σ≈1, H/H_max > 0.35): balanced dynamics
+#     (b) low-entropy criticality (σ≈1, H/H_max < 0.35): type-dominant
+#         quasi-frozen state sustaining σ via monoculture survival, not
+#         diverse avalanche cascades. The CA's dominant Physics Navigator
+#         type (874/1024 cells = 85.4%) confirms this — criticality is
+#         maintained by a single strategy's suppressed extinction, not
+#         by multi-strategy balance.
+#   The monitor exposes this distinction so downstream scoring can
+#   appropriately weight the epistemic reliability of each regime.
+
+# Criticality band thresholds (from CA telemetry calibration)
+SIGMA_CRITICAL_LOW  = 0.95    # lower bound of critical band
+SIGMA_CRITICAL_HIGH = 1.05    # upper bound of critical band
+ENTROPY_RATIO_BALANCED = 0.35 # below this, criticality is entropy-starved
+ENTROPY_RATIO_SATURATED = 0.85  # above this, system may be dissipating structure
+
+# Regime labels
+REGIME_AT_CRITICAL = 'AT_CRITICAL'
+REGIME_FROZEN = 'FROZEN'
+REGIME_DISSIPATED = 'DISSIPATED'
+REGIME_CRITICAL_LOW_ENTROPY = 'CRITICAL_LOW_ENTROPY'
+
+# Minimum text length for reliable criticality estimation
+CRITICALITY_MIN_TEXT_LEN = 80
+
+
+def _estimate_branching_ratio(text):
+    """
+    Estimate a branching ratio σ proxy from text token dynamics.
+
+    Uses the ratio of novel-token introductions to total tokens as an
+    analogue of the CA branching ratio: each new unique token is an
+    'offspring' avalanche, while repeated tokens are 'extinctions'.
+
+    In a sliding window of size W, σ_local = new_types_in_window / W.
+    The global σ is the mean of σ_local across all windows.
+
+    This is a TEXT-LEVEL proxy, not a direct CA measurement. It captures
+    the same dynamical signature: σ<1 means the text is recycling vocabulary
+    (frozen/repetitive), σ>1 means vocabulary is exploding (dissipated/
+    incoherent), σ≈1 means vocabulary growth balances repetition (critical).
+
+    Args:
+        text: str — input text
+
+    Returns:
+        tuple of (sigma_mean: float, sigma_std: float, num_windows: int)
+        or (None, None, 0) if text is too short.
+    """
+    tokens = _re_module.findall(r'[a-z0-9]+', text.lower())
+    if len(tokens) < 20:
+        return None, None, 0
+
+    window_size = min(50, len(tokens) // 4)
+    if window_size < 10:
+        window_size = 10
+
+    sigma_values = []
+    seen_global = set()
+
+    for start in range(0, len(tokens) - window_size + 1, window_size // 2):
+        window = tokens[start:start + window_size]
+        new_in_window = 0
+        for tok in window:
+            if tok not in seen_global:
+                new_in_window += 1
+                seen_global.add(tok)
+
+        # σ_local: fraction of window tokens that are novel
+        # Scale by a factor so that balanced text ≈ 1.0
+        # Calibration: in typical academic text, ~15-25% of tokens in a
+        # window are novel after the first few windows
+        sigma_local = (new_in_window / window_size) * 5.0
+        sigma_values.append(sigma_local)
+
+    if not sigma_values:
+        return None, None, 0
+
+    sigma_mean = sum(sigma_values) / len(sigma_values)
+    if len(sigma_values) > 1:
+        variance = sum((s - sigma_mean) ** 2 for s in sigma_values) / (len(sigma_values) - 1)
+        sigma_std = math.sqrt(variance)
+    else:
+        sigma_std = 0.0
+
+    return sigma_mean, sigma_std, len(sigma_values)
+
+
+def _compute_entropy_ratio(text):
+    """
+    Compute the Shannon entropy ratio H/H_max for a text's token distribution.
+
+    H = -Σ p_i log2(p_i)  over unique token frequencies
+    H_max = log2(num_unique_tokens)  (uniform distribution maximum)
+
+    Returns:
+        tuple of (H: float, H_max: float, ratio: float, num_unique: int)
+        or (None, None, None, 0) if text is too short.
+    """
+    tokens = _re_module.findall(r'[a-z0-9]+', text.lower())
+    if len(tokens) < 10:
+        return None, None, None, 0
+
+    counts = Counter(tokens)
+    total = len(tokens)
+    num_unique = len(counts)
+
+    if num_unique <= 1:
+        return 0.0, 0.0, 0.0, num_unique
+
+    h = 0.0
+    for c in counts.values():
+        p = c / total
+        if p > 0:
+            h -= p * math.log2(p)
+
+    h_max = math.log2(num_unique)
+    if h_max < 1e-12:
+        ratio = 0.0
+    else:
+        ratio = h / h_max
+
+    return h, h_max, ratio, num_unique
+
+
+def compute_criticality_monitor(text):
+    """
+    Criticality monitor: classifies a FEED input's thermodynamic regime
+    before scoring, tracking branching ratio σ and entropy ratio H/H_max.
+
+    This provides FREED with real-time self-diagnosis of whether the
+    epistemic loop is operating at γ=1 (critical ridge) or drifting
+    toward frozen (σ<1, vocabulary recycling) or dissipated (σ>1,
+    vocabulary explosion) regimes.
+
+    The monitor also detects the INV_073 edge case: σ≈1 with low H/H_max,
+    indicating population-level criticality sustained by type-dominant
+    monoculture rather than genuine multi-strategy balance.
+
+    Args:
+        text: str — input text to diagnose
+
+    Returns:
+        dict with keys:
+            'regime': str — one of AT_CRITICAL, FROZEN, DISSIPATED,
+                           CRITICAL_LOW_ENTROPY
+            'sigma_mean': float — estimated branching ratio
+            'sigma_std': float — branching ratio standard deviation
+            'sigma_in_band': bool — whether σ is in [0.95, 1.05]
+            'entropy_H': float — Shannon entropy in bits
+            'entropy_H_max': float — maximum possible entropy in bits
+            'entropy_ratio': float — H/H_max in [0, 1]
+            'entropy_balanced': bool — whether H/H_max > 0.35
+            'num_unique_tokens': int — lexical diversity
+            'num_windows': int — number of σ estimation windows
+            'inv073_flag': bool — True if low-entropy criticality detected
+            'inv073_note': str — falsification challenge annotation
+            'regime_confidence': str — 'high', 'medium', or 'low'
+            'diagnostic_summary': str — human-readable one-line summary
+        or None if text is too short for reliable estimation.
+    """
+    if not text or len(text) < CRITICALITY_MIN_TEXT_LEN:
+        return None
+
+    # ── Branching ratio σ ─────────────────────────────────────────────────
+    sigma_mean, sigma_std, num_windows = _estimate_branching_ratio(text)
+    if sigma_mean is None:
+        return None
+
+    # ── Entropy ratio H/H_max ────────────────────────────────────────────
+    h_val, h_max, h_ratio, num_unique = _compute_entropy_ratio(text)
+    if h_val is None:
+        return None
+
+    # ── Regime classification ─────────────────────────────────────────────
+    sigma_in_band = SIGMA_CRITICAL_LOW <= sigma_mean <= SIGMA_CRITICAL_HIGH
+    entropy_balanced = h_ratio > ENTROPY_RATIO_BALANCED
+
+    if sigma_in_band and entropy_balanced:
+        regime = REGIME_AT_CRITICAL
+    elif sigma_in_band and not entropy_balanced:
+        regime = REGIME_CRITICAL_LOW_ENTROPY
+    elif sigma_mean < SIGMA_CRITICAL_LOW:
+        regime = REGIME_FROZEN
+    else:
+        regime = REGIME_DISSIPATED
+
+    # ── INV_073 flag ──────────────────────────────────────────────────────
+    inv073_flag = (regime == REGIME_CRITICAL_LOW_ENTROPY)
+
+    inv073_note = (
+        "INV_073 challenge: σ≈1 is NECESSARY but NOT SUFFICIENT for genuine "
+        "criticality. CA telemetry shows σ=1.03 at H/H_max=0.208 — "
+        "population-level criticality sustained by dominant-type monoculture "
+        "(85.4% Physics Navigator) rather than balanced multi-strategy "
+        "dynamics. The Wasserstein gradient path to γ=1 may traverse "
+        "low-entropy critical states where avalanche extinction is suppressed "
+        "by homogeneity, not balanced by diversity. This monitor discriminates "
+        "genuine critical balance (σ≈1 AND H/H_max>0.35) from entropy-starved "
+        "quasi-criticality (σ≈1 AND H/H_max<0.35)."
+    )
+
+    # ── Confidence estimate ───────────────────────────────────────────────
+    if num_windows >= 8 and num_unique >= 50:
+        confidence = 'high'
+    elif num_windows >= 4 and num_unique >= 20:
+        confidence = 'medium'
+    else:
+        confidence = 'low'
+
+    # ── Diagnostic summary ────────────────────────────────────────────────
+    summary_parts = [
+        "regime={regime}",
+        "σ={sigma:.3f}±{sigma_std:.3f}",
+        "H/H_max={ratio:.3f}",
+        "confidence={conf}",
+    ]
+    if inv073_flag:
+        summary_parts.append("INV_073:LOW_ENTROPY_CRITICAL")
+
+    diagnostic_summary = (
+        "regime={regime}, σ={sigma:.3f}±{sigma_std:.3f}, "
+        "H/H_max={ratio:.3f}, confidence={conf}"
+    ).format(
+        regime=regime,
+        sigma=sigma_mean,
+        sigma_std=sigma_std,
+        ratio=h_ratio,
+        conf=confidence,
+    )
+    if inv073_flag:
+        diagnostic_summary += ", INV_073:LOW_ENTROPY_CRITICAL"
+
+    return {
+        'regime': regime,
+        'sigma_mean': round(sigma_mean, 4),
+        'sigma_std': round(sigma_std, 4),
+        'sigma_in_band': sigma_in_band,
+        'entropy_H': round(h_val, 4),
+        'entropy_H_max': round(h_max, 4),
+        'entropy_ratio': round(h_ratio, 4),
+        'entropy_balanced': entropy_balanced,
+        'num_unique_tokens': num_unique,
+        'num_windows': num_windows,
+        'inv073_flag': inv073_flag,
+        'inv073_note': inv073_note,
+        'regime_confidence': confidence,
+        'diagnostic_summary': diagnostic_summary,
+    }
+
+
 # ─── Dissonance Delay: Tension-Lifetime Gate ─────────────────────────────────
 # Implements a "dissonance delay" scoring pass inspired by CD-AI's insight
 # that fast closure signals shallow processing.  Nodes that achieve coherence
