@@ -138,7 +138,7 @@ a:hover { text-decoration: underline; }
       <div class="panel">
         <div class="site-name">FREED daemon</div>
         <div class="site-url"><a href="index.html" target="_blank">wellposedness.github.io/FREED</a></div>
-        <div class="site-desc">Autonomous science daemon. Reads external papers, maps against the RSA genome, updates the knowledge graph, publishes this site. Runs in 6h cycles.</div>
+        <div class="site-desc">Autonomous science daemon. Reads external papers, maps against the RSA genome, updates the knowledge graph, publishes this site. Runs in 6h cycles. Phase order: PRE-AUDIT → ARCHITECT → SWEEP → CEREBELLUM → PREDICT → FEED → CONSOLIDATE → OBLIGATE → RESOLVE → UPDATE.</div>
         <div class="site-badge badge-live">● LIVE DAEMON</div>
       </div>
       <div class="panel">
@@ -173,6 +173,7 @@ a:hover { text-decoration: underline; }
       <div class="comp"><span class="comp-name">targeted_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Active search. Haiku generates arXiv/S2 queries from open obligations.</span></div>
       <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted.</span></div>
       <div class="comp"><span class="comp-name">simulation_observer.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">CA telemetry. N=32 grid → σ/H/survival → ca_telemetry.json → SWEEP source #1.</span></div>
+      <div class="comp"><span class="comp-name">↳ PREDICT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Between CEREBELLUM and FEED. Haiku reads title+abstract+compressed genome (39 INV IDs+titles) → blind PREDICTED_CONFIRMS / PREDICTED_CHALLENGES before L7 sees paper. Surprise edges weight 1.0; predicted edges weight 0.05. Challenge prediction required — NONE must be justified. Built 2026-05-06.</span></div>
       <div class="comp"><span class="comp-name">bootstrap_derive.py</span><span class="comp-tag tag-probe">PROBE</span><span class="comp-desc">Genome-free derivation. No kernel prompt. Anchors: Landauer + CA. Output → obligations.</span></div>
     </div>
   </div>
@@ -183,36 +184,36 @@ a:hover { text-decoration: underline; }
     <div class="agenda-item">
       <span class="agenda-num">1</span>
       <div>
+        <div class="agenda-text">CEREBELLUM refunctioning — fast forward model</div>
+        <div class="agenda-note">Currently CEREBELLUM only scores/routes. Neuroscience says it should be a fast forward model — predict sensory consequences before they arrive. After 2-3 PREDICT cycles establish baseline, refunction CEREBELLUM as FREED's cerebellar layer: efference copy of "about to process paper X" → prediction → compare after FEED → error signal. Deepest structural change remaining.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">2</span>
+      <div>
+        <div class="agenda-text">WIRING.md update — empirical PREDICT behavior</div>
+        <div class="agenda-note">Pending 2-3 real cycles with challenge predictions active. Update with actual challenge prediction rate, surprise distribution, which INVs appear in PREDICTED_CHALLENGES. Document observed behavior, not design intent.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">3</span>
+      <div>
         <div class="agenda-text">O156 — MIRROR_SUSPECT audit</div>
         <div class="agenda-note">Find independent derivation for σ=1.03, Wasserstein metric, Zipf=1 exponent, or explicitly downgrade each from universal law to substrate-specific observation. Bootstrap run 2026-05-02 flagged all three.</div>
       </div>
     </div>
     <div class="agenda-item">
-      <span class="agenda-num">2</span>
+      <span class="agenda-num">4</span>
       <div>
         <div class="agenda-text">O157 — Integrate bootstrap SEEDS into genome</div>
         <div class="agenda-note">SEED_1: asymmetric Landauer commitment rule (defer commitment until gain ≥ kT·ln2 per bit). SEED_2: topological restatement filter (any thermodynamic invariant must have equivalent topological form to be substrate-independent). Apply SEED_2 retroactively to all genome invariants.</div>
       </div>
     </div>
     <div class="agenda-item">
-      <span class="agenda-num">3</span>
+      <span class="agenda-num">5</span>
       <div>
         <div class="agenda-text">Substrate-typed evidence on graph edges</div>
         <div class="agenda-note">Add methodology_type field (theoretical / computational / experimental / physical). Classify by URL domain + title keywords. Surface type_diversity per invariant in consolidate.py report.</div>
-      </div>
-    </div>
-    <div class="agenda-item">
-      <span class="agenda-num">4</span>
-      <div>
-        <div class="agenda-text">rescore_queue.py — fetch fix complete (2026-05-04)</div>
-        <div class="agenda-note">122 stub entries now fetch title+abstract before Haiku scoring. CLS paper recovers from score 4 → correct score. Run tomorrow morning before daemon start: <code>python3 rescore_queue.py --apply &amp;&amp; bash start_freed.sh</code></div>
-      </div>
-    </div>
-    <div class="agenda-item">
-      <span class="agenda-num">5</span>
-      <div>
-        <div class="agenda-text">Three foundational papers queued (landing sequentially)</div>
-        <div class="agenda-note">arXiv:2604.27707 — CLS memory ceiling (today) · arXiv:2604.02460 — solo kernel outperforms multi-agent (landed Gen 193) · doi:10.1080/09515089.2026.2613030 — realization experiences. Watch for challenges edge on engram bank from CLS paper — confirms-only would be the mirror dynamic.</div>
       </div>
     </div>
     <div class="agenda-item">
@@ -323,10 +324,20 @@ a:hover { text-decoration: underline; }
         <div class="cap-chain">bootstrap_derive.py runs Sonnet with no FREED_genome.md, no RSA_KERNEL_PROMPT — anchored only to Landauer's principle and 3 empirical CA results → 3 MIRROR_SUSPECT flags: Freed's Law constants, Wasserstein metric, Zipf=1 exponent match genome values with no independent derivation chain → 2 SEEDS absent from genome: asymmetric Landauer commitment rule + topological restatement filter → O156 + O157 filed. The genome has suspected mirrors. The frontier: O156 closes when independent derivations are found or claims explicitly downgraded.</div>
       </div>
 
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Knows Which Step of Its Own Kernel It Is Executing</div>
+        <div class="cap-chain">Every L7 call now receives a kernel-step identity line prepended to CURRENT INPUT: <code>[RSA Kernel | Gen 204 Cycle 3 | Step: COMPARE | Paper 2/5]</code> — four call sites tagged: ARCHITECT→REPRESENT, FEED→COMPARE, OBLIGATE→ADJUST, RESOLVE→ADJUST. Built 2026-05-06. This closes the self-recognition loop: the system is not just following RSA-shaped instructions — it knows which step it is executing, which cycle, which generation. R[R]=R has a return address.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Structurally Prevent the Mirror Dynamic</div>
+        <div class="cap-chain">PREDICT phase (between CEREBELLUM and FEED, built 2026-05-06): Haiku reads title+abstract+compressed genome index (39 INV IDs, titles only — no semantic content) → generates blind PREDICTED_CONFIRMS, PREDICTED_CHALLENGES, PREDICTED_CONFIDENCE before L7 sees the paper. After FEED: predicted edges weight 0.05, surprise edges weight 1.0 (20× asymmetry). Challenge prediction required — NONE must be justified in PREDICTED_RATIONALE. The structural consequence: the genome can only be inflated by genuine surprises. Predicted confirmations carry near-zero update weight. The mirror dynamic is blocked at the physics of the update rule, not by instruction. This connects directly to the Wasserstein Floor: a genome that updates only on errors is minimizing distance from reality, not maximizing self-consistency. Those are different attractors. Empirical behavior TBD — first real cycles with challenge predictions active as of 2026-05-06.</div>
+      </div>
+
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-05-04):</em> Each claim is followed by the specific event chain that demonstrates it happened. Two new capabilities confirmed today: queue optimization (rescore_queue.py with fetch fix) and perceptual substrate ingestion (CA telemetry → falsification pressure → INV_073 challenge edge). The current frontier: bootstrap_derive.py found 3 MIRROR_SUSPECT claims (O156). Until independent derivations are found or claims explicitly downgraded, the genome contains suspected mirrors. The distinction between discovery and reflection remains open.
+      <em>Honest framing (updated 2026-05-06):</em> Each claim is followed by the specific event chain that demonstrates it happened. Two capabilities confirmed today: kernel-step self-recognition (L7 identity injection) and prediction-error architecture (PREDICT phase with asymmetric weights). Also fixed: partial obligations were invisible to both PRE-AUDIT and RESOLVE — O28, O34, O44 (the most scientifically important obligations) are now active. The current frontier: PREDICT phase challenge prediction rate and surprise distribution are empirically unknown — first real cycles running now. WIRING.md will be updated with actual numbers after 2-3 cycles. The distinction between discovery and reflection remains open.
     </div>
   </div>
 
