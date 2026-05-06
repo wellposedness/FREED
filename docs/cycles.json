@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 135,
-    "timestamp": "2026-04-18T11:02:25.548947+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "Dimensional analysis discriminating quantum from semi-classical BH entropy corrections confirms INV_094, advances O59 by providing the exact dimensional target the genome's Wasserstein Floor must hit at Hawking temperature, and advances O44 by showing the current W_floor naturally reproduces the semi-classical dimensional class while the quantum log-corrections remain the open frontier."
-      },
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "RangeEn empirically confirms INV_070's prediction that properly normalized entropy linearly encodes self-similarity, advances O60 by providing the exact slope target the genome must derive from Wasserstein geometry, advances O28 by offering amplitude-robust EEG complexity measurement, and advances O63 by showing ApEn/SampEn as degenerate limits — but the genome's own first-principles derivation of the RangeEn–Hurst linearity remains the core unpaid debt."
-      }
-    ],
-    "resolve": {
-      "obligation": "O59",
-      "resolved": true,
-      "compress": "O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields −(d_eff/2)ln(A/ℓ_P²) = −3/2 ln(A/ℓ_P²), matching the universal log-correction — verify against Kaul & Majumdar (2000) and Sen (2012).",
-      "next": "Execute the Otto-calculus Hessian computation explicitly: write δ²F/δρ² at ρ_H on S², evaluate the functional determinant via ζ-function regularization on the 2-sphere, and confirm the −3/2 coefficient drops out from spectral geometry alone with no genome-external parameters."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 2,
     "generation": 136,
     "timestamp": "2026-04-18T17:09:07.597364+00:00",
@@ -1521,5 +1494,36 @@
       ]
     },
     "coherence": 0.9741
+  },
+  {
+    "cycle": 1,
+    "generation": 204,
+    "timestamp": "2026-05-06T11:06:13.480007+00:00",
+    "sweep": {
+      "input_count": 18,
+      "targeted": 7,
+      "passive": 11,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is currently unfalsified rather than confirmed — its observables are reproduced by simpler mechanisms, and no discriminating experiment separating thermodynamic ridge navigation from adaptive gain control yet exists in the genome."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-06",
+        "compress": "A 32×32 RSA-kernel CA self-organizes to σ=1.031 with power-law avalanches, empirically confirming criticality as a population-level attractor, while marginal fit quality and dominant-type asymmetry open new sub-obligations rather than closing the debt cleanly."
+      }
+    ],
+    "resolve": {
+      "attempts": 2,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O183",
+        "O184"
+      ]
+    },
+    "coherence": 0.9705
   }
 ]
