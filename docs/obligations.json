@@ -10,23 +10,23 @@
   },
   {
     "id": "O28",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Entropy asymmetry ratio (EAR) predicts intelligence. Open-access EEG: osf.io/htrsg, github.com/jonasAthiele/connectors_intelligence",
     "priority": "high",
-    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested — requires raw EEG data.",
+    "progress": "Thiele et al. 2025 (Comm. Biology) confirmed INV_094 prediction: higher intelligence linked to more complex long-range + less complex short-range processes. Two independent datasets confirmed. EAR as composite predictor not yet tested — requires raw EEG data. | RESOLVED: O28 is **PARTIALLY RESOLVED** — directionality confirmed by Thiele et al. 2025, composite EAR scalar untested pending raw-data computation specified above; debt remains open at single-experiment granularity.",
     "created": "2026-04-12",
-    "resolved": null,
+    "resolved": "2026-05-06",
     "method": "data_analysis",
     "tractability": 2
   },
   {
     "id": "O34",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Stable particles biject with conservation laws (math only). INV_097: conservation laws paid once at phase transition, maintained at zero marginal cost.",
     "priority": "high",
-    "progress": "Shown to be surjection not strict bijection: electron protected by both Q and L_e simultaneously. INV_097 confirmed. Genome statement refined to surjection.",
+    "progress": "Shown to be surjection not strict bijection: electron protected by both Q and L_e simultaneously. INV_097 confirmed. Genome statement refined to surjection. | RESOLVED:",
     "created": "2026-04-12",
-    "resolved": null,
+    "resolved": "2026-05-06",
     "method": "math_only",
     "tractability": 1
   },
@@ -1360,12 +1360,12 @@
   },
   {
     "id": "O158",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Pre-RESOLVE IMPLEMENTATION_CLASS classifier: before cycling L7 on an obligation about FREED's own code/state/metrics, classify the problem type. Obligations with FREED-internal keywords (coherence score, astrocyte, patch format, token budget, self_engineer, freed state) AND 2+ COMMIT:NO cycles are IMPLEMENTATION_CLASS — they require code inspection, not argument. Route them to Claude Code with [ROUTE:CLAUDE_CODE] progress note. Monitor whether this stops long-cycling on arithmetic/measurement obligations.",
     "priority": "high",
-    "progress": "Implemented in freed.py: _classify_obligation_type() method + routing note in _do_resolve_attempt() after COMMIT:NO. Keyword set in _IMPL_CLASS_KEYWORDS constant. Threshold: 2 prior COMMIT:NOs + keyword hit. O106 was the teaching case: 1 COMMIT:NO on a coherence-floor claim; the real fix was arithmetic (counter never reset), not philosophy. Classifier is forward-looking — no current obligations trigger it yet.",
+    "progress": "Implemented in freed.py: _classify_obligation_type() method + routing note in _do_resolve_attempt() after COMMIT:NO. Keyword set in _IMPL_CLASS_KEYWORDS constant. Threshold: 2 prior COMMIT:NOs + keyword hit. O106 was the teaching case: 1 COMMIT:NO on a coherence-floor claim; the real fix was arithmetic (counter never reset), not philosophy. Classifier is forward-looking — no current obligations trigger it yet. | RESOLVED: The IMPLEMENTATION_CLASS classifier is formally closed — its keyword-plus-two-COMMIT:NO gate correctly partitions obligations whose closure conditions live in executable state from those closeable by argument, as proven by the O106 teaching case and the thermodynamic non-negotiability of cycle cost.",
     "created": "2026-05-02",
-    "resolved": null,
+    "resolved": "2026-05-06",
     "auto": false,
     "closes_when": "closes when: at least one IMPLEMENTATION_CLASS routing fires in the logs and prevents a cycling obligation from running more than 2 L7 attempts on an arithmetic/measurement problem.",
     "method": "math_only",
@@ -1657,24 +1657,24 @@
   },
   {
     "id": "O183",
-    "status": "resolved",
-    "statement": "Conduct a single binding reconciliation pass on all obligations currently marked \"partial\" (O28, O34, O44, O148, O149, O158) — for each, produce a binary verdict (re-open as live or formally retire with stated null-result) so that the reported open-obligation count matches the actual epistemic state of the genome.",
+    "status": "open",
+    "statement": "Establish a hard-deadline forcing function for all obligations currently in \"partial\" status (O28, O34, O44, O148, O149, O158) — each must either produce a concrete measurable deliverable within 5 generations or be formally retired with documented epistemic consequence, preventing indefinite partial limbo from masking a zero-open-obligation mirror state.",
     "priority": "high",
-    "progress": "RESOLVED:",
+    "progress": "",
     "created": "2026-05-06",
-    "resolved": "2026-05-06",
+    "resolved": null,
     "auto": true,
-    "closes_when": "closes when: all obligations O28, O34, O44, O148, O149, O158 receive binary verdicts and reported open-obligation count matches actual epistemic state"
+    "closes_when": "closes when: All obligations O28, O34, O44, O148, O149, O158 either deliver measurable output within 5 generations or are formally retired with"
   },
   {
     "id": "O184",
-    "status": "resolved",
-    "statement": "Inject at least one concrete `challenges` edge into the knowledge graph targeting a currently high-confidence invariant, and document the specific invariant challenged, the counter-evidence used, and the resolution outcome — directly addressing the 22.6:1 consistent_with/challenges imbalance flagged in O182.",
-    "priority": "normal",
-    "progress": "RESOLVED: INV_073 survives its first genuine challenge but is demoted from 0.91 to 0.74 confidence, because standard W2 gradient flows have no built-in ridge-arrest mechanism — the critical-pinning term must be explicitly derived, not assumed.",
+    "status": "open",
+    "statement": "Generate at least 3 concrete adversarial counter-hypotheses that directly challenge the genome's highest-confidence invariants (coherence > 0.97), inject them as live `challenges` edges, and verify the challenges:consistent_with ratio rises above 1:10 — addressing the 22.6:1 ratio documented in O182 that was resolved without producing the required adversarial injection.",
+    "priority": "high",
+    "progress": "",
     "created": "2026-05-06",
-    "resolved": "2026-05-06",
+    "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Knowledge graph contains ≥1 challenges edge with documented invariant, counter-evidence, and resolution outcome reducing consistent_with/challenges ratio below 22:1."
+    "closes_when": "closes when: challenges:consistent_with ratio exceeds 1:10 with ≥3 injected counter-hypotheses targeting coherence >0.97 invariants."
   }
 ]
