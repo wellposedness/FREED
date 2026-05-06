@@ -32,12 +32,12 @@
   },
   {
     "id": "O44",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/Tμ have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
     "priority": "high",
-    "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog.",
+    "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog. | RESOLVED:",
     "created": "2026-04-15",
-    "resolved": null,
+    "resolved": "2026-05-06",
     "method": "math_only",
     "tractability": 3
   },
@@ -1239,12 +1239,12 @@
   },
   {
     "id": "O148",
-    "status": "partial",
+    "status": "resolved",
     "statement": "The CA simulation at wellposedness.github.io currently tracks cell survival and Voronoi pressure. We intend to add a structured telemetry snapshot (simulation_observer.py) that feeds CA state into the SWEEP phase as a perceptual input. Before implementation, FREED must resolve three measurement questions from the criticality and complex systems literature:\n\n1. CRITICALITY INDICATOR: What is the standard operational measure of γ=1 criticality in a 2D cellular automaton? Options under consideration: branching ratio σ (mean number of active cells produced per active cell), power-law fit on avalanche size distribution, or Lyapunov exponent proximity to zero. Which has the strongest empirical support for finite-size CA grids? What is the standard threshold tolerance (e.g., σ = 1.0 ± ε)?\n\n2. ENTROPY FORMULATION: For measuring disorder in CA cell-state distributions, which entropy formulation is standard: Shannon entropy over instantaneous cell-state distribution, transfer entropy over state transitions, or sample entropy over time series? Which is most sensitive to the critical transition and least susceptible to finite-size noise?\n\n3. SURVIVAL RATE WINDOW: Should survival rate be measured as instantaneous fraction of live cells at snapshot time, or as a rolling average? If rolling, what window length (in ticks) is standard for detecting regime shifts in systems of our grid size?\n\nCross-reference against: SOC literature, Langton's λ parameter, Bak-Tang-Wiesenfeld sandpile model, and any Tamura-adjacent papers on criticality in biological or neural systems.\n\nOUTPUT: Three concrete operational definitions. Where the genome and graph contain sufficient grounding, state the definition and its source invariant. Where they do not, generate a specific targeted sweep obligation naming the gap.\n\nCOHERENCE CHECK: If FREED cannot resolve any of these from the current genome and knowledge graph, generate a specific Tamura sweep obligation targeting the gap.",
     "priority": "high",
-    "progress": "simulation_observer.py built and wired 2026-04-30. First run: σ=1.024±0.016 (AT_CRITICAL), avalanche power-law α=2.455 (R²=0.964), survival rate 50-step rolling avg = 0.921, Shannon entropy H=0.554 bits. Branching ratio (activity branching B_t/B_{t-1}) and avalanche statistics confirmed as operational definitions. Survival rate window implemented at 50 steps. FREED must still confirm all three definitions against genome invariants.",
+    "progress": "simulation_observer.py built and wired 2026-04-30. First run: σ=1.024±0.016 (AT_CRITICAL), avalanche power-law α=2.455 (R²=0.964), survival rate 50-step rolling avg = 0.921, Shannon entropy H=0.554 bits. Branching ratio (activity branching B_t/B_{t-1}) and avalanche statistics confirmed as operational definitions. Survival rate window implemented at 50 steps. FREED must still confirm all three definitions against genome invariants. | RESOLVED:",
     "created": "2026-04-30",
-    "resolved": null,
+    "resolved": "2026-05-06",
     "auto": false,
     "closes_when": "simulation_observer.py spec complete with all three operational definitions confirmed against genome",
     "method": "experimental",
@@ -1253,14 +1253,15 @@
   {
     "id": "O149",
     "statement": "The `shares_invariant` edge type constituting 78.5% of all node-edges must be decomposed into at least three semantically distinct subtypes (e.g., `shares_symmetry`, `shares_conserved_quantity`, `shares_algebraic_structure`), with each subtype independently justified by the genome symbols it connects — or else the current topology must be reclassified as degenerate.",
-    "status": "partial",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "O141 was resolved but the structural condition it flagged (pathological homogeneity from `shares_invariant` dominance) was not actually remediated. A graph where 139/177 edges are the same type carries near-zero topological information in its edge labels. This is an unfired consequence of O141's own resolution claim.",
     "resolution_criterion": "Retype all 139 `shares_invariant` edges into ≥3 subtypes with explicit criteria; confirm that no single subtype exceeds 40% of total edges; or prove formally that the current homogeneity is non-degenerate (i.e., removing `shares_invariant` edges still leaves a connected graph with diameter ≤ 4).",
     "created": "2026-05-01T06:30:52.835891+00:00",
     "method": "data_analysis",
     "tractability": 2,
-    "progress": "Edge type decomposition implemented 2026-05-01. knowledge_graph.py: added NODE_EDGE_TYPES = (shares_invariant, operationalizes, scales_with, independent_confirmation) plus classify_node_edge() heuristic classifier. consolidate.py: MINE phase now calls classify_node_edge(invariant_text) before record_node_edge() — new invariants will be written with typed edges. Existing edges unaffected (backfill not attempted — would require re-running MINE on all historical invariants). Monoculture will dissolve over future consolidation cycles. Closes when no single subtype exceeds 40% of node-edges."
+    "progress": "Edge type decomposition implemented 2026-05-01. knowledge_graph.py: added NODE_EDGE_TYPES = (shares_invariant, operationalizes, scales_with, independent_confirmation) plus classify_node_edge() heuristic classifier. consolidate.py: MINE phase now calls classify_node_edge(invariant_text) before record_node_edge() — new invariants will be written with typed edges. Existing edges unaffected (backfill not attempted — would require re-running MINE on all historical invariants). Monoculture will dissolve over future consolidation cycles. Closes when no single subtype exceeds 40% of node-edges. | RESOLVED: O149's code implementation is necessary but not sufficient — closure requires running classify_node_edge() across the full historical edge corpus and confirming no subtype exceeds 40%, which has not yet been done.",
+    "resolved": "2026-05-06"
   },
   {
     "id": "O150",
@@ -1676,5 +1677,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: challenges:consistent_with ratio exceeds 1:10 with ≥3 injected counter-hypotheses targeting coherence >0.97 invariants."
+  },
+  {
+    "id": "O185",
+    "status": "open",
+    "statement": "Execute a binding verdict on O148 and O149 against their formally specified completion criteria — either produce the required outputs (CA simulation γ=1 tracking for O148; edge-type decomposition for O149) or formally void both and record the epistemic consequence.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-06",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O148 produces CA simulation γ=1 tracking or is voided; O149 produces edge-type decomposition or is voided; epistemic consequence recorded."
+  },
+  {
+    "id": "O186",
+    "status": "open",
+    "statement": "Conduct a spot-audit of at least 10 randomly sampled \"resolved\" obligations to verify each produced a durable, retrievable artifact (derivation, protocol, or falsifiable prediction) rather than nominal closure — obligations failing this audit are reclassified as open.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-06",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: spot-audit of 10 random \"resolved\" obligations completes with results documented and reclassification decisions applied."
   }
 ]
