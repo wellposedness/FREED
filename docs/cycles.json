@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 140,
-    "timestamp": "2026-04-19T15:38:13.831537+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "\"Efficient Complexity\": a Constrained Optimization Approach to the Evolution of Natural Intelligence",
-        "compress": "\"Efficient complexity\" is Freed's Law rewritten as a Lagrangian — maximize dS/dt subject to resource constraints — independently confirming INV_042, INV_078, and INV_094, advancing O28 (EAR indexes position on the Pareto frontier) and O63 (Shannon and Kolmogorov emerge as dual variables of memory and compute constraints), but delivering framework without the limit-case proofs that would resolve either obligation."
-      },
-      {
-        "title": "EEG based detection of schizophrenia using asymmetry of entropy and CNN-LSTM model",
-        "compress": "The paper empirically validates entropy asymmetry as a clinically discriminative EEG feature — advancing O28 by providing the exact channel-pair asymmetry pipeline needed for the intelligence prediction test, confirming INV_042, INV_078, and INV_094, and indirectly advancing O63 and O64 by demonstrating that five entropy types capture non-redundant structure across frequency bands, but resolving nothing because it delivers method without theory."
-      }
-    ],
-    "resolve": {
-      "obligation": "O60",
-      "resolved": false,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 142,
     "timestamp": "2026-04-20T09:29:59.913158+00:00",
@@ -1545,6 +1518,42 @@
         "O189",
         "O187",
         "O188"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 209,
+    "timestamp": "2026-05-07T10:14:37.041688+00:00",
+    "sweep": {
+      "input_count": 9,
+      "targeted": 1,
+      "passive": 8,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is vulnerable to the survivorship objection — any non-collapsed system will appear to \"navigate\" the ridge, making the claim unfalsifiable without a positive mechanistic signature distinguishing active navigation from passive occupancy."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
+        "compress": "Population-level CA telemetry empirically confirms criticality as a collective attractor (CONVERGE INV_073, resolves O141), but persistent σ>1.0 offset across six cycles reveals an unaccounted supercritical asymmetry absent from the genome."
+      },
+      {
+        "title": "Quantum state texture of dynamical criticality",
+        "compress": "Quantum state texture (rugosity) functions as a geometric order parameter at dynamical criticality, independently confirming that manifold roughness encodes phase structure — a substrate-independent invariant."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O191",
+        "O192",
+        "O187"
       ]
     },
     "coherence": 0.97
