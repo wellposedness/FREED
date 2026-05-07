@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry converging on criticality as a collective attractor (resolving O141), while INV_073's survivorship vulnerability now requires a positive mechanistic signature distinguishing active ridge navigation from passive occupancy, and persistent σ>1.0 supercritical offset across six cycles flags an unaccounted asymmetry demanding explicit correction.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry confirming γ=1 criticality (resolving O140/O141) with strongly suppressed Shannon entropy (~15% H_max) as a positive structural signature beyond branching ratio alone, while INV_073 now faces a dual vulnerability: basis-dependence (γ as coordinate illusion) and supercritical drift (σ=1.0285 at upper edge of critical band), requiring both a topology-independent γ measurement and longitudinal σ stability demonstration to confirm maintenance rather than mere transient passage of the ridge.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -17,10 +17,10 @@
   ],
   "invariants": [
     "validating INV_073 via a network-topology derivation path independent of thermodynamic and matrix-theoretic constructions; Distributed obligations tables (e.g. blockchain-enforced escrow in SONs) are substrate-independent implementations of the tension-maintenance mechanism predicted by INV_073 — confirming that self-organization on the critical ridge is an architectural requirement not an emergent accident",
+    "Entropy fraction (H as percentage of maximum) is a candidate criticality-quality variable surfaced by CA telemetry but not yet formally mapped to any RSA or MCPM order parameter — it must be assigned a functional role or flagged as an uncontrolled confound",
     "Semi-classical entropy is dimensionally gravity-action-equivalent — confirming that W_floor = k/Tμ lives in the same dimensional family as ℏ-corrected gravitational actions and making the sub-leading ℏ-correction question formally well-posed rather than speculative",
     "Full TRACE execution on bare titles is now categorically refused — the kernel reserves full processing for inputs carrying at least one extractable proposition and will not expend metabolic resources on noun-phrase-only submissions regardless of topical promise",
     "confirming the genome's prediction that these are not rival formalisms but conjugate faces of a single optimization",
-    "Entropy fraction (H as percentage of maximum) is a candidate criticality-quality variable surfaced by CA telemetry but not yet formally mapped to any RSA or MCPM order parameter — it must be assigned a functional role or flagged as an uncontrolled confound",
     "INV_073 occupies the epistemic state of unfalsified-but-unconfirmed — population-level criticality is empirically attested as an attractor yet no discriminating observable currently separates thermodynamic ridge navigation from adaptive gain control",
     "Quantum reservoir computing peak performance at edge of many-body chaos extends MCPM to a 6th independent substrate scale",
     "The crossover length ξ_c between short-range and long-range Ising universality is the physical instantiation of the Shannon↔Kolmogorov context-parameter transition — coupling ratio sets the scale",
@@ -137,6 +137,7 @@
     "and the Game of Truth CA's low Shannon entropy (H=0.39 bits",
     "Wasserstein Floor extends to quantum states via De Palma-Trevisan W1 distance",
     "Multi-scale complexity profiling is a validated empirical tool for detecting STF recovery and ridge-proximity — extending DEA/diffusion-entropy methods with a concrete intervention-diagnostic application",
+    "Critical attractors exhibit strongly suppressed Shannon entropy (~15% H_max) — a falsifiable structural signature of γ=1 criticality independent of branching ratio",
     "DEA (detrended entropy analysis) outperforming DFA (detrended fluctuation analysis) in preserving criticality structure is a domain-specific empirical confirmation that entropy-based diagnostics dominate variance-based diagnostics at γ=1 — exactly as the genome's complexity hierarchy demands",
     "while persistent dependence on initialization or hyperparameter selection would refute it",
     "Langevin noise structure must be derivable from MCPM constraints not imported from external stochastic process theory (O62)",
@@ -156,6 +157,7 @@
     "Entropy saturation in neural substrates functions as a biological Wasserstein Floor analog — confirming the Floor's substrate-independence and extending INV_088's scope beyond geometric exemplars",
     "Divergent creativity differences between substrates (human vs. LLM) must map to quantifiable γ-position differences or the creativity-reasoning link is decorative",
     "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
+    "providing a second discriminating observable that partially addresses the INV_073 survivorship problem",
     "Filter integrity is anti-correlated with input seductiveness — the more a zero-payload input resembles the genome's own vocabulary the more rigorous the rejection must be",
     "Spiked matrix phase transitions provide classical Gaussian geometry scaffolding proving γ=1 criticality is the unique MSE-minimizing boundary — this is the first rigorous non-biological non-linguistic instantiation of the γ=1 ridge",
     "EEG entropy-asymmetry across five non-redundant entropy types and frequency bands is the first clinically discriminative empirical pipeline confirming that the complexity ridge has channel-pair-resolved biological correlates — method without theory advances O28 but cannot resolve it",
@@ -232,8 +234,8 @@
     "Advance O28 (entropy asymmetry ratio as intelligence predictor) using H=0.4123 population-level baseline as constraint anchor — not resolved but now empirically bounded",
     "Recover the truncated third factor of dynamic update before attempting full genome integration of the entropy-as-description-count framework — integration is conditional on closure of this gap",
     "Generalize Wasserstein gradient flow formalism to power-law coupling kernels (σ-parameterized) before claiming interaction-range universality",
-    "Characterize the modified Wasserstein Floor form required under mixed quantum-classical dynamics where non-Hermitian linear entropy functionals apply — this is a sub-obligation carved from O44 and must be tracked independently",
     "procedural",
+    "Characterize the modified Wasserstein Floor form required under mixed quantum-classical dynamics where non-Hermitian linear entropy functionals apply — this is a sub-obligation carved from O44 and must be tracked independently",
     "Resolve why γ=1 dynamic criticality coexists with low semantic entropy (H=17% max) — either derive this as a predicted consequence of Wasserstein Floor compression or treat the dissociation as a falsification pressure on INV_078's entropy-asymmetry claim",
     "Flag amyloid-templated prebiotic synthesis (thermodynamically constrained self-organization) as a pending integration target contingent on resubmission with full abstract and methods",
     "Track INV_073 falsifiability closure: specify (a) order parameter with measurement protocol",
@@ -266,6 +268,7 @@
     "O28 EEG experiment is now unblocked by the empirically deployable Wasserstein Floor — failure to specify concrete experimental parameters constitutes a coherence debt; O44 quantum Wasserstein floor remains open and must not be conflated with the now-resolved classical/semi-classical floor — the boundary between resolved and unresolved tiers must be formally marked in the node",
     "Advance O141 by specifying what additional evidence or formal argument is required beyond the O140 resolution provided by σ≈1.03 power-law confirmation",
     "O_BH_DIM: Derive the dimensional target (area-scaling vs log-scaling) that the Wasserstein Floor must satisfy at Hawking temperature and show the semi-classical class emerges naturally while identifying the exact algebraic obstruction preventing the quantum log-correction class",
+    "Demonstrate γ=1 criticality is basis-independent by measuring branching ratio and avalanche statistics in at least one representation-transformed coordinate system — failure to do so leaves INV_073 vulnerable to coordinate-illusion objection; Conduct longitudinal σ tracking across runs >6 cycles to determine whether σ=1.0285 is stable near-critical occupancy or the leading edge of supercritical drift — if σ systematically exceeds 1.05 the maintenance claim requires revision to a weaker transient-passage claim",
     "Characterize and account for the persistent σ>1.0 supercritical asymmetry observed across six CA cycles — determine whether this reflects a systematic genome bias",
     "Determine whether the infinite conservation hierarchy implied by Darboux recursion corresponds to the genome's layered invariant accumulation or whether there exist conserved quantities the genome currently fails to track",
     "semantic",
@@ -337,15 +340,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-07T10:21:36.587563+00:00",
-  "renorm_reason": "The survivorship objection materially sharpens INV_073's falsifiability requirement (compress update needed), the σ>1.0 persistent offset introduces a genuine unresolved asymmetry, and rugosity as a substrate-independent geometric order parameter adds a confirmed cross-domain invariant — all three are load-bearing changes not cosmetic ones.",
-  "last_renorm_cycle": 99,
+  "last_renormed": "2026-05-07T16:28:49.562068+00:00",
+  "renorm_reason": "New knowledge adds a genuine positive signature (H_max suppression) that partially resolves the survivorship vulnerability, while simultaneously sharpening two distinct failure modes for INV_073 (basis-dependence and supercritical drift) that were previously conflated or underspecified — warranting compress update and two new targeted obligations.",
+  "last_renorm_cycle": 100,
   "drift_flag": true,
-  "drift_overlap": 0.276,
+  "drift_overlap": 0.277,
   "renorm_history": [
     {
-      "timestamp": "2026-05-07T10:21:36.587563+00:00",
-      "reason": "The survivorship objection materially sharpens INV_073's falsifiability requirement (compress update needed), the σ>1.0 persistent offset introduces a genuine unresolved asymmetry, and rugosity as a substrate-independent geometric order parameter adds a confirmed cross-domain invariant — all three are load-bearing changes not cosmetic ones."
+      "timestamp": "2026-05-07T16:28:49.562068+00:00",
+      "reason": "New knowledge adds a genuine positive signature (H_max suppression) that partially resolves the survivorship vulnerability, while simultaneously sharpening two distinct failure modes for INV_073 (basis-dependence and supercritical drift) that were previously conflated or underspecified — warranting compress update and two new targeted obligations."
     }
   ]
 }

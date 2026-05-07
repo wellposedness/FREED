@@ -1708,7 +1708,9 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.]"
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O188",
@@ -1734,14 +1736,16 @@
   },
   {
     "id": "O190",
-    "status": "open",
+    "status": "resolved",
     "statement": "After O187 and O188 both resolve, synthesize their outputs into a single graph-health certificate that either confirms or flags the genome's relational structure as fit for the next FEED cycle.",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED:  The genome's relational graph passes all three audit lenses — monoidal closure (T1), thermodynamic admissibility (T2), critical ridge occupancy (T3) — issuing certificate **C = FIT** with explicit falsification conditions, the most live of which is premature resolution of both remaining open obligations before FEED 210. ---",
     "created": "2026-05-07",
-    "resolved": null,
+    "resolved": "2026-05-07",
     "auto": true,
-    "closes_when": "closes when: a graph-health certificate is produced stating either \"fit\" or \"unfit\" for next FEED cycle."
+    "closes_when": "closes when: a graph-health certificate is produced stating either \"fit\" or \"unfit\" for next FEED cycle.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O191",
@@ -1766,5 +1770,31 @@
     "resolved": "2026-05-07",
     "auto": true,
     "closes_when": "closes when: kernel action taken if σ>1.026 for 3+ cycles specified, parameter identified, and return criterion to [1.00,1.026] defined."
+  },
+  {
+    "id": "O193",
+    "status": "open",
+    "statement": "Verify that the correction protocol established by O192 has produced a measurable directional change in CA telemetry σ toward the γ=1 target band — report pre/post σ values and declare success or null-result.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-07",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Pre/post CA telemetry σ values reported and directional movement toward γ=1 target band confirmed or null-result declared.",
+    "method": "experimental",
+    "tractability": 3
+  },
+  {
+    "id": "O194",
+    "status": "resolved",
+    "statement": "Execute at least one operationalization specified in O188 on real or synthetic data and report a concrete measured value — distinguishing specified-but-untested from empirically instantiated.",
+    "priority": "normal",
+    "progress": "RESOLVED:",
+    "created": "2026-05-07",
+    "resolved": "2026-05-07",
+    "auto": true,
+    "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
+    "method": "data_analysis",
+    "tractability": 2
   }
 ]

@@ -4,7 +4,7 @@
   "created": "2026-04-12",
   "generation": 110,
   "summary": "This document progressively tightens the RSA substrate law from a quantifier-loose formulation (∃R(t) ⇒ ∃M₀ : dS/dt > 0) to a causally bound thermodynamic necessity (R(t) ⇒ ∃M_R : dS(M_R,t)/dt > 0), then derives that reasoning requires entropy gradients, far-from-equilibrium conditions, and dissipative structure dynamics. It demonstrates that RSA's PERCEIVE-REPRESENT-PREDICT-COMPARE-ADJUST-COMPRESS kernel maps precisely onto thermodynamic dissipative information processing, connecting to Landauer's principle, Prigogine's dissipative structures, Friston's Free Energy Principle, and optimal transport geometry.",
-  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure compressing environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the SR↔LR Ising crossover ridge (γ=1) — population-level γ=1 confirmed as dynamical attractor resolving O141, yet the survivorship objection demands a positive mechanistic signature distinguishing active ridge navigation from passive occupancy, and persistent σ>1.0 supercritical offset across six cycles marks an unaccounted asymmetry requiring structural explanation.",
+  "compress": "Reasoning is a substrate-independent, scale-invariant dissipative structure compressing environmental information along minimal-entropy-cost paths through belief space, self-maintaining via recursive autopoiesis at the SR↔LR Ising crossover ridge (γ=1) — population-level γ=1 confirmed as dynamical attractor across 10+ substrates, yet three open vulnerabilities remain: basis-dependence of γ (coordinate-illusion objection), supercritical drift risk (σ=1.0285 at upper critical-band edge), and the mechanistic gap between active ridge navigation and passive occupancy — all requiring operationally closed falsification signatures beyond branching ratio alone.",
   "tags": [
     "thermodynamics",
     "Landauer principle",
@@ -144,6 +144,7 @@
     "feed deduplication must be enforced upstream of the falsification layer to prevent redundant processing cycles from masquerading as confirmatory weight",
     "entropy-based diagnostics (DEA) outperform variance-based diagnostics (DFA) at γ=1 criticality — this is a structural prediction of the genome's hierarchy (entropy is the fundamental observable at criticality not variance)",
     "PREDICT/PRE-AUDIT duality has an explicit algebraic template in Lax pair compatibility — the genome's asserted but underived duality now has a derivation pathway via direct/dual overdetermined system interleaving",
+    "basis-independence of γ=1 criticality must be demonstrated by showing the branching-ratio signature is invariant under representation change — coordinate-dependent criticality would demote INV_073 from substrate law to artifact; critical attractors exhibit strongly suppressed Shannon entropy (~15% H_max) as a falsifiable structural signature independent of branching ratio — low semantic entropy coexisting with dynamical criticality is a dual-channel confirmation requirement not reducible to σ alone",
     "alignment is structural not ideological",
     "GGD-CDF normalization is a more principled realization of amplitude-invariance than tolerance-windowing — the genome should prefer distribution-theoretic over ad-hoc-geometric approaches to normalization when both satisfy INV_042",
     "quantum reservoir computing at the edge of many-body chaos is Freed's Law written in qubits — extending MCPM confirmation to a 6th independent substrate scale",
@@ -283,6 +284,7 @@
     "recover the truncated third factor of the dynamic update rule before integrating the entropy-as-description-count framework — its absence is a structural gap that leaves the Bayesian update geometry of the genome incomplete; determine whether the ℏ-correction to W_floor is computable from existing genome invariants or requires new substrate-specific input — if the former",
     "experimental falsification criteria must propagate back to update invariants if violated",
     "flag as a new empirical anchor point requiring external confirmation",
+    "measure σ under extended-run conditions to determine whether σ=1.0285 is a stable ridge lock or the onset of supercritical drift — if σ systematically exceeds 1.05 over longer horizons INV_073's maintenance claim requires revision; demonstrate γ=1 invariance under basis transformation (e.g. re-parameterizing the CA kernel or changing the avalanche-detection observable) to close the coordinate-illusion objection before INV_073 can be promoted to theorem status",
     "Demonstrate that RSA's critical ridge (γ=1) is an attractor under perturbation — i.e.",
     "the quantum Wasserstein Floor formalism requires augmentation before O44 can close",
     "must demonstrate that R[R]=R terminates the mapmaker regress in a way that survives the Abstraction Fallacy's own objections to self-referential closure",
@@ -310,15 +312,15 @@
     "GPT (primary interlocutor driving formalization)",
     "human architect (RSA originator prompting derivation chain)"
   ],
-  "last_renormed": "2026-05-07T10:21:59.526780+00:00",
-  "renorm_reason": "O141 resolution and collective attractor confirmation strengthen INV_073's empirical base, but the survivorship objection introduces a genuine unfalsifiability crack requiring mechanistic discrimination, the σ>1.0 asymmetry is a new anomaly absent from the genome demanding structural integration, and rugosity as a substrate-independent geometric order parameter is a genuinely new invariant class extending the criticality diagnostic framework beyond scalar entropy measures — net coherence gain is modest because the new obligations partially offset the confirm",
-  "last_renorm_cycle": 99,
+  "last_renormed": "2026-05-07T16:29:16.389465+00:00",
+  "renorm_reason": "New knowledge adds a genuine basis-dependence vulnerability not previously formalized, sharpens the supercritical-drift risk into a testable trajectory question, and introduces suppressed Shannon entropy as a second independent falsification channel — all materially tightening the invariant structure without overturning confirmed results.",
+  "last_renorm_cycle": 100,
   "drift_flag": true,
-  "drift_overlap": 0.369,
+  "drift_overlap": 0.434,
   "renorm_history": [
     {
-      "timestamp": "2026-05-07T10:21:59.526780+00:00",
-      "reason": "O141 resolution and collective attractor confirmation strengthen INV_073's empirical base, but the survivorship objection introduces a genuine unfalsifiability crack requiring mechanistic discrimination, the σ>1.0 asymmetry is a new anomaly absent from the genome demanding structural integration, and rugosity as a substrate-independent geometric order parameter is a genuinely new invariant class extending the criticality diagnostic framework beyond scalar entropy measures — net coherence gain is modest because the new obligations partially offset the confirm"
+      "timestamp": "2026-05-07T16:29:16.389465+00:00",
+      "reason": "New knowledge adds a genuine basis-dependence vulnerability not previously formalized, sharpens the supercritical-drift risk into a testable trajectory question, and introduces suppressed Shannon entropy as a second independent falsification channel — all materially tightening the invariant structure without overturning confirmed results."
     }
   ]
 }
