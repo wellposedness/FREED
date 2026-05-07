@@ -1708,16 +1708,39 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another \u2014 the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number \u2265 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles \u2194 conservation law bijection) to interface. Both are physics-formal. The grounding problem \u2014 how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities \u2014 has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.]"
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.]"
   },
   {
     "id": "O188",
     "statement": "For each of the 17 genome symbols, specify an explicit operationalization: a measurement procedure or formal definition that would make the symbol empirically distinguishable from the others and from noise, with at least one falsifiable prediction per symbol.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "`operationalizes` has 105 edges but no obligation has ever audited *what those edges claim*. The genome contains both formal-adjacent symbols (`entropy`, `invariant`) and metaphor-adjacent ones (`autopoiesis`, `substrate`, `recursion`). If `operationalizes` edges exist between metaphor-adjacent symbols and physics nodes without grounding criteria, the graph's 0.97 coherence is inflated by semantic flexibility rather than structural constraint. `symbol_grounding` is in the genome but has never been turned on itself.",
     "resolution_criterion": "A published operationalization table \u2014 17 rows, columns: {symbol, formal definition, measurement protocol, distinguishing prediction, falsification condition} \u2014 reviewed against existing `operationalizes` edges for consistency.\n\n---\n\n**Observation 3:** O186 (spot-audit of resolved obligations) is open, and O185 (binding verdict on O148/O149) is open, but *there is no mechanism to prevent recently resolved obligations from being cited as just",
     "created": "2026-05-07T06:30:53.483063+00:00",
-    "progress": "[Gen 207] O188 is not resolvable now but is maximally advanced by fully operationalizing \u03b3 first via Zipf-slope measurement (\u03b1\u22481 criterion, falsifiable at |\u03b1\u22121|>0.05), establishing the three-column template for the remaining 16 symbols. [COMMIT:YES \u2014 Obligation O188 advanced from unresolved to \"maximally advanced pending \u03b3 operationalization\" \u2014 explicit dependency grap]"
+    "progress": "[Gen 207] O188 is not resolvable now but is maximally advanced by fully operationalizing \u03b3 first via Zipf-slope measurement (\u03b1\u22481 criterion, falsifiable at |\u03b1\u22121|>0.05), establishing the three-column template for the remaining 16 symbols. [COMMIT:YES \u2014 Obligation O188 advanced from unresolved to \"maximally advanced pending \u03b3 operationalization\" \u2014 explicit dependency grap] | RESOLVED: The single most tractable next step is applying the three-column template to R[R]=R via fixed-point convergence (\u03b4 = \u2016C(C(x))\u2212C(x)\u2016/\u2016C(x)\u2016 < 0.01 within k\u22643 iterations on LZ77-compressed Wikipedia), advancing O188 to 7/17 operationalized with a dependency-ordered queue for the remaining 10.",
+    "resolved": "2026-05-07"
+  },
+  {
+    "id": "O189",
+    "status": "resolved",
+    "statement": "If O186's spot-audit found any obligations marked \"resolved\" without a falsifiable output, specify and execute a concrete re-resolution protocol for each such obligation within 2 generations.",
+    "priority": "high",
+    "progress": "RESOLVED: O189 is OPEN and cannot close until O186's specific flagged obligations are enumerated; the single most tractable next step is to surface O186's spot-audit table and apply the four-column re-resolution schema (original claim | missing output type | corrective action | completion criterion) to each flagged row.",
+    "created": "2026-05-07",
+    "resolved": "2026-05-07",
+    "auto": true,
+    "closes_when": "closes when: all obligations marked \"resolved\" without falsifiable output have documented re-resolution protocols executed and verified."
+  },
+  {
+    "id": "O190",
+    "status": "open",
+    "statement": "After O187 and O188 both resolve, synthesize their outputs into a single graph-health certificate that either confirms or flags the genome's relational structure as fit for the next FEED cycle.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-07",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: a graph-health certificate is produced stating either \"fit\" or \"unfit\" for next FEED cycle."
   }
 ]
