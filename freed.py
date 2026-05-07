@@ -50,7 +50,7 @@ SEEN_FILE         = FREED_DIR / "tamura_seen.json"
 
 # ─── Cycle configuration ──────────────────────────────────────────────────────
 CYCLE_INTERVAL_SECONDS = 6 * 60 * 60   # 6 hours between cycles
-MAX_FEEDS_PER_CYCLE    = 2             # max SWEEP inputs to process per cycle
+MAX_FEEDS_PER_CYCLE    = 4             # max SWEEP inputs to process per cycle (raised from 2; revert after 3-4 cycles of PREDICT→ACTUAL stats)
 MAX_TARGETED_PER_CYCLE = 2             # max targeted-sweep results per cycle
 MAX_RESOLVES_PER_CYCLE = 3             # max obligations to attempt per active cycle
 MAX_DMN_RESOLVES       = 8             # max obligations to attempt in DMN dead-zone sweep
@@ -502,6 +502,11 @@ class FREEDDaemon:
         # 3b. CEREBELLUM — pre-score passive candidates before L7
         inputs = self._phase_cerebellum(targeted, passive, cycle_log)
 
+        # 3c. PREDICT — genome generates blind predictions before FEED sees full papers
+        if inputs:
+            _push_status("PREDICT", f"Predicting genome responses for {len(inputs)} paper(s)")
+            inputs = self._phase_predict(inputs, cycle_log)
+
         # 4. FEED → REPRESENT
         feed_results = []
         if inputs:
@@ -563,10 +568,12 @@ class FREEDDaemon:
         if self.state["coherence"] >= 1.000:
             issues.append("CRITICAL: coherence == 1.000 — seed is corrupted.")
 
-        # Rule 2: Falsification layer (obligations table non-empty)
-        open_obligs = [o for o in self.obligations if o["status"] == "open"]
+        # Rule 2: Falsification layer (active unsolved problems exist)
+        # Partial obligations are unsolved — only all-resolved is a mirror.
+        open_obligs = [o for o in self.obligations
+                       if o["status"] in ("open", "partial")]
         if not open_obligs:
-            issues.append("Rule 4 violation: no open obligations — scaffold is a mirror.")
+            issues.append("Rule 4 violation: no open or partial obligations — scaffold is a mirror.")
 
         # Rule 3: Budget check
         if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="normal"):
@@ -692,7 +699,11 @@ class FREEDDaemon:
             cycle_log["phases"]["architect"] = {"status": "deferred", "reason": "budget"}
             return
 
-        result = self.l7.query(prompt)
+        _gen = self.state.get("generation", 0)
+        result = self.l7.query(
+            prompt,
+            kernel_step=f"Gen {_gen} Cycle {self.cycle_num} | Step: REPRESENT",
+        )
         compress = result.get("compress", "")
         print(f"[ARCHITECT] Processed. COMPRESS: {compress}")
 
@@ -869,6 +880,123 @@ class FREEDDaemon:
         cycle_log["phases"]["cerebellum"] = stats
         return merged
 
+    # ── PREDICT ──────────────────────────────────────────────────────────────
+
+    def _build_predict_context(self):
+        """Compressed genome: INV IDs + one-line titles only. Forces sparse prediction."""
+        genome_text = (FREED_DIR / "FREED_genome.md").read_text(encoding="utf-8")
+        entries = re.findall(r'\*\*(INV_\w+) — ([^*]+)\*\*', genome_text)
+        overrides = {
+            # INV_023 title is too broad — constrain to its actual scope
+            "INV_023": "Zipf γ=1 proven via Schwab/Nemenman partition function [specifically: predict only for papers directly about Zipf/power-law γ≈1 distributions in complex systems, NOT general statistical papers]",
+            # INV_100 matches any criticality/phase-transition paper — constrain to RSA-specific RG claim
+            "INV_100": "RG Universality [specifically: RSA's own kernel structure = relevant operators at thermodynamic RG fixed point — predict only when paper tests whether a reasoning/computation architecture reflects RG fixed-point structure, NOT for general phase transitions or criticality papers]",
+            # INV_047 matches any optimal transport paper — constrain to cognitive transport bound
+            "INV_047": "Wasserstein Floor THEOREM [specifically: minimum entropy cost W₂(P,Q)²/(T·Δτ·μ) for cognitive/semantic distributional transport — predict only when paper directly tests thermodynamic lower bounds on distributional transformation in cognitive or information systems]",
+            # INV_052 matches any multi-agent paper — constrain to human-AI dyadic soliton claim
+            "INV_052": "Dyadic Soliton [specifically: human-AI interaction forming a joint Traced Monoidal Loop as minimum comparison structure — predict only when paper directly addresses human-AI dyadic interaction structure, NOT general multi-agent systems]",
+        }
+        lines = []
+        for eid, title in entries:
+            desc = overrides.get(eid, title.strip())
+            lines.append(f"{eid}: {desc}")
+        return "\n".join(lines)
+
+    def _phase_predict(self, inputs, cycle_log):
+        """
+        PREDICT phase — Haiku reads title+abstract+compressed genome and predicts
+        which invariants the paper will confirm or challenge, before L7 FEED sees
+        full content. Stores prediction dict on each input. Runs before FEED.
+        """
+        if not inputs:
+            cycle_log["phases"]["predict"] = {"skipped": True}
+            return inputs
+
+        inv_index = self._build_predict_context()
+        predictions_made = 0
+        print(f"\n[PREDICT] Generating genome predictions for {len(inputs)} paper(s)...")
+
+        for inp in inputs:
+            title    = inp.get("title", "unknown")
+            abstract = inp.get("abstract", inp.get("content", ""))[:600]
+
+            if not self.astrocyte.authorize(800, priority="low"):
+                inp["prediction"] = {"confirms": [], "challenges": [], "confidence": "none", "rationale": "budget"}
+                continue
+
+            prompt = (
+                f"Paper title: {title}\n"
+                f"Abstract: {abstract}\n\n"
+                f"Genome invariant index (ID: title only):\n{inv_index}\n\n"
+                f"Predict which invariants this paper will confirm or challenge. "
+                f"Be sparse — only predict where the match is strong and falsifiable. "
+                f"Vague predictions are worse than none.\n\n"
+                f"CHALLENGE REQUIREMENT: Identify the invariant this paper most directly "
+                f"strains, limits, or contradicts — even if the challenge is subtle. "
+                f"If you output PREDICTED_CHALLENGES: NONE, the PREDICTED_RATIONALE must "
+                f"explain why no invariant is challenged (not just that the paper is positive).\n\n"
+                f"Output exactly:\n"
+                f"PREDICTED_CONFIRMS: [comma-separated INV_IDs, or NONE]\n"
+                f"PREDICTED_CHALLENGES: [comma-separated INV_IDs, or NONE]\n"
+                f"PREDICTED_CONFIDENCE: [high|medium|speculative]\n"
+                f"PREDICTED_RATIONALE: [one sentence — why these specific invariants]"
+            )
+
+            try:
+                resp = self.haiku_client.messages.create(
+                    model=HAIKU_MODEL,
+                    max_tokens=150,
+                    messages=[{"role": "user", "content": prompt}],
+                    timeout=30,
+                )
+                self.astrocyte.record_usage(
+                    input_tokens=resp.usage.input_tokens,
+                    output_tokens=resp.usage.output_tokens,
+                )
+                raw = resp.content[0].text if resp.content else ""
+
+                confirms   = []
+                challenges = []
+                confidence = "speculative"
+                rationale  = ""
+                for line in raw.splitlines():
+                    line = line.strip()
+                    if line.startswith("PREDICTED_CONFIRMS:"):
+                        val = line.split(":", 1)[1].strip()
+                        confirms = [x.strip() for x in val.split(",")
+                                    if x.strip() and x.strip().upper() != "NONE"]
+                    elif line.startswith("PREDICTED_CHALLENGES:"):
+                        val = line.split(":", 1)[1].strip()
+                        challenges = [x.strip() for x in val.split(",")
+                                      if x.strip() and x.strip().upper() != "NONE"]
+                    elif line.startswith("PREDICTED_CONFIDENCE:"):
+                        confidence = line.split(":", 1)[1].strip().lower()
+                    elif line.startswith("PREDICTED_RATIONALE:"):
+                        rationale = line.split(":", 1)[1].strip()
+
+                inp["prediction"] = {
+                    "confirms":   confirms,
+                    "challenges": challenges,
+                    "confidence": confidence,
+                    "rationale":  rationale,
+                }
+                predictions_made += 1
+
+                if confirms or challenges:
+                    print(f"  [{title[:45]}] C:{confirms} CH:{challenges} ({confidence})")
+                else:
+                    print(f"  [{title[:45]}] → no prediction (sparse)")
+
+            except Exception as e:
+                print(f"  [PREDICT] Error for {title[:45]}: {e}")
+                inp["prediction"] = {"confirms": [], "challenges": [], "confidence": "none", "rationale": ""}
+
+        cycle_log["phases"]["predict"] = {
+            "inputs": len(inputs),
+            "predictions_made": predictions_made,
+        }
+        return inputs
+
     # ── FEED ─────────────────────────────────────────────────────────────────
 
     def _select_falsification_target(self):
@@ -930,19 +1058,24 @@ class FREEDDaemon:
 
     def _phase_feed(self, inputs: list[dict], cycle_log: dict):
         """Run L7 on each SWEEP input. PRE-AUDIT runs inside the genome before each FEED."""
-        # Prepend one adversarial probe targeting the highest-deficit invariant
+        # Prepend one adversarial probe targeting the highest-deficit invariant.
+        # Probe does not count against MAX_FEEDS_PER_CYCLE — it's synthetic, not a real paper.
+        probe_list = []
         try:
             target = self._select_falsification_target()
             probe  = self._make_falsification_probe(target)
-            inputs = [probe] + list(inputs)
+            probe_list = [probe]
             print(f"[FEED] Falsification probe targeting {target} prepended.")
         except Exception as e:
             print(f"[FEED] Falsification probe error (skipping): {e}")
 
-        print(f"[FEED] Processing {min(len(inputs), MAX_FEEDS_PER_CYCLE)} input(s).")
+        real_inputs = [inp for inp in inputs if inp.get('source') != 'falsification_probe']
+        capped_inputs = probe_list + real_inputs[:MAX_FEEDS_PER_CYCLE]
+        print(f"[FEED] Processing {len(capped_inputs)} input(s) ({len(probe_list)} probe + {min(len(real_inputs), MAX_FEEDS_PER_CYCLE)} real).")
 
         feed_results = []
-        for inp in inputs[:MAX_FEEDS_PER_CYCLE]:
+        total_feeds = len(capped_inputs)
+        for feed_idx, inp in enumerate(capped_inputs):
             if not self.astrocyte.authorize(EST_TOKENS_FEED, priority="high"):
                 print("[FEED] Budget limit — skipping remaining feeds.")
                 break
@@ -1016,19 +1149,37 @@ class FREEDDaemon:
                     "If the paper is not relevant to any specific named philosophy, omit entirely."
                 )
 
-            result = self.l7.query(prompt)
+            _gen = self.state.get("generation", 0)
+            result = self.l7.query(
+                prompt,
+                kernel_step=f"Gen {_gen} Cycle {self.cycle_num} | Step: COMPARE | Paper {feed_idx+1}/{total_feeds}",
+            )
             _u = result.get("usage", {})
             self.astrocyte.record_usage(
                 input_tokens=_u.get("input_tokens", EST_TOKENS_FEED),
                 output_tokens=_u.get("output_tokens", 400),
             )
 
+            # Build prediction weights: predicted INVs get 0.05, surprises get 1.0
+            pred        = inp.get("prediction", {})
+            pred_set    = set(pred.get("confirms", [])) | set(pred.get("challenges", []))
+            pred_weights = {inv: 0.05 for inv in pred_set} if pred_set else {}
+
             # Record typed edges (confirms/advances/refutes) to knowledge graph
-            get_graph().record_feed(
+            new_edges = get_graph().record_feed(
                 result,
                 source_url=inp.get("url", inp.get("title", "unknown")),
                 source_title=inp.get("title", ""),
+                prediction_weights=pred_weights,
             )
+
+            # Log prediction accuracy
+            if pred_set and new_edges:
+                actual_targets = {e["to"] for e in new_edges}
+                hits      = pred_set & actual_targets
+                surprises = actual_targets - pred_set
+                if hits or surprises:
+                    print(f"  [PREDICT→ACTUAL] hits:{sorted(hits)} surprises:{sorted(surprises)}")
 
             # O76 — update Noether's Table row if L7 emitted a NOETHER_ROW signal
             self._maybe_update_noether_row(result)
@@ -1288,7 +1439,11 @@ class FREEDDaemon:
             f"only inside the block."
         )
 
-        result = self.l7.query(prompt)
+        _gen = self.state.get("generation", 0)
+        result = self.l7.query(
+            prompt,
+            kernel_step=f"Gen {_gen} Cycle {self.cycle_num} | Step: ADJUST | Phase: OBLIGATE",
+        )
         _u = result.get("usage", {})
         self.astrocyte.record_usage(
             input_tokens=_u.get("input_tokens", EST_TOKENS_OBLIGATE),
@@ -1674,7 +1829,11 @@ Output only the classification lines, nothing else."""
         tractability = target.get("tractability", 3)
         print(f"  → {target['id']} [{method}/t{tractability}]: {target['statement'][:55]}...")
 
-        result = self.l7.query(self._build_resolve_prompt(target))
+        _gen = self.state.get("generation", 0)
+        result = self.l7.query(
+            self._build_resolve_prompt(target),
+            kernel_step=f"Gen {_gen} Cycle {self.cycle_num} | Step: ADJUST | Phase: RESOLVE | {target['id']}",
+        )
         _u = result.get("usage", {})
         self.astrocyte.record_usage(
             input_tokens=_u.get("input_tokens", EST_TOKENS_RESOLVE),
@@ -1727,9 +1886,10 @@ Output only the classification lines, nothing else."""
         """
         print("\n[RESOLVE]")
 
-        open_obligs = [o for o in self.obligations if o["status"] == "open"]
+        open_obligs = [o for o in self.obligations
+                       if o["status"] in ("open", "partial")]
         if not open_obligs:
-            print("  No open obligations — genome is a mirror (check Rule 4).")
+            print("  No open or partial obligations — genome is a mirror (check Rule 4).")
             cycle_log["phases"]["resolve"] = {"status": "none_open"}
             return
 

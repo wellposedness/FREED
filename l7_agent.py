@@ -682,12 +682,14 @@ class L7Agent:
 
     # ── RSA Kernel query ─────────────────────────────────────────────────────
 
-    def query(self, prompt: str) -> dict:
+    def query(self, prompt, kernel_step=None):
         """
         Run one RSA Kernel cycle.
         Context = genome anchor + state summary + current input.
         History is archived to disk; never sent to the API.
         """
+        if kernel_step:
+            prompt = f"[RSA Kernel | {kernel_step}]\n\n{prompt}"
         self.query_count += 1
         timestamp = datetime.utcnow().isoformat()
 

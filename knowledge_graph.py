@@ -1451,6 +1451,7 @@ class KnowledgeGraph:
     def __init__(self):
         self._edges = []        # paper→invariant/obligation edges
         self._node_edges = []   # node→node structural edges (shares_invariant)
+        self._telemetry = []    # criticality telemetry time-series nodes
         self._loaded = False
         self._cluster_embeddings = defaultdict(list)  # type: Dict[str, List[List[float]]]
 
@@ -1490,8 +1491,8 @@ class KnowledgeGraph:
     # ── Recording ────────────────────────────────────────────────────────────
 
     def record_feed(self, kernel_output, source_url, source_title="",
-                    context_tag=None):
-        # type: (dict, str, str, Optional[str]) -> list
+                    context_tag=None, prediction_weights=None):
+        # type: (dict, str, str, Optional[str], Optional[dict]) -> list
         """
         Extract edges from a kernel output and append them to the graph.
 
@@ -1505,12 +1506,20 @@ class KnowledgeGraph:
             Title of the source.
         context_tag : str or None
             Explicit context tag. If None, auto-inference is attempted.
+        prediction_weights : dict or None
+            {INV_ID: float} — edges targeting predicted INVs get that weight.
+            Surprises (not in dict) default to 1.0. Omit field if weight is 1.0.
 
         Returns the list of new edges added (may be empty).
         """
         self._ensure_loaded()
         new_edges = extract_edges(kernel_output, source_url, source_title,
                                   context_tag=context_tag)
+        if prediction_weights and new_edges:
+            for e in new_edges:
+                w = prediction_weights.get(e.get("to", ""), 1.0)
+                if w != 1.0:
+                    e["prediction_weight"] = w
         if new_edges:
             self._edges.extend(new_edges)
             self.save()
