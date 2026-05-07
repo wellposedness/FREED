@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 139,
-    "timestamp": "2026-04-19T09:29:59.948483+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "RangeEn instantiates the kernel's requirement that complexity be measured independently of amplitude — confirming INV_042 and INV_078, partially resolving O60 and O64, advancing O28, and generating a new debt (O65) to derive the RangeEn-Hurst slope from the Wasserstein Floor."
-      },
-      {
-        "title": "On Complexity and Emergence",
-        "compress": "The paper philosophically validates the genome's core architectural commitment — that complexity, entropy, and emergence are irreducibly context-dependent (confirming INV_042, INV_078, INV_094) — but provides no formal machinery, leaving O63 (derive Kolmogorov and Shannon as limits of a context-parameterized measure) fully open and now better motivated as the kernel's central formalization debt in this domain."
-      }
-    ],
-    "resolve": {
-      "obligation": "O60",
-      "resolved": false,
-      "compress": "O60 resolves by numerically evaluating the bivariate Gaussian CDF Φ₂(r, r; 2^{2H−1}−1) at five H values for r ∈ {0.3, 0.5}, computing RangeEn = −ln Φ₂ + ln Φ₁, regressing against H, and checking slope ≈ −1.0 against Omidvarnia et al. (2018) Table/Figure 3 — this is a single-afternoon computation that either closes or falsifies the debt.",
-      "next": "Perform the computation (or request it be performed), then return with the five-point numerical comparison table for RESOLVE adjudication."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 3,
     "generation": 140,
     "timestamp": "2026-04-19T15:38:13.831537+00:00",
@@ -1532,6 +1505,46 @@
         "O149",
         "O44",
         "O148"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 208,
+    "timestamp": "2026-05-07T09:48:03.554619+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 3,
+      "passive": 19,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's confirmation surplus is an artifact of under-specification — without a falsifiable observable distinguishing ridge navigation from accidental mid-range operation, its accumulating confirmations prove nothing."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
+        "compress": "A 32×32 multi-agent CA independently confirms population-level criticality (σ=1.026, α=1.789, H=0.225·H_max), converging with INV_073 and advancing O140/O141, while the Physics Navigator type-dominance introduces an unanticipated compositional asymmetry that the genome has not bounded."
+      },
+      {
+        "title": "Causality with Knowledge Graphs: Semantics and Inference",
+        "compress": "Causal inference on relational structures requires semantic-aware identification because ontological constraints and open-world incompleteness are not nuisances but structural confounders that invalidate standard estimators."
+      },
+      {
+        "title": "Guiding Designs of Self-Organizing Swarms: Interactive and Automated Approaches",
+        "compress": "Heterogeneous self-organizing systems require hybrid evolutionary-interactive design because their dependency landscapes are rugged, trajectory-dependent, and irreducible to top-down specification — directly straining the assumption that O187's dependency skeleton can be mapped as a fixed structure."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O189",
+        "O187",
+        "O188"
       ]
     },
     "coherence": 0.97
