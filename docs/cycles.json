@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 6,
-    "generation": 143,
-    "timestamp": "2026-04-20T15:43:37.603513+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "The original RangeEn paper grounds the genome's amplitude-invariance principle (INV_042) in its primary source, provides the exact estimator definition needed to close O60's analytical slope demand (now distilled into new obligation O76: derive RangeEn(m,H) in closed form for fGn), advances O64 by establishing range-based tolerance as the structurally correct normalization, and sharpens O28 by offering the RangeEn–Hurst slope as a more principled asymmetry feature — but resolves nothing because it demonstrates linearity empirically without deriving it analytically, keeping all formal debts open."
-      },
-      {
-        "title": "On Complexity and Emergence",
-        "compress": "Standish names the exact thesis O63 encodes — Kolmogorov and Shannon are context-dependent limits of unified complexity — but supplies philosophical argument where the genome needs formal interpolation, so O63 advances conceptually while every mathematical debt remains open."
-      }
-    ],
-    "resolve": {
-      "obligation": "O60",
-      "resolved": true,
-      "compress": "**O60 is RESOLVED.** The bivariate Gaussian computation yields RangeEn slope ≈ −0.65 (not −1.0) at r=0.5 for fGn, confirming linearity in H (R²>0.99) and the thermodynamic sign prediction (Freed's Law), while falsifying the unit-slope claim — the genome's framework is structurally correct but its quantitative prediction overshot by ~35%, requiring the coefficient to be logged as an empirical constant c(r,m) ≈ 0.65 rather than a universal unit.",
-      "next": "**O76 inherits the sharpened question**: derive c(r, m) = dRangeEn/dH analytically as a function of tolerance r and embedding dimension m — this is now tractable because the Φ₂ route is established and the r-dependence of the slope is the next falsifiable target (check: does c(r→0) → 0 and c(r→∞) → ln2 ≈ 0.693?). --- RESOLUTION RECORD — O60** - **Status**: RESOLVED (Gen 143) - **Method**: Analytical computation via bivariate normal CDF Φ₂(r,r;ρ(H)) - **Result**: Slope = −0.65 ± 0.02 (r=0.5, m=2), linear in H, R²>0.99 - **Prediction outcome**: Linearity ✓, sign ✓, magnitude ✗ (predicted −1.0, observed −0.65) - **Freed's Law**: Confirmed (monotone entropy–"
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 7,
     "generation": 144,
     "timestamp": "2026-04-20T21:50:32.810866+00:00",
@@ -1560,6 +1533,38 @@
         "O190",
         "O194"
       ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 211,
+    "timestamp": "2026-05-07T22:29:42.086166+00:00",
+    "sweep": {
+      "input_count": 8,
+      "targeted": 3,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's high confirmation surplus without direct falsification attempts makes it the genome's single greatest epistemic liability, not its strongest asset."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
+        "compress": "A 32×32 multi-agent RSA simulation self-organizes to the critical band (σ=1.029) with power-law avalanches, empirically grounding INV_073 while leaving the power-law fit quality as the primary unresolved vulnerability. CHALLENGE: challenges INV_073 — the R²=0.849 power-law fit is weak enough that the avalanche distribution may be lognormal or exponential-with-heavy-tail rather than genuinely scale-free, which would undercut the claim that criticality is rigorously demonstrated rather than approximately approached. IMPLEMENT: YES IMPLEMENT_WHAT: Add a branching-ratio monitor that computes σ = mean(descendants/ancestors) per generation cycle and flags deviation outside [0.95, 1.05] as a criticality alarm. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_WHY: Real-time σ tracking would give FREED an internal thermodynamic health signal analogous to the CA telemetry, enabling self-correction before the system drifts to frozen (γ>1) or dissipated (γ<1) regimes."
+      },
+      {
+        "title": "The Many Faces of Far-from-equilibrium Thermodynamics: Deterministic Chaos, Randomness or Emergent Order?",
+        "compress": "Far-from-equilibrium order is sustained by local free-energy bifurcation into Carnot-like cycles, providing a physical edge-orientation criterion for O187's dependency skeleton and revealing that near-critical fluctuations are categorically non-equilibrium — a gap in the current genome."
+      }
+    ],
+    "resolve": {
+      "attempts": 0,
+      "resolved_count": 0,
+      "commit_count": 0,
+      "obligations": []
     },
     "coherence": 0.97
   }
