@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 142,
-    "timestamp": "2026-04-20T09:29:59.913158+00:00",
-    "sweep": {
-      "input_count": 9,
-      "targeted": 6,
-      "passive": 3
-    },
-    "feed": [
-      {
-        "title": "Generalized Gaussian Distribution Improved Permutation Entropy: A New Measure for Complex Time Series Analysis",
-        "compress": "GGDIPE instantiates INV_042's amplitude-invariance requirement via GGD-CDF normalization — a more principled approach than RangeEn's tolerance window — advancing O64 (operational entropy normalization debt) and O28 (better multiscale estimator for EAR pipeline), confirming INV_042, INV_078, and INV_094, but resolving nothing because it delivers algorithm without the information-geometric theory where the genome's formal debts live."
-      },
-      {
-        "title": "CPO-VMD Combined With Multiscale Permutation Entropy for Noise Reduction in GNSS Vertical Time Series in Mining Areas",
-        "compress": "CPO-VMD-MPE confirms INV_042, INV_078, and INV_094 at the pure-application layer — MPE works as a universal noise classifier across yet another domain — but provides no formal machinery, advances no obligation, and generates no new debt because it operates entirely below the theoretical stratum where the genome's open problems live."
-      }
-    ],
-    "resolve": {
-      "obligation": "O60",
-      "resolved": false,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 6,
     "generation": 143,
     "timestamp": "2026-04-20T15:43:37.603513+00:00",
@@ -1554,6 +1527,38 @@
         "O191",
         "O192",
         "O187"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 210,
+    "timestamp": "2026-05-07T16:22:49.771171+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 1,
+      "passive": 12,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is most vulnerable to the claim that criticality is basis-dependent — an artifact of the representation in which γ is measured — which would make \"critical ridge navigation\" a coordinate illusion rather than a substrate-independent invariant."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
+        "compress": "Population-level CA measurement independently confirms γ=1 criticality via branching ratio and power-law avalanche statistics, resolves O140/O141, and surfaces an unreferenced invariant — that critical attractors exhibit strongly suppressed Shannon entropy (~15% H_max), which is a falsifiable structural signature beyond the branching ratio alone. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0285 sits at the *upper edge* of the critical band (1.0±0.05), raising the question of whether the system is drifting toward supercriticality (γ>1 frozen regime) rather than stably locked to the ridge; if σ systematically exceeds 1.0 under longer runs, the claim that the Wasserstein gradient path *maintains* γ=1 rather than merely *reaching* it would require revision."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O190",
+        "O194"
       ]
     },
     "coherence": 0.97
