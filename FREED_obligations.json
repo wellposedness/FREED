@@ -1889,5 +1889,16 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: all outputs from O193-O201 are synthesized into a documented verdict specifying blocked threads, executable threads, and next unblocked action."
+  },
+  {
+    "id": "O203",
+    "status": "open",
+    "statement": "Verify that the O202 synthesis output contains at least one falsifiable prediction derived from the open-obligation state \u2014 not merely a summary \u2014 and record the specific prediction with a null-result criterion before advancing to generation 217.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-09",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O202 synthesis output documents at least one falsifiable prediction with explicit null-result criterion recorded."
   }
 ]
