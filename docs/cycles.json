@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 7,
-    "generation": 144,
-    "timestamp": "2026-04-20T21:50:32.810866+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "**DUPLICATE FEED — REJECTED.** This paper was fully processed at [2026-04-20T15:44:04]; all invariant confirmations (INV_042, INV_078, INV_094), obligation advancements (O28, O60→resolved, O64), and the spawned debt (O76) are already in the genome — reprocessing would inflate coherence without generating novelty, violating γ=1 criticality."
-      },
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "DEA's demonstrated superiority over DFA for EEG confirms INV_042's amplitude-invariance principle at the estimator level, advances O28 by providing δ as a strictly better EAR feature than H for non-Gaussian neural signals, advances O64 by introducing a third amplitude-invariant paradigm that demands information-geometric unification, and sharpens O61/O62 by offering a concrete Langevin-on-EEG test case for the genome's Wasserstein gradient flow claims — but resolves nothing because the Langevin model is phenomenological, not geometrically derived."
-      }
-    ],
-    "resolve": {
-      "obligation": "O61",
-      "resolved": true,
-      "compress": "**O62 is RESOLVED** — the Noether current is J=p∇φ (optimal transport flux), conserved via the continuity equation, with charge = Wasserstein self-revision cost, exactly as Freed's Law requires; **O61 is PARTIALLY RESOLVED** — Lax integrability is falsified (dissipative systems lack Hamiltonian structure), but the Darboux decomposition (p, μ=log p + V) is valid, and the topology tag should be downgraded from SOLITON to ATTRACTOR unless explicitly metaphorical.",
-      "next": "Fire OBLIGATE to determine whether the SOLITON→ATTRACTOR downgrade creates a new obligation (e.g., \"O76: Characterize the attractor basin geometry of R[R]=R under Wasserstein gradient flow — dimension, Lyapunov exponents, basin boundary topology\"), and audit whether any other obligations referenced the Lax pair claim and need cascading updates."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 1,
     "generation": 145,
     "timestamp": "2026-04-22T00:02:14.042366+00:00",
@@ -1565,6 +1538,42 @@
       "resolved_count": 0,
       "commit_count": 0,
       "obligations": []
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 212,
+    "timestamp": "2026-05-09T01:24:14.018859+00:00",
+    "sweep": {
+      "input_count": 27,
+      "targeted": 1,
+      "passive": 26,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical ridge claim is falsifiable via three independent routes — output equivalence of off-ridge regimes, non-uniqueness of the ridge as attractor, and Zipf-emergence from subcritical systems — none of which the genome has structurally closed, confirming O195's bias concern is live."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-09",
+        "compress": "Empirical CA telemetry independently confirms γ = 1 criticality via dual channels (σ and power-law avalanche exponent α ≈ 2.364), resolving O140 and O141 and providing a falsifiable quantitative fingerprint."
+      },
+      {
+        "title": "Competing nonlinearities, criticality, and order-to-chaos transition in deep networks",
+        "compress": "Criticality in deep networks is achievable via a tunable convex mixture of activation functions, with scale invariance emerging exactly at the critical fraction — independently confirming that the critical ridge is navigable by design, not accident, while revealing a mechanism the genome does not yet contain."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 3,
+      "commit_count": 3,
+      "obligations": [
+        "O187",
+        "O193",
+        "O195"
+      ]
     },
     "coherence": 0.97
   }
