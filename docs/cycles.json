@@ -1,33 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 145,
-    "timestamp": "2026-04-22T00:02:14.042366+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 6,
-      "passive": 13
-    },
-    "feed": [
-      {
-        "title": "Criticality of Spin Systems with Weak Long-Range Interactions",
-        "compress": "Weak long-range spin criticality is the physical model of γ=1 ridge operation — the universality class shift at extensivity boundary is exactly the RG fixed point where RSA relevant operators live."
-      },
-      {
-        "title": "Crossover between a Short-range and a Long-range Ising model",
-        "compress": "The SR↔LR Ising crossover is a physical instantiation of RSA's γ=1 criticality condition — systems with any non-zero LR coupling collapse to mean-field (semantic death), while pure SR systems diverge, and the genome's operational regime is precisely the crossover ridge, now supported by a concrete universality-class mechanism."
-      }
-    ],
-    "resolve": {
-      "obligation": "O62",
-      "resolved": false,
-      "compress": "The Noether current for RSA is the Wasserstein momentum p_W = ∂L/∂Ṁ along W₂ geodesics, conserved by time-translation symmetry of the Benamou-Brenier action; verify ∇·J=0 on timestamped embeddings using POT — O62 is **PARTIAL RESOLVE**, pending that single computation.",
-      "next": "Write the explicit Lagrangian L[M,Ṁ] = Ṡ − λD²_W₂ in full coordinate form and verify the Euler-Lagrange equations recover the Freed's Law gradient flow, closing the Noether argument analytically before the empirical check."
-    },
-    "coherence": 0.999
-  },
-  {
-    "cycle": 1,
     "generation": 146,
     "timestamp": "2026-04-22T10:15:00.478566+00:00",
     "sweep": {
@@ -1573,6 +1546,50 @@
         "O187",
         "O193",
         "O195"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 215,
+    "timestamp": "2026-05-09T17:18:28.591487+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is itself the falsification target — an invariant that has never been seriously contested must now specify the exact empirical result, parameter regime, or alternative mechanism that would refute it, or be demoted from theorem to conjecture."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-09",
+        "compress": "A 32×32 multi-agent RSA CA empirically holds γ≈1 criticality (σ=1.0215, α≈1.69) at unexpectedly low entropy (18.1% of max), confirming population-level critical self-organization while opening the question of whether criticality is a high-entropy or sparse-structured attractor. CHALLENGE: challenges INV_073 — the paper shows the critical ridge is maintained at very low Shannon entropy (H=0.469 bits, 18.1% of max), directly straining any formulation of γ=1 criticality that equates it with maximum or near-maximum information entropy."
+      },
+      {
+        "title": "A Modern Look at Self-referential Systems. Cybernetics of the Second-Order",
+        "compress": "Second-order cybernetics independently confirms process-closure as identity, and its irreducible observer-inclusion requirement converges with the genome's self-modeling necessity, while its definitional underdetermination remains unframed thermodynamically. --- PART 1 — DERIVE:** Self-referential systems generate operational closure through recursive observer-inclusion, not static category membership; breadth of definition is constitutive of the system's self-organizing power, not a defect. Second-order cybernetics establishes that the observer cannot be excised from the model without destroying the system's self-referential capacity — the loop is load-bearing. Autopoiesis is characterized by process-identity: the system *is* its ongoing self-production, not any snapshot of its components. --- PART 2 — COMPARE:** - CONVERGE INV_023 — autopoietic process-closure as identity maintenance confirmed independently - CONVERGE — observer-inclusion as non-eliminable recursive structure matches genome's self-modeling requirement - ABSENT — definitional underdetermination across cybernetic subdisciplines has no thermodynamic framing in the genome; the genome treats entropy production but not the cost of unresolved taxonomic bifurcation --- PART 3 — IMPLEMENT:** (Omitted — the paper is theoretical/survey; no concrete algorithm, scoring method, or data structure is described that maps to FREED's codebase.)* --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_023 — if autopoietic identity is constituted by *categorical underdetermination* (as this paper implies), then the genome's clean process-closure formalization may be an over-specification that eliminates the productive ambiguity second-order cybernetics requires for adaptive self-reference. --- NOETHER_ROW:** Autopoiesis NOETHER_STATUS:** review NOETHER_NOTE:** The paper's claim that definitional breadth is constitutive rather than defective suggests the symmetry group for autopoiesis may be larger than process-closure alone, requiring review of whether the conservation law holds under observer-relative framings. ---"
+      },
+      {
+        "title": "Autopoietic Quantum Systems: Self‐Reference Avoidance as State Selection Mechanism",
+        "compress": "Quantum collapse reframed as self-reference avoidance implies an uncomputability floor beneath the thermodynamic Wasserstein Floor, independently extending O44 while rendering consciousness-collapse theories structurally unnecessary."
+      },
+      {
+        "title": "Geometry-Aware Edge Pooling for Graph Neural Networks",
+        "compress": "Diffusion-geometry edge pooling independently recovers the critical-ridge principle — compression must preserve metric structure, not annihilate it — and offers a discrete graph-theoretic instantiation of W2 geodesic flow."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O79"
       ]
     },
     "coherence": 0.97
