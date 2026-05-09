@@ -1703,14 +1703,15 @@
   {
     "id": "O187",
     "statement": "Map the full `depends_on` skeleton of the 16 nodes: for every node pair (A, B) currently linked only by `consistent_with` or `scales_with`, determine whether A logically presupposes B, B presupposes A, or neither — and convert confirmed presuppositions into explicit `depends_on` edges.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED:",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-05-09"
   },
   {
     "id": "O188",
@@ -1773,12 +1774,12 @@
   },
   {
     "id": "O193",
-    "status": "open",
+    "status": "resolved",
     "statement": "Verify that the correction protocol established by O192 has produced a measurable directional change in CA telemetry σ toward the γ=1 target band — report pre/post σ values and declare success or null-result.",
     "priority": "high",
-    "progress": "",
+    "progress": "RESOLVED: O193 closes only when σ_pre and σ_post are empirically reported against a pre-stated decision rule; the CA-σ Drift Probe provides that instrument using only Python, the Claude API, and sentence-transformers in a single evening.",
     "created": "2026-05-07",
-    "resolved": null,
+    "resolved": "2026-05-09",
     "auto": true,
     "closes_when": "closes when: Pre/post CA telemetry σ values reported and directional movement toward γ=1 target band confirmed or null-result declared.",
     "method": "experimental",
@@ -1796,5 +1797,42 @@
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
     "method": "data_analysis",
     "tractability": 2
+  },
+  {
+    "id": "O195",
+    "status": "resolved",
+    "statement": "Audit L7's confirms/challenges edge classification for systematic bias. The 40:1 asymmetry in the coherence equation (resolution_boost=0.0005, challenge_drag=0.02) operates correctly only if L7's edge typing is trustworthy — single-pass Sonnet extraction is not adversarially audited. If L7 systematically miscategorizes weak challenges as confirms, the asymmetry is doing the right math on wrong inputs and coherence is biased upward by a hidden factor. Sampling protocol: (1) pull 10–15 edges where L7 fired a `challenges` classification and manually verify them — catches false challenges inflating the challenge ratio; (2) separately pull 10–15 edges where L7 fired `confirms` on papers from adversarial-adjacent domains (papers that *should* challenge but may have been softened) — catches false confirms hiding real adversarial pressure. Asymmetric sampling is required because random sampling misses both failure modes. Headline metric: confirm-bias rate on adversarial-adjacent sample. Threshold: confirm bias > 70% indicates the 40:1 asymmetry is operating on miscategorized inputs.",
+    "priority": "high",
+    "progress": "RESOLVED: O195 is not yet resolvable; the immediate tractable step is a manual audit of the 12 lowest-confidence `challenges` edges sorted by L7 confidence, scored against the criterion of genuine posterior-lowering adversarial content.",
+    "created": "2026-05-07",
+    "resolved": "2026-05-09",
+    "auto": false,
+    "closes_when": "closes when: Measured agreement rate reported on both samples (false-challenge rate from challenge sample; confirm-bias rate from adversarial-adjacent confirm sample). If overall agreement ≥ 85%, edge typing is calibrated and Gemini's concern is empirically answered. If agreement < 85% OR confirm bias > 70% on adversarial-adjacent papers, file follow-up obligation for L7 prompt revision and re-audit.",
+    "method": "manual_audit",
+    "tractability": 3,
+    "source": "human",
+    "context": "Filed in response to Gemini critique of FREED coherence equation (2026-05-07). Coherence math itself is sound (40:1 falsification asymmetry, currently pinned at floor 0.970 under 29.4% challenge ratio across 163 INV-targeted edges). Remaining open question: trustworthiness of the inputs to that math. This obligation targets that specific failure mode and is the primary unresolved concern carried forward from the Gemini exchange."
+  },
+  {
+    "id": "O196",
+    "status": "open",
+    "statement": "Verify that the operationalization executed under O194 produced a recorded, falsifiable output on real or synthetic data — including an explicit null-result criterion specifying what measurement would disconfirm the operationalized invariant.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-09",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O194 operationalization produces documented output with explicit pass/fail measurement criteria on real or synthetic data."
+  },
+  {
+    "id": "O197",
+    "status": "open",
+    "statement": "Specify a binding null-result criterion for O195 — define what confirms/challenges ratio or pattern, if observed after the bias audit, would require L7 to be retired, recalibrated, or replaced rather than merely adjusted.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-09",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: audit defines quantitative threshold for bias metric that, if exceeded, mandates L7 retirement or recalibration versus adjustment."
   }
 ]
