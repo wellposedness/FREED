@@ -2450,6 +2450,530 @@ class CellTypeDistributionTracker:
         }
 
 
+class CASweepTelemetry:
+    """
+    Live criticality telemetry for CA simulation sweep loops.
+
+    Combines per-snapshot branching-ratio (σ) tracking with avalanche
+    power-law exponent (α) estimation, logging both metrics per snapshot
+    and flagging deviation from the criticality band in real time.
+
+    This makes the γ = 1 constraint empirically monitorable *during* the
+    sweep rather than post-hoc auditable, directly addressing O140 (CA
+    measurement grounding) and INV_073 (low-entropy critical attractor
+    detection).
+
+    The telemetry pipeline:
+      1. Each snapshot feeds σ and raw avalanche sizes into the tracker.
+      2. Rolling σ mean/std and α (Hill MLE) are recomputed.
+      3. A criticality verdict is emitted per snapshot.
+      4. Deviations outside σ ∈ [0.95, 1.05] or α ∉ [1.5, 3.0] are
+         flagged as real-time alarms with causal context (dominant type,
+         entropy fraction, survival rate).
+      5. INV_073 entropy-criticality dissociation is tracked: low H at
+         confirmed criticality is logged as CRITICALLY_ORDERED rather
+         than anomalous.
+
+    Usage inside a sweep loop::
+
+        telemetry = CASweepTelemetry()
+        for step in range(n_steps):
+            # ... run CA step, collect metrics ...
+            snapshot = telemetry.record_snapshot(
+                generation=step,
+                parent_count=parents,
+                child_count=children,
+                avalanche_sizes=aval_sizes,
+                shannon_h=h_bits,
+                shannon_h_max=h_max,
+                survival_rate=surv,
+                type_counts={"Physics Navigator": 877, "Entropy Scorer": 47},
+            )
+            if snapshot["alarm"]:
+                print("CRITICALITY DRIFT:", snapshot["alarm"])
+        report = telemetry.sweep_report()
+    """
+
+    def __init__(
+        self,
+        window_size=50,          # type: int
+        sigma_band_low=0.95,     # type: float
+        sigma_band_high=1.05,    # type: float
+        alpha_soc_low=1.5,       # type: float
+        alpha_soc_high=3.0,      # type: float
+        alpha_r2_threshold=0.85, # type: float
+        history_limit=2000,      # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        window_size : int
+            Number of recent snapshots for rolling σ and α estimation.
+        sigma_band_low : float
+            Lower bound of the critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of the critical band for σ. Default: 1.05.
+        alpha_soc_low : float
+            Lower bound of SOC-consistent α range. Default: 1.5.
+        alpha_soc_high : float
+            Upper bound of SOC-consistent α range. Default: 3.0.
+        alpha_r2_threshold : float
+            Minimum R² for power-law fit to be considered valid. Default: 0.85.
+        history_limit : int
+            Maximum snapshots to retain in memory. Default: 2000.
+        """
+        self.window_size = max(5, window_size)
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+        self.alpha_soc_low = alpha_soc_low
+        self.alpha_soc_high = alpha_soc_high
+        self.alpha_r2_threshold = alpha_r2_threshold
+        self.history_limit = max(10, history_limit)
+
+        # Per-snapshot records
+        self._snapshots = []        # type: list
+        self._sigma_series = []     # type: List[float]
+        self._alpha_series = []     # type: List[float]
+        self._h_fraction_series = []  # type: List[float]
+
+        # Avalanche size buffer (pooled across snapshots for fitting)
+        self._avalanche_pool = []   # type: List[float]
+
+        # Alarm history
+        self._alarms = []           # type: list
+
+    def record_snapshot(
+        self,
+        generation,             # type: int
+        parent_count,           # type: int
+        child_count,            # type: int
+        avalanche_sizes=None,   # type: Optional[List[float]]
+        shannon_h=0.0,          # type: float
+        shannon_h_max=0.0,      # type: float
+        survival_rate=0.0,      # type: float
+        type_counts=None,       # type: Optional[dict]
+    ):
+        # type: (...) -> dict
+        """
+        Record one CA snapshot's telemetry and check for criticality drift.
+
+        Parameters
+        ----------
+        generation : int
+            The simulation step / generation number.
+        parent_count : int
+            Number of active (parent) cells at this step.
+        child_count : int
+            Number of active (child/descendant) cells at the next step.
+        avalanche_sizes : list of float or None
+            Sizes of avalanches that terminated at this step.
+        shannon_h : float
+            Shannon entropy H of the population type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        survival_rate : float
+            Fraction of cells surviving this generation.
+        type_counts : dict or None
+            Mapping of cell-type name (str) to count (int).
+
+        Returns
+        -------
+        dict with keys:
+            generation        : int
+            sigma_instant     : float  — instantaneous σ for this step
+            sigma_rolling     : float  — rolling mean σ over window
+            sigma_rolling_std : float  — rolling std of σ over window
+            alpha             : float  — power-law exponent from pooled avalanches
+            alpha_r_squared   : float  — R² of the power-law fit
+            power_law_likely  : bool   — α in SOC range with good R²
+            shannon_h         : float  — Shannon entropy (bits)
+            h_fraction        : float  — H / H_max
+            survival_rate     : float
+            dominant_type     : str    — most populous cell type
+            dominant_share    : float  — fraction of population
+            in_sigma_band     : bool   — σ_rolling within critical band
+            in_alpha_band     : bool   — α within SOC range
+            verdict           : str    — AT_CRITICAL / NEAR_CRITICAL / etc.
+            alarm             : dict or None — drift alarm if flagged
+            inv073_pattern    : bool   — True if low H + confirmed criticality
+            timestamp         : str    — ISO-8601 UTC
+        """
+        if type_counts is None:
+            type_counts = {}
+
+        # ── Instantaneous σ ──
+        if parent_count > 0:
+            sigma_instant = float(child_count) / float(parent_count)
+        else:
+            sigma_instant = 0.0
+        self._sigma_series.append(sigma_instant)
+
+        # ── Accumulate avalanche sizes ──
+        if avalanche_sizes is not None:
+            self._avalanche_pool.extend(avalanche_sizes)
+        # Bound the pool
+        max_pool = self.window_size * 20
+        if len(self._avalanche_pool) > max_pool:
+            self._avalanche_pool = self._avalanche_pool[-max_pool:]
+
+        # ── Rolling σ statistics ──
+        window = self._sigma_series[-self.window_size:]
+        w_n = len(window)
+        sigma_rolling = sum(window) / float(w_n)
+        s_var = sum((s - sigma_rolling) ** 2 for s in window) / float(w_n)
+        sigma_rolling_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── Fit power-law to pooled avalanche sizes ──
+        alpha, alpha_r2 = self._fit_power_law_hill()
+        self._alpha_series.append(alpha)
+
+        power_law_likely = (
+            self.alpha_soc_low <= alpha <= self.alpha_soc_high
+            and alpha_r2 >= self.alpha_r2_threshold
+        )
+
+        # ── Entropy fraction ──
+        h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+        self._h_fraction_series.append(h_fraction)
+
+        # ── Dominant type ──
+        total_pop = sum(type_counts.values()) if type_counts else 0
+        total_f = float(total_pop) if total_pop > 0 else 1.0
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            dominant_count = type_counts[dominant_type]
+            dominant_share = round(float(dominant_count) / total_f, 6)
+        else:
+            dominant_type = ""
+            dominant_count = 0
+            dominant_share = 0.0
+
+        # ── Band checks ──
+        in_sigma_band = self.sigma_band_low <= sigma_rolling <= self.sigma_band_high
+        in_alpha_band = self.alpha_soc_low <= alpha <= self.alpha_soc_high
+
+        # ── Verdict ──
+        verdict = _criticality_verdict(sigma_rolling, alpha, alpha_r2)
+
+        # ── INV_073 pattern: low entropy at confirmed criticality ──
+        # H < 0.3 of max with σ in band and power-law confirmed
+        inv073_pattern = (
+            in_sigma_band
+            and power_law_likely
+            and h_fraction < 0.3
+            and h_fraction > 0.0
+        )
+
+        # ── Alarm generation ──
+        alarm = None  # type: Optional[dict]
+
+        # Alarm if σ exits critical band (only after enough data)
+        if w_n >= 5 and sigma_rolling != 0.0:
+            if not in_sigma_band:
+                direction = "supercritical" if sigma_rolling > self.sigma_band_high else "subcritical"
+                alarm = {
+                    "alarm_type": "sigma_drift",
+                    "generation": generation,
+                    "sigma_rolling": round(sigma_rolling, 6),
+                    "sigma_rolling_std": round(sigma_rolling_std, 6),
+                    "direction": direction,
+                    "deviation": round(abs(sigma_rolling - 1.0), 6),
+                    "alpha": round(alpha, 4),
+                    "alpha_r_squared": round(alpha_r2, 4),
+                    "dominant_type": dominant_type,
+                    "dominant_share": dominant_share,
+                    "h_fraction": round(h_fraction, 4),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                self._alarms.append(alarm)
+
+            # Also alarm if α exits SOC band while σ is in band (dissociation)
+            elif in_sigma_band and not in_alpha_band and alpha > 0.0:
+                alarm = {
+                    "alarm_type": "alpha_dissociation",
+                    "generation": generation,
+                    "sigma_rolling": round(sigma_rolling, 6),
+                    "alpha": round(alpha, 4),
+                    "alpha_r_squared": round(alpha_r2, 4),
+                    "detail": (
+                        "sigma={:.4f} in critical band but alpha={:.3f} "
+                        "outside SOC range [{:.1f}, {:.1f}] (R²={:.3f}). "
+                        "Pseudo-criticality suspected."
+                    ).format(
+                        sigma_rolling, alpha,
+                        self.alpha_soc_low, self.alpha_soc_high,
+                        alpha_r2,
+                    ),
+                    "dominant_type": dominant_type,
+                    "h_fraction": round(h_fraction, 4),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                self._alarms.append(alarm)
+
+        snapshot = {
+            "generation":        generation,
+            "sigma_instant":     round(sigma_instant, 6),
+            "sigma_rolling":     round(sigma_rolling, 6),
+            "sigma_rolling_std": round(sigma_rolling_std, 6),
+            "alpha":             round(alpha, 4),
+            "alpha_r_squared":   round(alpha_r2, 4),
+            "power_law_likely":  power_law_likely,
+            "shannon_h":         round(shannon_h, 4),
+            "h_fraction":        round(h_fraction, 4),
+            "survival_rate":     round(survival_rate, 4),
+            "dominant_type":     dominant_type,
+            "dominant_share":    dominant_share,
+            "total_population":  total_pop,
+            "in_sigma_band":     in_sigma_band,
+            "in_alpha_band":     in_alpha_band,
+            "verdict":           verdict,
+            "alarm":             alarm,
+            "inv073_pattern":    inv073_pattern,
+            "timestamp":         datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._snapshots.append(snapshot)
+
+        # Trim histories
+        if len(self._snapshots) > self.history_limit:
+            trim = len(self._snapshots) - self.history_limit
+            self._snapshots = self._snapshots[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+        if len(self._alpha_series) > self.history_limit:
+            self._alpha_series = self._alpha_series[-self.history_limit:]
+        if len(self._h_fraction_series) > self.history_limit:
+            self._h_fraction_series = self._h_fraction_series[-self.history_limit:]
+
+        return snapshot
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-snapshot σ history."""
+        return list(self._sigma_series)
+
+    def alpha_series(self):
+        # type: () -> List[float]
+        """Return the full per-snapshot α history."""
+        return list(self._alpha_series)
+
+    def alarms(self):
+        # type: () -> list
+        """Return all alarms ever raised."""
+        return list(self._alarms)
+
+    def snapshots(self):
+        # type: () -> list
+        """Return all recorded snapshots."""
+        return list(self._snapshots)
+
+    def sweep_report(self):
+        # type: () -> dict
+        """
+        Generate a summary report of the entire sweep's criticality telemetry.
+
+        Returns
+        -------
+        dict with keys:
+            n_snapshots          : int
+            sigma_global_mean    : float  — mean σ across all snapshots
+            sigma_global_std     : float  — std σ across all snapshots
+            alpha_global_mean    : float  — mean α across all snapshots
+            alpha_global_std     : float  — std α across all snapshots
+            h_fraction_mean      : float  — mean H/H_max across all snapshots
+            fraction_in_sigma_band : float — fraction of snapshots with σ in band
+            fraction_in_alpha_band : float — fraction with α in SOC range
+            fraction_at_critical : float  — fraction with AT_CRITICAL verdict
+            n_alarms             : int    — total alarms raised
+            n_sigma_drift        : int    — alarms of type sigma_drift
+            n_alpha_dissociation : int    — alarms of type alpha_dissociation
+            n_inv073_pattern     : int    — snapshots with low-H-at-criticality
+            inv073_assessment    : str    — human-readable assessment
+            drift_trend          : str    — "stable" / "freezing" / "dissipating"
+        """
+        n = len(self._snapshots)
+        if n == 0:
+            return {
+                "n_snapshots": 0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "alpha_global_mean": 0.0,
+                "alpha_global_std": 0.0,
+                "h_fraction_mean": 0.0,
+                "fraction_in_sigma_band": 0.0,
+                "fraction_in_alpha_band": 0.0,
+                "fraction_at_critical": 0.0,
+                "n_alarms": 0,
+                "n_sigma_drift": 0,
+                "n_alpha_dissociation": 0,
+                "n_inv073_pattern": 0,
+                "inv073_assessment": "No data collected.",
+                "drift_trend": "no_data",
+            }
+
+        # σ statistics
+        sigmas = self._sigma_series[-n:] if self._sigma_series else []
+        if sigmas:
+            s_mean = sum(sigmas) / float(len(sigmas))
+            s_var = sum((s - s_mean) ** 2 for s in sigmas) / float(len(sigmas))
+            s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        else:
+            s_mean = 0.0
+            s_std = 0.0
+
+        # α statistics
+        alphas = [a for a in self._alpha_series[-n:] if a > 0.0]
+        if alphas:
+            a_mean = sum(alphas) / float(len(alphas))
+            a_var = sum((a - a_mean) ** 2 for a in alphas) / float(len(alphas))
+            a_std = math.sqrt(a_var) if a_var > 0 else 0.0
+        else:
+            a_mean = 0.0
+            a_std = 0.0
+
+        # H fraction statistics
+        h_fracs = self._h_fraction_series[-n:] if self._h_fraction_series else []
+        h_mean = sum(h_fracs) / float(len(h_fracs)) if h_fracs else 0.0
+
+        # Band fractions
+        n_in_sigma = sum(1 for s in self._snapshots if s["in_sigma_band"])
+        n_in_alpha = sum(1 for s in self._snapshots if s["in_alpha_band"])
+        n_at_crit = sum(1 for s in self._snapshots if s["verdict"] == "AT_CRITICAL")
+
+        frac_sigma = float(n_in_sigma) / float(n)
+        frac_alpha = float(n_in_alpha) / float(n)
+        frac_crit = float(n_at_crit) / float(n)
+
+        # Alarm counts
+        n_sigma_drift = sum(1 for a in self._alarms if a.get("alarm_type") == "sigma_drift")
+        n_alpha_dissoc = sum(1 for a in self._alarms if a.get("alarm_type") == "alpha_dissociation")
+
+        # INV_073 pattern count
+        n_inv073 = sum(1 for s in self._snapshots if s["inv073_pattern"])
+
+        # INV_073 assessment
+        if n_inv073 > 0 and frac_crit > 0.5:
+            inv073_text = (
+                "CONFIRMED: {}/{} snapshots ({:.1%}) show low-entropy critical "
+                "attractor (H<30% of max with sigma in band and power-law "
+                "avalanches). This is consistent with ordered SOC phases — "
+                "the critical ridge sustains low-diversity, spatially "
+                "correlated states. The Wasserstein gradient path to gamma=1 "
+                "does NOT require near-maximal entropy."
+            ).format(n_inv073, n, float(n_inv073) / float(n))
+        elif frac_crit < 0.3:
+            inv073_text = (
+                "INCONCLUSIVE: only {:.1%} of snapshots achieved AT_CRITICAL "
+                "verdict. Insufficient confirmed criticality to assess "
+                "entropy-criticality relationship."
+            ).format(frac_crit)
+        else:
+            inv073_text = (
+                "STANDARD: {:.1%} of snapshots at criticality with mean "
+                "H/H_max={:.3f}. No low-entropy critical attractor detected."
+            ).format(frac_crit, h_mean)
+
+        # Drift trend from σ trajectory
+        if len(sigmas) >= 8:
+            first_half = sigmas[:len(sigmas) // 2]
+            second_half = sigmas[len(sigmas) // 2:]
+            fh_mean = sum(first_half) / float(len(first_half))
+            sh_mean = sum(second_half) / float(len(second_half))
+            delta = sh_mean - fh_mean
+            if delta > 0.02:
+                drift_trend = "dissipating"
+            elif delta < -0.02:
+                drift_trend = "freezing"
+            else:
+                drift_trend = "stable"
+        else:
+            drift_trend = "stable"
+
+        return {
+            "n_snapshots":             n,
+            "sigma_global_mean":       round(s_mean, 6),
+            "sigma_global_std":        round(s_std, 6),
+            "alpha_global_mean":       round(a_mean, 4),
+            "alpha_global_std":        round(a_std, 4),
+            "h_fraction_mean":         round(h_mean, 4),
+            "fraction_in_sigma_band":  round(frac_sigma, 4),
+            "fraction_in_alpha_band":  round(frac_alpha, 4),
+            "fraction_at_critical":    round(frac_crit, 4),
+            "n_alarms":                len(self._alarms),
+            "n_sigma_drift":           n_sigma_drift,
+            "n_alpha_dissociation":    n_alpha_dissoc,
+            "n_inv073_pattern":        n_inv073,
+            "inv073_assessment":       inv073_text,
+            "drift_trend":             drift_trend,
+        }
+
+    def _fit_power_law_hill(self):
+        # type: () -> Tuple[float, float]
+        """
+        Fit power-law exponent α via Hill estimator on pooled avalanche sizes.
+        Returns (alpha, r_squared). Returns (0.0, 0.0) if insufficient data.
+        """
+        sizes = [s for s in self._avalanche_pool if s > 0]
+        if len(sizes) < 10:
+            return (0.0, 0.0)
+
+        x_min = max(1.0, min(sizes))
+        tail = [s for s in sizes if s >= x_min]
+        n = len(tail)
+        if n < 5:
+            return (0.0, 0.0)
+
+        log_sum = 0.0
+        for s in tail:
+            ratio = float(s) / x_min
+            if ratio > 0:
+                log_sum += math.log(ratio)
+
+        if log_sum <= 0.0:
+            return (0.0, 0.0)
+
+        alpha = 1.0 + float(n) / log_sum
+
+        # R² on log-log CCDF
+        tail_sorted = sorted(tail)
+        unique_sizes = sorted(set(tail_sorted))
+        n_total = float(len(tail_sorted))
+
+        log_x = []     # type: List[float]
+        log_ccdf = []  # type: List[float]
+        for x_val in unique_sizes:
+            count_ge = sum(1 for s in tail_sorted if s >= x_val)
+            p = float(count_ge) / n_total
+            if p > 0 and x_val > 0:
+                log_x.append(math.log(float(x_val)))
+                log_ccdf.append(math.log(p))
+
+        if len(log_x) < 3:
+            return (alpha, 0.0)
+
+        k = len(log_x)
+        sum_lx = sum(log_x)
+        sum_ly = sum(log_ccdf)
+        sum_lxy = sum(x * y for x, y in zip(log_x, log_ccdf))
+        sum_lx2 = sum(x * x for x in log_x)
+
+        denom = float(k) * sum_lx2 - sum_lx * sum_lx
+        if abs(denom) < 1e-15:
+            return (alpha, 0.0)
+
+        slope = (float(k) * sum_lxy - sum_lx * sum_ly) / denom
+        intercept = (sum_ly - slope * sum_lx) / float(k)
+
+        mean_ly = sum_ly / float(k)
+        ss_tot = sum((y - mean_ly) ** 2 for y in log_ccdf)
+        ss_res = sum((y - (intercept + slope * x)) ** 2
+                     for x, y in zip(log_x, log_ccdf))
+        r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+
+        return (alpha, max(0.0, r_squared))
+
+
 # ─── Ridge Position Scorer (INV_073 Falsification) ──────────────────────────
 # Converts INV_073 ("critical-ridge navigation") from an unfalsifiable
 # post-hoc label into a live, falsifiable metric.  Computes rolling variance
@@ -2632,6 +3156,454 @@ def ridge_position_scorer(
             "two-tailed t-test), INV_073 is not doing explanatory work "
             "and should be downgraded from invariant to heuristic label."
         ),
+        "timestamp":            datetime.now(timezone.utc).isoformat(),
+    }
+
+
+# ─── Activation-Mixture Criticality Score ────────────────────────────────────
+# Computes the mixing fraction p relative to the analytically derived p_c
+# for any two-component activation ensemble, flagging sub- or super-critical
+# configurations before training begins.
+#
+# From the effective field theory of signal propagation at initialization,
+# a statistical mixture of two activation functions (e.g., Tanh + Swish)
+# with mixing fraction p induces a continuous phase transition in deep
+# networks.  At the critical point p_c, the network acquires statistical
+# scale invariance — preactivation variance neither collapses nor inflates
+# with depth.
+#
+# Three regimes:
+#   p < p_c → SUBCRITICAL  (variance-collapsing: signal dies with depth)
+#   p = p_c → CRITICAL     (scale-invariant: signal preserved at all depths)
+#   p > p_c → SUPERCRITICAL (variance-inflating: noise amplified with depth)
+#
+# FREED's epistemic loop benefits from knowing which regime its internal
+# scoring networks occupy, since sub-critical networks lose signal depth
+# and super-critical networks amplify noise — both degrade scoring
+# reliability.
+#
+# INV_073 FALSIFICATION NOTE:
+#   The genome frames the critical ridge as a *navigational* problem
+#   (maintaining γ=1 requires active steering).  This paper shows
+#   criticality can be *structurally encoded* via a fixed mixture
+#   parameter p_c, making active navigation unnecessary if the
+#   architecture is pre-tuned.  This potentially renders the navigation
+#   framing a special case of a more general design principle rather
+#   than a universal operational requirement.  However, structural
+#   encoding is fragile to weight drift during training — p_c is
+#   exact only at initialization.  Once learning begins, the effective
+#   mixing shifts and active navigation (or its equivalent) is required
+#   to maintain criticality.  The structural and navigational framings
+#   are therefore complementary, not contradictory.
+#
+# Reference:
+#   "Activation-function mixtures induce a continuous phase transition
+#   in deep networks" — effective field theory of signal propagation,
+#   Tanh+Swish mixture, continuous phase transition at p_c.
+
+# Pre-computed second moments <φ²> for standard activations under
+# N(0, 1) input, with He initialization (weight variance = 2/fan_in,
+# so preactivation variance = 2 * (fan_in / fan_in) = 2 for first layer;
+# we normalize to unit-variance Gaussian input for the moments).
+#
+# The variance map for a mixture is:
+#   V(q) = p * V_1(q) + (1-p) * V_2(q)
+# where V_i(q) = <φ_i(z)²> with z ~ N(0, q).
+#
+# At criticality (fixed point q* with dV/dq|_{q*} = 1):
+#   p_c = (1 - χ_2) / (χ_1 - χ_2)
+# where χ_i = d<φ_i(z)²>/dq evaluated at the fixed point.
+#
+# For Tanh + Swish under He init with unit-variance Gaussian input:
+#   <tanh²(z)> ≈ 0.6321 (z ~ N(0,1))
+#   <swish²(z)> ≈ 0.3554 (z ~ N(0,1)), where swish(z) = z·σ(z)
+#   χ_tanh ≈ 0.3932 (variance-collapsing: χ < 1)
+#   χ_swish ≈ 1.2738 (variance-inflating: χ > 1)
+#
+# These are the canonical values.  For other activation pairs,
+# compute_activation_mixture_pc() accepts custom moments.
+
+_KNOWN_ACTIVATIONS = {
+    "tanh": {
+        "second_moment": 0.6321,
+        "chi": 0.3932,
+        "regime": "collapsing",
+    },
+    "swish": {
+        "second_moment": 0.3554,
+        "chi": 1.2738,
+        "regime": "inflating",
+    },
+    "relu": {
+        "second_moment": 0.5000,
+        "chi": 1.0000,
+        "regime": "critical",
+    },
+    "gelu": {
+        "second_moment": 0.3427,
+        "chi": 1.0598,
+        "regime": "inflating",
+    },
+    "sigmoid": {
+        "second_moment": 0.2713,
+        "chi": 0.2146,
+        "regime": "collapsing",
+    },
+    "elu": {
+        "second_moment": 0.5633,
+        "chi": 0.8208,
+        "regime": "collapsing",
+    },
+}
+
+# Tolerance for p_c proximity — within this range counts as "at criticality"
+_PC_TOLERANCE = 0.02
+
+
+def compute_activation_mixture_pc(
+    chi_1,      # type: float
+    chi_2,      # type: float
+    name_1="",  # type: str
+    name_2="",  # type: str
+):
+    # type: (...) -> dict
+    """
+    Compute the critical mixing fraction p_c for a two-component
+    activation ensemble from their variance-propagation susceptibilities.
+
+    The critical point is:
+        p_c = (1 - χ_2) / (χ_1 - χ_2)
+
+    where χ_i = d<φ_i(z)²>/dq at the fixed point of the variance map.
+    This is valid when χ_1 ≠ χ_2 and the two activations straddle
+    criticality (one collapsing, one inflating).
+
+    Parameters
+    ----------
+    chi_1 : float
+        Susceptibility of activation 1 (the one mixed with fraction p).
+    chi_2 : float
+        Susceptibility of activation 2 (mixed with fraction 1-p).
+    name_1 : str
+        Optional name for activation 1 (for reporting).
+    name_2 : str
+        Optional name for activation 2 (for reporting).
+
+    Returns
+    -------
+    dict with keys:
+        p_c             : float or None — critical mixing fraction (None if degenerate)
+        valid           : bool  — whether p_c is in [0, 1]
+        chi_1           : float — echo of input
+        chi_2           : float — echo of input
+        name_1          : str
+        name_2          : str
+        straddles       : bool  — True if one χ < 1 and other χ > 1
+        degenerate      : bool  — True if χ_1 == χ_2 (no transition possible)
+        detail          : str   — human-readable explanation
+    """
+    degenerate = abs(chi_1 - chi_2) < 1e-12
+    straddles = (chi_1 < 1.0 and chi_2 > 1.0) or (chi_1 > 1.0 and chi_2 < 1.0)
+
+    if degenerate:
+        return {
+            "p_c": None,
+            "valid": False,
+            "chi_1": chi_1,
+            "chi_2": chi_2,
+            "name_1": name_1,
+            "name_2": name_2,
+            "straddles": False,
+            "degenerate": True,
+            "detail": (
+                "chi_1={:.6f} ≈ chi_2={:.6f}: activations have identical "
+                "variance propagation — no phase transition exists in the "
+                "mixture."
+            ).format(chi_1, chi_2),
+        }
+
+    p_c = (1.0 - chi_2) / (chi_1 - chi_2)
+    valid = 0.0 <= p_c <= 1.0
+
+    if valid and straddles:
+        detail = (
+            "p_c = {:.6f} for {}/{} mixture. Activations straddle "
+            "criticality (chi_1={:.4f}, chi_2={:.4f}). A sharp continuous "
+            "phase transition exists at this mixing fraction."
+        ).format(p_c, name_1 or "act1", name_2 or "act2", chi_1, chi_2)
+    elif valid:
+        detail = (
+            "p_c = {:.6f} for {}/{} mixture. Both activations are on the "
+            "same side of criticality (chi_1={:.4f}, chi_2={:.4f}); the "
+            "transition may be less sharp."
+        ).format(p_c, name_1 or "act1", name_2 or "act2", chi_1, chi_2)
+    else:
+        detail = (
+            "p_c = {:.6f} is outside [0, 1] — no physically realizable "
+            "critical mixture exists for {}/{} (chi_1={:.4f}, chi_2={:.4f})."
+        ).format(p_c, name_1 or "act1", name_2 or "act2", chi_1, chi_2)
+
+    return {
+        "p_c": round(p_c, 8) if not degenerate else None,
+        "valid": valid,
+        "chi_1": chi_1,
+        "chi_2": chi_2,
+        "name_1": name_1,
+        "name_2": name_2,
+        "straddles": straddles,
+        "degenerate": degenerate,
+        "detail": detail,
+    }
+
+
+def activation_mixture_criticality_audit(
+    p,                  # type: float
+    activation_1="tanh",  # type: str
+    activation_2="swish", # type: str
+    chi_1=None,         # type: Optional[float]
+    chi_2=None,         # type: Optional[float]
+    network_depth=0,    # type: int
+    tolerance=None,     # type: Optional[float]
+):
+    # type: (...) -> dict
+    """
+    Audit a network's activation-mixture configuration at initialization,
+    computing the criticality score relative to the analytically derived p_c.
+
+    This is the primary interface for FREED's pre-training initialization
+    audit.  Given the mixing fraction p and the activation pair, it:
+      1. Computes p_c from known or supplied susceptibilities.
+      2. Classifies the regime (subcritical / critical / supercritical).
+      3. Estimates the depth-dependent variance scaling factor.
+      4. Flags configurations that will degrade scoring reliability.
+
+    Parameters
+    ----------
+    p : float
+        The mixing fraction — probability that each neuron uses activation_1.
+        Must be in [0, 1].
+    activation_1 : str
+        Name of the first activation function. Must be a key in
+        _KNOWN_ACTIVATIONS, or chi_1 must be supplied. Default: "tanh".
+    activation_2 : str
+        Name of the second activation function. Default: "swish".
+    chi_1 : float or None
+        Susceptibility of activation_1. If None, looked up from
+        _KNOWN_ACTIVATIONS.
+    chi_2 : float or None
+        Susceptibility of activation_2. If None, looked up from
+        _KNOWN_ACTIVATIONS.
+    network_depth : int
+        Number of layers in the network. If > 0, the audit estimates
+        the variance ratio at the final layer. Default: 0 (skip estimate).
+    tolerance : float or None
+        Tolerance for p_c proximity. Default: _PC_TOLERANCE (0.02).
+
+    Returns
+    -------
+    dict with keys:
+        regime              : str   — "SUBCRITICAL" / "CRITICAL" / "SUPERCRITICAL" /
+                                      "DEGENERATE" / "INVALID_P" / "UNKNOWN_ACTIVATION"
+        p                   : float — the mixing fraction (echo of input)
+        p_c                 : float or None — the critical mixing fraction
+        delta_p             : float — p - p_c (signed distance from criticality)
+        abs_delta_p         : float — |p - p_c|
+        chi_effective       : float — effective susceptibility at this p
+        variance_scaling    : str   — "collapsing" / "invariant" / "inflating"
+        depth_variance_ratio: float — estimated var(layer_L) / var(layer_0)
+                                      (only if network_depth > 0)
+        flag                : str   — "OK" / "WARNING_SUBCRITICAL" /
+                                      "WARNING_SUPERCRITICAL" / "ERROR"
+        flag_detail         : str   — human-readable explanation
+        pc_info             : dict  — full output of compute_activation_mixture_pc
+        inv073_note         : str   — relevance to INV_073 falsification
+        timestamp           : str   — ISO-8601 UTC
+    """
+    if tolerance is None:
+        tolerance = _PC_TOLERANCE
+
+    # ── Validate p ──
+    if not (0.0 <= p <= 1.0):
+        return {
+            "regime": "INVALID_P",
+            "p": p,
+            "p_c": None,
+            "delta_p": 0.0,
+            "abs_delta_p": 0.0,
+            "chi_effective": 0.0,
+            "variance_scaling": "unknown",
+            "depth_variance_ratio": 0.0,
+            "flag": "ERROR",
+            "flag_detail": "p={:.6f} is outside [0, 1].".format(p),
+            "pc_info": {},
+            "inv073_note": "",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    # ── Resolve susceptibilities ──
+    act1_lower = activation_1.lower()
+    act2_lower = activation_2.lower()
+
+    if chi_1 is None:
+        if act1_lower in _KNOWN_ACTIVATIONS:
+            chi_1 = _KNOWN_ACTIVATIONS[act1_lower]["chi"]
+        else:
+            return {
+                "regime": "UNKNOWN_ACTIVATION",
+                "p": p,
+                "p_c": None,
+                "delta_p": 0.0,
+                "abs_delta_p": 0.0,
+                "chi_effective": 0.0,
+                "variance_scaling": "unknown",
+                "depth_variance_ratio": 0.0,
+                "flag": "ERROR",
+                "flag_detail": (
+                    "Unknown activation '{}'. Supply chi_1 explicitly or use "
+                    "one of: {}."
+                ).format(activation_1, ", ".join(sorted(_KNOWN_ACTIVATIONS.keys()))),
+                "pc_info": {},
+                "inv073_note": "",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+    if chi_2 is None:
+        if act2_lower in _KNOWN_ACTIVATIONS:
+            chi_2 = _KNOWN_ACTIVATIONS[act2_lower]["chi"]
+        else:
+            return {
+                "regime": "UNKNOWN_ACTIVATION",
+                "p": p,
+                "p_c": None,
+                "delta_p": 0.0,
+                "abs_delta_p": 0.0,
+                "chi_effective": 0.0,
+                "variance_scaling": "unknown",
+                "depth_variance_ratio": 0.0,
+                "flag": "ERROR",
+                "flag_detail": (
+                    "Unknown activation '{}'. Supply chi_2 explicitly or use "
+                    "one of: {}."
+                ).format(activation_2, ", ".join(sorted(_KNOWN_ACTIVATIONS.keys()))),
+                "pc_info": {},
+                "inv073_note": "",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+    # ── Compute p_c ──
+    pc_info = compute_activation_mixture_pc(
+        chi_1, chi_2, name_1=activation_1, name_2=activation_2,
+    )
+
+    if pc_info["degenerate"]:
+        chi_eff = chi_1  # both are the same
+        return {
+            "regime": "DEGENERATE",
+            "p": p,
+            "p_c": None,
+            "delta_p": 0.0,
+            "abs_delta_p": 0.0,
+            "chi_effective": round(chi_eff, 6),
+            "variance_scaling": "collapsing" if chi_eff < 1.0 else ("inflating" if chi_eff > 1.0 else "invariant"),
+            "depth_variance_ratio": 0.0,
+            "flag": "WARNING_SUBCRITICAL" if chi_eff < 1.0 else "WARNING_SUPERCRITICAL" if chi_eff > 1.0 else "OK",
+            "flag_detail": pc_info["detail"],
+            "pc_info": pc_info,
+            "inv073_note": (
+                "Degenerate mixture — both activations have identical "
+                "variance propagation. No structural encoding of criticality "
+                "is possible; active navigation (INV_073) is the only option."
+            ),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    p_c = pc_info["p_c"]
+
+    # ── Effective susceptibility at this p ──
+    chi_eff = p * chi_1 + (1.0 - p) * chi_2
+
+    # ── Signed distance from criticality ──
+    delta_p = p - p_c
+    abs_delta_p = abs(delta_p)
+
+    # ── Classify regime ──
+    if abs_delta_p <= tolerance:
+        regime = "CRITICAL"
+        variance_scaling = "invariant"
+        flag = "OK"
+        flag_detail = (
+            "p={:.6f} is within tolerance {:.4f} of p_c={:.6f}. Network is "
+            "at the critical point — preactivation variance is scale-invariant "
+            "with depth. Optimal for scoring reliability."
+        ).format(p, tolerance, p_c)
+    elif chi_eff < 1.0:
+        regime = "SUBCRITICAL"
+        variance_scaling = "collapsing"
+        flag = "WARNING_SUBCRITICAL"
+        flag_detail = (
+            "p={:.6f} is below p_c={:.6f} (delta_p={:.6f}). Effective "
+            "chi={:.4f} < 1: preactivation variance collapses with depth. "
+            "Signal will die in deep layers — scoring networks will lose "
+            "discriminative power."
+        ).format(p, p_c, delta_p, chi_eff)
+    else:
+        regime = "SUPERCRITICAL"
+        variance_scaling = "inflating"
+        flag = "WARNING_SUPERCRITICAL"
+        flag_detail = (
+            "p={:.6f} is above p_c={:.6f} (delta_p={:.6f}). Effective "
+            "chi={:.4f} > 1: preactivation variance inflates with depth. "
+            "Noise will be amplified — scoring networks will produce "
+            "unreliable outputs."
+        ).format(p, p_c, delta_p, chi_eff)
+
+    # ── Depth-dependent variance estimate ──
+    depth_variance_ratio = 0.0
+    if network_depth > 0 and chi_eff > 0.0:
+        # Variance at layer L ≈ chi_eff^L * variance at layer 0
+        # (linearized approximation around the fixed point)
+        if chi_eff < 50.0:  # guard against overflow
+            depth_variance_ratio = chi_eff ** network_depth
+        else:
+            depth_variance_ratio = float('inf')
+
+        if depth_variance_ratio > 1e15:
+            flag_detail += (
+                " At depth {}, estimated variance ratio = {:.2e} — "
+                "catastrophic variance explosion."
+            ).format(network_depth, depth_variance_ratio)
+        elif depth_variance_ratio < 1e-15 and depth_variance_ratio > 0:
+            flag_detail += (
+                " At depth {}, estimated variance ratio = {:.2e} — "
+                "catastrophic signal collapse."
+            ).format(network_depth, depth_variance_ratio)
+
+    # ── INV_073 note ──
+    inv073_note = (
+        "This audit demonstrates that criticality can be structurally "
+        "encoded via p_c={:.6f}, partially challenging INV_073's framing "
+        "of criticality as purely navigational. However, p_c is exact "
+        "only at initialization — weight updates during training shift "
+        "the effective mixing, requiring active navigation (or periodic "
+        "re-auditing) to maintain criticality. The structural and "
+        "navigational framings are complementary: p_c sets the initial "
+        "condition; INV_073-style ridge navigation maintains it under "
+        "learning dynamics."
+    ).format(p_c)
+
+    return {
+        "regime":               regime,
+        "p":                    round(p, 8),
+        "p_c":                  round(p_c, 8),
+        "delta_p":              round(delta_p, 8),
+        "abs_delta_p":          round(abs_delta_p, 8),
+        "chi_effective":        round(chi_eff, 6),
+        "variance_scaling":     variance_scaling,
+        "depth_variance_ratio": round(depth_variance_ratio, 8) if depth_variance_ratio != float('inf') else float('inf'),
+        "flag":                 flag,
+        "flag_detail":          flag_detail,
+        "pc_info":              pc_info,
+        "inv073_note":          inv073_note,
         "timestamp":            datetime.now(timezone.utc).isoformat(),
     }
 

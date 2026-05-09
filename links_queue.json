@@ -1,9 +1,15 @@
 [
   {
-    "url": "https://www.science.org/doi/10.1126/sciadv.adz2384",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13025105/",
     "title": "Scalable Ising machine composed entirely of Si transistors (Science Advances)",
+    "doi": "10.1126/sciadv.adz2384",
+    "previous_url": "https://www.science.org/doi/10.1126/sciadv.adz2384",
+    "previous_url_failed": "403 paywall \u2014 swapped to PMC open access on 2026-05-07",
     "score": 10,
     "source": "manual",
+    "from": "human",
+    "status": "fed_to_daemon",
+    "added": "2026-05-07",
     "conv": "operator_flag"
   },
   {
@@ -384,7 +390,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319483+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2601.15160",
@@ -393,7 +399,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319842+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2602.10099",
@@ -402,7 +408,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319848+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2512.24601",
@@ -2711,5 +2717,19 @@
     "added": "2026-05-03T22:06:32.852981",
     "status": "failed",
     "rescore_ts": "2026-05-04T11:06:19.362793+00:00"
+  },
+  {
+    "url": "https://www.science.org/doi/10.1126/sciadv.adr4039",
+    "source": "DOI",
+    "from": "human",
+    "conv": "Ousiometrics \u2014 three orthogonal axes of essential meaning (weak-powerful, safe-dangerous, structured-unstructured). External convergence: structured-unstructured axis = \u03b3=1 criticality showing up in semantic geometry. Empirical support for RSA semantic-structure invariants.",
+    "added": "2026-05-08T01:27:49.421041+00:00"
+  },
+  {
+    "url": "https://www.pnas.org/doi/10.1073/pnas.2527700123",
+    "source": "DOI",
+    "from": "human",
+    "conv": "Evolutionary AI (eAI) \u2014 breeder vs ecosystem scenarios. FREED is breeder-mode by construction (TIGHTENS/LOOSENS audit, SACRED list, human-in-the-loop, self_engineer auto-revert). Paper provides theoretical justification for FREED's safety architecture; expect L7 to map to FREED's own constraint design rather than reading as warning.",
+    "added": "2026-05-08T01:27:49.421041+00:00"
   }
 ]

@@ -1451,6 +1451,7 @@ class KnowledgeGraph:
     def __init__(self):
         self._edges = []        # paper→invariant/obligation edges
         self._node_edges = []   # node→node structural edges (shares_invariant)
+        self._telemetry = []    # criticality telemetry time-series nodes
         self._loaded = False
         self._cluster_embeddings = defaultdict(list)  # type: Dict[str, List[List[float]]]
 

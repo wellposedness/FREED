@@ -54,6 +54,44 @@ NODE_EDGE_TYPES = (
     "independent_confirmation", # reserved: bootstrap CONVERGE or verified cross-domain feed edge required
 )
 
+# ─── Open World Assumption (OWA) Edge Completeness ──────────────────────────
+# Under Closed World Assumption (CWA), an absent edge between two nodes is
+# treated as evidence of no relationship (hard negation).  Under OWA, absence
+# is epistemically ambiguous: the edge may exist but be unobserved.
+#
+# This distinction is critical for dependency skeleton recovery (O187): with
+# 16 nodes the skeleton has 120 possible undirected edges.  Under CWA, each
+# absent edge is a definite non-dependency, yielding a single determinate
+# skeleton.  Under OWA, each absent edge contributes epistemic uncertainty,
+# making the skeleton underdetermined — the number of compatible skeletons
+# grows combinatorially with the number of unobserved edges.
+#
+# Edge epistemic status:
+#   "observed_present"  — edge exists in the graph (standard positive edge)
+#   "observed_absent"   — edge confirmed absent via explicit negative evidence
+#                         (e.g., "ABSENT INV_094" from FEED output)
+#   "unobserved"        — no evidence either way; OWA treats this as unknown
+#
+# The OWA incompleteness score for a node pair (A, B) is:
+#   owa_score = 1.0  if edge is observed_present (full confidence)
+#   owa_score = 0.0  if edge is observed_absent  (confirmed non-link)
+#   owa_score = prior if edge is unobserved       (epistemic uncertainty)
+#
+# The default prior (OWA_UNOBSERVED_PRIOR) is 0.5 (maximum ignorance),
+# but can be adjusted based on graph density or domain knowledge.
+#
+# Reference: "Semantics-aware causal inference frameworks for knowledge
+# graphs" — addresses data incompleteness violating causal assumptions
+# under the Open World Assumption.
+# ─────────────────────────────────────────────────────────────────────────────
+
+OWA_EDGE_STATUSES = ("observed_present", "observed_absent", "unobserved")
+
+# Default prior probability for unobserved edges under OWA.
+# 0.5 = maximum ignorance (no bias toward presence or absence).
+# Lower values bias toward sparsity; higher toward density.
+OWA_UNOBSERVED_PRIOR = 0.5
+
 # Keywords used to classify node-edge type from invariant text
 _SCALE_KEYWORDS = re.compile(
     r'\b(?:scale|L\d|substrate.independent|macro|micro|level|layer|multi.scale|cross.scale|hierarchy)\b', re.I
@@ -2798,12 +2836,50 @@ class KnowledgeGraph:
             for e in new_edges
             if e.get("to")
         ))
-        return self.detect_avalanche(
+        result = self.detect_avalanche(
             seed_ids,
             degree_threshold=degree_threshold,
             max_depth=max_depth,
             recent_feed_count=recent_feed_count,
         )
+
+        # ── Branching-ratio tracker (σ across cascade depths) ────────────
+        # σ_d = (propagating offspring at depth d) / (parents at depth d-1).
+        # σ = mean across depths d≥1.  Flag excursions outside [0.95, 1.05]
+        # — the critical band INV_073 claims is the attractor.
+        depth_dist = result.get("depth_distribution", {}) or {}
+        # Keys may be int (live result) or str (round-tripped through JSON).
+        depth_pairs = []  # type: List[tuple]
+        for k, v in depth_dist.items():
+            try:
+                depth_pairs.append((int(k), int(v)))
+            except (TypeError, ValueError):
+                continue
+        depth_pairs.sort(key=lambda kv: kv[0])
+
+        sigmas = []  # type: List[float]
+        for i in range(1, len(depth_pairs)):
+            parents   = depth_pairs[i - 1][1]
+            offspring = depth_pairs[i][1]
+            if parents > 0:
+                sigmas.append(offspring / float(parents))
+
+        if sigmas:
+            sigma_mean = sum(sigmas) / len(sigmas)
+            in_band = 0.95 <= sigma_mean <= 1.05
+            result["branching_ratio"]      = round(sigma_mean, 4)
+            result["branching_per_depth"]  = [round(s, 4) for s in sigmas]
+            result["branching_excursion"]  = not in_band
+            if not in_band:
+                regime_label = "supercritical" if sigma_mean > 1.05 else "subcritical"
+                print(f"[GRAPH:BRANCHING] σ={sigma_mean:.4f} EXCURSION "
+                      f"({regime_label}) — per-depth: {result['branching_per_depth']}")
+        else:
+            result["branching_ratio"]     = None
+            result["branching_per_depth"] = []
+            result["branching_excursion"] = False
+
+        return result
 
 # ── Singleton accessor ────────────────────────────────────────────────────────
 

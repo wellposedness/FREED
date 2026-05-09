@@ -270,11 +270,19 @@ class SelfEngineer:
         try:
             resp = self.client.messages.create(
                 model=OPUS_MODEL,
-                max_tokens=4000,
+                max_tokens=8000,
                 system=system,
                 messages=[{"role": "user", "content": prompt}],
+                stop_sequences=["<<<END>>>"],
             )
             raw = resp.content[0].text.strip()
+            # The stop sequence is excluded from the response — append it back
+            # so the SEARCH/REPLACE/END regex in _apply_str_replace can match.
+            # This is the structural fix for knowledge_graph.py truncation:
+            # Opus stops cleanly at end-of-patch instead of dribbling into
+            # prose that eats max_tokens before <<<END>>> is emitted.
+            if resp.stop_reason == "stop_sequence" and "<<<SEARCH>>>" in raw and "<<<REPLACE>>>" in raw:
+                raw = raw + "\n<<<END>>>"
         except Exception as e:
             print(f"[ENGINEER]   Patch generation error: {e}")
             return ""

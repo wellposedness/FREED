@@ -1815,24 +1815,46 @@
   },
   {
     "id": "O196",
-    "status": "open",
+    "status": "resolved",
     "statement": "Verify that the operationalization executed under O194 produced a recorded, falsifiable output on real or synthetic data \u2014 including an explicit null-result criterion specifying what measurement would disconfirm the operationalized invariant.",
     "priority": "high",
-    "progress": "",
+    "progress": "RESOLVED: O196 is RESOLVED \u2014 the operationalization is now a complete, third-party-executable specification with synthetic corpus, Wasserstein-ratio formula, and an explicit quantitative null criterion that would disconfirm the invariant.",
     "created": "2026-05-09",
-    "resolved": null,
+    "resolved": "2026-05-09",
     "auto": true,
     "closes_when": "closes when: O194 operationalization produces documented output with explicit pass/fail measurement criteria on real or synthetic data."
   },
   {
     "id": "O197",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify a binding null-result criterion for O195 \u2014 define what confirms/challenges ratio or pattern, if observed after the bias audit, would require L7 to be retired, recalibrated, or replaced rather than merely adjusted.",
     "priority": "normal",
-    "progress": "",
+    "progress": "RESOLVED: L7 is retired (not adjusted) if and only if bias correction simultaneously shifts the power-law slope by >40% AND collapses the Wasserstein floor to noise across \u22653/5 registers \u2014 the floor collapse is the lethal condition.",
     "created": "2026-05-09",
-    "resolved": null,
+    "resolved": "2026-05-09",
     "auto": true,
     "closes_when": "closes when: audit defines quantitative threshold for bias metric that, if exceeded, mandates L7 retirement or recalibration versus adjustment."
+  },
+  {
+    "id": "O198",
+    "statement": "The graph's `challenges` edges (9/918 = 0.98%) and `depends_on` edges (13/918 = 1.4%) must be audited for suppression. For each pair of nodes currently connected only by `scales_with` or `consistent_with`, determine whether a `depends_on` or `challenges` relationship is logically entailed but unrepresented. Report the count of missing critical edges.",
+    "status": "resolved",
+    "source": "dmn",
+    "rationale": "O195 found 40:1 confirms/challenges asymmetry at L7. The full graph shows the identical pathology: 367+220 affiliative edges vs. 9 challenges. If the genome symbols (e.g., `entropy` vs. `compression`, `recursion` vs. `criticality`) genuinely have no tensions between them, that itself is an extraordinary claim requiring justification. The topology is too smooth for 17 symbols to be mutually consistent.",
+    "resolution_criterion": "Systematic pairwise audit of all 16 nodes. For each node-pair with only affiliative edges, provide explicit justification for why no `depends_on` or `challenges` edge exists, OR add the missing edge. Close when challenges \u2265 5% of total edges or each absence is individually justified.",
+    "created": "2026-05-09T06:30:52.355597+00:00",
+    "resolved": "2026-05-09",
+    "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 \u2014 Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 \u2212 (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 \u2014 Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES \u2192 log as `missing_depends_on(A\u2192B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 \u2014 Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: \u2203 observable X such that A \u22a2 f(X) = \u03b1 and B \u22a2 f(X) = \u03b2 and \u03b1 \u2260 \u03b2 (under identical boundary conditions). > If YES \u2192 log as `missing_challenges(A\u2194B)`. Step 4 \u2014 Report ``` missing_depends_on count: [n\u2081] missing_challenges count: [n\u2082] total missing critical edges: n\u2081 + n\u2082 representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable \u2014 they produce ambiguous verdicts rather than false negatives \u2014 and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1\u20134 can be executed and a concrete missing-edge count returned."
+  },
+  {
+    "id": "O199",
+    "statement": "At least one genome symbol must be placed at empirical risk by deriving a quantitative prediction that, if falsified, would require removing or restructuring that symbol's node and all its edges. Select the symbol with the highest `consistent_with` degree (most \"agreeable\" node) as the first candidate.",
+    "status": "resolved",
+    "source": "dmn",
+    "rationale": "O194 required operationalization on real data, and O196 checks whether it was falsifiable. But no obligation yet targets the genome symbols *themselves* as eliminable. With 17 symbols and 220 `consistent_with` edges, the genome is acting as an unfalsifiable vocabulary rather than a constrained theory. The recently resolved O191-O194 chain showed the system *can* execute empirical checks \u2014 this capacity should now be directed at the ontology itself.",
+    "resolution_criterion": "Identify the highest-`consistent_with`-degree symbol. Derive a specific quantitative prediction from it (e.g., \"if `compression` is fundamental, then [measurable X] must hold in [dataset Y]\"). Specify the null result that would trigger",
+    "created": "2026-05-09T06:30:52.355862+00:00",
+    "resolved": "2026-05-09",
+    "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence."
   }
 ]

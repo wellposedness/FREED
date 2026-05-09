@@ -150,7 +150,7 @@ a:hover { text-decoration: underline; }
       <div class="panel">
         <div class="site-name">RSA Framework</div>
         <div class="site-url" style="color:var(--muted)">~/Downloads/RSA_OMEGA_v20_CANONICAL.md</div>
-        <div class="site-desc">The theoretical seed. Reasoning Substrate Argument → Freed's Law → γ=1 criticality. v20 canonical genome. 43 obligations. The source everything maps against.</div>
+        <div class="site-desc">The theoretical seed. Reasoning Substrate Argument → Freed's Law → γ=1 criticality. v20 canonical genome. 157 obligations (155 resolved, 2 open). The source everything maps against.</div>
         <div class="site-badge badge-concept">LOCAL · OBSIDIAN VAULT</div>
       </div>
     </div>
@@ -171,9 +171,9 @@ a:hover { text-decoration: underline; }
       <div class="comp"><span class="comp-name">dmn.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Default Mode Network. Fires at 2:30am. Cross-connect + internal-oblige.</span></div>
       <div class="comp"><span class="comp-name">consolidate.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Renormalization. SELECT→RENORM→MINE. MINE runs on Haiku (504× cheaper than Sonnet).</span></div>
       <div class="comp"><span class="comp-name">targeted_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Active search. Haiku generates arXiv/S2 queries from open obligations.</span></div>
-      <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted.</span></div>
+      <div class="comp"><span class="comp-name">tamura_sweep.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">Passive surface. Tamura/Lifeboat + arXiv biophysics RSS. Runs after targeted. Real-time branching-ratio (σ) tracker + power-law avalanche MLE added 2026-05-08 — flags σ/avalanche dissociation (σ in critical band, avalanche stats fail).</span></div>
       <div class="comp"><span class="comp-name">simulation_observer.py</span><span class="comp-tag tag-mod">MOD</span><span class="comp-desc">CA telemetry. N=32 grid → σ/H/survival → ca_telemetry.json → SWEEP source #1.</span></div>
-      <div class="comp"><span class="comp-name">↳ PREDICT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Between CEREBELLUM and FEED. Haiku reads title+abstract+compressed genome (39 INV IDs+titles) → blind PREDICTED_CONFIRMS / PREDICTED_CHALLENGES before L7 sees paper. Surprise edges weight 1.0; predicted edges weight 0.05. Challenge prediction required — NONE must be justified. Built 2026-05-06.</span></div>
+      <div class="comp"><span class="comp-name">↳ PREDICT</span><span class="comp-tag tag-sacred">SACRED</span><span class="comp-desc">Between CEREBELLUM and FEED. Haiku reads title+abstract+compressed genome (50 INV IDs + titles) → blind PREDICTED_CONFIRMS / PREDICTED_CHALLENGES before L7 sees paper. Surprise edges weight 1.0; predicted edges weight 0.05. Challenge prediction required — NONE must be justified. Scope-field overrides constrain INV_023, INV_100, INV_047, INV_052 from conceptual neighborhood to specific claim. Falsification probe bypasses PREDICT (prepended in FEED, not SWEEP). MAX_FEEDS_PER_CYCLE=4 (raised from 2 for surprise-rate stats). Built 2026-05-06, hardened 2026-05-07.</span></div>
       <div class="comp"><span class="comp-name">bootstrap_derive.py</span><span class="comp-tag tag-probe">PROBE</span><span class="comp-desc">Genome-free derivation. No kernel prompt. Anchors: Landauer + CA. Output → obligations.</span></div>
     </div>
   </div>
@@ -185,14 +185,14 @@ a:hover { text-decoration: underline; }
       <span class="agenda-num">1</span>
       <div>
         <div class="agenda-text">CEREBELLUM refunctioning — fast forward model</div>
-        <div class="agenda-note">Currently CEREBELLUM only scores/routes. Neuroscience says it should be a fast forward model — predict sensory consequences before they arrive. After 2-3 PREDICT cycles establish baseline, refunction CEREBELLUM as FREED's cerebellar layer: efference copy of "about to process paper X" → prediction → compare after FEED → error signal. Deepest structural change remaining.</div>
+        <div class="agenda-note">Currently CEREBELLUM only scores/routes. Neuroscience says it should be a fast forward model — predict sensory consequences before they arrive. PREDICT baseline now established (Gen 205-212, 8 cycles). Next: refunction CEREBELLUM as FREED's cerebellar layer — efference copy of "about to process paper X" → prediction → compare after FEED → error signal. Deepest structural change remaining.</div>
       </div>
     </div>
     <div class="agenda-item">
       <span class="agenda-num">2</span>
       <div>
         <div class="agenda-text">WIRING.md update — empirical PREDICT behavior</div>
-        <div class="agenda-note">Pending 2-3 real cycles with challenge predictions active. Update with actual challenge prediction rate, surprise distribution, which INVs appear in PREDICTED_CHALLENGES. Document observed behavior, not design intent.</div>
+        <div class="agenda-note">Empirical data now available (Gen 205-212 = 8 cycles post-build). Update with measured numbers: challenge prediction rate (~65-83% post-prompt-fix), surprise distribution, which INVs appear in PREDICTED_CHALLENGES, σ/H dissociation flag. Document observed behavior, not design intent.</div>
       </div>
     </div>
     <div class="agenda-item">
@@ -219,6 +219,20 @@ a:hover { text-decoration: underline; }
     <div class="agenda-item">
       <span class="agenda-num">6</span>
       <div>
+        <div class="agenda-text">σ/H dissociation — open theoretical puzzle (Gen 212)</div>
+        <div class="agenda-note">CA settled at σ=1.0273 (AT_CRITICAL) but H=0.4507 bits — only 17.4% of max entropy. RSA's working assumption: criticality and high entropy production travel together. Dissociation is real and self-flagged by the daemon. Either revise the assumption (criticality predicts branching but not entropy production), narrow the claim (only certain critical states are entropy-maximal), or treat the CA as a special case. Belongs in O156 audit scope.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">7</span>
+      <div>
+        <div class="agenda-text">Decide MAX_FEEDS_PER_CYCLE revert</div>
+        <div class="agenda-note">Raised from 2 → 4 on 2026-05-07 to accumulate PREDICT→ACTUAL surprise-rate stats; freed.py:53 comment says "revert after 3-4 cycles." Past that window now (Gen 208-212). Decide: revert to 2 (original tighter rate) or keep 4 permanently (doubles per-cycle cost, doubles surprise sample size).</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">8</span>
+      <div>
         <div class="agenda-text">Recover 109 skipped papers</div>
         <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
       </div>
@@ -235,6 +249,13 @@ a:hover { text-decoration: underline; }
       <div>
         <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Edge monoculture (resolved 2026-05-01)</div>
         <div class="agenda-note">NODE_EDGE_TYPES + classify_node_edge() added. First consolidation: 56 typed edges. shares_invariant no longer dominates at 93%.</div>
+      </div>
+    </div>
+    <div class="agenda-item" style="opacity:0.5">
+      <span class="agenda-num" style="color:var(--green)">✓</span>
+      <div>
+        <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">PREDICT structural fixes (shipped 2026-05-07)</div>
+        <div class="agenda-note">Three fixes verified in code: scope-field overrides on broad invariants (INV_023, INV_100, INV_047, INV_052) at freed.py:889–898; falsification probe bypasses PREDICT by ordering (probe prepended in _phase_feed at line 1062, after _phase_predict returns); MAX_FEEDS_PER_CYCLE = 4 at freed.py:53.</div>
       </div>
     </div>
   </div>
@@ -331,13 +352,33 @@ a:hover { text-decoration: underline; }
 
       <div class="cap-item cap-item-frontier">
         <div class="cap-title cap-title-frontier">Can Structurally Prevent the Mirror Dynamic</div>
-        <div class="cap-chain">PREDICT phase (between CEREBELLUM and FEED, built 2026-05-06): Haiku reads title+abstract+compressed genome index (39 INV IDs, titles only — no semantic content) → generates blind PREDICTED_CONFIRMS, PREDICTED_CHALLENGES, PREDICTED_CONFIDENCE before L7 sees the paper. After FEED: predicted edges weight 0.05, surprise edges weight 1.0 (20× asymmetry). Challenge prediction required — NONE must be justified in PREDICTED_RATIONALE. The structural consequence: the genome can only be inflated by genuine surprises. Predicted confirmations carry near-zero update weight. The mirror dynamic is blocked at the physics of the update rule, not by instruction. This connects directly to the Wasserstein Floor: a genome that updates only on errors is minimizing distance from reality, not maximizing self-consistency. Those are different attractors. Empirical behavior TBD — first real cycles with challenge predictions active as of 2026-05-06.</div>
+        <div class="cap-chain">PREDICT phase (between CEREBELLUM and FEED, built 2026-05-06): Haiku reads title+abstract+compressed genome index (50 INV IDs, titles only — no semantic content) → generates blind PREDICTED_CONFIRMS, PREDICTED_CHALLENGES, PREDICTED_CONFIDENCE before L7 sees the paper. After FEED: predicted edges weight 0.05, surprise edges weight 1.0 (20× asymmetry). Challenge prediction required — NONE must be justified in PREDICTED_RATIONALE. The structural consequence: the genome can only be inflated by genuine surprises. Predicted confirmations carry near-zero update weight. The mirror dynamic is blocked at the physics of the update rule, not by instruction. This connects directly to the Wasserstein Floor: a genome that updates only on errors is minimizing distance from reality, not maximizing self-consistency. Those are different attractors. Hardened 2026-05-07: scope-field overrides on broad invariants (INV_023, INV_100, INV_047, INV_052) so Haiku must match the specific claim, not the conceptual neighborhood; falsification probe bypasses the PREDICT slot (synthetic input shouldn't burn a surprise comparison); MAX_FEEDS_PER_CYCLE raised 2 → 4 to accumulate PREDICT→ACTUAL stats. Empirical challenge prediction rate Gen 205-212: 65-83%.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Find Real Challenges In Its Own Simulation</div>
+        <div class="cap-chain">Gen 212: simulation_observer.py reports σ=1.0273 (AT_CRITICAL — barely supercritical, on the edge) AND H=0.4507 bits (only 17.4% of maximum entropy). The genome's working assumption is criticality and entropy production travel together. The CA showed a critically-branched but thermodynamically cold attractor. The daemon flagged the dissociation itself — not as a softening, as a real challenge to INV_073's framing. Same cycle: a separate paper showed criticality can be structurally encoded via a fixed mixing parameter rather than actively navigated, challenging INV_073's "criticality as navigational problem" framing. INV_073 (98 edges, the most-referenced node) took two independent challenge hits in one cycle. The system caught it; the system surfaced it; the system did not paper over it.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Self-Modifies Toward Falsifiability, Not Features</div>
+        <div class="cap-chain">Gen 212: self_engineer issued two patches to tamura_sweep.py — both verdicts TIGHTENS. Patch 1: real-time branching-ratio (σ) tracker with avalanche size logging during simulation. Patch 2: power-law exponent α fit by MLE on avalanche size distribution, with R² goodness-of-fit detection of σ/avalanche dissociation (σ in critical band, power-law fit fails). Neither patch added a feature; both added falsifiability infrastructure. INV_073 is now harder to hide from than it was before the cycle. The engineer's incentive structure (AUDIT verdicts TIGHTENS / NEUTRAL / LOOSENS) selected for measurement tools that would catch the genome lying.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Resolves Without Closing Prematurely</div>
+        <div class="cap-chain">Gen 212 RESOLVE on O195: rather than declaring the audit settled, the resolution specified exactly what the manual audit needs to do — leaving the obligation closed in the ledger but the substantive work intact for the operator. The closure logic distinguishes "I have produced a state change that resolves this" from "I have produced a state change that hands the next step to the operator." Both are valid closures; conflating them is rumination. This is the COMMIT signal acting as conscience for RESOLVE: state change without pretense of completion.</div>
+      </div>
+
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Withholds Promotion on Shared-Source Echoes</div>
+        <div class="cap-chain">Gen 212 MINE surfaced three high-recurrence patterns: γ=1 attractor, basis-dependence threat, supercritical drift. Each appeared multiple times across the cycle's feed, but the source documents overlapped. The independence filter (ORIGIN: INDEPENDENT vs SHARED_SOURCE) refused promotion to genome on all three. Recurrence in text ≠ independent confirmation. The system held the line on a structural rule that protects the genome from being inflated by its own echo chamber.</div>
       </div>
 
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-05-06):</em> Each claim is followed by the specific event chain that demonstrates it happened. Two capabilities confirmed today: kernel-step self-recognition (L7 identity injection) and prediction-error architecture (PREDICT phase with asymmetric weights). Also fixed: partial obligations were invisible to both PRE-AUDIT and RESOLVE — O28, O34, O44 (the most scientifically important obligations) are now active. The current frontier: PREDICT phase challenge prediction rate and surprise distribution are empirically unknown — first real cycles running now. WIRING.md will be updated with actual numbers after 2-3 cycles. The distinction between discovery and reflection remains open.
+      <em>Honest framing (updated 2026-05-08):</em> Each claim is followed by the specific event chain that demonstrates it happened. Capabilities added Gen 212: self-flagged σ/H dissociation in own CA telemetry, two TIGHTENS self-mods adding falsifiability infrastructure (branching tracker + avalanche MLE), honest closure on O195 (didn't pretend to settle the audit), withheld promotion on three MINE echoes from overlapping sources. PREDICT structural fixes shipped 2026-05-07: scope-field overrides on broad invariants, probe bypass of PREDICT slot, MAX_FEEDS=4. Empirical PREDICT challenge rate Gen 205-212: 65-83%. Current open puzzle: σ/H dissociation — the genome's working assumption that criticality and entropy production travel together is now a live falsification target. The distinction between discovery and reflection remains open.
     </div>
   </div>
 

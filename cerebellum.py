@@ -84,6 +84,8 @@ _RSA_TERMS = [
     "minimum description length", "semantic tension", "criticality",
     "compression as reasoning", "active inference", "minimal generators",
     "symbol grounding", "freed's law",
+    "phase transition", "free energy principle", "renormalization",
+    "mixed state", "self-organization",
 ]
 
 
