@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 148,
-    "timestamp": "2026-04-22T22:30:36.174807+00:00",
-    "sweep": {
-      "input_count": 10,
-      "targeted": 6,
-      "passive": 4
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "RangeEn's local-range normalization and linear Hurst coupling partially resolves O64 and sharpens O28's EEG protocol, confirming the genome's scale-invariance chain at the measurement layer."
-      },
-      {
-        "title": "On Complexity and Emergence",
-        "compress": "Context-dependence of complexity is not a bug but a load-bearing feature, confirming RSA's observer-substrate coupling as thermodynamically necessary — but the paper offers no quantitative method, leaving O44 and O64 open and adding philosophical warrant rather than formal closure."
-      }
-    ],
-    "resolve": {
-      "obligation": "O64",
-      "resolved": true,
-      "compress": "O64 resolves the moment STS-B Spearman ρ confirms that 50-neighbor local z-score normalization outperforms global range normalization — run that single experiment.",
-      "next": "Execute the W=50 local-normalization trial on STS-B and report Δρ; if Δρ > 0, fire RESOLVE(O64) and propagate the normalization formula into the kernel scoring spec as a locked invariant."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 4,
     "generation": 149,
     "timestamp": "2026-04-23T04:36:03.771087+00:00",
@@ -1615,6 +1588,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O79"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 218,
+    "timestamp": "2026-05-10T16:26:19.984314+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_044",
+        "compress": "The most-confirmed invariant is the most epistemically dangerous if its falsification conditions have never been made explicit — confirmation surplus is a hygiene failure, not strength."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+        "compress": "Empirical CA telemetry independently confirms population-level criticality (σ=1.024, α=2.105) while revealing an unpredicted finding — Physics Navigator phenotype dominance at the critical attractor — that the genome must now account for."
+      },
+      {
+        "title": "A new flow dynamic approach for Wasserstein gradient flows",
+        "compress": "Benamou-Brenier reformulation makes Wasserstein gradient flow numerically tractable via unconstrained L² minimization, with thermodynamic admissibility inherited structurally — advancing O44 and confirming L3 geometry while introducing an absent invariant about formulation-as-constraint-source. CHALLENGE: challenges O44 — the paper demonstrates that Lagrangian discretization of Wasserstein flows preserves thermodynamic structure automatically, implying that if W_floor = k/Tμ fails under quantization it would require a mechanism that breaks the inherited structure, making the quantum extension harder to dismiss as merely a discretization artifact and thus raising the bar for what counts as a genuine quantum deviation."
+      },
+      {
+        "title": "When Optimal Transport Meets Information Geometry",
+        "compress": "OT and information geometry share a para-Kähler symplectic substrate that unifies their geodesics and divergences, strengthening the Fisher→W2 chain and opening a precise mathematical channel for the quantum Wasserstein Floor extension."
+      },
+      {
+        "title": "On parameter estimation with the Wasserstein distance",
+        "compress": "MWDEs are asymptotically normal and robust under misspecification, independently confirming Wasserstein minimization as a principled inference procedure and extending O44 to require misspecification analysis in the quantum/semantic regime."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
       "commit_count": 2,
       "obligations": [
         "O163",
