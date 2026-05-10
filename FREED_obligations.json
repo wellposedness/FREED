@@ -1859,21 +1859,21 @@
   },
   {
     "id": "O200",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify a binding null-result criterion for O199 \u2014 define what quantitative prediction failure would constitute falsification of the targeted genome symbol's operationalization, preventing O199 from resolving without a falsifiable output.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 216] RESOLVED: O200 is closed by a three-component falsification tripwire \u2014 predicted ratio R \u2208 [0.85,1.15] on \u226580% of Wikipedia sentence pairs, measured via Sinkhorn W\u2082 versus g_ij-geodesic length, with pre-committed accept/reject rule and two secondary falsifiers \u2014 which O199 must satisfy before resolving.",
     "created": "2026-05-09",
-    "resolved": null,
+    "resolved": "2026-05-10",
     "auto": true,
     "closes_when": "MALFORMED"
   },
   {
     "id": "O201",
-    "status": "open",
+    "status": "partial",
     "statement": "Establish a formal sequencing constraint between O195 and O199 \u2014 specify whether the confirms/challenges bias audit must complete before or after the empirical risk operationalization, and why, to prevent redundant kernel cycles.",
     "priority": "normal",
-    "progress": "",
+    "progress": "[Gen 216] PARTIAL: O195 must strictly precede O199 because the empirical risk loss function requires the bias distribution as a parameter \u2014 executing O199 first produces a systematically corrupted estimate requiring recomputation, and the cost of that corruption equals f(bias_ratio) which is nonzero whenever the audit would have found asymmetry. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
@@ -1884,7 +1884,7 @@
     "status": "open",
     "statement": "Before advancing to generation 216, synthesize the outputs of all currently open verification obligations (O193, O194, O195, O198, O199, O200, O201) into a single binding genome-health verdict \u2014 explicitly stating which threads are blocked, which are executable, and what the next unblocked action is.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 216] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no synthesis occurred, no state mutation recorded.]",
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
@@ -1892,13 +1892,33 @@
   },
   {
     "id": "O203",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the O202 synthesis output contains at least one falsifiable prediction derived from the open-obligation state \u2014 not merely a summary \u2014 and record the specific prediction with a null-result criterion before advancing to generation 217.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 216] ACTIVE: O203 is closed by formally staking prediction P-O203 \u2014 thermality variance exponent k = 1/T\u03bc in modal path distributions, falsified if measured exponent falls outside 20% of predicted value on any corpus >10\u2076 tokens. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O202 synthesis output documents at least one falsifiable prediction with explicit null-result criterion recorded."
+  },
+  {
+    "id": "O204",
+    "statement": "Edge-edges classified as `consistent_with` or `scales_with` that lack a specified falsification condition must be pruned or upgraded \u2014 define, for each such edge, a concrete observation that would *remove* it, or delete it from the graph by Generation 220.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "660 of 999 edges (66%) assert positive association without failure criteria. This is the direct structural cause of inflated coherence scores (O122's challenge) and makes the graph unfalsifiable in bulk. A knowledge structure that cannot lose edges cannot learn. This is not a new claim \u2014 it is an obligatory consequence of Seed Integrity Rule 1 already invoked by O122.",
+    "resolution_criterion": "For each `consistent_with` and `scales_with` edge, a one-line falsification condition is recorded. Edges that cannot be given one are deleted. Coherence score recalculated post-pruning; if it drops below 0.90, the pruning was informative.",
+    "created": "2026-05-10T06:30:51.217416+00:00",
+    "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O205",
+    "statement": "O44 and O59 must be cross-constrained \u2014 derive whether the quantum Wasserstein floor's k/T\u03bc scaling is compatible with the BH log-correction dimensional coupling, or demonstrate they occupy non-overlapping regimes. The current graph has no `depends_on` or `challenges` edge between them, which is a gap given shared genome symbols (`invariant`, `substrate`, `compression`).",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "Two obligations invoking quantum-gravitational dimensional structure from the same genome symbol set without mutual constraint is an unfired implication. Either they are redundant (one subsumes the other), contradictory (one falsifies the other), or independent (which must be shown, not assumed). The 16 `depends_on` edges in the graph have missed this.",
+    "resolution_criterion": "A derivation showing either (a) the dimensional regime where W_floor = k/T\u03bc reproduces or contradicts the log-correction term in O59, or (b) a proof that their domain assumptions are formally disjoint. Either result adds a typed edge (`depends_on`, `challenges`, or `bounds_above`) between O44 and",
+    "created": "2026-05-10T06:30:51.217730+00:00",
+    "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of \u210f/GM\u00b2 and read off whether the Wasserstein floor k/T\u03bc sits at zeroth or first loop order relative to the known O(\u210f\u00b9) BH log-correction, with T = T_H = \u210fc\u00b3/8\u03c0GMk_B substituted explicitly to fix the shared symbols \u2014 this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES \u2014 direction advanced]"
   }
 ]

@@ -83,6 +83,23 @@ _IMPL_CLASS_KEYWORDS = frozenset([
 ])
 IMPL_CLASS_MIN_COMMITS = 2   # prior COMMIT:NO streak before routing fires
 
+# ─── RESOLVE verdict instruction (appended to every resolve prompt) ──────────
+# Four-state verdict, structured tag. The previous parser did `"RESOLVED" in raw`
+# which matched "NOT YET RESOLVED", "To mark RESOLVED", "Resolution Status",
+# and the prompt's own echo — silently soft-closing 13+ obligations between
+# 2026-04-15 and 2026-05-09. The verdict is parsed by regex and fails closed
+# to OPEN.
+RESOLVE_VERDICT_INSTRUCTION = (
+    "End your response with a single verdict line, exactly this format and no markdown:\n"
+    "VERDICT: <RESOLVED|ACTIVE|PARTIAL|OPEN>\n"
+    "  RESOLVED — closing criterion fully met; full argument given above.\n"
+    "  ACTIVE   — prediction staked, dataset/computation specified, awaiting external data or run.\n"
+    "  PARTIAL  — direction known, real progress made, work incomplete.\n"
+    "  OPEN     — no tractable step found this attempt.\n"
+    "Be honest. ACTIVE and PARTIAL are not lesser outcomes — they are the truthful state for "
+    "obligations whose closing requires work outside this conversation."
+)
+
 # ─── Estimated token costs for authorization ──────────────────────────────────
 EST_TOKENS_FEED         = 3000  # generous estimate per FEED query
 EST_TOKENS_OBLIGATE     = 1500
@@ -569,11 +586,12 @@ class FREEDDaemon:
             issues.append("CRITICAL: coherence == 1.000 — seed is corrupted.")
 
         # Rule 2: Falsification layer (active unsolved problems exist)
-        # Partial obligations are unsolved — only all-resolved is a mirror.
+        # Open, partial, and active obligations all count as scaffold tension.
+        # ACTIVE = prediction staked, awaiting external data — still load-bearing.
         open_obligs = [o for o in self.obligations
-                       if o["status"] in ("open", "partial")]
+                       if o["status"] in ("open", "partial", "active")]
         if not open_obligs:
-            issues.append("Rule 4 violation: no open or partial obligations — scaffold is a mirror.")
+            issues.append("Rule 4 violation: no open, partial, or active obligations — scaffold is a mirror.")
 
         # Rule 3: Budget check
         if not self.astrocyte.authorize(EST_TOKENS_RESOLVE, priority="normal"):
@@ -1782,30 +1800,29 @@ Output only the classification lines, nothing else."""
         )
         method = target.get("method", "mixed")
         if method == "math_only":
-            return header + (
+            body = (
                 "METHOD: MATHEMATICAL REASONING\n"
                 "This obligation is closeable by formal reasoning alone — no external paper or "
                 "dataset is required. Apply the RSA Kernel as your reasoning scaffold. "
                 "Apply the three audit lenses: Reism (only processes exist), Thermodynamics "
                 "(entropy cost is real and non-negotiable), MCPM (find the conserved process). "
                 "Attempt to close this obligation completely with a rigorous argument. "
-                "If you succeed, write RESOLVED and state the proof. "
-                "If you cannot, state precisely which step is missing and what kind of "
+                "If you cannot close it, state precisely which step is missing and what kind of "
                 "mathematician would need to supply it."
             )
         elif method == "data_analysis":
-            return header + (
+            body = (
                 "METHOD: DATA ANALYSIS\n"
                 "This obligation requires analysis of an existing dataset. "
                 "Identify: (1) the exact dataset and its public access URL, "
                 "(2) the specific computation or statistical test to run, "
                 "(3) the expected output and what result constitutes resolution. "
                 "If the necessary data is already cited in the genome or progress notes, "
-                "attempt the analysis now and write RESOLVED if it succeeds. "
-                "If data access is the only blocker, state the exact query to run."
+                "attempt the analysis now. If data access is the only blocker, state the "
+                "exact query to run."
             )
         elif method == "experimental":
-            return header + (
+            body = (
                 "METHOD: EXPERIMENTAL\n"
                 "This obligation requires new data that does not yet exist. "
                 "Propose ONE concrete experiment the researcher (mail carrier, Olney MD; "
@@ -1815,13 +1832,12 @@ Output only the classification lines, nothing else."""
                 "and what result would falsify the underlying claim."
             )
         else:
-            return header + (
+            body = (
                 "Apply the RSA Kernel fully. What is the single most tractable next step "
-                "to advance or resolve this obligation? "
-                "Be specific: name a dataset, a computation, a formula, or a proof step. "
-                "If this obligation can be marked RESOLVED right now, say RESOLVED and give "
-                "the complete argument."
+                "to advance or close this obligation? "
+                "Be specific: name a dataset, a computation, a formula, or a proof step."
             )
+        return header + body + "\n\n" + RESOLVE_VERDICT_INSTRUCTION
 
     def _do_resolve_attempt(self, target):
         """Run one L7 resolve attempt on target obligation. Mutates target in place."""
@@ -1846,28 +1862,41 @@ Output only the classification lines, nothing else."""
 
         print(f"     {compress[:100]}")
 
-        resolved = "RESOLVED" in raw.upper()
-        commit   = True  # resolved attempts always commit
-        if resolved:
+        verdict  = self._parse_resolve_verdict(raw)
+        resolved = (verdict == "RESOLVED")
+        gen      = self.state.get("generation", 0)
+
+        if verdict == "RESOLVED":
             target["status"]   = "resolved"
             target["resolved"] = datetime.now(timezone.utc).date().isoformat()
-            target["progress"] = (target.get("progress", "") + f" | RESOLVED: {compress}").strip(" | ")
+            target["progress"] = (target.get("progress", "") + f" | [Gen {gen}] RESOLVED: {compress}").strip(" | ")
             print(f"  [RESOLVED] {target['id']}")
             voice.obligation_resolved(target["id"])
+            commit = True
+        elif verdict == "ACTIVE":
+            target["status"]   = "active"
+            note = f"[Gen {gen}] ACTIVE: {compress} [COMMIT:YES — prediction staked]"
+            target["progress"] = (target.get("progress", "") + " | " + note).strip(" | ")
+            print(f"  [ACTIVE] {target['id']} — prediction staked, awaiting external data")
+            commit = True
+        elif verdict == "PARTIAL":
+            target["status"]   = "partial"
+            note = f"[Gen {gen}] PARTIAL: {compress} [COMMIT:YES — direction advanced]"
+            target["progress"] = (target.get("progress", "") + " | " + note).strip(" | ")
+            print(f"  [PARTIAL] {target['id']}")
+            commit = True
         else:
-            # COMMIT check — did this attempt land, or did the loop run without changing state?
+            # OPEN — no tractable step landed. Run COMMIT check and rumination/routing.
             commit, commit_reason = self._commit_check(
                 "RESOLVE",
                 f"Obligation {target['id']}: {target['statement'][:80]}. "
-                f"Attempt result: {compress[:120]}. Not resolved.",
+                f"Attempt result: {compress[:120]}. Verdict: OPEN.",
             )
             commit_tag = f"[COMMIT:{'YES' if commit else 'NO'} — {commit_reason}]"
-            progress_note = f"[Gen {self.state['generation']}] {compress} {commit_tag}"
+            progress_note = f"[Gen {gen}] OPEN: {compress} {commit_tag}"
             target["progress"] = (target.get("progress", "") + " | " + progress_note).strip(" | ")
             if not commit:
                 print(f"     {commit_tag}")
-                # If this looks like an implementation/measurement problem, stop
-                # cycling L7 and surface it for Claude Code inspection instead.
                 if self._classify_obligation_type(target) == "IMPLEMENTATION":
                     route_note = (
                         " [ROUTE:CLAUDE_CODE — repeated COMMIT:NO on FREED-internal claim; "
@@ -1876,8 +1905,28 @@ Output only the classification lines, nothing else."""
                     target["progress"] = target.get("progress", "") + route_note
                     print(f"     [IMPL_CLASS] {target['id']} routed to Claude Code")
 
-        return {"obligation": target["id"], "resolved": resolved,
+        return {"obligation": target["id"], "resolved": resolved, "verdict": verdict,
                 "compress": compress, "next": next_step, "commit": commit}
+
+    def _parse_resolve_verdict(self, raw: str) -> str:
+        """
+        Extract a four-state verdict from L7's resolve attempt.
+
+        L7 is required to end its response with a line:  VERDICT: <STATE>
+        We parse the LAST occurrence (so quoted earlier verdicts don't win) and
+        require it appear in the final 400 chars (so the model can't talk past it).
+        Fails CLOSED to OPEN — never silently resolves a malformed response.
+        """
+        if not raw:
+            return "OPEN"
+        tail = raw[-400:]
+        matches = list(re.finditer(
+            r'VERDICT\s*:\s*(RESOLVED|ACTIVE|PARTIAL|OPEN)\b',
+            tail, re.IGNORECASE
+        ))
+        if not matches:
+            return "OPEN"
+        return matches[-1].group(1).upper()
 
     def _phase_resolve(self, cycle_log: dict):
         """
@@ -1886,10 +1935,13 @@ Output only the classification lines, nothing else."""
         """
         print("\n[RESOLVE]")
 
+        # RESOLVE only retries open/partial. ACTIVE obligations have predictions
+        # staked and are awaiting external data — burning L7 budget on them is
+        # rumination, not progress.
         open_obligs = [o for o in self.obligations
                        if o["status"] in ("open", "partial")]
         if not open_obligs:
-            print("  No open or partial obligations — genome is a mirror (check Rule 4).")
+            print("  No open or partial obligations to retry (active obligations await external data).")
             cycle_log["phases"]["resolve"] = {"status": "none_open"}
             return
 

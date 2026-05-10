@@ -2711,6 +2711,10 @@ class CASweepTelemetry:
                 }
                 self._alarms.append(alarm)
 
+        # ── Composition vector: counts per type alongside σ and H ──
+        # Surfaces whether population composition predicts criticality (INV_073).
+        composition_vector = dict(type_counts) if type_counts else {}
+
         snapshot = {
             "generation":        generation,
             "sigma_instant":     round(sigma_instant, 6),
@@ -2725,6 +2729,7 @@ class CASweepTelemetry:
             "dominant_type":     dominant_type,
             "dominant_share":    dominant_share,
             "total_population":  total_pop,
+            "composition_vector": composition_vector,
             "in_sigma_band":     in_sigma_band,
             "in_alpha_band":     in_alpha_band,
             "verdict":           verdict,
@@ -2972,6 +2977,335 @@ class CASweepTelemetry:
         r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
 
         return (alpha, max(0.0, r_squared))
+
+
+# ─── Per-Timestep Sigma Monitor (Real-Time Criticality Control Signal) ───────
+# Lightweight per-timestep branching-ratio monitor that logs σ at every
+# simulation step and flags deviation beyond ±0.05 from 1.0, converting
+# criticality from a retrospective measurement into a closed-loop control
+# signal.  Designed for direct insertion into a CA simulation loop with
+# zero configuration overhead.
+#
+# Addresses O140 (CA measurement grounding) and INV_073 (Wasserstein
+# gradient as necessary path to γ=1): if the CA reaches and holds
+# criticality via discrete local rules with no explicit Wasserstein
+# geometry, the attractor is reachable through multiple dynamical routes.
+#
+# The monitor emits a per-step dict containing:
+#   - σ (instantaneous branching ratio)
+#   - rolling mean and std of σ over a configurable window
+#   - a boolean flag when σ deviates beyond ±0.05 from 1.0
+#   - the direction of deviation (supercritical / subcritical)
+#   - cumulative deviation statistics for drift detection
+#
+# Usage inside a CA simulation loop::
+#
+#     monitor = SigmaMonitor()
+#     for step in range(n_steps):
+#         # ... run CA step ...
+#         result = monitor.log(parent_count, child_count)
+#         if result["flag"]:
+#             # Real-time criticality control signal
+#             adjust_ca_parameters(result["direction"], result["deviation"])
+#     print(monitor.summary())
+
+SIGMA_DEVIATION_THRESHOLD = 0.05  # ±0.05 from 1.0
+
+
+class SigmaMonitor:
+    """
+    Per-timestep branching-ratio (σ) monitor for real-time criticality tracking.
+
+    Logs σ at every simulation step, computes rolling statistics, and
+    immediately flags when σ deviates beyond ±0.05 from 1.0.  This converts
+    criticality from a post-hoc snapshot measurement into a closed-loop
+    control signal that enables the epistemic loop to detect and respond
+    to phase transitions *before* they consolidate.
+
+    The monitor is intentionally minimal — no avalanche fitting, no
+    power-law estimation, no cell-type tracking.  It does one thing well:
+    per-timestep σ logging with real-time deviation flagging.  For richer
+    telemetry, compose with CASweepTelemetry or BranchingRatioTracker.
+
+    Example::
+
+        monitor = SigmaMonitor(window=50, threshold=0.05)
+        for step in range(200):
+            parents, children = run_ca_step(grid)
+            result = monitor.log(parents, children)
+            if result["flag"]:
+                print(f"Step {step}: σ={result['sigma']:.4f} "
+                      f"({result['direction']}, Δ={result['deviation']:.4f})")
+        summary = monitor.summary()
+        print(f"Mean σ={summary['sigma_mean']:.4f} ± {summary['sigma_std']:.4f}, "
+              f"flagged {summary['n_flagged']}/{summary['n_steps']} steps")
+    """
+
+    def __init__(
+        self,
+        window=50,          # type: int
+        threshold=None,     # type: Optional[float]
+        center=1.0,         # type: float
+        history_limit=5000, # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        window : int
+            Number of recent steps for rolling σ mean/std. Default: 50.
+        threshold : float or None
+            Deviation threshold from center for flagging.  Default: 0.05
+            (the SIGMA_DEVIATION_THRESHOLD constant).
+        center : float
+            The target σ value (perfect criticality). Default: 1.0.
+        history_limit : int
+            Maximum per-step records to retain. Default: 5000.
+        """
+        self.window = max(1, window)
+        self.threshold = threshold if threshold is not None else SIGMA_DEVIATION_THRESHOLD
+        self.center = center
+        self.history_limit = max(10, history_limit)
+
+        self._sigma_log = []       # type: List[float]
+        self._flag_log = []        # type: List[bool]
+        self._step_count = 0       # type: int
+        self._n_flagged = 0        # type: int
+        self._n_supercritical = 0  # type: int
+        self._n_subcritical = 0    # type: int
+        self._cumulative_deviation = 0.0  # type: float
+        self._max_deviation = 0.0  # type: float
+        self._flag_events = []     # type: list
+
+    def log(self, parent_count, child_count):
+        # type: (int, int) -> dict
+        """
+        Log one simulation step and return a real-time criticality signal.
+
+        Parameters
+        ----------
+        parent_count : int
+            Number of active (parent) cells at this step.
+        child_count : int
+            Number of active (child/descendant) cells produced.
+
+        Returns
+        -------
+        dict with keys:
+            step           : int    — the step number (0-indexed)
+            sigma          : float  — instantaneous branching ratio
+            sigma_rolling  : float  — rolling mean σ over window
+            sigma_std      : float  — rolling std σ over window
+            deviation      : float  — |σ_rolling - center|
+            flag           : bool   — True if deviation > threshold
+            direction      : str    — "supercritical" / "subcritical" / ""
+            cumulative_dev : float  — sum of all |σ - center| so far
+            max_deviation  : float  — largest |σ_rolling - center| seen
+            n_flagged      : int    — total flagged steps so far
+            timestamp      : str    — ISO-8601 UTC
+        """
+        self._step_count += 1
+
+        # Instantaneous σ
+        if parent_count > 0:
+            sigma = float(child_count) / float(parent_count)
+        else:
+            sigma = 0.0
+
+        self._sigma_log.append(sigma)
+
+        # Rolling statistics over window
+        window_data = self._sigma_log[-self.window:]
+        w_n = len(window_data)
+        sigma_rolling = sum(window_data) / float(w_n)
+        s_var = sum((s - sigma_rolling) ** 2 for s in window_data) / float(w_n)
+        sigma_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # Deviation from center
+        deviation = abs(sigma_rolling - self.center)
+        self._cumulative_deviation += abs(sigma - self.center)
+        if deviation > self._max_deviation:
+            self._max_deviation = deviation
+
+        # Flag check: deviation beyond ±threshold from center
+        flag = (sigma_rolling != 0.0) and (deviation > self.threshold)
+        self._flag_log.append(flag)
+
+        direction = ""
+        if flag:
+            self._n_flagged += 1
+            if sigma_rolling > self.center + self.threshold:
+                direction = "supercritical"
+                self._n_supercritical += 1
+            elif sigma_rolling < self.center - self.threshold:
+                direction = "subcritical"
+                self._n_subcritical += 1
+
+            self._flag_events.append({
+                "step": self._step_count - 1,
+                "sigma": round(sigma, 6),
+                "sigma_rolling": round(sigma_rolling, 6),
+                "deviation": round(deviation, 6),
+                "direction": direction,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
+
+        # Trim history
+        if len(self._sigma_log) > self.history_limit:
+            trim = len(self._sigma_log) - self.history_limit
+            self._sigma_log = self._sigma_log[trim:]
+            self._flag_log = self._flag_log[trim:]
+
+        return {
+            "step":           self._step_count - 1,
+            "sigma":          round(sigma, 6),
+            "sigma_rolling":  round(sigma_rolling, 6),
+            "sigma_std":      round(sigma_std, 6),
+            "deviation":      round(deviation, 6),
+            "flag":           flag,
+            "direction":      direction,
+            "cumulative_dev": round(self._cumulative_deviation, 6),
+            "max_deviation":  round(self._max_deviation, 6),
+            "n_flagged":      self._n_flagged,
+            "timestamp":      datetime.now(timezone.utc).isoformat(),
+        }
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-step σ history."""
+        return list(self._sigma_log)
+
+    def flag_events(self):
+        # type: () -> list
+        """Return all flag events (steps where σ deviated beyond threshold)."""
+        return list(self._flag_events)
+
+    def summary(self):
+        # type: () -> dict
+        """
+        Generate a summary of the entire monitoring run.
+
+        Returns
+        -------
+        dict with keys:
+            n_steps            : int    — total steps logged
+            sigma_mean         : float  — global mean σ
+            sigma_std          : float  — global std σ
+            sigma_min          : float  — minimum σ observed
+            sigma_max          : float  — maximum σ observed
+            n_flagged          : int    — total flagged steps
+            n_supercritical    : int    — flagged steps above band
+            n_subcritical      : int    — flagged steps below band
+            flag_rate          : float  — fraction of steps flagged
+            mean_deviation     : float  — mean |σ - center| per step
+            max_deviation      : float  — largest rolling |σ - center|
+            threshold          : float  — the deviation threshold used
+            center             : float  — the target σ value
+            verdict            : str    — AT_CRITICAL / DRIFTING_SUPER /
+                                          DRIFTING_SUB / UNSTABLE / NO_DATA
+            inv073_note        : str    — relevance to INV_073 challenge
+        """
+        n = self._step_count
+
+        if n == 0:
+            return {
+                "n_steps": 0,
+                "sigma_mean": 0.0,
+                "sigma_std": 0.0,
+                "sigma_min": 0.0,
+                "sigma_max": 0.0,
+                "n_flagged": 0,
+                "n_supercritical": 0,
+                "n_subcritical": 0,
+                "flag_rate": 0.0,
+                "mean_deviation": 0.0,
+                "max_deviation": 0.0,
+                "threshold": self.threshold,
+                "center": self.center,
+                "verdict": "NO_DATA",
+                "inv073_note": "No steps logged.",
+            }
+
+        all_sigma = self._sigma_log
+        s_n = len(all_sigma)
+        s_mean = sum(all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_var = sum((s - s_mean) ** 2 for s in all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        s_min = min(all_sigma) if all_sigma else 0.0
+        s_max = max(all_sigma) if all_sigma else 0.0
+
+        flag_rate = round(float(self._n_flagged) / float(n), 6) if n > 0 else 0.0
+        mean_dev = round(self._cumulative_deviation / float(n), 6) if n > 0 else 0.0
+
+        # Verdict based on global σ statistics
+        global_deviation = abs(s_mean - self.center)
+        if global_deviation <= self.threshold and flag_rate < 0.15:
+            verdict = "AT_CRITICAL"
+        elif s_mean > self.center + self.threshold:
+            verdict = "DRIFTING_SUPER"
+        elif s_mean < self.center - self.threshold:
+            verdict = "DRIFTING_SUB"
+        elif flag_rate >= 0.3:
+            verdict = "UNSTABLE"
+        else:
+            verdict = "AT_CRITICAL"
+
+        # INV_073 assessment
+        if verdict == "AT_CRITICAL":
+            inv073_note = (
+                "σ={:.4f}±{:.4f} within critical band (center={:.2f} "
+                "±{:.2f}) with flag rate {:.1%}. The CA reaches and holds "
+                "criticality via discrete local rules without explicit "
+                "Wasserstein geometry, supporting the hypothesis that the "
+                "critical attractor is reachable through multiple dynamical "
+                "routes (INV_073 challenge)."
+            ).format(s_mean, s_std, self.center, self.threshold, flag_rate)
+        elif verdict in ("DRIFTING_SUPER", "DRIFTING_SUB"):
+            inv073_note = (
+                "σ={:.4f}±{:.4f} drifting {} from critical band. "
+                "Real-time monitoring detected phase transition before "
+                "consolidation — closed-loop control signal available for "
+                "parameter adjustment."
+            ).format(
+                s_mean, s_std,
+                "supercritical" if verdict == "DRIFTING_SUPER" else "subcritical",
+            )
+        else:
+            inv073_note = (
+                "σ={:.4f}±{:.4f} with flag rate {:.1%} — system is "
+                "oscillating between regimes. Active stabilization required."
+            ).format(s_mean, s_std, flag_rate)
+
+        return {
+            "n_steps":          n,
+            "sigma_mean":       round(s_mean, 6),
+            "sigma_std":        round(s_std, 6),
+            "sigma_min":        round(s_min, 6),
+            "sigma_max":        round(s_max, 6),
+            "n_flagged":        self._n_flagged,
+            "n_supercritical":  self._n_supercritical,
+            "n_subcritical":    self._n_subcritical,
+            "flag_rate":        flag_rate,
+            "mean_deviation":   mean_dev,
+            "max_deviation":    round(self._max_deviation, 6),
+            "threshold":        self.threshold,
+            "center":           self.center,
+            "verdict":          verdict,
+            "inv073_note":      inv073_note,
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Reset all state for a new monitoring run."""
+        self._sigma_log = []
+        self._flag_log = []
+        self._step_count = 0
+        self._n_flagged = 0
+        self._n_supercritical = 0
+        self._n_subcritical = 0
+        self._cumulative_deviation = 0.0
+        self._max_deviation = 0.0
+        self._flag_events = []
 
 
 # ─── Ridge Position Scorer (INV_073 Falsification) ──────────────────────────

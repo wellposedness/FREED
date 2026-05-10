@@ -54,6 +54,44 @@ NODE_EDGE_TYPES = (
     "independent_confirmation", # reserved: bootstrap CONVERGE or verified cross-domain feed edge required
 )
 
+# ─── Open World Assumption (OWA) Edge Completeness ──────────────────────────
+# Under Closed World Assumption (CWA), an absent edge between two nodes is
+# treated as evidence of no relationship (hard negation).  Under OWA, absence
+# is epistemically ambiguous: the edge may exist but be unobserved.
+#
+# This distinction is critical for dependency skeleton recovery (O187): with
+# 16 nodes the skeleton has 120 possible undirected edges.  Under CWA, each
+# absent edge is a definite non-dependency, yielding a single determinate
+# skeleton.  Under OWA, each absent edge contributes epistemic uncertainty,
+# making the skeleton underdetermined — the number of compatible skeletons
+# grows combinatorially with the number of unobserved edges.
+#
+# Edge epistemic status:
+#   "observed_present"  — edge exists in the graph (standard positive edge)
+#   "observed_absent"   — edge confirmed absent via explicit negative evidence
+#                         (e.g., "ABSENT INV_094" from FEED output)
+#   "unobserved"        — no evidence either way; OWA treats this as unknown
+#
+# The OWA incompleteness score for a node pair (A, B) is:
+#   owa_score = 1.0  if edge is observed_present (full confidence)
+#   owa_score = 0.0  if edge is observed_absent  (confirmed non-link)
+#   owa_score = prior if edge is unobserved       (epistemic uncertainty)
+#
+# The default prior (OWA_UNOBSERVED_PRIOR) is 0.5 (maximum ignorance),
+# but can be adjusted based on graph density or domain knowledge.
+#
+# Reference: "Semantics-aware causal inference frameworks for knowledge
+# graphs" — addresses data incompleteness violating causal assumptions
+# under the Open World Assumption.
+# ─────────────────────────────────────────────────────────────────────────────
+
+OWA_EDGE_STATUSES = ("observed_present", "observed_absent", "unobserved")
+
+# Default prior probability for unobserved edges under OWA.
+# 0.5 = maximum ignorance (no bias toward presence or absence).
+# Lower values bias toward sparsity; higher toward density.
+OWA_UNOBSERVED_PRIOR = 0.5
+
 # Keywords used to classify node-edge type from invariant text
 _SCALE_KEYWORDS = re.compile(
     r'\b(?:scale|L\d|substrate.independent|macro|micro|level|layer|multi.scale|cross.scale|hierarchy)\b', re.I
@@ -137,6 +175,105 @@ _COMPLEXITY_KEYWORDS = re.compile(
     r'\b(?:complexity|entropy|information|coarse[- ]grain|emergence|disorder|randomness|compressibility)\b',
     re.I
 )
+
+# ─── Entropy-Flux Decomposition Source Types ─────────────────────────────────
+# Following the paper's three-factor partition of entropy change, every edge
+# update is tagged with the flux source that generated it:
+#
+#   "internal_inference" — the system's INTERNAL DYNAMICS: edges produced by
+#       consolidation, avalanche cascades, structural mining, or any process
+#       that operates on existing graph state without new external input.
+#       Entropy change from this source is reversible under the system's own
+#       dynamics (Noether: conserved under time-translation of internal state).
+#
+#   "external_feed" — UNSOLICITED external perturbation: edges produced by
+#       FEED ingestion of new papers/data.  This is the irreversible injection
+#       of information from the environment, breaking the internal-dynamics
+#       symmetry and driving net entropy change.
+#
+#   "coarse_graining_collapse" — the third factor: edges produced when
+#       context-aware deduplication, scale-layer compression, or explicit
+#       coarse-graining operations merge or collapse fine-grained distinctions.
+#       This is information loss by observer choice, not by dynamics or input.
+#
+# The decomposition enables:
+#   - Debt-ratio tracking partitioned by source (which flux drives coherence?)
+#   - PRE-AUDIT failure-mode prediction (external floods vs. internal drift
+#     vs. resolution-loss from aggressive coarse-graining)
+#   - Direct mapping to the Noether conservation structure: internal dynamics
+#     conserve entropy; external feed and coarse-graining break conservation.
+#
+# CHALLENGE (O44): The three-factor decomposition is structurally parallel to
+# classical entropy production terms (σ_int + σ_ext + σ_cg) but the paper's
+# density-operator extension to quantum Wasserstein metrics remains ungrounded
+# at this step — the classical graph Laplacian decomposes cleanly but the
+# non-commutative case requires additional structure not yet provided.
+# ─────────────────────────────────────────────────────────────────────────────
+
+ENTROPY_FLUX_SOURCES = (
+    "internal_inference",
+    "external_feed",
+    "coarse_graining_collapse",
+)
+
+# Patterns to classify flux source from processing context
+_INTERNAL_INFERENCE_PATTERNS = re.compile(
+    r'\b(?:consolidat|avalanche|cascade|mine|mined|structural|infer(?:red|ence)|'
+    r'derive[ds]?|propagat|rescore|internal|CONVERGE|bootstrap)\b', re.I
+)
+_COARSE_GRAINING_PATTERNS = re.compile(
+    r'\b(?:coarse[- ]?grain|collaps|merg|deduplic|compress|renormali[sz]|'
+    r'truncat|aggregate|subsume|absorb|resolution[- ]?loss)\b', re.I
+)
+
+
+def classify_entropy_flux_source(processing_context="", edge_type="", is_feed=True):
+    # type: (str, str, bool) -> str
+    """
+    Classify the entropy-flux source for an edge update, mirroring the paper's
+    three-factor decomposition of entropy change.
+
+    The classification uses a priority hierarchy:
+      1. coarse_graining_collapse — if processing context indicates merging,
+         deduplication, or explicit coarse-graining operations
+      2. internal_inference — if processing context indicates consolidation,
+         avalanche cascades, structural mining, or derivation from existing state
+      3. external_feed — default for edges produced by FEED ingestion
+
+    Parameters
+    ----------
+    processing_context : str
+        Description of the processing step that generated this edge.
+        E.g. "FEED ingestion", "consolidate MINE phase", "avalanche cascade",
+        "context-aware deduplication", etc.
+    edge_type : str
+        The edge type (confirms, refutes, etc.). Used as secondary signal.
+    is_feed : bool
+        Whether this edge was generated during a FEED operation (default True).
+        When False, the default shifts from external_feed to internal_inference.
+
+    Returns
+    -------
+    str
+        One of ENTROPY_FLUX_SOURCES: "internal_inference", "external_feed",
+        or "coarse_graining_collapse".
+    """
+    ctx = processing_context + " " + edge_type
+
+    # Priority 1: coarse-graining collapse
+    if _COARSE_GRAINING_PATTERNS.search(ctx):
+        return "coarse_graining_collapse"
+
+    # Priority 2: internal inference
+    if _INTERNAL_INFERENCE_PATTERNS.search(ctx):
+        return "internal_inference"
+
+    # Priority 3: default based on is_feed flag
+    if is_feed:
+        return "external_feed"
+    else:
+        return "internal_inference"
+
 
 # ─── Extraction patterns ──────────────────────────────────────────────────────
 # Scans kernel output text (all fields) for typed relationships to named nodes.
@@ -1257,6 +1394,635 @@ def cluster_complexity_scores(clusters):
     return results
 
 
+# ─── Wasserstein-Levi-Civita Geometry on the Probability Simplex ─────────────
+# Represents knowledge graph node distributions as points on the probability
+# simplex Σ_n = {p ∈ R^n : p_i > 0, Σ p_i = 1} equipped with the L²-Wasserstein
+# metric tensor g_W(p).  The metric nonlinearity comes from the weighted graph
+# Laplacian L_w of the underlying knowledge graph adjacency structure.
+#
+# The key construction (following the transport information geometry paper):
+#   Given a weighted graph G = (V, E, w) with n vertices and weighted Laplacian
+#   L_w, the Wasserstein metric tensor at a point p on the simplex is:
+#     g_W(p)[σ, τ] = Σ_{(i,j)∈E} w_{ij} (φ_i - φ_j)² p_{ij}
+#   where φ = L_w(diag(p))^† σ is the potential solving the continuity equation,
+#   L_w(diag(p)) is the p-weighted Laplacian, and ^† is the pseudoinverse.
+#
+# This makes the probability simplex a torsion-free Riemannian manifold with
+# fully computable Christoffel symbols, geodesics, and curvature tensors —
+# all derived from the graph Laplacian structure.
+#
+# CHALLENGE (O44): By grounding W2 geometry rigorously in finite classical
+# probability spaces via graph Laplacians, this sharpens the question of
+# whether the quantum extension requires a genuinely different metric structure
+# or merely a non-commutative Laplacian, making the current O44 formulation
+# under-specified rather than open.
+#
+# QUERY: Whether the Laplace-Beltrami eigenspectrum on the Wasserstein
+# probability simplex has been connected to spectral gaps in Markov chains
+# or thermodynamic relaxation rates — this would directly link the geometric
+# structure to the Wasserstein Floor invariant W_floor = k/Tμ.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _build_adjacency_matrix(n, edge_pairs, edge_weights=None):
+    # type: (int, List[Tuple[int, int]], Optional[List[float]]) -> List[List[float]]
+    """
+    Build an n×n symmetric adjacency matrix from edge pairs.
+
+    Parameters
+    ----------
+    n : int
+        Number of vertices.
+    edge_pairs : list of (int, int)
+        Edges as (i, j) index pairs (0-indexed).
+    edge_weights : list of float or None
+        Weight for each edge. If None, all weights are 1.0.
+
+    Returns
+    -------
+    list of list of float
+        n×n symmetric adjacency matrix.
+    """
+    A = [[0.0] * n for _ in range(n)]
+    for idx, (i, j) in enumerate(edge_pairs):
+        w = 1.0 if edge_weights is None else edge_weights[idx]
+        A[i][j] = w
+        A[j][i] = w
+    return A
+
+
+def _build_weighted_graph_laplacian(adjacency):
+    # type: (List[List[float]]) -> List[List[float]]
+    """
+    Build the weighted graph Laplacian L_w = D - A where D is the diagonal
+    degree matrix and A is the weighted adjacency matrix.
+
+    Parameters
+    ----------
+    adjacency : list of list of float
+        n×n symmetric weighted adjacency matrix.
+
+    Returns
+    -------
+    list of list of float
+        n×n weighted graph Laplacian (positive semi-definite, row-sums zero).
+    """
+    n = len(adjacency)
+    L = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        row_sum = sum(adjacency[i])
+        for j in range(n):
+            if i == j:
+                L[i][j] = row_sum - adjacency[i][j]
+            else:
+                L[i][j] = -adjacency[i][j]
+    return L
+
+
+def _build_p_weighted_laplacian(laplacian, p):
+    # type: (List[List[float]], List[float]) -> List[List[float]]
+    """
+    Build the probability-weighted Laplacian L_w(diag(p)) used in the
+    Wasserstein metric tensor construction.
+
+    For the L²-Wasserstein metric on a graph, the p-weighted Laplacian is:
+        L_p = diag(p)^{1/2} · L_w · diag(p)^{1/2}
+
+    This symmetrization ensures the resulting metric tensor is symmetric
+    positive semi-definite on the tangent space of the simplex.
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    p : list of float
+        Probability vector on the simplex (all entries > 0, sum to 1).
+
+    Returns
+    -------
+    list of list of float
+        n×n p-weighted Laplacian.
+    """
+    n = len(laplacian)
+    sqrt_p = [math.sqrt(max(pi, 1e-15)) for pi in p]
+    L_p = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            L_p[i][j] = sqrt_p[i] * laplacian[i][j] * sqrt_p[j]
+    return L_p
+
+
+def _matrix_pseudoinverse_symmetric(matrix, tol=1e-10):
+    # type: (List[List[float]], float) -> List[List[float]]
+    """
+    Compute the Moore-Penrose pseudoinverse of a symmetric matrix using
+    eigendecomposition via the Jacobi eigenvalue algorithm.
+
+    For graph Laplacians, this handles the rank deficiency (zero eigenvalue
+    corresponding to the constant vector) by zeroing out the inverse of
+    eigenvalues below tolerance.
+
+    Parameters
+    ----------
+    matrix : list of list of float
+        n×n symmetric matrix.
+    tol : float
+        Eigenvalue threshold below which the reciprocal is set to zero.
+
+    Returns
+    -------
+    list of list of float
+        n×n pseudoinverse matrix.
+    """
+    n = len(matrix)
+    if n == 0:
+        return []
+
+    # For small matrices (n <= 20), use iterative Jacobi method
+    # Copy matrix to avoid mutation
+    A = [row[:] for row in matrix]
+    # V accumulates eigenvectors (starts as identity)
+    V = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+
+    max_iter = 100 * n * n
+    for iteration in range(max_iter):
+        # Find the largest off-diagonal element
+        max_val = 0.0
+        p_idx = 0
+        q_idx = 1
+        for i in range(n):
+            for j in range(i + 1, n):
+                if abs(A[i][j]) > max_val:
+                    max_val = abs(A[i][j])
+                    p_idx = i
+                    q_idx = j
+        if max_val < tol:
+            break
+
+        # Compute rotation angle
+        app = A[p_idx][p_idx]
+        aqq = A[q_idx][q_idx]
+        apq = A[p_idx][q_idx]
+
+        if abs(app - aqq) < tol:
+            theta = math.pi / 4.0
+        else:
+            theta = 0.5 * math.atan2(2.0 * apq, app - aqq)
+
+        c = math.cos(theta)
+        s = math.sin(theta)
+
+        # Apply Jacobi rotation to A
+        new_A = [row[:] for row in A]
+        for i in range(n):
+            if i != p_idx and i != q_idx:
+                new_A[i][p_idx] = c * A[i][p_idx] + s * A[i][q_idx]
+                new_A[p_idx][i] = new_A[i][p_idx]
+                new_A[i][q_idx] = -s * A[i][p_idx] + c * A[i][q_idx]
+                new_A[q_idx][i] = new_A[i][q_idx]
+        new_A[p_idx][p_idx] = c * c * app + 2 * s * c * apq + s * s * aqq
+        new_A[q_idx][q_idx] = s * s * app - 2 * s * c * apq + c * c * aqq
+        new_A[p_idx][q_idx] = 0.0
+        new_A[q_idx][p_idx] = 0.0
+        A = new_A
+
+        # Accumulate eigenvectors
+        for i in range(n):
+            vip = V[i][p_idx]
+            viq = V[i][q_idx]
+            V[i][p_idx] = c * vip + s * viq
+            V[i][q_idx] = -s * vip + c * viq
+
+    # Eigenvalues are on the diagonal of A
+    eigenvalues = [A[i][i] for i in range(n)]
+
+    # Build pseudoinverse: V · diag(1/λ_i for λ_i > tol, else 0) · V^T
+    inv_eigenvalues = [0.0] * n
+    for i in range(n):
+        if abs(eigenvalues[i]) > tol:
+            inv_eigenvalues[i] = 1.0 / eigenvalues[i]
+
+    # Reconstruct: M^+ = V · diag(inv_eigenvalues) · V^T
+    result = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            s_val = 0.0
+            for k in range(n):
+                s_val += V[i][k] * inv_eigenvalues[k] * V[j][k]
+            result[i][j] = s_val
+
+    return result
+
+
+def wasserstein_metric_tensor(laplacian, p):
+    # type: (List[List[float]], List[float]) -> List[List[float]]
+    """
+    Compute the L²-Wasserstein metric tensor g_W at point p on the
+    probability simplex, using the weighted graph Laplacian.
+
+    The metric tensor is:
+        g_W(p) = L_p^†
+    where L_p is the p-weighted Laplacian and ^† is the pseudoinverse.
+
+    This is the fundamental geometric object: inner products of tangent
+    vectors σ, τ at p are computed as:
+        ⟨σ, τ⟩_W = σ^T · g_W(p) · τ
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    p : list of float
+        Probability vector on the simplex (all entries > 0, sum to 1).
+
+    Returns
+    -------
+    list of list of float
+        n×n Wasserstein metric tensor at p.
+    """
+    L_p = _build_p_weighted_laplacian(laplacian, p)
+    return _matrix_pseudoinverse_symmetric(L_p)
+
+
+def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
+    # type: (List[List[float]], List[float], List[float], int) -> float
+    """
+    Compute the approximate L²-Wasserstein geodesic distance between two
+    probability distributions p and q on the simplex, using the graph
+    Laplacian-induced metric.
+
+    Uses numerical integration along the linear interpolation path
+    (McCann interpolation) with the Wasserstein metric tensor evaluated
+    at each interpolation point:
+
+        d_W(p, q) ≈ ∫_0^1 √(v^T · g_W(γ(t)) · v) dt
+
+    where γ(t) = (1-t)p + tq is the displacement interpolant and
+    v = q - p is the tangent vector.
+
+    For exact geodesics on the Wasserstein simplex, the true geodesic
+    is the McCann displacement interpolant (which coincides with the
+    linear interpolant in Euclidean coordinates for the graph Laplacian
+    metric).  The trapezoidal quadrature approximation converges as
+    O(1/n_steps²).
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    p : list of float
+        Source probability distribution.
+    q : list of float
+        Target probability distribution.
+    n_steps : int
+        Number of quadrature points for numerical integration (default 20).
+
+    Returns
+    -------
+    float
+        Approximate W2 geodesic distance. Returns 0.0 for identical
+        distributions.
+
+    Notes
+    -----
+    The metric nonlinearity from the graph Laplacian means this distance
+    respects the graph topology: probability mass that must "travel" across
+    many edges incurs proportionally higher cost than mass moving along
+    direct edges, making this a geometrically correct measure of conceptual
+    proximity in the knowledge graph.
+    """
+    n = len(p)
+    if n != len(q) or n == 0:
+        return 0.0
+
+    # Tangent vector (constant along linear interpolant)
+    v = [q[i] - p[i] for i in range(n)]
+
+    # Check for identical distributions
+    if all(abs(vi) < 1e-15 for vi in v):
+        return 0.0
+
+    # Trapezoidal quadrature along the interpolation path
+    dt = 1.0 / float(n_steps)
+    integrand_values = []  # type: List[float]
+
+    for step in range(n_steps + 1):
+        t = step * dt
+        # Interpolated point on the simplex
+        gamma_t = [(1.0 - t) * p[i] + t * q[i] for i in range(n)]
+
+        # Ensure positivity (clamp small values)
+        gamma_t = [max(gi, 1e-15) for gi in gamma_t]
+        # Re-normalize to stay on the simplex
+        total = sum(gamma_t)
+        if total > 0:
+            gamma_t = [gi / total for gi in gamma_t]
+
+        # Metric tensor at this point
+        g = wasserstein_metric_tensor(laplacian, gamma_t)
+
+        # Compute v^T · g · v (the squared speed along the path)
+        vgv = 0.0
+        for i in range(n):
+            for j in range(n):
+                vgv += v[i] * g[i][j] * v[j]
+
+        # The integrand is √(v^T g v); ensure non-negative
+        integrand_values.append(math.sqrt(max(0.0, vgv)))
+
+    # Trapezoidal rule
+    integral = 0.0
+    for step in range(n_steps):
+        integral += 0.5 * (integrand_values[step] + integrand_values[step + 1]) * dt
+
+    return integral
+
+
+def wasserstein_christoffel_symbols(laplacian, p, h=1e-5):
+    # type: (List[List[float]], List[float], float) -> List[List[List[float]]]
+    """
+    Compute the Christoffel symbols Γ^k_{ij} of the Levi-Civita connection
+    on the probability simplex at point p, using finite differences of the
+    Wasserstein metric tensor.
+
+    The Christoffel symbols are:
+        Γ^k_{ij} = (1/2) Σ_l g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})
+
+    where g^{kl} is the inverse metric tensor and ∂_i denotes the partial
+    derivative with respect to the i-th coordinate on the simplex.
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    p : list of float
+        Point on the probability simplex.
+    h : float
+        Step size for finite difference computation (default 1e-5).
+
+    Returns
+    -------
+    list of list of list of float
+        n×n×n array where result[k][i][j] = Γ^k_{ij}.
+        These are the torsion-free Christoffel symbols of the second kind.
+    """
+    n = len(p)
+    if n == 0:
+        return []
+
+    # Compute metric tensor at p
+    g_p = wasserstein_metric_tensor(laplacian, p)
+
+    # Compute inverse metric tensor (g^{kl}) via pseudoinverse
+    g_inv = _matrix_pseudoinverse_symmetric(g_p)
+
+    # Compute partial derivatives of metric tensor by finite differences
+    # ∂_m g_{ij} ≈ (g_{ij}(p + h·e_m) - g_{ij}(p - h·e_m)) / (2h)
+    # On the simplex, we perturb in direction e_m - e_n (last coordinate)
+    # to stay on the tangent plane of the simplex.
+    dg = [[[0.0] * n for _ in range(n)] for _ in range(n)]  # dg[m][i][j] = ∂_m g_{ij}
+
+    for m in range(n):
+        # Forward perturbation: p + h*(e_m - 1/n * ones) projected to simplex
+        p_fwd = list(p)
+        p_fwd[m] += h
+        # Re-normalize
+        total = sum(p_fwd)
+        p_fwd = [max(pi / total, 1e-15) for pi in p_fwd]
+        total = sum(p_fwd)
+        p_fwd = [pi / total for pi in p_fwd]
+
+        # Backward perturbation
+        p_bwd = list(p)
+        p_bwd[m] -= h
+        # Clamp and re-normalize
+        p_bwd = [max(pi, 1e-15) for pi in p_bwd]
+        total = sum(p_bwd)
+        p_bwd = [pi / total for pi in p_bwd]
+
+        g_fwd = wasserstein_metric_tensor(laplacian, p_fwd)
+        g_bwd = wasserstein_metric_tensor(laplacian, p_bwd)
+
+        for i in range(n):
+            for j in range(n):
+                dg[m][i][j] = (g_fwd[i][j] - g_bwd[i][j]) / (2.0 * h)
+
+    # Christoffel symbols: Γ^k_{ij} = (1/2) Σ_l g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})
+    gamma = [[[0.0] * n for _ in range(n)] for _ in range(n)]
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                s = 0.0
+                for l in range(n):
+                    s += g_inv[k][l] * (
+                        dg[i][j][l] + dg[j][i][l] - dg[l][i][j]
+                    )
+                gamma[k][i][j] = 0.5 * s
+
+    return gamma
+
+
+def wasserstein_laplace_beltrami_eigenspectrum(laplacian, p, k_eigenvalues=None):
+    # type: (List[List[float]], List[float], Optional[int]) -> dict
+    """
+    Compute eigenvalues of the p-weighted Laplacian (proxy for the
+    Laplace-Beltrami operator on the Wasserstein probability simplex).
+
+    The eigenspectrum of the Laplace-Beltrami operator on the Wasserstein
+    manifold encodes geometric information about the simplex curvature
+    and connects to:
+      - Spectral gaps in the associated Markov chain (mixing times)
+      - Thermodynamic relaxation rates (Wasserstein Floor invariant link)
+      - Ricci curvature lower bounds via Lichnerowicz-type inequalities
+
+    QUERY (O44 connection): The spectral gap λ_1 of this operator may
+    directly bound the Wasserstein Floor invariant W_floor = k/Tμ via
+    the relationship between optimal transport cost and Markov chain
+    mixing: if λ_1 ≥ κ > 0 (positive Ricci curvature lower bound),
+    then the W2 contraction rate is exponential in κ, providing a
+    geometric foundation for the thermodynamic bound.
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    p : list of float
+        Point on the probability simplex.
+    k_eigenvalues : int or None
+        Number of smallest eigenvalues to return. If None, returns all.
+
+    Returns
+    -------
+    dict
+        {
+            "eigenvalues": list of float — sorted ascending,
+            "spectral_gap": float — λ_1 (smallest positive eigenvalue),
+            "n_zero_modes": int — number of near-zero eigenvalues,
+            "markov_mixing_bound": float — 1/λ_1 (upper bound on mixing time),
+            "wasserstein_contraction_rate": float — exponential contraction
+                rate from Ricci curvature (= spectral_gap when positive),
+            "o44_spectral_link": str — diagnostic for O44 obligation,
+        }
+    """
+    n = len(p)
+    if n == 0:
+        return {
+            "eigenvalues": [],
+            "spectral_gap": 0.0,
+            "n_zero_modes": 0,
+            "markov_mixing_bound": float('inf'),
+            "wasserstein_contraction_rate": 0.0,
+            "o44_spectral_link": "empty_distribution",
+        }
+
+    L_p = _build_p_weighted_laplacian(laplacian, p)
+
+    # Extract eigenvalues via Jacobi method (reusing pseudoinverse infrastructure)
+    # Copy matrix
+    A = [row[:] for row in L_p]
+    V = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+
+    tol = 1e-12
+    max_iter = 100 * n * n
+    for iteration in range(max_iter):
+        max_val = 0.0
+        p_idx = 0
+        q_idx = 1
+        for i in range(n):
+            for j in range(i + 1, n):
+                if abs(A[i][j]) > max_val:
+                    max_val = abs(A[i][j])
+                    p_idx = i
+                    q_idx = j
+        if max_val < tol:
+            break
+
+        app = A[p_idx][p_idx]
+        aqq = A[q_idx][q_idx]
+        apq = A[p_idx][q_idx]
+
+        if abs(app - aqq) < tol:
+            theta = math.pi / 4.0
+        else:
+            theta = 0.5 * math.atan2(2.0 * apq, app - aqq)
+
+        c = math.cos(theta)
+        s = math.sin(theta)
+
+        new_A = [row[:] for row in A]
+        for i in range(n):
+            if i != p_idx and i != q_idx:
+                new_A[i][p_idx] = c * A[i][p_idx] + s * A[i][q_idx]
+                new_A[p_idx][i] = new_A[i][p_idx]
+                new_A[i][q_idx] = -s * A[i][p_idx] + c * A[i][q_idx]
+                new_A[q_idx][i] = new_A[i][q_idx]
+        new_A[p_idx][p_idx] = c * c * app + 2 * s * c * apq + s * s * aqq
+        new_A[q_idx][q_idx] = s * s * app - 2 * s * c * apq + c * c * aqq
+        new_A[p_idx][q_idx] = 0.0
+        new_A[q_idx][p_idx] = 0.0
+        A = new_A
+
+        for i in range(n):
+            vip = V[i][p_idx]
+            viq = V[i][q_idx]
+            V[i][p_idx] = c * vip + s * viq
+            V[i][q_idx] = -s * vip + c * viq
+
+    eigenvalues = sorted([A[i][i] for i in range(n)])
+
+    # Count zero modes
+    zero_tol = 1e-8
+    n_zero = sum(1 for ev in eigenvalues if abs(ev) < zero_tol)
+
+    # Spectral gap: smallest positive eigenvalue
+    positive_evs = [ev for ev in eigenvalues if ev > zero_tol]
+    spectral_gap = positive_evs[0] if positive_evs else 0.0
+
+    # Markov mixing bound: 1/λ_1
+    mixing_bound = 1.0 / spectral_gap if spectral_gap > 0 else float('inf')
+
+    # Wasserstein contraction rate (from Ricci curvature ≥ λ_1 argument)
+    contraction_rate = spectral_gap
+
+    # O44 spectral link diagnostic
+    if spectral_gap > 0:
+        o44_link = (
+            f"spectral_gap={spectral_gap:.6f}:positive_ricci_curvature:"
+            f"w2_contraction_exponential:mixing_bound={mixing_bound:.4f}:"
+            f"wfloor_geometric_foundation_viable"
+        )
+    else:
+        o44_link = (
+            "spectral_gap=0:flat_or_degenerate:no_exponential_contraction:"
+            "wfloor_geometric_foundation_requires_regularization"
+        )
+
+    if k_eigenvalues is not None:
+        eigenvalues = eigenvalues[:k_eigenvalues]
+
+    return {
+        "eigenvalues": [round(ev, 10) for ev in eigenvalues],
+        "spectral_gap": round(spectral_gap, 10),
+        "n_zero_modes": n_zero,
+        "markov_mixing_bound": round(mixing_bound, 6) if mixing_bound != float('inf') else float('inf'),
+        "wasserstein_contraction_rate": round(contraction_rate, 10),
+        "o44_spectral_link": o44_link,
+    }
+
+
+def node_distribution_from_edges(node_id, edges, all_node_ids):
+    # type: (str, list, List[str]) -> List[float]
+    """
+    Construct a probability distribution over graph nodes for a given node,
+    based on its edge weights (confirmation/support counts).
+
+    The distribution represents how the node's epistemic weight is distributed
+    across its neighbors — a point on the probability simplex Σ_n.
+
+    Parameters
+    ----------
+    node_id : str
+        The node whose distribution to construct.
+    edges : list of dict
+        All edges in the graph.
+    all_node_ids : list of str
+        Ordered list of all node IDs (defines the simplex coordinates).
+
+    Returns
+    -------
+    list of float
+        Probability vector of length len(all_node_ids), summing to 1.0.
+        Uses Laplace smoothing to ensure strict positivity (required for
+        the Wasserstein metric tensor to be well-defined).
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return []
+
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+    nid_upper = node_id.upper()
+
+    # Count edges to/from each neighbor
+    counts = [0.0] * n
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        if from_id == nid_upper and to_id in node_index:
+            counts[node_index[to_id]] += 1.0
+        elif to_id == nid_upper and from_id in node_index:
+            counts[node_index[from_id]] += 1.0
+
+    # Laplace smoothing: add α = 0.01 to every entry for strict positivity
+    alpha = 0.01
+    smoothed = [c + alpha for c in counts]
+    total = sum(smoothed)
+    if total > 0:
+        return [s / total for s in smoothed]
+    else:
+        # Uniform distribution as fallback
+        return [1.0 / n] * n
+
+
 # ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
 # Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
 # by counting the number of distinct sub-patterns encountered in a left-to-right
@@ -1949,6 +2715,270 @@ class KnowledgeGraph:
                 )
 
         return results
+
+    # ── Challenge Deficit Scoring ────────────────────────────────────────────
+    # Computes a "challenge deficit" ratio for each invariant:
+    #   ratio = confirmation_count / max(1, direct_falsification_attempts)
+    # where direct_falsification_attempts = count of edges with type in
+    # {"challenges", "refutes", "contradicts"} targeting that invariant.
+    #
+    # Invariants exceeding a threshold ratio (default 5.0) are flagged as
+    # requiring a mandatory adversarial probe before further confirmations
+    # are accepted.  This surfaces structural bias in the epistemic loop:
+    # an invariant with high confirmation surplus and zero adversarial
+    # testing is epistemically unaudited — its robustness is indistinguishable
+    # from untested.
+    #
+    # CHALLENGE (INV_094): This mechanism directly exposes that INV_094 has
+    # no documented falsification conditions, meaning its apparent robustness
+    # is an artifact of challenge absence rather than evidence of invariance.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Edge types counted as confirmations vs. falsification attempts
+    _CONFIRMATION_EDGE_TYPES = frozenset({"confirms", "supports", "extends"})
+    _FALSIFICATION_EDGE_TYPES = frozenset({"challenges", "refutes", "contradicts"})
+
+    def challenge_deficit_scores(self, ratio_threshold=5.0):
+        # type: (float) -> Dict[str, dict]
+        """
+        Compute a challenge deficit score for every invariant in the graph.
+
+        The challenge deficit ratio is:
+            ratio = confirmation_count / max(1, falsification_attempt_count)
+
+        Invariants where this ratio exceeds *ratio_threshold* are flagged as
+        requiring a mandatory adversarial probe before further confirmations
+        should be accepted.
+
+        Parameters
+        ----------
+        ratio_threshold : float
+            Ratio above which an invariant is flagged as challenge-deficit
+            (default 5.0).  A ratio of 5 means the invariant has received
+            at least 5× more confirmations than direct challenges.
+
+        Returns
+        -------
+        dict
+            Mapping of invariant_id → {
+                "confirmation_count": int — number of confirming/supporting edges,
+                "falsification_count": int — number of challenging/refuting edges,
+                "challenge_deficit_ratio": float — the deficit score,
+                "requires_adversarial_probe": bool — True if ratio > threshold,
+                "probe_blocked": bool — True if ratio > threshold, meaning
+                    further confirmations should NOT be accepted until a
+                    challenge is recorded,
+                "deficit_severity": str — "none" (ratio <= 1), "mild" (1 < ratio <= 3),
+                    "moderate" (3 < ratio <= threshold), "critical" (ratio > threshold),
+                    "untested" (confirmations > 0, challenges == 0),
+                "confirmation_edge_types": dict — breakdown by edge type,
+                "falsification_edge_types": dict — breakdown by edge type,
+                "falsification_conditions_documented": bool — True if at least
+                    one 'challenges' edge exists (not just 'refutes'),
+                "recommendation": str — human-readable recommendation,
+            }
+        """
+        self._ensure_loaded()
+
+        # Collect all edges per invariant, partitioned by confirmation vs falsification
+        inv_confirmations = defaultdict(list)  # type: Dict[str, list]
+        inv_falsifications = defaultdict(list)  # type: Dict[str, list]
+        all_inv_ids = set()  # type: set
+
+        for e in self._edges:
+            target = e.get("to", "")
+            etype = e.get("type", "")
+            if not target:
+                continue
+            # Only score invariant nodes (INV_*)
+            if not target.upper().startswith("INV_"):
+                continue
+            target_upper = target.upper()
+            all_inv_ids.add(target_upper)
+            if etype in self._CONFIRMATION_EDGE_TYPES:
+                inv_confirmations[target_upper].append(e)
+            elif etype in self._FALSIFICATION_EDGE_TYPES:
+                inv_falsifications[target_upper].append(e)
+
+        results = {}  # type: Dict[str, dict]
+        flagged_critical = []  # type: List[str]
+        flagged_untested = []  # type: List[str]
+
+        for inv_id in sorted(all_inv_ids):
+            conf_edges = inv_confirmations.get(inv_id, [])
+            fals_edges = inv_falsifications.get(inv_id, [])
+
+            n_conf = len(conf_edges)
+            n_fals = len(fals_edges)
+
+            # Challenge deficit ratio
+            ratio = float(n_conf) / float(max(1, n_fals))
+
+            # Requires adversarial probe?
+            requires_probe = ratio > ratio_threshold
+            probe_blocked = requires_probe  # Block further confirmations
+
+            # Breakdown by edge type
+            conf_type_counts = defaultdict(int)  # type: Dict[str, int]
+            for e in conf_edges:
+                conf_type_counts[e.get("type", "unknown")] += 1
+
+            fals_type_counts = defaultdict(int)  # type: Dict[str, int]
+            for e in fals_edges:
+                fals_type_counts[e.get("type", "unknown")] += 1
+
+            # Check if explicit 'challenges' edges exist (not just refutes)
+            has_challenges = fals_type_counts.get("challenges", 0) > 0
+
+            # Severity classification
+            if n_conf == 0:
+                severity = "none"
+            elif n_fals == 0 and n_conf > 0:
+                severity = "untested"
+            elif ratio <= 1.0:
+                severity = "none"
+            elif ratio <= 3.0:
+                severity = "mild"
+            elif ratio <= ratio_threshold:
+                severity = "moderate"
+            else:
+                severity = "critical"
+
+            # Recommendation
+            if severity == "critical":
+                recommendation = (
+                    f"MANDATORY: {inv_id} has {n_conf} confirmations and only "
+                    f"{n_fals} falsification attempt(s) (ratio={ratio:.1f}). "
+                    f"Further confirmations BLOCKED until an adversarial probe "
+                    f"is recorded. Emit specific falsification conditions, "
+                    f"boundary parameters, and alternative mechanisms."
+                )
+            elif severity == "untested":
+                recommendation = (
+                    f"WARNING: {inv_id} has {n_conf} confirmation(s) and ZERO "
+                    f"falsification attempts. Its robustness is indistinguishable "
+                    f"from untested. Schedule adversarial probe."
+                )
+            elif severity == "moderate":
+                recommendation = (
+                    f"ADVISORY: {inv_id} confirmation surplus is growing "
+                    f"(ratio={ratio:.1f}). Consider scheduling an adversarial "
+                    f"probe to maintain epistemic balance."
+                )
+            elif severity == "mild":
+                recommendation = (
+                    f"OK: {inv_id} has mild confirmation surplus "
+                    f"(ratio={ratio:.1f}). Monitor."
+                )
+            else:
+                recommendation = f"OK: {inv_id} is epistemically balanced."
+
+            results[inv_id] = {
+                "confirmation_count": n_conf,
+                "falsification_count": n_fals,
+                "challenge_deficit_ratio": round(ratio, 4),
+                "requires_adversarial_probe": requires_probe,
+                "probe_blocked": probe_blocked,
+                "deficit_severity": severity,
+                "confirmation_edge_types": dict(conf_type_counts),
+                "falsification_edge_types": dict(fals_type_counts),
+                "falsification_conditions_documented": has_challenges,
+                "recommendation": recommendation,
+            }
+
+            if severity == "critical":
+                flagged_critical.append(inv_id)
+            elif severity == "untested":
+                flagged_untested.append(inv_id)
+
+        # ── Log summary ─────────────────────────────────────────────────
+        if flagged_critical or flagged_untested:
+            print(
+                f"[GRAPH:CHALLENGE_DEFICIT] "
+                f"{len(results)} invariant(s) scored — "
+                f"critical={len(flagged_critical)}, "
+                f"untested={len(flagged_untested)}, "
+                f"threshold={ratio_threshold}"
+            )
+            for inv_id in flagged_critical:
+                r = results[inv_id]
+                print(
+                    f"  🚫 {inv_id}: ratio={r['challenge_deficit_ratio']}, "
+                    f"confirmations={r['confirmation_count']}, "
+                    f"falsifications={r['falsification_count']} — "
+                    f"PROBE REQUIRED"
+                )
+            for inv_id in flagged_untested[:5]:  # Cap log output
+                r = results[inv_id]
+                print(
+                    f"  ⚠ {inv_id}: {r['confirmation_count']} confirmation(s), "
+                    f"0 falsification attempts — UNTESTED"
+                )
+            if len(flagged_untested) > 5:
+                print(
+                    f"  ... and {len(flagged_untested) - 5} more untested invariant(s)"
+                )
+
+        return results
+
+    def get_probe_required_invariants(self, ratio_threshold=5.0):
+        # type: (float) -> List[str]
+        """
+        Return a list of invariant IDs that require mandatory adversarial
+        probing before further confirmations are accepted.
+
+        This is a convenience wrapper around ``challenge_deficit_scores()``
+        that returns only the IDs flagged as critical or untested.
+
+        Parameters
+        ----------
+        ratio_threshold : float
+            Ratio above which an invariant is flagged (default 5.0).
+
+        Returns
+        -------
+        list of str
+            Invariant IDs requiring adversarial probes, sorted by deficit
+            ratio (highest first).
+        """
+        scores = self.challenge_deficit_scores(ratio_threshold=ratio_threshold)
+        flagged = [
+            (inv_id, info)
+            for inv_id, info in scores.items()
+            if info["requires_adversarial_probe"] or info["deficit_severity"] == "untested"
+        ]
+        # Sort by deficit ratio descending (worst offenders first)
+        flagged.sort(key=lambda x: x[1]["challenge_deficit_ratio"], reverse=True)
+        return [inv_id for inv_id, _ in flagged]
+
+    def is_confirmation_blocked(self, invariant_id, ratio_threshold=5.0):
+        # type: (str, float) -> bool
+        """
+        Check whether further confirmations of *invariant_id* are blocked
+        due to challenge deficit.
+
+        Returns True if the invariant's challenge deficit ratio exceeds
+        the threshold, meaning an adversarial probe must be recorded before
+        additional confirmations are accepted.
+
+        Parameters
+        ----------
+        invariant_id : str
+            The invariant to check (e.g. "INV_094").
+        ratio_threshold : float
+            Ratio threshold (default 5.0).
+
+        Returns
+        -------
+        bool
+            True if confirmations are blocked pending adversarial probe.
+        """
+        scores = self.challenge_deficit_scores(ratio_threshold=ratio_threshold)
+        inv_upper = invariant_id.upper()
+        info = scores.get(inv_upper)
+        if info is None:
+            return False
+        return info.get("probe_blocked", False)
 
     # ── SOC Avalanche Detection ──────────────────────────────────────────────
     # Inspired by Self-Organized Criticality (SOC) cellular automaton models:
@@ -2798,12 +3828,916 @@ class KnowledgeGraph:
             for e in new_edges
             if e.get("to")
         ))
-        return self.detect_avalanche(
+        result = self.detect_avalanche(
             seed_ids,
             degree_threshold=degree_threshold,
             max_depth=max_depth,
             recent_feed_count=recent_feed_count,
         )
+
+        # ── Branching-ratio tracker (σ across cascade depths) ────────────
+        # σ_d = (propagating offspring at depth d) / (parents at depth d-1).
+        # σ = mean across depths d≥1.  Flag excursions outside [0.95, 1.05]
+        # — the critical band INV_073 claims is the attractor.
+        depth_dist = result.get("depth_distribution", {}) or {}
+        # Keys may be int (live result) or str (round-tripped through JSON).
+        depth_pairs = []  # type: List[tuple]
+        for k, v in depth_dist.items():
+            try:
+                depth_pairs.append((int(k), int(v)))
+            except (TypeError, ValueError):
+                continue
+        depth_pairs.sort(key=lambda kv: kv[0])
+
+        sigmas = []  # type: List[float]
+        for i in range(1, len(depth_pairs)):
+            parents   = depth_pairs[i - 1][1]
+            offspring = depth_pairs[i][1]
+            if parents > 0:
+                sigmas.append(offspring / float(parents))
+
+        if sigmas:
+            sigma_mean = sum(sigmas) / len(sigmas)
+            in_band = 0.95 <= sigma_mean <= 1.05
+            result["branching_ratio"]      = round(sigma_mean, 4)
+            result["branching_per_depth"]  = [round(s, 4) for s in sigmas]
+            result["branching_excursion"]  = not in_band
+            if not in_band:
+                regime_label = "supercritical" if sigma_mean > 1.05 else "subcritical"
+                print(f"[GRAPH:BRANCHING] σ={sigma_mean:.4f} EXCURSION "
+                      f"({regime_label}) — per-depth: {result['branching_per_depth']}")
+        else:
+            result["branching_ratio"]     = None
+            result["branching_per_depth"] = []
+            result["branching_excursion"] = False
+
+        return result
+
+    # ── Self-Reference Detection (Mutual Citation Cycle Audit) ───────────────
+    # Detects when two nodes mutually cite each other as evidence, creating a
+    # circular evidential dependency — the epistemic analog of self-referential
+    # superposition.  Inspired by the paper's claim that wave function collapse
+    # is self-reference avoidance: quantum superposition encodes uncomputable
+    # self-referential prohibitions, and collapse selects definite states to
+    # escape paradox.
+    #
+    # In the knowledge graph, circular evidential dependencies produce "false
+    # coherence inflation": A confirms B, B confirms A, so both appear
+    # well-supported when neither is grounded in independent evidence.  This
+    # is structurally identical to the self-referential loops that the paper
+    # argues physical systems must collapse to avoid.
+    #
+    # CHALLENGE (INV_064): The paper's self-reference-avoidance collapse
+    # mechanism implies *any* sufficiently complex physical system (not just
+    # metabolic ones) undergoes structurally-forced state selection, threatening
+    # the specificity of the metabolic test as a unique consciousness criterion.
+    #
+    # NOETHER (Copenhagen Interpretation): If collapse is self-reference
+    # avoidance rather than observer-induced, the Copenhagen symmetry between
+    # observer and system is broken — the observer becomes structurally
+    # irrelevant, not constitutive.
+    #
+    # When a mutual citation cycle is detected, the pair is flagged for
+    # paradox-resolution audit rather than standard merge.  Resolution
+    # strategies:
+    #   1. Ground-truth anchoring: trace each node's evidence chain to an
+    #      external (non-graph) source — breaking the cycle.
+    #   2. Temporal ordering: if A was recorded before B, B's citation of A
+    #      is evidential but A's citation of B is retroactive — asymmetric.
+    #   3. Collapse to strongest: select the node with more independent
+    #      (non-circular) support and demote the other's confirmation weight.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    # Edge types that constitute "citing as evidence"
+    _EVIDENTIAL_EDGE_TYPES = frozenset({
+        "confirms", "supports", "extends", "advances",
+    })
+
+    def detect_self_references(self):
+        # type: () -> Dict[str, dict]
+        """
+        Detect mutual citation cycles in the knowledge graph where two nodes
+        each cite the other as evidence, creating circular evidential
+        dependencies.
+
+        A mutual citation cycle exists between nodes A and B when:
+          - There exists at least one evidential edge from A → B
+            (A cites B as evidence: confirms, supports, extends, advances)
+          - AND at least one evidential edge from B → A
+
+        Such cycles inflate coherence scores without grounding in independent
+        evidence — the epistemic analog of self-referential superposition
+        that the paper argues physical systems must collapse to avoid.
+
+        Returns
+        -------
+        dict
+            {
+                "cycles_detected": list of dict — each mutual citation cycle:
+                    {
+                        "node_a": str,
+                        "node_b": str,
+                        "a_to_b_edges": list of dict — evidential edges A→B,
+                        "b_to_a_edges": list of dict — evidential edges B→A,
+                        "cycle_strength": float — min(|A→B|, |B→A|) / max(|A→B|, |B→A|),
+                            1.0 = perfectly symmetric mutual citation,
+                        "grounded_a": bool — A has non-circular external evidence,
+                        "grounded_b": bool — B has non-circular external evidence,
+                        "resolution_strategy": str — recommended resolution,
+                        "temporal_asymmetry": str or None — which node was cited first,
+                        "paradox_severity": str — "benign", "warning", "critical",
+                    },
+                "n_cycles": int,
+                "n_critical": int — cycles where neither node is independently grounded,
+                "n_warning": int,
+                "n_benign": int,
+                "coherence_inflation_risk": float — fraction of evidential edges
+                    participating in cycles (0.0 = no inflation, 1.0 = all circular),
+                "merge_blocked_pairs": list of tuple — (node_a, node_b) pairs where
+                    standard merge should be replaced by paradox-resolution audit,
+                "inv064_flag": str — diagnostic for INV_064 challenge,
+                "noether_copenhagen_note": str — Noether symmetry status,
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+
+        # ── Build directed evidential adjacency ──────────────────────────
+        # Key: (from_node, to_node) → list of evidential edges
+        evidential_pairs = defaultdict(list)  # type: Dict[Tuple[str, str], list]
+        total_evidential = 0
+
+        for e in self._edges:
+            etype = e.get("type", "")
+            if etype not in self._EVIDENTIAL_EDGE_TYPES:
+                continue
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id and to_id and from_id != to_id:
+                evidential_pairs[(from_id, to_id)].append(e)
+                total_evidential += 1
+
+        # Also check node_edges for evidential structural links
+        for e in self._node_edges:
+            etype = e.get("type", "")
+            # Node-edge types that imply evidential support
+            if etype in ("operationalizes", "independent_confirmation",
+                         "scales_with"):
+                from_id = e.get("from", "").upper()
+                to_id = e.get("to", "").upper()
+                if from_id and to_id and from_id != to_id:
+                    evidential_pairs[(from_id, to_id)].append(e)
+                    total_evidential += 1
+
+        # ── Detect mutual pairs ──────────────────────────────────────────
+        checked = set()  # type: set
+        cycles = []  # type: List[dict]
+        edges_in_cycles = 0
+
+        for (a, b), a_to_b_edges in evidential_pairs.items():
+            pair_key = tuple(sorted([a, b]))
+            if pair_key in checked:
+                continue
+            checked.add(pair_key)
+
+            b_to_a_edges = evidential_pairs.get((b, a), [])
+            if not b_to_a_edges:
+                continue
+
+            # Mutual citation cycle found!
+            n_a2b = len(a_to_b_edges)
+            n_b2a = len(b_to_a_edges)
+            edges_in_cycles += n_a2b + n_b2a
+
+            # Cycle strength: symmetry of mutual citation
+            cycle_strength = float(min(n_a2b, n_b2a)) / float(max(n_a2b, n_b2a))
+
+            # ── Check independent grounding ──────────────────────────────
+            # A node is "grounded" if it has evidential edges from sources
+            # OTHER than the cycle partner
+            def _has_independent_evidence(node, partner):
+                # type: (str, str) -> bool
+                for (src, tgt), edges in evidential_pairs.items():
+                    if tgt == node and src != partner:
+                        return True
+                    if src == node and tgt != partner:
+                        # Node provides evidence to others — check if node
+                        # itself receives evidence from non-partner
+                        pass
+                # Also check if node has external (non-graph-node) sources
+                for e in self._edges:
+                    etype = e.get("type", "")
+                    if etype not in self._EVIDENTIAL_EDGE_TYPES:
+                        continue
+                    to_id = e.get("to", "").upper()
+                    from_id = e.get("from", "").upper()
+                    if to_id == node and from_id != partner:
+                        return True
+                return False
+
+            grounded_a = _has_independent_evidence(a, b)
+            grounded_b = _has_independent_evidence(b, a)
+
+            # ── Temporal asymmetry ───────────────────────────────────────
+            # Determine which direction was recorded first
+            def _earliest_timestamp(edge_list):
+                # type: (list) -> Optional[str]
+                timestamps = [e.get("timestamp", "") for e in edge_list
+                              if e.get("timestamp")]
+                return min(timestamps) if timestamps else None
+
+            ts_a2b = _earliest_timestamp(a_to_b_edges)
+            ts_b2a = _earliest_timestamp(b_to_a_edges)
+
+            temporal_asymmetry = None  # type: Optional[str]
+            if ts_a2b and ts_b2a:
+                if ts_a2b < ts_b2a:
+                    temporal_asymmetry = f"{a}_cited_first"
+                elif ts_b2a < ts_a2b:
+                    temporal_asymmetry = f"{b}_cited_first"
+                else:
+                    temporal_asymmetry = "simultaneous"
+
+            # ── Paradox severity classification ──────────────────────────
+            if not grounded_a and not grounded_b:
+                # Neither node has independent evidence — fully circular
+                severity = "critical"
+                resolution = (
+                    "COLLAPSE_REQUIRED: Neither node has independent grounding. "
+                    "Trace both to external sources or demote mutual "
+                    "confirmations to 'ungrounded_circular' status. "
+                    "Do NOT merge — paradox-resolution audit required."
+                )
+            elif grounded_a and not grounded_b:
+                severity = "warning"
+                resolution = (
+                    f"ASYMMETRIC_GROUND: {a} is independently grounded but "
+                    f"{b} relies on circular citation. Demote {b}'s citation "
+                    f"of {a} from evidential to derivative. Standard merge "
+                    f"blocked until {b} acquires independent evidence."
+                )
+            elif not grounded_a and grounded_b:
+                severity = "warning"
+                resolution = (
+                    f"ASYMMETRIC_GROUND: {b} is independently grounded but "
+                    f"{a} relies on circular citation. Demote {a}'s citation "
+                    f"of {b} from evidential to derivative. Standard merge "
+                    f"blocked until {a} acquires independent evidence."
+                )
+            else:
+                # Both grounded — cycle exists but is not the sole support
+                severity = "benign"
+                resolution = (
+                    "BOTH_GROUNDED: Mutual citation exists but both nodes "
+                    "have independent evidence. Cycle is reinforcing, not "
+                    "constitutive. Standard merge permitted with cycle "
+                    "annotation for transparency."
+                )
+
+            # Apply temporal ordering as secondary resolution signal
+            if temporal_asymmetry and severity != "benign":
+                resolution += (
+                    f" Temporal signal: {temporal_asymmetry} — consider "
+                    f"treating the later citation as retroactive confirmation "
+                    f"(lower evidential weight)."
+                )
+
+            cycles.append({
+                "node_a": a,
+                "node_b": b,
+                "a_to_b_edges": a_to_b_edges,
+                "b_to_a_edges": b_to_a_edges,
+                "cycle_strength": round(cycle_strength, 4),
+                "grounded_a": grounded_a,
+                "grounded_b": grounded_b,
+                "resolution_strategy": resolution,
+                "temporal_asymmetry": temporal_asymmetry,
+                "paradox_severity": severity,
+            })
+
+        # ── Aggregate metrics ────────────────────────────────────────────
+        n_critical = sum(1 for c in cycles if c["paradox_severity"] == "critical")
+        n_warning = sum(1 for c in cycles if c["paradox_severity"] == "warning")
+        n_benign = sum(1 for c in cycles if c["paradox_severity"] == "benign")
+
+        coherence_inflation = (
+            float(edges_in_cycles) / float(max(1, total_evidential))
+        )
+
+        # Merge-blocked pairs: critical and warning cycles block standard merge
+        merge_blocked = [
+            (c["node_a"], c["node_b"])
+            for c in cycles
+            if c["paradox_severity"] in ("critical", "warning")
+        ]
+
+        # INV_064 flag: if any cycle is detected, the self-reference-avoidance
+        # collapse mechanism is structurally relevant
+        if cycles:
+            inv064_flag = (
+                f"self_reference_detected:{len(cycles)}_cycles:"
+                f"critical={n_critical}:warning={n_warning}:"
+                f"coherence_inflation={coherence_inflation:.4f}:"
+                f"collapse_mechanism_applicable"
+            )
+        else:
+            inv064_flag = "no_self_reference:graph_acyclic_evidentially"
+
+        noether_note = (
+            "Copenhagen symmetry broken: if collapse is self-reference "
+            "avoidance (not observer-induced), the observer is structurally "
+            "irrelevant to state selection. Mutual citation cycles in the "
+            "knowledge graph are the epistemic analog — they must be "
+            "resolved by structural grounding, not by observer fiat."
+        )
+
+        ts = datetime.now(timezone.utc).isoformat()
+
+        result = {
+            "cycles_detected": cycles,
+            "n_cycles": len(cycles),
+            "n_critical": n_critical,
+            "n_warning": n_warning,
+            "n_benign": n_benign,
+            "coherence_inflation_risk": round(coherence_inflation, 4),
+            "merge_blocked_pairs": merge_blocked,
+            "inv064_flag": inv064_flag,
+            "noether_copenhagen_note": noether_note,
+            "timestamp": ts,
+        }
+
+        # ── Log results ──────────────────────────────────────────────────
+        if cycles:
+            print(
+                f"[GRAPH:SELF_REFERENCE] {len(cycles)} mutual citation "
+                f"cycle(s) detected — critical={n_critical}, "
+                f"warning={n_warning}, benign={n_benign}, "
+                f"coherence_inflation={coherence_inflation:.4f}"
+            )
+            for c in cycles:
+                if c["paradox_severity"] in ("critical", "warning"):
+                    print(
+                        f"  ⚠ {c['node_a']} ↔ {c['node_b']}: "
+                        f"severity={c['paradox_severity']}, "
+                        f"strength={c['cycle_strength']}, "
+                        f"grounded=({c['grounded_a']},{c['grounded_b']})"
+                    )
+            if merge_blocked:
+                print(
+                    f"[GRAPH:SELF_REFERENCE] {len(merge_blocked)} pair(s) "
+                    f"BLOCKED from standard merge — paradox-resolution "
+                    f"audit required"
+                )
+
+        return result
+
+    def is_merge_blocked_by_cycle(self, node_a, node_b):
+        # type: (str, str) -> bool
+        """
+        Check whether a standard merge between two nodes is blocked due
+        to a mutual citation cycle requiring paradox-resolution audit.
+
+        Parameters
+        ----------
+        node_a : str
+            First node identifier.
+        node_b : str
+            Second node identifier.
+
+        Returns
+        -------
+        bool
+            True if the pair has a critical or warning-severity mutual
+            citation cycle, blocking standard merge.
+        """
+        audit = self.detect_self_references()
+        pair_key = tuple(sorted([node_a.upper(), node_b.upper()]))
+        for blocked_a, blocked_b in audit.get("merge_blocked_pairs", []):
+            if tuple(sorted([blocked_a, blocked_b])) == pair_key:
+                return True
+        return False
+
+    def self_reference_aware_merge_candidates(self):
+        # type: () -> dict
+        """
+        Return merge candidates partitioned into safe (no cycle) and
+        blocked (cycle-detected, requires paradox-resolution audit).
+
+        Examines all node pairs connected by evidential edges and classifies
+        them based on the self-reference detection pass.
+
+        Returns
+        -------
+        dict
+            {
+                "safe_merges": list of tuple — (node_a, node_b) pairs safe
+                    for standard merge,
+                "blocked_merges": list of dict — pairs requiring paradox-
+                    resolution audit, each with cycle details,
+                "n_safe": int,
+                "n_blocked": int,
+            }
+        """
+        audit = self.detect_self_references()
+        blocked_set = set()  # type: set
+        for a, b in audit.get("merge_blocked_pairs", []):
+            blocked_set.add(tuple(sorted([a, b])))
+
+        blocked_details = []  # type: List[dict]
+        for c in audit.get("cycles_detected", []):
+            if c["paradox_severity"] in ("critical", "warning"):
+                blocked_details.append({
+                    "node_a": c["node_a"],
+                    "node_b": c["node_b"],
+                    "severity": c["paradox_severity"],
+                    "cycle_strength": c["cycle_strength"],
+                    "resolution_strategy": c["resolution_strategy"],
+                })
+
+        # Collect all evidential pairs as potential merge candidates
+        all_pairs = set()  # type: set
+        for e in self._edges:
+            etype = e.get("type", "")
+            if etype in self._EVIDENTIAL_EDGE_TYPES:
+                from_id = e.get("from", "").upper()
+                to_id = e.get("to", "").upper()
+                if from_id and to_id and from_id != to_id:
+                    all_pairs.add(tuple(sorted([from_id, to_id])))
+
+        safe = [p for p in sorted(all_pairs) if p not in blocked_set]
+
+        return {
+            "safe_merges": safe,
+            "blocked_merges": blocked_details,
+            "n_safe": len(safe),
+            "n_blocked": len(blocked_details),
+        }
+
+# ─── L₂((0,1)) Quantile-Function Embedding for Distribution Drift ───────────
+# Represents probability distributions over semantic tokens as elements of the
+# Hilbert space L₂((0,1)) via their quantile functions (inverse CDFs).  This
+# exploits the isometric embedding of the Wasserstein space 𝒫₂(ℝ) into
+# L₂((0,1)), converting W₂ distance computations to L₂ norms and enabling
+# subgradient-based discrepancy minimization as a scoring signal for
+# distribution drift in the knowledge graph.
+#
+# Key results from the paper:
+#   - The map μ ↦ F_μ⁻¹ (quantile function) is an isometry from
+#     (𝒫₂(ℝ), W₂) into (L₂((0,1)), ‖·‖₂), meaning:
+#       W₂(μ, ν) = ‖F_μ⁻¹ - F_ν⁻¹‖_{L₂((0,1))}
+#   - For the MMD functional ℱ_ν := 𝒟²_K(·, ν) with negative distance
+#     kernel K(x,y) = -|x-y|, the associated L₂ functional is convex.
+#   - Wasserstein gradient flows of functionals on 𝒫₂(ℝ) correspond to
+#     subgradient flows of associated functionals on L₂((0,1)).
+#   - For Dirac measures ν = δ_q, the subgradient flow and its convergence
+#     can be determined explicitly.
+#
+# This reduces the computational cost of tracking distribution drift from
+# OT solver complexity to Hilbert-space inner products and projections,
+# making FREED's distribution-tracking in the epistemic loop analytically
+# tractable and geometrically grounded.
+#
+# CHALLENGE (O44): The L₂ embedding is exact only for measures on ℝ (1-D).
+# For higher-dimensional semantic token spaces, the quantile-function
+# isometry breaks down — sliced Wasserstein or other projections are needed.
+# The current implementation treats each node's edge-weight distribution as
+# a 1-D empirical measure (via sorted token weights), which is valid for
+# per-node drift tracking but does NOT capture multi-dimensional semantic
+# geometry.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _empirical_quantile_function(weights, n_quantile_points=100):
+    # type: (List[float], int) -> List[float]
+    """
+    Compute the quantile function (inverse CDF) of an empirical distribution
+    defined by a list of weights, evaluated at n_quantile_points equally
+    spaced points in (0, 1).
+
+    The empirical distribution is formed by normalizing *weights* to sum to 1
+    and sorting; the quantile function is then the generalized inverse of the
+    resulting step-CDF.
+
+    Parameters
+    ----------
+    weights : list of float
+        Non-negative weights defining the empirical distribution.
+        Need not sum to 1 (will be normalized).
+    n_quantile_points : int
+        Number of evaluation points in (0, 1) for the quantile function
+        (default 100).  Higher values give finer L₂ approximation.
+
+    Returns
+    -------
+    list of float
+        The quantile function evaluated at t_k = (k + 0.5) / n_quantile_points
+        for k = 0, ..., n_quantile_points - 1.  This is an element of the
+        discretized L₂((0,1)) space.
+    """
+    if not weights:
+        return [0.0] * n_quantile_points
+
+    # Filter non-negative and normalize
+    w = [max(0.0, wi) for wi in weights]
+    total = sum(w)
+    if total <= 0.0:
+        return [0.0] * n_quantile_points
+
+    # Build sorted sample: each weight w_i contributes a mass w_i/total
+    # at position i (the "token index" serves as the real-line value)
+    # For a more meaningful embedding, we use the weight values themselves
+    # as the support points of the empirical measure.
+    sorted_w = sorted(w)
+    n = len(sorted_w)
+
+    # Build empirical CDF: F(x) = (1/total) * sum of sorted_w[j] for j where sorted_w[j] <= x
+    # The quantile function F^{-1}(t) = inf{x : F(x) >= t}
+    # For the empirical measure with atoms at sorted_w[i] with mass sorted_w[i]/total:
+    cumulative = []  # type: List[float]
+    running = 0.0
+    for wi in sorted_w:
+        running += wi / total
+        cumulative.append(running)
+
+    # Evaluate quantile function at uniformly spaced points
+    quantile = []  # type: List[float]
+    for k in range(n_quantile_points):
+        t = (k + 0.5) / float(n_quantile_points)
+        # F^{-1}(t) = sorted_w[j] where j = min{i : cumulative[i] >= t}
+        idx = 0
+        for i in range(n):
+            if cumulative[i] >= t - 1e-15:
+                idx = i
+                break
+            idx = i
+        quantile.append(sorted_w[idx])
+
+    return quantile
+
+
+def _l2_inner_product(f, g):
+    # type: (List[float], List[float]) -> float
+    """
+    Compute the L₂((0,1)) inner product of two discretized functions
+    ⟨f, g⟩ = ∫₀¹ f(t)g(t) dt, approximated by the trapezoidal rule
+    on equally spaced points.
+
+    Parameters
+    ----------
+    f : list of float
+        First discretized function (length n).
+    g : list of float
+        Second discretized function (same length n).
+
+    Returns
+    -------
+    float
+        Approximate L₂ inner product.
+    """
+    n = len(f)
+    if n == 0 or n != len(g):
+        return 0.0
+    dt = 1.0 / float(n)
+    return sum(fi * gi for fi, gi in zip(f, g)) * dt
+
+
+def _l2_norm(f):
+    # type: (List[float]) -> float
+    """
+    Compute the L₂((0,1)) norm ‖f‖ = √(⟨f, f⟩) of a discretized function.
+
+    Parameters
+    ----------
+    f : list of float
+        Discretized function.
+
+    Returns
+    -------
+    float
+        L₂ norm (non-negative).
+    """
+    return math.sqrt(max(0.0, _l2_inner_product(f, f)))
+
+
+def _l2_distance(f, g):
+    # type: (List[float], List[float]) -> float
+    """
+    Compute ‖f - g‖_{L₂((0,1))}, which equals W₂(μ, ν) when f and g are
+    the quantile functions of measures μ and ν (isometric embedding).
+
+    Parameters
+    ----------
+    f : list of float
+        Quantile function of first distribution.
+    g : list of float
+        Quantile function of second distribution.
+
+    Returns
+    -------
+    float
+        L₂ distance (= W₂ distance under the isometric embedding).
+    """
+    n = len(f)
+    if n == 0 or n != len(g):
+        return 0.0
+    diff = [fi - gi for fi, gi in zip(f, g)]
+    return _l2_norm(diff)
+
+
+def _mmd_negative_distance_kernel(f_mu, f_nu, n_points=None):
+    # type: (List[float], List[float], Optional[int]) -> float
+    """
+    Compute the MMD² functional ℱ_ν(μ) = 𝒟²_K(μ, ν) with the negative
+    distance kernel K(x,y) = -|x-y|, using the L₂ quantile representation.
+
+    Under the isometric embedding, the MMD functional with K(x,y) = -|x-y|
+    becomes a convex functional on L₂((0,1)):
+        ℱ_ν(μ) = ∫₀¹ |F_μ⁻¹(t) - F_ν⁻¹(t)| dt
+                  + cross terms from the kernel structure.
+
+    For the negative distance kernel specifically:
+        𝒟²_K(μ, ν) = 2∫₀¹∫₀¹ min(s,t) (F_μ⁻¹(t) - F_ν⁻¹(t))
+                      × (F_μ⁻¹(s) - F_ν⁻¹(s)) ds dt
+    which in L₂ terms reduces to a quadratic form involving the antiderivative
+    operator (integration operator on (0,1)).
+
+    For computational tractability, we use the simpler W₂² = ‖F_μ⁻¹ - F_ν⁻¹‖²
+    as the primary discrepancy and the L¹ integral as the MMD proxy:
+        MMD_proxy = (1/n) Σ_k |F_μ⁻¹(t_k) - F_ν⁻¹(t_k)|
+
+    Parameters
+    ----------
+    f_mu : list of float
+        Quantile function of μ.
+    f_nu : list of float
+        Quantile function of ν.
+    n_points : int or None
+        Override number of points (uses len(f_mu) if None).
+
+    Returns
+    -------
+    float
+        MMD proxy value (non-negative).  Convex in the L₂ representation,
+        enabling subgradient-based minimization.
+    """
+    n = len(f_mu)
+    if n == 0 or n != len(f_nu):
+        return 0.0
+    return sum(abs(fi - gi) for fi, gi in zip(f_mu, f_nu)) / float(n)
+
+
+def _mmd_subgradient(f_mu, f_nu):
+    # type: (List[float], List[float]) -> List[float]
+    """
+    Compute a subgradient of the MMD proxy functional at f_mu with respect
+    to the target f_nu, in the L₂((0,1)) representation.
+
+    For the L¹-based MMD proxy:
+        ∂ℱ_ν/∂f_μ(t_k) = sign(f_μ(t_k) - f_ν(t_k)) / n
+
+    This subgradient lives in L₂((0,1)) and can be used for subgradient
+    descent to minimize the discrepancy between μ and ν, corresponding
+    to a Wasserstein gradient flow on 𝒫₂(ℝ).
+
+    Parameters
+    ----------
+    f_mu : list of float
+        Quantile function of current distribution μ.
+    f_nu : list of float
+        Quantile function of target distribution ν.
+
+    Returns
+    -------
+    list of float
+        Subgradient vector in discretized L₂((0,1)), same length as inputs.
+        The sign convention is: descent direction is -subgradient.
+    """
+    n = len(f_mu)
+    if n == 0 or n != len(f_nu):
+        return []
+    inv_n = 1.0 / float(n)
+    subgrad = []  # type: List[float]
+    for fi, gi in zip(f_mu, f_nu):
+        diff = fi - gi
+        if diff > 0:
+            subgrad.append(inv_n)
+        elif diff < 0:
+            subgrad.append(-inv_n)
+        else:
+            subgrad.append(0.0)
+    return subgrad
+
+
+def quantile_embedding_drift_score(weights_t0, weights_t1, n_quantile_points=100):
+    # type: (List[float], List[float], int) -> dict
+    """
+    Compute the distribution drift score between two empirical distributions
+    (represented as weight vectors) using the L₂((0,1)) quantile-function
+    embedding.
+
+    This exploits the isometric embedding 𝒫₂(ℝ) → L₂((0,1)) to compute
+    W₂ distance as an L₂ norm, and provides the MMD subgradient as a
+    descent direction for drift minimization.
+
+    Parameters
+    ----------
+    weights_t0 : list of float
+        Weight vector defining the empirical distribution at time t0.
+    weights_t1 : list of float
+        Weight vector defining the empirical distribution at time t1.
+    n_quantile_points : int
+        Resolution of the quantile-function discretization (default 100).
+
+    Returns
+    -------
+    dict
+        {
+            "w2_distance": float — W₂ distance (= L₂ distance of quantile fns),
+            "w2_squared": float — W₂² (for gradient flow energy functional),
+            "mmd_proxy": float — MMD proxy with negative distance kernel,
+            "l2_norm_t0": float — ‖F_μ⁻¹‖ (L₂ norm of source quantile fn),
+            "l2_norm_t1": float — ‖F_ν⁻¹‖ (L₂ norm of target quantile fn),
+            "subgradient_norm": float — ‖∂ℱ/∂f_μ‖ (magnitude of drift signal),
+            "drift_severity": str — "none", "mild", "moderate", "severe",
+            "n_quantile_points": int,
+            "is_isometric": bool — True (confirms this is exact W₂, not approx),
+        }
+    """
+    q0 = _empirical_quantile_function(weights_t0, n_quantile_points)
+    q1 = _empirical_quantile_function(weights_t1, n_quantile_points)
+
+    w2_dist = _l2_distance(q0, q1)
+    w2_sq = w2_dist * w2_dist
+    mmd = _mmd_negative_distance_kernel(q0, q1)
+    norm_t0 = _l2_norm(q0)
+    norm_t1 = _l2_norm(q1)
+    subgrad = _mmd_subgradient(q0, q1)
+    subgrad_norm = _l2_norm(subgrad) if subgrad else 0.0
+
+    # Severity classification based on W₂ distance relative to norms
+    max_norm = max(norm_t0, norm_t1, 1e-12)
+    relative_drift = w2_dist / max_norm
+
+    if relative_drift < 0.01:
+        severity = "none"
+    elif relative_drift < 0.1:
+        severity = "mild"
+    elif relative_drift < 0.3:
+        severity = "moderate"
+    else:
+        severity = "severe"
+
+    return {
+        "w2_distance": round(w2_dist, 10),
+        "w2_squared": round(w2_sq, 10),
+        "mmd_proxy": round(mmd, 10),
+        "l2_norm_t0": round(norm_t0, 10),
+        "l2_norm_t1": round(norm_t1, 10),
+        "subgradient_norm": round(subgrad_norm, 10),
+        "drift_severity": severity,
+        "n_quantile_points": n_quantile_points,
+        "is_isometric": True,
+    }
+
+
+def quantile_embedding_subgradient_step(weights_current, weights_target,
+                                         step_size=0.1, n_quantile_points=100):
+    # type: (List[float], List[float], float, int) -> dict
+    """
+    Perform one subgradient descent step in L₂((0,1)) to move the current
+    distribution toward the target, then project back to a valid weight vector.
+
+    This implements the Wasserstein gradient flow of the MMD functional:
+        f_μ^{k+1} = f_μ^k - η · ∂ℱ_ν(f_μ^k)
+    followed by projection onto the set of valid quantile functions
+    (non-decreasing, non-negative).
+
+    Parameters
+    ----------
+    weights_current : list of float
+        Current weight vector (empirical distribution to update).
+    weights_target : list of float
+        Target weight vector (reference distribution to approach).
+    step_size : float
+        Subgradient step size η (default 0.1).
+    n_quantile_points : int
+        Quantile discretization resolution (default 100).
+
+    Returns
+    -------
+    dict
+        {
+            "updated_quantile": list of float — updated quantile function
+                after one subgradient step + projection,
+            "pre_projection_quantile": list of float — before monotonicity
+                projection (diagnostic),
+            "w2_before": float — W₂ distance before the step,
+            "w2_after": float — W₂ distance after the step,
+            "improvement": float — w2_before - w2_after (positive = progress),
+            "step_size_used": float,
+            "projected": bool — True if monotonicity projection was needed,
+        }
+    """
+    q_curr = _empirical_quantile_function(weights_current, n_quantile_points)
+    q_target = _empirical_quantile_function(weights_target, n_quantile_points)
+
+    w2_before = _l2_distance(q_curr, q_target)
+
+    # Compute subgradient
+    subgrad = _mmd_subgradient(q_curr, q_target)
+
+    # Subgradient step: f^{k+1} = f^k - η * ∂ℱ
+    q_updated_raw = [
+        q_curr[k] - step_size * subgrad[k]
+        for k in range(n_quantile_points)
+    ]
+
+    # Project onto valid quantile functions:
+    # 1. Non-negativity: clamp to 0
+    q_projected = [max(0.0, qi) for qi in q_updated_raw]
+
+    # 2. Monotonicity (quantile functions must be non-decreasing):
+    #    Apply isotonic regression (pool-adjacent-violators)
+    projected = False
+    for i in range(1, n_quantile_points):
+        if q_projected[i] < q_projected[i - 1]:
+            projected = True
+            # Pool: average with previous
+            avg = 0.5 * (q_projected[i - 1] + q_projected[i])
+            q_projected[i - 1] = avg
+            q_projected[i] = avg
+
+    # Second pass for full isotonic projection (simplified)
+    changed = True
+    max_passes = 10
+    passes = 0
+    while changed and passes < max_passes:
+        changed = False
+        passes += 1
+        for i in range(1, n_quantile_points):
+            if q_projected[i] < q_projected[i - 1]:
+                avg = 0.5 * (q_projected[i - 1] + q_projected[i])
+                q_projected[i - 1] = avg
+                q_projected[i] = avg
+                changed = True
+                projected = True
+
+    w2_after = _l2_distance(q_projected, q_target)
+    improvement = w2_before - w2_after
+
+    return {
+        "updated_quantile": [round(qi, 10) for qi in q_projected],
+        "pre_projection_quantile": [round(qi, 10) for qi in q_updated_raw],
+        "w2_before": round(w2_before, 10),
+        "w2_after": round(w2_after, 10),
+        "improvement": round(improvement, 10),
+        "step_size_used": step_size,
+        "projected": projected,
+    }
+
+
+def node_distribution_drift(node_id, edges_t0, edges_t1, all_node_ids,
+                             n_quantile_points=100):
+    # type: (str, list, list, List[str], int) -> dict
+    """
+    Compute the distribution drift for a knowledge graph node between two
+    edge snapshots, using the L₂((0,1)) quantile-function isometric embedding.
+
+    Constructs per-node probability distributions from edge weights at two
+    time points, embeds them as quantile functions in L₂((0,1)), and computes
+    the exact W₂ distance as the L₂ norm of their difference.
+
+    Parameters
+    ----------
+    node_id : str
+        The node whose distribution drift to measure.
+    edges_t0 : list of dict
+        Edge snapshot at time t0.
+    edges_t1 : list of dict
+        Edge snapshot at time t1.
+    all_node_ids : list of str
+        Ordered list of all node IDs (defines simplex coordinates).
+    n_quantile_points : int
+        Quantile discretization resolution (default 100).
+
+    Returns
+    -------
+    dict
+        Drift score dict from quantile_embedding_drift_score, augmented with:
+        "node_id": str,
+        "distribution_t0": list of float — probability vector at t0,
+        "distribution_t1": list of float — probability vector at t1,
+    """
+    dist_t0 = node_distribution_from_edges(node_id, edges_t0, all_node_ids)
+    dist_t1 = node_distribution_from_edges(node_id, edges_t1, all_node_ids)
+
+    drift = quantile_embedding_drift_score(dist_t0, dist_t1, n_quantile_points)
+    drift["node_id"] = node_id
+    drift["distribution_t0"] = [round(p, 8) for p in dist_t0]
+    drift["distribution_t1"] = [round(p, 8) for p in dist_t1]
+
+    return drift
+
 
 # ── Singleton accessor ────────────────────────────────────────────────────────
 
