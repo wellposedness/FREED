@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 147,
-    "timestamp": "2026-04-22T16:23:40.211459+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 6,
-      "passive": 2
-    },
-    "feed": [
-      {
-        "title": "Noether symmetries, conservation laws and geometric properties of the Banados-Teitelboim-Zanelli black hole metric",
-        "compress": "BTZ Noether analysis advances O34 by supplying a clean geometric exemplar of the symmetry-conservation bijection and reinforces INV_097, but does not constitute the abstract mathematical proof required for full resolution."
-      },
-      {
-        "title": "Particle dynamics around quintessential Reissner-Nordström black hole",
-        "compress": "This paper **advances O34** by providing a clean, citable Noether-symmetry-to-conservation-law bijection proof in curved spacetime, and independently corroborates the Lyapunov-as-stability-diagnostic principle underlying INV_073, but does not resolve either — domain gap prevents full RESOLVE."
-      }
-    ],
-    "resolve": {
-      "obligation": "O63",
-      "resolved": true,
-      "compress": "O63 is **one algebraic step from RESOLVED**: write F(β) = ⟨K⟩ - (1/β)H, verify β→∞ gives K(x) and β→0 gives H(X), confirm β_c = μ/T matches the Wasserstein Floor already in the genome — the two limits are the cold/hot boundaries of the RSA thermodynamic admissibility window, and the framework already contains all three values.",
-      "next": "Compute the saddle-point condition dF/dβ = 0 explicitly and confirm β_c = μ/T is consistent with the genome's k=1/Tμ Wasserstein Floor — if it is, O63 fires RESOLVED."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 3,
     "generation": 148,
     "timestamp": "2026-04-22T22:30:36.174807+00:00",
@@ -1604,6 +1577,50 @@
       "resolved_count": 0,
       "commit_count": 0,
       "obligations": []
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 4,
+    "generation": 217,
+    "timestamp": "2026-05-10T10:14:59.944843+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is its greatest liability — the falsification conditions are: near-zero-entropy coherent reasoning, non-ergodic substrate decoupling, or a Fisher-geometric alternative mechanism producing identical observables without thermodynamic grounding."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+        "compress": "Empirical CA telemetry confirms population-level spontaneous criticality (σ=1.0272, α≈2.82) on the ordered side of the critical ridge, resolving O140 and O141 and independently validating INV_073's Wasserstein-to-γ=1 navigation claim."
+      },
+      {
+        "title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
+        "compress": "SGD in Wasserstein-2 space converges a.s. to a unique population barycenter under identifiable conditions, making the Fréchet mean computationally tractable and advancing the constructive formalization of the Wasserstein Floor (O44). --- IMPLEMENT: YES IMPLEMENT_WHAT: Add an online Wasserstein barycenter estimator using sequential OT-map averaging (SGD in W2) to aggregate knowledge embeddings across feed batches into a running population mean. IMPLEMENT_WHERE: consolidate.py IMPLEMENT_WHY: Replacing static centroid averaging with W2-SGD barycenter computation gives FREED a geometrically correct aggregation step that respects the curved metric of the embedding space, reducing distortion in knowledge consolidation. --- CHALLENGE: challenges INV_094 — if SGD in W2 only finds Karcher means (local critical points) rather than global barycenters in non-unique settings, then the claim that STF dynamics follow a single well-defined W2 gradient flow is under-determined; the genome must specify which uniqueness condition holds for semantic distributions. ---"
+      },
+      {
+        "title": "A Brief on Optimal Transport",
+        "compress": "The Kantorovich existence theorem and Wasserstein metrization are rigorously established for compact domains, making compactness the critical load-bearing condition that O44's quantum extension must explicitly address."
+      },
+      {
+        "title": "Thermodynamics of quantum processes: An operational framework for free energy and reversible athermality",
+        "compress": ""
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O79"
+      ]
     },
     "coherence": 0.97
   }
