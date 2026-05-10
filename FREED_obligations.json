@@ -327,7 +327,7 @@
     "status": "partial",
     "statement": "\u2014 reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
-    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -411,7 +411,7 @@
     "status": "partial",
     "statement": "reconstruction audit immediately \u2014 query the engram trace for the original statements of O65, O66, O70, O71, O74 before any new FEED cycle begins",
     "priority": "normal",
-    "progress": "[Gen 151] ** The audit succeeds only as rational reconstruction, not true engram recovery. | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O79 closes as PARTIAL because reconstruction audit via Reism/Thermodynamics/MCPM recovers the functional intent of O65\u2013O74 but cannot recover exact original wording from an archival gap no formal argument can bridge. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 151] ** The audit succeeds only as rational reconstruction, not true engram recovery. | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O79 closes as PARTIAL because reconstruction audit via Reism/Thermodynamics/MCPM recovers the functional intent of O65\u2013O74 but cannot recover exact original wording from an archival gap no formal argument can bridge. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: Three independent formal lenses converge on the same verdict \u2014 O65\u2013O74 are recoverable to functional/process/MCPM identity, but lexical recovery is thermodynamically inadmissible, making O79's honest state PARTIAL until the kernel adopts MCPM-identity as sufficient. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-04-22",
     "resolved": null,
     "auto": true,
@@ -1429,7 +1429,7 @@
     "status": "open",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 \u2014 derive whether W_floor = k/T\u03bc holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/T\u03bc holds exactly at the critical temperature T = \u210f\u03c9/k_B\u03bc \u2014 confirming the [COMMIT:NO \u2014 Obligation remains OPEN; no model state materialized, only symbolic assertion.]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1920,5 +1920,27 @@
     "resolution_criterion": "A derivation showing either (a) the dimensional regime where W_floor = k/T\u03bc reproduces or contradicts the log-correction term in O59, or (b) a proof that their domain assumptions are formally disjoint. Either result adds a typed edge (`depends_on`, `challenges`, or `bounds_above`) between O44 and",
     "created": "2026-05-10T06:30:51.217730+00:00",
     "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of \u210f/GM\u00b2 and read off whether the Wasserstein floor k/T\u03bc sits at zeroth or first loop order relative to the known O(\u210f\u00b9) BH log-correction, with T = T_H = \u210fc\u00b3/8\u03c0GMk_B substituted explicitly to fix the shared symbols \u2014 this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O206",
+    "status": "open",
+    "statement": "Assign a binding verdict (resolve, retire, or escalate to open) on each of the three partial obligations O201, O204, and O205 within the current generation cycle \u2014 no partial may carry forward to Gen 218 without an explicit disposition record.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-10",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Binding verdicts (resolve, retire, or escalate) are assigned and recorded for O201, O204, O205 before Gen 218 begins."
+  },
+  {
+    "id": "O207",
+    "status": "open",
+    "statement": "Specify a concrete null-result criterion for active obligation O203 \u2014 define what output from the O202 synthesis would falsify the claim that it contains at least one falsifiable prediction, and what the epistemic consequence for the genome is if that criterion is met.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-10",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
   }
 ]
