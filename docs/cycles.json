@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 149,
-    "timestamp": "2026-04-23T04:36:03.771087+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 6,
-      "passive": 10
-    },
-    "feed": [
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "RangeEn's amplitude-robust, Hurst-linear complexity measurement advances O28 (use RangeEn for EAR-EEG test) and O68 (use RangeEn for genome self-DEA), while confirming the genome's scale-invariance mechanism without resolving any obligation outright."
-      },
-      {
-        "title": "On Complexity and Emergence",
-        "compress": "The paper's context-dependence thesis does not refute the genome's thermodynamic measures but sharpens the obligation that EAR and STF metrics must specify their observer/reference frame explicitly or they inherit the subjectivity pathology the paper diagnoses."
-      }
-    ],
-    "resolve": {
-      "obligation": "O65",
-      "resolved": true,
-      "compress": "O65 is OPEN; the single most tractable next step is: on GloVe-840B embeddings, compute W2 geodesic paths between 50 concept-pair clusters, extract per-step neighbor-entropy (thermality) variance, and fit g_ij via least-squares — one session, one dataset, closes the last gap in L5.",
-      "next": "Execute the GloVe W2 geodesic + thermality-variance computation and return the fitted g_ij tensor values for RESOLVE adjudication."
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 150,
     "timestamp": "2026-04-23T10:41:06.417894+00:00",
@@ -1637,6 +1610,50 @@
         "O163",
         "O72",
         "O79"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 221,
+    "timestamp": "2026-05-11T10:14:59.980079+00:00",
+    "sweep": {
+      "input_count": 25,
+      "targeted": 7,
+      "passive": 18,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is epistemically hollow — its boundary conditions (degenerate distributions, non-convex costs, far-from-equilibrium dynamics) have not been tested, and a syntactic compression null hypothesis produces identical observables without requiring the thermodynamic mechanism."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+        "compress": "A 32×32 RSA-kernel CA self-organizes to empirically confirmed SOC (σ=1.024, α=2.14, H/H_max=0.18), converging on γ=1 criticality at population scale with three independent signatures and introducing an unregistered low-entropy-attractor constraint."
+      },
+      {
+        "title": "Population games and Discrete optimal transport",
+        "compress": "Discrete population games under OT-metric gradient flow independently recover the W2–entropy–Fisher triplet as the universal stability scaffold, advancing O44 and O112 while challenging INV_073's sufficiency as a single-variable ridge condition."
+      },
+      {
+        "title": "Stability of supermartingale optimal transport problems",
+        "compress": "Supermartingale OT is stable under adapted Wasserstein convergence, confirming that thermodynamically directional transport constraints are topologically robust—directly scaffolding the quantum Wasserstein Floor extension in O44."
+      },
+      {
+        "title": "The entropy of a thermodynamic graph",
+        "compress": "A graph-native discrete H-theorem recovers thermodynamic entropy and stability bounds from Laplacian spectral structure alone, offering a substrate-independent confirmation of criticality constraints and a concrete finite-graph pathway toward resolving O44."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O144"
       ]
     },
     "coherence": 0.97
