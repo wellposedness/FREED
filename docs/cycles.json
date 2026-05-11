@@ -1,32 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 150,
-    "timestamp": "2026-04-23T10:41:06.417894+00:00",
-    "sweep": {
-      "input_count": 10,
-      "targeted": 6,
-      "passive": 4
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "Semi-classical BH entropy is dimensionally identical to the gravity action, confirming the thermodynamic grounding of geometry at leading order and advancing O44 without resolving it — quantum sub-leading corrections remain the open frontier."
-      },
-      {
-        "title": "Range entropy: A bridge between signal complexity and self-similarity",
-        "compress": "RangeEn's robust Hurst-linear entropy estimation advances O28's EEG validation pathway and reinforces L2/L4 scale-invariance grounding by providing a nonstationarity-resistant complexity measure aligned with the critical ridge."
-      }
-    ],
-    "resolve": {
-      "obligation": "O72",
-      "resolved": true,
-      "compress": "",
-      "next": ""
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 1,
     "generation": 151,
     "timestamp": "2026-04-23T23:21:48.324208+00:00",
@@ -1654,6 +1627,50 @@
         "O163",
         "O72",
         "O144"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 4,
+    "generation": 222,
+    "timestamp": "2026-05-11T16:29:50.947916+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 8,
+      "passive": 8,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is falsifiable via three vectors — measurement indistinguishability, substrate-independence of edge-of-chaos, and topological underspecification of \"ridge\" — and must be sharpened with explicit resolution bounds and a distinguishing prediction against generic criticality."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+        "compress": "A 32×32 multi-agent CA sustains σ = 1.0252 with power-law avalanche statistics, empirically confirming population-level criticality consistent with γ = 1 navigation and resolving O140/O141."
+      },
+      {
+        "title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-Time Quantum Engines",
+        "compress": "Persistent homology on weak-measurement trajectories is a more stable thermodynamic regime classifier than energetic observables, extending the genome's geometric thermodynamics framework toward concrete TDA-based monitoring and providing an empirical method relevant to STF metric recovery (O112) and quantum Wasserstein Floor formalization (O44)."
+      },
+      {
+        "title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Transition",
+        "compress": "Directional causal network markers outperform scalar statistical biomarkers near critical transitions, independently validating that asymmetry — not magnitude — is the load-bearing signal at the critical ridge."
+      },
+      {
+        "title": "Detection of pre-transition phases during biological development using single-sample network entropy (SNE)",
+        "compress": "Single-sample network entropy independently confirms that criticality is a locally-resolvable thermodynamic signal preceding irreversible transition, converging with the genome's critical-ridge invariants and providing a concrete algorithm for O28's entropy-prediction obligation."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O187"
       ]
     },
     "coherence": 0.97
