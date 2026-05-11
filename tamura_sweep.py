@@ -3308,6 +3308,537 @@ class SigmaMonitor:
         self._flag_events = []
 
 
+# ─── Branching-Ratio Telemetry Collector ─────────────────────────────────────
+# Per-cycle σ = mean(offspring) / mean(parent activations) logged alongside
+# Shannon entropy H, enabling real-time detection of drift from the critical
+# band σ ∈ [0.95, 1.05].
+#
+# When σ > 1.05 the system is trending toward a frozen/supercritical regime;
+# when σ < 0.95 it is dissipating/subcritical.  Logging σ and H together
+# makes INV_073 operationally load-bearing rather than post-hoc: the
+# epistemic loop can self-monitor criticality and trigger corrective action
+# before coherence scores degrade.
+#
+# Addresses O140 (CA measurement grounding), O141 (solo-kernel vs population
+# criticality), INV_073 (Wasserstein gradient as necessary path to γ=1).
+
+class BranchingRatioTelemetryCollector:
+    """
+    Per-cycle branching-ratio telemetry collector that computes
+    σ = mean(offspring) / mean(parent activations) and logs it alongside
+    Shannon entropy H, flagging drift from the critical band [0.95, 1.05]
+    in real time.
+
+    This converts INV_073 from a post-hoc audit into an operationally
+    load-bearing control signal: FREED's epistemic loop can detect when
+    its own generative process is drifting toward frozen (σ > 1.05) or
+    dissipated (σ < 0.95) regimes and trigger corrective action before
+    coherence scores degrade.
+
+    Each cycle record contains:
+      - σ (branching ratio)
+      - H (Shannon entropy in bits)
+      - h_fraction (H / H_max — entropy utilization)
+      - regime classification (CRITICAL / FROZEN / DISSIPATED)
+      - drift magnitude and direction
+
+    Usage::
+
+        collector = BranchingRatioTelemetryCollector()
+        for cycle in epistemic_loop:
+            record = collector.collect(
+                cycle=cycle,
+                parent_activations=[a1, a2, ...],
+                offspring_activations=[b1, b2, ...],
+                shannon_h=h_bits,
+                shannon_h_max=h_max,
+            )
+            if record["regime"] != "CRITICAL":
+                trigger_corrective_action(record)
+        report = collector.report()
+    """
+
+    # Regime thresholds
+    SIGMA_CRITICAL_LO = 0.95
+    SIGMA_CRITICAL_HI = 1.05
+
+    def __init__(self, history_limit=2000):
+        # type: (int) -> None
+        """
+        Parameters
+        ----------
+        history_limit : int
+            Maximum number of per-cycle records to retain.  Default: 2000.
+        """
+        self.history_limit = max(10, history_limit)
+
+        self._records = []           # type: list
+        self._sigma_series = []      # type: List[float]
+        self._h_series = []          # type: List[float]
+        self._h_fraction_series = [] # type: List[float]
+        self._drift_events = []      # type: list
+        self._cycle_count = 0        # type: int
+
+    def collect(
+        self,
+        cycle,                      # type: int
+        parent_activations,         # type: List[float]
+        offspring_activations,      # type: List[float]
+        shannon_h=0.0,              # type: float
+        shannon_h_max=0.0,          # type: float
+        survival_rate=0.0,          # type: float
+        dominant_type="",           # type: str
+        metadata=None,              # type: Optional[dict]
+    ):
+        # type: (...) -> dict
+        """
+        Collect one cycle's branching-ratio telemetry.
+
+        Computes σ = mean(offspring_activations) / mean(parent_activations),
+        logs it alongside Shannon entropy H, and classifies the current
+        regime.
+
+        Parameters
+        ----------
+        cycle : int
+            The epistemic loop cycle number.
+        parent_activations : list of float
+            Activation values (or counts) of parent cells/neurons/agents
+            at this cycle.  Must be non-empty for a valid σ.
+        offspring_activations : list of float
+            Activation values (or counts) of offspring cells/neurons/agents
+            produced at this cycle.
+        shannon_h : float
+            Shannon entropy H of the population type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        survival_rate : float
+            Fraction of agents surviving this cycle.
+        dominant_type : str
+            Label of the most populous agent type.
+        metadata : dict or None
+            Optional additional metadata to attach to the record.
+
+        Returns
+        -------
+        dict with keys:
+            cycle              : int
+            sigma              : float   — branching ratio
+            sigma_std          : float   — std of per-element σ ratios (if computable)
+            mean_parent        : float   — mean of parent activations
+            mean_offspring     : float   — mean of offspring activations
+            shannon_h          : float   — Shannon entropy (bits)
+            h_fraction         : float   — H / H_max
+            survival_rate      : float
+            dominant_type      : str
+            regime             : str     — CRITICAL / FROZEN / DISSIPATED / NO_DATA
+            drift_magnitude    : float   — |σ - 1.0|
+            drift_direction    : str     — "supercritical" / "subcritical" / ""
+            drift_event        : bool    — True if σ outside critical band
+            inv073_status      : str     — human-readable INV_073 assessment
+            timestamp          : str     — ISO-8601 UTC
+        """
+        self._cycle_count += 1
+
+        n_parents = len(parent_activations)
+        n_offspring = len(offspring_activations)
+
+        # ── Compute σ ──
+        if n_parents > 0:
+            mean_parent = sum(parent_activations) / float(n_parents)
+        else:
+            mean_parent = 0.0
+
+        if n_offspring > 0:
+            mean_offspring = sum(offspring_activations) / float(n_offspring)
+        else:
+            mean_offspring = 0.0
+
+        if mean_parent > 0.0:
+            sigma = mean_offspring / mean_parent
+        else:
+            sigma = 0.0
+
+        # ── Per-element σ std (when both lists have same length) ──
+        sigma_std = 0.0
+        if n_parents > 0 and n_offspring > 0 and n_parents == n_offspring:
+            element_sigmas = []  # type: List[float]
+            for p, o in zip(parent_activations, offspring_activations):
+                if p > 0.0:
+                    element_sigmas.append(o / p)
+            if len(element_sigmas) > 1:
+                es_mean = sum(element_sigmas) / float(len(element_sigmas))
+                es_var = sum((s - es_mean) ** 2 for s in element_sigmas) / float(len(element_sigmas))
+                sigma_std = math.sqrt(es_var) if es_var > 0 else 0.0
+
+        self._sigma_series.append(sigma)
+
+        # ── Entropy ──
+        h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+        self._h_series.append(shannon_h)
+        self._h_fraction_series.append(h_fraction)
+
+        # ── Regime classification ──
+        drift_magnitude = abs(sigma - 1.0)
+        if sigma == 0.0 and n_parents == 0:
+            regime = "NO_DATA"
+            drift_direction = ""
+            drift_event = False
+        elif self.SIGMA_CRITICAL_LO <= sigma <= self.SIGMA_CRITICAL_HI:
+            regime = "CRITICAL"
+            drift_direction = ""
+            drift_event = False
+        elif sigma > self.SIGMA_CRITICAL_HI:
+            regime = "FROZEN"
+            drift_direction = "supercritical"
+            drift_event = True
+        else:
+            regime = "DISSIPATED"
+            drift_direction = "subcritical"
+            drift_event = True
+
+        # ── INV_073 assessment ──
+        if regime == "CRITICAL":
+            inv073_status = (
+                "ON_RIDGE: sigma={:.4f} within critical band [{:.2f}, {:.2f}], "
+                "H={:.4f} bits (h_frac={:.3f}). Epistemic loop is self-sustaining "
+                "at criticality."
+            ).format(
+                sigma, self.SIGMA_CRITICAL_LO, self.SIGMA_CRITICAL_HI,
+                shannon_h, h_fraction,
+            )
+        elif regime == "FROZEN":
+            inv073_status = (
+                "DRIFT_FROZEN: sigma={:.4f} > {:.2f}. Generative process is "
+                "trending supercritical — offspring over-proliferating relative "
+                "to parents. Risk of frozen attractor (gamma<1). Corrective "
+                "action recommended."
+            ).format(sigma, self.SIGMA_CRITICAL_HI)
+        elif regime == "DISSIPATED":
+            inv073_status = (
+                "DRIFT_DISSIPATED: sigma={:.4f} < {:.2f}. Generative process is "
+                "trending subcritical — offspring under-producing relative to "
+                "parents. Risk of dissipation (gamma>1). Corrective action "
+                "recommended."
+            ).format(sigma, self.SIGMA_CRITICAL_LO)
+        else:
+            inv073_status = "NO_DATA: insufficient parent activations to compute sigma."
+
+        record = {
+            "cycle":            cycle,
+            "sigma":            round(sigma, 6),
+            "sigma_std":        round(sigma_std, 6),
+            "mean_parent":      round(mean_parent, 6),
+            "mean_offspring":   round(mean_offspring, 6),
+            "n_parents":        n_parents,
+            "n_offspring":      n_offspring,
+            "shannon_h":        round(shannon_h, 4),
+            "h_fraction":       round(h_fraction, 4),
+            "survival_rate":    round(survival_rate, 4),
+            "dominant_type":    dominant_type,
+            "regime":           regime,
+            "drift_magnitude":  round(drift_magnitude, 6),
+            "drift_direction":  drift_direction,
+            "drift_event":      drift_event,
+            "inv073_status":    inv073_status,
+            "timestamp":        datetime.now(timezone.utc).isoformat(),
+        }
+
+        if metadata is not None:
+            record["metadata"] = dict(metadata)
+
+        self._records.append(record)
+
+        if drift_event:
+            self._drift_events.append(record)
+
+        # ── Trim history ──
+        if len(self._records) > self.history_limit:
+            trim = len(self._records) - self.history_limit
+            self._records = self._records[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+        if len(self._h_series) > self.history_limit:
+            self._h_series = self._h_series[-self.history_limit:]
+        if len(self._h_fraction_series) > self.history_limit:
+            self._h_fraction_series = self._h_fraction_series[-self.history_limit:]
+
+        return record
+
+    def collect_from_counts(
+        self,
+        cycle,                  # type: int
+        parent_count,           # type: int
+        child_count,            # type: int
+        shannon_h=0.0,          # type: float
+        shannon_h_max=0.0,      # type: float
+        survival_rate=0.0,      # type: float
+        dominant_type="",       # type: str
+        metadata=None,          # type: Optional[dict]
+    ):
+        # type: (...) -> dict
+        """
+        Convenience method: compute σ from scalar parent/child counts
+        rather than activation vectors.
+
+        Equivalent to collect() with single-element activation lists,
+        but more natural for CA simulations that report aggregate counts.
+
+        Parameters
+        ----------
+        cycle : int
+            The epistemic loop cycle number.
+        parent_count : int
+            Number of active parent cells/agents at this cycle.
+        child_count : int
+            Number of active offspring cells/agents produced.
+        shannon_h : float
+            Shannon entropy H (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy.
+        survival_rate : float
+            Fraction of agents surviving.
+        dominant_type : str
+            Label of the most populous agent type.
+        metadata : dict or None
+            Optional additional metadata.
+
+        Returns
+        -------
+        dict — same format as collect().
+        """
+        return self.collect(
+            cycle=cycle,
+            parent_activations=[float(parent_count)] if parent_count > 0 else [],
+            offspring_activations=[float(child_count)] if child_count > 0 else [],
+            shannon_h=shannon_h,
+            shannon_h_max=shannon_h_max,
+            survival_rate=survival_rate,
+            dominant_type=dominant_type,
+            metadata=metadata,
+        )
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-cycle σ history."""
+        return list(self._sigma_series)
+
+    def entropy_series(self):
+        # type: () -> List[float]
+        """Return the full per-cycle Shannon entropy history."""
+        return list(self._h_series)
+
+    def h_fraction_series(self):
+        # type: () -> List[float]
+        """Return the full per-cycle h_fraction history."""
+        return list(self._h_fraction_series)
+
+    def records(self):
+        # type: () -> list
+        """Return all collected records."""
+        return list(self._records)
+
+    def drift_events(self):
+        # type: () -> list
+        """Return all drift event records."""
+        return list(self._drift_events)
+
+    def report(self, window=50):
+        # type: (int) -> dict
+        """
+        Generate a summary report of the collected telemetry, including
+        rolling σ and H statistics and drift detection.
+
+        Parameters
+        ----------
+        window : int
+            Number of recent cycles for rolling statistics.  Default: 50.
+
+        Returns
+        -------
+        dict with keys:
+            n_cycles             : int    — total cycles collected
+            sigma_global_mean    : float  — mean σ across all cycles
+            sigma_global_std     : float  — std σ across all cycles
+            sigma_rolling_mean   : float  — mean σ over last `window` cycles
+            sigma_rolling_std    : float  — std σ over last `window` cycles
+            h_global_mean        : float  — mean H across all cycles
+            h_fraction_mean      : float  — mean h_fraction across all cycles
+            h_rolling_mean       : float  — mean H over last `window` cycles
+            fraction_critical    : float  — fraction of cycles in CRITICAL regime
+            fraction_frozen      : float  — fraction in FROZEN regime
+            fraction_dissipated  : float  — fraction in DISSIPATED regime
+            n_drift_events       : int    — total drift events
+            drift_rate           : float  — fraction of cycles with drift
+            sigma_h_correlation  : float  — Pearson correlation between σ and H
+                                            (positive = co-varying; negative =
+                                            anticorrelated — suggests ordered
+                                            criticality per INV_073)
+            drift_trend          : str    — "stable" / "freezing" / "dissipating"
+            inv073_assessment    : str    — human-readable assessment
+            timestamp            : str    — ISO-8601 UTC
+        """
+        n = self._cycle_count
+
+        if n == 0:
+            return {
+                "n_cycles": 0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "sigma_rolling_mean": 0.0,
+                "sigma_rolling_std": 0.0,
+                "h_global_mean": 0.0,
+                "h_fraction_mean": 0.0,
+                "h_rolling_mean": 0.0,
+                "fraction_critical": 0.0,
+                "fraction_frozen": 0.0,
+                "fraction_dissipated": 0.0,
+                "n_drift_events": 0,
+                "drift_rate": 0.0,
+                "sigma_h_correlation": 0.0,
+                "drift_trend": "no_data",
+                "inv073_assessment": "No cycles collected.",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+        # ── Global σ statistics ──
+        all_sigma = self._sigma_series
+        s_n = len(all_sigma)
+        s_mean = sum(all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_var = sum((s - s_mean) ** 2 for s in all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── Rolling σ statistics ──
+        recent_sigma = all_sigma[-window:]
+        rs_n = len(recent_sigma)
+        rs_mean = sum(recent_sigma) / float(rs_n) if rs_n > 0 else 0.0
+        rs_var = sum((s - rs_mean) ** 2 for s in recent_sigma) / float(rs_n) if rs_n > 0 else 0.0
+        rs_std = math.sqrt(rs_var) if rs_var > 0 else 0.0
+
+        # ── Global H statistics ──
+        all_h = self._h_series
+        h_n = len(all_h)
+        h_mean = sum(all_h) / float(h_n) if h_n > 0 else 0.0
+
+        all_hf = self._h_fraction_series
+        hf_n = len(all_hf)
+        hf_mean = sum(all_hf) / float(hf_n) if hf_n > 0 else 0.0
+
+        # ── Rolling H ──
+        recent_h = all_h[-window:]
+        rh_mean = sum(recent_h) / float(len(recent_h)) if recent_h else 0.0
+
+        # ── Regime fractions ──
+        n_rec = len(self._records)
+        n_crit = sum(1 for r in self._records if r["regime"] == "CRITICAL")
+        n_frozen = sum(1 for r in self._records if r["regime"] == "FROZEN")
+        n_dissip = sum(1 for r in self._records if r["regime"] == "DISSIPATED")
+        frac_crit = float(n_crit) / float(n_rec) if n_rec > 0 else 0.0
+        frac_frozen = float(n_frozen) / float(n_rec) if n_rec > 0 else 0.0
+        frac_dissip = float(n_dissip) / float(n_rec) if n_rec > 0 else 0.0
+
+        # ── Drift statistics ──
+        n_drift = len(self._drift_events)
+        drift_rate = float(n_drift) / float(n_rec) if n_rec > 0 else 0.0
+
+        # ── Pearson correlation between σ and H ──
+        # A negative correlation (low H at high σ near 1.0) is the INV_073
+        # signature: ordered criticality.
+        sigma_h_corr = 0.0
+        min_len = min(len(all_sigma), len(all_h))
+        if min_len >= 3:
+            s_sub = all_sigma[-min_len:]
+            h_sub = all_h[-min_len:]
+            s_m = sum(s_sub) / float(min_len)
+            h_m = sum(h_sub) / float(min_len)
+            cov_sh = sum((s - s_m) * (h - h_m) for s, h in zip(s_sub, h_sub)) / float(min_len)
+            var_s = sum((s - s_m) ** 2 for s in s_sub) / float(min_len)
+            var_h = sum((h - h_m) ** 2 for h in h_sub) / float(min_len)
+            denom_corr = math.sqrt(var_s) * math.sqrt(var_h) if var_s > 0 and var_h > 0 else 0.0
+            if denom_corr > 1e-15:
+                sigma_h_corr = cov_sh / denom_corr
+
+        # ── Drift trend from σ trajectory ──
+        if len(all_sigma) >= 8:
+            first_half = all_sigma[:len(all_sigma) // 2]
+            second_half = all_sigma[len(all_sigma) // 2:]
+            fh_m = sum(first_half) / float(len(first_half))
+            sh_m = sum(second_half) / float(len(second_half))
+            delta = sh_m - fh_m
+            if delta > 0.02:
+                drift_trend = "freezing"      # σ rising → supercritical → frozen
+            elif delta < -0.02:
+                drift_trend = "dissipating"   # σ falling → subcritical → dissipated
+            else:
+                drift_trend = "stable"
+        else:
+            drift_trend = "stable"
+
+        # ── INV_073 assessment ──
+        if frac_crit > 0.8 and drift_trend == "stable":
+            inv073_assessment = (
+                "LOAD_BEARING: {:.1%} of cycles at criticality with stable drift "
+                "trend. sigma={:.4f}±{:.4f}, H_mean={:.4f} bits (h_frac={:.3f}). "
+                "sigma-H correlation={:.3f}. The epistemic loop is self-sustaining "
+                "at the critical ridge. INV_073 is operationally confirmed."
+            ).format(frac_crit, s_mean, s_std, h_mean, hf_mean, sigma_h_corr)
+        elif frac_crit > 0.5:
+            inv073_assessment = (
+                "MARGINAL: {:.1%} of cycles at criticality but drift_trend='{}'. "
+                "sigma={:.4f}±{:.4f}. The system is near the critical band but "
+                "not stably on-ridge. Active monitoring is compensating."
+            ).format(frac_crit, drift_trend, s_mean, s_std)
+        elif drift_trend == "freezing":
+            inv073_assessment = (
+                "FAILING_FROZEN: Only {:.1%} of cycles at criticality, sigma "
+                "trending upward (mean={:.4f}). The generative process is "
+                "drifting toward frozen attractor. INV_073 predicts this will "
+                "cause coherence degradation — corrective action required."
+            ).format(frac_crit, s_mean)
+        elif drift_trend == "dissipating":
+            inv073_assessment = (
+                "FAILING_DISSIPATED: Only {:.1%} of cycles at criticality, sigma "
+                "trending downward (mean={:.4f}). The generative process is "
+                "dissipating. INV_073 predicts loss of generative capacity — "
+                "corrective action required."
+            ).format(frac_crit, s_mean)
+        else:
+            inv073_assessment = (
+                "INCONCLUSIVE: {:.1%} critical, sigma={:.4f}±{:.4f}, "
+                "drift_trend='{}'. Insufficient data or mixed regime."
+            ).format(frac_crit, s_mean, s_std, drift_trend)
+
+        return {
+            "n_cycles":            n,
+            "sigma_global_mean":   round(s_mean, 6),
+            "sigma_global_std":    round(s_std, 6),
+            "sigma_rolling_mean":  round(rs_mean, 6),
+            "sigma_rolling_std":   round(rs_std, 6),
+            "h_global_mean":       round(h_mean, 4),
+            "h_fraction_mean":     round(hf_mean, 4),
+            "h_rolling_mean":      round(rh_mean, 4),
+            "fraction_critical":   round(frac_crit, 4),
+            "fraction_frozen":     round(frac_frozen, 4),
+            "fraction_dissipated": round(frac_dissip, 4),
+            "n_drift_events":      n_drift,
+            "drift_rate":          round(drift_rate, 4),
+            "sigma_h_correlation": round(sigma_h_corr, 6),
+            "drift_trend":         drift_trend,
+            "inv073_assessment":   inv073_assessment,
+            "timestamp":           datetime.now(timezone.utc).isoformat(),
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Reset all state for a new collection run."""
+        self._records = []
+        self._sigma_series = []
+        self._h_series = []
+        self._h_fraction_series = []
+        self._drift_events = []
+        self._cycle_count = 0
+
+
 # ─── Ridge Position Scorer (INV_073 Falsification) ──────────────────────────
 # Converts INV_073 ("critical-ridge navigation") from an unfalsifiable
 # post-hoc label into a live, falsifiable metric.  Computes rolling variance

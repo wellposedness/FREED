@@ -29,6 +29,7 @@ Triggered by:
 import os
 import json
 import time
+import math
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -258,11 +259,219 @@ class EscrowLedger:
         return violations
 
 
+class MWDEScorer:
+    """
+    Minimum Wasserstein Distance Estimator (MWDE) scoring for misspecification-robust
+    evidence integration.
+
+    Based on asymptotic theory: when the data-generating process P0 is NOT in the
+    model family {P_theta}, the MWDE still converges to the projection
+    theta* = argmin_theta W_p(P0, P_theta), and the estimator is asymptotically
+    normal around theta* at sqrt(n) rate.
+
+    This means Wasserstein-based scoring degrades gracefully under model
+    misspecification — unlike KL-based scoring which can diverge when the
+    model family doesn't contain the truth.
+
+    For FREED: we treat each node's semantic distribution (word/concept frequencies)
+    as the model distribution, and the empirical evidence (new knowledge) as the
+    data distribution. The MWDE score quantifies how well the node's semantic
+    model accommodates the evidence, even when the node's model is known to be
+    approximate.
+    """
+
+    def __init__(self, wasserstein_order=1):
+        # type: (int) -> None
+        self.p = wasserstein_order  # W_p distance order (1 = Earth Mover's)
+
+    @staticmethod
+    def _text_to_distribution(text, min_word_len=4):
+        # type: (str, int) -> dict
+        """Convert text to a normalized word frequency distribution."""
+        stopwords = {"that", "this", "with", "from", "have", "been", "will",
+                     "their", "they", "which", "what", "when", "where", "there",
+                     "would", "could", "should", "about", "into", "than", "then",
+                     "also", "some", "more", "most", "only", "just", "very"}
+        words = [
+            w.lower().strip(".,;:()[]'\"!?-")
+            for w in text.split()
+        ]
+        words = [w for w in words if len(w) >= min_word_len and w not in stopwords]
+        if not words:
+            return {}
+        counts = {}
+        for w in words:
+            counts[w] = counts.get(w, 0) + 1
+        total = float(sum(counts.values()))
+        return {w: c / total for w, c in counts.items()}
+
+    def _discrete_wasserstein_1d(self, dist_a, dist_b):
+        # type: (dict, dict) -> float
+        """
+        Compute discrete W_1 (Earth Mover's Distance) between two distributions
+        over a shared vocabulary, using the sorted-CDF method.
+
+        For discrete distributions on a linearly-ordered set, W_1 equals the
+        L1 norm of the difference of cumulative distributions. We order
+        the shared vocabulary alphabetically as a canonical ordering.
+
+        When supports don't overlap, unmatched mass contributes full cost —
+        this is the misspecification-robust property: distant semantic content
+        produces high W, not infinity (as KL would).
+        """
+        all_keys = sorted(set(list(dist_a.keys()) + list(dist_b.keys())))
+        if not all_keys:
+            return 1.0  # no content = maximal distance
+
+        # Build CDFs
+        cdf_a = 0.0
+        cdf_b = 0.0
+        w1 = 0.0
+        for key in all_keys:
+            cdf_a += dist_a.get(key, 0.0)
+            cdf_b += dist_b.get(key, 0.0)
+            w1 += abs(cdf_a - cdf_b)
+
+        # Normalize by vocabulary size to keep score in [0, 1] range
+        n_keys = len(all_keys)
+        return w1 / n_keys if n_keys > 0 else 1.0
+
+    def score_node_evidence(self, node_text, evidence_text):
+        # type: (str, str) -> dict
+        """
+        Score how well a node's semantic model accommodates new evidence,
+        using MWDE theory for misspecification-robust assessment.
+
+        Returns:
+            dict with:
+                - wasserstein_distance: W_1 between node and evidence distributions
+                - mwde_weight: evidence weight (higher = more compatible)
+                - misspecification_flag: True if distance suggests model inadequacy
+                - asymptotic_variance_proxy: proxy for the MWDE asymptotic variance
+                  (larger support overlap = tighter inference)
+        """
+        dist_node = self._text_to_distribution(node_text)
+        dist_evidence = self._text_to_distribution(evidence_text)
+
+        if not dist_node or not dist_evidence:
+            return {
+                "wasserstein_distance": 1.0,
+                "mwde_weight": 0.0,
+                "misspecification_flag": True,
+                "asymptotic_variance_proxy": float('inf'),
+                "support_overlap": 0.0,
+            }
+
+        w_dist = self._discrete_wasserstein_1d(dist_node, dist_evidence)
+
+        # Support overlap — proxy for sample size in the MWDE convergence rate
+        support_a = set(dist_node.keys())
+        support_b = set(dist_evidence.keys())
+        overlap = len(support_a & support_b)
+        union = len(support_a | support_b)
+        support_ratio = overlap / union if union > 0 else 0.0
+
+        # MWDE weight: transform distance to a compatibility score
+        # Using exp(-w/scale) which is the natural kernel for W_1 distances
+        # Scale parameter controls sensitivity — calibrated so W=0.5 gives ~0.37 weight
+        scale = 0.5
+        mwde_weight = math.exp(-w_dist / scale)
+
+        # Asymptotic variance proxy: V ~ W^2 / n_overlap
+        # When support overlap is small, variance is large (less reliable inference)
+        # This follows from the MWDE asymptotic normality: sqrt(n)(theta_hat - theta*) -> N(0, V)
+        if overlap > 0:
+            avar_proxy = (w_dist ** 2) / overlap
+        else:
+            avar_proxy = float('inf')
+
+        # Misspecification detection: high distance + low support overlap
+        # means the node's model family likely doesn't contain the truth
+        misspec_threshold = 0.7
+        misspec = w_dist > misspec_threshold and support_ratio < 0.3
+
+        return {
+            "wasserstein_distance": round(w_dist, 4),
+            "mwde_weight": round(mwde_weight, 4),
+            "misspecification_flag": misspec,
+            "asymptotic_variance_proxy": round(avar_proxy, 6) if avar_proxy != float('inf') else float('inf'),
+            "support_overlap": round(support_ratio, 4),
+        }
+
+    def rank_nodes_by_evidence(self, nodes, evidence_text):
+        # type: (list, str) -> list
+        """
+        Rank nodes by MWDE-weighted compatibility with evidence.
+        Returns list of (node, mwde_score_dict) tuples, sorted by mwde_weight descending.
+
+        This implements the misspecification-robust ranking: nodes whose semantic
+        model is a poor fit for the evidence get low weight rather than being
+        excluded entirely (graceful degradation, not hard cutoff).
+        """
+        scored = []
+        for node in nodes:
+            node_text = " ".join(filter(None, [
+                node.get("compress", ""),
+                node.get("summary", ""),
+                " ".join(node.get("invariants", [])),
+                " ".join(node.get("tags", [])),
+            ]))
+            mwde = self.score_node_evidence(node_text, evidence_text)
+            scored.append((node, mwde))
+
+        scored.sort(key=lambda x: x[1]["mwde_weight"], reverse=True)
+        return scored
+
+    def aggregate_evidence_weights(self, mwde_scores):
+        # type: (list) -> dict
+        """
+        Aggregate MWDE scores across multiple nodes to produce a consolidated
+        evidence quality assessment.
+
+        Uses inverse-variance weighting from the MWDE asymptotic normality result:
+        the optimal combination weights each node's evidence by 1/V_i where V_i
+        is the asymptotic variance proxy for that node.
+        """
+        if not mwde_scores:
+            return {"aggregate_weight": 0.0, "n_misspecified": 0, "n_scored": 0}
+
+        total_weight = 0.0
+        inv_var_sum = 0.0
+        n_misspec = 0
+        n_finite = 0
+
+        for s in mwde_scores:
+            total_weight += s["mwde_weight"]
+            if s["misspecification_flag"]:
+                n_misspec += 1
+            avar = s["asymptotic_variance_proxy"]
+            if avar != float('inf') and avar > 0:
+                inv_var_sum += 1.0 / avar
+                n_finite += 1
+
+        avg_weight = total_weight / len(mwde_scores)
+
+        # Effective sample size from inverse-variance weighting
+        if inv_var_sum > 0 and n_finite > 0:
+            eff_sample_size = inv_var_sum  # sum of precisions
+        else:
+            eff_sample_size = 0.0
+
+        return {
+            "aggregate_weight": round(avg_weight, 4),
+            "effective_sample_size": round(eff_sample_size, 4),
+            "n_misspecified": n_misspec,
+            "n_scored": len(mwde_scores),
+            "misspecification_ratio": round(n_misspec / len(mwde_scores), 3),
+        }
+
+
 class Consolidator:
     def __init__(self, api_key: str):
         self.client    = anthropic.Anthropic(api_key=api_key)
         self.astrocyte = Astrocyte()
         self.escrow    = EscrowLedger()
+        self.mwde      = MWDEScorer(wasserstein_order=1)
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 

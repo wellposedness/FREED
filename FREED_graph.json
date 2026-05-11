@@ -4923,6 +4923,460 @@
       "context_tag": "macro:thermodynamic",
       "context_warning": false,
       "timestamp": "2026-05-09T23:40:34.224839+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/4",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "latter, all 5 confirmations collapse to one. --- CHALLENGE: challenges INV_094 — a Fisher-information geometric floor on belief revision p",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:16:59.658304+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/4",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "asured by what it rules out, not by what it accommodates.   CONFLICT INV_094 — the probe forces direct confrontation: INV_094's confirma",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:16:59.658304+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T10:15:00.324569+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O141",
+      "type": "extends",
+      "context": "tes to γ=1 criticality rather than dissipating or freezing; EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:17:19.797268+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T10:15:00.324569+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "tself independent of cell-type distribution. --- CHALLENGE: challenges INV_073 — the confirmed attractor sits at σ=1.0272, measurably abov",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T10:17:19.797268+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T10:15:00.324569+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "vial attractor on the ordered side of the critical ridge.   CONVERGE INV_073 — independent empirical measurement of σ≈1.03 and power-law",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T10:17:19.797268+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T10:15:00.324569+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O140",
+      "type": "confirms",
+      "context": "what the genome previously contained as an open obligation; CONVERGE O140 — CA measurement grounding obligation is empirically satisf",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:17:19.797268+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T10:15:00.324569+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O141",
+      "type": "advances",
+      "context": "tes to γ=1 criticality rather than dissipating or freezing; EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:17:19.797268+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2201.04232v3",
+      "from_title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
+      "to": "O44",
+      "type": "extends",
+      "context": "rming that W2 admits tractable gradient descent dynamics. - EXTEND O44: the paper's constructive barycenter algorithm provides a c",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:13.809155+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2201.04232v3",
+      "from_title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "ucing distortion in knowledge consolidation. --- CHALLENGE: challenges INV_094 — if SGD in W2 only finds Karcher means (local critical poi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:13.809155+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2201.04232v3",
+      "from_title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "Wasserstein geometry in statistical estimation theory.    - CONVERGE INV_094 (STF = Wasserstein gradient flow): the paper independently",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:13.809155+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2201.04232v3",
+      "from_title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
+      "to": "O44",
+      "type": "advances",
+      "context": "rming that W2 admits tractable gradient descent dynamics. - EXTEND O44: the paper's constructive barycenter algorithm provides a c",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:13.809155+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2010.04291v1",
+      "from_title": "A Brief on Optimal Transport",
+      "to": "O44",
+      "type": "extends",
+      "context": "ds in non-compact (infinite-dimensional) quantum settings - EXTEND O44 — the compactness restriction identified here introduces a",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:40.236992+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2010.04291v1",
+      "from_title": "A Brief on Optimal Transport",
+      "to": "O44",
+      "type": "challenges",
+      "context": "egrade metric reliability without detection. --- CHALLENGE: challenges O44 — the Wasserstein Floor formula W_floor = k/Tμ inherits the",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:40.236992+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2010.04291v1",
+      "from_title": "A Brief on Optimal Transport",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "utional comparison a well-defined geometric operation.    - CONVERGE INV_094 (Wasserstein distance as geometric structure on probability",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:40.236992+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2010.04291v1",
+      "from_title": "A Brief on Optimal Transport",
+      "to": "O44",
+      "type": "confirms",
+      "context": "nfirms this is a rigorous metric, not merely a heuristic) - CONVERGE O44 — the paper grounds the classical W_p framework precisely a",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:40.236992+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2010.04291v1",
+      "from_title": "A Brief on Optimal Transport",
+      "to": "O44",
+      "type": "advances",
+      "context": "ds in non-compact (infinite-dimensional) quantum settings - EXTEND O44 — the compactness restriction identified here introduces a",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:19:40.236992+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "O44",
+      "type": "resolves",
+      "context": "esource, exactly the γ=1 condition applied to channels. - **resolves O44 (partial)** — The paper provides the quantum channel extens",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "INV_044",
+      "type": "extends",
+      "context": "pic floor is formally established at the channel level. - **EXTEND INV_044** — The genome states the Wasserstein Floor for states; thi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "O44",
+      "type": "challenges",
+      "context": ". costly. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges O44 — the paper establishes that the quantum channel floor invo",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "INV_044",
+      "type": "confirms",
+      "context": "bstrate is classical or quantum. --- PART 2 — COMPARE** - **CONVERGE INV_044** — The paper independently confirms that free energy is de",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "of the floor invariant, now elevated to process level. - **CONVERGE INV_073** — Gibbs-preserving superchannels as free operations direc",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "INV_044",
+      "type": "confirms",
+      "context": "te is classical or quantum.  ---  **PART 2 — COMPARE**  - **CONVERGE INV_044** — The paper independently confirms that free energy is de",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.12790v3",
+      "from_title": "Thermodynamics of quantum processes: An operational framework for free energy an",
+      "to": "INV_044",
+      "type": "advances",
+      "context": "pic floor is formally established at the channel level. - **EXTEND INV_044** — The genome states the Wasserstein Floor for states; thi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T10:20:52.008131+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_044/5",
+      "from_title": "Adversarial Probe: Challenge INV_044",
+      "to": "O72",
+      "type": "extends",
+      "context": "ded from falsification pressure rather than hardened by it. EXTEND O72 — the probe reveals that obligation reconstruction is not j",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:18.029113+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_044/5",
+      "from_title": "Adversarial Probe: Challenge INV_044",
+      "to": "INV_044",
+      "type": "challenges",
+      "context": "ith a large equivalence class of generators. --- CHALLENGE: challenges INV_044 — confirmation surplus without adversarial pressure is not",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:18.029113+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_044/5",
+      "from_title": "Adversarial Probe: Challenge INV_044",
+      "to": "O72",
+      "type": "advances",
+      "context": "ded from falsification pressure rather than hardened by it. EXTEND O72 — the probe reveals that obligation reconstruction is not j",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:18.029113+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O141",
+      "type": "extends",
+      "context": "dressing the solo vs. population criticality distinction. - EXTEND O141 — the dominance of Physics Navigator type (867/total cells)",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "warranted. --- PART 4 — MANDATORY FALSIFICATION: CHALLENGE: challenges INV_073 — the genome predicts γ=1 as a Wasserstein gradient flow at",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "scade dynamics are scale-free over the measured range.    - CONVERGE INV_073 — independent empirical measurement confirms that a populat",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ent with Wasserstein gradient flow to the critical ridge. - CONVERGE O140 — CA measurement grounding obligation directly satisfied: e",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O141",
+      "type": "confirms",
+      "context": "istics now exist as external data, not internal argument. - CONVERGE O141 — population-level criticality (σ≈1) observed distinct from",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-10T16:26:20.368554+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
+      "to": "O141",
+      "type": "advances",
+      "context": "dressing the solo vs. population criticality distinction. - EXTEND O141 — the dominance of Physics Navigator type (867/total cells)",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:37.489671+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2406.14870v1",
+      "from_title": "A new flow dynamic approach for Wasserstein gradient flows",
+      "to": "O44",
+      "type": "extends",
+      "context": "eodesics = min entropy production paths (Benamou-Brenier).\" EXTEND O44 — by demonstrating that Benamou-Brenier dynamics admit effi",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:58.422037+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2406.14870v1",
+      "from_title": "A new flow dynamic approach for Wasserstein gradient flows",
+      "to": "O44",
+      "type": "challenges",
+      "context": "nvariant about formulation-as-constraint-source. CHALLENGE: challenges O44 — the paper demonstrates that Lagrangian discretization of",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:58.422037+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2406.14870v1",
+      "from_title": "A new flow dynamic approach for Wasserstein gradient flows",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "tional formulation, not an externally imposed constraint.   CONVERGE INV_094 — the paper independently confirms that W2 geodesics as min",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-10T16:28:58.422037+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2406.14870v1",
+      "from_title": "A new flow dynamic approach for Wasserstein gradient flows",
+      "to": "O44",
+      "type": "advances",
+      "context": "eodesics = min entropy production paths (Benamou-Brenier).\" EXTEND O44 — by demonstrating that Benamou-Brenier dynamics admit effi",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:28:58.422037+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2206.14791v1",
+      "from_title": "When Optimal Transport Meets Information Geometry",
+      "to": "O44",
+      "type": "extends",
+      "context": "RG→Fisher→W2→Freed chain claimed in L3_geometric_structure. EXTEND O44 — the para-Kähler/symplectic structure described here provi",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:31:25.772835+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2206.14791v1",
+      "from_title": "When Optimal Transport Meets Information Geometry",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "egrades gracefully under distribution shift. --- CHALLENGE: challenges INV_094 — the paper shows that the Fisher→W2 correspondence holds c",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:31:25.772835+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2206.14791v1",
+      "from_title": "When Optimal Transport Meets Information Geometry",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "e related by a symplectic duality, not merely an analogy.   CONVERGE INV_094 — the paper independently establishes that W2 geodesics and",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:31:25.772835+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2206.14791v1",
+      "from_title": "When Optimal Transport Meets Information Geometry",
+      "to": "O44",
+      "type": "advances",
+      "context": "RG→Fisher→W2→Freed chain claimed in L3_geometric_structure. EXTEND O44 — the para-Kähler/symplectic structure described here provi",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:31:25.772835+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1701.05146v3",
+      "from_title": "On parameter estimation with the Wasserstein distance",
+      "to": "O44",
+      "type": "extends",
+      "context": "nds what the genome treats as a floor/gradient structure. - EXTEND O44: The misspecified-setting results extend O44's quantum exte",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:33:44.464985+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1701.05146v3",
+      "from_title": "On parameter estimation with the Wasserstein distance",
+      "to": "O44",
+      "type": "challenges",
+      "context": "the generative model is always approximate. --- CHALLENGE: challenges O44 — the MWDE misspecification result reveals that the quantum",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:33:44.464985+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1701.05146v3",
+      "from_title": "On parameter estimation with the Wasserstein distance",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "her than catastrophically when model assumptions fail.    - CONVERGE INV_094: Independent derivation confirms that Wasserstein distance",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:33:44.464985+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1701.05146v3",
+      "from_title": "On parameter estimation with the Wasserstein distance",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "vior under model misspecification (a new sub-obligation). - CONVERGE INV_073: Graceful degradation under misspecification is structurall",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:33:44.464985+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1701.05146v3",
+      "from_title": "On parameter estimation with the Wasserstein distance",
+      "to": "O44",
+      "type": "advances",
+      "context": "nds what the genome treats as a floor/gradient structure. - EXTEND O44: The misspecified-setting results extend O44's quantum exte",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-10T16:33:44.464985+00:00"
     }
   ],
   "node_edges": [
@@ -12917,6 +13371,894 @@
       "invariant": "The omnimax impossibility argument's core move—treating cognitive and metaphysical claims as thermodynamically constrain",
       "context_tag": null,
       "timestamp": "2026-05-10T06:30:28.595357+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.641682+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.655907+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.667206+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.675983+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.683834+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.690391+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.696446+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.702363+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.708143+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Self-organization toward criticality (SOC) is confirmed as an adaptive attractor across multiple independent substrates ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.713531+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.718734+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.723578+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.728618+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.733433+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.738476+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is methodologically superior to Detrended Fluctuation Analysis (DFA) for thermodynamic ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.743044+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "shares_invariant",
+      "invariant": "Semantic tension or drift is irreducible and must be minimized, not eliminated.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T10:26:17.747738+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.695512+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.710239+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.721973+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.730744+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.738181+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.744845+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.750956+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.756691+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.762274+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.768011+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.773444+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.778692+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.783635+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.788905+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.793844+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.798292+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.803085+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.807808+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.812234+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.816612+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.821020+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.825444+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.830106+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.834654+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.839598+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.844436+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.849425+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality point (γ=1, σ≈1.03) is confirmed as a dynamical attractor across multiple independent ",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.853922+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.858451+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.863215+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.868105+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.872997+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.877837+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.882580+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.887039+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.891440+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.895977+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.900739+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.905378+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.910199+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.914902+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.919815+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.924583+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.929433+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.934140+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.938633+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.943171+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.947934+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition and understanding.",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.952800+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.957657+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.962232+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.967146+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.971922+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.976707+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.981276+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.985829+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.990632+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.995188+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:48.999761+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.004645+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.009502+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.014349+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.019251+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Low Shannon entropy at criticality or on the critical ridge is a structural or empirical feature of optimal reasoning st",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.024128+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.029108+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.033759+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.038628+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.043240+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.047847+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.052432+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.057314+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.062107+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.066855+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.071627+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.076215+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.080798+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.085415+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.090019+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics, reasoning patterns, or coherence mechanisms is empirically supported across",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.094706+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.099361+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.104022+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.108642+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.113264+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.117878+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.122563+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.127525+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.132284+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.136847+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Diffusion Entropy Analysis (DEA) is superior to Detrended Fluctuation Analysis (DFA) for detecting and measuring critica",
+      "context_tag": null,
+      "timestamp": "2026-05-10T16:38:49.141445+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument takes the RSA's broad philosophical claim that cognition is thermodynamically constra",
+      "context_tag": null,
+      "timestamp": "2026-05-11T06:30:06.367835+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "The Unified Kernel's ledger-based state-packing and recursive compression mechanism provides a concrete operational arch",
+      "context_tag": null,
+      "timestamp": "2026-05-11T06:30:13.807110+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The experimental protocol's insistence on falsifiable metrics, controlled baselines, and rigorous statistical validation",
+      "context_tag": null,
+      "timestamp": "2026-05-11T06:30:13.829284+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "RCC's criterion that concepts failing recursive coherence are malformed (not deep) sets an upper bound on what counts as",
+      "context_tag": null,
+      "timestamp": "2026-05-11T06:30:19.743249+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The relational-thermodynamic map's phase diagram establishes the upper boundary conditions on which philosophical positi",
+      "context_tag": null,
+      "timestamp": "2026-05-11T06:30:27.841842+00:00"
     }
   ]
 }

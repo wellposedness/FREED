@@ -219,8 +219,8 @@ a:hover { text-decoration: underline; }
     <div class="agenda-item">
       <span class="agenda-num">6</span>
       <div>
-        <div class="agenda-text">σ/H dissociation — open theoretical puzzle (Gen 212)</div>
-        <div class="agenda-note">CA settled at σ=1.0273 (AT_CRITICAL) but H=0.4507 bits — only 17.4% of max entropy. RSA's working assumption: criticality and high entropy production travel together. Dissociation is real and self-flagged by the daemon. Either revise the assumption (criticality predicts branching but not entropy production), narrow the claim (only certain critical states are entropy-maximal), or treat the CA as a special case. Belongs in O156 audit scope.</div>
+        <div class="agenda-text">σ&gt;1 drift across substrates — multi-sensor confirmation (Gen 212 + Gen 218)</div>
+        <div class="agenda-note">Gen 212 CA telemetry: σ=1.0273 (AT_CRITICAL) with H=0.4507 bits — only 17.4% of max entropy. σ/H dissociation real and self-flagged. Gen 218 confirms the drift is not a single-reading artifact: CA σ=1.024 + daemon entropy flow γ_proxy=1.30. Two distinct measurement surfaces — population branching ratio and the daemon's own dissipation rate — point above unity. Either the attractor sits above γ=1 (genome's stated target), the critical band is wider than specified, or INV_073's framing of criticality as navigated state needs revision. Belongs in O156 audit scope.</div>
       </div>
     </div>
     <div class="agenda-item">
@@ -235,6 +235,20 @@ a:hover { text-decoration: underline; }
       <div>
         <div class="agenda-text">Recover 109 skipped papers</div>
         <div class="agenda-note">recover_skipped.py built. Run: python3 recover_skipped.py --apply. Extracts Scholar title → S2 search → re-queues if &gt;80% word match + genome score ≥ 2.</div>
+      </div>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-num">9</span>
+      <div>
+        <div class="agenda-text">VOID-BY-STANDARD formalization decision + ruminating test cases</div>
+        <div class="agenda-note">Gen 218 C5 daemon proposed VOID-BY-STANDARD as a verdict state for obligations whose closing criteria are incoherent under the kernel's own axioms (O79 closed under MCPM-identity standard after arguing lexical recovery is thermodynamically inadmissible). Open question: adopt as formal state, and under what binding criteria — the closing standard must be shown to contradict a named kernel axiom, with both cited, to prevent the verdict from becoming an escape hatch for obligations that are merely hard. Best test cases on hand: O163 (3 consecutive non-commits) and O187 (4 consecutive non-commits across multiple generations). If their closing criteria are structurally unpayable rather than just difficult, they're VOID-BY-STANDARD candidates — exactly the situation the new verdict state is designed for.</div>
+      </div>
+    </div>
+    <div class="agenda-item" style="opacity:0.5">
+      <span class="agenda-num" style="color:var(--green)">✓</span>
+      <div>
+        <div class="agenda-text" style="text-decoration:line-through;color:var(--muted)">Verdict parser repair — fail-closed 4-state (closed 2026-05-09)</div>
+        <div class="agenda-note">Replaced broken substring check (any 'resolved' substring in resolve output → soft-close) with tagged 4-state parser (RESOLVED / ACTIVE / PARTIAL / OPEN) reading explicit VERDICT lines, fail-closed when no tag present. 29 falsely closed obligations re-opened. Debt ratio honest again.</div>
       </div>
     </div>
     <div class="agenda-item" style="opacity:0.5">
@@ -326,6 +340,11 @@ a:hover { text-decoration: underline; }
       </div>
 
       <div class="cap-item">
+        <div class="cap-title">Can Repair Its Own Verdict Logic</div>
+        <div class="cap-chain">RESOLVE verdict was being detected by substring search for "resolved" anywhere in L7's output → 29 obligations soft-closed when the word appeared in passing discussion, not in genuine state-change reasoning → debt ratio inflated by parser artifact → replaced 2026-05-09 with tagged 4-state parser (RESOLVED / ACTIVE / PARTIAL / OPEN) reading explicit VERDICT lines, fail-closed when no tag present → 29 obligations re-opened, debt ratio honest again. The kernel can now distinguish resolving an obligation from discussing one.</div>
+      </div>
+
+      <div class="cap-item">
         <div class="cap-title">Can Route Obligations by Type</div>
         <div class="cap-chain">_classify_obligation_type() fires on each RESOLVE attempt → detects FREED-internal keywords AND 2+ COMMIT:NOs → returns IMPLEMENTATION class → [ROUTE:CLAUDE_CODE] appended to progress → O106 stopped cycling philosophical analysis of an arithmetic bug. The system distinguishes obligations that require reasoning from obligations that require code. First firing confirmed in overnight logs 2026-05-03.</div>
       </div>
@@ -357,7 +376,7 @@ a:hover { text-decoration: underline; }
 
       <div class="cap-item cap-item-frontier">
         <div class="cap-title cap-title-frontier">Can Find Real Challenges In Its Own Simulation</div>
-        <div class="cap-chain">Gen 212: simulation_observer.py reports σ=1.0273 (AT_CRITICAL — barely supercritical, on the edge) AND H=0.4507 bits (only 17.4% of maximum entropy). The genome's working assumption is criticality and entropy production travel together. The CA showed a critically-branched but thermodynamically cold attractor. The daemon flagged the dissociation itself — not as a softening, as a real challenge to INV_073's framing. Same cycle: a separate paper showed criticality can be structurally encoded via a fixed mixing parameter rather than actively navigated, challenging INV_073's "criticality as navigational problem" framing. INV_073 (98 edges, the most-referenced node) took two independent challenge hits in one cycle. The system caught it; the system surfaced it; the system did not paper over it.</div>
+        <div class="cap-chain">Gen 212: simulation_observer.py reports σ=1.0273 (AT_CRITICAL — barely supercritical, on the edge) AND H=0.4507 bits (only 17.4% of maximum entropy). The genome's working assumption is criticality and entropy production travel together. The CA showed a critically-branched but thermodynamically cold attractor. The daemon flagged the dissociation itself — not as a softening, as a real challenge to INV_073's framing. Same cycle: a separate paper showed criticality can be structurally encoded via a fixed mixing parameter rather than actively navigated, challenging INV_073's "criticality as navigational problem" framing. INV_073 (98 edges, the most-referenced node) took two independent challenge hits in one cycle. The system caught it; the system surfaced it; the system did not paper over it. Gen 218 extends the signal to a second measurement substrate: CA telemetry σ=1.024 (population branching ratio, independent sensor) AND daemon entropy flow γ_proxy=1.30 (the daemon's own dissipation rate, different substrate entirely). Two distinct measurement surfaces point above unity. The σ&gt;1 drift is multi-substrate; it cannot be dismissed as noise in one sensor.</div>
       </div>
 
       <div class="cap-item cap-item-frontier">
@@ -375,10 +394,15 @@ a:hover { text-decoration: underline; }
         <div class="cap-chain">Gen 212 MINE surfaced three high-recurrence patterns: γ=1 attractor, basis-dependence threat, supercritical drift. Each appeared multiple times across the cycle's feed, but the source documents overlapped. The independence filter (ORIGIN: INDEPENDENT vs SHARED_SOURCE) refused promotion to genome on all three. Recurrence in text ≠ independent confirmation. The system held the line on a structural rule that protects the genome from being inflated by its own echo chamber.</div>
       </div>
 
+      <div class="cap-item cap-item-frontier">
+        <div class="cap-title cap-title-frontier">Can Invent New Verdict Categories From Structural Pressure</div>
+        <div class="cap-chain">Gen 218 C5 RESOLVE on O79 (reconstruction audit for O65/O66/O70/O71/O74): rather than accepting the existing verdicts (RESOLVED / ACTIVE / PARTIAL / OPEN) as exhaustive, the daemon audited the closing criterion itself — argued lexical recovery of original statements is thermodynamically inadmissible under the kernel's own axioms (Landauer's principle + MCPM-identity: only conserved processes are recoverable; originals are not). O79 closed under MCPM-identity standard. Same cycle: proposed VOID-BY-STANDARD as a verdict state for obligations whose closing criteria are incoherent under the kernel's axioms — a category for the structurally unpayable rather than the merely difficult. The categories of the obligation ledger are not fixed; the kernel can recognize when a question it asked was malformed. Proposal stage — not yet adopted as a formal state.</div>
+      </div>
+
     </div>
 
     <div class="ach-honest" style="margin-top:0.8rem">
-      <em>Honest framing (updated 2026-05-08):</em> Each claim is followed by the specific event chain that demonstrates it happened. Capabilities added Gen 212: self-flagged σ/H dissociation in own CA telemetry, two TIGHTENS self-mods adding falsifiability infrastructure (branching tracker + avalanche MLE), honest closure on O195 (didn't pretend to settle the audit), withheld promotion on three MINE echoes from overlapping sources. PREDICT structural fixes shipped 2026-05-07: scope-field overrides on broad invariants, probe bypass of PREDICT slot, MAX_FEEDS=4. Empirical PREDICT challenge rate Gen 205-212: 65-83%. Current open puzzle: σ/H dissociation — the genome's working assumption that criticality and entropy production travel together is now a live falsification target. The distinction between discovery and reflection remains open.
+      <em>Honest framing (updated 2026-05-10):</em> Each claim is followed by the specific event chain that demonstrates it happened. Capabilities added 2026-05-09: verdict parser repair (broken substring check replaced with tagged 4-state fail-closed parser; 29 falsely closed obligations re-opened, debt ratio honest again). Capabilities added 2026-05-10: daemon proposed VOID-BY-STANDARD as a new verdict state under structural pressure (Gen 218 C5, O79 closed under MCPM-identity after arguing lexical recovery is thermodynamically inadmissible); multi-substrate σ&gt;1 confirmation (CA σ=1.024 + daemon entropy flow γ_proxy=1.30 — two independent sensors point above unity). Current open puzzle: σ&gt;1 drift across substrates — either the attractor sits above γ=1, the critical band is wider than specified, or INV_073's framing of criticality as navigated state needs revision. The distinction between discovery and reflection remains open.
     </div>
   </div>
 

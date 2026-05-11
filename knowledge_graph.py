@@ -2023,6 +2023,418 @@ def node_distribution_from_edges(node_id, edges, all_node_ids):
         return [1.0 / n] * n
 
 
+# ─── Channel-Level Divergence Scorer (Process Free Energy) ───────────────────
+# Computes D(channel ‖ thermal_baseline) — the quantum relative entropy between
+# a knowledge-graph update channel (represented as a transition matrix) and an
+# "absolutely thermal" baseline channel whose fixed output is the equilibrium
+# (uniform or Gibbs) distribution.  This is the process-level analog of state
+# free energy: it quantifies how far each graph update operation is from
+# thermodynamic reversibility.
+#
+# Following the paper's axiomatics:
+#   - A quantum channel Φ is a CPTP map; here we approximate with a classical
+#     stochastic transition matrix T (column-stochastic or row-stochastic).
+#   - The absolutely thermal channel Φ_β has a fixed output: every input maps
+#     to the thermal (Gibbs) state π_β.  For a graph with n nodes and uniform
+#     Hamiltonian (fully degenerate), π_β = (1/n, ..., 1/n).
+#   - The channel divergence D(Φ ‖ Φ_β) is computed as the average KL
+#     divergence of the channel's output distributions from the thermal output,
+#     weighted by the input distribution (taken as uniform over active nodes
+#     when not specified):
+#
+#       D(T ‖ T_β) = Σ_i p(i) · D_KL( T(·|i) ‖ π_β )
+#
+#     where T(·|i) is the i-th column (output distribution given input i)
+#     and π_β is the thermal baseline output.
+#
+# Interpretation:
+#   D ≈ 0  →  channel is thermodynamically cheap (output ≈ thermal noise,
+#              update is reversible / information-destroying)
+#   D >> 0 →  channel is thermodynamically costly (output is far from
+#              equilibrium, update creates/preserves structure irreversibly)
+#
+# This enables FREED to distinguish:
+#   - Cheap updates: edge additions that merely redistribute existing weight
+#     (low divergence, near-thermal transition structure)
+#   - Costly updates: edge additions that create new structure or concentrate
+#     probability on specific nodes (high divergence, far-from-equilibrium)
+#
+# CHALLENGE (O44): The paper's "golden units" are unitary channels measured
+# against the absolutely thermal channel with fully degenerate output
+# Hamiltonian.  The classical transition-matrix approximation used here
+# loses unitarity structure — the non-commutative (quantum) channel
+# divergence D(Φ ‖ Φ_β) = S(Φ_β) - S(Φ) + Tr[Φ(·) log Φ_β(·)] requires
+# density-operator-level computation not yet implemented.  The classical
+# version provides an upper bound via the data-processing inequality.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _build_transition_matrix_from_edges(edges, all_node_ids):
+    # type: (list, List[str]) -> List[List[float]]
+    """
+    Build a row-stochastic transition matrix from knowledge graph edges.
+
+    Entry T[i][j] = P(transition to j | currently at i), estimated from
+    edge counts between nodes.  Uses Laplace smoothing to ensure strict
+    positivity (required for finite KL divergence).
+
+    Parameters
+    ----------
+    edges : list of dict
+        Graph edges (each with 'from' and 'to' fields).
+    all_node_ids : list of str
+        Ordered list of all node IDs (defines matrix indices).
+
+    Returns
+    -------
+    list of list of float
+        n×n row-stochastic transition matrix.
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return []
+
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+    alpha = 0.01  # Laplace smoothing
+
+    # Initialize with smoothing
+    T = [[alpha] * n for _ in range(n)]
+
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None and j is not None:
+            T[i][j] += 1.0
+        # Also count reverse direction for undirected interpretation
+        if j is not None and i is not None and i != j:
+            T[j][i] += 1.0
+
+    # Row-normalize to make stochastic
+    for i in range(n):
+        row_sum = sum(T[i])
+        if row_sum > 0:
+            T[i] = [t / row_sum for t in T[i]]
+        else:
+            T[i] = [1.0 / n] * n
+
+    return T
+
+
+def _thermal_baseline_distribution(n, hamiltonian=None, temperature=1.0):
+    # type: (int, Optional[List[float]], float) -> List[float]
+    """
+    Compute the thermal (Gibbs) baseline distribution for n states.
+
+    For fully degenerate Hamiltonian (all energies equal), this is the
+    uniform distribution.  For non-degenerate Hamiltonian, it is the
+    Boltzmann distribution π_i = exp(-E_i / T) / Z.
+
+    Parameters
+    ----------
+    n : int
+        Number of states.
+    hamiltonian : list of float or None
+        Energy levels for each state.  If None, assumes fully degenerate
+        (uniform output).
+    temperature : float
+        Temperature parameter (default 1.0).  Must be > 0.
+
+    Returns
+    -------
+    list of float
+        Thermal baseline distribution (sums to 1.0).
+    """
+    if n == 0:
+        return []
+
+    if hamiltonian is None:
+        return [1.0 / n] * n
+
+    T = max(temperature, 1e-15)
+    boltzmann = [math.exp(-E / T) for E in hamiltonian]
+    Z = sum(boltzmann)
+    if Z <= 0:
+        return [1.0 / n] * n
+    return [b / Z for b in boltzmann]
+
+
+def _kl_divergence(p, q):
+    # type: (List[float], List[float]) -> float
+    """
+    Compute KL divergence D_KL(p ‖ q) = Σ_i p_i * log(p_i / q_i).
+
+    Both p and q must be strictly positive probability vectors of the
+    same length.  Uses natural logarithm (nats).
+
+    Parameters
+    ----------
+    p : list of float
+        Distribution p (must be strictly positive, sum to ~1).
+    q : list of float
+        Reference distribution q (must be strictly positive, sum to ~1).
+
+    Returns
+    -------
+    float
+        KL divergence in nats (non-negative).  Returns 0.0 for empty inputs.
+    """
+    n = len(p)
+    if n == 0 or n != len(q):
+        return 0.0
+
+    kl = 0.0
+    for i in range(n):
+        pi = max(p[i], 1e-15)
+        qi = max(q[i], 1e-15)
+        kl += pi * math.log(pi / qi)
+    return max(0.0, kl)
+
+
+def channel_divergence_from_thermal(transition_matrix, thermal_baseline=None,
+                                     input_distribution=None,
+                                     hamiltonian=None, temperature=1.0):
+    # type: (List[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], float) -> dict
+    """
+    Compute the channel-level divergence D(channel ‖ thermal_baseline) as
+    a process-free-energy estimate.
+
+    The divergence measures how far the channel's transition structure is
+    from the absolutely thermal channel (whose every output is the Gibbs
+    equilibrium distribution).  This is the operational free energy of the
+    channel: the amount of "thermodynamic work" the graph update represents.
+
+    D(T ‖ T_β) = Σ_i p(i) · D_KL( T(·|i) ‖ π_β )
+
+    where T(·|i) is the i-th row of the transition matrix (output distribution
+    given input state i), p(i) is the input distribution, and π_β is the
+    thermal baseline.
+
+    Parameters
+    ----------
+    transition_matrix : list of list of float
+        n×n row-stochastic transition matrix representing the channel.
+    thermal_baseline : list of float or None
+        The thermal (Gibbs) output distribution π_β.  If None, computed
+        from the hamiltonian parameter (or uniform if hamiltonian is also None).
+    input_distribution : list of float or None
+        Distribution over input states p(i).  If None, uses uniform.
+    hamiltonian : list of float or None
+        Energy levels for thermal baseline computation (default: degenerate).
+    temperature : float
+        Temperature for Gibbs distribution (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "channel_divergence": float — D(T ‖ T_β) in nats,
+            "per_input_divergence": list of float — D_KL(T(·|i) ‖ π_β) for each i,
+            "max_input_divergence": float — max over inputs (worst-case cost),
+            "min_input_divergence": float — min over inputs (best-case cost),
+            "thermal_baseline": list of float — π_β used,
+            "input_distribution": list of float — p(i) used,
+            "n_states": int,
+            "is_near_thermal": bool — True if divergence < 0.01 nats,
+            "is_far_from_thermal": bool — True if divergence > 1.0 nats,
+            "thermodynamic_cost_label": str — "reversible", "cheap",
+                "moderate", "costly", "very_costly",
+            "o44_channel_flag": str — diagnostic for O44 obligation,
+        }
+    """
+    n = len(transition_matrix)
+    if n == 0:
+        return {
+            "channel_divergence": 0.0,
+            "per_input_divergence": [],
+            "max_input_divergence": 0.0,
+            "min_input_divergence": 0.0,
+            "thermal_baseline": [],
+            "input_distribution": [],
+            "n_states": 0,
+            "is_near_thermal": True,
+            "is_far_from_thermal": False,
+            "thermodynamic_cost_label": "reversible",
+            "o44_channel_flag": "empty_channel:trivially_thermal",
+        }
+
+    # Determine thermal baseline
+    if thermal_baseline is None:
+        pi_beta = _thermal_baseline_distribution(n, hamiltonian, temperature)
+    else:
+        pi_beta = list(thermal_baseline)
+
+    # Determine input distribution
+    if input_distribution is None:
+        p_input = [1.0 / n] * n
+    else:
+        p_input = list(input_distribution)
+        total = sum(p_input)
+        if total > 0:
+            p_input = [p / total for p in p_input]
+        else:
+            p_input = [1.0 / n] * n
+
+    # Compute per-input KL divergence: D_KL(T(·|i) ‖ π_β)
+    per_input_div = []  # type: List[float]
+    for i in range(n):
+        row_i = transition_matrix[i]
+        d_kl = _kl_divergence(row_i, pi_beta)
+        per_input_div.append(d_kl)
+
+    # Channel divergence: weighted average over input distribution
+    channel_div = sum(p_input[i] * per_input_div[i] for i in range(n))
+
+    max_div = max(per_input_div) if per_input_div else 0.0
+    min_div = min(per_input_div) if per_input_div else 0.0
+
+    is_near_thermal = channel_div < 0.01
+    is_far = channel_div > 1.0
+
+    # Cost label
+    if channel_div < 0.01:
+        cost_label = "reversible"
+    elif channel_div < 0.1:
+        cost_label = "cheap"
+    elif channel_div < 0.5:
+        cost_label = "moderate"
+    elif channel_div < 2.0:
+        cost_label = "costly"
+    else:
+        cost_label = "very_costly"
+
+    # O44 diagnostic
+    o44_flag = (
+        f"channel_divergence={channel_div:.6f}:cost={cost_label}:"
+        f"classical_upper_bound:quantum_channel_divergence_unresolved"
+    )
+
+    return {
+        "channel_divergence": round(channel_div, 10),
+        "per_input_divergence": [round(d, 10) for d in per_input_div],
+        "max_input_divergence": round(max_div, 10),
+        "min_input_divergence": round(min_div, 10),
+        "thermal_baseline": [round(p, 10) for p in pi_beta],
+        "input_distribution": [round(p, 10) for p in p_input],
+        "n_states": n,
+        "is_near_thermal": is_near_thermal,
+        "is_far_from_thermal": is_far,
+        "thermodynamic_cost_label": cost_label,
+        "o44_channel_flag": o44_flag,
+    }
+
+
+def score_graph_update_channel_cost(edges_before, edges_after, all_node_ids,
+                                     hamiltonian=None, temperature=1.0):
+    # type: (list, list, List[str], Optional[List[float]], float) -> dict
+    """
+    Score the thermodynamic cost of a knowledge-graph update operation by
+    computing the channel divergence from thermal baseline on the transition
+    matrices before and after the update.
+
+    This is the main entry point for process-free-energy estimation: given
+    two edge snapshots (before and after a FEED, CONSOLIDATE, or avalanche
+    cascade), it builds transition matrices for both, computes their
+    divergences from the thermal baseline, and reports the delta as the
+    irreversibility cost of the update.
+
+    Parameters
+    ----------
+    edges_before : list of dict
+        Edge snapshot before the update operation.
+    edges_after : list of dict
+        Edge snapshot after the update operation.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    hamiltonian : list of float or None
+        Energy levels for thermal baseline (default: degenerate/uniform).
+    temperature : float
+        Temperature for Gibbs distribution (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "divergence_before": dict — channel_divergence_from_thermal result
+                for the pre-update transition matrix,
+            "divergence_after": dict — channel_divergence_from_thermal result
+                for the post-update transition matrix,
+            "delta_divergence": float — D_after - D_before (positive = update
+                moved the channel further from equilibrium = irreversible cost),
+            "update_is_irreversible": bool — True if delta > 0.01,
+            "update_is_thermalizing": bool — True if delta < -0.01 (update
+                moved channel toward equilibrium = information-destroying),
+            "process_free_energy_estimate": float — max(0, delta_divergence),
+                the non-negative free energy cost of the update,
+            "cost_label": str — "free", "cheap", "moderate", "costly",
+            "n_edges_added": int — edges_after count - edges_before count,
+            "n_states": int,
+            "o44_process_flag": str — diagnostic for O44,
+        }
+    """
+    n = len(all_node_ids)
+
+    T_before = _build_transition_matrix_from_edges(edges_before, all_node_ids)
+    T_after = _build_transition_matrix_from_edges(edges_after, all_node_ids)
+
+    div_before = channel_divergence_from_thermal(
+        T_before, hamiltonian=hamiltonian, temperature=temperature
+    )
+    div_after = channel_divergence_from_thermal(
+        T_after, hamiltonian=hamiltonian, temperature=temperature
+    )
+
+    d_before = div_before.get("channel_divergence", 0.0)
+    d_after = div_after.get("channel_divergence", 0.0)
+    delta = d_after - d_before
+
+    is_irreversible = delta > 0.01
+    is_thermalizing = delta < -0.01
+    process_fe = max(0.0, delta)
+
+    if process_fe < 0.01:
+        cost_label = "free"
+    elif process_fe < 0.1:
+        cost_label = "cheap"
+    elif process_fe < 0.5:
+        cost_label = "moderate"
+    else:
+        cost_label = "costly"
+
+    n_added = len(edges_after) - len(edges_before)
+
+    o44_flag = (
+        f"process_free_energy={process_fe:.6f}:"
+        f"delta_divergence={delta:.6f}:"
+        f"{'irreversible' if is_irreversible else 'thermalizing' if is_thermalizing else 'neutral'}:"
+        f"classical_channel_approximation"
+    )
+
+    result = {
+        "divergence_before": div_before,
+        "divergence_after": div_after,
+        "delta_divergence": round(delta, 10),
+        "update_is_irreversible": is_irreversible,
+        "update_is_thermalizing": is_thermalizing,
+        "process_free_energy_estimate": round(process_fe, 10),
+        "cost_label": cost_label,
+        "n_edges_added": n_added,
+        "n_states": n,
+        "o44_process_flag": o44_flag,
+    }
+
+    # Log summary
+    print(
+        f"[GRAPH:CHANNEL_DIVERGENCE] Update cost — "
+        f"D_before={d_before:.6f}, D_after={d_after:.6f}, "
+        f"delta={delta:.6f}, process_FE={process_fe:.6f}, "
+        f"cost={cost_label}, edges_added={n_added}"
+    )
+
+    return result
+
+
 # ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
 # Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
 # by counting the number of distinct sub-patterns encountered in a left-to-right
@@ -4442,6 +4854,222 @@ def _l2_distance(f, g):
         return 0.0
     diff = [fi - gi for fi, gi in zip(f, g)]
     return _l2_norm(diff)
+
+
+# ─── Wasserstein Compactness Verification ─────────────────────────────────────
+# The Wasserstein distance W_p metrizes the space of probability measures only
+# on COMPACT domains (Villani, Ch. 6).  For empirical distributions with
+# unbounded support, the optimal coupling existence theorem (Kantorovich) still
+# holds under finite p-th moment conditions, but the metric-space properties
+# (completeness, separability of (P_p(X), W_p)) require compactness or at
+# minimum tight moment bounds.
+#
+# CHALLENGE (O44): The Wasserstein Floor formula W_floor = k/Tμ inherits this
+# compactness requirement.  The quantum extension to infinite-dimensional
+# operator spaces must either restrict to compact state spaces or supply a new
+# existence proof — a condition not currently stated in the obligation.
+#
+# This module checks empirical distributions for support compactness (bounded
+# range) and finite moment conditions before W_p computation, logging warnings
+# when assumptions may be violated and optionally applying moment truncation
+# to enforce effective compactness.
+# ─────────────────────────────────────────────────────────────────────────────
+
+import logging as _logging
+
+_wasserstein_logger = _logging.getLogger("FREED.wasserstein.compactness")
+
+
+def _check_support_compactness(weights, label="distribution",
+                                compact_range_threshold=1e6,
+                                moment_order=2,
+                                moment_threshold=1e12,
+                                truncate_if_noncompact=False,
+                                truncation_quantile=0.995):
+    # type: (List[float], str, float, int, float, bool, float) -> dict
+    """
+    Verify that an empirical distribution's support satisfies the compactness
+    (bounded domain) assumption required for Wasserstein distance to metrize
+    the probability space.
+
+    Checks three conditions:
+      1. Bounded range: max(support) - min(support) < compact_range_threshold
+      2. Finite p-th moment: E[|X|^p] < moment_threshold
+      3. No infinite/NaN values in support
+
+    When violations are detected, logs a warning and optionally applies moment
+    truncation (winsorization at the given quantile) to impose effective
+    compactness.
+
+    Parameters
+    ----------
+    weights : list of float
+        Non-negative weights defining the empirical distribution.
+    label : str
+        Human-readable label for log messages (default "distribution").
+    compact_range_threshold : float
+        Maximum allowed range (max - min) of the support before flagging
+        non-compactness (default 1e6).
+    moment_order : int
+        Order p of the moment to check (default 2, matching W_2).
+    moment_threshold : float
+        Maximum allowed p-th moment before flagging (default 1e12).
+    truncate_if_noncompact : bool
+        If True, apply winsorization to enforce effective compactness
+        when violations are detected (default False).
+    truncation_quantile : float
+        Quantile at which to truncate (default 0.995 = clip at 99.5th
+        percentile from both tails).
+
+    Returns
+    -------
+    dict
+        {
+            "is_compact": bool — True if all compactness conditions met,
+            "support_range": float — max - min of weight values,
+            "moment_p": float — the p-th moment E[|X|^p],
+            "has_infinite": bool — True if any value is inf or nan,
+            "violations": list of str — list of violated conditions,
+            "truncated": bool — True if truncation was applied,
+            "weights_out": list of float — original or truncated weights,
+            "o44_compactness_flag": str — diagnostic tag for O44,
+        }
+    """
+    violations = []  # type: List[str]
+    truncated = False
+    weights_out = list(weights)
+
+    if not weights:
+        return {
+            "is_compact": True,
+            "support_range": 0.0,
+            "moment_p": 0.0,
+            "has_infinite": False,
+            "violations": [],
+            "truncated": False,
+            "weights_out": weights_out,
+            "o44_compactness_flag": "empty_distribution:trivially_compact",
+        }
+
+    # Check for infinite/NaN values
+    has_infinite = any(
+        (not math.isfinite(w)) for w in weights
+    )
+    if has_infinite:
+        violations.append("non_finite_values_in_support")
+        _wasserstein_logger.warning(
+            "[WASSERSTEIN:COMPACTNESS] %s contains inf/NaN values — "
+            "compact-domain assumption VIOLATED. W_p metric properties "
+            "are not guaranteed. (O44: W_floor = k/Tμ inheritance threatened)",
+            label,
+        )
+
+    # Filter to finite values for further checks
+    finite_weights = [w for w in weights if math.isfinite(w)]
+    if not finite_weights:
+        return {
+            "is_compact": False,
+            "support_range": float('inf'),
+            "moment_p": float('inf'),
+            "has_infinite": has_infinite,
+            "violations": violations + ["all_values_non_finite"],
+            "truncated": False,
+            "weights_out": weights_out,
+            "o44_compactness_flag": "non_finite:compactness_undefined",
+        }
+
+    # Check bounded range (support compactness)
+    w_min = min(finite_weights)
+    w_max = max(finite_weights)
+    support_range = w_max - w_min
+
+    if support_range > compact_range_threshold:
+        violations.append(
+            f"support_range={support_range:.4g}_exceeds_threshold="
+            f"{compact_range_threshold:.4g}"
+        )
+        _wasserstein_logger.warning(
+            "[WASSERSTEIN:COMPACTNESS] %s support range %.4g exceeds "
+            "compact threshold %.4g — Wasserstein metrization on compact "
+            "domains (Villani Ch. 6) may not apply. (O44: W_floor "
+            "derivation assumes compactness)",
+            label, support_range, compact_range_threshold,
+        )
+
+    # Check p-th moment
+    n_finite = len(finite_weights)
+    total_w = sum(max(0.0, w) for w in finite_weights)
+    if total_w > 0:
+        moment_p = sum(
+            (max(0.0, w) / total_w) * (abs(w) ** moment_order)
+            for w in finite_weights
+        )
+    else:
+        moment_p = 0.0
+
+    if moment_p > moment_threshold:
+        violations.append(
+            f"moment_{moment_order}={moment_p:.4g}_exceeds_threshold="
+            f"{moment_threshold:.4g}"
+        )
+        _wasserstein_logger.warning(
+            "[WASSERSTEIN:COMPACTNESS] %s has %d-th moment %.4g exceeding "
+            "threshold %.4g — finite moment condition for W_%d may be "
+            "marginal. Consider moment truncation. (O44: existence of "
+            "optimal coupling requires finite moments)",
+            label, moment_order, moment_p, moment_threshold, moment_order,
+        )
+
+    # Apply truncation if requested and violations detected
+    if truncate_if_noncompact and violations:
+        sorted_finite = sorted(finite_weights)
+        n_f = len(sorted_finite)
+        lo_idx = int((1.0 - truncation_quantile) * n_f)
+        hi_idx = int(truncation_quantile * n_f) - 1
+        lo_idx = max(0, lo_idx)
+        hi_idx = max(lo_idx, min(hi_idx, n_f - 1))
+        lo_val = sorted_finite[lo_idx]
+        hi_val = sorted_finite[hi_idx]
+
+        weights_out = []
+        for w in weights:
+            if not math.isfinite(w):
+                weights_out.append(hi_val)  # Replace non-finite with upper clip
+            else:
+                weights_out.append(max(lo_val, min(hi_val, w)))
+        truncated = True
+        _wasserstein_logger.info(
+            "[WASSERSTEIN:COMPACTNESS] %s truncated to [%.4g, %.4g] "
+            "(quantile=%.4f) to impose effective compactness",
+            label, lo_val, hi_val, truncation_quantile,
+        )
+
+    is_compact = len(violations) == 0
+
+    # O44 diagnostic tag
+    if is_compact:
+        o44_flag = "compact_support:wfloor_valid"
+    elif truncated:
+        o44_flag = (
+            f"non_compact:truncated_to_effective_compact:"
+            f"violations={len(violations)}:wfloor_conditional"
+        )
+    else:
+        o44_flag = (
+            f"non_compact:violations={len(violations)}:"
+            f"wfloor_threatened:quantum_extension_requires_new_proof"
+        )
+
+    return {
+        "is_compact": is_compact,
+        "support_range": support_range,
+        "moment_p": moment_p,
+        "has_infinite": has_infinite,
+        "violations": violations,
+        "truncated": truncated,
+        "weights_out": weights_out,
+        "o44_compactness_flag": o44_flag,
+    }
 
 
 def _mmd_negative_distance_kernel(f_mu, f_nu, n_points=None):

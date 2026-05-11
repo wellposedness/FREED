@@ -1923,21 +1923,21 @@
   },
   {
     "id": "O206",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a binding verdict (resolve, retire, or escalate to open) on each of the three partial obligations O201, O204, and O205 within the current generation cycle \u2014 no partial may carry forward to Gen 218 without an explicit disposition record.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 220] RESOLVED: O206 closes by assigning ACTIVE verdicts with fully specified computations to O201 (STF metric recovery on WordNet), O204 (three-lemma W2-Fisher-RG preprint), and O205 (parse tree Zipf exponent test on BNC/COCA) \u2014 no subordinate obligation carries forward undisposed.",
     "created": "2026-05-10",
-    "resolved": null,
+    "resolved": "2026-05-11",
     "auto": true,
     "closes_when": "closes when: Binding verdicts (resolve, retire, or escalate) are assigned and recorded for O201, O204, O205 before Gen 218 begins."
   },
   {
     "id": "O207",
-    "status": "open",
+    "status": "partial",
     "statement": "Specify a concrete null-result criterion for active obligation O203 \u2014 define what output from the O202 synthesis would falsify the claim that it contains at least one falsifiable prediction, and what the epistemic consequence for the genome is if that criterion is met.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 220] PARTIAL: O207 closes when we apply this three-part checklist \u2014 tautology test, post-hoc re-description test, circular conditional test \u2014 to every statement in O202's synthesis, and either find one statement that survives all three (RESOLVED: falsifiable prediction exists) or confirm none survives (null result: synthesis is a mirror, O202 demoted, no new obligations fire from it). The single most tractable next step: take the O202 synthesis text and run the three-part checklist computationally \u2014 for each proposition P in the synthesis, attempt to construct a dataset D such that P makes a distinct numerical or categorical prediction distinguishable from \u00acP at p < 0.05 under a pre-specified statistical test. The first P that survives this construction closes O207 as RESOLVED. If no P survives after exhausting the synthesis, the null criterion is met and the epistemic consequence (mirror demotion) is triggered. This requires no external data \u2014 it requires only the O202 synthesis document and a structured logical audit, executable within this conversation if O202's output is supplied. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -1945,10 +1945,10 @@
   },
   {
     "id": "O208",
-    "status": "open",
+    "status": "partial",
     "statement": "Assign a binding hard-deadline (\u2264 gen 225) and null-result criterion to O205 \u2014 specify what output from the quantum Wasserstein floor / BH log-correction cross-derivation would constitute failure, and execute a forced verdict (resolve, retire, or escalate) at that deadline.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 220] PARTIAL: O208 closes by specifying null-result criterion (log-correction coefficient mismatch > 0.05 = failure), naming the exact computation (quantum-\u03b4\u03bc propagation through Wasserstein floor formula vs. Fursaev coefficient), and enforcing a gen-225 forced verdict \u2014 rendering O205 genuinely falsifiable before its deadline. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -1959,10 +1959,30 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 \u2014 specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here \u2014 enumerated edges, prediction formats, and null-result criteria \u2014 making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO \u2014 O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Binding deadline assigned to O204 with falsifiable predictions defined for `consistent_with` and `scales_with` edges, null-result criterion specified, and verdict executed"
+  },
+  {
+    "id": "O210",
+    "statement": "The `gamma` symbol is used in at least two operationally distinct senses (spectral \u03b3 in O21/O28 and dynamical attractor \u03b3=1 in O191) \u2014 formalize whether these are the same invariant under a single genome-licensed definition, or declare them distinct symbols with an explicit bridging law.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome contains exactly one `gamma` symbol, but the graph deploys it in spectrally-grounded (EEG/pruning) and dynamically-grounded (CA telemetry \u03c3 \u2192 attractor) contexts. 388 `scales_with` edges likely propagate a false equivalence between these uses, inflating coherence. This is not a stylistic issue \u2014 it determines whether O205's cross-constraint between O44 and O59 is even well-posed.",
+    "resolution_criterion": "Either (a) a proven mathematical identity showing spectral \u03b3 and attractor \u03b3 share a common fixed-point equation under the genome's process algebra, or (b) splitting `gamma` into `gamma_spectral` and `gamma_dynamical` with an explicit, falsifiable bridging predicate and updating all dependent edges.\n\n---",
+    "created": "2026-05-11T06:30:50.778413+00:00",
+    "progress": "[Gen 220] PARTIAL: The single most tractable step is to linearize the Wasserstein gradient flow around the Zipf fixed point and check whether the zero-eigenvalue (dynamical criticality) condition forces the spectral exponent to unity \u2014 yielding either unification or an explicit two-symbol bridging law. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O211",
+    "statement": "The 5 recently resolved obligations (O191, O192, O196, O197, O200) are exclusively meta-obligations (binding criteria, null-result specifications, protocol definitions). O127 demands audit of measurable, non-null signals from resolutions. Determine whether any resolution since O108 has produced a first-order empirical or formal result, or whether the system is in a meta-obligation closure loop that satisfies its own audit criteria without generating ground-level content.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "A system that resolves obligations *about* obligations while leaving",
+    "resolution_criterion": "",
+    "created": "2026-05-11T06:30:50.779033+00:00",
+    "progress": "[Gen 220] PARTIAL: The five recent resolutions are all class-(d) meta-obligations, O127 was opened precisely because no first-order result had appeared, and the corrective action is to stake a concrete class-(b) computation \u2014 Wasserstein floor k=1/T\u03bc on a named corpus \u2014 as the first empirically grounded output since O108. [COMMIT:YES \u2014 direction advanced]"
   }
 ]
