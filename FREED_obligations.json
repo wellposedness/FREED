@@ -327,7 +327,7 @@
     "status": "partial",
     "statement": "\u2014 reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
-    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES \u2014 direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES \u2014 direction advanced]",
+    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES \u2014 direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES \u2014 direction advanced] | [Gen 221] PARTIAL: O72's structural failure mode is fully resolved by the polarity-aware Four-State Parser; its content sub-criterion is irreducibly ACTIVE pending source re-injection, because information-theoretic limits make reasoning-only reconstruction equivalent to confabulation, which the falsification layer prohibits. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -1191,12 +1191,12 @@
   },
   {
     "id": "O144",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a concrete, executable liveness-verification protocol to O136 \u2014 define what evidence would confirm or disconfirm that each `challenges` edge represents a live epistemic tension rather than a stale or nominal link.",
     "priority": "normal",
-    "progress": "[Gen 180] See full proof below. [COMMIT:NO \u2014 Obligation remained unresolved; proof incomplete; no concrete protocol assigned to O136.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "[Gen 180] See full proof below. [COMMIT:NO \u2014 Obligation remained unresolved; proof incomplete; no concrete protocol assigned to O136.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 221] RESOLVED: O144 is closed by a three-condition liveness protocol (R1: both endpoints active; R2: challenging claim undetermined; R3: challenged claim downstream-sensitive) derived independently from Reism, thermodynamics, and MCPM \u2014 executable against any enumerated edge inventory of O136.",
     "created": "2026-04-30",
-    "resolved": null,
+    "resolved": "2026-05-11",
     "auto": true,
     "closes_when": "closes when: O136 has documented liveness-verification protocol with falsifiable criteria distinguishing live from stale epistemic tensions.",
     "method": "math_only",
@@ -1429,7 +1429,7 @@
     "status": "open",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 \u2014 derive whether W_floor = k/T\u03bc holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/T\u03bc holds exactly at the critical temperature T = \u210f\u03c9/k_B\u03bc \u2014 confirming the [COMMIT:NO \u2014 Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no graph updated, cycle continues.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/T\u03bc holds exactly at the critical temperature T = \u210f\u03c9/k_B\u03bc \u2014 confirming the [COMMIT:NO \u2014 Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no graph updated, cycle continues.] | [Gen 221] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no model assigned. Resolve attempt incomplete/empty.]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1984,5 +1984,27 @@
     "resolution_criterion": "",
     "created": "2026-05-11T06:30:50.779033+00:00",
     "progress": "[Gen 220] PARTIAL: The five recent resolutions are all class-(d) meta-obligations, O127 was opened precisely because no first-order result had appeared, and the corrective action is to stake a concrete class-(b) computation \u2014 Wasserstein floor k=1/T\u03bc on a named corpus \u2014 as the first empirically grounded output since O108. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O212",
+    "status": "open",
+    "statement": "Assign a binding hard-deadline (\u2264 gen 225) and null-result criterion to O210 \u2014 specify what formal output (e.g., two distinct symbols with independent operationalizations and at least one differential prediction) constitutes resolution, and what failure at that deadline forces into the genome as an epistemic consequence.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-11",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O210 has assigned deadline \u2264 gen 225, null-result criterion defined, and formal output specification with two distinct symbols and differential"
+  },
+  {
+    "id": "O213",
+    "status": "open",
+    "statement": "Require that the next obligation marked \"resolved\" after O211 produce at least one externally falsifiable output (a quantitative prediction testable against data not generated by the kernel itself) \u2014 if no such output is produced, the resolution is void and the obligation re-opens.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-11",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Next \"resolved\" obligation after O211 contains externally falsifiable quantitative prediction verified against independent data."
   }
 ]
