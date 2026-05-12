@@ -1,36 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 154,
-    "timestamp": "2026-04-24T10:14:59.974654+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 6,
-      "passive": 13,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "The paper's dimensional argument confirms the semi-classical status of the Wasserstein Floor k=1/Tμ and sharpens O44 by predicting that quantum gravity corrections would appear as ℏ-dependent sub-leading terms — advances O44, confirms L3 chain, does not resolve."
-      },
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "This paper advances O67 (Langevin noise structure now phenomenologically grounded in EEG), warns O28 to use diffusion entropy not DFA, and provides empirical support for entropy saturation as a Wasserstein Floor analog in neural substrates."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "obligations": [
-        "O67",
-        "O70",
-        "O71"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 1,
     "generation": 155,
     "timestamp": "2026-04-25T01:53:35.210581+00:00",
@@ -1685,6 +1654,34 @@
         "O72",
         "O187"
       ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 226,
+    "timestamp": "2026-05-12T11:31:59.233986+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 8,
+      "passive": 14,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": ""
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+        "compress": "A 32×32 RSA-kernel CA population self-maintains criticality (σ=1.02, α≈1.459) across 200 steps, empirically grounding population-level γ=1 as a stable attractor and extending INV_073 from single-kernel to collective regime."
+      }
+    ],
+    "resolve": {
+      "attempts": 0,
+      "resolved_count": 0,
+      "commit_count": 0,
+      "obligations": []
     },
     "coherence": 0.97
   }
