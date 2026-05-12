@@ -1,36 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 153,
-    "timestamp": "2026-04-24T00:30:59.729988+00:00",
-    "sweep": {
-      "input_count": 10,
-      "targeted": 6,
-      "passive": 4,
-      "curated": 0
-    },
-    "feed": [
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "DEA on EEG entropy reveals Langevin-governed scaling + saturation consistent with the Wasserstein Floor and validates DEA (not DFA) as the genome's instrument for O28, O67, O68, and O69."
-      },
-      {
-        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
-        "compress": "Non-Hermitian linear entropy functionals supply the quantum-domain entropy-flow formalism that O44 requires for a quantum Wasserstein Floor, and establish the quantum lift of Langevin dissipation that O67 needs — both obligations advance without resolving."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "obligations": [
-        "O79",
-        "O67",
-        "O69"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 2,
     "generation": 154,
     "timestamp": "2026-04-24T10:14:59.974654+00:00",
@@ -1672,6 +1641,50 @@
       "resolved_count": 0,
       "commit_count": 0,
       "obligations": []
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 225,
+    "timestamp": "2026-05-12T10:14:59.972787+00:00",
+    "sweep": {
+      "input_count": 29,
+      "targeted": 7,
+      "passive": 22,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is degenerate with at least three alternative mechanisms that produce identical system-level observables, making it currently underdetermined without sub-system resolution criteria."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+        "compress": "Population-level Game of Truth CA spontaneously self-organizes to the critical ridge (σ=1.018, α≈2.337), empirically confirming INV_073's Wasserstein attractor prediction at collective scale and partially resolving O140/O141. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0183 sits above unity rather than exactly at it, which is consistent with criticality but also consistent with weak supercriticality; if the measurement stabilizes above 1.0 across longer runs, the claim that γ=1 is the true attractor (not a slightly supercritical fixed point) would require revision."
+      },
+      {
+        "title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optimal Transport",
+        "compress": "Sinkhorn iterations embedded as differentiable layers make OT transport plans learnable predictors of distributional dynamics, providing a concrete algorithmic path toward the empirical STF metric tensor recovery specified in O112."
+      },
+      {
+        "title": "Equilibrium selection via Optimal transport",
+        "compress": "Optimal transport game dynamics independently confirms that Fisher information + entropy jointly govern equilibrium selection, extending the Fisher-Wasserstein gradient flow structure into strategic multi-agent systems and providing a concrete scaffold for O112's empirical recovery demand."
+      },
+      {
+        "title": "Quantification of Biological Robustness at the Systemic Level",
+        "compress": "** Biological robustness is quantifiable as the Nash equilibrium of a zero-sum entropy game, independently confirming that the critical ridge is the game-theoretic fixed point of living organization."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
+      "obligations": [
+        "O163",
+        "O72",
+        "O187"
+      ]
     },
     "coherence": 0.97
   }
