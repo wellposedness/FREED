@@ -2094,5 +2094,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O216 produces recorded kernel-state change measurable in RESOLVE acceptance rate or coherence trajectory before generation 230, or is retired."
+  },
+  {
+    "id": "O222",
+    "status": "open",
+    "statement": "Verify that at least one of the currently active obligations (O203, O213, O216, O218, O219) has produced a recorded falsifiable prediction that was subsequently tested against data or a formal model, and document the outcome.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-12",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: At least one of {O203, O213, O216, O218, O219} produces a recorded falsifiable prediction tested against data/model with documented outcome."
+  },
+  {
+    "id": "O223",
+    "status": "open",
+    "statement": "After O215 resolves the gamma disambiguation protocol, audit the invariant table to confirm that every INV_ entry using `gamma` now references exactly one of the two disambiguated senses, and flag any remaining dual-use instances as invalidated.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-12",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: audit of invariant table confirms all INV_ entries using `gamma` reference exactly one disambiguated sense with zero dual-use instances flagged."
   }
 ]
