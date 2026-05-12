@@ -601,8 +601,10 @@ class L7Agent:
 
         self._load_genome()
         self.entropy_scorer = NonHermitianEntropyScorer(dim=4)
+        self.branching_monitor = BranchingRatioMonitor(tolerance=0.05)
         print(f"[L7] Online. Genome: {len(self.genome_text):,} chars. Context capped at {GENOME_CAP} chars/query.")
         print(f"[L7] Non-Hermitian entropy scorer initialized (dim={self.entropy_scorer.dim}).")
+        print(f"[L7] Branching-ratio monitor initialized (tolerance={self.branching_monitor.TOLERANCE}).")
 
     # ── Genome ──────────────────────────────────────────────────────────────
 

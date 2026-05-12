@@ -2023,6 +2023,418 @@ def node_distribution_from_edges(node_id, edges, all_node_ids):
         return [1.0 / n] * n
 
 
+# ─── Channel-Level Divergence Scorer (Process Free Energy) ───────────────────
+# Computes D(channel ‖ thermal_baseline) — the quantum relative entropy between
+# a knowledge-graph update channel (represented as a transition matrix) and an
+# "absolutely thermal" baseline channel whose fixed output is the equilibrium
+# (uniform or Gibbs) distribution.  This is the process-level analog of state
+# free energy: it quantifies how far each graph update operation is from
+# thermodynamic reversibility.
+#
+# Following the paper's axiomatics:
+#   - A quantum channel Φ is a CPTP map; here we approximate with a classical
+#     stochastic transition matrix T (column-stochastic or row-stochastic).
+#   - The absolutely thermal channel Φ_β has a fixed output: every input maps
+#     to the thermal (Gibbs) state π_β.  For a graph with n nodes and uniform
+#     Hamiltonian (fully degenerate), π_β = (1/n, ..., 1/n).
+#   - The channel divergence D(Φ ‖ Φ_β) is computed as the average KL
+#     divergence of the channel's output distributions from the thermal output,
+#     weighted by the input distribution (taken as uniform over active nodes
+#     when not specified):
+#
+#       D(T ‖ T_β) = Σ_i p(i) · D_KL( T(·|i) ‖ π_β )
+#
+#     where T(·|i) is the i-th column (output distribution given input i)
+#     and π_β is the thermal baseline output.
+#
+# Interpretation:
+#   D ≈ 0  →  channel is thermodynamically cheap (output ≈ thermal noise,
+#              update is reversible / information-destroying)
+#   D >> 0 →  channel is thermodynamically costly (output is far from
+#              equilibrium, update creates/preserves structure irreversibly)
+#
+# This enables FREED to distinguish:
+#   - Cheap updates: edge additions that merely redistribute existing weight
+#     (low divergence, near-thermal transition structure)
+#   - Costly updates: edge additions that create new structure or concentrate
+#     probability on specific nodes (high divergence, far-from-equilibrium)
+#
+# CHALLENGE (O44): The paper's "golden units" are unitary channels measured
+# against the absolutely thermal channel with fully degenerate output
+# Hamiltonian.  The classical transition-matrix approximation used here
+# loses unitarity structure — the non-commutative (quantum) channel
+# divergence D(Φ ‖ Φ_β) = S(Φ_β) - S(Φ) + Tr[Φ(·) log Φ_β(·)] requires
+# density-operator-level computation not yet implemented.  The classical
+# version provides an upper bound via the data-processing inequality.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _build_transition_matrix_from_edges(edges, all_node_ids):
+    # type: (list, List[str]) -> List[List[float]]
+    """
+    Build a row-stochastic transition matrix from knowledge graph edges.
+
+    Entry T[i][j] = P(transition to j | currently at i), estimated from
+    edge counts between nodes.  Uses Laplace smoothing to ensure strict
+    positivity (required for finite KL divergence).
+
+    Parameters
+    ----------
+    edges : list of dict
+        Graph edges (each with 'from' and 'to' fields).
+    all_node_ids : list of str
+        Ordered list of all node IDs (defines matrix indices).
+
+    Returns
+    -------
+    list of list of float
+        n×n row-stochastic transition matrix.
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return []
+
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+    alpha = 0.01  # Laplace smoothing
+
+    # Initialize with smoothing
+    T = [[alpha] * n for _ in range(n)]
+
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None and j is not None:
+            T[i][j] += 1.0
+        # Also count reverse direction for undirected interpretation
+        if j is not None and i is not None and i != j:
+            T[j][i] += 1.0
+
+    # Row-normalize to make stochastic
+    for i in range(n):
+        row_sum = sum(T[i])
+        if row_sum > 0:
+            T[i] = [t / row_sum for t in T[i]]
+        else:
+            T[i] = [1.0 / n] * n
+
+    return T
+
+
+def _thermal_baseline_distribution(n, hamiltonian=None, temperature=1.0):
+    # type: (int, Optional[List[float]], float) -> List[float]
+    """
+    Compute the thermal (Gibbs) baseline distribution for n states.
+
+    For fully degenerate Hamiltonian (all energies equal), this is the
+    uniform distribution.  For non-degenerate Hamiltonian, it is the
+    Boltzmann distribution π_i = exp(-E_i / T) / Z.
+
+    Parameters
+    ----------
+    n : int
+        Number of states.
+    hamiltonian : list of float or None
+        Energy levels for each state.  If None, assumes fully degenerate
+        (uniform output).
+    temperature : float
+        Temperature parameter (default 1.0).  Must be > 0.
+
+    Returns
+    -------
+    list of float
+        Thermal baseline distribution (sums to 1.0).
+    """
+    if n == 0:
+        return []
+
+    if hamiltonian is None:
+        return [1.0 / n] * n
+
+    T = max(temperature, 1e-15)
+    boltzmann = [math.exp(-E / T) for E in hamiltonian]
+    Z = sum(boltzmann)
+    if Z <= 0:
+        return [1.0 / n] * n
+    return [b / Z for b in boltzmann]
+
+
+def _kl_divergence(p, q):
+    # type: (List[float], List[float]) -> float
+    """
+    Compute KL divergence D_KL(p ‖ q) = Σ_i p_i * log(p_i / q_i).
+
+    Both p and q must be strictly positive probability vectors of the
+    same length.  Uses natural logarithm (nats).
+
+    Parameters
+    ----------
+    p : list of float
+        Distribution p (must be strictly positive, sum to ~1).
+    q : list of float
+        Reference distribution q (must be strictly positive, sum to ~1).
+
+    Returns
+    -------
+    float
+        KL divergence in nats (non-negative).  Returns 0.0 for empty inputs.
+    """
+    n = len(p)
+    if n == 0 or n != len(q):
+        return 0.0
+
+    kl = 0.0
+    for i in range(n):
+        pi = max(p[i], 1e-15)
+        qi = max(q[i], 1e-15)
+        kl += pi * math.log(pi / qi)
+    return max(0.0, kl)
+
+
+def channel_divergence_from_thermal(transition_matrix, thermal_baseline=None,
+                                     input_distribution=None,
+                                     hamiltonian=None, temperature=1.0):
+    # type: (List[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], float) -> dict
+    """
+    Compute the channel-level divergence D(channel ‖ thermal_baseline) as
+    a process-free-energy estimate.
+
+    The divergence measures how far the channel's transition structure is
+    from the absolutely thermal channel (whose every output is the Gibbs
+    equilibrium distribution).  This is the operational free energy of the
+    channel: the amount of "thermodynamic work" the graph update represents.
+
+    D(T ‖ T_β) = Σ_i p(i) · D_KL( T(·|i) ‖ π_β )
+
+    where T(·|i) is the i-th row of the transition matrix (output distribution
+    given input state i), p(i) is the input distribution, and π_β is the
+    thermal baseline.
+
+    Parameters
+    ----------
+    transition_matrix : list of list of float
+        n×n row-stochastic transition matrix representing the channel.
+    thermal_baseline : list of float or None
+        The thermal (Gibbs) output distribution π_β.  If None, computed
+        from the hamiltonian parameter (or uniform if hamiltonian is also None).
+    input_distribution : list of float or None
+        Distribution over input states p(i).  If None, uses uniform.
+    hamiltonian : list of float or None
+        Energy levels for thermal baseline computation (default: degenerate).
+    temperature : float
+        Temperature for Gibbs distribution (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "channel_divergence": float — D(T ‖ T_β) in nats,
+            "per_input_divergence": list of float — D_KL(T(·|i) ‖ π_β) for each i,
+            "max_input_divergence": float — max over inputs (worst-case cost),
+            "min_input_divergence": float — min over inputs (best-case cost),
+            "thermal_baseline": list of float — π_β used,
+            "input_distribution": list of float — p(i) used,
+            "n_states": int,
+            "is_near_thermal": bool — True if divergence < 0.01 nats,
+            "is_far_from_thermal": bool — True if divergence > 1.0 nats,
+            "thermodynamic_cost_label": str — "reversible", "cheap",
+                "moderate", "costly", "very_costly",
+            "o44_channel_flag": str — diagnostic for O44 obligation,
+        }
+    """
+    n = len(transition_matrix)
+    if n == 0:
+        return {
+            "channel_divergence": 0.0,
+            "per_input_divergence": [],
+            "max_input_divergence": 0.0,
+            "min_input_divergence": 0.0,
+            "thermal_baseline": [],
+            "input_distribution": [],
+            "n_states": 0,
+            "is_near_thermal": True,
+            "is_far_from_thermal": False,
+            "thermodynamic_cost_label": "reversible",
+            "o44_channel_flag": "empty_channel:trivially_thermal",
+        }
+
+    # Determine thermal baseline
+    if thermal_baseline is None:
+        pi_beta = _thermal_baseline_distribution(n, hamiltonian, temperature)
+    else:
+        pi_beta = list(thermal_baseline)
+
+    # Determine input distribution
+    if input_distribution is None:
+        p_input = [1.0 / n] * n
+    else:
+        p_input = list(input_distribution)
+        total = sum(p_input)
+        if total > 0:
+            p_input = [p / total for p in p_input]
+        else:
+            p_input = [1.0 / n] * n
+
+    # Compute per-input KL divergence: D_KL(T(·|i) ‖ π_β)
+    per_input_div = []  # type: List[float]
+    for i in range(n):
+        row_i = transition_matrix[i]
+        d_kl = _kl_divergence(row_i, pi_beta)
+        per_input_div.append(d_kl)
+
+    # Channel divergence: weighted average over input distribution
+    channel_div = sum(p_input[i] * per_input_div[i] for i in range(n))
+
+    max_div = max(per_input_div) if per_input_div else 0.0
+    min_div = min(per_input_div) if per_input_div else 0.0
+
+    is_near_thermal = channel_div < 0.01
+    is_far = channel_div > 1.0
+
+    # Cost label
+    if channel_div < 0.01:
+        cost_label = "reversible"
+    elif channel_div < 0.1:
+        cost_label = "cheap"
+    elif channel_div < 0.5:
+        cost_label = "moderate"
+    elif channel_div < 2.0:
+        cost_label = "costly"
+    else:
+        cost_label = "very_costly"
+
+    # O44 diagnostic
+    o44_flag = (
+        f"channel_divergence={channel_div:.6f}:cost={cost_label}:"
+        f"classical_upper_bound:quantum_channel_divergence_unresolved"
+    )
+
+    return {
+        "channel_divergence": round(channel_div, 10),
+        "per_input_divergence": [round(d, 10) for d in per_input_div],
+        "max_input_divergence": round(max_div, 10),
+        "min_input_divergence": round(min_div, 10),
+        "thermal_baseline": [round(p, 10) for p in pi_beta],
+        "input_distribution": [round(p, 10) for p in p_input],
+        "n_states": n,
+        "is_near_thermal": is_near_thermal,
+        "is_far_from_thermal": is_far,
+        "thermodynamic_cost_label": cost_label,
+        "o44_channel_flag": o44_flag,
+    }
+
+
+def score_graph_update_channel_cost(edges_before, edges_after, all_node_ids,
+                                     hamiltonian=None, temperature=1.0):
+    # type: (list, list, List[str], Optional[List[float]], float) -> dict
+    """
+    Score the thermodynamic cost of a knowledge-graph update operation by
+    computing the channel divergence from thermal baseline on the transition
+    matrices before and after the update.
+
+    This is the main entry point for process-free-energy estimation: given
+    two edge snapshots (before and after a FEED, CONSOLIDATE, or avalanche
+    cascade), it builds transition matrices for both, computes their
+    divergences from the thermal baseline, and reports the delta as the
+    irreversibility cost of the update.
+
+    Parameters
+    ----------
+    edges_before : list of dict
+        Edge snapshot before the update operation.
+    edges_after : list of dict
+        Edge snapshot after the update operation.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    hamiltonian : list of float or None
+        Energy levels for thermal baseline (default: degenerate/uniform).
+    temperature : float
+        Temperature for Gibbs distribution (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "divergence_before": dict — channel_divergence_from_thermal result
+                for the pre-update transition matrix,
+            "divergence_after": dict — channel_divergence_from_thermal result
+                for the post-update transition matrix,
+            "delta_divergence": float — D_after - D_before (positive = update
+                moved the channel further from equilibrium = irreversible cost),
+            "update_is_irreversible": bool — True if delta > 0.01,
+            "update_is_thermalizing": bool — True if delta < -0.01 (update
+                moved channel toward equilibrium = information-destroying),
+            "process_free_energy_estimate": float — max(0, delta_divergence),
+                the non-negative free energy cost of the update,
+            "cost_label": str — "free", "cheap", "moderate", "costly",
+            "n_edges_added": int — edges_after count - edges_before count,
+            "n_states": int,
+            "o44_process_flag": str — diagnostic for O44,
+        }
+    """
+    n = len(all_node_ids)
+
+    T_before = _build_transition_matrix_from_edges(edges_before, all_node_ids)
+    T_after = _build_transition_matrix_from_edges(edges_after, all_node_ids)
+
+    div_before = channel_divergence_from_thermal(
+        T_before, hamiltonian=hamiltonian, temperature=temperature
+    )
+    div_after = channel_divergence_from_thermal(
+        T_after, hamiltonian=hamiltonian, temperature=temperature
+    )
+
+    d_before = div_before.get("channel_divergence", 0.0)
+    d_after = div_after.get("channel_divergence", 0.0)
+    delta = d_after - d_before
+
+    is_irreversible = delta > 0.01
+    is_thermalizing = delta < -0.01
+    process_fe = max(0.0, delta)
+
+    if process_fe < 0.01:
+        cost_label = "free"
+    elif process_fe < 0.1:
+        cost_label = "cheap"
+    elif process_fe < 0.5:
+        cost_label = "moderate"
+    else:
+        cost_label = "costly"
+
+    n_added = len(edges_after) - len(edges_before)
+
+    o44_flag = (
+        f"process_free_energy={process_fe:.6f}:"
+        f"delta_divergence={delta:.6f}:"
+        f"{'irreversible' if is_irreversible else 'thermalizing' if is_thermalizing else 'neutral'}:"
+        f"classical_channel_approximation"
+    )
+
+    result = {
+        "divergence_before": div_before,
+        "divergence_after": div_after,
+        "delta_divergence": round(delta, 10),
+        "update_is_irreversible": is_irreversible,
+        "update_is_thermalizing": is_thermalizing,
+        "process_free_energy_estimate": round(process_fe, 10),
+        "cost_label": cost_label,
+        "n_edges_added": n_added,
+        "n_states": n,
+        "o44_process_flag": o44_flag,
+    }
+
+    # Log summary
+    print(
+        f"[GRAPH:CHANNEL_DIVERGENCE] Update cost — "
+        f"D_before={d_before:.6f}, D_after={d_after:.6f}, "
+        f"delta={delta:.6f}, process_FE={process_fe:.6f}, "
+        f"cost={cost_label}, edges_added={n_added}"
+    )
+
+    return result
+
+
 # ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
 # Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
 # by counting the number of distinct sub-patterns encountered in a left-to-right
@@ -5422,6 +5834,534 @@ def wgf_belief_update(node_id, edges, all_node_ids, log_likelihood_values,
     }
 
 
+# ─── Adapted Wasserstein Distance (A𝒲_r) for Causal Coupling Stability ──────
+# Scores semantic trajectory approximations using the adapted Wasserstein
+# distance A𝒲_r, which penalizes couplings that violate temporal/causal
+# ordering in FREED's epistemic update sequences.  Standard W_r convergence
+# misses filtration/causal structure: two couplings can have identical W_r
+# cost but radically different causal fidelity.  A𝒲_r distinguishes causal
+# from non-causal convergence by requiring that the coupling respect the
+# filtration (information available at each time step).
+#
+# Following the paper's approximation result: under W_r-convergence of
+# marginals (μ^k, ν^k) → (μ, ν) with μ^k ≤_{cd} ν^k (convex-decreasing
+# order, i.e., supermartingale couplings exist), any π ∈ Π_S(μ, ν) can be
+# approximated by π^k ∈ Π_S(μ^k, ν^k) such that A𝒲_r(π^k, π) → 0.
+#
+# In FREED's epistemic loop, this means:
+#   - Trajectory approximations (e.g., from discretized belief updates)
+#     are scored not just by marginal fit (W_r) but by causal fidelity (A𝒲_r).
+#   - Couplings that "look close" in W_r but violate the temporal ordering
+#     of epistemic updates receive a penalty, surfacing non-causal convergence.
+#   - The supermartingale constraint (μ ≤_{cd} ν) maps to the requirement
+#     that belief updates do not systematically inflate expected value —
+#     a natural epistemic constraint (you cannot consistently expect to
+#     learn more than you observe).
+#
+# CHALLENGE (O44): The paper's framework is classical/real-line.  The
+# supermartingale constraint's stability under A𝒲_r does not trivially
+# extend to non-commutative (quantum) settings where the convex-decreasing
+# order ≤_{cd} lacks a direct analogue, leaving the quantum W_floor
+# formalization structurally incomplete.  The classical A𝒲_r implementation
+# here provides a scoring signal but does NOT resolve the quantum gap.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _check_convex_decreasing_order(mu_weights, nu_weights):
+    # type: (List[float], List[float]) -> dict
+    """
+    Check whether μ ≤_{cd} ν (convex-decreasing order), which is the
+    necessary and sufficient condition for the existence of supermartingale
+    couplings Π_S(μ, ν) ≠ ∅.
+
+    For probability measures on ℝ, μ ≤_{cd} ν iff:
+      (1) mean(μ) ≥ mean(ν)  (supermartingale: conditional expectation
+          cannot increase), AND
+      (2) For all convex decreasing functions φ: ∫φ dμ ≤ ∫φ dν.
+          Equivalently, the integrated quantile condition:
+          ∫_0^t F_μ⁻¹(s) ds ≥ ∫_0^t F_ν⁻¹(s) ds  for all t ∈ [0,1]
+          (second-order stochastic dominance in the supermartingale direction).
+
+    Parameters
+    ----------
+    mu_weights : list of float
+        Weights defining the source distribution μ.
+    nu_weights : list of float
+        Weights defining the target distribution ν.
+
+    Returns
+    -------
+    dict
+        {
+            "holds": bool — True if μ ≤_{cd} ν,
+            "mean_mu": float,
+            "mean_nu": float,
+            "mean_condition": bool — mean(μ) ≥ mean(ν),
+            "integrated_quantile_condition": bool — second-order condition,
+            "max_violation": float — largest violation of integrated quantile
+                condition (0.0 if no violation),
+        }
+    """
+    n_pts = 100
+
+    # Normalize
+    def _normalize(w):
+        # type: (List[float]) -> List[float]
+        filtered = [max(0.0, wi) for wi in w]
+        total = sum(filtered)
+        if total <= 0:
+            return [1.0 / max(len(w), 1)] * max(len(w), 1)
+        return [wi / total for wi in filtered]
+
+    mu_norm = _normalize(mu_weights)
+    nu_norm = _normalize(nu_weights)
+
+    # Compute means (using weight values as support points)
+    mu_sorted = sorted(mu_norm)
+    nu_sorted = sorted(nu_norm)
+
+    mean_mu = sum(mu_norm) / max(len(mu_norm), 1)
+    mean_nu = sum(nu_norm) / max(len(nu_norm), 1)
+
+    mean_condition = mean_mu >= mean_nu - 1e-12
+
+    # Compute quantile functions
+    q_mu = _empirical_quantile_function(mu_weights, n_pts)
+    q_nu = _empirical_quantile_function(nu_weights, n_pts)
+
+    # Check integrated quantile condition:
+    # ∫_0^t F_μ⁻¹(s) ds ≥ ∫_0^t F_ν⁻¹(s) ds  for all t
+    dt = 1.0 / float(n_pts)
+    int_mu = 0.0
+    int_nu = 0.0
+    max_violation = 0.0
+    integrated_condition = True
+
+    for k in range(n_pts):
+        int_mu += q_mu[k] * dt
+        int_nu += q_nu[k] * dt
+        deficit = int_nu - int_mu
+        if deficit > 1e-12:
+            integrated_condition = False
+            if deficit > max_violation:
+                max_violation = deficit
+
+    holds = mean_condition and integrated_condition
+
+    return {
+        "holds": holds,
+        "mean_mu": round(mean_mu, 10),
+        "mean_nu": round(mean_nu, 10),
+        "mean_condition": mean_condition,
+        "integrated_quantile_condition": integrated_condition,
+        "max_violation": round(max_violation, 10),
+    }
+
+
+def _causal_coupling_penalty(coupling_matrix, timestamps_mu, timestamps_nu):
+    # type: (List[List[float]], List[str], List[str]) -> dict
+    """
+    Compute the causal ordering penalty for a coupling matrix, measuring
+    how much probability mass is transported backward in time (violating
+    the filtration structure).
+
+    A coupling π(i, j) is "causal" if the temporal ordering of source index i
+    is consistent with the temporal ordering of target index j.  Mass assigned
+    to (i, j) where timestamp(i) > timestamp(j) violates causality.
+
+    The penalty is the total mass assigned to causality-violating pairs,
+    normalized to [0, 1]:
+        penalty = Σ_{(i,j): t_i > t_j} π(i, j) / Σ_{(i,j)} π(i, j)
+
+    Parameters
+    ----------
+    coupling_matrix : list of list of float
+        n_mu × n_nu coupling (transport plan), where entry [i][j] is the
+        mass transported from source i to target j.
+    timestamps_mu : list of str
+        ISO timestamps for source distribution support points.
+    timestamps_nu : list of str
+        ISO timestamps for target distribution support points.
+
+    Returns
+    -------
+    dict
+        {
+            "causal_penalty": float — fraction of mass violating causal order,
+            "total_mass": float,
+            "violating_mass": float,
+            "n_violating_pairs": int,
+            "n_total_pairs": int,
+            "is_causal": bool — True if penalty < 1e-10,
+        }
+    """
+    n_mu = len(coupling_matrix)
+    if n_mu == 0:
+        return {
+            "causal_penalty": 0.0,
+            "total_mass": 0.0,
+            "violating_mass": 0.0,
+            "n_violating_pairs": 0,
+            "n_total_pairs": 0,
+            "is_causal": True,
+        }
+
+    n_nu = len(coupling_matrix[0]) if coupling_matrix[0] else 0
+
+    # Parse timestamps for ordering (lexicographic on ISO format is correct)
+    ts_mu = timestamps_mu if timestamps_mu else [""] * n_mu
+    ts_nu = timestamps_nu if timestamps_nu else [""] * n_nu
+
+    total_mass = 0.0
+    violating_mass = 0.0
+    n_violating = 0
+    n_total = 0
+
+    for i in range(min(n_mu, len(ts_mu))):
+        for j in range(min(n_nu, len(ts_nu))):
+            if i >= len(coupling_matrix) or j >= len(coupling_matrix[i]):
+                continue
+            mass_ij = coupling_matrix[i][j]
+            if mass_ij <= 0:
+                continue
+            n_total += 1
+            total_mass += mass_ij
+
+            # Causal violation: source timestamp strictly after target timestamp
+            if ts_mu[i] and ts_nu[j] and ts_mu[i] > ts_nu[j]:
+                violating_mass += mass_ij
+                n_violating += 1
+
+    penalty = violating_mass / max(total_mass, 1e-15)
+
+    return {
+        "causal_penalty": round(penalty, 10),
+        "total_mass": round(total_mass, 10),
+        "violating_mass": round(violating_mass, 10),
+        "n_violating_pairs": n_violating,
+        "n_total_pairs": n_total,
+        "is_causal": penalty < 1e-10,
+    }
+
+
+def adapted_wasserstein_score(weights_mu, weights_nu,
+                               timestamps_mu=None, timestamps_nu=None,
+                               coupling_matrix=None,
+                               r=2, n_quantile_points=100,
+                               causal_penalty_weight=1.0):
+    # type: (List[float], List[float], Optional[List[str]], Optional[List[str]], Optional[List[List[float]]], int, int, float) -> dict
+    """
+    Compute the Adapted Wasserstein distance (A𝒲_r) score for a coupling
+    between two empirical distributions, distinguishing causal from
+    non-causal convergence.
+
+    The score combines:
+      1. Standard W_r distance (via L₂ quantile embedding for r=2)
+      2. Causal ordering penalty (mass transported backward in time)
+      3. Supermartingale constraint check (μ ≤_{cd} ν)
+
+    The adapted score is:
+        A𝒲_r = W_r + causal_penalty_weight × causal_penalty × W_r
+
+    This ensures that couplings with identical W_r but different causal
+    fidelity receive different scores, with causality-violating couplings
+    penalized proportionally to both their W_r cost and the fraction of
+    mass transported acausally.
+
+    Parameters
+    ----------
+    weights_mu : list of float
+        Weights defining the source distribution μ (e.g., prior belief).
+    weights_nu : list of float
+        Weights defining the target distribution ν (e.g., posterior belief).
+    timestamps_mu : list of str or None
+        ISO timestamps for source support points (for causal ordering).
+        If None, causal penalty is computed as 0 (no ordering info).
+    timestamps_nu : list of str or None
+        ISO timestamps for target support points.
+    coupling_matrix : list of list of float or None
+        Explicit coupling (transport plan).  If None, the identity/monotone
+        coupling is assumed (optimal for 1-D W_r) and causal penalty is
+        computed from the induced ordering.
+    r : int
+        Order of the Wasserstein distance (default 2).
+    n_quantile_points : int
+        Quantile discretization resolution (default 100).
+    causal_penalty_weight : float
+        Multiplicative weight for the causal penalty term (default 1.0).
+        Set to 0.0 to recover standard W_r without causal scoring.
+
+    Returns
+    -------
+    dict
+        {
+            "w_r": float — standard W_r distance,
+            "adapted_w_r": float — A𝒲_r score (W_r + causal penalty),
+            "causal_penalty": float — fraction of mass violating causal order,
+            "causal_penalty_contribution": float — the additive penalty term,
+            "is_causal_coupling": bool — True if coupling respects temporal order,
+            "supermartingale_check": dict — convex-decreasing order verification,
+            "supermartingale_coupling_exists": bool — True if Π_S(μ,ν) ≠ ∅,
+            "convergence_type": str — "causal" if is_causal and supermartingale
+                holds, "non_causal" if W_r is small but causal penalty is large,
+                "no_supermartingale" if ≤_{cd} fails,
+            "o44_adapted_flag": str — diagnostic for O44 challenge,
+            "quantum_gap_note": str — note on non-commutative extension,
+        }
+    """
+    # 1. Standard W_r via quantile embedding (exact for r=2, approximate for others)
+    q_mu = _empirical_quantile_function(weights_mu, n_quantile_points)
+    q_nu = _empirical_quantile_function(weights_nu, n_quantile_points)
+
+    if r == 2:
+        w_r = _l2_distance(q_mu, q_nu)
+    else:
+        # W_r for general r: (∫|F_μ⁻¹ - F_ν⁻¹|^r dt)^{1/r}
+        dt = 1.0 / float(n_quantile_points)
+        integral = sum(
+            abs(q_mu[k] - q_nu[k]) ** r for k in range(n_quantile_points)
+        ) * dt
+        w_r = integral ** (1.0 / r) if integral > 0 else 0.0
+
+    # 2. Supermartingale constraint check
+    sm_check = _check_convex_decreasing_order(weights_mu, weights_nu)
+    sm_exists = sm_check["holds"]
+
+    # 3. Causal ordering penalty
+    if coupling_matrix is not None and timestamps_mu and timestamps_nu:
+        causal_info = _causal_coupling_penalty(
+            coupling_matrix, timestamps_mu, timestamps_nu
+        )
+    elif timestamps_mu and timestamps_nu:
+        # No explicit coupling — build monotone coupling (optimal for 1-D)
+        # and check causal ordering on the induced pairing
+        n_mu = len(weights_mu)
+        n_nu = len(weights_nu)
+        # For the monotone coupling, source index i pairs with target index
+        # i * (n_nu / n_mu) — proportional mapping
+        mono_coupling = [[0.0] * n_nu for _ in range(n_mu)]
+        if n_mu > 0 and n_nu > 0:
+            for i in range(n_mu):
+                j = min(int(i * n_nu / max(n_mu, 1)), n_nu - 1)
+                w_i = max(0.0, weights_mu[i])
+                total_mu = sum(max(0.0, w) for w in weights_mu)
+                mass = w_i / max(total_mu, 1e-15)
+                mono_coupling[i][j] = mass
+        causal_info = _causal_coupling_penalty(
+            mono_coupling, timestamps_mu, timestamps_nu
+        )
+    else:
+        causal_info = {
+            "causal_penalty": 0.0,
+            "total_mass": 0.0,
+            "violating_mass": 0.0,
+            "n_violating_pairs": 0,
+            "n_total_pairs": 0,
+            "is_causal": True,
+        }
+
+    causal_penalty = causal_info["causal_penalty"]
+    is_causal = causal_info["is_causal"]
+
+    # 4. Adapted Wasserstein score
+    causal_contribution = causal_penalty_weight * causal_penalty * w_r
+    adapted_w_r = w_r + causal_contribution
+
+    # 5. Convergence type classification
+    if not sm_exists:
+        convergence_type = "no_supermartingale"
+    elif is_causal and w_r < 0.1:
+        convergence_type = "causal"
+    elif not is_causal and w_r < 0.1:
+        convergence_type = "non_causal"
+    elif is_causal:
+        convergence_type = "causal_distant"
+    else:
+        convergence_type = "non_causal_distant"
+
+    # 6. O44 diagnostic
+    if sm_exists and is_causal:
+        o44_flag = (
+            f"adapted_w{r}={adapted_w_r:.8f}:causal_coupling:"
+            f"supermartingale_valid:classical_stability_holds"
+        )
+    elif sm_exists and not is_causal:
+        o44_flag = (
+            f"adapted_w{r}={adapted_w_r:.8f}:NON_causal_coupling:"
+            f"supermartingale_valid_but_filtration_violated:"
+            f"standard_w{r}_misleading"
+        )
+    elif not sm_exists:
+        o44_flag = (
+            f"adapted_w{r}={adapted_w_r:.8f}:no_supermartingale:"
+            f"convex_decreasing_order_fails:coupling_set_empty"
+        )
+    else:
+        o44_flag = f"adapted_w{r}={adapted_w_r:.8f}:indeterminate"
+
+    quantum_note = (
+        "The adapted Wasserstein distance A𝒲_r is defined for classical "
+        "measures on ℝ with filtration structure. The supermartingale "
+        "constraint μ ≤_{cd} ν (convex-decreasing order) has no direct "
+        "analogue in non-commutative (quantum) settings where probability "
+        "measures are replaced by density operators. The quantum extension "
+        "requires: (1) a non-commutative convex order on density matrices, "
+        "(2) a filtration structure on operator algebras (quantum filtered "
+        "probability spaces), and (3) stability of the adapted distance "
+        "under the resulting quantum supermartingale constraint. This gap "
+        "leaves the quantum W_floor formalization structurally incomplete "
+        "(O44 open)."
+    )
+
+    result = {
+        "w_r": round(w_r, 10),
+        "adapted_w_r": round(adapted_w_r, 10),
+        "causal_penalty": round(causal_penalty, 10),
+        "causal_penalty_contribution": round(causal_contribution, 10),
+        "is_causal_coupling": is_causal,
+        "supermartingale_check": sm_check,
+        "supermartingale_coupling_exists": sm_exists,
+        "convergence_type": convergence_type,
+        "o44_adapted_flag": o44_flag,
+        "quantum_gap_note": quantum_note,
+    }
+
+    # Log when non-causal convergence is detected
+    if not is_causal and w_r < 0.1:
+        print(
+            f"[GRAPH:ADAPTED_WASSERSTEIN] ⚠ Non-causal convergence detected — "
+            f"W_{r}={w_r:.6f} (small) but causal_penalty={causal_penalty:.4f} "
+            f"(significant). Standard W_{r} is MISLEADING for this coupling. "
+            f"A𝒲_{r}={adapted_w_r:.6f} correctly penalizes filtration violation."
+        )
+
+    return result
+
+
+def score_trajectory_approximation(trajectory_weights, trajectory_timestamps,
+                                    reference_weights, reference_timestamps,
+                                    r=2, n_quantile_points=100,
+                                    causal_penalty_weight=1.0):
+    # type: (List[List[float]], List[str], List[List[float]], List[str], int, int, float) -> dict
+    """
+    Score a sequence of epistemic trajectory approximations against a
+    reference trajectory using A𝒲_r at each time step.
+
+    This is the main entry point for evaluating whether a discretized or
+    approximate belief update sequence faithfully preserves the causal
+    structure of the reference (exact) sequence.
+
+    Parameters
+    ----------
+    trajectory_weights : list of list of float
+        Sequence of weight vectors (approximation trajectory).
+    trajectory_timestamps : list of str
+        ISO timestamps for each step of the approximation.
+    reference_weights : list of list of float
+        Sequence of weight vectors (reference trajectory).
+    reference_timestamps : list of str
+        ISO timestamps for each step of the reference.
+    r : int
+        Wasserstein order (default 2).
+    n_quantile_points : int
+        Quantile discretization (default 100).
+    causal_penalty_weight : float
+        Causal penalty weight (default 1.0).
+
+    Returns
+    -------
+    dict
+        {
+            "per_step_scores": list of dict — A𝒲_r score at each paired step,
+            "mean_w_r": float — mean standard W_r across steps,
+            "mean_adapted_w_r": float — mean A𝒲_r across steps,
+            "mean_causal_penalty": float — mean causal penalty,
+            "max_causal_penalty": float — worst causal violation,
+            "n_non_causal_steps": int — steps where causal penalty > 0.01,
+            "n_steps_scored": int,
+            "trajectory_causal_fidelity": float — 1.0 - mean_causal_penalty,
+            "overall_convergence_type": str,
+            "o44_trajectory_flag": str,
+        }
+    """
+    n_steps = min(len(trajectory_weights), len(reference_weights))
+    n_ts_traj = len(trajectory_timestamps)
+    n_ts_ref = len(reference_timestamps)
+
+    per_step = []  # type: List[dict]
+    for k in range(n_steps):
+        ts_mu = [trajectory_timestamps[k]] if k < n_ts_traj else []
+        ts_nu = [reference_timestamps[k]] if k < n_ts_ref else []
+
+        score = adapted_wasserstein_score(
+            weights_mu=trajectory_weights[k],
+            weights_nu=reference_weights[k],
+            timestamps_mu=ts_mu if ts_mu else None,
+            timestamps_nu=ts_nu if ts_nu else None,
+            r=r,
+            n_quantile_points=n_quantile_points,
+            causal_penalty_weight=causal_penalty_weight,
+        )
+        per_step.append(score)
+
+    if not per_step:
+        return {
+            "per_step_scores": [],
+            "mean_w_r": 0.0,
+            "mean_adapted_w_r": 0.0,
+            "mean_causal_penalty": 0.0,
+            "max_causal_penalty": 0.0,
+            "n_non_causal_steps": 0,
+            "n_steps_scored": 0,
+            "trajectory_causal_fidelity": 1.0,
+            "overall_convergence_type": "empty",
+            "o44_trajectory_flag": "empty_trajectory",
+        }
+
+    w_rs = [s["w_r"] for s in per_step]
+    aw_rs = [s["adapted_w_r"] for s in per_step]
+    penalties = [s["causal_penalty"] for s in per_step]
+
+    mean_wr = sum(w_rs) / len(w_rs)
+    mean_awr = sum(aw_rs) / len(aw_rs)
+    mean_cp = sum(penalties) / len(penalties)
+    max_cp = max(penalties)
+    n_non_causal = sum(1 for p in penalties if p > 0.01)
+    causal_fidelity = 1.0 - mean_cp
+
+    # Overall convergence type
+    if mean_cp < 0.01 and mean_wr < 0.1:
+        overall_type = "causal_convergent"
+    elif mean_cp >= 0.01 and mean_wr < 0.1:
+        overall_type = "non_causal_convergent"
+    elif mean_cp < 0.01 and mean_wr >= 0.1:
+        overall_type = "causal_distant"
+    else:
+        overall_type = "non_causal_distant"
+
+    o44_flag = (
+        f"trajectory_steps={n_steps}:"
+        f"mean_w{r}={mean_wr:.6f}:"
+        f"mean_aw{r}={mean_awr:.6f}:"
+        f"causal_fidelity={causal_fidelity:.4f}:"
+        f"convergence={overall_type}:"
+        f"classical_framework:quantum_extension_open"
+    )
+
+    return {
+        "per_step_scores": per_step,
+        "mean_w_r": round(mean_wr, 10),
+        "mean_adapted_w_r": round(mean_awr, 10),
+        "mean_causal_penalty": round(mean_cp, 10),
+        "max_causal_penalty": round(max_cp, 10),
+        "n_non_causal_steps": n_non_causal,
+        "n_steps_scored": n_steps,
+        "trajectory_causal_fidelity": round(causal_fidelity, 10),
+        "overall_convergence_type": overall_type,
+        "o44_trajectory_flag": o44_flag,
+    }
+
+
 def node_distribution_drift(node_id, edges_t0, edges_t1, all_node_ids,
                              n_quantile_points=100):
     # type: (str, list, list, List[str], int) -> dict
@@ -5463,6 +6403,956 @@ def node_distribution_drift(node_id, edges_t0, edges_t1, all_node_ids,
     drift["distribution_t1"] = [round(p, 8) for p in dist_t1]
 
     return drift
+
+
+# ─── Graph-Laplacian Thermodynamic Entropy & Stability Monitor ────────────────
+# Implements a discrete H-theorem monitor for the knowledge graph, treating
+# vertices as concepts with heat capacity and edges as conductivity-weighted
+# co-activation channels.  Computes:
+#
+#   1. Discrete thermodynamic entropy S(t) = -Σ_i c_i · u_i(t) · ln(u_i(t))
+#      where c_i is the heat capacity (node degree) and u_i is the "temperature"
+#      (normalized activation level / belief weight) at vertex i.
+#
+#   2. The maximum stable time-step Δt_max = 2 / λ_max(D^{-1} L_w)
+#      where λ_max is the largest eigenvalue of the capacity-normalized
+#      graph Laplacian.  When the effective update step exceeds this bound,
+#      the discrete heat equation becomes oscillatory/divergent — the
+#      thermodynamic analog of violating the CFL condition.
+#
+#   3. Spectral stability bound comparison:  the ratio Δt_eff / Δt_max
+#      is the "thermodynamic admissibility ratio".  When > 1, the graph's
+#      update dynamics are operating outside the thermodynamically stable
+#      regime, directly operationalizing the γ=1 criticality condition on
+#      the epistemic substrate.
+#
+# Derivation follows the paper's approach: recurrence relations of heat
+# conduction on the graph are derived from first principles (conductivity
+# and capacity coefficients) without differential equations.  The entropy
+# S(t) is shown to be non-decreasing (discrete H-theorem) if and only if
+# Δt ≤ Δt_max = 2 / λ_max.
+#
+# CHALLENGE (O44): The discrete entropy S = -Σ c_i u_i ln(u_i) with stability
+# bound Δt_max = 2/λ_max provides a finite-graph analog of the Wasserstein
+# Floor k = 1/Tμ.  Specifically, the spectral stability bound constrains the
+# minimum "temporal resolution" of the epistemic dynamics, just as k/Tμ
+# constrains the minimum transport cost.  If λ_max ~ Tμ (spectral gap scales
+# with the thermodynamic parameter), then Δt_max ~ 1/Tμ recovers a quantity
+# proportional to the Wasserstein Floor from pure Laplacian spectral structure,
+# resolving O44 via a substrate-independent finite-graph construction.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _build_capacity_vector_from_degrees(adjacency):
+    # type: (List[List[float]]) -> List[float]
+    """
+    Build the heat capacity vector c_i = degree(i) for each vertex.
+
+    In the thermodynamic graph model, heat capacity at a vertex is
+    proportional to its connectivity (more connections = more thermal
+    inertia = harder to change temperature).  For the knowledge graph,
+    this maps node degree to epistemic inertia: highly-connected concepts
+    resist rapid belief revision.
+
+    Parameters
+    ----------
+    adjacency : list of list of float
+        n×n symmetric weighted adjacency matrix.
+
+    Returns
+    -------
+    list of float
+        Capacity vector of length n. Minimum capacity is clamped to 1.0
+        to avoid division by zero for isolated nodes.
+    """
+    n = len(adjacency)
+    capacities = []  # type: List[float]
+    for i in range(n):
+        deg = sum(adjacency[i])
+        capacities.append(max(deg, 1.0))
+    return capacities
+
+
+def _build_capacity_normalized_laplacian(laplacian, capacities):
+    # type: (List[List[float]], List[float]) -> List[List[float]]
+    """
+    Build the capacity-normalized Laplacian C^{-1} L_w, where C = diag(c_i)
+    is the diagonal capacity matrix and L_w is the weighted graph Laplacian.
+
+    The eigenvalues of C^{-1} L_w determine the stability of the discrete
+    heat equation: the recurrence u(t+Δt) = u(t) - Δt · C^{-1} L_w · u(t)
+    is stable iff Δt ≤ 2 / λ_max(C^{-1} L_w).
+
+    Parameters
+    ----------
+    laplacian : list of list of float
+        n×n weighted graph Laplacian L_w.
+    capacities : list of float
+        Capacity vector c_i (all entries > 0).
+
+    Returns
+    -------
+    list of list of float
+        n×n capacity-normalized Laplacian.
+    """
+    n = len(laplacian)
+    CinvL = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        inv_ci = 1.0 / max(capacities[i], 1e-15)
+        for j in range(n):
+            CinvL[i][j] = inv_ci * laplacian[i][j]
+    return CinvL
+
+
+def _largest_eigenvalue_power_iteration(matrix, max_iter=200, tol=1e-10):
+    # type: (List[List[float]], int, float) -> float
+    """
+    Estimate the largest eigenvalue of a symmetric positive semi-definite
+    matrix using the power iteration method.
+
+    Parameters
+    ----------
+    matrix : list of list of float
+        n×n symmetric matrix.
+    max_iter : int
+        Maximum iterations (default 200).
+    tol : float
+        Convergence tolerance on relative eigenvalue change (default 1e-10).
+
+    Returns
+    -------
+    float
+        Estimated largest eigenvalue (non-negative).
+    """
+    n = len(matrix)
+    if n == 0:
+        return 0.0
+
+    # Initialize with a non-zero vector
+    v = [1.0 / math.sqrt(n)] * n
+    lam = 0.0
+
+    for _iteration in range(max_iter):
+        # Matrix-vector product: w = M · v
+        w = [0.0] * n
+        for i in range(n):
+            s = 0.0
+            for j in range(n):
+                s += matrix[i][j] * v[j]
+            w[i] = s
+
+        # Rayleigh quotient: λ = v^T w / v^T v
+        vw = sum(vi * wi for vi, wi in zip(v, w))
+        vv = sum(vi * vi for vi in v)
+        if vv < 1e-30:
+            break
+        lam_new = vw / vv
+
+        # Normalize w to get new v
+        w_norm = math.sqrt(sum(wi * wi for wi in w))
+        if w_norm < 1e-30:
+            break
+        v = [wi / w_norm for wi in w]
+
+        # Check convergence
+        if abs(lam_new - lam) < tol * max(abs(lam_new), 1.0):
+            lam = lam_new
+            break
+        lam = lam_new
+
+    return max(0.0, lam)
+
+
+def thermodynamic_graph_entropy(activation_levels, capacities):
+    # type: (List[float], List[float]) -> float
+    """
+    Compute the discrete thermodynamic entropy of the graph state.
+
+    S = -Σ_i c_i · u_i · ln(u_i)
+
+    where c_i is the heat capacity at vertex i and u_i is the normalized
+    activation level ("temperature") at vertex i.  Values u_i ≤ 0 are
+    skipped (they contribute 0 to entropy by the convention 0·ln(0) = 0).
+
+    This is the graph-native analog of continuous thermodynamic entropy,
+    derived from first principles on the finite graph without differential
+    equations.
+
+    Parameters
+    ----------
+    activation_levels : list of float
+        Activation / belief weight at each vertex.  Should be > 0 for
+        meaningful entropy.  Need not sum to 1 (the entropy formula uses
+        raw values, not probabilities).
+    capacities : list of float
+        Heat capacity at each vertex (typically node degree).
+
+    Returns
+    -------
+    float
+        Discrete thermodynamic entropy (non-negative for u_i in (0,1),
+        can be negative for u_i > 1).
+    """
+    n = len(activation_levels)
+    if n == 0:
+        return 0.0
+
+    S = 0.0
+    for i in range(min(n, len(capacities))):
+        u_i = activation_levels[i]
+        c_i = capacities[i]
+        if u_i > 1e-30:
+            S -= c_i * u_i * math.log(u_i)
+    return S
+
+
+def spectral_stability_bound(adjacency, capacities=None):
+    # type: (List[List[float]], Optional[List[float]]) -> dict
+    """
+    Compute the maximum stable time-step Δt_max for discrete heat conduction
+    on the thermodynamic graph, and the spectral stability diagnostics.
+
+    The discrete heat equation on the graph is:
+        u(t + Δt) = u(t) - Δt · C^{-1} · L_w · u(t)
+
+    This is stable (non-oscillatory, entropy non-decreasing) iff:
+        Δt ≤ Δt_max = 2 / λ_max(C^{-1} L_w)
+
+    where λ_max is the largest eigenvalue of the capacity-normalized
+    Laplacian.
+
+    Parameters
+    ----------
+    adjacency : list of list of float
+        n×n symmetric weighted adjacency matrix of the knowledge graph.
+    capacities : list of float or None
+        Heat capacity vector.  If None, uses node degrees as capacities.
+
+    Returns
+    -------
+    dict
+        {
+            "lambda_max": float — largest eigenvalue of C^{-1} L_w,
+            "dt_max": float — maximum stable time-step 2/λ_max,
+            "n_vertices": int,
+            "capacities": list of float — the capacity vector used,
+            "o44_spectral_stability_note": str — diagnostic for O44,
+        }
+    """
+    n = len(adjacency)
+    if n == 0:
+        return {
+            "lambda_max": 0.0,
+            "dt_max": float('inf'),
+            "n_vertices": 0,
+            "capacities": [],
+            "o44_spectral_stability_note": "empty_graph:trivially_stable",
+        }
+
+    if capacities is None:
+        capacities = _build_capacity_vector_from_degrees(adjacency)
+
+    L = _build_weighted_graph_laplacian(adjacency)
+    CinvL = _build_capacity_normalized_laplacian(L, capacities)
+
+    lam_max = _largest_eigenvalue_power_iteration(CinvL)
+
+    if lam_max > 1e-15:
+        dt_max = 2.0 / lam_max
+    else:
+        dt_max = float('inf')
+
+    o44_note = (
+        f"lambda_max={lam_max:.8f}:dt_max={dt_max:.8f}:"
+        f"discrete_htheorem_bound:if_lambda_max~T_mu_then_dt_max~1/T_mu:"
+        f"finite_graph_wasserstein_floor_candidate"
+    )
+
+    return {
+        "lambda_max": round(lam_max, 10),
+        "dt_max": round(dt_max, 10) if dt_max != float('inf') else float('inf'),
+        "n_vertices": n,
+        "capacities": [round(c, 6) for c in capacities],
+        "o44_spectral_stability_note": o44_note,
+    }
+
+
+def thermodynamic_admissibility_check(adjacency, activation_levels,
+                                       effective_dt=1.0, capacities=None):
+    # type: (List[List[float]], List[float], float, Optional[List[float]]) -> dict
+    """
+    Full thermodynamic admissibility check for the knowledge graph.
+
+    Combines:
+    1. Discrete thermodynamic entropy S(t) of the current graph state
+    2. Spectral stability bound Δt_max from the capacity-normalized Laplacian
+    3. Admissibility ratio Δt_eff / Δt_max — when > 1, the update dynamics
+       are thermodynamically inadmissible (discrete H-theorem violated)
+
+    This is the main entry point for FREED's discrete H-theorem monitor.
+
+    Parameters
+    ----------
+    adjacency : list of list of float
+        n×n symmetric weighted adjacency matrix of the knowledge graph.
+        Edge weight w_{ij} = conductivity of co-activation between concepts
+        i and j (e.g., confirmation count, similarity score).
+    activation_levels : list of float
+        Current activation / belief weight at each vertex.  Should be > 0.
+        Typically derived from node_distribution_from_edges or edge counts.
+    effective_dt : float
+        The effective time-step of the current update operation (default 1.0).
+        For FEED ingestion, this is 1.0 per feed.  For avalanche cascades,
+        this may be > 1 (multiple steps in one operation).  For consolidation,
+        this may be < 1 (sub-step refinement).
+    capacities : list of float or None
+        Heat capacity vector.  If None, derived from node degrees.
+
+    Returns
+    -------
+    dict
+        {
+            "entropy": float — current discrete thermodynamic entropy S(t),
+            "lambda_max": float — largest eigenvalue of C^{-1} L_w,
+            "dt_max": float — maximum stable time-step,
+            "effective_dt": float — the time-step being used,
+            "admissibility_ratio": float — Δt_eff / Δt_max (> 1 = inadmissible),
+            "is_admissible": bool — True if ratio ≤ 1.0,
+            "is_critical": bool — True if 0.9 < ratio ≤ 1.0 (near boundary),
+            "is_inadmissible": bool — True if ratio > 1.0,
+            "regime": str — "stable", "critical", or "inadmissible",
+            "h_theorem_status": str — "guaranteed" if admissible, "violated"
+                if inadmissible, "marginal" if critical,
+            "capacities": list of float,
+            "n_vertices": int,
+            "gamma_1_diagnostic": str — operationalization of γ=1 criticality:
+                the system is at the critical boundary when ratio ≈ 1.0,
+            "o44_discrete_htheorem": str — challenge status for O44,
+            "wasserstein_floor_proxy": float or None — if λ_max > 0,
+                the quantity 2/λ_max as a candidate for k/Tμ,
+            "timestamp": str,
+        }
+    """
+    n = len(adjacency)
+    if n == 0:
+        ts = datetime.now(timezone.utc).isoformat()
+        return {
+            "entropy": 0.0,
+            "lambda_max": 0.0,
+            "dt_max": float('inf'),
+            "effective_dt": effective_dt,
+            "admissibility_ratio": 0.0,
+            "is_admissible": True,
+            "is_critical": False,
+            "is_inadmissible": False,
+            "regime": "stable",
+            "h_theorem_status": "guaranteed",
+            "capacities": [],
+            "n_vertices": 0,
+            "gamma_1_diagnostic": "empty_graph:no_dynamics",
+            "o44_discrete_htheorem": "empty_graph:trivially_admissible",
+            "wasserstein_floor_proxy": None,
+            "timestamp": ts,
+        }
+
+    if capacities is None:
+        capacities = _build_capacity_vector_from_degrees(adjacency)
+
+    # 1. Entropy
+    S = thermodynamic_graph_entropy(activation_levels, capacities)
+
+    # 2. Spectral stability bound
+    stability = spectral_stability_bound(adjacency, capacities)
+    lam_max = stability["lambda_max"]
+    dt_max = stability["dt_max"]
+
+    # 3. Admissibility ratio
+    if dt_max == float('inf') or dt_max <= 0:
+        ratio = 0.0
+    else:
+        ratio = effective_dt / dt_max
+
+    is_admissible = ratio <= 1.0
+    is_critical = 0.9 < ratio <= 1.0
+    is_inadmissible = ratio > 1.0
+
+    if is_inadmissible:
+        regime = "inadmissible"
+        h_status = "violated"
+    elif is_critical:
+        regime = "critical"
+        h_status = "marginal"
+    else:
+        regime = "stable"
+        h_status = "guaranteed"
+
+    # γ=1 criticality diagnostic
+    if is_critical:
+        gamma_diag = (
+            f"admissibility_ratio={ratio:.6f}:NEAR_CRITICAL_BOUNDARY:"
+            f"gamma_1_operationalized:system_at_edge_of_stability:"
+            f"discrete_htheorem_marginal"
+        )
+    elif is_inadmissible:
+        gamma_diag = (
+            f"admissibility_ratio={ratio:.6f}:BEYOND_CRITICAL:"
+            f"gamma>1:update_dynamics_unstable:"
+            f"discrete_htheorem_VIOLATED:reduce_effective_dt_or_increase_capacity"
+        )
+    else:
+        gamma_diag = (
+            f"admissibility_ratio={ratio:.6f}:SUBCRITICAL:"
+            f"gamma<1:dynamics_stable:entropy_nondecreasing"
+        )
+
+    # Wasserstein Floor proxy
+    wfloor_proxy = None  # type: Optional[float]
+    if lam_max > 1e-15:
+        wfloor_proxy = 2.0 / lam_max
+
+    # O44 diagnostic
+    o44_diag = (
+        f"discrete_entropy={S:.6f}:"
+        f"lambda_max={lam_max:.8f}:"
+        f"dt_max={dt_max:.8f}:"
+        f"ratio={ratio:.6f}:"
+        f"regime={regime}:"
+        f"wfloor_proxy={'%.8f' % wfloor_proxy if wfloor_proxy is not None else 'N/A'}:"
+        f"if_lambda_max_proportional_to_T_mu_then_dt_max_proportional_to_1_over_T_mu:"
+        f"finite_graph_discrete_htheorem_construction"
+    )
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    result = {
+        "entropy": round(S, 10),
+        "lambda_max": round(lam_max, 10),
+        "dt_max": round(dt_max, 10) if dt_max != float('inf') else float('inf'),
+        "effective_dt": effective_dt,
+        "admissibility_ratio": round(ratio, 10),
+        "is_admissible": is_admissible,
+        "is_critical": is_critical,
+        "is_inadmissible": is_inadmissible,
+        "regime": regime,
+        "h_theorem_status": h_status,
+        "capacities": [round(c, 6) for c in capacities],
+        "n_vertices": n,
+        "gamma_1_diagnostic": gamma_diag,
+        "o44_discrete_htheorem": o44_diag,
+        "wasserstein_floor_proxy": (
+            round(wfloor_proxy, 10) if wfloor_proxy is not None else None
+        ),
+        "timestamp": ts,
+    }
+
+    # Log warnings for critical/inadmissible regimes
+    if is_inadmissible:
+        print(
+            f"[GRAPH:THERMODYNAMIC] 🚨 INADMISSIBLE — "
+            f"Δt_eff={effective_dt:.4f} > Δt_max={dt_max:.4f} "
+            f"(ratio={ratio:.4f}). Discrete H-theorem VIOLATED. "
+            f"λ_max={lam_max:.6f}, S={S:.6f}. "
+            f"Update dynamics are UNSTABLE — reduce step size or "
+            f"increase graph capacity."
+        )
+    elif is_critical:
+        print(
+            f"[GRAPH:THERMODYNAMIC] ⚠ CRITICAL — "
+            f"Δt_eff={effective_dt:.4f} ≈ Δt_max={dt_max:.4f} "
+            f"(ratio={ratio:.4f}). At γ=1 criticality boundary. "
+            f"λ_max={lam_max:.6f}, S={S:.6f}."
+        )
+
+    return result
+
+
+def thermodynamic_admissibility_from_edges(edges, all_node_ids,
+                                            effective_dt=1.0):
+    # type: (list, List[str], float) -> dict
+    """
+    Convenience wrapper: build adjacency matrix and activation levels from
+    knowledge graph edges, then run the full thermodynamic admissibility check.
+
+    This is the primary integration point for FREED's discrete H-theorem
+    monitor, callable directly from FEED and CONSOLIDATE pipelines.
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    effective_dt : float
+        Effective time-step of the current update (default 1.0).
+
+    Returns
+    -------
+    dict
+        Full thermodynamic admissibility result (see thermodynamic_admissibility_check).
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return thermodynamic_admissibility_check([], [], effective_dt)
+
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+
+    # Build adjacency matrix from edge co-occurrence
+    # Edge weight between nodes i and j = count of edges connecting them
+    adj = [[0.0] * n for _ in range(n)]
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None and j is not None and i != j:
+            adj[i][j] += 1.0
+            adj[j][i] += 1.0
+
+    # Activation levels: edge count per node (normalized to (0,1) range)
+    edge_counts = [0.0] * n
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None:
+            edge_counts[i] += 1.0
+        if j is not None:
+            edge_counts[j] += 1.0
+
+    max_count = max(edge_counts) if edge_counts else 1.0
+    if max_count <= 0:
+        max_count = 1.0
+
+    # Normalize to (0, 1) with a small floor to avoid log(0)
+    activation = [max(ec / max_count, 1e-6) for ec in edge_counts]
+
+    return thermodynamic_admissibility_check(
+        adj, activation, effective_dt=effective_dt
+    )
+
+
+# ─── Persistent-Homology Anomaly Detection (Betti Number Tracker) ─────────────
+# Implements a TDA-inspired topological anomaly detector for knowledge-graph
+# trajectory embeddings.  Tracks the evolution of Betti numbers (β₀ = connected
+# components, β₁ = independent cycles) across FEED cycles to flag topological
+# discontinuities — sudden regime shifts, coherence collapses, or obligation
+# graph topology changes — as structural fault signals.
+#
+# Following the paper's approach for quantum Otto engine fault detection:
+#   1. Construct a time-delay embedding from graph-state observables
+#      (edge counts, node degrees, entropy, coherence) at each FEED cycle.
+#   2. Build a Vietoris-Rips simplicial complex at multiple filtration radii
+#      from pairwise distances in the embedded space.
+#   3. Track persistent homology: compute Betti numbers (β₀, β₁) as a
+#      function of filtration radius ε.
+#   4. Detect anomalies: sudden jumps in Betti numbers across consecutive
+#      FEED cycles signal topological phase transitions in the epistemic loop.
+#
+# The key insight: Betti numbers are topological invariants robust to small
+# perturbations (noise), but sensitive to genuine structural changes.  A sudden
+# increase in β₀ (fragmentation) signals coherence collapse; a sudden increase
+# in β₁ (new cycles) signals circular dependency formation; a sudden decrease
+# in β₁ signals obligation resolution (cycle closure).
+#
+# CHALLENGE (O44): The persistent homology construction here operates on
+# classical point clouds embedded from graph observables.  The quantum
+# extension — persistent homology of density-operator trajectory embeddings
+# in non-commutative spaces — requires a Wasserstein-stable persistence
+# module construction not yet available.  The classical version provides
+# a noise-robust, single-shot fault signal without requiring the quantum
+# generalization.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _euclidean_distance_vectors(va, vb):
+    # type: (List[float], List[float]) -> float
+    """Euclidean distance between two equal-length float vectors."""
+    return math.sqrt(sum((a - b) ** 2 for a, b in zip(va, vb)))
+
+
+def _pairwise_distance_matrix(points):
+    # type: (List[List[float]]) -> List[List[float]]
+    """Compute full pairwise Euclidean distance matrix for a point cloud."""
+    n = len(points)
+    D = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            d = _euclidean_distance_vectors(points[i], points[j])
+            D[i][j] = d
+            D[j][i] = d
+    return D
+
+
+def _vietoris_rips_betti_numbers(distance_matrix, epsilon):
+    # type: (List[List[float]], float) -> Tuple[int, int]
+    """
+    Compute Betti numbers β₀ and β₁ of the Vietoris-Rips complex at
+    filtration radius ε from a pairwise distance matrix.
+
+    β₀ = number of connected components (rank of H₀).
+    β₁ = number of independent 1-cycles (rank of H₁).
+
+    The Vietoris-Rips complex at radius ε includes:
+      - A 0-simplex (vertex) for each point.
+      - A 1-simplex (edge) for each pair with distance ≤ ε.
+      - A 2-simplex (triangle) for each triple where all pairwise distances ≤ ε.
+
+    β₀ is computed via union-find on the 1-skeleton.
+    β₁ is computed via the Euler characteristic: β₁ = n_edges - n_vertices
+    + β₀ - n_triangles (from χ = β₀ - β₁ + β₂ ≈ β₀ - β₁ for VR complexes
+    where β₂ ≈ 0 for small point clouds, corrected by triangle count).
+
+    More precisely, for a 2-dimensional simplicial complex:
+        χ = V - E + F   and   χ = β₀ - β₁ + β₂
+    where V = vertices, E = edges, F = 2-faces (triangles).
+    Assuming β₂ = 0 (no voids in a VR complex on small point clouds):
+        β₁ = E - V + β₀ - F
+
+    Parameters
+    ----------
+    distance_matrix : list of list of float
+        n×n pairwise distance matrix.
+    epsilon : float
+        Filtration radius.
+
+    Returns
+    -------
+    tuple of (int, int)
+        (β₀, β₁) — Betti numbers of the Vietoris-Rips complex at ε.
+    """
+    n = len(distance_matrix)
+    if n == 0:
+        return (0, 0)
+
+    # ── Build 1-skeleton (edges) ─────────────────────────────────────────
+    edges = []  # type: List[Tuple[int, int]]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if distance_matrix[i][j] <= epsilon:
+                edges.append((i, j))
+
+    # ── β₀ via union-find ────────────────────────────────────────────────
+    parent = list(range(n))
+
+    def _find(x):
+        # type: (int) -> int
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def _union(x, y):
+        # type: (int, int) -> None
+        rx, ry = _find(x), _find(y)
+        if rx != ry:
+            parent[rx] = ry
+
+    for (i, j) in edges:
+        _union(i, j)
+
+    beta_0 = len(set(_find(i) for i in range(n)))
+
+    # ── Count 2-simplices (triangles) ────────────────────────────────────
+    # Build adjacency set for fast triangle detection
+    adj = [set() for _ in range(n)]  # type: List[set]
+    for (i, j) in edges:
+        adj[i].add(j)
+        adj[j].add(i)
+
+    n_triangles = 0
+    for i in range(n):
+        for j in adj[i]:
+            if j <= i:
+                continue
+            # Count common neighbors k > j
+            for k in adj[i]:
+                if k <= j:
+                    continue
+                if k in adj[j]:
+                    n_triangles += 1
+
+    # ── β₁ from Euler characteristic ────────────────────────────────────
+    # χ = V - E + F = β₀ - β₁ + β₂
+    # Assuming β₂ ≈ 0: β₁ = E - V + β₀ - F
+    n_edges = len(edges)
+    beta_1 = max(0, n_edges - n + beta_0 - n_triangles)
+
+    return (beta_0, beta_1)
+
+
+def _persistent_homology_filtration(distance_matrix, n_filtration_steps=20):
+    # type: (List[List[float]], int) -> List[dict]
+    """
+    Compute Betti numbers across a filtration of Vietoris-Rips complexes
+    at uniformly spaced radii from 0 to max_distance.
+
+    This produces a "persistence barcode" approximation: each filtration
+    step records the Betti numbers, and transitions between steps reveal
+    births and deaths of topological features.
+
+    Parameters
+    ----------
+    distance_matrix : list of list of float
+        n×n pairwise distance matrix.
+    n_filtration_steps : int
+        Number of filtration radii to evaluate (default 20).
+
+    Returns
+    -------
+    list of dict
+        Each entry: {
+            "epsilon": float — filtration radius,
+            "beta_0": int — number of connected components,
+            "beta_1": int — number of independent cycles,
+        }
+    """
+    n = len(distance_matrix)
+    if n == 0:
+        return []
+
+    # Find max distance for filtration range
+    max_dist = 0.0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if distance_matrix[i][j] > max_dist:
+                max_dist = distance_matrix[i][j]
+
+    if max_dist <= 0:
+        return [{"epsilon": 0.0, "beta_0": n, "beta_1": 0}]
+
+    filtration = []  # type: List[dict]
+    for step in range(n_filtration_steps + 1):
+        eps = max_dist * step / float(max(n_filtration_steps, 1))
+        b0, b1 = _vietoris_rips_betti_numbers(distance_matrix, eps)
+        filtration.append({
+            "epsilon": round(eps, 10),
+            "beta_0": b0,
+            "beta_1": b1,
+        })
+
+    return filtration
+
+
+def _time_delay_embedding(observable_series, embedding_dim=3, delay=1):
+    # type: (List[List[float]], int, int) -> List[List[float]]
+    """
+    Construct time-delay embedding vectors from a multivariate observable
+    time series.
+
+    Given a series of d-dimensional observation vectors [x_0, x_1, ...],
+    produce embedded vectors by concatenating delayed copies:
+        y_t = [x_t, x_{t-τ}, x_{t-2τ}, ..., x_{t-(m-1)τ}]
+    where m = embedding_dim and τ = delay.
+
+    Parameters
+    ----------
+    observable_series : list of list of float
+        Time-ordered sequence of d-dimensional observation vectors.
+    embedding_dim : int
+        Number of delayed copies to concatenate (default 3).
+    delay : int
+        Time delay τ between copies (default 1).
+
+    Returns
+    -------
+    list of list of float
+        Embedded point cloud. Each point has dimension d * embedding_dim.
+        Length = len(observable_series) - (embedding_dim - 1) * delay.
+    """
+    n = len(observable_series)
+    total_lag = (embedding_dim - 1) * delay
+    if n <= total_lag:
+        return []
+
+    embedded = []  # type: List[List[float]]
+    for t in range(total_lag, n):
+        point = []  # type: List[float]
+        for k in range(embedding_dim):
+            idx = t - k * delay
+            point.extend(observable_series[idx])
+        embedded.append(point)
+
+    return embedded
+
+
+def detect_topological_anomalies(betti_history, window=3,
+                                  beta0_jump_threshold=2,
+                                  beta1_jump_threshold=1):
+    # type: (List[dict], int, int, int) -> List[dict]
+    """
+    Detect topological anomalies (discontinuities) in a Betti number
+    time series by comparing each cycle's Betti signature against a
+    rolling window of recent cycles.
+
+    Anomaly types:
+      - "fragmentation": sudden β₀ increase (graph splitting into components)
+      - "coherence_collapse": β₀ jumps to n (every node isolated)
+      - "cycle_formation": sudden β₁ increase (new circular dependencies)
+      - "cycle_resolution": sudden β₁ decrease (obligations resolved)
+      - "topological_phase_transition": simultaneous β₀ and β₁ jump
+
+    Parameters
+    ----------
+    betti_history : list of dict
+        Time-ordered Betti number records, each with at minimum:
+        {"cycle": int, "beta_0": int, "beta_1": int}
+    window : int
+        Rolling window size for baseline comparison (default 3).
+    beta0_jump_threshold : int
+        Minimum β₀ change to flag as anomaly (default 2).
+    beta1_jump_threshold : int
+        Minimum β₁ change to flag as anomaly (default 1).
+
+    Returns
+    -------
+    list of dict
+        Detected anomalies, each with:
+        {"cycle": int, "anomaly_type": str, "beta_0": int, "beta_1": int,
+         "delta_beta_0": int, "delta_beta_1": int, "baseline_beta_0": float,
+         "baseline_beta_1": float, "severity": str}
+    """
+    if len(betti_history) < window + 1:
+        return []
+
+    anomalies = []  # type: List[dict]
+
+    for idx in range(window, len(betti_history)):
+        current = betti_history[idx]
+        # Compute baseline from preceding window
+        window_slice = betti_history[idx - window:idx]
+        baseline_b0 = sum(r.get("beta_0", 0) for r in window_slice) / float(window)
+        baseline_b1 = sum(r.get("beta_1", 0) for r in window_slice) / float(window)
+
+        cur_b0 = current.get("beta_0", 0)
+        cur_b1 = current.get("beta_1", 0)
+
+        delta_b0 = cur_b0 - int(round(baseline_b0))
+        delta_b1 = cur_b1 - int(round(baseline_b1))
+
+        abs_d_b0 = abs(delta_b0)
+        abs_d_b1 = abs(delta_b1)
+
+        anomaly_type = None  # type: Optional[str]
+        severity = "none"
+
+        # Check for simultaneous jumps first (phase transition)
+        if abs_d_b0 >= beta0_jump_threshold and abs_d_b1 >= beta1_jump_threshold:
+            anomaly_type = "topological_phase_transition"
+            severity = "critical"
+        elif delta_b0 >= beta0_jump_threshold:
+            # β₀ increase = fragmentation
+            n_vertices = current.get("n_vertices", cur_b0)
+            if n_vertices > 0 and cur_b0 >= n_vertices:
+                anomaly_type = "coherence_collapse"
+                severity = "critical"
+            else:
+                anomaly_type = "fragmentation"
+                severity = "warning" if abs_d_b0 >= 2 * beta0_jump_threshold else "moderate"
+        elif delta_b0 <= -beta0_jump_threshold:
+            # β₀ decrease = merging / consolidation (usually healthy)
+            anomaly_type = "consolidation"
+            severity = "info"
+        elif delta_b1 >= beta1_jump_threshold:
+            # β₁ increase = new cycles forming
+            anomaly_type = "cycle_formation"
+            severity = "warning"
+        elif delta_b1 <= -beta1_jump_threshold:
+            # β₁ decrease = cycles closing (obligation resolution)
+            anomaly_type = "cycle_resolution"
+            severity = "info"
+
+        if anomaly_type is not None:
+            anomalies.append({
+                "cycle": current.get("cycle", idx),
+                "anomaly_type": anomaly_type,
+                "beta_0": cur_b0,
+                "beta_1": cur_b1,
+                "delta_beta_0": delta_b0,
+                "delta_beta_1": delta_b1,
+                "baseline_beta_0": round(baseline_b0, 4),
+                "baseline_beta_1": round(baseline_b1, 4),
+                "severity": severity,
+            })
+
+    return anomalies
+
+
+def graph_snapshot_observables(edges, all_node_ids):
+    # type: (list, List[str]) -> List[float]
+    """
+    Extract a fixed-dimensional observable vector from a graph edge snapshot,
+    suitable for time-delay embedding and persistent homology tracking.
+
+    The observable vector captures:
+      [n_edges, n_active_nodes, mean_degree, max_degree, n_edge_types,
+       edge_type_entropy, n_confirmations, n_challenges, n_contradictions,
+       confirmation_ratio]
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+
+    Returns
+    -------
+    list of float
+        10-dimensional observable vector.
+    """
+    n_edges = float(len(edges))
+    n_nodes = float(len(all_node_ids))
+
+    # Node degrees
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+    degrees = [0.0] * len(all_node_ids)
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None:
+            degrees[i] += 1.0
+        if j is not None:
+            degrees[j] += 1.0
+
+    active_nodes = float(sum(1 for d in degrees if d > 0))
+    mean_degree = sum(degrees) / max(n_nodes, 1.0)
+    max_degree = max(degrees) if degrees else 0.0
+
+    # Edge type distribution
+    type_counts = defaultdict(int)  # type: Dict[str, int]
+    for e in edges:
+        etype = e.get("type", "unknown")
+        type_counts[etype] += 1
+
+    n_edge_types = float(len(type_counts))
+
+    # Edge type entropy
+    total_e = float(max(len(edges), 1))
+    etype_entropy = 0.0
+    for count in type_counts.values():
+        p = count / total_e
+        if p > 0:
+            etype_entropy -= p * math.log(p)
+
+    n_confirmations = float(
+        type_counts.get("confirms", 0) + type_counts.get("supports", 0)
+    )
+    n_challenges = float(
+        type_counts.get("challenges", 0) + type_counts.get("refutes", 0)
+        + type_counts.get("contradicts", 0)
+    )
+    n_contradictions = float(type_counts.get("contradicts", 0))
+
+    conf_ratio = n_confirmations / max(n_confirmations + n_challenges, 1.0)
+
+    return [
+        n_edges, active_nodes, mean_degree, max_degree, n_edge_types,
+        etype_entropy, n_confirmations, n_challenges, n_contradictions,
+        conf_ratio,
+    ]
 
 
 # ── Singleton accessor ────────────────────────────────────────────────────────

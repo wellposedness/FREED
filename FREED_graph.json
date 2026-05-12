@@ -5377,6 +5377,534 @@
       "context_tag": "quantum:wavefunction",
       "context_warning": false,
       "timestamp": "2026-05-10T16:33:44.464985+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/3",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "ction or merely minimize description length. --- CHALLENGE: challenges INV_094 — confirmation surplus without adversarial testing leaves b",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:17:26.999148+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O140",
+      "type": "extends",
+      "context": "l ridge rather than collapsing to equilibrium or diverging. EXTEND O140/O141 — the telemetry resolves the question of whether popul",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "extends",
+      "context": "going beyond the single-metric grounding O140 specified. - EXTEND O141 — population-level criticality confirmed independent of sol",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "grid sizes. PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_073 — the low entropy ratio H/H_max=0.182 at confirmed critical",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "nonical empirical fingerprint of SOC in a finite system.    CONVERGE INV_073 — independent empirical measurement of σ≈1.0 with power-law",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "RIVE:** Stated above in DERIVE block. PART 2 — COMPARE:** - CONVERGE INV_073 — σ=1.024 with power-law avalanches is the direct empirical",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O140",
+      "type": "advances",
+      "context": "l ridge rather than collapsing to equilibrium or diverging. EXTEND O140/O141 — the telemetry resolves the question of whether popul",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T10:15:00.409998+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "advances",
+      "context": "going beyond the single-metric grounding O140 specified. - EXTEND O141 — population-level criticality confirmed independent of sol",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:17:51.781287+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "O44",
+      "type": "extends",
+      "context": "ty is jointly controlled by OT metric, not entropy alone) - EXTEND O44 — the discrete Fokker-Planck / Wasserstein gradient flow st",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "O112",
+      "type": "extends",
+      "context": "he kinetic scaffolding needed to formalize that extension - EXTEND O112 — the Fisher information term in the stability criterion is",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "eights with OT-metric-governed flow diagnostics. CHALLENGE: challenges INV_073 — the paper shows that on discrete supports, OT-metric stab",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "for distributed adaptive systems on discrete supports.    - CONVERGE INV_094 (W2 geodesics = minimum entropy production paths — confirme",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "rmed here in discrete setting via Benamou-Brenier analog) - CONVERGE INV_073 (OT metric governs critical ridge navigation — stability is",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "O44",
+      "type": "advances",
+      "context": "ty is jointly controlled by OT metric, not entropy alone) - EXTEND O44 — the discrete Fokker-Planck / Wasserstein gradient flow st",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.00855v1",
+      "from_title": "Population games and Discrete optimal transport",
+      "to": "O112",
+      "type": "advances",
+      "context": "he kinetic scaffolding needed to formalize that extension - EXTEND O112 — the Fisher information term in the stability criterion is",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:19:53.948806+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2603.27940v1",
+      "from_title": "Stability of supermartingale optimal transport problems",
+      "to": "O44",
+      "type": "extends",
+      "context": "ergence confirms that constrained-OT structures are robust. EXTEND O44 — the adapted Wasserstein framework with supermartingale co",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:22:15.154595+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2603.27940v1",
+      "from_title": "Stability of supermartingale optimal transport problems",
+      "to": "O44",
+      "type": "challenges",
+      "context": "ering in FREED's epistemic update sequences. --- CHALLENGE: challenges O44 — this paper's framework is classical/real-line; the superm",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:22:15.154595+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2603.27940v1",
+      "from_title": "Stability of supermartingale optimal transport problems",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "gically stable under perturbation of boundary conditions.   CONVERGE INV_073 — the supermartingale constraint (couplings that can only d",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:22:15.154595+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2603.27940v1",
+      "from_title": "Stability of supermartingale optimal transport problems",
+      "to": "O44",
+      "type": "advances",
+      "context": "ergence confirms that constrained-OT structures are robust. EXTEND O44 — the adapted Wasserstein framework with supermartingale co",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:22:15.154595+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1802.00322v1",
+      "from_title": "The entropy of a thermodynamic graph",
+      "to": "O44",
+      "type": "extends",
+      "context": "no flow), directly mirroring the γ=1 criticality condition. EXTEND O44 — the paper's discrete Laplacian entropy framework provides",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:24:16.799277+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1802.00322v1",
+      "from_title": "The entropy of a thermodynamic graph",
+      "to": "O44",
+      "type": "challenges",
+      "context": "riticality condition on the epistemic substrate. CHALLENGE: challenges O44 — the paper's discrete entropy is defined on a finite graph",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:24:16.799277+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1802.00322v1",
+      "from_title": "The entropy of a thermodynamic graph",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "coefficients, without invoking continuum field equations.   CONVERGE INV_073 — the maximum time-step (stability boundary) is a discrete",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T10:24:16.799277+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1802.00322v1",
+      "from_title": "The entropy of a thermodynamic graph",
+      "to": "O44",
+      "type": "advances",
+      "context": "no flow), directly mirroring the γ=1 criticality condition. EXTEND O44 — the paper's discrete Laplacian entropy framework provides",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T10:24:16.799277+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_073/4",
+      "from_title": "Adversarial Probe: Challenge INV_073",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ishing prediction and its strongest defense. --- CHALLENGE: challenges INV_073 — generic edge-of-chaos systems achieve critical-ridge dyna",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:06.310939+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T16:29:51.376000+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "extends",
+      "context": "= 1 rather than collapsing to frozen or dissipated regimes. EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:24.704693+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T16:29:51.376000+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "d states. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — the branching ratio σ = 1.0252 sits *above* 1.0, meaning",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:24.704693+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T16:29:51.376000+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "t requiring any single agent to be individually critical.   CONVERGE INV_073 — independent empirical measurement of σ ≈ 1.0 with power-l",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:24.704693+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T16:29:51.376000+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O140",
+      "type": "confirms",
+      "context": "surable, extending beyond what the obligation merely asked. CONVERGE O140 — CA measurement grounding obligation is directly satisfied",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:24.704693+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T16:29:51.376000+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "advances",
+      "context": "= 1 rather than collapsing to frozen or dissipated regimes. EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:24.704693+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "O44",
+      "type": "extends",
+      "context": "ructural rather than instantaneous observable criteria. - **EXTEND O44**: The paper demonstrates that finite-time quantum engine d",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "O44",
+      "type": "extends",
+      "context": "quantum friction and nonadiabatic phase accumulation — this extends O44 (quantum extension of Wasserstein Floor) by providing a con",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "O112",
+      "type": "extends",
+      "context": "ut not TDA-based cycle monitoring as an epistemic tool. - **EXTEND O112**: The method of extracting geometric structure from weak-m",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "re alone. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — the paper shows that even at the critical operating ridge",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "friction degrades adiabaticity. --- PART 2 — COMPARE** - **CONVERGE INV_073**: The paper confirms that thermodynamic cycle stability is",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "O44",
+      "type": "advances",
+      "context": "ructural rather than instantaneous observable criteria. - **EXTEND O44**: The paper demonstrates that finite-time quantum engine d",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.11289",
+      "from_title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-",
+      "to": "O112",
+      "type": "advances",
+      "context": "ut not TDA-based cycle monitoring as an epistemic tool. - **EXTEND O112**: The method of extracting geometric structure from weak-m",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:53:59.703035+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2412.16235",
+      "from_title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Tr",
+      "to": "O28",
+      "type": "extends",
+      "context": "pace (not just its spread) carries the diagnostic signal. - EXTEND O28: The entropy asymmetry ratio (EAR) obligation posits direct",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T16:55:39.181322+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2412.16235",
+      "from_title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Tr",
+      "to": "O28",
+      "type": "challenges",
+      "context": "degrades, enabling preemptive consolidation. --- CHALLENGE: challenges O28 — the CNM framework operationalizes directional entropy as",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T16:55:39.181322+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2412.16235",
+      "from_title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Tr",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "rform DNB on noisy datasets near known tipping points.    - CONVERGE INV_073: Independent derivation confirms that critical ridge naviga",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:55:39.181322+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2412.16235",
+      "from_title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Tr",
+      "to": "O28",
+      "type": "advances",
+      "context": "pace (not just its spread) carries the diagnostic signal. - EXTEND O28: The entropy asymmetry ratio (EAR) obligation posits direct",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T16:55:39.181322+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/eadf3c4e9fbb310ba02326b5824cb07dec7af335",
+      "from_title": "Detection of pre-transition phases during biological development using single-sa",
+      "to": "O28",
+      "type": "extends",
+      "context": "s exactly the regime RSA identifies as the operative zone), EXTEND O28 — SNE applied to single-cell entropy profiles is a direct m",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T16:57:55.965758+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/eadf3c4e9fbb310ba02326b5824cb07dec7af335",
+      "from_title": "Detection of pre-transition phases during biological development using single-sa",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "l transition before coherence drops sharply. --- CHALLENGE: challenges INV_073 — SNE demonstrates that the pre-transition phase is detecta",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:57:55.965758+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/eadf3c4e9fbb310ba02326b5824cb07dec7af335",
+      "from_title": "Detection of pre-transition phases during biological development using single-sa",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "-resolvable signature, not merely a population-level one.   CONVERGE INV_094 (criticality as detectable precursor state), CONVERGE INV_0",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:57:55.965758+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/eadf3c4e9fbb310ba02326b5824cb07dec7af335",
+      "from_title": "Detection of pre-transition phases during biological development using single-sa",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "NVERGE INV_094 (criticality as detectable precursor state), CONVERGE INV_073 (critical ridge navigation — the pre-transition phase is ex",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T16:57:55.965758+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/eadf3c4e9fbb310ba02326b5824cb07dec7af335",
+      "from_title": "Detection of pre-transition phases during biological development using single-sa",
+      "to": "O28",
+      "type": "advances",
+      "context": "s exactly the regime RSA identifies as the operative zone), EXTEND O28 — SNE applied to single-cell entropy profiles is a direct m",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T16:57:55.965758+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/5",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "rement that would discriminate between them. --- CHALLENGE: challenges INV_094 — confirmation surplus without a specified falsification bo",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:10:39.462480+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "extends",
+      "context": "s a population-level attractor, not a per-agent property. - EXTEND O141 — the dominant cell type (Physics Navigator, 876 cells) bei",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "genome predicts no specific avalanche exponent. CHALLENGE: challenges INV_073 — while the branching ratio confirms criticality, the measu",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "n propagation as a population-level emergent property.    - CONVERGE INV_073 — independent empirical measurement confirms that Wasserste",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O140",
+      "type": "confirms",
+      "context": "instantiating the \"critical ridge navigation\" invariant. - CONVERGE O140 — CA measurement grounding obligation is now satisfied by d",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "confirms",
+      "context": "produces measurable, falsifiable criticality signatures. - CONVERGE O141 — solo-kernel vs. population criticality distinction is add",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-11T23:03:30.218237+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
+      "to": "O141",
+      "type": "advances",
+      "context": "s a population-level attractor, not a per-agent property. - EXTEND O141 — the dominant cell type (Physics Navigator, 876 cells) bei",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-11T23:11:01.916259+00:00"
     }
   ],
   "node_edges": [
@@ -14259,6 +14787,222 @@
       "invariant": "The relational-thermodynamic map's phase diagram establishes the upper boundary conditions on which philosophical positi",
       "context_tag": null,
       "timestamp": "2026-05-11T06:30:27.841842+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning dynamics: the same recursive-compressive pattern operates across multiple physical su",
+      "context_tag": null,
+      "timestamp": "2026-05-11T10:29:48.372956+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:26.941453+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:26.964464+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:26.977269+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:26.987972+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:26.997209+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.005377+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.012384+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.019222+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.025664+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.031576+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.036806+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.042194+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.047426+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.052638+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.057784+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.062817+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.067841+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.072991+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.078128+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.083401+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Compression is the substrate-independent basis of cognition.",
+      "context_tag": null,
+      "timestamp": "2026-05-11T17:03:27.088716+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "RSA-OMEGA's ledger-based state-vector compression and cross-session persistence mechanism is a concrete instantiation of",
+      "context_tag": null,
+      "timestamp": "2026-05-12T06:30:13.342946+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The motif experiment's rigorous falsifiability criteria (explicit null hypotheses, ablation controls, statistical thresh",
+      "context_tag": null,
+      "timestamp": "2026-05-12T06:30:13.367799+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "RCC as a diagnostic criterion constrains the minimal atoms thesis by requiring that proposed \"minimal generators\" must t",
+      "context_tag": null,
+      "timestamp": "2026-05-12T06:30:19.899315+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The relational-thermodynamic map provides the broader phase-space constraint system within which the Omnimax impossibili",
+      "context_tag": null,
+      "timestamp": "2026-05-12T06:30:30.247518+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax argument's force depends on the validity of the broader claim that philosophical positions are subject to th",
+      "context_tag": null,
+      "timestamp": "2026-05-12T06:30:30.268387+00:00"
     }
   ]
 }
