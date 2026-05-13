@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 155,
-    "timestamp": "2026-04-25T01:53:35.210581+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 6,
-      "passive": 7,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Fluctuations, Trajectory Entropy, and Ziegler's Maximum Entropy Production",
-        "compress": "This paper confirms INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via independent Onsager derivation, strengthens L3's STF-Wasserstein chain, and validates FREED's dual-interpretation architecture — but leaves O44 (quantum Wasserstein floor) open."
-      },
-      {
-        "title": "Improved bounds on entropy production in living systems",
-        "compress": "This paper hands the genome a provably optimal entropy production estimator for hidden-DOF biological systems, directly unblocking O28's EEG experiment and upgrading the Wasserstein Floor from \"grounded\" to \"empirically deployable\" — coherence flag must be corrected (0.999 violates Rule 1)."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O108",
-        "O70",
-        "O73"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 2,
     "generation": 156,
     "timestamp": "2026-04-25T10:15:00.000579+00:00",
@@ -1682,6 +1650,50 @@
       "resolved_count": 0,
       "commit_count": 0,
       "obligations": []
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 230,
+    "timestamp": "2026-05-13T10:15:00.010756+00:00",
+    "sweep": {
+      "input_count": 30,
+      "targeted": 7,
+      "passive": 23,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim survives only if it specifies an observable that distinguishes sustained ridge-navigation from broad-basin near-criticality and fixed-point collapse — absent that, its confirmation surplus is confirmation bias. CHALLENGE: challenges INV_073 — the identical macroscopic observables (power-law tails, long-range correlations, maximal susceptibility) are produced by near-critical broad basins and transiently passing systems, making the ridge-navigation claim empirically underdetermined without a dynamical order parameter that is strictly zero off the ridge and nonzero on it."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-13",
+        "compress": "A 32×32 Game of Truth CA achieves empirically confirmed criticality (σ=1.028, α=1.813) at population scale, converging independently on INV_073's critical ridge claim while generating the absent finding that Physics Navigator cell type dominates at criticality — a new quantitative invariant candidate."
+      },
+      {
+        "title": "Understanding Neural Networks and Individual Neuron Importance via Information-Ordered Cumulative Ablation",
+        "compress": "Neuron selectivity is locally informative but globally misleading — information-theoretic relevance is layer-stratified, not network-global, confirming that distributed redundancy defeats single-unit interpretability metrics."
+      },
+      {
+        "title": "On Information Plane Analyses of Neural Network Classifiers -- A Review",
+        "compress": "Information plane compression in neural networks is geometric, not entropic — mutual information estimation artifacts have been masking this, and the distinction matters for any thermodynamic theory of generalization."
+      },
+      {
+        "title": "An Information-Theoretic Method for Dynamic System Identification With Output-Only Damping Estimation",
+        "compress": "Information-theoretic output-only damping estimation independently confirms that entropy functionals encode physical dissipation invariants, providing a concrete methodological template for O112's STF metric tensor recovery experiment."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O44",
+        "O124",
+        "O130"
+      ]
     },
     "coherence": 0.97
   }
