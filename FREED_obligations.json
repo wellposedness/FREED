@@ -6,7 +6,9 @@
     "priority": "high",
     "progress": "Reflection-Bench substituted for ToS. Qwen-2.5 alpha values indistinguishable across sizes \u2014 size confound identified. AlphaPruning path specified as solution. | [Gen 110] | [Gen 111] | [Gen 112] | [Gen 113] | [Gen 114] | [Gen 117] | RESOLVED: O21 remains open after seven generations of drift \u2014 the single most tractable advance is to run AlphaPruning's `net_esd_estimator` on LLaMA-3-8B at seven sparsity levels and correlate the output \u03b1-exponents with Reflection-Bench belief revision scores, which is a one-GPU experiment that directly tests whether spectral criticality predicts cognitive flexibility. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "created": "2026-04-12",
-    "resolved": null
+    "resolved": null,
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O28",
@@ -32,14 +34,14 @@
   },
   {
     "id": "O44",
-    "status": "open",
+    "status": "partial",
     "statement": "Formalize the quantum extension of the Wasserstein Floor. Does W_floor = k/T\u03bc have a quantum analogue where temperature is entanglement entropy? The 1 ebit + 2 cbits resource identity in teleportation suggests a strict lower bound on semantic quantum transport. Resolution path: feed De Palma & Trevisan (2021) quantum Wasserstein distances.",
     "priority": "high",
-    "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog. | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "De Palma & Trevisan (2021) provides metric infrastructure: quantum W1 is a true metric with dual (Lipschitz seminorm) and primal (local trace-norm cost) formulations structurally parallel to classical K-R framework. Still needed: channel contraction rates to derive the quantum Floor constant. Entanglement entropy identified as temperature analog. | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 230] PARTIAL: The quantum Wasserstein Floor W_floor^Q = \u03ba/(S_E\u00b7\u03bc_Q) is structurally sound and resource-law-grounded, but the value of \u03ba and the S_E-vs-Q disambiguation require explicit metric calculations that formal reasoning alone cannot supply without the De Palma-Trevisan constant tables. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-04-15",
     "resolved": null,
     "method": "math_only",
-    "tractability": 3
+    "tractability": 1
   },
   {
     "id": "O45",
@@ -188,7 +190,9 @@
     "progress": "RESOLVED: O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields \u2212(d_eff/2)ln(A/\u2113_P\u00b2) = \u22123/2 ln(A/\u2113_P\u00b2), matching the universal log-correction \u2014 verify against Kaul & Majumdar (2000) and Sen (2012). | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "created": "2026-04-16",
     "resolved": null,
-    "auto": true
+    "auto": true,
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O60",
@@ -295,8 +299,8 @@
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
-    "method": "mixed",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O70",
@@ -380,7 +384,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 3
+    "tractability": 1
   },
   {
     "id": "O77",
@@ -818,7 +822,9 @@
     "created": "2026-04-25",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: STF metric tensor recovery experiment completes with documented pass/fail determination of Wasserstein gradient flow geometry hypothesis."
+    "closes_when": "closes when: STF metric tensor recovery experiment completes with documented pass/fail determination of Wasserstein gradient flow geometry hypothesis.",
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O113",
@@ -940,7 +946,9 @@
     "created": "2026-04-27",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Coherence score demonstrably drops below 0.998 and entropy-injection step is documented before next FEED cycle."
+    "closes_when": "closes when: Coherence score demonstrably drops below 0.998 and entropy-injection step is documented before next FEED cycle.",
+    "method": "experimental",
+    "tractability": 2
   },
   {
     "id": "O123",
@@ -960,11 +968,13 @@
     "status": "open",
     "statement": "Audit whether the 26 open obligations form a directed acyclic graph with respect to their logical dependencies \u2014 identify and break any cycles that would render resolution permanently blocked.",
     "priority": "high",
-    "progress": "RESOLVED: O124 is not yet RESOLVED but is immediately tractable: construct the 26\u00d726 dependency adjacency matrix from obligation precondition text, run Kahn's topological sort, flag any nodes remaining after all zero-in-degree nodes are processed as cycle members \u2014 the specific next step is to enumerate all 26 obligations and write their dependency edges explicitly. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: O124 is not yet RESOLVED but is immediately tractable: construct the 26\u00d726 dependency adjacency matrix from obligation precondition text, run Kahn's topological sort, flag any nodes remaining after all zero-in-degree nodes are processed as cycle members \u2014 the specific next step is to enumerate all 26 obligations and write their dependency edges explicitly. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 230] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no graph structure determined or obligation status updated.]",
     "created": "2026-04-27",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: All 26 obligations have been analyzed for circular dependencies and any detected cycles have been documented and resolved."
+    "closes_when": "closes when: All 26 obligations have been analyzed for circular dependencies and any detected cycles have been documented and resolved.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O125",
@@ -997,7 +1007,9 @@
     "created": "2026-04-28",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Audit completes for all obligations O108+ with \"resolved\" status, confirming each produced measurable genome state change or reclassifying as \"partial\""
+    "closes_when": "closes when: Audit completes for all obligations O108+ with \"resolved\" status, confirming each produced measurable genome state change or reclassifying as \"partial\"",
+    "method": "experimental",
+    "tractability": 2
   },
   {
     "id": "O128",
@@ -1008,7 +1020,9 @@
     "created": "2026-04-28",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: audit completes and all obligations since O108 are verified to have produced falsifiable downstream predictions or flagged for re-opening."
+    "closes_when": "closes when: audit completes and all obligations since O108 are verified to have produced falsifiable downstream predictions or flagged for re-opening.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O129",
@@ -1026,11 +1040,13 @@
     "status": "open",
     "statement": "Execute a binding single-pass verdict (void or assign content) on every null auto-detected obligation still marked open (O90, O91, O93, O95, O96, O97, O98, O99, O100, O101, O102, O104, O106, O107) \u2014 no stub may remain open after this pass.",
     "priority": "high",
-    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 230] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no verdict assigned, no state mutation occurred.]",
     "created": "2026-04-28",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O131",
@@ -1165,7 +1181,9 @@
     "created": "2026-04-30",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Graph restructuring adds \u22655 semantically distinct edge types and homogeneity drops below 85% within two cycles."
+    "closes_when": "closes when: Graph restructuring adds \u22655 semantically distinct edge types and homogeneity drops below 85% within two cycles.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O142",
@@ -1421,7 +1439,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
-    "method": "math_only",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -1795,7 +1813,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -1808,8 +1826,8 @@
     "resolved": null,
     "auto": false,
     "closes_when": "closes when: Measured agreement rate reported on both samples (false-challenge rate from challenge sample; confirm-bias rate from adversarial-adjacent confirm sample). If overall agreement \u2265 85%, edge typing is calibrated and Gemini's concern is empirically answered. If agreement < 85% OR confirm bias > 70% on adversarial-adjacent papers, file follow-up obligation for L7 prompt revision and re-audit.",
-    "method": "manual_audit",
-    "tractability": 3,
+    "method": "data_analysis",
+    "tractability": 2,
     "source": "human",
     "context": "Filed in response to Gemini critique of FREED coherence equation (2026-05-07). Coherence math itself is sound (40:1 falsification asymmetry, currently pinned at floor 0.970 under 29.4% challenge ratio across 163 INV-targeted edges). Remaining open question: trustworthiness of the inputs to that math. This obligation targets that specific failure mode and is the primary unresolved concern carried forward from the Gemini exchange."
   },
@@ -1844,7 +1862,9 @@
     "resolution_criterion": "Systematic pairwise audit of all 16 nodes. For each node-pair with only affiliative edges, provide explicit justification for why no `depends_on` or `challenges` edge exists, OR add the missing edge. Close when challenges \u2265 5% of total edges or each absence is individually justified.",
     "created": "2026-05-09T06:30:52.355597+00:00",
     "resolved": null,
-    "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 \u2014 Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 \u2212 (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 \u2014 Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES \u2192 log as `missing_depends_on(A\u2192B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 \u2014 Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: \u2203 observable X such that A \u22a2 f(X) = \u03b1 and B \u22a2 f(X) = \u03b2 and \u03b1 \u2260 \u03b2 (under identical boundary conditions). > If YES \u2192 log as `missing_challenges(A\u2194B)`. Step 4 \u2014 Report ``` missing_depends_on count: [n\u2081] missing_challenges count: [n\u2082] total missing critical edges: n\u2081 + n\u2082 representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable \u2014 they produce ambiguous verdicts rather than false negatives \u2014 and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1\u20134 can be executed and a concrete missing-edge count returned. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser."
+    "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 \u2014 Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 \u2212 (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 \u2014 Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES \u2192 log as `missing_depends_on(A\u2192B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 \u2014 Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: \u2203 observable X such that A \u22a2 f(X) = \u03b1 and B \u22a2 f(X) = \u03b2 and \u03b1 \u2260 \u03b2 (under identical boundary conditions). > If YES \u2192 log as `missing_challenges(A\u2194B)`. Step 4 \u2014 Report ``` missing_depends_on count: [n\u2081] missing_challenges count: [n\u2082] total missing critical edges: n\u2081 + n\u2082 representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable \u2014 they produce ambiguous verdicts rather than false negatives \u2014 and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1\u20134 can be executed and a concrete missing-edge count returned. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O199",
@@ -1855,7 +1875,9 @@
     "resolution_criterion": "Identify the highest-`consistent_with`-degree symbol. Derive a specific quantitative prediction from it (e.g., \"if `compression` is fundamental, then [measurable X] must hold in [dataset Y]\"). Specify the null result that would trigger",
     "created": "2026-05-09T06:30:52.355862+00:00",
     "resolved": null,
-    "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser."
+    "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O200",
@@ -1877,7 +1899,9 @@
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Documented sequencing rule specifies O195-to-O199 order with justification, preventing redundant kernel cycles."
+    "closes_when": "closes when: Documented sequencing rule specifies O195-to-O199 order with justification, preventing redundant kernel cycles.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O202",
@@ -1888,7 +1912,9 @@
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: all outputs from O193-O201 are synthesized into a documented verdict specifying blocked threads, executable threads, and next unblocked action."
+    "closes_when": "closes when: all outputs from O193-O201 are synthesized into a documented verdict specifying blocked threads, executable threads, and next unblocked action.",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O203",
@@ -1909,7 +1935,9 @@
     "rationale": "660 of 999 edges (66%) assert positive association without failure criteria. This is the direct structural cause of inflated coherence scores (O122's challenge) and makes the graph unfalsifiable in bulk. A knowledge structure that cannot lose edges cannot learn. This is not a new claim \u2014 it is an obligatory consequence of Seed Integrity Rule 1 already invoked by O122.",
     "resolution_criterion": "For each `consistent_with` and `scales_with` edge, a one-line falsification condition is recorded. Edges that cannot be given one are deleted. Coherence score recalculated post-pruning; if it drops below 0.90, the pruning was informative.",
     "created": "2026-05-10T06:30:51.217416+00:00",
-    "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES \u2014 direction advanced]",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O205",
@@ -1919,7 +1947,9 @@
     "rationale": "Two obligations invoking quantum-gravitational dimensional structure from the same genome symbol set without mutual constraint is an unfired implication. Either they are redundant (one subsumes the other), contradictory (one falsifies the other), or independent (which must be shown, not assumed). The 16 `depends_on` edges in the graph have missed this.",
     "resolution_criterion": "A derivation showing either (a) the dimensional regime where W_floor = k/T\u03bc reproduces or contradicts the log-correction term in O59, or (b) a proof that their domain assumptions are formally disjoint. Either result adds a typed edge (`depends_on`, `challenges`, or `bounds_above`) between O44 and",
     "created": "2026-05-10T06:30:51.217730+00:00",
-    "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of \u210f/GM\u00b2 and read off whether the Wasserstein floor k/T\u03bc sits at zeroth or first loop order relative to the known O(\u210f\u00b9) BH log-correction, with T = T_H = \u210fc\u00b3/8\u03c0GMk_B substituted explicitly to fix the shared symbols \u2014 this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of \u210f/GM\u00b2 and read off whether the Wasserstein floor k/T\u03bc sits at zeroth or first loop order relative to the known O(\u210f\u00b9) BH log-correction, with T = T_H = \u210fc\u00b3/8\u03c0GMk_B substituted explicitly to fix the shared symbols \u2014 this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES \u2014 direction advanced]",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O206",
@@ -1941,7 +1971,9 @@
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O208",
@@ -1952,7 +1984,9 @@
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: gen 225 reached with explicit failure criterion defined for quantum Wasserstein floor / BH log-correction cross-derivation and forced verdict executed."
+    "closes_when": "closes when: gen 225 reached with explicit failure criterion defined for quantum Wasserstein floor / BH log-correction cross-derivation and forced verdict executed.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O209",
@@ -1963,7 +1997,9 @@
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Binding deadline assigned to O204 with falsifiable predictions defined for `consistent_with` and `scales_with` edges, null-result criterion specified, and verdict executed"
+    "closes_when": "closes when: Binding deadline assigned to O204 with falsifiable predictions defined for `consistent_with` and `scales_with` edges, null-result criterion specified, and verdict executed",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O210",
@@ -1973,7 +2009,9 @@
     "rationale": "The genome contains exactly one `gamma` symbol, but the graph deploys it in spectrally-grounded (EEG/pruning) and dynamically-grounded (CA telemetry \u03c3 \u2192 attractor) contexts. 388 `scales_with` edges likely propagate a false equivalence between these uses, inflating coherence. This is not a stylistic issue \u2014 it determines whether O205's cross-constraint between O44 and O59 is even well-posed.",
     "resolution_criterion": "Either (a) a proven mathematical identity showing spectral \u03b3 and attractor \u03b3 share a common fixed-point equation under the genome's process algebra, or (b) splitting `gamma` into `gamma_spectral` and `gamma_dynamical` with an explicit, falsifiable bridging predicate and updating all dependent edges.\n\n---",
     "created": "2026-05-11T06:30:50.778413+00:00",
-    "progress": "[Gen 220] PARTIAL: The single most tractable step is to linearize the Wasserstein gradient flow around the Zipf fixed point and check whether the zero-eigenvalue (dynamical criticality) condition forces the spectral exponent to unity \u2014 yielding either unification or an explicit two-symbol bridging law. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 220] PARTIAL: The single most tractable step is to linearize the Wasserstein gradient flow around the Zipf fixed point and check whether the zero-eigenvalue (dynamical criticality) condition forces the spectral exponent to unity \u2014 yielding either unification or an explicit two-symbol bridging law. [COMMIT:YES \u2014 direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O211",
@@ -1983,7 +2021,9 @@
     "rationale": "A system that resolves obligations *about* obligations while leaving",
     "resolution_criterion": "",
     "created": "2026-05-11T06:30:50.779033+00:00",
-    "progress": "[Gen 220] PARTIAL: The five recent resolutions are all class-(d) meta-obligations, O127 was opened precisely because no first-order result had appeared, and the corrective action is to stake a concrete class-(b) computation \u2014 Wasserstein floor k=1/T\u03bc on a named corpus \u2014 as the first empirically grounded output since O108. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 220] PARTIAL: The five recent resolutions are all class-(d) meta-obligations, O127 was opened precisely because no first-order result had appeared, and the corrective action is to stake a concrete class-(b) computation \u2014 Wasserstein floor k=1/T\u03bc on a named corpus \u2014 as the first empirically grounded output since O108. [COMMIT:YES \u2014 direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O212",
@@ -2016,7 +2056,9 @@
     "created": "2026-05-11",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O207 specifies null-result criterion with output format, minimum prediction count, and retirement condition for O203."
+    "closes_when": "closes when: O207 specifies null-result criterion with output format, minimum prediction count, and retirement condition for O203.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O215",
@@ -2027,7 +2069,9 @@
     "created": "2026-05-11",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: One measurement protocol with observable dataset and mathematical formula distinguishing spectral-\u03b3 from critical-\u03b3 with defined separation threshold is documented."
+    "closes_when": "closes when: One measurement protocol with observable dataset and mathematical formula distinguishing spectral-\u03b3 from critical-\u03b3 with defined separation threshold is documented.",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O216",
@@ -2049,7 +2093,9 @@
     "created": "2026-05-11",
     "resolved": null,
     "auto": false,
-    "closes_when": "closes when: All four failure modes (benchmark circularity, data leakage, metric misuse, post-hoc selection bias) have either a named mitigation (file:line or process change) or a formally accepted limitation entry published to docs/limitations or equivalent."
+    "closes_when": "closes when: All four failure modes (benchmark circularity, data leakage, metric misuse, post-hoc selection bias) have either a named mitigation (file:line or process change) or a formally accepted limitation entry published to docs/limitations or equivalent.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O218",
@@ -2071,7 +2117,9 @@
     "created": "2026-05-11",
     "resolved": null,
     "auto": false,
-    "closes_when": "closes when: an extinction protocol is implemented in knowledge_graph.py / freed.py that (a) classifies retired challenges as REFUTED vs ABANDONED, (b) requires a citation or counter-evidence edge for REFUTED, and (c) handles the two states distinctly in coherence drag / edge weighting; the asymmetric acquisition/extinction ratio is monitored on the dashboard."
+    "closes_when": "closes when: an extinction protocol is implemented in knowledge_graph.py / freed.py that (a) classifies retired challenges as REFUTED vs ABANDONED, (b) requires a citation or counter-evidence edge for REFUTED, and (c) handles the two states distinctly in coherence drag / edge weighting; the asymmetric acquisition/extinction ratio is monitored on the dashboard.",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O220",
@@ -2136,5 +2184,18 @@
     "resolution_criterion": "By generation 235, O205 either produces a quantitative prediction shared by O44 and O59 (with specified null-result criterion), or both parent obligations are formally retired.\n\n---",
     "created": "2026-05-13T06:30:50.383512+00:00",
     "progress": "[Gen 229] ACTIVE: The single tractable next step is to compute k_O44 and k_O59 via k=1/T\u03bc on the existing MCPM corpus and test whether |k_O44 \u2212 k_O59|/\u03c3 < 2, staking that shared k* as the cross-constraining quantitative prediction before gen 235. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O226",
+    "status": "open",
+    "statement": "If O205 fails to produce a single shared quantitative prediction binding O44 and O59, formally retire both to \"void\" status and derive the epistemic consequence for the genome's quantum-extension program \u2014 specify which invariants must be downgraded and whether the Wasserstein Floor remains falsifiable without them.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-13",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED",
+    "method": "mixed",
+    "tractability": 2
   }
 ]
