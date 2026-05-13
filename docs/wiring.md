@@ -3,7 +3,7 @@
 **Surgical navigation index for Claude Code and visiting LLMs.**
 To change X, read only the files and functions listed. Do not scan whole files.
 
-Last updated: 2026-05-01. Update this file whenever you add a module, rename a function, or change where data lives.
+Last updated: 2026-05-13. Update this file whenever you add a module, rename a function, or change where data lives.
 
 ---
 
@@ -24,6 +24,10 @@ Last updated: 2026-05-01. Update this file whenever you add a module, rename a f
 | Change node-edge classification logic | `knowledge_graph.py` | `classify_node_edge()` + `_SCALE_KEYWORDS`, `_IMPL_KEYWORDS`, `_DOMAIN_KEYWORDS` |
 | Grant `independent_confirmation` to a node-edge | `knowledge_graph.py` | Only via bootstrap CONVERGE or explicit cross-domain feed signal — never via `classify_node_edge()` keyword match |
 | Change edge extraction regex | `knowledge_graph.py` | `_EDGE_PATTERNS` L126 |
+| Classify compression-estimator type (geometric vs MI) | `knowledge_graph.py` | `classify_compression_estimator()` L358 — separates geometric compression (PCA rank, intrinsic dim, Riemannian) from MI-based (binning/KDE/KSG/MINE). Used in INV_094 challenge. `COMPRESSION_ESTIMATOR_TYPES` L308. Added 2026-05-13 |
+| Read estimator-type flag from a node-edge | `knowledge_graph.py` | `classify_compression_estimator()` returns `estimator_type` + `mi_estimator_warning` + `inv094_flag`; consumed in MI-ablation scoring at L546, L613 |
+| Estimate dissipation from output-only signal | `tamura_sweep.py` | `output_only_dissipation_estimator(signal)` L6290 — returns `mi_decay_rate`, `spectral_entropy`, `damping_regime`, `dissipation_score`. For passive monitoring of coherence stream. O112 (STF recovery). Added 2026-05-13 |
+| Time-lagged MI internal helper | `tamura_sweep.py` | `_time_lagged_mutual_information(signal, max_lag, n_bins)` — used by `output_only_dissipation_estimator()` |
 | Change what files the self-engineer may patch | `self_engineer.py` | `MODIFIABLE` L43 (restart daemon after) |
 | Add a file to the never-touch list | `self_engineer.py` | `SACRED` L55 (restart daemon after) |
 | Change patch format / str_replace logic | `self_engineer.py` | `_generate_patch()` L199, `_apply_str_replace()` L287 |
