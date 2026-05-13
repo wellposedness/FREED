@@ -1176,6 +1176,8 @@ class FREEDDaemon:
             self.astrocyte.record_usage(
                 input_tokens=_u.get("input_tokens", EST_TOKENS_FEED),
                 output_tokens=_u.get("output_tokens", 400),
+                cache_creation_tokens=_u.get("cache_creation_input_tokens", 0),
+                cache_read_tokens=_u.get("cache_read_input_tokens", 0),
             )
 
             # Build prediction weights: predicted INVs get 0.05, surprises get 1.0
@@ -1466,6 +1468,8 @@ class FREEDDaemon:
         self.astrocyte.record_usage(
             input_tokens=_u.get("input_tokens", EST_TOKENS_OBLIGATE),
             output_tokens=_u.get("output_tokens", 200),
+            cache_creation_tokens=_u.get("cache_creation_input_tokens", 0),
+            cache_read_tokens=_u.get("cache_read_input_tokens", 0),
         )
 
         compress = result.get("compress", "")
@@ -1854,6 +1858,8 @@ Output only the classification lines, nothing else."""
         self.astrocyte.record_usage(
             input_tokens=_u.get("input_tokens", EST_TOKENS_RESOLVE),
             output_tokens=_u.get("output_tokens", 600),
+            cache_creation_tokens=_u.get("cache_creation_input_tokens", 0),
+            cache_read_tokens=_u.get("cache_read_input_tokens", 0),
         )
 
         compress  = result.get("compress", "")

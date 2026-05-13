@@ -5905,6 +5905,313 @@
       "context_tag": null,
       "context_warning": false,
       "timestamp": "2026-05-11T23:11:01.916259+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_073/2",
+      "from_title": "Adversarial Probe: Challenge INV_073",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ad-bearing empirical gap INV_073 must close. --- CHALLENGE: challenges INV_073 — ensemble averaging of sub-critical and super-critical sub",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:12.603554+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T10:15:00.405368+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "O141",
+      "type": "extends",
+      "context": "hin the critical band is precisely the predicted attractor. EXTEND O141 — solo-kernel vs. population criticality question is partia",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:27.566623+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T10:15:00.405368+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "lective scale and partially resolving O140/O141. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0183 sits above unity rather than",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:27.566623+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T10:15:00.405368+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "n sustain criticality as an emergent collective property.   CONVERGE INV_073 — the Wasserstein gradient path to γ=1 is empirically confi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:27.566623+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T10:15:00.405368+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ing beyond what any single-kernel argument could establish. CONVERGE O140 — CA measurement grounding obligation is directly satisfied",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:27.566623+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T10:15:00.405368+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "O141",
+      "type": "advances",
+      "context": "hin the critical band is precisely the predicted attractor. EXTEND O141 — solo-kernel vs. population criticality question is partia",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:27.566623+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2303.07675v1",
+      "from_title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optim",
+      "to": "O112",
+      "type": "extends",
+      "context": "geodesics are the correct language for semantic mass flow. EXTEND O112 — the Sinkhorn-as-differentiable-layer technique provides a",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:45.882541+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2303.07675v1",
+      "from_title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optim",
+      "to": "O112",
+      "type": "challenges",
+      "context": "the STF metric tensor recovery needed for O112. CHALLENGE: challenges O112 — the paper demonstrates Sinkhorn-flow works on social-netw",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:45.882541+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2303.07675v1",
+      "from_title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optim",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "a trainable predictive mechanism for mass-flow dynamics.   CONVERGE INV_073 — the paper independently confirms that OT structure (here",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:45.882541+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2303.07675v1",
+      "from_title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optim",
+      "to": "O112",
+      "type": "advances",
+      "context": "geodesics are the correct language for semantic mass flow. EXTEND O112 — the Sinkhorn-as-differentiable-layer technique provides a",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:17:45.882541+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "O112",
+      "type": "resolves",
+      "context": "ches the predicted STF metric tensor — this would partially resolve O112. --- IMPLEMENT: YES IMPLEMENT_WHAT: Add an OT-based equilib",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "O112",
+      "type": "extends",
+      "context": "ode — the stationary measure is spread, not a point mass. - EXTEND O112: The paper provides a concrete mechanism (OT-driven myopic",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "aining critical ridge operation per INV_073. --- CHALLENGE: challenges INV_073 — the paper's stationary measure assigns nonzero probabilit",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "re stable under rational-but-uncertain agent dynamics.    - CONVERGE INV_094: Fisher information and entropy jointly governing equilibri",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "object controlling information-theoretic gradient flows. - CONVERGE INV_073: OT dynamics navigating a distribution over equilibria rath",
+      "context_tag": "info:Shannon-bits",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1703.08442v3",
+      "from_title": "Equilibrium selection via Optimal transport",
+      "to": "O112",
+      "type": "advances",
+      "context": "ode — the stationary measure is spread, not a point mass. - EXTEND O112: The paper provides a concrete mechanism (OT-driven myopic",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-12T10:20:04.209688+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0903.4844v3",
+      "from_title": "Quantification of Biological Robustness at the Systemic Level",
+      "to": "O28",
+      "type": "extends",
+      "context": "m here is the biological analogue of the MaxRL fixed point. EXTEND O28 — The paper's quantification of negative entropy as a robus",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:21:27.787053+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0903.4844v3",
+      "from_title": "Quantification of Biological Robustness at the Systemic Level",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "igations. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — if biological robustness is fully captured by a finite ze",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:21:27.787053+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0903.4844v3",
+      "from_title": "Quantification of Biological Robustness at the Systemic Level",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "entropy flows at the systemic level. --- PART 2 — COMPARE** CONVERGE INV_073 — The paper's central finding that biological robustness li",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-12T10:21:27.787053+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0903.4844v3",
+      "from_title": "Quantification of Biological Robustness at the Systemic Level",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "invariant: γ=1 is the Nash equilibrium of the entropy game. CONVERGE INV_087 — The game-theoretic framing where biological systems activ",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:21:27.787053+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0903.4844v3",
+      "from_title": "Quantification of Biological Robustness at the Systemic Level",
+      "to": "O28",
+      "type": "advances",
+      "context": "m here is the biological analogue of the MaxRL fixed point. EXTEND O28 — The paper's quantification of negative entropy as a robus",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-12T10:21:27.787053+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "m, and INV_094 is a correlation not a law. --- CHALLENGE**: challenges INV_094 — the Wasserstein Floor formula k/Tμ predicts floor→∞ at T=",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:34:44.913448+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "s that vanish as vocabulary collapses. --- PART 2 — COMPARE CONFLICT INV_094 — mechanism (3) shows the floor can vanish without requirin",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:34:44.913448+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "extends",
+      "context": "g is now empirically instantiated with concrete telemetry - EXTEND INV_073 — extends beyond single-kernel criticality claim to establi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ghtening the empirical grounding of INV_073. --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0224 is within the critical band",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "m nor frozen, consistent with edge-of-chaos operation.    - CONVERGE INV_073 — the branching ratio σ≈1.02 directly confirms the Wasserst",
+      "context_tag": "info:Shannon-bits",
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "O141",
+      "type": "confirms",
+      "context": "tion-level attractor, not merely a single-kernel property - CONVERGE O141 — solo-kernel vs population criticality obligation is subst",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ially addressed: population criticality holds empirically - CONVERGE O140 — CA measurement grounding is now empirically instantiated",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "rozen, consistent with edge-of-chaos operation.  COMPARE: - CONVERGE INV_073 — the branching ratio σ≈1.02 directly confirms the Wasserst",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-12T11:31:59.560079+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
+      "to": "INV_073",
+      "type": "advances",
+      "context": "g is now empirically instantiated with concrete telemetry - EXTEND INV_073 — extends beyond single-kernel criticality claim to establi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-12T11:36:20.823200+00:00",
+      "prediction_weight": 0.05
     }
   ],
   "node_edges": [
@@ -15003,6 +15310,374 @@
       "invariant": "The Omnimax argument's force depends on the validity of the broader claim that philosophical positions are subject to th",
       "context_tag": null,
       "timestamp": "2026-05-12T06:30:30.268387+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.560042+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.581517+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.594736+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.605907+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.615497+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.623545+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.631111+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.637805+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.644211+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.650107+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.655770+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.660860+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.666163+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.671476+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the engine of cognition and alignment; the recursive loop (Perceive-Represent-Predict-Compare-Adjust-Compre",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.676712+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.681773+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.686841+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.692202+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.697531+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.702916+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.708176+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.713672+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.719044+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.724309+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.729704+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.735128+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.740503+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.745757+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.751120+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Multi-agent population-level criticality (σ≈1.0252 with power-law avalanche statistics) independently confirms γ=1 as a ",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.756497+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.762043+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.767122+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.772532+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.777906+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.783363+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "RangeEn (range-entropy) provides an amplitude-invariant linear bridge between complexity and self-similarity, independen",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.788778+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "Wasserstein-2 metric and optimal transport gradient flow recover the entropy–Fisher–coupling triplet as a universal stab",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.794144+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein-2 metric and optimal transport gradient flow recover the entropy–Fisher–coupling triplet as a universal stab",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.799195+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein-2 metric and optimal transport gradient flow recover the entropy–Fisher–coupling triplet as a universal stab",
+      "context_tag": null,
+      "timestamp": "2026-05-12T10:27:21.804589+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument provides a specific formal deployment (via Bekenstein Bound, Kolmogorov Complexity, L",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:07.909014+00:00"
+    },
+    {
+      "from": "the_reasoning_substrate_argument_rsa",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "RSA's broader naturalistic framework sets the epistemological ceiling for the Omnimax argument by establishing that any ",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:07.920291+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "The RSA-OMEGA kernel's ledger-based state-packing and recursive compression into portable vectors is a concrete implemen",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:14.966625+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The experimental brief's insistence on falsifiable metrics, controlled baselines, and rigorous statistical testing chall",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:14.984084+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "operationalizes",
+      "invariant": "The Minimal Atoms demonstrates the concrete mechanism by which recursive compression yields irreducible generators (refl",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:20.173221+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "RCC's framework constrains the Minimal Atoms thesis by predicting that any proposed \"minimal generating set\" that fails ",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:20.191998+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The relational-thermodynamic map's phase-space framework sets the upper bound conditions under which any philosophical a",
+      "context_tag": null,
+      "timestamp": "2026-05-13T06:30:28.668973+00:00"
     }
   ]
 }

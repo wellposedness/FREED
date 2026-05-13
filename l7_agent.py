@@ -586,6 +586,366 @@ class BranchingRatioMonitor:
             self._generation = 0
 
 
+# ─── OT Equilibrium Scorer ───────────────────────────────────────────────────
+
+class OTEquilibriumScorer:
+    """
+    Optimal-Transport-based equilibrium scoring module.
+
+    Given a set of candidate outputs (Nash equilibria analogs), computes a
+    stationary distribution weighted by entropy and Fisher information curvature
+    rather than selecting a single argmax.
+
+    Background (from paper):
+      The OT dynamics for finite player discrete strategy games yields a
+      stationary measure that assigns each pure Nash equilibrium a probability.
+      For potential games, the dynamical properties are characterized by
+      entropy and Fisher information.
+
+    Implementation:
+      Each candidate is scored by:
+        1. Shannon entropy of its internal token/signal distribution
+        2. Fisher information curvature (estimated from score function gradients)
+        3. A potential function value (epistemic yield, coherence alignment, etc.)
+
+      The stationary distribution π over candidates is:
+        π_i ∝ exp( -β * V_i ) * H_i^α * I_i^(-κ)
+      where:
+        V_i = potential (lower is better — cost of candidate)
+        H_i = Shannon entropy of candidate (diversity of signal)
+        I_i = Fisher information (curvature — high curvature = sharp, fragile)
+        β   = inverse temperature (sharpness of selection)
+        α   = entropy weight (>0 favors diverse candidates)
+        κ   = Fisher curvature penalty (>0 penalizes brittle equilibria)
+
+    INV_073 challenge note:
+      The stationary measure assigns nonzero probability to ALL Nash equilibria
+      including suboptimal ones. This is by design — it prevents γ>1 freezing
+      (argmax lock-in) while the Fisher curvature penalty prevents γ<1 diffusion
+      into low-quality equilibria. The critical ridge is maintained by the
+      entropy-Fisher balance, not by point selection.
+
+    Noether conservation:
+      At stationarity, the Fisher-entropy product H_i * I_i is approximately
+      conserved across the support of π, providing the discrete analog of the
+      continuous Wasserstein gradient flow conservation law.
+    """
+
+    # Default hyperparameters for the stationary distribution
+    DEFAULT_BETA = 2.0     # inverse temperature
+    DEFAULT_ALPHA = 0.5    # entropy weight
+    DEFAULT_KAPPA = 0.3    # Fisher curvature penalty
+
+    # Floor to prevent log(0) and division by zero
+    _EPS = 1e-12
+
+    def __init__(
+        self,
+        beta=None,    # type: Optional[float]
+        alpha=None,   # type: Optional[float]
+        kappa=None,   # type: Optional[float]
+    ):
+        # type: (...) -> None
+        """
+        Initialize the OT equilibrium scorer.
+
+        Args:
+            beta:  inverse temperature (higher = sharper selection, risk of γ>1)
+            alpha: entropy weight (higher = favor diverse candidates)
+            kappa: Fisher curvature penalty (higher = penalize brittle equilibria)
+        """
+        self.beta = beta if beta is not None else self.DEFAULT_BETA
+        self.alpha = alpha if alpha is not None else self.DEFAULT_ALPHA
+        self.kappa = kappa if kappa is not None else self.DEFAULT_KAPPA
+
+    # ── Entropy computation ──────────────────────────────────────────────
+
+    @staticmethod
+    def _shannon_entropy(distribution):
+        # type: (List[float]) -> float
+        """
+        Compute Shannon entropy H = -Σ p_i log(p_i) for a probability vector.
+        Input need not be normalized; it will be normalized internally.
+        """
+        total = sum(abs(x) for x in distribution)
+        if total < 1e-15:
+            return 0.0
+        probs = [abs(x) / total for x in distribution]
+        h = 0.0
+        for p in probs:
+            if p > 1e-15:
+                h -= p * math.log(p)
+        return h
+
+    # ── Fisher information estimation ────────────────────────────────────
+
+    @staticmethod
+    def _fisher_information(signal_values):
+        # type: (List[float]) -> float
+        """
+        Estimate Fisher information from a discrete signal as the mean
+        squared score function (discrete derivative of log-likelihood).
+
+        For a sequence of values [v_0, v_1, ..., v_n], the Fisher
+        information is approximated as:
+            I ≈ (1/n) Σ (d/dθ log p(v_i))² ≈ (1/n) Σ (Δv_i / v_i)²
+
+        This captures curvature: high Fisher = sharp peak = fragile equilibrium.
+        """
+        if len(signal_values) < 2:
+            return 0.0
+
+        fisher_sum = 0.0
+        count = 0
+        for i in range(1, len(signal_values)):
+            v_prev = signal_values[i - 1]
+            v_curr = signal_values[i]
+            # Use midpoint to avoid division by zero
+            midpoint = (abs(v_prev) + abs(v_curr)) / 2.0 + 1e-12
+            delta = v_curr - v_prev
+            score = delta / midpoint
+            fisher_sum += score * score
+            count += 1
+
+        return fisher_sum / max(count, 1)
+
+    # ── Potential function ───────────────────────────────────────────────
+
+    @staticmethod
+    def _compute_potential(candidate):
+        # type: (Dict[str, Any]) -> float
+        """
+        Compute the potential V for a candidate equilibrium.
+
+        The potential combines:
+          - cost: lower is better (e.g., negative yield, incoherence)
+          - alignment: how well the candidate aligns with genome invariants
+
+        Candidates should provide at minimum a 'cost' or 'yield' key.
+        """
+        # Support both cost (minimize) and yield (maximize) framing
+        if "cost" in candidate:
+            return float(candidate["cost"])
+        elif "yield" in candidate:
+            # Negate yield so lower potential = higher yield
+            return -float(candidate["yield"])
+        elif "score" in candidate:
+            return -float(candidate["score"])
+        else:
+            return 0.0
+
+    # ── Stationary distribution computation ──────────────────────────────
+
+    def compute_stationary_distribution(self, candidates):
+        # type: (List[Dict[str, Any]]) -> Dict[str, Any]
+        """
+        Compute the OT stationary distribution over candidate equilibria.
+
+        Each candidate dict should contain:
+          - 'id' or 'label': identifier (optional, defaults to index)
+          - 'signals': List[float] — internal signal distribution for entropy/Fisher
+          - 'yield' or 'cost' or 'score': potential function input
+
+        Returns:
+            Dict with:
+              weights:          List[float] — stationary distribution π
+              candidates:       List[Dict] — annotated candidates with H, I, V
+              selected_idx:     int — index of highest-weight candidate (for fallback)
+              entropy_total:    float — entropy of the stationary distribution itself
+              fisher_entropy_products: List[float] — H_i * I_i per candidate (Noether check)
+              noether_variance: float — variance of H*I products (lower = better conservation)
+              gamma_regime:     str — "frozen"/"critical"/"dissipated" based on distribution shape
+              recommendation:   str
+        """
+        n = len(candidates)
+        if n == 0:
+            return {
+                "weights": [],
+                "candidates": [],
+                "selected_idx": -1,
+                "entropy_total": 0.0,
+                "fisher_entropy_products": [],
+                "noether_variance": 0.0,
+                "gamma_regime": "frozen",
+                "recommendation": "No candidates provided.",
+            }
+
+        if n == 1:
+            cand = candidates[0]
+            signals = cand.get("signals", [0.5])
+            h_val = self._shannon_entropy(signals)
+            i_val = self._fisher_information(signals)
+            v_val = self._compute_potential(cand)
+            annotated = dict(cand)
+            annotated.update({"H": round(h_val, 6), "I": round(i_val, 6), "V": round(v_val, 6)})
+            return {
+                "weights": [1.0],
+                "candidates": [annotated],
+                "selected_idx": 0,
+                "entropy_total": 0.0,
+                "fisher_entropy_products": [round(h_val * max(i_val, self._EPS), 6)],
+                "noether_variance": 0.0,
+                "gamma_regime": "frozen",
+                "recommendation": "Single candidate — no equilibrium selection needed.",
+            }
+
+        # ── Compute H, I, V for each candidate ──────────────────────────
+        h_values = []   # type: List[float]
+        i_values = []   # type: List[float]
+        v_values = []   # type: List[float]
+        annotated_candidates = []  # type: List[Dict[str, Any]]
+
+        for idx, cand in enumerate(candidates):
+            signals = cand.get("signals", [0.5])
+            if not isinstance(signals, list) or len(signals) == 0:
+                signals = [0.5]
+
+            h_val = self._shannon_entropy(signals)
+            i_val = self._fisher_information(signals)
+            v_val = self._compute_potential(cand)
+
+            h_values.append(h_val)
+            i_values.append(i_val)
+            v_values.append(v_val)
+
+            annotated = dict(cand)
+            annotated.update({
+                "H": round(h_val, 6),
+                "I": round(i_val, 6),
+                "V": round(v_val, 6),
+            })
+            annotated_candidates.append(annotated)
+
+        # ── Compute unnormalized log-weights ─────────────────────────────
+        # π_i ∝ exp(-β * V_i) * H_i^α * I_i^(-κ)
+        # log π_i = -β * V_i + α * log(H_i) - κ * log(I_i) + const
+        log_weights = []  # type: List[float]
+        for idx in range(n):
+            h_safe = max(h_values[idx], self._EPS)
+            i_safe = max(i_values[idx], self._EPS)
+            lw = (
+                -self.beta * v_values[idx]
+                + self.alpha * math.log(h_safe)
+                - self.kappa * math.log(i_safe)
+            )
+            log_weights.append(lw)
+
+        # ── Normalize via log-sum-exp for numerical stability ────────────
+        max_lw = max(log_weights)
+        exp_weights = [math.exp(lw - max_lw) for lw in log_weights]
+        total_weight = sum(exp_weights)
+        if total_weight < self._EPS:
+            # Degenerate: uniform fallback
+            weights = [1.0 / n] * n
+        else:
+            weights = [w / total_weight for w in exp_weights]
+
+        # ── Annotate candidates with their weights ───────────────────────
+        for idx in range(n):
+            annotated_candidates[idx]["weight"] = round(weights[idx], 6)
+
+        # ── Distribution-level diagnostics ───────────────────────────────
+
+        # Entropy of the stationary distribution itself
+        dist_entropy = self._shannon_entropy(weights)
+
+        # Maximum possible entropy for n candidates
+        max_entropy = math.log(n) if n > 1 else 1.0
+
+        # Fisher-entropy products (Noether conservation check)
+        fi_products = []  # type: List[float]
+        for idx in range(n):
+            h_safe = max(h_values[idx], self._EPS)
+            i_safe = max(i_values[idx], self._EPS)
+            fi_products.append(round(h_safe * i_safe, 6))
+
+        # Noether variance: how well H*I is conserved across support
+        if len(fi_products) > 1:
+            fi_mean = sum(fi_products) / len(fi_products)
+            fi_var = sum((p - fi_mean) ** 2 for p in fi_products) / (len(fi_products) - 1)
+        else:
+            fi_var = 0.0
+
+        # ── Gamma regime from distribution shape ─────────────────────────
+        # High concentration (low dist_entropy) → frozen (γ>1)
+        # High spread (high dist_entropy) → dissipated (γ<1)
+        # Moderate → critical (γ≈1)
+        entropy_ratio = dist_entropy / max(max_entropy, self._EPS)
+        if entropy_ratio < 0.15:
+            gamma_regime = "frozen"
+            recommendation = (
+                "Stationary distribution highly concentrated — approaching argmax/frozen "
+                "regime (γ>1). Consider reducing β (inverse temperature) or increasing α "
+                "(entropy weight) to restore critical ridge operation."
+            )
+        elif entropy_ratio > 0.85:
+            gamma_regime = "dissipated"
+            recommendation = (
+                "Stationary distribution nearly uniform — approaching dissipated regime "
+                "(γ<1). Consider increasing β or κ (Fisher penalty) to sharpen selection "
+                "toward higher-quality equilibria."
+            )
+        else:
+            gamma_regime = "critical"
+            recommendation = (
+                "Stationary distribution maintains critical balance between concentration "
+                "and spread. Fisher-entropy conservation "
+                + ("holds well" if fi_var < 0.01 else "shows drift (Noether check)")
+                + f" (Var[H*I]={fi_var:.6f}). Operating on critical ridge."
+            )
+
+        selected_idx = max(range(n), key=lambda i: weights[i])
+
+        return {
+            "weights": [round(w, 6) for w in weights],
+            "candidates": annotated_candidates,
+            "selected_idx": selected_idx,
+            "entropy_total": round(dist_entropy, 6),
+            "entropy_ratio": round(entropy_ratio, 4),
+            "fisher_entropy_products": fi_products,
+            "noether_variance": round(fi_var, 6),
+            "gamma_regime": gamma_regime,
+            "recommendation": recommendation,
+        }
+
+    def score_from_yields(self, yields, coherences=None):
+        # type: (List[float], Optional[List[float]]) -> Dict[str, Any]
+        """
+        Convenience method: build candidates from parallel lists of yields
+        and optional coherences, then compute stationary distribution.
+
+        Args:
+            yields:      List of epistemic yield values for each candidate
+            coherences:  Optional list of coherence values (same length as yields)
+
+        Returns:
+            Same as compute_stationary_distribution.
+        """
+        n = len(yields)
+        if coherences is None:
+            coherences = [0.5] * n
+
+        candidates = []  # type: List[Dict[str, Any]]
+        for idx in range(n):
+            y = yields[idx]
+            c = coherences[idx] if idx < len(coherences) else 0.5
+            # Build a synthetic signal distribution from yield and coherence
+            signals = [
+                max(self._EPS, y),
+                max(self._EPS, c),
+                max(self._EPS, 1.0 - y),
+                max(self._EPS, 1.0 - c),
+            ]
+            candidates.append({
+                "label": f"candidate_{idx}",
+                "yield": y,
+                "coherence": c,
+                "signals": signals,
+            })
+
+        return self.compute_stationary_distribution(candidates)
+
+
 # ─── L7 Agent ─────────────────────────────────────────────────────────────────
 
 class L7Agent:
@@ -704,33 +1064,49 @@ class L7Agent:
         # Fixed, bounded context — three sources only
         genome_anchor = self.genome_text[:GENOME_CAP]
         state_context = self._build_state_context()
-        context = (
+        stable_context = (
             f"GENOME ANCHOR:\n{genome_anchor}\n\n"
-            f"CURRENT STATE:\n{state_context}\n\n"
-            f"CURRENT INPUT:\n{prompt}"
+            f"CURRENT STATE:\n{state_context}"
         )
+        variable_context = f"\n\nCURRENT INPUT:\n{prompt}"
+        context = stable_context + variable_context  # preserved for yield calc below
 
         result_text = ""
         actual_input = actual_output = 0
+        cache_creation = cache_read = 0
         with self.client.messages.stream(
             model=MODEL,
             max_tokens=2048,
-            system=RSA_KERNEL_PROMPT,
-            messages=[{"role": "user", "content": context}],
+            system=[
+                {"type": "text", "text": RSA_KERNEL_PROMPT,
+                 "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+            ],
+            messages=[{"role": "user", "content": [
+                {"type": "text", "text": stable_context,
+                 "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+                {"type": "text", "text": variable_context},
+            ]}],
             timeout=120,
         ) as stream:
             for text in stream.text_stream:
                 result_text += text
-            final_msg    = stream.get_final_message()
-            actual_input = final_msg.usage.input_tokens
-            actual_output = final_msg.usage.output_tokens
+            final_msg      = stream.get_final_message()
+            actual_input   = final_msg.usage.input_tokens
+            actual_output  = final_msg.usage.output_tokens
+            cache_creation = getattr(final_msg.usage, "cache_creation_input_tokens", 0) or 0
+            cache_read     = getattr(final_msg.usage, "cache_read_input_tokens", 0) or 0
 
         parsed              = self._parse_kernel_output(result_text)
         parsed["raw"]       = result_text
         parsed["input"]     = prompt
         parsed["timestamp"] = timestamp
         parsed["query_n"]   = self.query_count
-        parsed["usage"]     = {"input_tokens": actual_input, "output_tokens": actual_output}
+        parsed["usage"]     = {
+            "input_tokens":                actual_input,
+            "output_tokens":               actual_output,
+            "cache_creation_input_tokens": cache_creation,
+            "cache_read_input_tokens":     cache_read,
+        }
 
         # Epistemic yield: compress length / tokens burned (MDL signal)
         compress_len    = len(parsed.get("compress", ""))

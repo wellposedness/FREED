@@ -594,12 +594,20 @@ class Consolidator:
         message = self._api_call(
             model=MODEL,
             max_tokens=600,
-            system=RENORM_SYSTEM,
+            system=[
+                {"type": "text", "text": RENORM_SYSTEM,
+                 "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+            ],
             messages=[{"role": "user", "content": prompt}],
             timeout=90,
         )
         raw = message.content[0].text.strip()
-        self.astrocyte.record_usage(message.usage.input_tokens, message.usage.output_tokens)
+        self.astrocyte.record_usage(
+            message.usage.input_tokens,
+            message.usage.output_tokens,
+            cache_creation_tokens=getattr(message.usage, "cache_creation_input_tokens", 0) or 0,
+            cache_read_tokens=getattr(message.usage, "cache_read_input_tokens", 0) or 0,
+        )
 
         # Parse delta
         def field(name):
@@ -701,12 +709,20 @@ class Consolidator:
         message = self._api_call(
             model=HAIKU_MODEL,
             max_tokens=1500,
-            system=MINE_SYSTEM,
+            system=[
+                {"type": "text", "text": MINE_SYSTEM,
+                 "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+            ],
             messages=[{"role": "user", "content": digest}],
             timeout=90,
         )
         raw = message.content[0].text.strip()
-        self.astrocyte.record_usage(message.usage.input_tokens, message.usage.output_tokens)
+        self.astrocyte.record_usage(
+            message.usage.input_tokens,
+            message.usage.output_tokens,
+            cache_creation_tokens=getattr(message.usage, "cache_creation_input_tokens", 0) or 0,
+            cache_read_tokens=getattr(message.usage, "cache_read_input_tokens", 0) or 0,
+        )
 
         # Parse clusters
         import re

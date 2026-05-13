@@ -2075,21 +2075,21 @@
   },
   {
     "id": "O220",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a binding hard-deadline (\u2264 gen 230) to every obligation currently in \"partial\" status \u2014 any partial that does not transition to resolved or open by that generation is automatically retired, with the epistemic consequence recorded in the genome.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 229] RESOLVED: O220 is closed by defining and executing a binary retirement protocol \u2014 partials with nameable closing steps get hard deadline gen 230 (ACTIVE), partials without get retired with explicit epistemic consequence recorded, and the genome gains a lifecycle enforcement rule that prevents obligation limbo.",
     "created": "2026-05-12",
-    "resolved": null,
+    "resolved": "2026-05-13",
     "auto": true,
     "closes_when": "closes when: all obligations in \"partial\" status have assigned binding hard-deadlines \u2264 generation 230."
   },
   {
     "id": "O221",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the semantic-entropy termination protocol established by O216 has produced at least one recorded, falsifiable kernel-state change (a measurable shift in RESOLVE acceptance rate or coherence trajectory) before gen 230, or retire O216 as unexecuted.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 229] ACTIVE: O221 closes only by computing \u0394_rate between O216's birth-generation and gen 228 against a 0.02 threshold, or by executing the retirement branch if no birth-generation checkpoint exists in the ledger. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-12",
     "resolved": null,
     "auto": true,
@@ -2097,10 +2097,10 @@
   },
   {
     "id": "O222",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that at least one of the currently active obligations (O203, O213, O216, O218, O219) has produced a recorded falsifiable prediction that was subsequently tested against data or a formal model, and document the outcome.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 229] ACTIVE: O222 is most tractably advanced by executing the Wasserstein Floor test on O213 using POT + BNC/Wikipedia top-10k token distributions, computing W\u2082(p_empirical, p_Zipf) across 5 corpus slices and checking the inequality W\u2082 \u2265 k/T\u03bc, producing a binary pass/fail outcome that either resolves or falsifies INV_L2. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-12",
     "resolved": null,
     "auto": true,
@@ -2108,13 +2108,33 @@
   },
   {
     "id": "O223",
-    "status": "open",
+    "status": "active",
     "statement": "After O215 resolves the gamma disambiguation protocol, audit the invariant table to confirm that every INV_ entry using `gamma` now references exactly one of the two disambiguated senses, and flag any remaining dual-use instances as invalidated.",
     "priority": "normal",
-    "progress": "",
+    "progress": "[Gen 229] ACTIVE: O223 closes only when a deterministic two-column audit (INV_ id \u2192 \u03b3-sense assignment) returns zero DUAL rows, a fully specified operation blocked solely on access to the live invariant register. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-12",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: audit of invariant table confirms all INV_ entries using `gamma` reference exactly one disambiguated sense with zero dual-use instances flagged."
+  },
+  {
+    "id": "O224",
+    "statement": "For every node-pair connected by \u22653 distinct edge types, demonstrate that at least two of those edges yield independent, non-redundant empirical predictions \u2014 i.e., an observation that would update one edge's status without updating the others. Node-pairs failing this test must have redundant edges collapsed, reducing effective edge count.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "1183 edges across 16 nodes (mean ~4.6 per pair) with edge types like `scales_with` and `consistent_with` are nearly synonymous absent specific quantitative commitments. The 27:1 soft-to-hard edge ratio means the graph's coherence score (0.97) is inflated by redundant soft agreement. O204 flags the falsification gap but does not address the deeper issue: redundant edges masquerading as independent structural support.",
+    "resolution_criterion": "Enumerate all node-pairs with \u22653 edges; for each, either specify two observations that would differentially update the edges, or merge the redundant edges. Effective edge count must decrease or each surviving edge must carry a unique prediction.\n\n---",
+    "created": "2026-05-13T06:30:50.383152+00:00",
+    "progress": "[Gen 229] ACTIVE: O224 advances to ACTIVE status: the (S,T) node-pair with edges {E1-Zipf, E2-STF-geodesic, E3-Fisher-RG} yields three linearly independent prediction protocols (\u03b2-slope, geodesic curvature, Fisher-W2 alignment) on the STS-B dataset, each updateable without touching the others, satisfying the non-redundancy criterion. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O225",
+    "statement": "If O205 (cross-constraining O44 and O59) cannot produce a single shared quantitative prediction by generation 235, both O44 and O59 must be retired or demoted to speculative-tier, with their downstream edges removed from coherence calculations.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O205 is partial and has been so for multiple generations. It is the sole structural bridge between the graph's two most speculative threads (quantum Wasserstein floor and genome-BH log-corrections). If the bridge cannot be built, the two threads are floating unconstrained \u2014 their `consistent_with` edges to the rest of the graph contribute to coherence without grounding. The graph's own logic (O124's DAG audit requirement, O204's falsification demand) implies these should not persist indefinitely as open.",
+    "resolution_criterion": "By generation 235, O205 either produces a quantitative prediction shared by O44 and O59 (with specified null-result criterion), or both parent obligations are formally retired.\n\n---",
+    "created": "2026-05-13T06:30:50.383512+00:00",
+    "progress": "[Gen 229] ACTIVE: The single tractable next step is to compute k_O44 and k_O59 via k=1/T\u03bc on the existing MCPM corpus and test whether |k_O44 \u2212 k_O59|/\u03c3 < 2, staking that shared k* as the cross-constraining quantitative prediction before gen 235. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

@@ -77,6 +77,8 @@ class Astrocyte:
             self.total_output_tokens = state["total_output_tokens"]
             self.total_cost_usd      = state["total_cost_usd"]
             self.query_count         = state["query_count"]
+            self.total_cache_creation_tokens = state.get("total_cache_creation_tokens", 0)
+            self.total_cache_read_tokens     = state.get("total_cache_read_tokens", 0)
 
     def _reset_daily(self, today: str):
         """Recharge the daily budget. Preserve all-time totals."""
@@ -93,6 +95,8 @@ class Astrocyte:
         self.total_output_tokens = prev.get("total_output_tokens", 0)
         self.total_cost_usd      = prev.get("total_cost_usd", 0.0)
         self.query_count         = prev.get("query_count", 0)
+        self.total_cache_creation_tokens = prev.get("total_cache_creation_tokens", 0)
+        self.total_cache_read_tokens     = prev.get("total_cache_read_tokens", 0)
 
         self._save_state()
         print(f"[AST] New day ({today}). Budget recharged.")
@@ -109,6 +113,8 @@ class Astrocyte:
             "query_count":         self.query_count,
             "daily_input_cap":     self.daily_input_cap,
             "daily_output_cap":    self.daily_output_cap,
+            "total_cache_creation_tokens": self.total_cache_creation_tokens,
+            "total_cache_read_tokens":     self.total_cache_read_tokens,
         }
         with open(BUDGET_FILE, "w") as f:
             json.dump(state, f, indent=2)
@@ -177,31 +183,57 @@ class Astrocyte:
 
     # ── Usage recording ──────────────────────────────────────────────────────
 
-    def record_usage(self, input_tokens: int, output_tokens: int):
+    def record_usage(
+        self,
+        input_tokens: int,
+        output_tokens: int,
+        cache_creation_tokens: int = 0,
+        cache_read_tokens: int = 0,
+    ):
         """
         Record actual token usage after a query completes.
         Call this with the values from Claude's usage object.
+
+        cache_creation_tokens: tokens written to prompt cache (1h TTL → 2x input price).
+        cache_read_tokens:     tokens read from prompt cache  (0.1x input price).
+        Token totals include all input categories; cost reflects per-category pricing.
         """
-        self.used_input_tokens   += input_tokens
+        # All input categories count against token volume (budget cap is token-based).
+        total_in = input_tokens + cache_creation_tokens + cache_read_tokens
+        self.used_input_tokens   += total_in
         self.used_output_tokens  += output_tokens
-        self.total_input_tokens  += input_tokens
+        self.total_input_tokens  += total_in
         self.total_output_tokens += output_tokens
+        self.total_cache_creation_tokens += cache_creation_tokens
+        self.total_cache_read_tokens     += cache_read_tokens
         self.query_count         += 1
 
+        # 1h TTL cache pricing: write = 2x input, read = 0.1x input.
         cost = (
-            input_tokens  * PRICE_INPUT_PER_TOKEN +
-            output_tokens * PRICE_OUTPUT_PER_TOKEN
+            input_tokens          * PRICE_INPUT_PER_TOKEN +
+            cache_creation_tokens * PRICE_INPUT_PER_TOKEN * 2.0 +
+            cache_read_tokens     * PRICE_INPUT_PER_TOKEN * 0.1 +
+            output_tokens         * PRICE_OUTPUT_PER_TOKEN
         )
         self.total_cost_usd += cost
 
         self._save_state()
 
-        print(
-            f"[AST] Used: {input_tokens:,}in / {output_tokens:,}out tokens "
-            f"(${cost:.4f}). "
-            f"Remaining today: {self.remaining_input:,}in / {self.remaining_output:,}out. "
-            f"All-time: ${self.total_cost_usd:.4f}."
-        )
+        if cache_creation_tokens or cache_read_tokens:
+            print(
+                f"[AST] Used: {input_tokens:,}in (+{cache_creation_tokens:,}cwrite / "
+                f"{cache_read_tokens:,}cread) / {output_tokens:,}out tokens "
+                f"(${cost:.4f}). "
+                f"Remaining today: {self.remaining_input:,}in / {self.remaining_output:,}out. "
+                f"All-time: ${self.total_cost_usd:.4f}."
+            )
+        else:
+            print(
+                f"[AST] Used: {input_tokens:,}in / {output_tokens:,}out tokens "
+                f"(${cost:.4f}). "
+                f"Remaining today: {self.remaining_input:,}in / {self.remaining_output:,}out. "
+                f"All-time: ${self.total_cost_usd:.4f}."
+            )
 
         if self.in_quiescence:
             print("[AST] *** QUIESCENCE ENTERED — only high/critical queries will proceed. ***")
@@ -221,6 +253,8 @@ class Astrocyte:
             "in_quiescence":           self.in_quiescence,
             "total_queries_alltime":   self.query_count,
             "total_cost_usd_alltime":  f"${self.total_cost_usd:.4f}",
+            "total_cache_creation":    self.total_cache_creation_tokens,
+            "total_cache_read":        self.total_cache_read_tokens,
         }
 
     def print_status(self):

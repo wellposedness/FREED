@@ -3392,6 +3392,401 @@ class KnowledgeGraph:
             return False
         return info.get("probe_blocked", False)
 
+    # ── Confirmation-Surplus Monitor & Adversarial Probe Queue ───────────────
+    # Automated detection of invariants that have accumulated unchallenged
+    # confirmation surplus: >N confirmations and <M challenges.  Flagged
+    # invariants are queued for adversarial probe cycles, preventing any
+    # invariant from accruing indefinite unchallenged confirmation.
+    #
+    # This directly operationalizes the epistemic hygiene principle: an
+    # invariant with many confirmations and few challenges is structurally
+    # indistinguishable from one that has never been seriously tested.
+    # The monitor makes the falsification layer load-bearing by ensuring
+    # that high-surplus invariants are automatically surfaced for probing.
+    #
+    # CHALLENGE (INV_094): This mechanism was designed specifically because
+    # INV_094 (Wasserstein Floor k/Tμ) accumulated the highest confirmation
+    # surplus in the genome with zero documented falsification conditions.
+    # The monitor ensures that no invariant — including INV_094 — can
+    # indefinitely avoid adversarial scrutiny.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def confirmation_surplus_monitor(self, min_confirmations=3,
+                                      max_challenges=1,
+                                      auto_queue=True):
+        # type: (int, int, bool) -> dict
+        """
+        Monitor all invariants for confirmation surplus: flag any invariant
+        with more than *min_confirmations* confirmations and fewer than
+        *max_challenges* challenges, and optionally queue adversarial probe
+        cycles for them.
+
+        The monitor detects the structural vulnerability where an invariant
+        accumulates apparent robustness through repeated confirmation without
+        ever facing serious challenge.  This is epistemically dangerous
+        because confirmation surplus without challenge is indistinguishable
+        from untested consensus.
+
+        When *auto_queue* is True, flagged invariants are added to an
+        internal adversarial probe queue (stored in graph metadata) that
+        downstream pipeline stages (FEED, CONSOLIDATE) can consume to
+        trigger mandatory falsification probes.
+
+        Parameters
+        ----------
+        min_confirmations : int
+            Minimum number of confirmations (confirms + supports + extends)
+            for an invariant to be eligible for surplus flagging (default 3).
+            Invariants below this threshold are too new to audit.
+        max_challenges : int
+            Maximum number of challenges (challenges + refutes + contradicts)
+            below which the invariant is considered under-challenged
+            (default 1).  An invariant with <= max_challenges direct
+            falsification attempts is flagged when it also exceeds
+            min_confirmations.
+        auto_queue : bool
+            If True (default), automatically queue flagged invariants for
+            adversarial probe cycles.  The queue is stored in memory and
+            accessible via ``get_adversarial_probe_queue()``.
+
+        Returns
+        -------
+        dict
+            {
+                "monitored_count": int — total invariants examined,
+                "flagged_count": int — invariants exceeding surplus thresholds,
+                "flagged_invariants": list of dict — each flagged invariant:
+                    {
+                        "invariant_id": str,
+                        "confirmation_count": int,
+                        "challenge_count": int,
+                        "surplus": int — confirmations - challenges,
+                        "surplus_ratio": float — confirmations / max(1, challenges),
+                        "confirmation_sources": list of str — distinct source domains,
+                        "challenge_sources": list of str — distinct challenge sources,
+                        "last_confirmation_ts": str or None — most recent confirmation,
+                        "last_challenge_ts": str or None — most recent challenge,
+                        "days_since_last_challenge": float or None,
+                        "probe_priority": str — "critical", "high", "moderate",
+                        "probe_directive": str — specific adversarial probe instruction,
+                    },
+                "queued_for_probe": list of str — invariant IDs added to probe queue,
+                "queue_size": int — total size of the adversarial probe queue,
+                "thresholds": dict — {min_confirmations, max_challenges} used,
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+
+        # Initialize probe queue if not present
+        if not hasattr(self, '_adversarial_probe_queue'):
+            self._adversarial_probe_queue = []  # type: List[dict]
+
+        # Collect confirmation and challenge edges per invariant
+        inv_confirmations = defaultdict(list)  # type: Dict[str, list]
+        inv_challenges = defaultdict(list)  # type: Dict[str, list]
+        all_inv_ids = set()  # type: set
+
+        for e in self._edges:
+            target = e.get("to", "")
+            etype = e.get("type", "")
+            if not target or not target.upper().startswith("INV_"):
+                continue
+            target_upper = target.upper()
+            all_inv_ids.add(target_upper)
+            if etype in self._CONFIRMATION_EDGE_TYPES:
+                inv_confirmations[target_upper].append(e)
+            elif etype in self._FALSIFICATION_EDGE_TYPES:
+                inv_challenges[target_upper].append(e)
+
+        flagged = []  # type: List[dict]
+        queued_ids = []  # type: List[str]
+        ts_now = datetime.now(timezone.utc)
+        ts_now_iso = ts_now.isoformat()
+
+        for inv_id in sorted(all_inv_ids):
+            conf_edges = inv_confirmations.get(inv_id, [])
+            chal_edges = inv_challenges.get(inv_id, [])
+            n_conf = len(conf_edges)
+            n_chal = len(chal_edges)
+
+            # Check surplus thresholds
+            if n_conf < min_confirmations:
+                continue
+            if n_chal > max_challenges:
+                continue
+
+            # This invariant has surplus: many confirmations, few challenges
+            surplus = n_conf - n_chal
+            surplus_ratio = float(n_conf) / float(max(1, n_chal))
+
+            # Extract source domains for confirmations
+            conf_sources = sorted(set(
+                self._extract_source_domain(e.get("from", ""))
+                for e in conf_edges
+            ))
+            chal_sources = sorted(set(
+                self._extract_source_domain(e.get("from", ""))
+                for e in chal_edges
+            ))
+
+            # Timestamps
+            conf_timestamps = [
+                e.get("timestamp", "") for e in conf_edges if e.get("timestamp")
+            ]
+            chal_timestamps = [
+                e.get("timestamp", "") for e in chal_edges if e.get("timestamp")
+            ]
+            last_conf_ts = max(conf_timestamps) if conf_timestamps else None
+            last_chal_ts = max(chal_timestamps) if chal_timestamps else None
+
+            # Days since last challenge
+            days_since_challenge = None  # type: Optional[float]
+            if last_chal_ts:
+                try:
+                    last_chal_dt = datetime.fromisoformat(
+                        last_chal_ts.replace("Z", "+00:00")
+                    )
+                    delta = ts_now - last_chal_dt
+                    days_since_challenge = delta.total_seconds() / 86400.0
+                except (ValueError, TypeError):
+                    pass
+            elif n_conf > 0:
+                # Never challenged — use time since first confirmation
+                if conf_timestamps:
+                    try:
+                        first_conf_dt = datetime.fromisoformat(
+                            min(conf_timestamps).replace("Z", "+00:00")
+                        )
+                        delta = ts_now - first_conf_dt
+                        days_since_challenge = delta.total_seconds() / 86400.0
+                    except (ValueError, TypeError):
+                        pass
+
+            # Priority classification
+            if n_chal == 0 and n_conf >= 5:
+                priority = "critical"
+            elif n_chal == 0 and n_conf >= min_confirmations:
+                priority = "high"
+            elif surplus_ratio > 10.0:
+                priority = "high"
+            else:
+                priority = "moderate"
+
+            # Generate specific probe directive
+            probe_directive = (
+                f"ADVERSARIAL PROBE REQUIRED for {inv_id}: "
+                f"{n_conf} confirmation(s), {n_chal} challenge(s) "
+                f"(surplus_ratio={surplus_ratio:.1f}). "
+                f"Emit: (1) specific falsification conditions with "
+                f"measurable thresholds, (2) boundary parameters where "
+                f"the invariant's formula breaks (e.g., T→0, T→∞, "
+                f"degenerate limits), (3) at least one alternative "
+                f"mechanism that produces the same observables without "
+                f"requiring {inv_id} to be true, (4) a CHALLENGE edge "
+                f"targeting {inv_id} with the strongest falsification "
+                f"argument found."
+            )
+
+            entry = {
+                "invariant_id": inv_id,
+                "confirmation_count": n_conf,
+                "challenge_count": n_chal,
+                "surplus": surplus,
+                "surplus_ratio": round(surplus_ratio, 4),
+                "confirmation_sources": conf_sources,
+                "challenge_sources": chal_sources,
+                "last_confirmation_ts": last_conf_ts,
+                "last_challenge_ts": last_chal_ts,
+                "days_since_last_challenge": (
+                    round(days_since_challenge, 2)
+                    if days_since_challenge is not None else None
+                ),
+                "probe_priority": priority,
+                "probe_directive": probe_directive,
+            }
+            flagged.append(entry)
+
+            # Auto-queue for adversarial probe
+            if auto_queue:
+                # Check if already queued
+                already_queued = any(
+                    q.get("invariant_id") == inv_id
+                    for q in self._adversarial_probe_queue
+                )
+                if not already_queued:
+                    self._adversarial_probe_queue.append({
+                        "invariant_id": inv_id,
+                        "queued_at": ts_now_iso,
+                        "priority": priority,
+                        "surplus_ratio": round(surplus_ratio, 4),
+                        "confirmation_count": n_conf,
+                        "challenge_count": n_chal,
+                        "probe_directive": probe_directive,
+                        "status": "pending",
+                    })
+                    queued_ids.append(inv_id)
+
+        # Sort flagged by surplus_ratio descending (worst offenders first)
+        flagged.sort(key=lambda x: x["surplus_ratio"], reverse=True)
+
+        result = {
+            "monitored_count": len(all_inv_ids),
+            "flagged_count": len(flagged),
+            "flagged_invariants": flagged,
+            "queued_for_probe": queued_ids,
+            "queue_size": len(self._adversarial_probe_queue),
+            "thresholds": {
+                "min_confirmations": min_confirmations,
+                "max_challenges": max_challenges,
+            },
+            "timestamp": ts_now_iso,
+        }
+
+        # Log results
+        if flagged:
+            print(
+                f"[GRAPH:SURPLUS_MONITOR] {len(flagged)} invariant(s) flagged "
+                f"with confirmation surplus (>{min_confirmations} confirms, "
+                f"<={max_challenges} challenges) — "
+                f"queued={len(queued_ids)}, queue_size="
+                f"{len(self._adversarial_probe_queue)}"
+            )
+            for entry in flagged[:5]:
+                print(
+                    f"  {'🚨' if entry['probe_priority'] == 'critical' else '⚠'} "
+                    f"{entry['invariant_id']}: "
+                    f"confirms={entry['confirmation_count']}, "
+                    f"challenges={entry['challenge_count']}, "
+                    f"surplus_ratio={entry['surplus_ratio']}, "
+                    f"priority={entry['probe_priority']}"
+                )
+            if len(flagged) > 5:
+                print(f"  ... and {len(flagged) - 5} more flagged invariant(s)")
+
+        return result
+
+    def get_adversarial_probe_queue(self, status="pending"):
+        # type: (str) -> List[dict]
+        """
+        Return the current adversarial probe queue, optionally filtered by status.
+
+        The queue contains invariants flagged by ``confirmation_surplus_monitor``
+        that require mandatory adversarial probing before further confirmations
+        are accepted.
+
+        Parameters
+        ----------
+        status : str
+            Filter by queue entry status: "pending" (default), "in_progress",
+            "completed", or "all" to return everything.
+
+        Returns
+        -------
+        list of dict
+            Queue entries sorted by priority (critical first) then by
+            surplus_ratio (highest first).  Each entry has:
+            {"invariant_id", "queued_at", "priority", "surplus_ratio",
+             "confirmation_count", "challenge_count", "probe_directive", "status"}
+        """
+        if not hasattr(self, '_adversarial_probe_queue'):
+            self._adversarial_probe_queue = []  # type: List[dict]
+
+        if status == "all":
+            entries = list(self._adversarial_probe_queue)
+        else:
+            entries = [
+                q for q in self._adversarial_probe_queue
+                if q.get("status") == status
+            ]
+
+        # Sort: critical > high > moderate, then by surplus_ratio descending
+        priority_order = {"critical": 0, "high": 1, "moderate": 2}
+        entries.sort(
+            key=lambda q: (
+                priority_order.get(q.get("priority", "moderate"), 3),
+                -q.get("surplus_ratio", 0.0),
+            )
+        )
+        return entries
+
+    def mark_probe_completed(self, invariant_id):
+        # type: (str) -> bool
+        """
+        Mark an adversarial probe as completed for a given invariant.
+
+        Called after a challenge/refute/contradict edge has been recorded
+        for the invariant, indicating that the adversarial probe cycle
+        has been fulfilled.
+
+        Parameters
+        ----------
+        invariant_id : str
+            The invariant whose probe to mark as completed.
+
+        Returns
+        -------
+        bool
+            True if the invariant was found in the queue and marked,
+            False if it was not in the queue.
+        """
+        if not hasattr(self, '_adversarial_probe_queue'):
+            return False
+
+        inv_upper = invariant_id.upper()
+        found = False
+        for q in self._adversarial_probe_queue:
+            if q.get("invariant_id") == inv_upper and q.get("status") == "pending":
+                q["status"] = "completed"
+                q["completed_at"] = datetime.now(timezone.utc).isoformat()
+                found = True
+                print(
+                    f"[GRAPH:SURPLUS_MONITOR] Adversarial probe COMPLETED "
+                    f"for {inv_upper} — removed from active queue"
+                )
+                break
+        return found
+
+    def drain_probe_queue_for_feed(self, max_probes=3):
+        # type: (int) -> List[dict]
+        """
+        Drain up to *max_probes* pending entries from the adversarial probe
+        queue, marking them as in-progress.  Returns the probe directives
+        for inclusion in the next FEED cycle's kernel prompt.
+
+        This is the integration point for the FEED pipeline: before
+        processing a new paper, call this to get mandatory adversarial
+        probe directives that must be included in the kernel output.
+
+        Parameters
+        ----------
+        max_probes : int
+            Maximum number of probes to drain per FEED cycle (default 3).
+
+        Returns
+        -------
+        list of dict
+            Probe entries marked as "in_progress", sorted by priority.
+            Each has "invariant_id" and "probe_directive" fields that
+            can be injected into the kernel prompt.
+        """
+        pending = self.get_adversarial_probe_queue(status="pending")
+        drained = []  # type: List[dict]
+
+        for q in pending[:max_probes]:
+            q["status"] = "in_progress"
+            q["drained_at"] = datetime.now(timezone.utc).isoformat()
+            drained.append(q)
+
+        if drained:
+            ids = [q["invariant_id"] for q in drained]
+            print(
+                f"[GRAPH:SURPLUS_MONITOR] Drained {len(drained)} probe(s) "
+                f"for FEED cycle: {', '.join(ids)}"
+            )
+
+        return drained
+
     # ── SOC Avalanche Detection ──────────────────────────────────────────────
     # Inspired by Self-Organized Criticality (SOC) cellular automaton models:
     # when a cluster of newly-fed nodes crosses a degree threshold, a cascade

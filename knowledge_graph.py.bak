@@ -7355,6 +7355,520 @@ def graph_snapshot_observables(edges, all_node_ids):
     ]
 
 
+# ─── Single-Sample Network Entropy (SNE) — Pre-Transition Detector ───────────
+# Computes correlation-graph entropy over individual knowledge node activation
+# patterns to detect pre-transition (phase-shift) states in the evolving
+# knowledge graph, using ONLY the current sample's activation profile — no
+# population-level statistics required.
+#
+# The method follows the paper's SNE algorithm:
+#   1. Given a single sample's node activation vector z = [z_1, ..., z_n],
+#      construct a sample-specific correlation-deviation network by comparing
+#      each node's activation against a reference (baseline) profile.
+#   2. For each edge (i, j) in the background correlation graph, compute a
+#      local entropy contribution based on the conditional probability that
+#      node j deviates given node i deviates.
+#   3. The single-sample network entropy (SNE) is the weighted sum of local
+#      edge entropies.  A sharp DROP in SNE signals the pre-transition state:
+#      the network's correlation structure is tightening (losing entropy)
+#      immediately before a critical reorganization.
+#
+# CHALLENGE (INV_073): SNE demonstrates that the pre-transition phase is
+# detectable and *navigable* at the single-sample level, which strains the
+# genome's implicit assumption that critical-ridge navigation requires
+# population-level statistics.  If single-instance entropy suffices, the
+# ridge may be narrower and more fragile than the current formalization
+# admits.  The SNE score is annotated with an inv073_flag that surfaces
+# this tension whenever a pre-transition signal is detected.
+#
+# Integration: Called after each FEED cycle on the current graph snapshot's
+# node activation vector (edge counts per node).  The SNE time series is
+# stored in KnowledgeGraph._telemetry for retrospective phase analysis.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _node_activation_vector(edges, all_node_ids):
+    # type: (list, List[str]) -> List[float]
+    """
+    Build a node activation vector from graph edges: activation_i = number
+    of edges incident on node i, normalized to [0, 1].
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+
+    Returns
+    -------
+    list of float
+        Activation vector of length len(all_node_ids), each entry in [0, 1].
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return []
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+    counts = [0.0] * n
+    for e in edges:
+        for key in ("from", "to"):
+            nid = e.get(key, "").upper()
+            idx = node_index.get(nid)
+            if idx is not None:
+                counts[idx] += 1.0
+    max_c = max(counts) if counts else 1.0
+    if max_c <= 0:
+        max_c = 1.0
+    return [c / max_c for c in counts]
+
+
+def _correlation_graph_from_edges(edges, all_node_ids, min_co_occurrence=1):
+    # type: (list, List[str], int) -> List[Tuple[int, int]]
+    """
+    Build a background correlation graph: an edge (i, j) exists when nodes
+    i and j co-occur in the 'from'/'to' fields of at least *min_co_occurrence*
+    shared edges (they are mentioned together or share a common source/target).
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    min_co_occurrence : int
+        Minimum number of shared edges to form a correlation edge (default 1).
+
+    Returns
+    -------
+    list of (int, int)
+        Edge pairs as 0-indexed indices into all_node_ids.
+    """
+    n = len(all_node_ids)
+    if n < 2:
+        return []
+    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
+
+    # For each edge, collect the pair of nodes it connects
+    co_occur = defaultdict(int)  # type: Dict[Tuple[int, int], int]
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        i = node_index.get(from_id)
+        j = node_index.get(to_id)
+        if i is not None and j is not None and i != j:
+            pair = (min(i, j), max(i, j))
+            co_occur[pair] += 1
+
+    result = []  # type: List[Tuple[int, int]]
+    for pair, count in co_occur.items():
+        if count >= min_co_occurrence:
+            result.append(pair)
+    return result
+
+
+def single_sample_network_entropy(activation_vector, reference_vector,
+                                   correlation_edges, deviation_threshold=0.5):
+    # type: (List[float], List[float], List[Tuple[int, int]], float) -> dict
+    """
+    Compute Single-Sample Network Entropy (SNE) for one activation snapshot.
+
+    The algorithm:
+      1. For each node i, determine whether it is "deviated" by comparing
+         |z_i - ref_i| against *deviation_threshold*.
+      2. For each correlation edge (i, j), compute the conditional probability
+         p(j deviated | i deviated) using the local activation profile:
+           p_ij = 1  if both deviated
+           p_ij = 0  if i deviated but j did not
+           (edges where i is NOT deviated contribute 0 to the entropy.)
+         To avoid degenerate 0/1 probabilities, apply Laplace smoothing:
+           p_ij_smooth = (match + α) / (1 + 2α)  where α = 0.01
+      3. The local edge entropy is:
+           h_ij = -p_ij * log(p_ij) - (1 - p_ij) * log(1 - p_ij)
+         (binary Shannon entropy of the conditional deviation probability).
+      4. SNE = (1 / |E_corr|) * Σ_{(i,j) ∈ E_corr} w_ij * h_ij
+         where w_ij = |z_i - ref_i| + |z_j - ref_j| weights edges by
+         deviation magnitude (nodes with larger deviations dominate the
+         entropy signal).
+
+    A sharp DROP in SNE across consecutive samples signals the pre-transition
+    phase: correlations are tightening (conditional deviations becoming more
+    predictable = lower entropy) before a structural reorganization.
+
+    Parameters
+    ----------
+    activation_vector : list of float
+        Current sample's node activation levels (length n).
+    reference_vector : list of float
+        Baseline / reference activation levels (e.g., running mean from
+        previous FEED cycles).  Same length as activation_vector.
+    correlation_edges : list of (int, int)
+        Background correlation graph edges as index pairs.
+    deviation_threshold : float
+        Threshold on |z_i - ref_i| to classify a node as "deviated"
+        (default 0.5).
+
+    Returns
+    -------
+    dict
+        {
+            "sne_score": float — the single-sample network entropy (≥ 0),
+            "n_deviated_nodes": int — count of nodes exceeding threshold,
+            "n_correlation_edges": int — edges in the background graph,
+            "n_active_edges": int — correlation edges where at least one
+                endpoint is deviated,
+            "mean_edge_entropy": float — average local edge entropy,
+            "max_edge_entropy": float — maximum local edge entropy,
+            "deviation_magnitudes": list of float — |z_i - ref_i| per node,
+            "is_pre_transition": bool — True if SNE dropped significantly
+                (requires comparison with prior; flagged here if SNE < 0.2
+                AND n_deviated_nodes > 30% of nodes — a heuristic pre-signal),
+            "pre_transition_confidence": float — heuristic confidence [0, 1],
+            "inv073_flag": str — challenge annotation for INV_073,
+        }
+    """
+    n = len(activation_vector)
+    if n == 0 or n != len(reference_vector) or not correlation_edges:
+        return {
+            "sne_score": 0.0,
+            "n_deviated_nodes": 0,
+            "n_correlation_edges": 0,
+            "n_active_edges": 0,
+            "mean_edge_entropy": 0.0,
+            "max_edge_entropy": 0.0,
+            "deviation_magnitudes": [],
+            "is_pre_transition": False,
+            "pre_transition_confidence": 0.0,
+            "inv073_flag": "insufficient_data",
+        }
+
+    # Step 1: Compute deviation magnitudes and classify deviated nodes
+    deviations = [abs(activation_vector[i] - reference_vector[i]) for i in range(n)]
+    is_deviated = [d >= deviation_threshold for d in deviations]
+    n_deviated = sum(is_deviated)
+
+    # Step 2–3: Compute local edge entropies
+    alpha = 0.01  # Laplace smoothing
+    edge_entropies = []  # type: List[float]
+    edge_weights = []  # type: List[float]
+    n_active = 0
+
+    for (i, j) in correlation_edges:
+        if i >= n or j >= n:
+            continue
+
+        # At least one endpoint must be deviated for the edge to be "active"
+        if not is_deviated[i] and not is_deviated[j]:
+            continue
+
+        n_active += 1
+
+        # Conditional probability: both deviated given at least one is
+        if is_deviated[i] and is_deviated[j]:
+            match = 1.0
+        else:
+            match = 0.0
+
+        # Laplace-smoothed conditional probability
+        p_ij = (match + alpha) / (1.0 + 2.0 * alpha)
+
+        # Binary Shannon entropy
+        if p_ij <= 0 or p_ij >= 1:
+            h_ij = 0.0
+        else:
+            h_ij = -p_ij * math.log(p_ij) - (1.0 - p_ij) * math.log(1.0 - p_ij)
+
+        # Weight by deviation magnitude at both endpoints
+        w_ij = deviations[i] + deviations[j]
+
+        edge_entropies.append(h_ij)
+        edge_weights.append(w_ij)
+
+    # Step 4: Compute SNE as weighted average
+    n_corr = len(correlation_edges)
+    if edge_entropies and sum(edge_weights) > 0:
+        total_weight = sum(edge_weights)
+        sne = sum(h * w for h, w in zip(edge_entropies, edge_weights)) / total_weight
+    elif edge_entropies:
+        sne = sum(edge_entropies) / len(edge_entropies)
+    else:
+        sne = 0.0
+
+    mean_h = sum(edge_entropies) / len(edge_entropies) if edge_entropies else 0.0
+    max_h = max(edge_entropies) if edge_entropies else 0.0
+
+    # Pre-transition heuristic: low SNE + high fraction of deviated nodes
+    deviated_fraction = n_deviated / max(n, 1)
+    is_pre_transition = (sne < 0.2 and deviated_fraction > 0.3 and n_active > 0)
+
+    # Confidence: combine SNE drop signal with deviation coverage
+    # Low SNE + high coverage = high confidence
+    if n_active > 0:
+        entropy_signal = max(0.0, 1.0 - sne / math.log(2.0))  # normalized to [0,1]
+        coverage_signal = min(1.0, deviated_fraction / 0.5)  # saturates at 50% deviated
+        pre_transition_confidence = round(entropy_signal * coverage_signal, 4)
+    else:
+        pre_transition_confidence = 0.0
+
+    # INV_073 challenge flag
+    if is_pre_transition:
+        inv073_flag = (
+            "SINGLE_SAMPLE_PRE_TRANSITION_DETECTED:"
+            f"sne={sne:.6f}:deviated_fraction={deviated_fraction:.4f}:"
+            f"confidence={pre_transition_confidence}:"
+            "critical_ridge_detectable_at_single_instance_level:"
+            "population_statistics_NOT_required:"
+            "ridge_may_be_narrower_and_more_fragile_than_genome_assumes"
+        )
+    elif sne < 0.4 and deviated_fraction > 0.2:
+        inv073_flag = (
+            "APPROACHING_PRE_TRANSITION:"
+            f"sne={sne:.6f}:deviated_fraction={deviated_fraction:.4f}:"
+            "single_sample_signal_marginal:monitor_closely"
+        )
+    else:
+        inv073_flag = (
+            f"NORMAL:sne={sne:.6f}:"
+            "no_pre_transition_signal_at_single_sample_level"
+        )
+
+    return {
+        "sne_score": round(sne, 10),
+        "n_deviated_nodes": n_deviated,
+        "n_correlation_edges": n_corr,
+        "n_active_edges": n_active,
+        "mean_edge_entropy": round(mean_h, 10),
+        "max_edge_entropy": round(max_h, 10),
+        "deviation_magnitudes": [round(d, 8) for d in deviations],
+        "is_pre_transition": is_pre_transition,
+        "pre_transition_confidence": pre_transition_confidence,
+        "inv073_flag": inv073_flag,
+    }
+
+
+def sne_from_graph_edges(edges, all_node_ids, reference_edges=None,
+                          deviation_threshold=0.5, min_co_occurrence=1):
+    # type: (list, List[str], Optional[list], float, int) -> dict
+    """
+    Convenience wrapper: compute SNE directly from graph edge snapshots.
+
+    Builds the activation vector, reference vector, and correlation graph
+    from the edge data, then computes single_sample_network_entropy.
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges (the "single sample").
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    reference_edges : list of dict or None
+        Baseline / reference graph edges.  If None, a uniform reference
+        (all activations = 0.5) is used, representing maximum ignorance.
+    deviation_threshold : float
+        Threshold for classifying a node as deviated (default 0.5).
+    min_co_occurrence : int
+        Minimum co-occurrence count for correlation edges (default 1).
+
+    Returns
+    -------
+    dict
+        SNE result dict (see single_sample_network_entropy), augmented with:
+        "activation_vector": list of float,
+        "reference_vector": list of float,
+    """
+    n = len(all_node_ids)
+    if n == 0:
+        return {
+            "sne_score": 0.0,
+            "n_deviated_nodes": 0,
+            "n_correlation_edges": 0,
+            "n_active_edges": 0,
+            "mean_edge_entropy": 0.0,
+            "max_edge_entropy": 0.0,
+            "deviation_magnitudes": [],
+            "is_pre_transition": False,
+            "pre_transition_confidence": 0.0,
+            "inv073_flag": "empty_graph",
+            "activation_vector": [],
+            "reference_vector": [],
+        }
+
+    activation = _node_activation_vector(edges, all_node_ids)
+
+    if reference_edges is not None:
+        reference = _node_activation_vector(reference_edges, all_node_ids)
+    else:
+        # Uniform reference: maximum ignorance baseline
+        reference = [0.5] * n
+
+    # Build correlation graph from the union of current + reference edges
+    all_edges_for_corr = list(edges)
+    if reference_edges is not None:
+        all_edges_for_corr.extend(reference_edges)
+    corr_edges = _correlation_graph_from_edges(
+        all_edges_for_corr, all_node_ids, min_co_occurrence
+    )
+
+    result = single_sample_network_entropy(
+        activation, reference, corr_edges, deviation_threshold
+    )
+    result["activation_vector"] = [round(a, 8) for a in activation]
+    result["reference_vector"] = [round(r, 8) for r in reference]
+
+    # Log pre-transition signals
+    if result["is_pre_transition"]:
+        print(
+            f"[GRAPH:SNE] ⚠ PRE-TRANSITION DETECTED — "
+            f"sne={result['sne_score']:.6f}, "
+            f"deviated={result['n_deviated_nodes']}/{n}, "
+            f"confidence={result['pre_transition_confidence']:.4f}. "
+            f"Knowledge graph approaching critical reorganization. "
+            f"(INV_073: single-sample detection — ridge may be fragile)"
+        )
+    elif result.get("inv073_flag", "").startswith("APPROACHING"):
+        print(
+            f"[GRAPH:SNE] Approaching pre-transition — "
+            f"sne={result['sne_score']:.6f}, "
+            f"deviated={result['n_deviated_nodes']}/{n}. Monitor."
+        )
+
+    return result
+
+
+def sne_time_series_analysis(sne_history, drop_threshold=0.15, window=3):
+    # type: (List[dict], float, int) -> dict
+    """
+    Analyze an SNE time series for pre-transition phase detection.
+
+    Detects the characteristic sharp DROP in SNE that signals the
+    pre-transition state: the network's correlation structure is
+    tightening (entropy decreasing) immediately before a critical
+    structural reorganization.
+
+    Parameters
+    ----------
+    sne_history : list of dict
+        Time-ordered SNE results (from single_sample_network_entropy or
+        sne_from_graph_edges).  Each must have at least "sne_score".
+    drop_threshold : float
+        Minimum absolute SNE drop between consecutive samples to flag
+        as a transition signal (default 0.15).
+    window : int
+        Rolling window for baseline comparison (default 3).
+
+    Returns
+    -------
+    dict
+        {
+            "n_samples": int,
+            "sne_values": list of float — the SNE time series,
+            "sne_deltas": list of float — consecutive differences,
+            "drop_events": list of dict — detected SNE drop events:
+                {"index": int, "sne_before": float, "sne_after": float,
+                 "delta": float, "is_sharp_drop": bool},
+            "n_sharp_drops": int,
+            "current_phase": str — "normal", "approaching_transition",
+                "pre_transition", or "post_transition",
+            "transition_imminent": bool — True if the most recent sample
+                shows a pre-transition signal,
+            "inv073_summary": str — challenge summary for INV_073,
+        }
+    """
+    n = len(sne_history)
+    sne_vals = [h.get("sne_score", 0.0) for h in sne_history]
+
+    if n < 2:
+        return {
+            "n_samples": n,
+            "sne_values": sne_vals,
+            "sne_deltas": [],
+            "drop_events": [],
+            "n_sharp_drops": 0,
+            "current_phase": "normal",
+            "transition_imminent": False,
+            "inv073_summary": "insufficient_history_for_phase_detection",
+        }
+
+    # Compute consecutive deltas
+    deltas = [sne_vals[i] - sne_vals[i - 1] for i in range(1, n)]
+
+    # Detect drop events
+    drop_events = []  # type: List[dict]
+    for i, delta in enumerate(deltas):
+        is_sharp = delta < -drop_threshold
+        if abs(delta) > drop_threshold * 0.5:  # Record moderate drops too
+            drop_events.append({
+                "index": i + 1,
+                "sne_before": round(sne_vals[i], 8),
+                "sne_after": round(sne_vals[i + 1], 8),
+                "delta": round(delta, 8),
+                "is_sharp_drop": is_sharp,
+            })
+
+    n_sharp = sum(1 for d in drop_events if d["is_sharp_drop"])
+
+    # Phase classification based on recent trajectory
+    recent_sne = sne_vals[-1] if sne_vals else 0.0
+    recent_pre_trans = (
+        sne_history[-1].get("is_pre_transition", False) if sne_history else False
+    )
+
+    # Check if most recent delta is a sharp drop
+    recent_delta = deltas[-1] if deltas else 0.0
+    recent_sharp_drop = recent_delta < -drop_threshold
+
+    if recent_pre_trans or recent_sharp_drop:
+        current_phase = "pre_transition"
+        transition_imminent = True
+    elif n >= window + 1:
+        baseline = sum(sne_vals[-window - 1:-1]) / window
+        if recent_sne < baseline * 0.7 and recent_sne < 0.4:
+            current_phase = "approaching_transition"
+            transition_imminent = False
+        elif n_sharp > 0 and drop_events and drop_events[-1]["index"] == n - 1:
+            # Sharp drop was the previous sample, current may be post-transition
+            current_phase = "post_transition"
+            transition_imminent = False
+        else:
+            current_phase = "normal"
+            transition_imminent = False
+    else:
+        current_phase = "normal"
+        transition_imminent = False
+
+    # INV_073 summary
+    if transition_imminent:
+        inv073_summary = (
+            f"PRE_TRANSITION_PHASE_ACTIVE:n_sharp_drops={n_sharp}:"
+            f"current_sne={recent_sne:.6f}:delta={recent_delta:.6f}:"
+            "single_sample_detection_sufficient:"
+            "genome_population_level_assumption_STRAINED:"
+            "critical_ridge_narrower_than_formalized"
+        )
+    elif current_phase == "approaching_transition":
+        inv073_summary = (
+            f"APPROACHING:n_sharp_drops={n_sharp}:"
+            f"current_sne={recent_sne:.6f}:"
+            "single_sample_signal_building:monitor"
+        )
+    else:
+        inv073_summary = (
+            f"NORMAL:n_sharp_drops={n_sharp}:"
+            f"current_sne={recent_sne:.6f}:"
+            "no_pre_transition_phase_detected"
+        )
+
+    return {
+        "n_samples": n,
+        "sne_values": [round(v, 8) for v in sne_vals],
+        "sne_deltas": [round(d, 8) for d in deltas],
+        "drop_events": drop_events,
+        "n_sharp_drops": n_sharp,
+        "current_phase": current_phase,
+        "transition_imminent": transition_imminent,
+        "inv073_summary": inv073_summary,
+    }
+
+
 # ── Singleton accessor ────────────────────────────────────────────────────────
 
 _graph_instance = None  # type: Optional[KnowledgeGraph]
