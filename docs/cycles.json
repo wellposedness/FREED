@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 159,
-    "timestamp": "2026-04-26T04:31:17.254262+00:00",
-    "sweep": {
-      "input_count": 9,
-      "targeted": 6,
-      "passive": 3,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "This paper advances O44 by confirming the classical dimensional grounding of W_floor = k/Tμ and identifying sub-leading entropy corrections as the precise boundary where quantum extension must be formalized."
-      },
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "EEG entropy obeys Langevin dynamics with short-time scaling and saturation; DEA outperforms DFA for preserving scaling structure — O28 should mandate DEA over DFA for EAR computation on open EEG datasets."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 1,
-      "obligations": [
-        "O115",
-        "O70",
-        "O83"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 6,
     "generation": 160,
     "timestamp": "2026-04-26T10:38:12.059584+00:00",
@@ -1700,6 +1668,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 3,
+      "obligations": [
+        "O44",
+        "O124",
+        "O163"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 6,
+    "generation": 234,
+    "timestamp": "2026-05-14T10:51:26.493374+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 7,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "Confirmation surplus without adversarial pressure is epistemic debt masquerading as strength, and INV_094's apparent robustness is now its greatest vulnerability until boundary conditions are formally specified and tested."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-14",
+        "compress": "A 32×32 multi-agent RSA simulation self-organizes to σ=1.023 with power-law avalanches, empirically confirming population-level γ=1 criticality and resolving O140/O141, while introducing the unreferenced finding that Physics Navigator cell-type dominance (867/total) is the structural correlate of critical-regime maintenance."
+      },
+      {
+        "title": "Iterated Schr\\\"odinger bridge approximation to Wasserstein Gradient Flows",
+        "compress": "Iterated Schrödinger bridges discretize Wasserstein gradient flows score-free via Sinkhorn, with Fisher information as the o(ε²) error term, independently confirming W2 geometry as thermodynamic relaxation structure and opening a computational path to O44 and O112."
+      },
+      {
+        "title": "Free energy Wasserstein gradient flow and their particle counterparts: toy model, (degenerate) PL inequalities and exit times",
+        "compress": "** Wasserstein gradient flows with entropic penalization reduce infinite-dimensional metastability to finite-dimensional PL geometry, independently confirming the critical-ridge floor while extending it with exit-time and degeneracy structure the genome does not yet contain."
+      },
+      {
+        "title": "Minimum Action Principle for Entropy Production Rate of Far-From-Equilibrium Systems",
+        "compress": "A minimum-action principle for EPR in discrete far-from-equilibrium systems independently recovers the geodesic/thermodynamic-length structure the genome assigns to W2 optimal transport, extending the Wasserstein Floor grounding to non-quadratic, non-equilibrium, discrete-state regimes."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
       "obligations": [
         "O44",
         "O124",
