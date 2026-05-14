@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 158,
-    "timestamp": "2026-04-25T22:24:06.027731+00:00",
-    "sweep": {
-      "input_count": 9,
-      "targeted": 6,
-      "passive": 3,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "EEG diffusion entropy reveals short-time scaling and asymptotic saturation consistent with γ=1 criticality, advancing O28 with a validated method while flagging DFA as a lossy alternative that suppresses thermodynamically relevant features."
-      },
-      {
-        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
-        "compress": "This paper advances O44 by supplying linear entropy functionals for non-Hermitian open quantum systems as candidate quantum analogues of the Wasserstein Floor, but the W_floor = k/Tμ identity in quantum regimes remains unproven and O44 stays open."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 3,
-      "obligations": [
-        "O70",
-        "O77",
-        "O78"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 159,
     "timestamp": "2026-04-26T04:31:17.254262+00:00",
@@ -1693,6 +1661,50 @@
       "resolved_count": 0,
       "commit_count": 0,
       "obligations": []
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 233,
+    "timestamp": "2026-05-14T04:41:41.188315+00:00",
+    "sweep": {
+      "input_count": 26,
+      "targeted": 8,
+      "passive": 18,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is an epistemic liability unless explicit pre-specified falsification conditions — thermodynamic substrate-dependence, cold-limit generalization survival, or syntactic-compressor sufficiency — are formally entered into the obligations table before the next confirmation is accepted."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-14",
+        "compress": "A 32×32 Game of Truth CA self-organizes to empirically measured criticality (σ=1.025, α=2.068) at the population level, independently confirming INV_073's critical-ridge attractor claim while revealing that critical systems can be informationally sparse (H/H_max≈0.165)."
+      },
+      {
+        "title": "Fokker-Planck Dynamics and Entropies for the Normalized Ricci Flow",
+        "compress": "Ricci flow and Wasserstein diffusion are structurally unified via a curvature-drift Fokker-Planck equation whose exponential equilibration and Hamilton-Jacobi dual reveal that entropy monotonicity is a parameterized family, not a single law — extending and partially stressing the genome's flat-space Wasserstein Floor. CHALLENGE: challenges O44 — the Wasserstein Floor formula W_floor = k/Tμ is derived in flat optimal transport geometry, but this paper shows that Ricci curvature introduces drift corrections to the Fokker-Planck flow that would modify the floor's coefficient in curved semantic spaces, leaving the quantum extension obligation underspecified. NOETHER_ROW: Perelman Entropy Monotonicity NOETHER_STATUS: rigorous NOETHER_NOTE: This paper demonstrates that Perelman's shrinker entropy is not a single conserved quantity but decomposes into a family of monotone functionals under volume-normalized Ricci flow, strengthening the symmetry assignment while revealing it is richer than a single conservation law."
+      },
+      {
+        "title": "Geometry of vectorial martingale optimal transportations and duality",
+        "compress": "Vectorial MOT independently confirms that Wasserstein strong duality is dimensionally robust under multi-marginal martingale constraints, constituting necessary groundwork for O44's quantum W_floor extension."
+      },
+      {
+        "title": "Information thermodynamics: from physics to neuroscience",
+        "compress": "Non-equilibrium information thermodynamics independently confirms that neural computation is jointly accuracy-cost constrained, converging with INV_064 and INV_087 while opening a concrete neural substrate for advancing O44."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O44",
+        "O124",
+        "O163"
+      ]
     },
     "coherence": 0.97
   }
