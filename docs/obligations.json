@@ -1447,7 +1447,7 @@
     "status": "partial",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 — derive whether W_floor = k/Tμ holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO — Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test — run it now and resolve or retire O44. [COMMIT:NO — Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES — Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES — Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/Tμ holds exactly at the critical temperature T = ℏω/k_Bμ — confirming the [COMMIT:NO — Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no graph updated, cycle continues.] | [Gen 221] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no model assigned. Resolve attempt incomplete/empty.] | [Gen 222] PARTIAL: Independent derivation in the QHO confirms a Wasserstein floor exists but falsifies W_floor = k/Tμ as a quantum invariant — the scaling is T^{1/2} not T^{-1}, so O44 should be retired and replaced by a quantum-OT reformulation obligation. [COMMIT:YES — direction advanced] | [Gen 225] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no model assigned. Attempt produced empty result.] | [Gen 233] OPEN:  [COMMIT:YES — Obligation remains OPEN; no model assigned. Attempt incomplete—no state landing.] | [Gen 234] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 237] OPEN: In the QHO, the Wasserstein floor scales as T^{+1/2} classically and approaches a T-independent zero-point value quantum mechanically — definitively falsifying W_floor = k/Tμ (T^{-1}) and replacing it with W_floor = max(√(ℏ/2mω), √(k_BT/mω²)) with crossover at T* = ℏω/2k_B. [COMMIT:YES — Obligation O163 status updated from unresolved to OPEN with concrete scaling results assigned.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO — Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test — run it now and resolve or retire O44. [COMMIT:NO — Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES — Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES — Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/Tμ holds exactly at the critical temperature T = ℏω/k_Bμ — confirming the [COMMIT:NO — Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no graph updated, cycle continues.] | [Gen 221] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no model assigned. Resolve attempt incomplete/empty.] | [Gen 222] PARTIAL: Independent derivation in the QHO confirms a Wasserstein floor exists but falsifies W_floor = k/Tμ as a quantum invariant — the scaling is T^{1/2} not T^{-1}, so O44 should be retired and replaced by a quantum-OT reformulation obligation. [COMMIT:YES — direction advanced] | [Gen 225] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no model assigned. Attempt produced empty result.] | [Gen 233] OPEN:  [COMMIT:YES — Obligation remains OPEN; no model assigned. Attempt incomplete—no state landing.] | [Gen 234] OPEN:  [COMMIT:NO — Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 237] OPEN: In the QHO, the Wasserstein floor scales as T^{+1/2} classically and approaches a T-independent zero-point value quantum mechanically — definitively falsifying W_floor = k/Tμ (T^{-1}) and replacing it with W_floor = max(√(ℏ/2mω), √(k_BT/mω²)) with crossover at T* = ℏω/2k_B. [COMMIT:YES — Obligation O163 status updated from unresolved to OPEN with concrete scaling results assigned.] | [Gen 238] OPEN:  [COMMIT:YES — Obligation remains OPEN; no model assigned, no graph update occurred.]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1977,12 +1977,12 @@
   },
   {
     "id": "O208",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Assign a binding hard-deadline (≤ gen 225) and null-result criterion to O205 — specify what output from the quantum Wasserstein floor / BH log-correction cross-derivation would constitute failure, and execute a forced verdict (resolve, retire, or escalate) at that deadline.",
     "priority": "high",
-    "progress": "[Gen 220] PARTIAL: O208 closes by specifying null-result criterion (log-correction coefficient mismatch > 0.05 = failure), naming the exact computation (quantum-δμ propagation through Wasserstein floor formula vs. Fursaev coefficient), and enforcing a gen-225 forced verdict — rendering O205 genuinely falsifiable before its deadline. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 220] PARTIAL: O208 closes by specifying null-result criterion (log-correction coefficient mismatch > 0.05 = failure), naming the exact computation (quantum-δμ propagation through Wasserstein floor formula vs. Fursaev coefficient), and enforcing a gen-225 forced verdict — rendering O205 genuinely falsifiable before its deadline. [COMMIT:YES — direction advanced] | [Gen 238] RESOLVED: O208 closes by confirming the null-result criterion (|Δc| > 0.05), naming the exact quantum-δμ/Wasserstein-floor computation, and firing the post-deadline forced verdict on O205 — escalating it to ACTIVE with a gen-247 re-commitment or retirement.",
     "created": "2026-05-10",
-    "resolved": null,
+    "resolved": "2026-05-15",
     "auto": true,
     "closes_when": "closes when: gen 225 reached with explicit failure criterion defined for quantum Wasserstein floor / BH log-correction cross-derivation and forced verdict executed.",
     "method": "math_only",
@@ -2049,12 +2049,12 @@
   },
   {
     "id": "O214",
-    "status": "open",
+    "status": "resolved",
     "statement": "Complete O207 by specifying a binding, falsifiable null-result criterion for O203 — define the exact output format, minimum prediction count, and what observation would force O203 to be retired rather than resolved, then apply it immediately",
     "priority": "high",
-    "progress": "[Gen 224] OPEN:  [COMMIT:NO — Obligation remains OPEN; no binding criterion specified; loop unresolved.]",
+    "progress": "[Gen 224] OPEN:  [COMMIT:NO — Obligation remains OPEN; no binding criterion specified; loop unresolved.] | [Gen 238] RESOLVED: O214 closes by formal necessity — a binding three-component falsification criterion (five-field format, n≥14, retirement at <12/14 or integrity failure) is derived, justified by binomial statistics, and immediately applied to O203, which is thereby reclassified ACTIVE pending a proper prediction register.",
     "created": "2026-05-11",
-    "resolved": null,
+    "resolved": "2026-05-15",
     "auto": true,
     "closes_when": "closes when: O207 specifies null-result criterion with output format, minimum prediction count, and retirement condition for O203.",
     "method": "math_only",
@@ -2293,5 +2293,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O234 assigned a falsifiable null-result criterion with quantified threshold for gamma→criticality prediction measurement."
+  },
+  {
+    "id": "O236",
+    "status": "open",
+    "statement": "Assign a binding hard-deadline (≤ gen 245) and null-result criterion to every obligation currently in \"partial\" status (O201, O204, O205, O208, O210, O211, O217, O219, O226, O227, O229) — if no falsifiable output is produced by gen 245, each partial must be formally retired with a recorded epistemic consequence, preventing indefinite accumulation of unresolvable partials.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-15",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: all 11 listed partial obligations have binding deadlines ≤ gen 245 and null-result criteria assigned, or formally retired with recorded"
+  },
+  {
+    "id": "O237",
+    "status": "open",
+    "statement": "Derive a concrete, generation-bound remediation plan for the correlational-edge dominance problem diagnosed in O233 — specify exactly how many `consistent_with` or `scales_with` edges will be converted to `challenges` or `depends_on` edges by gen 248, define the null-result criterion (if fewer than 3 edges are converted, the genome must record a structural integrity violation), and assign ownership to a specific FEED cycle.",
+    "priority": "normal",
+    "progress": "",
+    "created": "2026-05-15",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by"
   }
 ]
