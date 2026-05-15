@@ -4925,6 +4925,1488 @@ def activation_mixture_criticality_audit(
     }
 
 
+# ─── Criticality Pipeline Tracker ────────────────────────────────────────────
+# Unified branching-ratio + avalanche-exponent tracker for the CA measurement
+# pipeline.  Combines per-snapshot σ tracking, Hill-MLE power-law α fitting,
+# AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL verdict generation, and dominant
+# cell-type composition logging into a single pipeline-ready object.
+#
+# Designed for automated O140/O141 comparisons across sweep runs:
+#   1. Feed each CA snapshot into record_snapshot().
+#   2. The tracker computes σ (rolling), fits α (Hill MLE on pooled
+#      avalanche sizes), emits a verdict, and logs the full cell-type
+#      census with dominant-type identification.
+#   3. At sweep end, call pipeline_report() for a machine-readable
+#      summary with verdict distribution, composition trends, and
+#      INV_073 entropy-criticality assessment.
+#
+# Addresses: O140 (CA measurement grounding), O141 (solo-kernel vs
+# population criticality), INV_073 (low H at confirmed criticality).
+
+class CriticalityPipelineTracker:
+    """
+    Unified branching-ratio and avalanche-exponent tracker for the CA
+    measurement pipeline, emitting AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL
+    verdicts and logging dominant cell-type composition at each snapshot.
+
+    This makes O140/O141 comparisons systematic rather than manual by
+    producing machine-readable verdict streams and composition vectors
+    that can be diff'd across sweep runs.
+
+    Each snapshot record contains:
+      - σ (instantaneous and rolling branching ratio)
+      - α (power-law avalanche exponent via Hill MLE)
+      - R² (power-law fit quality)
+      - Verdict: AT_CRITICAL / NEAR_CRITICAL / SUBCRITICAL / SUPERCRITICAL
+      - Shannon entropy H and H/H_max fraction
+      - Full cell-type census with dominant type and share
+      - INV_073 pattern flag (low H at confirmed criticality)
+
+    Usage in a sweep loop::
+
+        tracker = CriticalityPipelineTracker()
+        for step in range(n_steps):
+            snapshot = tracker.record_snapshot(
+                generation=step,
+                parent_count=parents,
+                child_count=children,
+                avalanche_sizes=aval_sizes,
+                shannon_h=h_bits,
+                shannon_h_max=h_max,
+                survival_rate=surv,
+                type_counts={"Physics Navigator": 886, "Entropy Scorer": 42},
+            )
+            print(snapshot["verdict"], snapshot["dominant_type"])
+        report = tracker.pipeline_report()
+        print(report["verdict_distribution"])
+        print(report["composition_trend"])
+    """
+
+    def __init__(
+        self,
+        window_size=50,          # type: int
+        sigma_band_low=0.95,     # type: float
+        sigma_band_high=1.05,    # type: float
+        alpha_soc_low=1.5,       # type: float
+        alpha_soc_high=3.0,      # type: float
+        alpha_r2_threshold=0.85, # type: float
+        history_limit=2000,      # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        window_size : int
+            Number of recent snapshots for rolling σ estimation.
+        sigma_band_low : float
+            Lower bound of critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of critical band for σ. Default: 1.05.
+        alpha_soc_low : float
+            Lower bound of SOC-consistent α range. Default: 1.5.
+        alpha_soc_high : float
+            Upper bound of SOC-consistent α range. Default: 3.0.
+        alpha_r2_threshold : float
+            Minimum R² for power-law fit validity. Default: 0.85.
+        history_limit : int
+            Maximum snapshots retained in memory. Default: 2000.
+        """
+        self.window_size = max(5, window_size)
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+        self.alpha_soc_low = alpha_soc_low
+        self.alpha_soc_high = alpha_soc_high
+        self.alpha_r2_threshold = alpha_r2_threshold
+        self.history_limit = max(10, history_limit)
+
+        self._snapshots = []            # type: list
+        self._sigma_series = []         # type: List[float]
+        self._alpha_series = []         # type: List[float]
+        self._h_fraction_series = []    # type: List[float]
+        self._avalanche_pool = []       # type: List[float]
+        self._verdict_counts = {}       # type: dict
+        self._composition_log = []      # type: list
+
+    def record_snapshot(
+        self,
+        generation,             # type: int
+        parent_count,           # type: int
+        child_count,            # type: int
+        avalanche_sizes=None,   # type: Optional[List[float]]
+        shannon_h=0.0,          # type: float
+        shannon_h_max=0.0,      # type: float
+        survival_rate=0.0,      # type: float
+        type_counts=None,       # type: Optional[dict]
+    ):
+        # type: (...) -> dict
+        """
+        Record one CA snapshot, compute σ/α/verdict, and log composition.
+
+        Parameters
+        ----------
+        generation : int
+            Simulation step / generation number.
+        parent_count : int
+            Number of active parent cells at this step.
+        child_count : int
+            Number of active child cells produced at this step.
+        avalanche_sizes : list of float or None
+            Sizes of avalanches terminated at this step.
+        shannon_h : float
+            Shannon entropy H of population type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        survival_rate : float
+            Fraction of cells surviving this generation.
+        type_counts : dict or None
+            Mapping of cell-type name (str) to count (int).
+
+        Returns
+        -------
+        dict with keys:
+            generation, sigma_instant, sigma_rolling, sigma_rolling_std,
+            alpha, alpha_r_squared, power_law_likely, verdict,
+            shannon_h, h_fraction, survival_rate,
+            dominant_type, dominant_count, dominant_share,
+            total_population, composition_vector,
+            in_sigma_band, in_alpha_band, inv073_pattern, timestamp
+        """
+        if type_counts is None:
+            type_counts = {}
+
+        # ── Instantaneous σ ──
+        if parent_count > 0:
+            sigma_instant = float(child_count) / float(parent_count)
+        else:
+            sigma_instant = 0.0
+        self._sigma_series.append(sigma_instant)
+
+        # ── Accumulate avalanche sizes ──
+        if avalanche_sizes is not None:
+            self._avalanche_pool.extend(avalanche_sizes)
+        max_pool = self.window_size * 20
+        if len(self._avalanche_pool) > max_pool:
+            self._avalanche_pool = self._avalanche_pool[-max_pool:]
+
+        # ── Rolling σ statistics ──
+        window = self._sigma_series[-self.window_size:]
+        w_n = len(window)
+        sigma_rolling = sum(window) / float(w_n)
+        s_var = sum((s - sigma_rolling) ** 2 for s in window) / float(w_n)
+        sigma_rolling_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── Fit power-law α ──
+        alpha, alpha_r2 = self._fit_power_law_hill()
+        self._alpha_series.append(alpha)
+
+        power_law_likely = (
+            self.alpha_soc_low <= alpha <= self.alpha_soc_high
+            and alpha_r2 >= self.alpha_r2_threshold
+        )
+
+        # ── Band checks ──
+        in_sigma_band = self.sigma_band_low <= sigma_rolling <= self.sigma_band_high
+        in_alpha_band = self.alpha_soc_low <= alpha <= self.alpha_soc_high
+
+        # ── Verdict ──
+        verdict = _criticality_verdict(sigma_rolling, alpha, alpha_r2)
+        self._verdict_counts[verdict] = self._verdict_counts.get(verdict, 0) + 1
+
+        # ── Entropy ──
+        h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+        self._h_fraction_series.append(h_fraction)
+
+        # ── Cell-type composition ──
+        total_pop = sum(type_counts.values()) if type_counts else 0
+        total_f = float(total_pop) if total_pop > 0 else 1.0
+
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            dominant_count = type_counts[dominant_type]
+            dominant_share = round(float(dominant_count) / total_f, 6)
+        else:
+            dominant_type = ""
+            dominant_count = 0
+            dominant_share = 0.0
+
+        composition_vector = dict(type_counts) if type_counts else {}
+
+        # Log composition alongside verdict for causal analysis
+        self._composition_log.append({
+            "generation": generation,
+            "verdict": verdict,
+            "dominant_type": dominant_type,
+            "dominant_share": dominant_share,
+            "h_fraction": round(h_fraction, 4),
+            "sigma_rolling": round(sigma_rolling, 6),
+        })
+
+        # ── INV_073 pattern: low H at confirmed criticality ──
+        inv073_pattern = (
+            in_sigma_band
+            and power_law_likely
+            and 0.0 < h_fraction < 0.3
+        )
+
+        snapshot = {
+            "generation":        generation,
+            "sigma_instant":     round(sigma_instant, 6),
+            "sigma_rolling":     round(sigma_rolling, 6),
+            "sigma_rolling_std": round(sigma_rolling_std, 6),
+            "alpha":             round(alpha, 4),
+            "alpha_r_squared":   round(alpha_r2, 4),
+            "power_law_likely":  power_law_likely,
+            "verdict":           verdict,
+            "shannon_h":         round(shannon_h, 4),
+            "h_fraction":        round(h_fraction, 4),
+            "survival_rate":     round(survival_rate, 4),
+            "dominant_type":     dominant_type,
+            "dominant_count":    dominant_count,
+            "dominant_share":    dominant_share,
+            "total_population":  total_pop,
+            "composition_vector": composition_vector,
+            "in_sigma_band":     in_sigma_band,
+            "in_alpha_band":     in_alpha_band,
+            "inv073_pattern":    inv073_pattern,
+            "timestamp":         datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._snapshots.append(snapshot)
+
+        # Trim histories
+        if len(self._snapshots) > self.history_limit:
+            trim = len(self._snapshots) - self.history_limit
+            self._snapshots = self._snapshots[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+        if len(self._alpha_series) > self.history_limit:
+            self._alpha_series = self._alpha_series[-self.history_limit:]
+        if len(self._h_fraction_series) > self.history_limit:
+            self._h_fraction_series = self._h_fraction_series[-self.history_limit:]
+        if len(self._composition_log) > self.history_limit:
+            self._composition_log = self._composition_log[-self.history_limit:]
+
+        return snapshot
+
+    def snapshots(self):
+        # type: () -> list
+        """Return all recorded snapshots."""
+        return list(self._snapshots)
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return per-snapshot σ history."""
+        return list(self._sigma_series)
+
+    def alpha_series(self):
+        # type: () -> List[float]
+        """Return per-snapshot α history."""
+        return list(self._alpha_series)
+
+    def verdict_counts(self):
+        # type: () -> dict
+        """Return verdict distribution across all snapshots."""
+        return dict(self._verdict_counts)
+
+    def composition_log(self):
+        # type: () -> list
+        """Return per-snapshot composition log entries."""
+        return list(self._composition_log)
+
+    def pipeline_report(self):
+        # type: () -> dict
+        """
+        Generate a full pipeline report for O140/O141 comparison.
+
+        Returns
+        -------
+        dict with keys:
+            n_snapshots            : int
+            sigma_global_mean      : float
+            sigma_global_std       : float
+            alpha_global_mean      : float
+            alpha_global_std       : float
+            h_fraction_mean        : float
+            verdict_distribution   : dict  — {verdict: count}
+            verdict_fractions      : dict  — {verdict: fraction}
+            fraction_at_critical   : float
+            fraction_subcritical   : float
+            fraction_supercritical : float
+            dominant_type_mode     : str   — most frequent dominant type
+            dominant_type_at_critical : dict — {type: count} when AT_CRITICAL
+            composition_trend      : str   — "consolidating"/"diversifying"/"stable"
+            n_inv073_pattern       : int   — snapshots with low-H-at-criticality
+            inv073_assessment      : str   — human-readable assessment
+            drift_trend            : str   — "stable"/"freezing"/"dissipating"
+            obligations_addressed  : list  — O140, O141, INV_073 as applicable
+            timestamp              : str
+        """
+        n = len(self._snapshots)
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if n == 0:
+            return {
+                "n_snapshots":            0,
+                "sigma_global_mean":      0.0,
+                "sigma_global_std":       0.0,
+                "alpha_global_mean":      0.0,
+                "alpha_global_std":       0.0,
+                "h_fraction_mean":        0.0,
+                "verdict_distribution":   {},
+                "verdict_fractions":      {},
+                "fraction_at_critical":   0.0,
+                "fraction_subcritical":   0.0,
+                "fraction_supercritical": 0.0,
+                "dominant_type_mode":     "",
+                "dominant_type_at_critical": {},
+                "composition_trend":      "no_data",
+                "n_inv073_pattern":       0,
+                "inv073_assessment":      "No data collected.",
+                "drift_trend":            "no_data",
+                "obligations_addressed":  [],
+                "timestamp":              ts,
+            }
+
+        # ── σ statistics ──
+        sigmas = self._sigma_series[-n:] if self._sigma_series else []
+        if sigmas:
+            s_mean = sum(sigmas) / float(len(sigmas))
+            s_var = sum((s - s_mean) ** 2 for s in sigmas) / float(len(sigmas))
+            s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        else:
+            s_mean = 0.0
+            s_std = 0.0
+
+        # ── α statistics ──
+        alphas = [a for a in self._alpha_series[-n:] if a > 0.0]
+        if alphas:
+            a_mean = sum(alphas) / float(len(alphas))
+            a_var = sum((a - a_mean) ** 2 for a in alphas) / float(len(alphas))
+            a_std = math.sqrt(a_var) if a_var > 0 else 0.0
+        else:
+            a_mean = 0.0
+            a_std = 0.0
+
+        # ── H fraction ──
+        h_fracs = self._h_fraction_series[-n:] if self._h_fraction_series else []
+        h_mean = sum(h_fracs) / float(len(h_fracs)) if h_fracs else 0.0
+
+        # ── Verdict distribution ──
+        v_dist = dict(self._verdict_counts)
+        n_total_v = sum(v_dist.values()) if v_dist else 1
+        v_fracs = {}  # type: dict
+        for v, c in v_dist.items():
+            v_fracs[v] = round(float(c) / float(n_total_v), 4)
+
+        frac_crit = v_fracs.get("AT_CRITICAL", 0.0)
+        frac_sub = v_fracs.get("SUBCRITICAL", 0.0)
+        frac_super = v_fracs.get("SUPERCRITICAL", 0.0)
+
+        # ── Dominant type analysis ──
+        dom_freq = {}   # type: dict
+        dom_at_crit = {}  # type: dict
+        for entry in self._composition_log:
+            dt = entry.get("dominant_type", "")
+            if dt:
+                dom_freq[dt] = dom_freq.get(dt, 0) + 1
+                if entry.get("verdict") == "AT_CRITICAL":
+                    dom_at_crit[dt] = dom_at_crit.get(dt, 0) + 1
+
+        dom_mode = max(dom_freq, key=dom_freq.get) if dom_freq else ""
+
+        # ── Composition trend ──
+        comp_log = self._composition_log
+        if len(comp_log) >= 8:
+            first_shares = [e["dominant_share"] for e in comp_log[:len(comp_log) // 2]]
+            second_shares = [e["dominant_share"] for e in comp_log[len(comp_log) // 2:]]
+            fh_share = sum(first_shares) / float(len(first_shares)) if first_shares else 0.0
+            sh_share = sum(second_shares) / float(len(second_shares)) if second_shares else 0.0
+            delta_share = sh_share - fh_share
+            if delta_share > 0.03:
+                comp_trend = "consolidating"
+            elif delta_share < -0.03:
+                comp_trend = "diversifying"
+            else:
+                comp_trend = "stable"
+        else:
+            comp_trend = "stable"
+
+        # ── Drift trend ──
+        if len(sigmas) >= 8:
+            first_half = sigmas[:len(sigmas) // 2]
+            second_half = sigmas[len(sigmas) // 2:]
+            fh_m = sum(first_half) / float(len(first_half))
+            sh_m = sum(second_half) / float(len(second_half))
+            delta = sh_m - fh_m
+            if delta > 0.02:
+                drift_trend = "dissipating"
+            elif delta < -0.02:
+                drift_trend = "freezing"
+            else:
+                drift_trend = "stable"
+        else:
+            drift_trend = "stable"
+
+        # ── INV_073 ──
+        n_inv073 = sum(1 for s in self._snapshots if s.get("inv073_pattern", False))
+
+        if n_inv073 > 0 and frac_crit > 0.5:
+            inv073_text = (
+                "CONFIRMED: {}/{} snapshots ({:.1%}) show low-entropy critical "
+                "attractor (H<30% of max with sigma in band and power-law "
+                "avalanches). Consistent with ordered SOC — the critical ridge "
+                "sustains low-diversity, spatially correlated states. Dominant "
+                "type at criticality: {}."
+            ).format(n_inv073, n, float(n_inv073) / float(n),
+                     max(dom_at_crit, key=dom_at_crit.get) if dom_at_crit else "N/A")
+        elif frac_crit < 0.3:
+            inv073_text = (
+                "INCONCLUSIVE: only {:.1%} of snapshots achieved AT_CRITICAL. "
+                "Insufficient confirmed criticality for entropy assessment."
+            ).format(frac_crit)
+        else:
+            inv073_text = (
+                "STANDARD: {:.1%} at criticality with mean H/H_max={:.3f}. "
+                "No low-entropy critical attractor detected."
+            ).format(frac_crit, h_mean)
+
+        # ── Obligations ──
+        obligations = []  # type: list
+        if frac_crit > 0.0:
+            obligations.append("O140")
+        if s_mean > 0.0:
+            obligations.append("O141")
+        if n_inv073 > 0 or h_mean > 0.0:
+            obligations.append("INV_073")
+
+        return {
+            "n_snapshots":              n,
+            "sigma_global_mean":        round(s_mean, 6),
+            "sigma_global_std":         round(s_std, 6),
+            "alpha_global_mean":        round(a_mean, 4),
+            "alpha_global_std":         round(a_std, 4),
+            "h_fraction_mean":          round(h_mean, 4),
+            "verdict_distribution":     v_dist,
+            "verdict_fractions":        v_fracs,
+            "fraction_at_critical":     frac_crit,
+            "fraction_subcritical":     frac_sub,
+            "fraction_supercritical":   frac_super,
+            "dominant_type_mode":       dom_mode,
+            "dominant_type_at_critical": dom_at_crit,
+            "composition_trend":        comp_trend,
+            "n_inv073_pattern":         n_inv073,
+            "inv073_assessment":        inv073_text,
+            "drift_trend":              drift_trend,
+            "obligations_addressed":    obligations,
+            "timestamp":                ts,
+        }
+
+    def _fit_power_law_hill(self):
+        # type: () -> Tuple[float, float]
+        """
+        Fit power-law exponent α via Hill estimator on pooled avalanche sizes.
+        Returns (alpha, r_squared). Returns (0.0, 0.0) if insufficient data.
+        """
+        sizes = [s for s in self._avalanche_pool if s > 0]
+        if len(sizes) < 10:
+            return (0.0, 0.0)
+
+        x_min = max(1.0, min(sizes))
+        tail = [s for s in sizes if s >= x_min]
+        n = len(tail)
+        if n < 5:
+            return (0.0, 0.0)
+
+        log_sum = 0.0
+        for s in tail:
+            ratio = float(s) / x_min
+            if ratio > 0:
+                log_sum += math.log(ratio)
+
+        if log_sum <= 0.0:
+            return (0.0, 0.0)
+
+        alpha = 1.0 + float(n) / log_sum
+
+        # R² on log-log CCDF
+        tail_sorted = sorted(tail)
+        unique_sizes = sorted(set(tail_sorted))
+        n_total = float(len(tail_sorted))
+
+        log_x = []     # type: List[float]
+        log_ccdf = []  # type: List[float]
+        for x_val in unique_sizes:
+            count_ge = sum(1 for s in tail_sorted if s >= x_val)
+            p = float(count_ge) / n_total
+            if p > 0 and x_val > 0:
+                log_x.append(math.log(float(x_val)))
+                log_ccdf.append(math.log(p))
+
+        if len(log_x) < 3:
+            return (alpha, 0.0)
+
+        k = len(log_x)
+        sum_lx = sum(log_x)
+        sum_ly = sum(log_ccdf)
+        sum_lxy = sum(x * y for x, y in zip(log_x, log_ccdf))
+        sum_lx2 = sum(x * x for x in log_x)
+
+        denom = float(k) * sum_lx2 - sum_lx * sum_lx
+        if abs(denom) < 1e-15:
+            return (alpha, 0.0)
+
+        slope = (float(k) * sum_lxy - sum_lx * sum_ly) / denom
+        intercept = (sum_ly - slope * sum_lx) / float(k)
+
+        mean_ly = sum_ly / float(k)
+        ss_tot = sum((y - mean_ly) ** 2 for y in log_ccdf)
+        ss_res = sum((y - (intercept + slope * x)) ** 2
+                     for x, y in zip(log_x, log_ccdf))
+        r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+
+        return (alpha, max(0.0, r_squared))
+
+
+class CompositionalSkewDetector:
+    """
+    Branching-ratio tracker that flags when σ exits the critical band
+    [0.95, 1.05] and logs the dominant cell-type fraction alongside
+    Shannon entropy H, enabling automated detection of compositional
+    skew at criticality.
+
+    Closes the gap between population-level criticality verdicts and the
+    mechanistic question of *which agent types are load-bearing* at the
+    critical ridge.  When σ exits the band, the detector records the
+    full type-fraction snapshot so downstream analysis can determine
+    whether compositional skew (e.g., Physics Navigator dominance at
+    85%+ of the population) *precedes* or *follows* criticality drift.
+
+    INV_073 falsification relevance:
+      The telemetry snapshot (σ=1.0242±0.0153, H=0.4315 bits = 0.167·H_max)
+      demonstrates that the critical band can be reached with highly ordered
+      populations.  If the Wasserstein gradient flow interpretation of
+      INV_073 equates γ=1 criticality with maximum information throughput
+      or entropy maximization, this is a direct counterexample: the system
+      is at criticality with H far below H_max.  The detector makes this
+      pattern machine-detectable by jointly tracking σ-band membership,
+      H/H_max, and dominant-type fraction at every step.
+
+      Low-entropy critical states (H ≈ 0.167·H_max) ARE admissible
+      attractors on the critical ridge — the Wasserstein gradient path
+      to γ=1 does NOT require near-maximal entropy.  What it requires
+      is H > 0 (not frozen) with σ ≈ 1 and power-law avalanches.  This
+      detector flags the distinction between frozen (H=0), ordered-critical
+      (0 < H << H_max, σ ≈ 1), and balanced-critical (H ≈ H_max, σ ≈ 1).
+
+    Addresses: O140 (CA measurement grounding), O141 (solo-kernel vs
+    population criticality), INV_073 (low-entropy critical attractor
+    detection and compositional skew at criticality).
+
+    Usage::
+
+        detector = CompositionalSkewDetector()
+        for step in simulation:
+            result = detector.record(
+                generation=step,
+                sigma=sigma_val,
+                shannon_h=h_bits,
+                shannon_h_max=h_max,
+                type_counts={"Physics Navigator": 876, "Entropy Scorer": 48,
+                             "Topology Agent": 100},
+            )
+            if result["sigma_excursion"]:
+                print("σ exited band at step", step,
+                      "dominant:", result["dominant_type"],
+                      "fraction:", result["dominant_fraction"])
+            if result["compositional_skew"]:
+                print("Compositional skew detected:", result["skew_detail"])
+        report = detector.skew_report()
+    """
+
+    # Skew threshold: dominant type fraction above which compositional
+    # skew is flagged (even if σ is in-band)
+    SKEW_THRESHOLD = 0.80
+
+    def __init__(
+        self,
+        sigma_band_low=0.95,    # type: float
+        sigma_band_high=1.05,   # type: float
+        skew_threshold=0.80,    # type: float
+        history_limit=2000,     # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        sigma_band_low : float
+            Lower bound of the critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of the critical band for σ. Default: 1.05.
+        skew_threshold : float
+            Dominant-type fraction above which compositional skew is
+            flagged. Default: 0.80.
+        history_limit : int
+            Maximum records to retain in memory. Default: 2000.
+        """
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+        self.skew_threshold = skew_threshold
+        self.history_limit = max(10, history_limit)
+
+        self._records = []              # type: list
+        self._excursion_records = []    # type: list
+        self._skew_records = []         # type: list
+        self._sigma_series = []         # type: List[float]
+        self._h_fraction_series = []    # type: List[float]
+        self._dominant_fraction_series = []  # type: List[float]
+
+    def record(
+        self,
+        generation,         # type: int
+        sigma,              # type: float
+        shannon_h=0.0,      # type: float
+        shannon_h_max=0.0,  # type: float
+        type_counts=None,   # type: Optional[dict]
+        sigma_std=0.0,      # type: float
+        alpha=0.0,          # type: float
+        alpha_r_squared=0.0,# type: float
+        survival_rate=0.0,  # type: float
+    ):
+        # type: (...) -> dict
+        """
+        Record one generation's telemetry and check for σ excursion
+        and compositional skew.
+
+        Parameters
+        ----------
+        generation : int
+            Simulation step / generation number.
+        sigma : float
+            Branching ratio σ at this step.
+        shannon_h : float
+            Shannon entropy H of the type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        type_counts : dict or None
+            Mapping of cell-type name (str) to count (int).
+        sigma_std : float
+            Standard deviation of σ within the measurement window.
+        alpha : float
+            Power-law exponent α from avalanche size distribution.
+        alpha_r_squared : float
+            R² goodness-of-fit for the power-law regression.
+        survival_rate : float
+            Fraction of cells surviving this generation.
+
+        Returns
+        -------
+        dict with keys:
+            generation          : int
+            sigma               : float
+            sigma_in_band       : bool
+            sigma_excursion     : bool   — True if σ outside [0.95, 1.05]
+            excursion_direction : str    — "supercritical"/"subcritical"/""
+            shannon_h           : float
+            h_fraction          : float  — H / H_max
+            dominant_type       : str
+            dominant_fraction   : float  — fraction of population
+            dominant_count      : int
+            total_population    : int
+            type_fractions      : dict   — {type: fraction} for all types
+            compositional_skew  : bool   — True if dominant fraction > threshold
+            skew_detail         : str    — human-readable skew description
+            entropy_regime      : str    — "frozen"/"ordered"/"moderate"/"balanced"
+            criticality_composition : str — joint classification
+            inv073_flag         : bool   — True if low H at confirmed criticality
+            timestamp           : str
+        """
+        if type_counts is None:
+            type_counts = {}
+
+        self._sigma_series.append(sigma)
+
+        # ── Band check ──
+        sigma_in_band = self.sigma_band_low <= sigma <= self.sigma_band_high
+        sigma_excursion = (sigma != 0.0) and not sigma_in_band
+        if sigma_excursion:
+            excursion_direction = "supercritical" if sigma > self.sigma_band_high else "subcritical"
+        else:
+            excursion_direction = ""
+
+        # ── Entropy ──
+        h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+        self._h_fraction_series.append(h_fraction)
+
+        # Classify entropy regime
+        if shannon_h <= 0.0:
+            entropy_regime = "frozen"
+        elif h_fraction < 0.20:
+            entropy_regime = "ordered"
+        elif h_fraction < 0.50:
+            entropy_regime = "moderate"
+        else:
+            entropy_regime = "balanced"
+
+        # ── Type fractions ──
+        total_pop = sum(type_counts.values()) if type_counts else 0
+        total_f = float(total_pop) if total_pop > 0 else 1.0
+
+        type_fractions = {}  # type: dict
+        for cell_type, count in type_counts.items():
+            type_fractions[cell_type] = round(float(count) / total_f, 6)
+
+        if type_counts:
+            dominant_type = max(type_counts, key=type_counts.get)
+            dominant_count = type_counts[dominant_type]
+            dominant_fraction = round(float(dominant_count) / total_f, 6)
+        else:
+            dominant_type = ""
+            dominant_count = 0
+            dominant_fraction = 0.0
+
+        self._dominant_fraction_series.append(dominant_fraction)
+
+        # ── Compositional skew detection ──
+        compositional_skew = dominant_fraction >= self.skew_threshold
+        skew_detail = ""
+        if compositional_skew:
+            skew_detail = (
+                "{} dominates at {:.1%} of population ({}/{} cells). "
+                "H/H_max={:.3f} ({}). sigma={:.4f} ({})."
+            ).format(
+                dominant_type, dominant_fraction, dominant_count, total_pop,
+                h_fraction, entropy_regime, sigma,
+                "in band" if sigma_in_band else excursion_direction,
+            )
+
+        # ── Joint criticality-composition classification ──
+        power_law_ok = (
+            ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+            and alpha_r_squared >= ALPHA_R2_THRESHOLD
+        )
+
+        if sigma_in_band and power_law_ok and compositional_skew and entropy_regime == "ordered":
+            criticality_composition = "CRITICALLY_ORDERED_SKEWED"
+        elif sigma_in_band and power_law_ok and compositional_skew:
+            criticality_composition = "CRITICALLY_SKEWED"
+        elif sigma_in_band and power_law_ok and entropy_regime == "ordered":
+            criticality_composition = "CRITICALLY_ORDERED"
+        elif sigma_in_band and power_law_ok:
+            criticality_composition = "CRITICALLY_BALANCED"
+        elif sigma_in_band:
+            criticality_composition = "NEAR_CRITICAL"
+        elif sigma > self.sigma_band_high:
+            criticality_composition = "SUPERCRITICAL"
+        elif sigma < self.sigma_band_low and sigma > 0.0:
+            criticality_composition = "SUBCRITICAL"
+        else:
+            criticality_composition = "UNDETERMINED"
+
+        # ── INV_073 flag: low H at confirmed criticality ──
+        inv073_flag = (
+            sigma_in_band
+            and power_law_ok
+            and 0.0 < h_fraction < 0.3
+        )
+
+        rec = {
+            "generation":              generation,
+            "sigma":                   round(sigma, 6),
+            "sigma_std":               round(sigma_std, 6),
+            "sigma_in_band":           sigma_in_band,
+            "sigma_excursion":         sigma_excursion,
+            "excursion_direction":     excursion_direction,
+            "shannon_h":               round(shannon_h, 4),
+            "h_fraction":              round(h_fraction, 4),
+            "shannon_h_max":           round(shannon_h_max, 4),
+            "alpha":                   round(alpha, 4),
+            "alpha_r_squared":         round(alpha_r_squared, 4),
+            "survival_rate":           round(survival_rate, 4),
+            "dominant_type":           dominant_type,
+            "dominant_fraction":       dominant_fraction,
+            "dominant_count":          dominant_count,
+            "total_population":        total_pop,
+            "type_fractions":          type_fractions,
+            "compositional_skew":      compositional_skew,
+            "skew_detail":             skew_detail,
+            "entropy_regime":          entropy_regime,
+            "criticality_composition": criticality_composition,
+            "inv073_flag":             inv073_flag,
+            "timestamp":               datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._records.append(rec)
+        if sigma_excursion:
+            self._excursion_records.append(rec)
+        if compositional_skew:
+            self._skew_records.append(rec)
+
+        # Trim
+        if len(self._records) > self.history_limit:
+            trim = len(self._records) - self.history_limit
+            self._records = self._records[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+        if len(self._h_fraction_series) > self.history_limit:
+            self._h_fraction_series = self._h_fraction_series[-self.history_limit:]
+        if len(self._dominant_fraction_series) > self.history_limit:
+            self._dominant_fraction_series = self._dominant_fraction_series[-self.history_limit:]
+
+        return rec
+
+    def records(self):
+        # type: () -> list
+        """Return all recorded snapshots."""
+        return list(self._records)
+
+    def excursion_records(self):
+        # type: () -> list
+        """Return all σ-excursion records."""
+        return list(self._excursion_records)
+
+    def skew_records(self):
+        # type: () -> list
+        """Return all compositional-skew records."""
+        return list(self._skew_records)
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the per-step σ history."""
+        return list(self._sigma_series)
+
+    def dominant_fraction_series(self):
+        # type: () -> List[float]
+        """Return the per-step dominant-type fraction history."""
+        return list(self._dominant_fraction_series)
+
+    def skew_report(self, window=50):
+        # type: (int) -> dict
+        """
+        Generate a summary report of compositional skew detection,
+        including σ-excursion statistics, dominant-type tallies at
+        excursions, and entropy-criticality joint analysis.
+
+        Parameters
+        ----------
+        window : int
+            Number of recent records for rolling statistics. Default: 50.
+
+        Returns
+        -------
+        dict with keys:
+            n_records               : int
+            n_excursions            : int    — σ exits from critical band
+            n_skew_events           : int    — compositional skew flags
+            excursion_rate          : float  — fraction of steps with σ excursion
+            skew_rate               : float  — fraction of steps with skew flag
+            sigma_global_mean       : float
+            sigma_global_std        : float
+            h_fraction_mean         : float
+            dominant_fraction_mean  : float  — mean dominant-type fraction
+            dominant_fraction_std   : float
+            dominant_type_at_excursion : dict — {type: count} at σ excursions
+            dominant_type_at_skew      : dict — {type: count} at skew events
+            skew_at_criticality     : int    — skew events while σ in band
+            skew_at_excursion       : int    — skew events while σ out of band
+            criticality_composition_counts : dict — {joint_class: count}
+            n_inv073_flags          : int    — low-H-at-criticality events
+            inv073_assessment       : str    — human-readable INV_073 status
+            skew_criticality_correlation : float — Pearson r between
+                                                   dominant_fraction and |σ-1|
+            composition_trend       : str    — "consolidating"/"diversifying"/"stable"
+            obligations_addressed   : list
+            timestamp               : str
+        """
+        n = len(self._records)
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if n == 0:
+            return {
+                "n_records": 0,
+                "n_excursions": 0,
+                "n_skew_events": 0,
+                "excursion_rate": 0.0,
+                "skew_rate": 0.0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "h_fraction_mean": 0.0,
+                "dominant_fraction_mean": 0.0,
+                "dominant_fraction_std": 0.0,
+                "dominant_type_at_excursion": {},
+                "dominant_type_at_skew": {},
+                "skew_at_criticality": 0,
+                "skew_at_excursion": 0,
+                "criticality_composition_counts": {},
+                "n_inv073_flags": 0,
+                "inv073_assessment": "No data collected.",
+                "skew_criticality_correlation": 0.0,
+                "composition_trend": "no_data",
+                "obligations_addressed": [],
+                "timestamp": ts,
+            }
+
+        n_exc = len(self._excursion_records)
+        n_skew = len(self._skew_records)
+        exc_rate = round(float(n_exc) / float(n), 6)
+        skew_rate = round(float(n_skew) / float(n), 6)
+
+        # ── σ statistics ──
+        sigmas = self._sigma_series
+        s_n = len(sigmas)
+        s_mean = sum(sigmas) / float(s_n) if s_n > 0 else 0.0
+        s_var = sum((s - s_mean) ** 2 for s in sigmas) / float(s_n) if s_n > 0 else 0.0
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── H fraction ──
+        hf = self._h_fraction_series
+        hf_mean = sum(hf) / float(len(hf)) if hf else 0.0
+
+        # ── Dominant fraction statistics ──
+        df = self._dominant_fraction_series
+        df_mean = sum(df) / float(len(df)) if df else 0.0
+        df_var = sum((d - df_mean) ** 2 for d in df) / float(len(df)) if df else 0.0
+        df_std = math.sqrt(df_var) if df_var > 0 else 0.0
+
+        # ── Dominant type tallies at excursions and skew events ──
+        dom_at_exc = {}   # type: dict
+        for r in self._excursion_records:
+            dt = r.get("dominant_type", "")
+            if dt:
+                dom_at_exc[dt] = dom_at_exc.get(dt, 0) + 1
+
+        dom_at_skew = {}  # type: dict
+        for r in self._skew_records:
+            dt = r.get("dominant_type", "")
+            if dt:
+                dom_at_skew[dt] = dom_at_skew.get(dt, 0) + 1
+
+        # ── Skew at criticality vs at excursion ──
+        skew_at_crit = sum(1 for r in self._skew_records if r.get("sigma_in_band", False))
+        skew_at_exc = sum(1 for r in self._skew_records if r.get("sigma_excursion", False))
+
+        # ── Joint classification counts ──
+        cc_counts = {}  # type: dict
+        for r in self._records:
+            cc = r.get("criticality_composition", "UNDETERMINED")
+            cc_counts[cc] = cc_counts.get(cc, 0) + 1
+
+        # ── INV_073 ──
+        n_inv073 = sum(1 for r in self._records if r.get("inv073_flag", False))
+
+        frac_crit = float(cc_counts.get("CRITICALLY_BALANCED", 0) +
+                          cc_counts.get("CRITICALLY_ORDERED", 0) +
+                          cc_counts.get("CRITICALLY_SKEWED", 0) +
+                          cc_counts.get("CRITICALLY_ORDERED_SKEWED", 0)) / float(n)
+
+        if n_inv073 > 0 and frac_crit > 0.3:
+            inv073_text = (
+                "INV_073 PATTERN DETECTED: {}/{} records ({:.1%}) show "
+                "low-entropy critical attractor (H<30% of max with sigma "
+                "in band). Dominant type at these events: {}. This "
+                "demonstrates that the critical ridge sustains ordered, "
+                "compositionally skewed states — the Wasserstein gradient "
+                "path to gamma=1 does NOT require entropy maximization. "
+                "Mean dominant fraction at INV_073 events: {:.1%}."
+            ).format(
+                n_inv073, n, float(n_inv073) / float(n),
+                dom_at_skew if dom_at_skew else "N/A",
+                df_mean,
+            )
+        elif frac_crit < 0.1:
+            inv073_text = (
+                "INV_073 INCONCLUSIVE: Only {:.1%} of records at confirmed "
+                "criticality. Cannot assess entropy-criticality-composition "
+                "relationship."
+            ).format(frac_crit)
+        else:
+            inv073_text = (
+                "INV_073 CONSISTENT: {:.1%} at criticality, mean H/H_max={:.3f}, "
+                "mean dominant fraction={:.3f}. No strong low-entropy critical "
+                "attractor detected."
+            ).format(frac_crit, hf_mean, df_mean)
+
+        # ── Pearson correlation: dominant_fraction vs |σ - 1| ──
+        # Positive correlation means higher dominance → farther from criticality
+        # Negative means higher dominance → closer to criticality (load-bearing)
+        skew_crit_corr = 0.0
+        min_len = min(len(df), len(sigmas))
+        if min_len >= 5:
+            drift_vals = [abs(s - 1.0) for s in sigmas[-min_len:]]
+            dom_vals = df[-min_len:]
+            d_m = sum(drift_vals) / float(min_len)
+            f_m = sum(dom_vals) / float(min_len)
+            cov = sum((d - d_m) * (f - f_m) for d, f in zip(drift_vals, dom_vals)) / float(min_len)
+            var_d = sum((d - d_m) ** 2 for d in drift_vals) / float(min_len)
+            var_f = sum((f - f_m) ** 2 for f in dom_vals) / float(min_len)
+            denom_c = math.sqrt(var_d) * math.sqrt(var_f) if var_d > 0 and var_f > 0 else 0.0
+            if denom_c > 1e-15:
+                skew_crit_corr = cov / denom_c
+
+        # ── Composition trend ──
+        if len(df) >= 8:
+            first_half = df[:len(df) // 2]
+            second_half = df[len(df) // 2:]
+            fh_m = sum(first_half) / float(len(first_half))
+            sh_m = sum(second_half) / float(len(second_half))
+            delta = sh_m - fh_m
+            if delta > 0.03:
+                comp_trend = "consolidating"
+            elif delta < -0.03:
+                comp_trend = "diversifying"
+            else:
+                comp_trend = "stable"
+        else:
+            comp_trend = "stable"
+
+        # ── Obligations ──
+        obligations = []  # type: list
+        if frac_crit > 0.0:
+            obligations.append("O140")
+        if s_mean > 0.0:
+            obligations.append("O141")
+        if n_inv073 > 0 or hf_mean > 0.0:
+            obligations.append("INV_073")
+
+        return {
+            "n_records":                     n,
+            "n_excursions":                  n_exc,
+            "n_skew_events":                 n_skew,
+            "excursion_rate":                exc_rate,
+            "skew_rate":                     skew_rate,
+            "sigma_global_mean":             round(s_mean, 6),
+            "sigma_global_std":              round(s_std, 6),
+            "h_fraction_mean":               round(hf_mean, 4),
+            "dominant_fraction_mean":        round(df_mean, 6),
+            "dominant_fraction_std":         round(df_std, 6),
+            "dominant_type_at_excursion":    dom_at_exc,
+            "dominant_type_at_skew":         dom_at_skew,
+            "skew_at_criticality":           skew_at_crit,
+            "skew_at_excursion":             skew_at_exc,
+            "criticality_composition_counts": cc_counts,
+            "n_inv073_flags":                n_inv073,
+            "inv073_assessment":             inv073_text,
+            "skew_criticality_correlation":  round(skew_crit_corr, 6),
+            "composition_trend":             comp_trend,
+            "obligations_addressed":         obligations,
+            "timestamp":                     ts,
+        }
+
+
+class StepwiseSigmaDriftDetector:
+    """
+    Per-step branching-ratio (σ) drift detector for the CA telemetry pipeline.
+
+    Computes σ = mean(offspring_events) / mean(parent_events) at every
+    simulation step and flags deviation from the critical band [0.95, 1.05]
+    as a criticality-drift alert.  This closes the feedback loop between
+    simulation state and the γ=1 constraint, enabling automated detection
+    of sub- or super-critical drift before it corrupts multi-step
+    measurements.
+
+    Design rationale (INV_073):
+      The empirical branching ratio σ=1.023±0.0155 from the 32×32 Game of
+      Truth telemetry confirms criticality, but the survival rate of 0.9249
+      (not 1.0) implies non-negligible cell death even at the critical ridge.
+      This detector treats the [0.95, 1.05] band as the operational definition
+      of "at criticality" and raises graded alerts (WARNING at band edges,
+      CRITICAL outside) so the epistemic loop can distinguish transient
+      fluctuations from structural drift.
+
+    Physics Navigator context:
+      Physics Navigator cells constitute the dominant population (867 cells)
+      at the confirmed critical point.  Their symmetry-conserving role —
+      maintaining structured information flow without freezing — is what
+      operationalizes Noether-type conservation of the critical regime.
+      This detector logs the dominant cell type at each drift alert to
+      enable causal analysis of whether population composition *predicts*
+      or *follows* criticality drift.
+
+    Addresses: O140 (CA measurement grounding), O141 (solo-kernel vs
+    population criticality), INV_073 (Wasserstein gradient bias detection).
+
+    Usage::
+
+        detector = StepwiseSigmaDriftDetector()
+        for step in range(n_steps):
+            parent_events = [p1, p2, ...]   # per-cell activity at step t
+            offspring_events = [c1, c2, ...]  # per-cell activity at step t+1
+            result = detector.step(
+                parent_events=parent_events,
+                offspring_events=offspring_events,
+                dominant_type="Physics Navigator",
+                dominant_count=867,
+                total_population=1024,
+            )
+            if result["alert_level"] != "NONE":
+                handle_drift_alert(result)
+        report = detector.drift_report()
+    """
+
+    # Alert levels
+    ALERT_NONE = "NONE"
+    ALERT_WARNING = "WARNING"       # σ near band edges (within 0.02 of boundary)
+    ALERT_CRITICAL = "CRITICAL"     # σ outside band
+
+    def __init__(
+        self,
+        sigma_band_low=0.95,    # type: float
+        sigma_band_high=1.05,   # type: float
+        warning_margin=0.02,    # type: float
+        rolling_window=50,      # type: int
+        history_limit=5000,     # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        sigma_band_low : float
+            Lower bound of the critical band for σ. Default: 0.95.
+        sigma_band_high : float
+            Upper bound of the critical band for σ. Default: 1.05.
+        warning_margin : float
+            Distance from band edge within which a WARNING is raised
+            even if σ is still inside the band. Default: 0.02.
+        rolling_window : int
+            Number of recent steps for rolling σ mean/std. Default: 50.
+        history_limit : int
+            Maximum per-step records retained. Default: 5000.
+        """
+        self.sigma_band_low = sigma_band_low
+        self.sigma_band_high = sigma_band_high
+        self.warning_margin = warning_margin
+        self.rolling_window = max(1, rolling_window)
+        self.history_limit = max(10, history_limit)
+
+        self._sigma_series = []     # type: List[float]
+        self._step_count = 0        # type: int
+        self._alerts = []           # type: list
+        self._n_warning = 0         # type: int
+        self._n_critical = 0        # type: int
+        self._cumulative_drift = 0.0  # type: float
+
+    def step(
+        self,
+        parent_events,          # type: List[float]
+        offspring_events,       # type: List[float]
+        dominant_type="",       # type: str
+        dominant_count=0,       # type: int
+        total_population=0,     # type: int
+    ):
+        # type: (...) -> dict
+        """
+        Process one simulation step: compute σ and check for drift.
+
+        Parameters
+        ----------
+        parent_events : list of float
+            Activity values (counts or activations) for parent cells at
+            this step.  σ is computed as mean(offspring_events) /
+            mean(parent_events).
+        offspring_events : list of float
+            Activity values for offspring cells produced at this step.
+        dominant_type : str
+            Label of the most populous cell type (for causal logging).
+        dominant_count : int
+            Count of the dominant cell type.
+        total_population : int
+            Total number of live cells.
+
+        Returns
+        -------
+        dict with keys:
+            step             : int    — step number (0-indexed)
+            sigma            : float  — instantaneous σ for this step
+            sigma_rolling    : float  — rolling mean σ over window
+            sigma_rolling_std: float  — rolling std σ over window
+            in_band          : bool   — whether σ_rolling is in [0.95, 1.05]
+            alert_level      : str    — NONE / WARNING / CRITICAL
+            alert_direction  : str    — "supercritical" / "subcritical" / ""
+            drift_from_unity : float  — |σ_rolling - 1.0|
+            dominant_type    : str
+            dominant_count   : int
+            total_population : int
+            cumulative_drift : float  — Σ |σ_i - 1.0| over all steps
+            timestamp        : str    — ISO-8601 UTC
+        """
+        self._step_count += 1
+
+        # ── Compute σ = mean(offspring) / mean(parent) ──
+        n_parent = len(parent_events)
+        n_offspring = len(offspring_events)
+
+        if n_parent > 0:
+            mean_parent = sum(parent_events) / float(n_parent)
+        else:
+            mean_parent = 0.0
+
+        if n_offspring > 0:
+            mean_offspring = sum(offspring_events) / float(n_offspring)
+        else:
+            mean_offspring = 0.0
+
+        if mean_parent > 0.0:
+            sigma = mean_offspring / mean_parent
+        else:
+            sigma = 0.0
+
+        self._sigma_series.append(sigma)
+        self._cumulative_drift += abs(sigma - 1.0)
+
+        # ── Rolling statistics ──
+        window = self._sigma_series[-self.rolling_window:]
+        w_n = len(window)
+        sigma_rolling = sum(window) / float(w_n)
+        s_var = sum((s - sigma_rolling) ** 2 for s in window) / float(w_n)
+        sigma_rolling_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── Band and alert checks ──
+        in_band = self.sigma_band_low <= sigma_rolling <= self.sigma_band_high
+        drift_from_unity = abs(sigma_rolling - 1.0)
+
+        alert_level = self.ALERT_NONE
+        alert_direction = ""
+
+        if sigma_rolling != 0.0:
+            if not in_band:
+                alert_level = self.ALERT_CRITICAL
+                self._n_critical += 1
+                if sigma_rolling > self.sigma_band_high:
+                    alert_direction = "supercritical"
+                else:
+                    alert_direction = "subcritical"
+            elif (sigma_rolling <= self.sigma_band_low + self.warning_margin or
+                  sigma_rolling >= self.sigma_band_high - self.warning_margin):
+                alert_level = self.ALERT_WARNING
+                self._n_warning += 1
+                if sigma_rolling >= self.sigma_band_high - self.warning_margin:
+                    alert_direction = "supercritical"
+                else:
+                    alert_direction = "subcritical"
+
+        result = {
+            "step":              self._step_count - 1,
+            "sigma":             round(sigma, 6),
+            "sigma_rolling":     round(sigma_rolling, 6),
+            "sigma_rolling_std": round(sigma_rolling_std, 6),
+            "in_band":           in_band,
+            "alert_level":       alert_level,
+            "alert_direction":   alert_direction,
+            "drift_from_unity":  round(drift_from_unity, 6),
+            "dominant_type":     dominant_type,
+            "dominant_count":    dominant_count,
+            "total_population":  total_population,
+            "cumulative_drift":  round(self._cumulative_drift, 6),
+            "timestamp":         datetime.now(timezone.utc).isoformat(),
+        }
+
+        if alert_level != self.ALERT_NONE:
+            self._alerts.append(result)
+
+        # ── Trim history ──
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+
+        return result
+
+    def step_from_counts(
+        self,
+        parent_count,       # type: int
+        child_count,        # type: int
+        dominant_type="",   # type: str
+        dominant_count=0,   # type: int
+        total_population=0, # type: int
+    ):
+        # type: (...) -> dict
+        """
+        Convenience: compute σ from scalar parent/child counts.
+
+        Equivalent to step() with single-element event lists.
+        """
+        return self.step(
+            parent_events=[float(parent_count)] if parent_count > 0 else [],
+            offspring_events=[float(child_count)] if child_count > 0 else [],
+            dominant_type=dominant_type,
+            dominant_count=dominant_count,
+            total_population=total_population,
+        )
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-step σ history."""
+        return list(self._sigma_series)
+
+    def alerts(self):
+        # type: () -> list
+        """Return all alert records."""
+        return list(self._alerts)
+
+    def drift_report(self):
+        # type: () -> dict
+        """
+        Generate a summary report of criticality drift detection.
+
+        Returns
+        -------
+        dict with keys:
+            n_steps              : int
+            sigma_global_mean    : float
+            sigma_global_std     : float
+            n_warnings           : int    — steps with WARNING alerts
+            n_critical_alerts    : int    — steps with CRITICAL alerts
+            alert_rate           : float  — fraction of steps with any alert
+            critical_alert_rate  : float  — fraction with CRITICAL alerts
+            mean_drift_per_step  : float  — mean |σ - 1.0| per step
+            max_sigma            : float
+            min_sigma            : float
+            fraction_in_band     : float  — fraction of steps with σ in band
+            dominant_at_critical : dict   — {type: count} at CRITICAL alerts
+            drift_trend          : str    — "stable" / "freezing" / "dissipating"
+            gamma1_constraint    : str    — assessment of γ=1 maintenance
+            inv073_assessment    : str    — human-readable INV_073 status
+            timestamp            : str
+        """
+        n = self._step_count
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if n == 0:
+            return {
+                "n_steps": 0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "n_warnings": 0,
+                "n_critical_alerts": 0,
+                "alert_rate": 0.0,
+                "critical_alert_rate": 0.0,
+                "mean_drift_per_step": 0.0,
+                "max_sigma": 0.0,
+                "min_sigma": 0.0,
+                "fraction_in_band": 0.0,
+                "dominant_at_critical": {},
+                "drift_trend": "no_data",
+                "gamma1_constraint": "No data.",
+                "inv073_assessment": "No steps recorded.",
+                "timestamp": ts,
+            }
+
+        all_sigma = self._sigma_series
+        s_n = len(all_sigma)
+        s_mean = sum(all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_var = sum((s - s_mean) ** 2 for s in all_sigma) / float(s_n) if s_n > 0 else 0.0
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+        s_min = min(all_sigma) if all_sigma else 0.0
+        s_max = max(all_sigma) if all_sigma else 0.0
+
+        n_total_alerts = self._n_warning + self._n_critical
+        alert_rate = round(float(n_total_alerts) / float(n), 6) if n > 0 else 0.0
+        crit_rate = round(float(self._n_critical) / float(n), 6) if n > 0 else 0.0
+        mean_drift = round(self._cumulative_drift / float(n), 6) if n > 0 else 0.0
+
+        n_in_band = sum(
+            1 for s in all_sigma
+            if self.sigma_band_low <= s <= self.sigma_band_high
+        )
+        frac_in_band = round(float(n_in_band) / float(s_n), 4) if s_n > 0 else 0.0
+
+        # Dominant type tally at CRITICAL alerts
+        dom_at_crit = {}  # type: dict
+        for a in self._alerts:
+            if a["alert_level"] == self.ALERT_CRITICAL:
+                dt = a.get("dominant_type", "")
+                if dt:
+                    dom_at_crit[dt] = dom_at_crit.get(dt, 0) + 1
+
+        # Drift trend
+        if len(all_sigma) >= 8:
+            first_half = all_sigma[:len(all_sigma) // 2]
+            second_half = all_sigma[len(all_sigma) // 2:]
+            fh_m = sum(first_half) / float(len(first_half))
+            sh_m = sum(second_half) / float(len(second_half))
+            delta = sh_m - fh_m
+            if delta > 0.02:
+                drift_trend = "dissipating"
+            elif delta < -0.02:
+                drift_trend = "freezing"
+            else:
+                drift_trend = "stable"
+        else:
+            drift_trend = "stable"
+
+        # γ=1 constraint assessment
+        if self.sigma_band_low <= s_mean <= self.sigma_band_high and crit_rate < 0.1:
+            gamma1 = (
+                "MAINTAINED: mean sigma={:.4f}±{:.4f} within critical band "
+                "[{:.2f}, {:.2f}], critical alert rate={:.1%}. The gamma=1 "
+                "constraint is operationally satisfied."
+            ).format(s_mean, s_std, self.sigma_band_low, self.sigma_band_high, crit_rate)
+        elif self.sigma_band_low <= s_mean <= self.sigma_band_high:
+            gamma1 = (
+                "STRAINED: mean sigma={:.4f}±{:.4f} within band but critical "
+                "alert rate={:.1%} indicates frequent transient violations. "
+                "The gamma=1 constraint is maintained on average but not "
+                "robustly."
+            ).format(s_mean, s_std, crit_rate)
+        else:
+            gamma1 = (
+                "VIOLATED: mean sigma={:.4f}±{:.4f} outside critical band "
+                "[{:.2f}, {:.2f}]. The gamma=1 constraint is NOT satisfied. "
+                "Drift direction: {}."
+            ).format(s_mean, s_std, self.sigma_band_low, self.sigma_band_high, drift_trend)
+
+        # INV_073 assessment
+        if frac_in_band > 0.85 and drift_trend == "stable":
+            inv073 = (
+                "CONSISTENT: {:.1%} of steps in critical band, drift trend "
+                "stable. sigma={:.4f}±{:.4f}. The system maintains criticality "
+                "without sustained directional drift, consistent with "
+                "Wasserstein gradient navigation to gamma=1 (INV_073). "
+                "Survival rate < 1.0 (empirically ~0.9249) is structurally "
+                "necessary for criticality, not a failure mode."
+            ).format(frac_in_band, s_mean, s_std)
+        elif s_mean > self.sigma_band_high:
+            inv073 = (
+                "CHALLENGE: mean sigma={:.4f} > {:.2f} (supercritical). "
+                "The Wasserstein gradient may be biased toward over-production "
+                "rather than true ridge navigation. INV_073 predicts this "
+                "should self-correct; if sustained, the gradient path is "
+                "not converging to gamma=1."
+            ).format(s_mean, self.sigma_band_high)
+        else:
+            inv073 = (
+                "MONITORING: sigma={:.4f}±{:.4f}, {:.1%} in band, "
+                "drift_trend='{}'. Ongoing monitoring required to assess "
+                "INV_073 convergence."
+            ).format(s_mean, s_std, frac_in_band, drift_trend)
+
+        return {
+            "n_steps":              n,
+            "sigma_global_mean":    round(s_mean, 6),
+            "sigma_global_std":     round(s_std, 6),
+            "n_warnings":           self._n_warning,
+            "n_critical_alerts":    self._n_critical,
+            "alert_rate":           alert_rate,
+            "critical_alert_rate":  crit_rate,
+            "mean_drift_per_step":  mean_drift,
+            "max_sigma":            round(s_max, 6),
+            "min_sigma":            round(s_min, 6),
+            "fraction_in_band":     frac_in_band,
+            "dominant_at_critical": dom_at_crit,
+            "drift_trend":          drift_trend,
+            "gamma1_constraint":    gamma1,
+            "inv073_assessment":    inv073,
+            "timestamp":            ts,
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Reset all state for a new detection run."""
+        self._sigma_series = []
+        self._step_count = 0
+        self._alerts = []
+        self._n_warning = 0
+        self._n_critical = 0
+        self._cumulative_drift = 0.0
+
+
 class TamuraSweep:
     """
     Fetches new articles from all configured sources.
@@ -5428,6 +6910,537 @@ class TamuraSweep:
         except requests.RequestException as e:
             print(f"[SWEEP]   Fetch error for {url}: {e}")
             return None
+
+
+# ─── Output-Only Entropy-to-Dissipation Estimator ────────────────────────────
+# Estimates coherence decay / damping parameters from output-only observation
+# streams using mutual-information and spectral-entropy decomposition.
+#
+# Motivation (O112 challenge):
+#   Recovering a physical metric tensor (damping) from output-only statistics
+#   is feasible but requires careful modal decomposition.  The STF recovery
+#   protocol has not yet specified this at sufficient algorithmic resolution.
+#   This module provides the missing algorithmic layer: given only an output
+#   signal stream (no known input / no controlled probes), it extracts latent
+#   decay rates via:
+#
+#     1. Spectral entropy H_s(f) — Shannon entropy of the normalized power
+#        spectral density.  A pure tone has H_s = 0; white noise has H_s = max.
+#        Damped oscillatory modes produce intermediate H_s values that decrease
+#        as damping increases (energy concentrates into fewer spectral bins as
+#        modes decay faster).
+#
+#     2. Time-lagged mutual information I(τ) — MI between the signal and its
+#        τ-lagged copy.  For a damped system, I(τ) decays approximately as
+#        exp(-2ζω_n τ) where ζ is the damping ratio and ω_n the natural
+#        frequency.  Fitting this decay gives a direct damping estimate
+#        without requiring known inputs.
+#
+#     3. Modal damping extraction — from the I(τ) decay envelope, extract
+#        per-mode damping ratios ζ_k by identifying peaks in the spectral
+#        entropy derivative and fitting exponential envelopes to the
+#        corresponding MI decay segments.
+#
+# This enables passive monitoring of semantic dissipation in FREED's
+# epistemic loop: feed coherence scores (output-only) into the estimator,
+# get back decay rates that indicate how fast coherence is dissipating
+# without needing to inject controlled probe signals.
+#
+# Reference:
+#   Information-theoretic method for output-only damping estimation in
+#   mechanical systems — uses MI and spectral entropy to enhance damping
+#   estimation accuracy beyond empirical operational modal identification.
+#
+# Addresses: O112 (STF recovery protocol — algorithmic resolution for
+# metric tensor recovery from output-only statistics).
+
+
+def _spectral_entropy(data, n_bins=None):
+    # type: (List[float], Optional[int]) -> dict
+    """
+    Compute spectral entropy of a signal via DFT-based power spectral density.
+
+    The normalized PSD is treated as a probability distribution; its Shannon
+    entropy measures how spread the signal's energy is across frequencies.
+
+    Parameters
+    ----------
+    data : list of float
+        The input time series (output-only observation stream).
+    n_bins : int or None
+        Number of frequency bins to use.  None → use N//2 (Nyquist).
+
+    Returns
+    -------
+    dict with keys:
+        spectral_entropy   : float — Shannon entropy of normalized PSD (nats)
+        spectral_entropy_norm : float — H_s / ln(n_freq_bins), in [0, 1]
+        n_freq_bins        : int   — number of frequency bins used
+        dominant_freq_idx  : int   — index of the bin with maximum power
+        psd_concentration  : float — fraction of total power in top 3 bins
+        n_points           : int   — length of input signal
+    """
+    n = len(data)
+    if n < 4:
+        return {
+            "spectral_entropy": 0.0,
+            "spectral_entropy_norm": 0.0,
+            "n_freq_bins": 0,
+            "dominant_freq_idx": 0,
+            "psd_concentration": 0.0,
+            "n_points": n,
+        }
+
+    # Compute one-sided PSD via DFT
+    n_freq = n // 2 if n_bins is None else min(n_bins, n // 2)
+    if n_freq < 1:
+        n_freq = 1
+
+    psd = []  # type: List[float]
+    for k in range(1, n_freq + 1):
+        real_part = 0.0
+        imag_part = 0.0
+        for j in range(n):
+            angle = 2.0 * math.pi * k * j / float(n)
+            real_part += data[j] * math.cos(angle)
+            imag_part -= data[j] * math.sin(angle)
+        power = (real_part ** 2 + imag_part ** 2) / float(n * n)
+        psd.append(power)
+
+    # Normalize PSD to a probability distribution
+    total_power = sum(psd)
+    if total_power <= 0.0:
+        return {
+            "spectral_entropy": 0.0,
+            "spectral_entropy_norm": 0.0,
+            "n_freq_bins": n_freq,
+            "dominant_freq_idx": 0,
+            "psd_concentration": 0.0,
+            "n_points": n,
+        }
+
+    psd_norm = [p / total_power for p in psd]
+
+    # Shannon entropy of the normalized PSD
+    h_s = 0.0
+    for p in psd_norm:
+        if p > 0.0:
+            h_s -= p * math.log(p)
+
+    h_max = math.log(float(n_freq)) if n_freq > 1 else 1.0
+    h_s_norm = h_s / h_max if h_max > 0.0 else 0.0
+
+    # Dominant frequency and concentration
+    dominant_idx = 0
+    max_power = psd_norm[0]
+    for i in range(1, len(psd_norm)):
+        if psd_norm[i] > max_power:
+            max_power = psd_norm[i]
+            dominant_idx = i
+
+    sorted_psd = sorted(psd_norm, reverse=True)
+    top3_power = sum(sorted_psd[:min(3, len(sorted_psd))])
+
+    return {
+        "spectral_entropy": round(h_s, 8),
+        "spectral_entropy_norm": round(h_s_norm, 6),
+        "n_freq_bins": n_freq,
+        "dominant_freq_idx": dominant_idx,
+        "psd_concentration": round(top3_power, 6),
+        "n_points": n,
+    }
+
+
+def _time_lagged_mutual_information(data, max_lag=None, n_bins=None):
+    # type: (List[float], Optional[int], Optional[int]) -> dict
+    """
+    Compute time-lagged mutual information I(τ) between a signal and its
+    τ-lagged copy for τ = 1, 2, ..., max_lag.
+
+    Uses histogram-based MI estimation.
+
+    Parameters
+    ----------
+    data : list of float
+        The input time series.
+    max_lag : int or None
+        Maximum lag τ to compute.  None → N // 4.
+    n_bins : int or None
+        Number of histogram bins for MI estimation.  None → Sturges' rule.
+
+    Returns
+    -------
+    dict with keys:
+        mi_curve       : list of (int, float) — [(τ, I(τ)), ...]
+        mi_decay_rate  : float — fitted exponential decay rate λ from
+                                 I(τ) ≈ I(0) * exp(-λτ), where λ ≈ 2ζω_n
+        mi_half_life   : float — τ at which I(τ) = I(0)/2 (= ln(2)/λ)
+        mi_at_lag1     : float — I(1), the first-lag MI
+        mi_initial     : float — I(0) (self-MI, equals marginal entropy)
+        r_squared      : float — goodness of fit for exponential decay
+        n_lags         : int   — number of lags computed
+        n_points       : int   — length of input signal
+    """
+    n = len(data)
+    if n < 8:
+        return {
+            "mi_curve": [],
+            "mi_decay_rate": 0.0,
+            "mi_half_life": 0.0,
+            "mi_at_lag1": 0.0,
+            "mi_initial": 0.0,
+            "r_squared": 0.0,
+            "n_lags": 0,
+            "n_points": n,
+        }
+
+    if max_lag is None:
+        max_lag = max(2, n // 4)
+    max_lag = min(max_lag, n - 4)
+
+    if n_bins is None:
+        n_bins = max(2, int(math.ceil(1.0 + math.log(n) / math.log(2.0))))
+
+    # Precompute data range for binning
+    d_min = min(data)
+    d_max = max(data)
+    d_span = d_max - d_min
+    if d_span == 0.0:
+        return {
+            "mi_curve": [],
+            "mi_decay_rate": 0.0,
+            "mi_half_life": 0.0,
+            "mi_at_lag1": 0.0,
+            "mi_initial": 0.0,
+            "r_squared": 0.0,
+            "n_lags": 0,
+            "n_points": n,
+        }
+
+    bin_width = d_span / float(n_bins)
+
+    def _bin_idx(val):
+        # type: (float) -> int
+        idx = int((val - d_min) / bin_width)
+        if idx >= n_bins:
+            idx = n_bins - 1
+        if idx < 0:
+            idx = 0
+        return idx
+
+    mi_curve = []  # type: List[Tuple[int, float]]
+
+    for tau in range(0, max_lag + 1):
+        # Joint and marginal histograms
+        n_pairs = n - tau
+        if n_pairs < 4:
+            break
+
+        joint = {}   # type: dict
+        marg_x = [0] * n_bins
+        marg_y = [0] * n_bins
+
+        for i in range(n_pairs):
+            bx = _bin_idx(data[i])
+            by = _bin_idx(data[i + tau])
+            key = (bx, by)
+            joint[key] = joint.get(key, 0) + 1
+            marg_x[bx] += 1
+            marg_y[by] += 1
+
+        n_f = float(n_pairs)
+
+        # MI = Σ p(x,y) * log(p(x,y) / (p(x)*p(y)))
+        mi = 0.0
+        for (bx, by), count in joint.items():
+            p_xy = float(count) / n_f
+            p_x = float(marg_x[bx]) / n_f
+            p_y = float(marg_y[by]) / n_f
+            if p_xy > 0.0 and p_x > 0.0 and p_y > 0.0:
+                mi += p_xy * math.log(p_xy / (p_x * p_y))
+
+        mi_curve.append((tau, mi))
+
+    if len(mi_curve) < 3:
+        return {
+            "mi_curve": mi_curve,
+            "mi_decay_rate": 0.0,
+            "mi_half_life": 0.0,
+            "mi_at_lag1": mi_curve[1][1] if len(mi_curve) > 1 else 0.0,
+            "mi_initial": mi_curve[0][1] if mi_curve else 0.0,
+            "r_squared": 0.0,
+            "n_lags": len(mi_curve),
+            "n_points": n,
+        }
+
+    mi_initial = mi_curve[0][1]
+    mi_at_lag1 = mi_curve[1][1] if len(mi_curve) > 1 else 0.0
+
+    # Fit exponential decay: log(I(τ)) = log(I(0)) - λτ
+    # Use only τ > 0 where I(τ) > 0
+    tau_vals = []   # type: List[float]
+    ln_mi = []      # type: List[float]
+    for tau, mi_val in mi_curve[1:]:
+        if mi_val > 1e-15:
+            tau_vals.append(float(tau))
+            ln_mi.append(math.log(mi_val))
+
+    decay_rate = 0.0
+    r_squared = 0.0
+    mi_half_life = 0.0
+
+    if len(tau_vals) >= 2:
+        # Linear regression: ln(I(τ)) = intercept - λ * τ
+        k = len(tau_vals)
+        sum_t = sum(tau_vals)
+        sum_lm = sum(ln_mi)
+        sum_t_lm = sum(t * lm for t, lm in zip(tau_vals, ln_mi))
+        sum_t2 = sum(t * t for t in tau_vals)
+
+        denom = float(k) * sum_t2 - sum_t * sum_t
+        if abs(denom) > 1e-15:
+            slope = (float(k) * sum_t_lm - sum_t * sum_lm) / denom
+            intercept = (sum_lm - slope * sum_t) / float(k)
+
+            decay_rate = -slope  # λ (positive = decaying)
+
+            # R²
+            mean_lm = sum_lm / float(k)
+            ss_tot = sum((lm - mean_lm) ** 2 for lm in ln_mi)
+            ss_res = sum((lm - (intercept + slope * t)) ** 2
+                         for t, lm in zip(tau_vals, ln_mi))
+            r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+
+            # Half-life: τ_{1/2} = ln(2) / λ
+            if decay_rate > 1e-15:
+                mi_half_life = math.log(2.0) / decay_rate
+
+    return {
+        "mi_curve": [(t, round(mi, 8)) for t, mi in mi_curve],
+        "mi_decay_rate": round(decay_rate, 8),
+        "mi_half_life": round(mi_half_life, 6),
+        "mi_at_lag1": round(mi_at_lag1, 8),
+        "mi_initial": round(mi_initial, 8),
+        "r_squared": round(max(0.0, r_squared), 6),
+        "n_lags": len(mi_curve),
+        "n_points": n,
+    }
+
+
+def output_only_dissipation_estimator(
+    signal,             # type: List[float]
+    max_lag=None,       # type: Optional[int]
+    n_bins_mi=None,     # type: Optional[int]
+    n_bins_psd=None,    # type: Optional[int]
+    fs=1.0,             # type: float
+):
+    # type: (...) -> dict
+    """
+    Output-only entropy-to-dissipation estimator.
+
+    Computes mutual-information decay and spectral entropy from an output-
+    only signal stream to extract latent decay/damping parameters without
+    requiring known inputs.
+
+    This enables passive monitoring of semantic dissipation in FREED's
+    epistemic loop: feed coherence scores (output-only) into this function,
+    get back decay rates indicating how fast coherence is dissipating.
+
+    The estimator combines two complementary information-theoretic probes:
+
+    1. **MI decay rate (λ)**: From the exponential fit to time-lagged
+       mutual information I(τ) ≈ I(0)·exp(-λτ).  For a damped oscillator,
+       λ ≈ 2ζω_n where ζ is the damping ratio and ω_n the natural
+       frequency.  Higher λ → faster dissipation.
+
+    2. **Spectral entropy (H_s)**: Shannon entropy of the normalized PSD.
+       Low H_s → energy concentrated in few modes (lightly damped, resonant).
+       High H_s → energy spread across frequencies (heavily damped or noisy).
+
+    The combination disambiguates:
+      - Low λ + Low H_s → lightly damped oscillatory (coherence persists)
+      - High λ + High H_s → heavily damped / noisy (coherence dissipating)
+      - Low λ + High H_s → broadband but persistent (multi-modal coherence)
+      - High λ + Low H_s → rapidly decaying resonance (brief coherence bursts)
+
+    Parameters
+    ----------
+    signal : list of float
+        The output-only observation stream (e.g., coherence scores over time).
+    max_lag : int or None
+        Maximum lag for MI computation.  None → N // 4.
+    n_bins_mi : int or None
+        Histogram bins for MI estimation.  None → Sturges' rule.
+    n_bins_psd : int or None
+        Frequency bins for spectral entropy.  None → N // 2.
+    fs : float
+        Sampling rate (Hz) for physical frequency interpretation.
+        Default: 1.0 (unitless).
+
+    Returns
+    -------
+    dict with keys:
+        mi_decay_rate          : float — exponential decay rate λ from MI(τ)
+        mi_half_life           : float — coherence half-life in samples (ln(2)/λ)
+        mi_half_life_seconds   : float — coherence half-life in seconds (÷ fs)
+        mi_r_squared           : float — goodness of fit for MI decay
+        mi_at_lag1             : float — first-lag mutual information
+        mi_initial             : float — self-mutual-information I(0)
+        spectral_entropy       : float — Shannon entropy of normalized PSD (nats)
+        spectral_entropy_norm  : float — H_s / H_max, in [0, 1]
+        psd_concentration      : float — fraction of power in top 3 frequency bins
+        dominant_freq_idx      : int   — index of dominant frequency bin
+        dominant_freq_hz       : float — dominant frequency in Hz (if fs provided)
+        damping_regime         : str   — "LIGHTLY_DAMPED" / "MODERATELY_DAMPED" /
+                                         "HEAVILY_DAMPED" / "OVERDAMPED" /
+                                         "UNDETERMINED"
+        dissipation_score      : float — 0.0 (no dissipation) to 1.0 (maximum)
+                                         composite score combining MI and spectral
+                                         entropy evidence
+        effective_damping_ratio: float — estimated ζ (if dominant frequency
+                                         identifiable): ζ ≈ λ / (2 * 2π * f_dom)
+        mi_detail              : dict  — full MI analysis result
+        spectral_detail        : dict  — full spectral entropy result
+        o112_status            : str   — relevance to O112 (STF recovery protocol)
+        method                 : str   — "output_only_dissipation_estimator"
+        n_points               : int   — length of input signal
+        timestamp              : str   — ISO-8601 UTC
+    """
+    n = len(signal)
+    ts = datetime.now(timezone.utc).isoformat()
+
+    if n < 8:
+        return {
+            "mi_decay_rate": 0.0,
+            "mi_half_life": 0.0,
+            "mi_half_life_seconds": 0.0,
+            "mi_r_squared": 0.0,
+            "mi_at_lag1": 0.0,
+            "mi_initial": 0.0,
+            "spectral_entropy": 0.0,
+            "spectral_entropy_norm": 0.0,
+            "psd_concentration": 0.0,
+            "dominant_freq_idx": 0,
+            "dominant_freq_hz": 0.0,
+            "damping_regime": "UNDETERMINED",
+            "dissipation_score": 0.0,
+            "effective_damping_ratio": 0.0,
+            "mi_detail": {},
+            "spectral_detail": {},
+            "o112_status": "Insufficient data (need >= 8 samples).",
+            "method": "output_only_dissipation_estimator",
+            "n_points": n,
+            "timestamp": ts,
+        }
+
+    # ── Compute MI decay ──
+    mi_result = _time_lagged_mutual_information(
+        signal, max_lag=max_lag, n_bins=n_bins_mi,
+    )
+
+    # ── Compute spectral entropy ──
+    spec_result = _spectral_entropy(signal, n_bins=n_bins_psd)
+
+    # ── Extract composite metrics ──
+    decay_rate = mi_result["mi_decay_rate"]
+    half_life = mi_result["mi_half_life"]
+    half_life_sec = half_life / fs if fs > 0.0 else 0.0
+    mi_r2 = mi_result["r_squared"]
+
+    h_s = spec_result["spectral_entropy"]
+    h_s_norm = spec_result["spectral_entropy_norm"]
+    psd_conc = spec_result["psd_concentration"]
+    dom_idx = spec_result["dominant_freq_idx"]
+
+    # Dominant frequency in Hz
+    # DFT bin k corresponds to frequency k * fs / N
+    dom_freq_hz = float(dom_idx + 1) * fs / float(n) if n > 0 and fs > 0 else 0.0
+
+    # ── Effective damping ratio estimate ──
+    # For a damped oscillator: λ ≈ 2ζω_n, so ζ ≈ λ / (2 * ω_n)
+    # where ω_n = 2π * f_dom
+    effective_zeta = 0.0
+    if dom_freq_hz > 1e-10 and decay_rate > 0.0:
+        omega_n = 2.0 * math.pi * dom_freq_hz
+        effective_zeta = decay_rate / (2.0 * omega_n)
+        # Clamp to physical range [0, inf) — values > 1 are overdamped
+        effective_zeta = max(0.0, effective_zeta)
+
+    # ── Classify damping regime ──
+    if decay_rate <= 0.0 or mi_r2 < 0.3:
+        damping_regime = "UNDETERMINED"
+    elif effective_zeta < 0.05:
+        damping_regime = "LIGHTLY_DAMPED"
+    elif effective_zeta < 0.3:
+        damping_regime = "MODERATELY_DAMPED"
+    elif effective_zeta < 1.0:
+        damping_regime = "HEAVILY_DAMPED"
+    else:
+        damping_regime = "OVERDAMPED"
+
+    # ── Composite dissipation score ──
+    # Combines MI decay rate and spectral entropy into a single 0–1 score.
+    # High decay_rate AND high spectral entropy → high dissipation.
+    # Weight: 0.6 for MI decay evidence, 0.4 for spectral entropy.
+    #
+    # Normalize decay_rate: use a sigmoid-like mapping.
+    # At decay_rate=0 → 0; at decay_rate=1 → ~0.73; at decay_rate=3 → ~0.95
+    mi_score = 1.0 - math.exp(-decay_rate) if decay_rate > 0 else 0.0
+    if mi_r2 < 0.5:
+        mi_score *= mi_r2 / 0.5  # penalize poor fit
+
+    dissipation_score = 0.6 * mi_score + 0.4 * h_s_norm
+    dissipation_score = round(min(1.0, max(0.0, dissipation_score)), 6)
+
+    # ── O112 assessment ──
+    if mi_r2 >= 0.7 and damping_regime != "UNDETERMINED":
+        o112_status = (
+            "O112 OPERATIONAL: Output-only damping estimation converged. "
+            "MI decay rate lambda={:.6f} (R^2={:.3f}), effective damping "
+            "ratio zeta={:.4f}, regime={}. Spectral entropy H_s={:.4f} "
+            "(norm={:.3f}). The metric tensor (damping) is recoverable "
+            "from output-only statistics at this signal length (N={})."
+        ).format(decay_rate, mi_r2, effective_zeta, damping_regime,
+                 h_s, h_s_norm, n)
+    elif mi_r2 >= 0.4:
+        o112_status = (
+            "O112 MARGINAL: MI decay fit is marginal (R^2={:.3f}). "
+            "Damping estimate lambda={:.6f} may be unreliable. Consider "
+            "longer observation window or higher sampling rate. Current "
+            "N={}, spectral_entropy_norm={:.3f}."
+        ).format(mi_r2, decay_rate, n, h_s_norm)
+    else:
+        o112_status = (
+            "O112 INSUFFICIENT: MI decay fit failed (R^2={:.3f}). The "
+            "signal may be too short (N={}), too noisy, or non-stationary "
+            "for output-only damping recovery. Spectral entropy suggests "
+            "{} signal structure (H_s_norm={:.3f})."
+        ).format(mi_r2, n,
+                 "broadband/noisy" if h_s_norm > 0.7 else "structured",
+                 h_s_norm)
+
+    return {
+        "mi_decay_rate":           round(decay_rate, 8),
+        "mi_half_life":            round(half_life, 6),
+        "mi_half_life_seconds":    round(half_life_sec, 6),
+        "mi_r_squared":            round(mi_r2, 6),
+        "mi_at_lag1":              mi_result["mi_at_lag1"],
+        "mi_initial":              mi_result["mi_initial"],
+        "spectral_entropy":        round(h_s, 8),
+        "spectral_entropy_norm":   round(h_s_norm, 6),
+        "psd_concentration":       psd_conc,
+        "dominant_freq_idx":       dom_idx,
+        "dominant_freq_hz":        round(dom_freq_hz, 6),
+        "damping_regime":          damping_regime,
+        "dissipation_score":       dissipation_score,
+        "effective_damping_ratio": round(effective_zeta, 8),
+        "mi_detail":               mi_result,
+        "spectral_detail":         spec_result,
+        "o112_status":             o112_status,
+        "method":                  "output_only_dissipation_estimator",
+        "n_points":                n,
+        "timestamp":               ts,
+    }
 
 
 # ─── Quick test ───────────────────────────────────────────────────────────────

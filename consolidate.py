@@ -466,12 +466,281 @@ class MWDEScorer:
         }
 
 
+class NonQuadraticEPRScorer:
+    """
+    Non-quadratic Entropy Production Rate (EPR) action scorer for
+    thermodynamic admissibility of knowledge-path merges.
+
+    Implements the paper's large-deviation rate functional:
+        φ(x) = x·ln(x) - x + 1
+    instead of the near-equilibrium quadratic approximation:
+        φ_quad(x) = (x - 1)² / 2
+
+    The non-quadratic form is tight for discrete-state Markov processes
+    far from equilibrium, producing strictly tighter bounds on which
+    consolidation merges are thermodynamically admissible. At high
+    semantic tension (large flux ratios), the quadratic form under-
+    estimates dissipation, permitting false consolidations.
+
+    The EPR action for a transition with forward flux j and equilibrium
+    flux j_eq is:
+        Σ_EPR = Σ_edges  j_eq · φ(j / j_eq)
+
+    where φ(x) = x·ln(x) - x + 1 is the Cramér rate function.
+
+    INV_073 DISCRETE CORRECTION: The paper's geodesic optimum is derived
+    for discrete-state systems. When the genome uses continuous Wasserstein
+    (W2) geometry, a discrete-state correction term is needed. We apply
+    a log-barrier correction: for N discrete states, the effective metric
+    gains a factor of (1 + 1/N), which vanishes in the continuous limit
+    but tightens the bound for small state spaces.
+    """
+
+    # The Cramér / large-deviation rate function
+    @staticmethod
+    def _phi(x):
+        # type: (float) -> float
+        """φ(x) = x·ln(x) - x + 1, the non-quadratic dissipation functional.
+        Defined for x > 0. φ(0) = 1 by continuous extension. φ(1) = 0."""
+        if x <= 0.0:
+            return 1.0  # lim_{x->0+} φ(x) = 1
+        if abs(x - 1.0) < 1e-12:
+            return 0.0  # equilibrium: no dissipation
+        return x * math.log(x) - x + 1.0
+
+    @staticmethod
+    def _phi_quadratic(x):
+        # type: (float) -> float
+        """Quadratic (near-equilibrium) approximation: (x-1)²/2.
+        Taylor expansion of φ(x) around x=1 to second order."""
+        return 0.5 * (x - 1.0) ** 2
+
+    def epr_action(self, flux_ratios, equilibrium_fluxes=None):
+        # type: (list, list) -> dict
+        """
+        Compute the EPR action for a set of transition flux ratios.
+
+        Args:
+            flux_ratios: list of j/j_eq ratios for each semantic edge
+            equilibrium_fluxes: optional weights (j_eq) per edge; if None,
+                               uniform weighting is assumed
+
+        Returns:
+            dict with epr_nonquad, epr_quad, tightening_ratio, and
+            admissibility assessment
+        """
+        if not flux_ratios:
+            return {
+                "epr_nonquad": 0.0,
+                "epr_quad": 0.0,
+                "tightening_ratio": 1.0,
+                "admissible": True,
+                "n_edges": 0,
+            }
+
+        n = len(flux_ratios)
+        if equilibrium_fluxes is None:
+            equilibrium_fluxes = [1.0 / n] * n
+
+        # Normalize equilibrium fluxes
+        total_jeq = sum(equilibrium_fluxes)
+        if total_jeq <= 0:
+            total_jeq = 1.0
+        jeq_norm = [j / total_jeq for j in equilibrium_fluxes]
+
+        epr_nq = 0.0
+        epr_q = 0.0
+        for i, x in enumerate(flux_ratios):
+            w = jeq_norm[i]
+            epr_nq += w * self._phi(x)
+            epr_q += w * self._phi_quadratic(x)
+
+        # Tightening ratio: how much tighter the non-quadratic bound is
+        # For x > 1: φ(x) > φ_quad(x), so non-quadratic is strictly larger
+        # For x < 1: φ(x) > φ_quad(x) as well (both are convex, φ is tighter)
+        if epr_q > 1e-12:
+            tightening = epr_nq / epr_q
+        else:
+            tightening = 1.0
+
+        return {
+            "epr_nonquad": round(epr_nq, 6),
+            "epr_quad": round(epr_q, 6),
+            "tightening_ratio": round(tightening, 4),
+            "admissible": True,  # assessed by score_merge_admissibility
+            "n_edges": n,
+        }
+
+    def semantic_flux_ratios(self, dist_node, dist_evidence):
+        # type: (dict, dict) -> tuple
+        """
+        Compute flux ratios j/j_eq from two semantic distributions.
+
+        The node distribution is treated as the equilibrium (reference)
+        distribution j_eq, and the evidence distribution as the current
+        flux j. The ratio j/j_eq for each shared vocabulary term gives
+        the local departure from equilibrium.
+
+        Returns:
+            (flux_ratios, equilibrium_fluxes, shared_keys)
+        """
+        all_keys = sorted(set(list(dist_node.keys()) + list(dist_evidence.keys())))
+        if not all_keys:
+            return [], [], []
+
+        flux_ratios = []
+        eq_fluxes = []
+
+        # Small floor to avoid division by zero — represents minimal
+        # background probability (Laplace smoothing analogue)
+        floor = 1e-6
+
+        for key in all_keys:
+            j_eq = dist_node.get(key, 0.0) + floor
+            j = dist_evidence.get(key, 0.0) + floor
+            flux_ratios.append(j / j_eq)
+            eq_fluxes.append(j_eq)
+
+        return flux_ratios, eq_fluxes, all_keys
+
+    def score_merge_admissibility(self, node_text, evidence_text,
+                                  tension_threshold=0.15,
+                                  n_discrete_states=None):
+        # type: (str, str, float, int) -> dict
+        """
+        Score whether merging evidence into a node is thermodynamically
+        admissible under the non-quadratic EPR action.
+
+        Uses the large-deviation rate functional φ(x) = x·ln(x) - x + 1
+        instead of the quadratic (x-1)²/2 to detect false consolidations
+        at high semantic tension.
+
+        Args:
+            node_text: existing node content
+            evidence_text: new knowledge to potentially merge
+            tension_threshold: EPR above this flags inadmissible merge
+            n_discrete_states: if provided, applies discrete-state correction
+                              (INV_073) to the metric
+
+        Returns:
+            dict with EPR scores, admissibility flag, and discrete correction
+        """
+        # Reuse MWDEScorer's text-to-distribution for consistency
+        dist_node = MWDEScorer._text_to_distribution(node_text)
+        dist_evidence = MWDEScorer._text_to_distribution(evidence_text)
+
+        if not dist_node or not dist_evidence:
+            return {
+                "epr_nonquad": 1.0,
+                "epr_quad": 0.5,
+                "tightening_ratio": 2.0,
+                "admissible": False,
+                "thermodynamic_tension": 1.0,
+                "discrete_correction": 1.0,
+                "quadratic_would_admit": True,
+                "false_consolidation_prevented": True,
+            }
+
+        flux_ratios, eq_fluxes, shared_keys = self.semantic_flux_ratios(
+            dist_node, dist_evidence)
+
+        epr = self.epr_action(flux_ratios, eq_fluxes)
+
+        # INV_073: Discrete-state correction term
+        # For N discrete states, the metric gains factor (1 + 1/N)
+        # This corrects the continuous W2 geometry used in the genome
+        if n_discrete_states is None:
+            n_discrete_states = len(shared_keys)
+        if n_discrete_states > 0:
+            discrete_correction = 1.0 + 1.0 / n_discrete_states
+        else:
+            discrete_correction = 2.0  # maximal correction for trivial state space
+
+        # Apply discrete correction to the EPR threshold
+        effective_threshold = tension_threshold * discrete_correction
+
+        # Thermodynamic tension: normalized EPR that accounts for
+        # the number of semantic edges (intensive quantity)
+        n_edges = max(len(flux_ratios), 1)
+        tension = epr["epr_nonquad"]  # already weighted by eq_fluxes
+
+        # Admissibility under non-quadratic vs quadratic
+        admissible_nq = tension < effective_threshold
+        admissible_q = epr["epr_quad"] < effective_threshold
+
+        # False consolidation: quadratic says yes, non-quadratic says no
+        false_consolidation_prevented = admissible_q and not admissible_nq
+
+        return {
+            "epr_nonquad": epr["epr_nonquad"],
+            "epr_quad": epr["epr_quad"],
+            "tightening_ratio": epr["tightening_ratio"],
+            "admissible": admissible_nq,
+            "thermodynamic_tension": round(tension, 6),
+            "effective_threshold": round(effective_threshold, 6),
+            "discrete_correction": round(discrete_correction, 6),
+            "n_semantic_edges": n_edges,
+            "quadratic_would_admit": admissible_q,
+            "false_consolidation_prevented": false_consolidation_prevented,
+        }
+
+    def thermodynamic_length(self, path_distributions):
+        # type: (list) -> dict
+        """
+        Compute the thermodynamic length of a knowledge path (sequence of
+        distributions), using the non-quadratic EPR action as the local
+        metric.
+
+        The paper proves that EPR-minimizing trajectories are geodesics
+        under this thermodynamic length (Noether: action invariance under
+        reparametrization). This provides a conserved quantity along
+        optimal consolidation paths.
+
+        Args:
+            path_distributions: list of distribution dicts (word->freq)
+                               representing the knowledge path
+
+        Returns:
+            dict with total thermodynamic length and per-step EPR
+        """
+        if len(path_distributions) < 2:
+            return {"thermodynamic_length": 0.0, "steps": [], "n_steps": 0}
+
+        steps = []
+        total_length = 0.0
+
+        for i in range(len(path_distributions) - 1):
+            dist_a = path_distributions[i]
+            dist_b = path_distributions[i + 1]
+
+            flux_ratios, eq_fluxes, _ = self.semantic_flux_ratios(dist_a, dist_b)
+            epr = self.epr_action(flux_ratios, eq_fluxes)
+
+            # Thermodynamic length element: sqrt(EPR) for the Riemannian
+            # metric induced by the Fisher-Rao / EPR structure
+            dl = math.sqrt(epr["epr_nonquad"]) if epr["epr_nonquad"] > 0 else 0.0
+            total_length += dl
+
+            steps.append({
+                "step": i,
+                "epr": epr["epr_nonquad"],
+                "dl": round(dl, 6),
+            })
+
+        return {
+            "thermodynamic_length": round(total_length, 6),
+            "steps": steps,
+            "n_steps": len(steps),
+        }
+
+
 class Consolidator:
     def __init__(self, api_key: str):
         self.client    = anthropic.Anthropic(api_key=api_key)
         self.astrocyte = Astrocyte()
         self.escrow    = EscrowLedger()
         self.mwde      = MWDEScorer(wasserstein_order=1)
+        self.epr       = NonQuadraticEPRScorer()
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 

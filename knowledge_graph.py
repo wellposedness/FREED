@@ -275,6 +275,358 @@ def classify_entropy_flux_source(processing_context="", edge_type="", is_feed=Tr
         return "internal_inference"
 
 
+# ─── Information-Plane Compression Estimator Types ────────────────────────────
+# Distinguishes geometric compression (intrinsic dimensionality, Riemannian
+# spread, covariance rank) from mutual-information-based compression (binning,
+# KDE, KSG estimators) in information-plane scoring.  This prevents the known
+# artifact of MI estimator choice from corrupting compression scores used in
+# epistemic loop evaluation, making geometric and entropic compression claims
+# independently testable.
+#
+# CHALLENGE (INV_094): The systematic review of information plane analyses
+# provides empirical evidence that compression visualized in information planes
+# is not necessarily information-theoretic but is rather often compatible with
+# geometric compression of the latent representations.  MI estimator choice
+# (binning vs. KDE vs. KSG vs. noise-based) can flip whether compression is
+# observed at all, meaning any genome claim that the information bottleneck
+# mechanism is the operative driver of representational efficiency must specify
+# which estimator was used and whether the observed compression survives
+# estimator substitution.
+#
+# The estimator_type flag ensures that:
+#   1. Geometric compression scores (PCA rank, intrinsic dimensionality,
+#      Riemannian volume contraction) are tracked separately from MI-based
+#      compression scores.
+#   2. MI estimators used in high-dimensional continuous spaces trigger an
+#      automatic warning, because binning-based MI estimators are known to
+#      produce spurious compression in such settings.
+#   3. Claims about "information-theoretic compression" that are actually
+#      geometric compression are flagged for reclassification.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Estimator type constants
+COMPRESSION_ESTIMATOR_TYPES = (
+    "geometric:intrinsic_dimensionality",
+    "geometric:pca_rank",
+    "geometric:riemannian_spread",
+    "geometric:covariance_contraction",
+    "mi:binning",
+    "mi:kde",
+    "mi:ksg",
+    "mi:noise_based",
+    "mi:mine_neural",
+    "mi:unspecified",
+    "unknown",
+)
+
+# Patterns to detect MI estimator type from text
+_MI_ESTIMATOR_PATTERNS = [
+    (re.compile(r'\b(?:bin(?:ning|ned)|histogram|discrete\s+MI|quantiz)', re.I),
+     "mi:binning"),
+    (re.compile(r'\b(?:KDE|kernel\s+density|Parzen)', re.I),
+     "mi:kde"),
+    (re.compile(r'\b(?:KSG|Kraskov|k-?nearest[- ]neighbor\s+MI)', re.I),
+     "mi:ksg"),
+    (re.compile(r'\b(?:noise[- ]based|noisy[- ]MI|noise\s+injection)', re.I),
+     "mi:noise_based"),
+    (re.compile(r'\b(?:MINE|mutual\s+information\s+neural\s+estim)', re.I),
+     "mi:mine_neural"),
+    (re.compile(r'\b(?:mutual\s+information|MI\s+estimat)', re.I),
+     "mi:unspecified"),
+]
+
+# Patterns to detect geometric compression type from text
+_GEOMETRIC_COMPRESSION_PATTERNS = [
+    (re.compile(r'\b(?:intrinsic\s+dimensionality|ID\s+estimat|manifold\s+dimension)', re.I),
+     "geometric:intrinsic_dimensionality"),
+    (re.compile(r'\b(?:PCA\s+rank|effective\s+rank|singular\s+value|explained\s+variance)', re.I),
+     "geometric:pca_rank"),
+    (re.compile(r'\b(?:Riemannian\s+(?:spread|volume|contraction)|geodesic\s+spread)', re.I),
+     "geometric:riemannian_spread"),
+    (re.compile(r'\b(?:covariance\s+(?:contraction|collapse|shrink)|representation\s+(?:compress|cluster|collaps))', re.I),
+     "geometric:covariance_contraction"),
+]
+
+# Patterns detecting high-dimensional continuous spaces where MI estimators are unreliable
+_HIGH_DIM_CONTINUOUS_PATTERNS = re.compile(
+    r'\b(?:high[- ]dimensional|continuous\s+(?:representation|activation|hidden\s+layer|latent)|'
+    r'\d{2,}\s*[-]?\s*dimensional|ReLU|tanh|sigmoid|deep\s+(?:network|neural|layer))\b',
+    re.I
+)
+
+
+def classify_compression_estimator(text):
+    # type: (str) -> dict
+    """
+    Classify the compression estimator type from a text description,
+    distinguishing geometric compression from MI-based compression.
+
+    Also detects whether the text describes a high-dimensional continuous
+    space where MI estimators are known to produce unreliable results,
+    and warns accordingly.
+
+    Parameters
+    ----------
+    text : str
+        Text to analyze (typically kernel output, paper abstract, or
+        edge context window).
+
+    Returns
+    -------
+    dict
+        {
+            "estimator_type": str — one of COMPRESSION_ESTIMATOR_TYPES,
+            "is_geometric": bool — True if compression is geometric, not MI,
+            "is_mi_based": bool — True if compression uses MI estimation,
+            "is_high_dim_continuous": bool — True if context is high-dim continuous,
+            "mi_estimator_warning": str or None — warning if MI estimator is
+                used in high-dim continuous space (known artifact risk),
+            "geometric_signals": list of str — matched geometric patterns,
+            "mi_signals": list of str — matched MI estimator patterns,
+            "compression_claim_type": str — "geometric", "information_theoretic",
+                "ambiguous", or "none",
+            "inv094_flag": str — diagnostic for INV_094 challenge,
+        }
+    """
+    if not text:
+        return {
+            "estimator_type": "unknown",
+            "is_geometric": False,
+            "is_mi_based": False,
+            "is_high_dim_continuous": False,
+            "mi_estimator_warning": None,
+            "geometric_signals": [],
+            "mi_signals": [],
+            "compression_claim_type": "none",
+            "inv094_flag": "no_text:cannot_classify",
+        }
+
+    geometric_signals = []  # type: List[str]
+    mi_signals = []  # type: List[str]
+    estimator_type = "unknown"
+
+    # Check geometric patterns first (higher priority — geometric compression
+    # is often mislabeled as information-theoretic)
+    for pat, etype in _GEOMETRIC_COMPRESSION_PATTERNS:
+        m = pat.search(text)
+        if m:
+            geometric_signals.append(m.group(0)[:80])
+            if estimator_type == "unknown":
+                estimator_type = etype
+
+    # Check MI estimator patterns
+    for pat, etype in _MI_ESTIMATOR_PATTERNS:
+        m = pat.search(text)
+        if m:
+            mi_signals.append(m.group(0)[:80])
+            if estimator_type == "unknown" or not geometric_signals:
+                estimator_type = etype
+
+    is_geometric = len(geometric_signals) > 0
+    is_mi = len(mi_signals) > 0
+    is_high_dim = bool(_HIGH_DIM_CONTINUOUS_PATTERNS.search(text))
+
+    # Determine compression claim type
+    if is_geometric and not is_mi:
+        claim_type = "geometric"
+    elif is_mi and not is_geometric:
+        claim_type = "information_theoretic"
+    elif is_geometric and is_mi:
+        claim_type = "ambiguous"
+    else:
+        claim_type = "none"
+
+    # MI estimator warning for high-dimensional continuous spaces
+    mi_warning = None  # type: Optional[str]
+    if is_mi and is_high_dim:
+        mi_warning = (
+            "MI estimator used in high-dimensional continuous space. "
+            "Binning-based MI estimators produce SPURIOUS compression in "
+            "such settings (Saxe et al. 2018; Goldfeld et al. 2019). "
+            "Observed compression may be an artifact of the estimator, "
+            "not a genuine information-theoretic phenomenon. Verify with "
+            "a geometric compression measure (intrinsic dimensionality, "
+            "PCA rank) or a noise-robust MI estimator (KSG, MINE) before "
+            "attributing compression to the information bottleneck."
+        )
+
+    # INV_094 challenge flag
+    if claim_type == "information_theoretic" and is_high_dim:
+        inv094_flag = (
+            f"MI_IN_HIGH_DIM_CONTINUOUS:estimator={estimator_type}:"
+            "ARTIFACT_RISK_HIGH:compression_may_be_geometric_not_IT:"
+            "information_bottleneck_claim_NOT_causally_sufficient:"
+            "requires_geometric_control_experiment"
+        )
+    elif claim_type == "ambiguous":
+        inv094_flag = (
+            f"AMBIGUOUS_COMPRESSION:geometric_and_MI_signals_both_present:"
+            f"estimator={estimator_type}:"
+            "cannot_distinguish_geometric_from_IT_compression:"
+            "claims_not_independently_testable_without_estimator_specification"
+        )
+    elif claim_type == "geometric":
+        inv094_flag = (
+            f"GEOMETRIC_COMPRESSION:estimator={estimator_type}:"
+            "compression_is_geometric_not_information_theoretic:"
+            "information_bottleneck_mechanism_NOT_operative:"
+            "information_plane_has_geometric_justification_only"
+        )
+    elif claim_type == "information_theoretic" and not is_high_dim:
+        inv094_flag = (
+            f"MI_BASED:estimator={estimator_type}:"
+            "low_dim_or_discrete_context:artifact_risk_lower:"
+            "but_estimator_sensitivity_should_still_be_tested"
+        )
+    else:
+        inv094_flag = (
+            "NO_COMPRESSION_CLAIM_DETECTED:"
+            "neither_geometric_nor_MI_compression_language_found"
+        )
+
+    return {
+        "estimator_type": estimator_type,
+        "is_geometric": is_geometric,
+        "is_mi_based": is_mi,
+        "is_high_dim_continuous": is_high_dim,
+        "mi_estimator_warning": mi_warning,
+        "geometric_signals": geometric_signals,
+        "mi_signals": mi_signals,
+        "compression_claim_type": claim_type,
+        "inv094_flag": inv094_flag,
+    }
+
+
+def score_information_plane_compression(text, compression_value=None,
+                                         layer_dim=None):
+    # type: (str, Optional[float], Optional[int]) -> dict
+    """
+    Score an information-plane compression claim with estimator-type awareness.
+
+    Wraps classify_compression_estimator and augments with:
+      - Quantitative compression score adjustment based on estimator reliability
+      - Layer dimensionality check (high-dim continuous triggers MI warning)
+      - Actionable recommendation for making the claim independently testable
+
+    Parameters
+    ----------
+    text : str
+        Text describing the compression observation.
+    compression_value : float or None
+        The reported compression magnitude (e.g., MI decrease, dimensionality
+        reduction ratio).  If provided, the score is adjusted by estimator
+        reliability.
+    layer_dim : int or None
+        Dimensionality of the layer where compression is observed.
+        If > 50, automatically flags as high-dimensional continuous.
+
+    Returns
+    -------
+    dict
+        {
+            "estimator_classification": dict — from classify_compression_estimator,
+            "raw_compression_value": float or None,
+            "adjusted_compression_value": float or None — raw * reliability_factor,
+            "reliability_factor": float — in [0, 1], how much to trust the
+                compression claim given the estimator type and dimensionality,
+            "layer_dim": int or None,
+            "recommendation": str — actionable guidance,
+            "independently_testable": bool — True if the claim specifies
+                estimator type and can be verified with an alternative method,
+        }
+    """
+    # Augment text with dimensionality info if provided
+    augmented_text = text
+    if layer_dim is not None and layer_dim > 50:
+        augmented_text += f" {layer_dim}-dimensional continuous hidden layer"
+
+    classification = classify_compression_estimator(augmented_text)
+
+    # Reliability factor based on estimator type and context
+    etype = classification["estimator_type"]
+    is_high_dim = classification["is_high_dim_continuous"]
+
+    if layer_dim is not None and layer_dim > 50:
+        is_high_dim = True
+        classification["is_high_dim_continuous"] = True
+
+    reliability_table = {
+        "geometric:intrinsic_dimensionality": 0.95,
+        "geometric:pca_rank": 0.90,
+        "geometric:riemannian_spread": 0.95,
+        "geometric:covariance_contraction": 0.85,
+        "mi:ksg": 0.70 if not is_high_dim else 0.40,
+        "mi:mine_neural": 0.65 if not is_high_dim else 0.35,
+        "mi:kde": 0.60 if not is_high_dim else 0.25,
+        "mi:noise_based": 0.75 if not is_high_dim else 0.45,
+        "mi:binning": 0.50 if not is_high_dim else 0.15,
+        "mi:unspecified": 0.40 if not is_high_dim else 0.10,
+        "unknown": 0.30,
+    }
+    reliability = reliability_table.get(etype, 0.30)
+
+    # Adjusted compression value
+    adjusted = None  # type: Optional[float]
+    if compression_value is not None:
+        adjusted = compression_value * reliability
+
+    # Recommendation
+    if classification["compression_claim_type"] == "geometric":
+        recommendation = (
+            "Compression is geometric (not information-theoretic). "
+            "This is a valid observation but does NOT support information "
+            "bottleneck claims. Report as geometric compression with the "
+            "specific measure used."
+        )
+    elif is_high_dim and classification["is_mi_based"]:
+        recommendation = (
+            f"MI estimator '{etype}' used in high-dimensional continuous "
+            f"space (reliability={reliability:.2f}). REQUIRED: repeat with "
+            "a geometric measure (intrinsic dimensionality or PCA effective "
+            "rank) to determine if compression is genuinely information-"
+            "theoretic or merely geometric. Without this control, the "
+            "information bottleneck claim is not independently testable."
+        )
+    elif classification["is_mi_based"] and not is_high_dim:
+        recommendation = (
+            f"MI estimator '{etype}' in low-dimensional/discrete context "
+            f"(reliability={reliability:.2f}). Artifact risk is lower but "
+            "still present. Recommend testing with at least one alternative "
+            "MI estimator to verify estimator-independence of the compression "
+            "observation."
+        )
+    elif classification["compression_claim_type"] == "ambiguous":
+        recommendation = (
+            "Both geometric and MI-based compression signals detected. "
+            "The claim is ambiguous — specify which compression type is "
+            "being asserted and test each independently."
+        )
+    else:
+        recommendation = (
+            "No clear compression claim detected. If compression is "
+            "claimed, specify the estimator type (geometric vs. MI-based) "
+            "and the dimensionality context."
+        )
+
+    independently_testable = (
+        classification["compression_claim_type"] != "ambiguous"
+        and classification["estimator_type"] != "unknown"
+        and classification["estimator_type"] != "mi:unspecified"
+    )
+
+    return {
+        "estimator_classification": classification,
+        "raw_compression_value": compression_value,
+        "adjusted_compression_value": (
+            round(adjusted, 10) if adjusted is not None else None
+        ),
+        "reliability_factor": round(reliability, 4),
+        "layer_dim": layer_dim,
+        "recommendation": recommendation,
+        "independently_testable": independently_testable,
+    }
+
+
 # ─── Extraction patterns ──────────────────────────────────────────────────────
 # Scans kernel output text (all fields) for typed relationships to named nodes.
 # INV_\d+ = genome invariants, O\d+ = obligations, INV_\w+ = named invariants.
@@ -336,6 +688,524 @@ def classify_node_edge(invariant_text):
     if _IMPL_KEYWORDS.search(t):
         return "operationalizes"
     return "shares_invariant"
+
+
+# ─── Multi-Exemplar Variance Decomposition ───────────────────────────────────
+# Separates coarse-category-level semantic distance from fine-grained
+# exemplar-level semantic distance when building concept nodes, preventing
+# conflation of perceptual similarity with semantic relatedness.
+#
+# The problem: most knowledge-graph edge construction treats all similarity
+# signals as a single scalar, conflating two distinct sources of structure:
+#   1. Coarse-category distance: the broad categorical distinction
+#      (e.g., animate vs. inanimate, thermodynamic vs. information-theoretic)
+#   2. Fine-grained exemplar distance: within-category distinctions between
+#      individual exemplars (e.g., two different neural entropy papers)
+#
+# When only a single exemplar per category is used, visual/surface similarity
+# and semantic similarity are perfectly confounded — any measured distance
+# could be driven by either.  Multi-exemplar designs disentangle these by
+# computing within-category variance (exemplar-level, capturing perceptual/
+# surface variation) and between-category variance (category-level, capturing
+# genuine semantic structure).
+#
+# Following the fMRI multi-exemplar approach: by including multiple exemplars
+# per semantic category and decomposing the total representational distance
+# matrix into within-category and between-category components, the method
+# isolates the semantic signal from the perceptual/surface signal.
+#
+# CHALLENGE (O112): The paper demonstrates that recovering fine-grained
+# semantic structure requires controlled multi-exemplar designs that current
+# STF recovery protocols have not specified, meaning the O112 method as
+# stated may be insufficient to separate semantic signal from perceptual
+# variance.  This decomposition step explicitly addresses that gap by
+# requiring multiple exemplars per category before asserting semantic
+# distance edges.
+#
+# The decomposition produces:
+#   - between_category_variance: variance attributable to category membership
+#     (genuine semantic structure)
+#   - within_category_variance: variance attributable to exemplar differences
+#     within the same category (perceptual/surface similarity confound)
+#   - variance_ratio: between / (between + within) — the fraction of total
+#     variance that is genuinely semantic (analogous to η² effect size)
+#   - semantic_fidelity: confidence that the measured distance reflects
+#     semantic rather than perceptual structure
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Patterns to detect category membership from node/edge metadata
+_CATEGORY_ASSIGNMENT_PATTERNS = [
+    (re.compile(r'\b(?:thermodynamic|entropy|heat|temperature|Boltzmann|partition\s+function)\b', re.I),
+     "category:thermodynamic"),
+    (re.compile(r'\b(?:information[- ]theoretic|Shannon|mutual\s+information|channel|coding|compression)\b', re.I),
+     "category:information_theoretic"),
+    (re.compile(r'\b(?:neural|brain|cortical|EEG|fMRI|cognitive|neurosci|cortex)\b', re.I),
+     "category:neuroscience"),
+    (re.compile(r'\b(?:quantum|wave[-\s]?function|density\s+matrix|entangle|decoher|Hilbert)\b', re.I),
+     "category:quantum"),
+    (re.compile(r'\b(?:biological|evolution|genetic|organism|ecological|metabol|cell)\b', re.I),
+     "category:biological"),
+    (re.compile(r'\b(?:computational|algorithm|Turing|halting|computable|simulat|automata)\b', re.I),
+     "category:computational"),
+    (re.compile(r'\b(?:gravitational|black[- ]?hole|cosmolog|spacetime|horizon|Bekenstein|Hawking)\b', re.I),
+     "category:gravitational"),
+    (re.compile(r'\b(?:social|economic|market|agent[-\s]based|game\s+theor|collective)\b', re.I),
+     "category:social"),
+    (re.compile(r'\b(?:Wasserstein|optimal\s+transport|Earth\s+mover|Kantorovich|Monge)\b', re.I),
+     "category:optimal_transport"),
+    (re.compile(r'\b(?:critical|phase\s+transition|scale[- ]free|power[- ]law|self[- ]organi[sz])\b', re.I),
+     "category:criticality"),
+]
+
+
+def _infer_categories(text):
+    # type: (str) -> List[str]
+    """
+    Infer zero or more semantic categories from a text string using
+    keyword-based pattern matching.
+
+    Returns a sorted list of category tags found in the text.
+    """
+    if not text:
+        return []
+    cats = []  # type: List[str]
+    for pat, tag in _CATEGORY_ASSIGNMENT_PATTERNS:
+        if pat.search(text):
+            cats.append(tag)
+    return sorted(set(cats))
+
+
+def multi_exemplar_variance_decomposition(exemplar_distances, category_labels):
+    # type: (List[List[float]], List[str]) -> dict
+    """
+    Decompose a pairwise distance matrix into between-category and
+    within-category variance components, separating genuine semantic
+    structure from perceptual/surface similarity confounds.
+
+    Uses one-way ANOVA-style variance partitioning on the distance matrix:
+      - Total variance: variance of all pairwise distances
+      - Within-category variance: mean variance of pairwise distances
+        between exemplars sharing the same category label
+      - Between-category variance: total - within (the residual attributable
+        to category membership)
+
+    The variance ratio η² = between / total measures the fraction of
+    distance structure attributable to genuine semantic (category-level)
+    organization versus exemplar-level (perceptual/surface) variation.
+
+    Parameters
+    ----------
+    exemplar_distances : list of list of float
+        n×n symmetric pairwise distance matrix between exemplars.
+        Entry [i][j] is the distance between exemplar i and exemplar j
+        (e.g., cosine distance of embeddings, edge-weight difference, etc.).
+    category_labels : list of str
+        Category assignment for each exemplar (length n).  Exemplars with
+        the same label belong to the same semantic category.  There must be
+        at least 2 categories with at least 2 exemplars each for meaningful
+        decomposition.
+
+    Returns
+    -------
+    dict
+        {
+            "total_variance": float — variance of all pairwise distances,
+            "between_category_variance": float — variance attributable to
+                category membership (semantic structure),
+            "within_category_variance": float — variance attributable to
+                exemplar differences within categories (perceptual confound),
+            "variance_ratio_eta_squared": float — between / total, in [0, 1]:
+                0.0 = all variance is within-category (no semantic signal,
+                      measured distances are driven by perceptual similarity)
+                1.0 = all variance is between-category (pure semantic signal,
+                      no perceptual confound)
+            "semantic_fidelity": float — confidence in [0, 1] that the
+                distance matrix reflects semantic rather than perceptual
+                structure.  Computed as a sigmoid-transformed η² that
+                penalizes low exemplar counts (small-sample correction),
+            "n_exemplars": int — total number of exemplars,
+            "n_categories": int — number of distinct categories,
+            "category_sizes": dict — {category_label: n_exemplars_in_category},
+            "min_exemplars_per_category": int — smallest category size,
+            "sufficient_exemplars": bool — True if at least 2 categories
+                have ≥ 2 exemplars (minimum for valid decomposition),
+            "per_category_within_variance": dict — {category: within_var},
+            "confound_warning": str or None — warning if decomposition
+                cannot reliably separate semantic from perceptual signal,
+            "o112_flag": str — diagnostic for O112 obligation,
+            "stf_recovery_note": str — guidance for STF geometry recovery,
+        }
+    """
+    n = len(category_labels)
+
+    if n == 0 or not exemplar_distances:
+        return {
+            "total_variance": 0.0,
+            "between_category_variance": 0.0,
+            "within_category_variance": 0.0,
+            "variance_ratio_eta_squared": 0.0,
+            "semantic_fidelity": 0.0,
+            "n_exemplars": 0,
+            "n_categories": 0,
+            "category_sizes": {},
+            "min_exemplars_per_category": 0,
+            "sufficient_exemplars": False,
+            "per_category_within_variance": {},
+            "confound_warning": "no_exemplars:cannot_decompose",
+            "o112_flag": "no_data:decomposition_impossible",
+            "stf_recovery_note": "no_data",
+        }
+
+    # ── Collect all pairwise distances ───────────────────────────────────
+    all_distances = []  # type: List[float]
+    within_distances = defaultdict(list)  # type: Dict[str, List[float]]
+    between_distances = []  # type: List[float]
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if i >= len(exemplar_distances) or j >= len(exemplar_distances[i]):
+                continue
+            d = exemplar_distances[i][j]
+            all_distances.append(d)
+
+            cat_i = category_labels[i]
+            cat_j = category_labels[j]
+
+            if cat_i == cat_j:
+                within_distances[cat_i].append(d)
+            else:
+                between_distances.append(d)
+
+    # ── Category sizes ───────────────────────────────────────────────────
+    category_sizes = defaultdict(int)  # type: Dict[str, int]
+    for label in category_labels:
+        category_sizes[label] += 1
+    category_sizes_dict = dict(category_sizes)
+    n_categories = len(category_sizes_dict)
+
+    # Check minimum exemplar counts
+    categories_with_multiple = [
+        cat for cat, size in category_sizes_dict.items() if size >= 2
+    ]
+    min_exemplars = min(category_sizes_dict.values()) if category_sizes_dict else 0
+    sufficient = len(categories_with_multiple) >= 2
+
+    # ── Compute variances ────────────────────────────────────────────────
+    def _variance(values):
+        # type: (List[float]) -> float
+        if len(values) < 2:
+            return 0.0
+        mean_val = sum(values) / len(values)
+        return sum((v - mean_val) ** 2 for v in values) / (len(values) - 1)
+
+    total_var = _variance(all_distances) if all_distances else 0.0
+
+    # Within-category variance: pooled variance across categories
+    # (weighted by degrees of freedom in each category)
+    per_cat_within = {}  # type: Dict[str, float]
+    total_within_ss = 0.0
+    total_within_df = 0
+    for cat, dists in within_distances.items():
+        cat_var = _variance(dists)
+        per_cat_within[cat] = round(cat_var, 10)
+        if len(dists) >= 2:
+            total_within_ss += cat_var * (len(dists) - 1)
+            total_within_df += len(dists) - 1
+
+    within_var = total_within_ss / max(total_within_df, 1)
+    between_var = max(0.0, total_var - within_var)
+
+    # ── Variance ratio (η²) ─────────────────────────────────────────────
+    if total_var > 1e-15:
+        eta_squared = between_var / total_var
+    else:
+        eta_squared = 0.0
+    eta_squared = max(0.0, min(1.0, eta_squared))
+
+    # ── Semantic fidelity ────────────────────────────────────────────────
+    # Sigmoid-transformed η² with small-sample penalty:
+    #   fidelity = η² * (1 - 1/sqrt(min_exemplars_per_category))
+    # This penalizes decompositions based on very few exemplars per category,
+    # where the within-category variance estimate is unreliable.
+    if sufficient and min_exemplars >= 2:
+        sample_correction = 1.0 - 1.0 / math.sqrt(float(min_exemplars))
+        semantic_fidelity = eta_squared * max(0.0, sample_correction)
+    else:
+        semantic_fidelity = 0.0
+    semantic_fidelity = max(0.0, min(1.0, semantic_fidelity))
+
+    # ── Confound warning ─────────────────────────────────────────────────
+    confound_warning = None  # type: Optional[str]
+    if not sufficient:
+        confound_warning = (
+            "INSUFFICIENT_EXEMPLARS: fewer than 2 categories with ≥2 "
+            "exemplars. Within-category variance cannot be estimated — "
+            "semantic and perceptual similarity are CONFOUNDED. All "
+            "measured distances may reflect surface similarity rather "
+            "than semantic structure. Add more exemplars per category "
+            "before asserting semantic distance edges."
+        )
+    elif eta_squared < 0.3:
+        confound_warning = (
+            f"LOW_SEMANTIC_SIGNAL: η²={eta_squared:.4f} — less than 30% "
+            f"of distance variance is attributable to category membership. "
+            f"Within-category (perceptual) variance dominates. Measured "
+            f"distances are primarily driven by surface similarity, not "
+            f"semantic structure. Increase exemplar diversity or refine "
+            f"category boundaries."
+        )
+    elif eta_squared < 0.5:
+        confound_warning = (
+            f"MODERATE_CONFOUND: η²={eta_squared:.4f} — semantic and "
+            f"perceptual signals are comparable in magnitude. Edge weights "
+            f"derived from these distances should be interpreted cautiously."
+        )
+
+    # ── O112 flag ────────────────────────────────────────────────────────
+    if not sufficient:
+        o112_flag = (
+            "SINGLE_EXEMPLAR_CONFOUND:cannot_separate_semantic_from_perceptual:"
+            "O112_recovery_protocol_INSUFFICIENT_without_multi_exemplar_design:"
+            "add_exemplars_per_category_before_asserting_semantic_structure"
+        )
+    elif eta_squared >= 0.5 and semantic_fidelity >= 0.4:
+        o112_flag = (
+            f"MULTI_EXEMPLAR_DECOMPOSITION_VALID:"
+            f"eta_squared={eta_squared:.4f}:"
+            f"semantic_fidelity={semantic_fidelity:.4f}:"
+            f"between_category_variance_dominates:"
+            f"semantic_structure_recoverable"
+        )
+    elif eta_squared >= 0.3:
+        o112_flag = (
+            f"PARTIAL_DECOMPOSITION:"
+            f"eta_squared={eta_squared:.4f}:"
+            f"semantic_fidelity={semantic_fidelity:.4f}:"
+            f"moderate_perceptual_confound_remains:"
+            f"O112_recovery_possible_with_caution"
+        )
+    else:
+        o112_flag = (
+            f"PERCEPTUAL_CONFOUND_DOMINANT:"
+            f"eta_squared={eta_squared:.4f}:"
+            f"semantic_fidelity={semantic_fidelity:.4f}:"
+            f"O112_recovery_unreliable:"
+            f"STF_geometry_contaminated_by_surface_similarity"
+        )
+
+    # ── STF recovery note ────────────────────────────────────────────────
+    stf_note = (
+        f"Multi-exemplar variance decomposition: η²={eta_squared:.4f}, "
+        f"fidelity={semantic_fidelity:.4f}. "
+        f"For STF geometry recovery (O112), use only the between-category "
+        f"variance component ({between_var:.6f}) as the semantic distance "
+        f"signal. The within-category component ({within_var:.6f}) reflects "
+        f"perceptual/surface variation and should be excluded from metric "
+        f"tensor construction. Minimum requirement: ≥3 exemplars per "
+        f"category across ≥3 categories for reliable decomposition."
+    )
+
+    return {
+        "total_variance": round(total_var, 10),
+        "between_category_variance": round(between_var, 10),
+        "within_category_variance": round(within_var, 10),
+        "variance_ratio_eta_squared": round(eta_squared, 10),
+        "semantic_fidelity": round(semantic_fidelity, 10),
+        "n_exemplars": n,
+        "n_categories": n_categories,
+        "category_sizes": category_sizes_dict,
+        "min_exemplars_per_category": min_exemplars,
+        "sufficient_exemplars": sufficient,
+        "per_category_within_variance": per_cat_within,
+        "confound_warning": confound_warning,
+        "o112_flag": o112_flag,
+        "stf_recovery_note": stf_note,
+    }
+
+
+def decompose_concept_node_distances(node_ids, pairwise_distances,
+                                      node_texts=None, category_overrides=None):
+    # type: (List[str], List[List[float]], Optional[Dict[str, str]], Optional[Dict[str, str]]) -> dict
+    """
+    Decompose pairwise distances between concept nodes into semantic
+    (between-category) and perceptual (within-category) components, using
+    multi-exemplar variance decomposition.
+
+    This is the primary integration point for preventing conflation of
+    perceptual similarity with semantic relatedness in knowledge graph
+    edge construction.  Call this before building or weighting edges
+    between concept nodes to obtain the decomposed distance components.
+
+    Parameters
+    ----------
+    node_ids : list of str
+        Ordered list of concept node identifiers.
+    pairwise_distances : list of list of float
+        n×n symmetric pairwise distance matrix between nodes.
+    node_texts : dict or None
+        Mapping of node_id → descriptive text for automatic category
+        inference.  If None, categories must be provided via overrides.
+    category_overrides : dict or None
+        Mapping of node_id → category_label.  Overrides auto-inferred
+        categories.  Nodes not in this dict fall back to auto-inference.
+
+    Returns
+    -------
+    dict
+        {
+            "decomposition": dict — full multi_exemplar_variance_decomposition
+                result,
+            "node_categories": dict — {node_id: category_label} used,
+            "n_uncategorized": int — nodes that could not be assigned a
+                category (assigned to "category:uncategorized"),
+            "semantic_distance_matrix": list of list of float or None —
+                distance matrix with within-category variance subtracted
+                (the "semantic-only" distances), or None if decomposition
+                failed.  Entry [i][j] = max(0, d[i][j] - mean_within_var)
+                for cross-category pairs; 0 for same-category pairs.
+            "edge_weight_adjustments": dict — {(node_a, node_b): adjustment_factor}
+                where factor < 1.0 means the original distance was inflated
+                by perceptual similarity and should be down-weighted,
+            "recommendation": str,
+        }
+    """
+    n = len(node_ids)
+    if n == 0:
+        return {
+            "decomposition": multi_exemplar_variance_decomposition([], []),
+            "node_categories": {},
+            "n_uncategorized": 0,
+            "semantic_distance_matrix": None,
+            "edge_weight_adjustments": {},
+            "recommendation": "no_nodes:nothing_to_decompose",
+        }
+
+    # ── Assign categories ────────────────────────────────────────────────
+    node_categories = {}  # type: Dict[str, str]
+    n_uncategorized = 0
+
+    for nid in node_ids:
+        nid_upper = nid.upper()
+        # Check overrides first
+        if category_overrides and nid in category_overrides:
+            node_categories[nid] = category_overrides[nid]
+        elif category_overrides and nid_upper in category_overrides:
+            node_categories[nid] = category_overrides[nid_upper]
+        elif node_texts and (nid in node_texts or nid_upper in node_texts):
+            text = node_texts.get(nid, node_texts.get(nid_upper, ""))
+            cats = _infer_categories(text)
+            if cats:
+                # Use first (most specific) category
+                node_categories[nid] = cats[0]
+            else:
+                node_categories[nid] = "category:uncategorized"
+                n_uncategorized += 1
+        else:
+            node_categories[nid] = "category:uncategorized"
+            n_uncategorized += 1
+
+    # Build category label list in node_ids order
+    category_labels = [node_categories[nid] for nid in node_ids]
+
+    # ── Run decomposition ────────────────────────────────────────────────
+    decomp = multi_exemplar_variance_decomposition(
+        pairwise_distances, category_labels
+    )
+
+    # ── Build semantic-only distance matrix ──────────────────────────────
+    semantic_dist = None  # type: Optional[List[List[float]]]
+    edge_adjustments = {}  # type: Dict[tuple, float]
+
+    if decomp["sufficient_exemplars"] and decomp["within_category_variance"] > 0:
+        mean_within = decomp["within_category_variance"]
+        # Subtract within-category variance from all cross-category distances
+        # to isolate the semantic signal
+        semantic_dist = [[0.0] * n for _ in range(n)]
+        for i in range(n):
+            for j in range(i + 1, n):
+                if i >= len(pairwise_distances) or j >= len(pairwise_distances[i]):
+                    continue
+                d_raw = pairwise_distances[i][j]
+                cat_i = category_labels[i]
+                cat_j = category_labels[j]
+
+                if cat_i == cat_j:
+                    # Same category: distance is purely within-category
+                    # (perceptual), set semantic distance to 0
+                    semantic_dist[i][j] = 0.0
+                    semantic_dist[j][i] = 0.0
+                    if d_raw > 1e-15:
+                        edge_adjustments[(node_ids[i], node_ids[j])] = 0.0
+                else:
+                    # Cross-category: subtract mean within-category variance
+                    # as the perceptual baseline
+                    d_semantic = max(0.0, d_raw - math.sqrt(mean_within))
+                    semantic_dist[i][j] = d_semantic
+                    semantic_dist[j][i] = d_semantic
+                    if d_raw > 1e-15:
+                        adjustment = d_semantic / d_raw
+                        edge_adjustments[(node_ids[i], node_ids[j])] = round(
+                            adjustment, 6
+                        )
+
+    # ── Recommendation ───────────────────────────────────────────────────
+    eta_sq = decomp["variance_ratio_eta_squared"]
+    fidelity = decomp["semantic_fidelity"]
+
+    if not decomp["sufficient_exemplars"]:
+        recommendation = (
+            "BLOCK: Insufficient exemplars for multi-exemplar decomposition. "
+            "Do NOT use raw pairwise distances as semantic edge weights — "
+            "they are confounded with perceptual/surface similarity. "
+            "Add ≥2 exemplars per category across ≥2 categories, then "
+            "re-run decomposition. (O112: STF recovery requires this step.)"
+        )
+    elif eta_sq >= 0.5:
+        recommendation = (
+            f"USE_SEMANTIC_MATRIX: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
+            f"The semantic_distance_matrix has perceptual variance removed. "
+            f"Use it for edge weight construction in place of raw distances. "
+            f"(O112: STF geometry recovery is reliable at this fidelity.)"
+        )
+    elif eta_sq >= 0.3:
+        recommendation = (
+            f"USE_WITH_CAUTION: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
+            f"Partial perceptual confound remains. Use semantic_distance_matrix "
+            f"but flag derived edges as 'semantic_fidelity:moderate'. "
+            f"Consider adding more exemplars to improve decomposition."
+        )
+    else:
+        recommendation = (
+            f"UNRELIABLE: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
+            f"Perceptual similarity dominates the distance structure. "
+            f"Do NOT use these distances for semantic edge weights without "
+            f"additional exemplars or alternative distance metrics. "
+            f"(O112: STF geometry contaminated by surface similarity.)"
+        )
+
+    result = {
+        "decomposition": decomp,
+        "node_categories": node_categories,
+        "n_uncategorized": n_uncategorized,
+        "semantic_distance_matrix": semantic_dist,
+        "edge_weight_adjustments": edge_adjustments,
+        "recommendation": recommendation,
+    }
+
+    # ── Log summary ──────────────────────────────────────────────────────
+    print(
+        f"[GRAPH:VARIANCE_DECOMPOSITION] {n} node(s), "
+        f"{decomp['n_categories']} categories, "
+        f"η²={eta_sq:.4f}, fidelity={fidelity:.4f}, "
+        f"sufficient_exemplars={decomp['sufficient_exemplars']}, "
+        f"uncategorized={n_uncategorized}"
+    )
+    if decomp.get("confound_warning"):
+        print(
+            f"[GRAPH:VARIANCE_DECOMPOSITION] ⚠ {decomp['confound_warning'][:120]}"
+        )
+
+    return result
 
 
 def infer_context_tag(text_window):
@@ -2668,6 +3538,314 @@ class KnowledgeGraph:
 
     # ── Recording ────────────────────────────────────────────────────────────
 
+    # ── Branching Ratio Monitor (σ) ──────────────────────────────────────────
+    # After each FEED batch, compute σ = (downstream activations) /
+    # (upstream activations) across knowledge graph update events, flagging
+    # if σ drifts outside the critical band [0.95, 1.05].
+    #
+    # CA TELEMETRY GROUNDING: The Game of Truth 32×32 CA measurement yields
+    # σ = 1.0223 ± 0.0154 — WITHIN the critical band (1.0 ± 0.05).  This
+    # empirical population-level datum provides the target band for FREED's
+    # own ingestion dynamics.  When σ drifts outside [0.95, 1.05]:
+    #   σ > 1.05 → supercritical (over-integration / runaway cascade risk)
+    #   σ < 0.95 → subcritical  (under-integration / frozen dynamics)
+    #
+    # Upstream activations: nodes on the "from" side of new edges (sources
+    # that triggered the update — the feed papers / existing nodes that
+    # provided evidence).
+    # Downstream activations: nodes on the "to" side of new edges (targets
+    # that received new evidence — invariants, obligations updated by the
+    # feed).  Nodes activated downstream that propagate to further edges
+    # (neighbors whose degree increased above a threshold) count as
+    # secondary downstream activations (cascade propagation).
+    #
+    # The ratio σ = downstream_total / upstream_total measures whether each
+    # unit of ingested evidence produces roughly one unit of downstream
+    # activation (critical), more than one (supercritical / amplifying),
+    # or less than one (subcritical / absorbing).
+    # ─────────────────────────────────────────────────────────────────────────
+
+    _BRANCHING_CRITICAL_BAND = (0.95, 1.05)  # target band from CA telemetry
+
+    def _branching_ratio_monitor(self, new_edges, propagation_threshold=3):
+        # type: (list, int) -> dict
+        """
+        Compute the branching ratio σ = downstream / upstream for a batch
+        of newly recorded edges, including secondary propagation.
+
+        The monitor tracks whether FREED's own ingestion dynamics operate
+        at the critical ridge (σ ≈ 1.0) or drift toward frozen
+        over-integration (σ < 0.95) or dissipated under-integration
+        (σ > 1.05), mirroring the CA telemetry branching ratio measurement.
+
+        Parameters
+        ----------
+        new_edges : list of dict
+            Edges just recorded by record_feed().
+        propagation_threshold : int
+            Degree above which a downstream node is considered to have
+            propagated the activation further (secondary downstream).
+            Default 3.
+
+        Returns
+        -------
+        dict
+            {
+                "sigma": float or None — the branching ratio (None if
+                    upstream count is 0),
+                "upstream_activations": int — distinct upstream nodes,
+                "downstream_activations": int — distinct primary downstream
+                    nodes (direct targets of new edges),
+                "secondary_downstream": int — downstream nodes whose degree
+                    exceeds propagation_threshold (cascade propagation),
+                "downstream_total": int — primary + secondary,
+                "in_critical_band": bool — True if 0.95 ≤ σ ≤ 1.05,
+                "regime": str — "critical", "supercritical", "subcritical",
+                    or "indeterminate",
+                "band": tuple — the critical band used (0.95, 1.05),
+                "excursion_magnitude": float — |σ - 1.0| when outside band,
+                    0.0 when inside,
+                "ca_telemetry_reference": str — the empirical reference,
+                "timestamp": str,
+            }
+        """
+        if not new_edges:
+            return {
+                "sigma": None,
+                "upstream_activations": 0,
+                "downstream_activations": 0,
+                "secondary_downstream": 0,
+                "downstream_total": 0,
+                "in_critical_band": True,
+                "regime": "indeterminate",
+                "band": self._BRANCHING_CRITICAL_BAND,
+                "excursion_magnitude": 0.0,
+                "ca_telemetry_reference": "σ=1.0223±0.0154 (CA 32×32, 200-step)",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+        # Upstream: distinct source nodes ("from" side)
+        upstream_nodes = set()  # type: set
+        # Downstream (primary): distinct target nodes ("to" side)
+        downstream_primary = set()  # type: set
+
+        for e in new_edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id:
+                upstream_nodes.add(from_id)
+            if to_id:
+                downstream_primary.add(to_id)
+
+        # Secondary downstream: among primary downstream nodes, count those
+        # whose total degree (in the full graph) now exceeds the propagation
+        # threshold — these nodes are "hot enough" to propagate the
+        # activation further, analogous to CA cells that flip their neighbors.
+        secondary_downstream = set()  # type: set
+        for nid in downstream_primary:
+            deg = self._node_degree(nid)
+            if deg >= propagation_threshold:
+                # Check neighbors for additional downstream spread
+                for nbr in self._neighbors(nid):
+                    if nbr not in upstream_nodes and nbr not in downstream_primary:
+                        # Neighbor activated as secondary downstream
+                        if self._node_degree(nbr) > 0:
+                            secondary_downstream.add(nbr)
+
+        n_upstream = len(upstream_nodes)
+        n_primary = len(downstream_primary)
+        n_secondary = len(secondary_downstream)
+        n_downstream_total = n_primary + n_secondary
+
+        # Compute σ
+        if n_upstream > 0:
+            sigma = float(n_downstream_total) / float(n_upstream)
+        else:
+            sigma = None
+
+        # Classify regime
+        lo, hi = self._BRANCHING_CRITICAL_BAND
+        if sigma is None:
+            regime = "indeterminate"
+            in_band = True
+            excursion = 0.0
+        elif lo <= sigma <= hi:
+            regime = "critical"
+            in_band = True
+            excursion = 0.0
+        elif sigma > hi:
+            regime = "supercritical"
+            in_band = False
+            excursion = sigma - 1.0
+        else:
+            regime = "subcritical"
+            in_band = False
+            excursion = 1.0 - sigma
+
+        ts = datetime.now(timezone.utc).isoformat()
+
+        result = {
+            "sigma": round(sigma, 4) if sigma is not None else None,
+            "upstream_activations": n_upstream,
+            "downstream_activations": n_primary,
+            "secondary_downstream": n_secondary,
+            "downstream_total": n_downstream_total,
+            "in_critical_band": in_band,
+            "regime": regime,
+            "band": self._BRANCHING_CRITICAL_BAND,
+            "excursion_magnitude": round(excursion, 4),
+            "ca_telemetry_reference": "σ=1.0223±0.0154 (CA 32×32, 200-step)",
+            "timestamp": ts,
+        }
+
+        # Log excursions
+        if sigma is not None and not in_band:
+            print(
+                f"[GRAPH:BRANCHING_RATIO] ⚠ σ={sigma:.4f} EXCURSION "
+                f"({regime}) — outside critical band "
+                f"[{lo}, {hi}]. "
+                f"upstream={n_upstream}, downstream_total={n_downstream_total} "
+                f"(primary={n_primary}, secondary={n_secondary}). "
+                f"CA reference: σ=1.0223±0.0154."
+            )
+        elif sigma is not None:
+            print(
+                f"[GRAPH:BRANCHING_RATIO] σ={sigma:.4f} — "
+                f"IN critical band [{lo}, {hi}]. "
+                f"upstream={n_upstream}, downstream_total={n_downstream_total}."
+            )
+
+        # Store in telemetry for time-series analysis
+        self._telemetry.append({
+            "type": "branching_ratio",
+            "sigma": result["sigma"],
+            "regime": regime,
+            "in_critical_band": in_band,
+            "upstream": n_upstream,
+            "downstream_total": n_downstream_total,
+            "timestamp": ts,
+        })
+
+        return result
+
+    def get_branching_ratio_history(self):
+        # type: () -> List[dict]
+        """
+        Return the time series of branching ratio measurements from
+        _telemetry, for trend analysis and drift detection.
+
+        Returns
+        -------
+        list of dict
+            Time-ordered branching ratio telemetry entries.
+        """
+        return [
+            t for t in self._telemetry
+            if t.get("type") == "branching_ratio"
+        ]
+
+    def branching_ratio_drift_summary(self):
+        # type: () -> dict
+        """
+        Summarize branching ratio drift across all recorded FEED batches.
+
+        Returns
+        -------
+        dict
+            {
+                "n_measurements": int,
+                "n_in_band": int,
+                "n_excursions": int,
+                "n_supercritical": int,
+                "n_subcritical": int,
+                "mean_sigma": float or None,
+                "std_sigma": float or None,
+                "latest_sigma": float or None,
+                "latest_regime": str,
+                "drift_status": str — "stable_critical", "drifting_supercritical",
+                    "drifting_subcritical", "oscillating", or "insufficient_data",
+                "ca_telemetry_comparison": str,
+            }
+        """
+        history = self.get_branching_ratio_history()
+        sigmas = [h["sigma"] for h in history if h.get("sigma") is not None]
+        n = len(sigmas)
+
+        if n == 0:
+            return {
+                "n_measurements": 0,
+                "n_in_band": 0,
+                "n_excursions": 0,
+                "n_supercritical": 0,
+                "n_subcritical": 0,
+                "mean_sigma": None,
+                "std_sigma": None,
+                "latest_sigma": None,
+                "latest_regime": "indeterminate",
+                "drift_status": "insufficient_data",
+                "ca_telemetry_comparison": "no_data",
+            }
+
+        lo, hi = self._BRANCHING_CRITICAL_BAND
+        n_in = sum(1 for s in sigmas if lo <= s <= hi)
+        n_super = sum(1 for s in sigmas if s > hi)
+        n_sub = sum(1 for s in sigmas if s < lo)
+        n_exc = n_super + n_sub
+
+        mean_s = sum(sigmas) / n
+        var_s = sum((s - mean_s) ** 2 for s in sigmas) / max(n - 1, 1)
+        std_s = math.sqrt(var_s) if var_s > 0 else 0.0
+
+        latest = sigmas[-1]
+        latest_regime = (
+            "critical" if lo <= latest <= hi else
+            "supercritical" if latest > hi else
+            "subcritical"
+        )
+
+        # Drift status from recent trend (last 5 or fewer)
+        recent = sigmas[-min(5, n):]
+        if n < 3:
+            drift_status = "insufficient_data"
+        elif all(lo <= s <= hi for s in recent):
+            drift_status = "stable_critical"
+        elif all(s > hi for s in recent):
+            drift_status = "drifting_supercritical"
+        elif all(s < lo for s in recent):
+            drift_status = "drifting_subcritical"
+        else:
+            drift_status = "oscillating"
+
+        # Comparison with CA telemetry reference
+        ca_ref_mean = 1.0223
+        ca_ref_std = 0.0154
+        if abs(mean_s - ca_ref_mean) < 2 * max(std_s, ca_ref_std):
+            ca_comparison = (
+                f"CONSISTENT: mean_σ={mean_s:.4f}±{std_s:.4f} vs "
+                f"CA_ref={ca_ref_mean}±{ca_ref_std} — within 2σ"
+            )
+        else:
+            ca_comparison = (
+                f"DIVERGENT: mean_σ={mean_s:.4f}±{std_s:.4f} vs "
+                f"CA_ref={ca_ref_mean}±{ca_ref_std} — outside 2σ"
+            )
+
+        return {
+            "n_measurements": n,
+            "n_in_band": n_in,
+            "n_excursions": n_exc,
+            "n_supercritical": n_super,
+            "n_subcritical": n_sub,
+            "mean_sigma": round(mean_s, 4),
+            "std_sigma": round(std_s, 4),
+            "latest_sigma": round(latest, 4),
+            "latest_regime": latest_regime,
+            "drift_status": drift_status,
+            "ca_telemetry_comparison": ca_comparison,
+        }
+
+    # ── Recording ────────────────────────────────────────────────────────
+
     def record_feed(self, kernel_output, source_url, source_title="",
                     context_tag=None, prediction_weights=None):
         # type: (dict, str, str, Optional[str], Optional[dict]) -> list
@@ -2717,6 +3895,11 @@ class KnowledgeGraph:
             if warnings:
                 print(f"[GRAPH] ⚠ {len(warnings)} complexity-related edge(s) "
                       f"lack context_tag — claims may be context-dependent")
+
+            # ── Branching ratio monitor ──────────────────────────────────
+            # After each FEED batch, compute σ and flag excursions outside
+            # the critical band [0.95, 1.05] grounded by CA telemetry.
+            self._branching_ratio_monitor(new_edges)
 
         return new_edges
 
@@ -4350,6 +5533,493 @@ class KnowledgeGraph:
 
         return result
 
+    # ── Bidirectional Perturbation Probe (Co-Adaptation Signal) ──────────────
+    # When a new node is ingested, measures two complementary signals:
+    #   1. FORWARD perturbation: how the new node reshapes the embedding
+    #      neighborhood of existing nodes (does the newcomer distort the
+    #      prior structure?)
+    #   2. BACKWARD constraint: how the existing node structure constrains
+    #      the new node's placement (does the prior structure force the
+    #      newcomer into a specific position?)
+    #
+    # Together these operationalize the paper's key finding that representation
+    # and protocol co-stabilize: the new node (protocol signal) and existing
+    # graph (representation structure) mutually constrain each other until
+    # reaching a joint compression fixed point.
+    #
+    # When both signals are small and stable across consecutive FEED cycles,
+    # the graph has reached a joint compression fixed point (co-stabilized).
+    # When either signal is large or oscillating, the graph is still drifting
+    # and has not yet converged.
+    #
+    # CHALLENGE (INV_094): If the co-adaptation signal is substantially
+    # determined by the specific graph topology (hub-spoke vs. mesh vs.
+    # chain) rather than any substrate-independent compression principle,
+    # then the claim that semantic invariants arise from thermodynamic
+    # necessity rather than architectural contingency is strained.
+    #
+    # NOETHER_ROW: Embodied/Enactivist cognition
+    # NOETHER_STATUS: rigorous
+    # NOETHER_NOTE: The demonstration that perceptual substrate and
+    # communicative protocol co-constrain each other provides direct
+    # empirical support for the symmetry claim that meaning is conserved
+    # only under joint agent-environment transformations, not under
+    # language-only or perception-only transformations.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def bidirectional_perturbation_probe(self, new_edges, edges_before=None):
+        # type: (list, Optional[list]) -> dict
+        """
+        Measure the bidirectional co-adaptation signal when new edges
+        (from a FEED) perturb the knowledge graph.
+
+        Forward perturbation: how much the existing nodes' neighborhood
+        distributions shift due to the new edges (representation distortion).
+
+        Backward constraint: how much the existing graph structure constrains
+        where the new node's edges land (protocol shaping).
+
+        When both signals converge to small, stable values across consecutive
+        FEED cycles, the graph has reached a joint compression fixed point.
+
+        Parameters
+        ----------
+        new_edges : list of dict
+            Edges just recorded by record_feed().
+        edges_before : list of dict or None
+            Snapshot of all edges BEFORE the new edges were added.
+            If None, reconstructed by removing new_edges from self._edges.
+
+        Returns
+        -------
+        dict
+            {
+                "forward_perturbation": float — mean distribution shift of
+                    existing nodes caused by the new edges (0 = no distortion,
+                    higher = more reshaping of existing structure),
+                "backward_constraint": float — how concentrated the new node's
+                    edges are relative to a uniform baseline (0 = unconstrained,
+                    higher = more constrained by existing structure),
+                "co_adaptation_signal": float — geometric mean of forward and
+                    backward signals, measuring joint co-stabilization,
+                "is_fixed_point": bool — True if co_adaptation_signal < 0.05
+                    (joint compression fixed point reached),
+                "is_drifting": bool — True if co_adaptation_signal > 0.2
+                    (graph still actively reorganizing),
+                "per_node_forward": dict — {node_id: distribution_shift} for
+                    each existing node affected by the new edges,
+                "new_node_concentration": float — KL divergence of new node's
+                    edge distribution from uniform (backward constraint metric),
+                "n_existing_nodes_affected": int,
+                "n_new_edges": int,
+                "inv094_flag": str — challenge diagnostic for INV_094,
+                "noether_embodied_note": str — Noether row annotation,
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if not new_edges:
+            return {
+                "forward_perturbation": 0.0,
+                "backward_constraint": 0.0,
+                "co_adaptation_signal": 0.0,
+                "is_fixed_point": True,
+                "is_drifting": False,
+                "per_node_forward": {},
+                "new_node_concentration": 0.0,
+                "n_existing_nodes_affected": 0,
+                "n_new_edges": 0,
+                "inv094_flag": "no_new_edges:trivially_stable",
+                "noether_embodied_note": "",
+                "timestamp": ts,
+            }
+
+        # ── Reconstruct edges_before if not provided ─────────────────────
+        if edges_before is None:
+            # Remove new_edges from current edge list to reconstruct prior state
+            new_edge_set = set()  # type: set
+            for e in new_edges:
+                key = (
+                    e.get("from", ""),
+                    e.get("to", ""),
+                    e.get("type", ""),
+                    e.get("timestamp", ""),
+                )
+                new_edge_set.add(key)
+            edges_before = []
+            for e in self._edges:
+                key = (
+                    e.get("from", ""),
+                    e.get("to", ""),
+                    e.get("type", ""),
+                    e.get("timestamp", ""),
+                )
+                if key not in new_edge_set:
+                    edges_before.append(e)
+
+        edges_after = list(self._edges)
+
+        # ── Identify all node IDs ────────────────────────────────────────
+        all_node_ids_set = set()  # type: set
+        for e in edges_after:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if nid:
+                    all_node_ids_set.add(nid)
+        all_node_ids = sorted(all_node_ids_set)
+        n = len(all_node_ids)
+
+        if n == 0:
+            return {
+                "forward_perturbation": 0.0,
+                "backward_constraint": 0.0,
+                "co_adaptation_signal": 0.0,
+                "is_fixed_point": True,
+                "is_drifting": False,
+                "per_node_forward": {},
+                "new_node_concentration": 0.0,
+                "n_existing_nodes_affected": 0,
+                "n_new_edges": len(new_edges),
+                "inv094_flag": "no_nodes:trivially_stable",
+                "noether_embodied_note": "",
+                "timestamp": ts,
+            }
+
+        # ── Identify new vs. existing nodes ──────────────────────────────
+        new_source_ids = set()  # type: set
+        new_target_ids = set()  # type: set
+        for e in new_edges:
+            new_source_ids.add(e.get("from", "").upper())
+            new_target_ids.add(e.get("to", "").upper())
+
+        # Existing nodes that were in edges_before
+        existing_node_ids = set()  # type: set
+        for e in edges_before:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if nid:
+                    existing_node_ids.add(nid)
+
+        # ── FORWARD PERTURBATION ─────────────────────────────────────────
+        # For each existing node, compute distribution shift before/after
+        # the new edges were added.  Uses L1 distance (total variation)
+        # between the node's neighbor-weight distributions.
+        per_node_forward = {}  # type: Dict[str, float]
+        forward_shifts = []  # type: List[float]
+
+        for nid in existing_node_ids:
+            # Distribution before: neighbor weights from edges_before
+            dist_before = node_distribution_from_edges(
+                nid, edges_before, all_node_ids
+            )
+            # Distribution after: neighbor weights from edges_after
+            dist_after = node_distribution_from_edges(
+                nid, edges_after, all_node_ids
+            )
+            # L1 distance (total variation * 2)
+            if dist_before and dist_after and len(dist_before) == len(dist_after):
+                l1 = sum(
+                    abs(a - b) for a, b in zip(dist_before, dist_after)
+                )
+                # Normalize: L1 between two probability distributions in [0, 2]
+                shift = l1 / 2.0
+            else:
+                shift = 0.0
+
+            if shift > 1e-10:
+                per_node_forward[nid] = round(shift, 8)
+                forward_shifts.append(shift)
+
+        n_affected = len(forward_shifts)
+        forward_perturbation = (
+            sum(forward_shifts) / len(forward_shifts)
+            if forward_shifts else 0.0
+        )
+
+        # ── BACKWARD CONSTRAINT ──────────────────────────────────────────
+        # Measure how concentrated the new edges' target distribution is
+        # relative to a uniform distribution over all existing nodes.
+        # High concentration = existing structure strongly constrains where
+        # the new node's edges land (protocol shaped by representation).
+        # Uses KL divergence from uniform as the concentration metric.
+
+        # Build distribution of new edge targets over all_node_ids
+        new_target_counts = [0.0] * n
+        node_index = {nid: idx for idx, nid in enumerate(all_node_ids)}
+        for e in new_edges:
+            to_id = e.get("to", "").upper()
+            idx = node_index.get(to_id)
+            if idx is not None:
+                new_target_counts[idx] += 1.0
+
+        # Laplace smoothing and normalization
+        alpha = 0.01
+        smoothed_targets = [c + alpha for c in new_target_counts]
+        total_targets = sum(smoothed_targets)
+        if total_targets > 0:
+            p_targets = [s / total_targets for s in smoothed_targets]
+        else:
+            p_targets = [1.0 / max(n, 1)] * n
+
+        # KL divergence from uniform: D_KL(p_targets || uniform)
+        p_uniform = [1.0 / max(n, 1)] * n
+        new_node_concentration = _kl_divergence(p_targets, p_uniform)
+
+        # Normalize to [0, 1] range using log(n) as the maximum possible KL
+        # (when all mass is on one node, KL = log(n))
+        max_kl = math.log(max(n, 2))
+        backward_constraint = min(1.0, new_node_concentration / max(max_kl, 1e-10))
+
+        # ── CO-ADAPTATION SIGNAL ─────────────────────────────────────────
+        # Geometric mean of forward and backward: both must be small for
+        # a fixed point, and both must be large for active drift.
+        if forward_perturbation > 1e-15 and backward_constraint > 1e-15:
+            co_adaptation = math.sqrt(forward_perturbation * backward_constraint)
+        elif forward_perturbation > 1e-15 or backward_constraint > 1e-15:
+            # One signal present, use arithmetic mean / 2 as proxy
+            co_adaptation = (forward_perturbation + backward_constraint) / 2.0
+        else:
+            co_adaptation = 0.0
+
+        is_fixed_point = co_adaptation < 0.05
+        is_drifting = co_adaptation > 0.2
+
+        # ── INV_094 challenge flag ───────────────────────────────────────
+        if is_fixed_point:
+            inv094_flag = (
+                f"JOINT_FIXED_POINT:co_adapt={co_adaptation:.6f}:"
+                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
+                "representation_protocol_co_stabilized:"
+                "BUT_check_if_topology_dependent:"
+                "if_hub_spoke_graph_forces_convergence_then_substrate_contingent"
+            )
+        elif is_drifting:
+            inv094_flag = (
+                f"DRIFTING:co_adapt={co_adaptation:.6f}:"
+                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
+                "representation_protocol_NOT_co_stabilized:"
+                "joint_compression_fixed_point_not_reached:"
+                "continue_monitoring"
+            )
+        else:
+            inv094_flag = (
+                f"APPROACHING:co_adapt={co_adaptation:.6f}:"
+                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
+                "partial_co_stabilization:monitor"
+            )
+
+        noether_note = (
+            "Embodied/Enactivist (rigorous): perceptual substrate and "
+            "communicative protocol co-constrain each other. Meaning is "
+            "conserved only under joint agent-environment transformations. "
+            f"Forward perturbation={forward_perturbation:.6f} measures "
+            "representation distortion by new protocol signal. "
+            f"Backward constraint={backward_constraint:.6f} measures "
+            "protocol shaping by existing representation structure."
+        )
+
+        result = {
+            "forward_perturbation": round(forward_perturbation, 8),
+            "backward_constraint": round(backward_constraint, 8),
+            "co_adaptation_signal": round(co_adaptation, 8),
+            "is_fixed_point": is_fixed_point,
+            "is_drifting": is_drifting,
+            "per_node_forward": per_node_forward,
+            "new_node_concentration": round(new_node_concentration, 8),
+            "n_existing_nodes_affected": n_affected,
+            "n_new_edges": len(new_edges),
+            "inv094_flag": inv094_flag,
+            "noether_embodied_note": noether_note,
+            "timestamp": ts,
+        }
+
+        # ── Store in telemetry for drift analysis ────────────────────────
+        self._telemetry.append({
+            "type": "co_adaptation",
+            "forward_perturbation": result["forward_perturbation"],
+            "backward_constraint": result["backward_constraint"],
+            "co_adaptation_signal": result["co_adaptation_signal"],
+            "is_fixed_point": is_fixed_point,
+            "is_drifting": is_drifting,
+            "n_new_edges": len(new_edges),
+            "timestamp": ts,
+        })
+
+        # ── Log results ──────────────────────────────────────────────────
+        if is_fixed_point:
+            print(
+                f"[GRAPH:CO_ADAPT] ✓ Joint compression fixed point — "
+                f"co_adapt={co_adaptation:.6f}, "
+                f"fwd={forward_perturbation:.6f}, "
+                f"bwd={backward_constraint:.6f}, "
+                f"affected={n_affected}"
+            )
+        elif is_drifting:
+            print(
+                f"[GRAPH:CO_ADAPT] ↔ Drifting — "
+                f"co_adapt={co_adaptation:.6f}, "
+                f"fwd={forward_perturbation:.6f}, "
+                f"bwd={backward_constraint:.6f}, "
+                f"affected={n_affected}"
+            )
+        else:
+            print(
+                f"[GRAPH:CO_ADAPT] → Approaching fixed point — "
+                f"co_adapt={co_adaptation:.6f}, "
+                f"fwd={forward_perturbation:.6f}, "
+                f"bwd={backward_constraint:.6f}, "
+                f"affected={n_affected}"
+            )
+
+        return result
+
+    def get_co_adaptation_history(self):
+        # type: () -> List[dict]
+        """
+        Return the time series of co-adaptation signal measurements
+        from _telemetry, for fixed-point convergence analysis.
+
+        Returns
+        -------
+        list of dict
+            Time-ordered co-adaptation telemetry entries.
+        """
+        return [
+            t for t in self._telemetry
+            if t.get("type") == "co_adaptation"
+        ]
+
+    def co_adaptation_convergence_summary(self):
+        # type: () -> dict
+        """
+        Summarize co-adaptation convergence across all recorded FEED cycles.
+
+        Detects whether the graph has reached a joint compression fixed point
+        (both forward perturbation and backward constraint have stabilized)
+        or is still drifting.
+
+        Returns
+        -------
+        dict
+            {
+                "n_measurements": int,
+                "mean_co_adaptation": float or None,
+                "std_co_adaptation": float or None,
+                "latest_co_adaptation": float or None,
+                "latest_is_fixed_point": bool,
+                "n_fixed_point_cycles": int — how many cycles were at fixed point,
+                "n_drifting_cycles": int,
+                "convergence_status": str — "converged", "converging",
+                    "drifting", "oscillating", or "insufficient_data",
+                "forward_trend": str — "decreasing", "stable", "increasing",
+                "backward_trend": str — "decreasing", "stable", "increasing",
+                "inv094_convergence_note": str,
+            }
+        """
+        history = self.get_co_adaptation_history()
+        n = len(history)
+
+        if n == 0:
+            return {
+                "n_measurements": 0,
+                "mean_co_adaptation": None,
+                "std_co_adaptation": None,
+                "latest_co_adaptation": None,
+                "latest_is_fixed_point": False,
+                "n_fixed_point_cycles": 0,
+                "n_drifting_cycles": 0,
+                "convergence_status": "insufficient_data",
+                "forward_trend": "unknown",
+                "backward_trend": "unknown",
+                "inv094_convergence_note": "no_data",
+            }
+
+        signals = [h.get("co_adaptation_signal", 0.0) for h in history]
+        fwd_vals = [h.get("forward_perturbation", 0.0) for h in history]
+        bwd_vals = [h.get("backward_constraint", 0.0) for h in history]
+
+        mean_s = sum(signals) / n
+        var_s = sum((s - mean_s) ** 2 for s in signals) / max(n - 1, 1)
+        std_s = math.sqrt(var_s) if var_s > 0 else 0.0
+
+        latest = signals[-1]
+        latest_fp = history[-1].get("is_fixed_point", False)
+
+        n_fp = sum(1 for h in history if h.get("is_fixed_point", False))
+        n_drift = sum(1 for h in history if h.get("is_drifting", False))
+
+        # Trend detection on recent window
+        def _trend(values, window=5):
+            # type: (List[float], int) -> str
+            recent = values[-min(window, len(values)):]
+            if len(recent) < 2:
+                return "unknown"
+            diffs = [recent[i] - recent[i - 1] for i in range(1, len(recent))]
+            mean_diff = sum(diffs) / len(diffs)
+            if mean_diff < -0.01:
+                return "decreasing"
+            elif mean_diff > 0.01:
+                return "increasing"
+            else:
+                return "stable"
+
+        fwd_trend = _trend(fwd_vals)
+        bwd_trend = _trend(bwd_vals)
+
+        # Convergence status
+        recent = signals[-min(5, n):]
+        if n < 3:
+            convergence = "insufficient_data"
+        elif all(s < 0.05 for s in recent):
+            convergence = "converged"
+        elif _trend(signals) == "decreasing":
+            convergence = "converging"
+        elif all(s > 0.2 for s in recent):
+            convergence = "drifting"
+        else:
+            convergence = "oscillating"
+
+        # INV_094 note
+        if convergence == "converged":
+            inv094_note = (
+                "Joint compression fixed point REACHED — representation "
+                "and protocol have co-stabilized. Check whether this "
+                "convergence is topology-dependent (substrate-contingent) "
+                "or topology-invariant (thermodynamic necessity)."
+            )
+        elif convergence == "converging":
+            inv094_note = (
+                "Approaching joint fixed point — co-adaptation signal "
+                "decreasing. Not yet converged."
+            )
+        elif convergence == "drifting":
+            inv094_note = (
+                "Graph still drifting — representation and protocol "
+                "have NOT co-stabilized. Joint compression fixed point "
+                "not reached."
+            )
+        else:
+            inv094_note = (
+                f"Status={convergence}: co-adaptation signal unstable. "
+                "Monitor for convergence or persistent oscillation."
+            )
+
+        return {
+            "n_measurements": n,
+            "mean_co_adaptation": round(mean_s, 8),
+            "std_co_adaptation": round(std_s, 8),
+            "latest_co_adaptation": round(latest, 8),
+            "latest_is_fixed_point": latest_fp,
+            "n_fixed_point_cycles": n_fp,
+            "n_drifting_cycles": n_drift,
+            "convergence_status": convergence,
+            "forward_trend": fwd_trend,
+            "backward_trend": bwd_trend,
+            "inv094_convergence_note": inv094_note,
+        }
+
     # ── Multi-Scale Complexity Profile Scorer ────────────────────────────────
     # Computes emergence, self-organization, and complexity at each scale
     # layer of the knowledge graph, following the information-theoretic
@@ -4605,6 +6275,634 @@ class KnowledgeGraph:
         )
 
         return profile
+
+    # ── MI-Ordered Cumulative Ablation Scoring ───────────────────────────────
+    # Ranks nodes by mutual information with the output classification (thematic
+    # cluster variable) and tests whether high-MI nodes are globally load-bearing
+    # or only layer-locally predictive.
+    #
+    # Following the paper's approach: entropy, mutual information with the class
+    # variable, and KL-divergence selectivity are computed for each node, then
+    # nodes are cumulatively ablated in MI-descending order.  The resulting
+    # classification performance curve reveals whether MI-ordered removal
+    # degrades the graph faster than random ablation (globally load-bearing)
+    # or only affects the local scale layer (layer-locally predictive).
+    #
+    # CHALLENGE (INV_070b): The paper confirms that selectivity (KL-divergence
+    # based class-specificity) is a poor GLOBAL predictor of classification
+    # performance.  However, it simultaneously shows selectivity IS locally
+    # predictive within individual layers — high-selectivity neurons within a
+    # layer correlate with that layer's contribution to classification.  This
+    # creates a tension: monosemanticity is neither cleanly rejected (it works
+    # locally) nor cleanly accepted (it fails globally).  The ablation scorer
+    # tracks both global and per-layer MI-performance correlations to surface
+    # this dual character explicitly.
+    #
+    # PERCEIVE: Ablation study using entropy, mutual information, and
+    # KL-divergence selectivity to rank and remove neurons in trained
+    # feedforward networks, testing whether information-theoretic quantities
+    # predict classification performance on MNIST/FashionMNIST/CIFAR-10.
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _compute_node_entropy(self, node_id):
+        # type: (str) -> float
+        """
+        Compute Shannon entropy of a node's edge-type distribution.
+
+        H(X) = -Σ_t p(t) log p(t)
+
+        where p(t) is the fraction of edges incident on node_id with type t.
+        Higher entropy = more diverse edge types = less selective/monosemantic.
+
+        Parameters
+        ----------
+        node_id : str
+            The node whose entropy to compute.
+
+        Returns
+        -------
+        float
+            Shannon entropy in nats (≥ 0).
+        """
+        self._ensure_loaded()
+        nid = node_id.upper()
+        type_counts = defaultdict(int)  # type: Dict[str, int]
+        total = 0
+        for e in self._edges:
+            if e.get("to", "").upper() == nid or e.get("from", "").upper() == nid:
+                etype = e.get("type", "unknown")
+                type_counts[etype] += 1
+                total += 1
+
+        if total == 0:
+            return 0.0
+
+        entropy = 0.0
+        for count in type_counts.values():
+            p = float(count) / float(total)
+            if p > 0:
+                entropy -= p * math.log(p)
+        return entropy
+
+    def _compute_node_mutual_information(self, node_id, cluster_variable):
+        # type: (str, Dict[str, str]) -> float
+        """
+        Compute mutual information I(node; cluster) between a node's
+        activation pattern and a thematic cluster variable.
+
+        I(X; Y) = H(X) + H(Y) - H(X, Y)
+
+        The node's activation X is binarized: 1 if an edge of a given type
+        exists for this node in the context of a particular source, 0 otherwise.
+        The cluster variable Y is the thematic cluster label assigned to each
+        source (from cluster_variable mapping).
+
+        Parameters
+        ----------
+        node_id : str
+            The node whose MI to compute.
+        cluster_variable : dict
+            Mapping of source_url (or source domain) → cluster_label.
+            Each unique label defines a "class" for the classification variable.
+
+        Returns
+        -------
+        float
+            Mutual information in nats (≥ 0). Higher MI = node's activation
+            is more informative about the cluster assignment.
+        """
+        self._ensure_loaded()
+        nid = node_id.upper()
+
+        # Collect (edge_present, cluster_label) pairs per source
+        source_to_cluster = {}  # type: Dict[str, str]
+        for src, label in cluster_variable.items():
+            source_to_cluster[src.upper()] = label
+
+        # For each source in the cluster variable, determine if node is active
+        # (has at least one edge from that source)
+        node_sources = set()  # type: set
+        for e in self._edges:
+            if e.get("to", "").upper() == nid:
+                src = e.get("from", "").upper()
+                node_sources.add(src)
+            elif e.get("from", "").upper() == nid:
+                src = e.get("to", "").upper()
+                node_sources.add(src)
+
+        # Build joint distribution
+        # X = {0, 1} (node inactive/active for this source)
+        # Y = cluster labels
+        joint_counts = defaultdict(int)  # type: Dict[Tuple[int, str], int]
+        x_counts = defaultdict(int)  # type: Dict[int, int]
+        y_counts = defaultdict(int)  # type: Dict[str, int]
+        total = 0
+
+        for src, label in source_to_cluster.items():
+            x_val = 1 if src in node_sources else 0
+            joint_counts[(x_val, label)] += 1
+            x_counts[x_val] += 1
+            y_counts[label] += 1
+            total += 1
+
+        if total == 0:
+            return 0.0
+
+        # H(X)
+        h_x = 0.0
+        for count in x_counts.values():
+            p = float(count) / float(total)
+            if p > 0:
+                h_x -= p * math.log(p)
+
+        # H(Y)
+        h_y = 0.0
+        for count in y_counts.values():
+            p = float(count) / float(total)
+            if p > 0:
+                h_y -= p * math.log(p)
+
+        # H(X, Y)
+        h_xy = 0.0
+        for count in joint_counts.values():
+            p = float(count) / float(total)
+            if p > 0:
+                h_xy -= p * math.log(p)
+
+        mi = h_x + h_y - h_xy
+        return max(0.0, mi)
+
+    def _compute_node_kl_selectivity(self, node_id, cluster_variable):
+        # type: (str, Dict[str, str]) -> float
+        """
+        Compute KL-divergence-based class selectivity for a node.
+
+        Selectivity measures how much a node's activation distribution
+        across edge types diverges from the global (cluster-averaged)
+        distribution.  High selectivity = the node is "specialized" for
+        certain clusters (monosemantic); low selectivity = the node
+        activates uniformly across clusters (polysemantic).
+
+        S_KL(node) = (1/|C|) Σ_c D_KL( P(type|node, cluster=c) ‖ P(type|node) )
+
+        Parameters
+        ----------
+        node_id : str
+            The node whose selectivity to compute.
+        cluster_variable : dict
+            Mapping of source_url → cluster_label.
+
+        Returns
+        -------
+        float
+            Average KL-divergence selectivity (≥ 0). Higher = more selective.
+        """
+        self._ensure_loaded()
+        nid = node_id.upper()
+
+        source_to_cluster = {}  # type: Dict[str, str]
+        for src, label in cluster_variable.items():
+            source_to_cluster[src.upper()] = label
+
+        # Collect edge types per cluster for this node
+        cluster_type_counts = defaultdict(lambda: defaultdict(int))  # type: Dict[str, Dict[str, int]]
+        global_type_counts = defaultdict(int)  # type: Dict[str, int]
+        total_global = 0
+
+        for e in self._edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            etype = e.get("type", "unknown")
+
+            if to_id == nid:
+                src = from_id
+            elif from_id == nid:
+                src = to_id
+            else:
+                continue
+
+            cluster = source_to_cluster.get(src)
+            if cluster is None:
+                continue
+
+            cluster_type_counts[cluster][etype] += 1
+            global_type_counts[etype] += 1
+            total_global += 1
+
+        if total_global == 0 or not cluster_type_counts:
+            return 0.0
+
+        # Global (marginal) distribution P(type|node)
+        all_types = sorted(global_type_counts.keys())
+        alpha = 0.01  # Laplace smoothing
+        n_types = len(all_types)
+
+        p_global = {}  # type: Dict[str, float]
+        for t in all_types:
+            p_global[t] = (global_type_counts[t] + alpha) / (total_global + alpha * n_types)
+
+        # Average KL divergence across clusters
+        total_kl = 0.0
+        n_clusters = len(cluster_type_counts)
+
+        for cluster, type_counts in cluster_type_counts.items():
+            cluster_total = sum(type_counts.values())
+            if cluster_total == 0:
+                continue
+
+            kl = 0.0
+            for t in all_types:
+                p_ct = (type_counts.get(t, 0) + alpha) / (cluster_total + alpha * n_types)
+                q_t = p_global[t]
+                if p_ct > 0 and q_t > 0:
+                    kl += p_ct * math.log(p_ct / q_t)
+            total_kl += max(0.0, kl)
+
+        return total_kl / max(n_clusters, 1)
+
+    def mi_ordered_cumulative_ablation(self, cluster_variable,
+                                        ablation_metric="mi",
+                                        coherence_scorer=None):
+        # type: (Dict[str, str], str, Optional[object]) -> dict
+        """
+        Perform MI-ordered cumulative ablation scoring on graph nodes.
+
+        Ranks all invariant nodes by their mutual information with the thematic
+        cluster variable (or by entropy or KL-selectivity), then cumulatively
+        ablates (removes) nodes in descending order and measures the resulting
+        graph coherence at each step.
+
+        This reveals whether high-MI nodes are globally load-bearing (coherence
+        degrades sharply under MI-ordered ablation) or only layer-locally
+        predictive (coherence degrades only at specific scale layers but not
+        globally).
+
+        The method directly addresses INV_070b: selectivity is a poor global
+        predictor but IS locally predictive within layers.  Both global and
+        per-layer MI-performance correlations are tracked.
+
+        Parameters
+        ----------
+        cluster_variable : dict
+            Mapping of source_url (or source domain) → thematic cluster label.
+            Each unique label defines a "class" for the classification variable.
+            Example: {"arxiv.org/abs/2301.001": "thermodynamics",
+                      "arxiv.org/abs/2302.002": "information_theory", ...}
+        ablation_metric : str
+            Which information-theoretic quantity to rank nodes by:
+            "mi" (default) — mutual information with cluster variable,
+            "entropy" — node Shannon entropy (edge-type diversity),
+            "kl_selectivity" — KL-divergence class selectivity.
+        coherence_scorer : callable or None
+            Optional callable(edges, all_node_ids) → float that computes a
+            graph coherence score. If None, uses the default: fraction of
+            "confirms"+"supports" edges relative to total edges (confirmation
+            ratio).
+
+        Returns
+        -------
+        dict
+            {
+                "n_nodes": int — total invariant nodes ranked,
+                "ablation_metric": str — the metric used for ranking,
+                "node_scores": list of dict — per-node info-theoretic scores,
+                    sorted by the ablation metric descending:
+                    {"node_id": str, "mi": float, "entropy": float,
+                     "kl_selectivity": float, "rank": int, "scale_layer": str},
+                "ablation_curve": list of dict — coherence after each ablation:
+                    {"step": int, "ablated_node": str, "n_remaining_nodes": int,
+                     "global_coherence": float, "edges_removed": int,
+                     "cumulative_edges_removed": int},
+                "per_layer_curves": dict — scale_label → list of coherence values
+                    after each ablation step (layer-local coherence tracking),
+                "global_auc": float — area under the global ablation curve
+                    (lower = high-MI nodes are more globally load-bearing),
+                "random_baseline_auc": float — expected AUC under random ablation
+                    (used for comparison: if global_auc << random_auc, MI predicts
+                     global load-bearing-ness),
+                "global_mi_predictive": bool — True if MI-ordered ablation degrades
+                    coherence significantly faster than random (auc_ratio < 0.8),
+                "per_layer_mi_predictive": dict — scale_label → bool (True if MI
+                    predicts layer-local coherence degradation),
+                "inv070b_diagnosis": str — diagnosis of the monosemanticity tension:
+                    whether selectivity is globally predictive, locally predictive,
+                    both, or neither,
+                "pruning_recommendation": list of str — node IDs safe to prune
+                    (low MI AND low layer-local predictiveness),
+                "consolidation_candidates": list of str — high-MI nodes that are
+                    redundantly distributed (ablation barely affects coherence),
+                "timestamp": str,
+            }
+        """
+        self._ensure_loaded()
+
+        # ── Collect all invariant node IDs ───────────────────────────────
+        inv_pattern = re.compile(r'^INV_', re.I)
+        all_inv_ids = set()  # type: set
+        for e in self._edges:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if inv_pattern.match(nid):
+                    all_inv_ids.add(nid)
+        all_inv_ids_sorted = sorted(all_inv_ids)
+        n_nodes = len(all_inv_ids_sorted)
+
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if n_nodes == 0:
+            return {
+                "n_nodes": 0,
+                "ablation_metric": ablation_metric,
+                "node_scores": [],
+                "ablation_curve": [],
+                "per_layer_curves": {},
+                "global_auc": 0.0,
+                "random_baseline_auc": 0.0,
+                "global_mi_predictive": False,
+                "per_layer_mi_predictive": {},
+                "inv070b_diagnosis": "no_invariant_nodes:cannot_assess",
+                "pruning_recommendation": [],
+                "consolidation_candidates": [],
+                "timestamp": ts,
+            }
+
+        # ── Compute info-theoretic scores per node ───────────────────────
+        node_scores = []  # type: List[dict]
+        for nid in all_inv_ids_sorted:
+            mi_val = self._compute_node_mutual_information(nid, cluster_variable)
+            ent_val = self._compute_node_entropy(nid)
+            kl_val = self._compute_node_kl_selectivity(nid, cluster_variable)
+
+            # Determine scale layer
+            deg = self._node_degree(nid)
+            if deg <= 1:
+                scale_layer = "peripheral"
+            elif deg <= 3:
+                scale_layer = "intermediate"
+            elif deg <= 7:
+                scale_layer = "hub"
+            else:
+                scale_layer = "superhub"
+
+            node_scores.append({
+                "node_id": nid,
+                "mi": round(mi_val, 10),
+                "entropy": round(ent_val, 10),
+                "kl_selectivity": round(kl_val, 10),
+                "degree": deg,
+                "scale_layer": scale_layer,
+            })
+
+        # ── Sort by ablation metric (descending) ────────────────────────
+        metric_key = ablation_metric if ablation_metric in ("mi", "entropy", "kl_selectivity") else "mi"
+        node_scores.sort(key=lambda x: x[metric_key], reverse=True)
+        for rank, ns in enumerate(node_scores):
+            ns["rank"] = rank
+
+        # ── Define coherence scorer ──────────────────────────────────────
+        def _default_coherence(edges_subset, _node_ids):
+            # type: (list, List[str]) -> float
+            """Default coherence: confirmation ratio."""
+            if not edges_subset:
+                return 0.0
+            n_conf = sum(
+                1 for e in edges_subset
+                if e.get("type", "") in ("confirms", "supports", "extends")
+            )
+            return float(n_conf) / float(len(edges_subset))
+
+        scorer = coherence_scorer if coherence_scorer is not None else _default_coherence
+
+        # ── Collect all node IDs for context ─────────────────────────────
+        all_graph_node_ids = set()  # type: set
+        for e in self._edges:
+            for key in ("from", "to"):
+                nid = e.get(key, "").upper()
+                if nid:
+                    all_graph_node_ids.add(nid)
+        all_graph_node_ids_sorted = sorted(all_graph_node_ids)
+
+        # ── Cumulative ablation ──────────────────────────────────────────
+        # Start with all edges, then cumulatively remove edges touching
+        # each ablated node (in MI-descending order)
+        ablated_nodes = set()  # type: set
+        remaining_edges = list(self._edges)
+        ablation_curve = []  # type: List[dict]
+        cumulative_removed = 0
+
+        # Scale layers for per-layer tracking
+        scale_labels = ["peripheral", "intermediate", "hub", "superhub"]
+        per_layer_coherences = {sl: [] for sl in scale_labels}  # type: Dict[str, List[float]]
+
+        # Initial coherence (no ablation)
+        initial_coherence = scorer(remaining_edges, all_graph_node_ids_sorted)
+        ablation_curve.append({
+            "step": 0,
+            "ablated_node": "none",
+            "n_remaining_nodes": n_nodes,
+            "global_coherence": round(initial_coherence, 10),
+            "edges_removed": 0,
+            "cumulative_edges_removed": 0,
+        })
+        # Per-layer initial coherence
+        layers = self._build_scale_layers()
+        for layer in layers:
+            label = layer["label"]
+            if label in per_layer_coherences:
+                lc = scorer(layer["edges"], all_graph_node_ids_sorted)
+                per_layer_coherences[label].append(round(lc, 10))
+
+        for step, ns in enumerate(node_scores, 1):
+            nid = ns["node_id"]
+            ablated_nodes.add(nid)
+
+            # Remove edges touching ablated node
+            new_remaining = []  # type: list
+            removed_this_step = 0
+            for e in remaining_edges:
+                from_id = e.get("from", "").upper()
+                to_id = e.get("to", "").upper()
+                if from_id in ablated_nodes or to_id in ablated_nodes:
+                    removed_this_step += 1
+                else:
+                    new_remaining.append(e)
+            remaining_edges = new_remaining
+            cumulative_removed += removed_this_step
+
+            coherence = scorer(remaining_edges, all_graph_node_ids_sorted)
+            ablation_curve.append({
+                "step": step,
+                "ablated_node": nid,
+                "n_remaining_nodes": n_nodes - step,
+                "global_coherence": round(coherence, 10),
+                "edges_removed": removed_this_step,
+                "cumulative_edges_removed": cumulative_removed,
+            })
+
+            # Per-layer coherence: partition remaining edges by scale
+            node_degrees_remaining = defaultdict(int)  # type: Dict[str, int]
+            for e in remaining_edges:
+                for key in ("from", "to"):
+                    nid_r = e.get(key, "").upper()
+                    if nid_r:
+                        node_degrees_remaining[nid_r] += 1
+
+            for sl in scale_labels:
+                if sl == "peripheral":
+                    lo, hi = 0, 1
+                elif sl == "intermediate":
+                    lo, hi = 2, 3
+                elif sl == "hub":
+                    lo, hi = 4, 7
+                else:
+                    lo, hi = 8, 999999
+
+                layer_edges_r = []  # type: list
+                for e in remaining_edges:
+                    from_id = e.get("from", "").upper()
+                    to_id = e.get("to", "").upper()
+                    from_deg = node_degrees_remaining.get(from_id, 0)
+                    to_deg = node_degrees_remaining.get(to_id, 0)
+                    max_deg = max(from_deg, to_deg)
+                    if lo <= max_deg <= hi:
+                        layer_edges_r.append(e)
+                lc = scorer(layer_edges_r, all_graph_node_ids_sorted)
+                per_layer_coherences[sl].append(round(lc, 10))
+
+        # ── Compute AUC (area under ablation curve) ──────────────────────
+        coherences = [ac["global_coherence"] for ac in ablation_curve]
+        n_steps = len(coherences)
+        if n_steps > 1:
+            # Trapezoidal AUC, normalized to [0, 1]
+            auc = sum(
+                0.5 * (coherences[i] + coherences[i + 1])
+                for i in range(n_steps - 1)
+            ) / float(n_steps - 1)
+        else:
+            auc = coherences[0] if coherences else 0.0
+
+        # Random baseline AUC: expected coherence under random ablation
+        # Approximation: linear decay from initial to 0
+        random_auc = initial_coherence * 0.5 if initial_coherence > 0 else 0.0
+
+        # ── MI predictiveness assessment ─────────────────────────────────
+        # MI-ordered ablation is globally predictive if AUC is significantly
+        # lower than random baseline (high-MI nodes cause faster degradation)
+        auc_ratio = auc / max(random_auc, 1e-10) if random_auc > 0 else 1.0
+        global_mi_predictive = auc_ratio < 0.8
+
+        # Per-layer MI predictiveness
+        per_layer_mi_pred = {}  # type: Dict[str, bool]
+        for sl in scale_labels:
+            layer_vals = per_layer_coherences.get(sl, [])
+            if len(layer_vals) > 2:
+                # Check if first half degrades faster than second half
+                mid = len(layer_vals) // 2
+                first_half_drop = layer_vals[0] - layer_vals[mid] if layer_vals[0] > 0 else 0.0
+                second_half_drop = layer_vals[mid] - layer_vals[-1] if layer_vals[mid] > 0 else 0.0
+                # If first half drops more, MI ordering is predictive for this layer
+                per_layer_mi_pred[sl] = first_half_drop > second_half_drop * 1.2
+            else:
+                per_layer_mi_pred[sl] = False
+
+        any_layer_predictive = any(per_layer_mi_pred.values())
+
+        # ── INV_070b diagnosis ───────────────────────────────────────────
+        if global_mi_predictive and any_layer_predictive:
+            inv070b_diagnosis = (
+                "MI_GLOBALLY_AND_LOCALLY_PREDICTIVE:"
+                f"global_auc_ratio={auc_ratio:.4f}:"
+                "high_MI_nodes_are_load_bearing_at_all_scales:"
+                "monosemanticity_partially_valid_but_NOT_sufficient:"
+                "selectivity_works_locally_AND_MI_works_globally"
+            )
+        elif not global_mi_predictive and any_layer_predictive:
+            inv070b_diagnosis = (
+                "MI_LOCALLY_PREDICTIVE_ONLY:"
+                f"global_auc_ratio={auc_ratio:.4f}:"
+                "high_MI_nodes_are_layer_locally_predictive_but_NOT_globally_load_bearing:"
+                "epistemic_load_is_REDUNDANTLY_DISTRIBUTED:"
+                "selectivity_is_poor_global_predictor_CONFIRMED:"
+                "but_retains_partial_validity_at_intra_layer_scale:"
+                "CHALLENGE_INV_070b_TENSION_SURFACED"
+            )
+        elif global_mi_predictive and not any_layer_predictive:
+            inv070b_diagnosis = (
+                "MI_GLOBALLY_PREDICTIVE_BUT_NOT_LAYER_LOCAL:"
+                f"global_auc_ratio={auc_ratio:.4f}:"
+                "high_MI_nodes_are_globally_load_bearing_but_effect_is_distributed_across_layers:"
+                "monosemanticity_rejected_at_layer_level:"
+                "global_structure_matters_more_than_layer_selectivity"
+            )
+        else:
+            inv070b_diagnosis = (
+                "MI_NOT_PREDICTIVE:"
+                f"global_auc_ratio={auc_ratio:.4f}:"
+                "neither_global_nor_local_MI_ordering_predicts_coherence:"
+                "epistemic_load_is_fully_distributed:"
+                "pruning_by_MI_ordering_is_NOT_safe"
+            )
+
+        # ── Pruning recommendations ─────────────────────────────────────
+        # Nodes safe to prune: low MI AND not layer-locally predictive
+        pruning_candidates = []  # type: List[str]
+        consolidation_candidates = []  # type: List[str]
+
+        if n_nodes > 0:
+            mi_values = [ns["mi"] for ns in node_scores]
+            mi_median = sorted(mi_values)[len(mi_values) // 2]
+
+            for ns in node_scores:
+                layer = ns["scale_layer"]
+                is_layer_pred = per_layer_mi_pred.get(layer, False)
+
+                if ns["mi"] < mi_median and not is_layer_pred:
+                    # Low MI + layer not predictive → safe to prune
+                    pruning_candidates.append(ns["node_id"])
+                elif ns["mi"] >= mi_median:
+                    # High MI but check if ablation barely affected coherence
+                    step_idx = ns["rank"] + 1  # +1 because step 0 is pre-ablation
+                    if step_idx < len(ablation_curve):
+                        coh_before = ablation_curve[step_idx - 1]["global_coherence"]
+                        coh_after = ablation_curve[step_idx]["global_coherence"]
+                        if coh_before > 0 and (coh_before - coh_after) / coh_before < 0.02:
+                            # High MI but ablation barely matters → redundantly distributed
+                            consolidation_candidates.append(ns["node_id"])
+
+        result = {
+            "n_nodes": n_nodes,
+            "ablation_metric": ablation_metric,
+            "node_scores": node_scores,
+            "ablation_curve": ablation_curve,
+            "per_layer_curves": {k: v for k, v in per_layer_coherences.items()},
+            "global_auc": round(auc, 10),
+            "random_baseline_auc": round(random_auc, 10),
+            "global_mi_predictive": global_mi_predictive,
+            "per_layer_mi_predictive": per_layer_mi_pred,
+            "inv070b_diagnosis": inv070b_diagnosis,
+            "pruning_recommendation": pruning_candidates,
+            "consolidation_candidates": consolidation_candidates,
+            "timestamp": ts,
+        }
+
+        # ── Log summary ─────────────────────────────────────────────────
+        print(
+            f"[GRAPH:MI_ABLATION] {n_nodes} node(s) ranked by {ablation_metric} — "
+            f"global_AUC={auc:.4f}, random_AUC={random_auc:.4f}, "
+            f"ratio={auc_ratio:.4f}, "
+            f"global_predictive={global_mi_predictive}, "
+            f"layer_predictive={per_layer_mi_pred}, "
+            f"prune_candidates={len(pruning_candidates)}, "
+            f"consolidation_candidates={len(consolidation_candidates)}"
+        )
+        if "TENSION_SURFACED" in inv070b_diagnosis:
+            print(
+                f"[GRAPH:MI_ABLATION] ⚠ INV_070b TENSION: selectivity is poor "
+                f"global predictor but retains partial validity at intra-layer "
+                f"scale — monosemanticity neither cleanly rejected nor accepted"
+            )
+
+        return result
 
     def avalanche_from_feed(self, new_edges, recent_feed_count=1,
                             degree_threshold=None, max_depth=None):
@@ -8262,6 +10560,1392 @@ def sne_time_series_analysis(sne_history, drop_threshold=0.15, window=3):
         "transition_imminent": transition_imminent,
         "inv073_summary": inv073_summary,
     }
+
+
+# ─── Thermodynamic Cost Scorer (Joint Accuracy-Energy Constraint) ─────────────
+# Penalizes knowledge graph edges where information gain is asserted without
+# corresponding dissipation cost, flagging claims that treat accuracy and energy
+# as separable.  This enforces the joint accuracy-cost constraint at the
+# epistemic structure level, preventing the graph from accumulating
+# thermodynamically inadmissible inference chains.
+#
+# Following the paper's central argument: in neural systems (and by extension,
+# in any physical inference system), decoding accuracy and energy cost are
+# jointly constrained by the thermodynamics of the underlying substrate.  The
+# Brownian particle model shows that optimal decoding strategies minimize a
+# joint functional of accuracy and dissipation, NOT accuracy alone.  Any claim
+# that accuracy can be improved without paying a corresponding dissipation cost
+# violates the second law (entropy production is the conserved quantity under
+# temporal translation of the decoding process — Noether: Information
+# Thermodynamics, status: rigorous).
+#
+# The scorer checks each edge for:
+#   1. Information gain assertion: does the edge claim improved accuracy,
+#      confirmation, or new information about a target node?
+#   2. Dissipation cost annotation: does the edge or its context window
+#      mention energy cost, entropy production, dissipation, or resource
+#      expenditure associated with obtaining that information?
+#   3. Separability assumption: does the text treat accuracy and energy as
+#      independent quantities (the precise error the paper argues against)?
+#
+# Edges that assert information gain without dissipation cost are flagged as
+# "thermodynamically inadmissible" — they represent inference steps that
+# implicitly assume accuracy and energy are separable, violating the joint
+# constraint the paper establishes.
+#
+# CHALLENGE (INV_087): If the Brownian particle model's optimal decoding
+# strategy can be derived purely from equilibrium statistical mechanics in
+# certain limiting regimes (e.g., quasi-static / near-equilibrium), the claim
+# that MaxRL's thermodynamic correction is UNIVERSALLY necessary (not just a
+# special-case refinement) comes under pressure.  The scorer annotates edges
+# with an inv087_flag that surfaces this tension: edges in near-equilibrium
+# contexts may be admissible even without explicit dissipation cost, because
+# the equilibrium limit makes the cost vanishingly small.
+#
+# NOETHER_ROW: Information Thermodynamics
+# NOETHER_STATUS: rigorous
+# NOETHER_NOTE: The paper grounds the symmetry between information-theoretic
+# and thermodynamic quantities in non-equilibrium statistical mechanics,
+# confirming that entropy production is the conserved quantity under temporal
+# translation of the decoding process, strengthening the rigorous assignment.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Patterns detecting information gain assertions
+_INFORMATION_GAIN_PATTERNS = [
+    re.compile(r'\b(?:confirm|support|verif|validat|establish|demonstrat)\w*\b', re.I),
+    re.compile(r'\b(?:information\s+gain|mutual\s+information|accuracy\s+improv)', re.I),
+    re.compile(r'\b(?:decoding\s+accuracy|inference\s+accuracy|prediction\s+accuracy)', re.I),
+    re.compile(r'\b(?:new\s+evidence|new\s+information|additional\s+data)', re.I),
+    re.compile(r'\b(?:reduces?\s+uncertainty|uncertainty\s+reduction|entropy\s+decrease)', re.I),
+    re.compile(r'\b(?:learn\w*|discover\w*|reveal\w*|uncover\w*)\b', re.I),
+    re.compile(r'\b(?:signal[-\s]?to[-\s]?noise|SNR\s+improv|precision\s+increase)', re.I),
+    re.compile(r'\b(?:bit\w*\s+of\s+information|nats?\s+of\s+information)', re.I),
+]
+
+# Patterns detecting dissipation cost acknowledgement
+_DISSIPATION_COST_PATTERNS = [
+    re.compile(r'\b(?:dissipat\w*|entropy\s+produc\w*|heat\s+generat\w*)', re.I),
+    re.compile(r'\b(?:energy\s+cost|metabolic\s+cost|thermodynamic\s+cost)', re.I),
+    re.compile(r'\b(?:free\s+energy|work\s+expenditure|ATP\s+consumption)', re.I),
+    re.compile(r'\b(?:Landauer\w*\s+(?:bound|limit|principle|cost|erasure))', re.I),
+    re.compile(r'\b(?:irreversib\w*|non[-\s]?equilibrium|out[-\s]?of[-\s]?equilibrium)', re.I),
+    re.compile(r'\b(?:resource\s+(?:cost|expenditure|consumption|budget))', re.I),
+    re.compile(r'\b(?:computational\s+cost|processing\s+cost|sampling\s+cost)', re.I),
+    re.compile(r'\b(?:k[_]?B\s*T|thermal\s+energy|thermal\s+fluctuation)', re.I),
+    re.compile(r'\b(?:entropy\s+increase|second\s+law|2nd\s+law)', re.I),
+    re.compile(r'\b(?:spike\s+cost|firing\s+rate\s+cost|neural\s+energy)', re.I),
+]
+
+# Patterns detecting explicit separability assumption (accuracy independent of energy)
+_SEPARABILITY_PATTERNS = [
+    re.compile(r'\b(?:independent(?:ly)?\s+of\s+(?:energy|cost|dissipation|resource))', re.I),
+    re.compile(r'\b(?:without\s+(?:additional\s+)?(?:energy|cost|dissipation))', re.I),
+    re.compile(r'\b(?:cost[-\s]?free|energy[-\s]?free|zero[-\s]?cost)\s+(?:improvement|gain|accuracy)', re.I),
+    re.compile(r'\b(?:accuracy\s+(?:alone|only|purely|solely))', re.I),
+    re.compile(r'\b(?:information\s+(?:without|independent\s+of)\s+(?:energy|thermo))', re.I),
+    re.compile(r'\b(?:decouple\w*|separat\w*)\s+.*?\b(?:accuracy|information)\b.*?\b(?:energy|cost|dissipation)\b', re.I),
+    re.compile(r'\b(?:accuracy|information)\b.*?\b(?:decouple\w*|separat\w*)\b.*?\b(?:energy|cost|dissipation)\b', re.I),
+]
+
+# Patterns detecting near-equilibrium context (where dissipation cost may vanish)
+_NEAR_EQUILIBRIUM_PATTERNS = [
+    re.compile(r'\b(?:equilibrium|quasi[-\s]?static|reversible\s+limit|adiabatic\s+limit)', re.I),
+    re.compile(r'\b(?:near[-\s]?equilibrium|close\s+to\s+equilibrium|weakly\s+driven)', re.I),
+    re.compile(r'\b(?:linear\s+response|Onsager|fluctuation[-\s]?dissipation\s+theorem)', re.I),
+    re.compile(r'\b(?:zero[-\s]?temperature\s+limit|T\s*→\s*0|low[-\s]?temperature)', re.I),
+    re.compile(r'\b(?:slow\s+driving|slow\s+protocol|quasistatic\s+protocol)', re.I),
+]
+
+
+# ─── Entropic Penalization (Temperature-Scaled KL Regularization) ─────────────
+# Adds a Langevin-type noise floor to graph traversal scoring, preventing
+# FREED's epistemic loop from freezing on locally consistent but globally
+# suboptimal invariant clusters (metastable basins).
+#
+# Following the paper's analysis of Wasserstein gradient flows with entropic
+# penalization: when the objective function contains an entropic term
+# F_ε[ρ] = F[ρ] + ε ∫ ρ log ρ, the particle system becomes a Langevin
+# diffusion process with temperature ε.  Without this term, gradient flows
+# get trapped in metastable basins with arbitrarily long exit times.  With
+# it, the exit time from a metastable basin of depth ΔF scales as
+# exp(ΔF / ε) — finite and controllable via the temperature parameter.
+#
+# In the knowledge graph traversal context:
+#   - The "objective" is the node/edge score used to rank traversal targets
+#   - "Metastable basins" are clusters of mutually-confirming invariants that
+#     appear locally coherent but are globally suboptimal (e.g., all evidence
+#     from a single paradigm, all confirmations without challenges)
+#   - The entropic penalty adds a KL divergence term D_KL(p ‖ p_uniform) to
+#     the score, penalizing distributions that concentrate too sharply on a
+#     small number of nodes — the temperature ε controls how strongly
+#     concentration is penalized
+#
+# The penalized score for node i is:
+#   s_penalized(i) = s_raw(i) - ε · log(p(i) / p_uniform(i))
+#
+# where p(i) is the current traversal distribution (how much attention/weight
+# node i receives), p_uniform(i) = 1/n is the maximum-entropy reference, and
+# ε is the temperature controlling the regularization strength.
+#
+# Properties:
+#   - ε = 0: no regularization, pure greedy traversal (metastable trapping)
+#   - ε → ∞: uniform exploration regardless of scores (no exploitation)
+#   - ε ∈ (0, 1]: balanced exploration-exploitation with guaranteed finite
+#     exit times from metastable clusters
+#   - The penalty is largest for nodes with high concentration (p(i) >> 1/n)
+#     and smallest (negative = bonus) for under-explored nodes (p(i) << 1/n)
+#
+# CHALLENGE (O44): The paper proves this for finite-dimensional particle
+# systems and a simple class of mean-field models.  The extension to
+# FREED's knowledge graph (a discrete, non-Euclidean structure) replaces
+# the Brownian noise term with a KL penalty on the traversal distribution,
+# which is the discrete analog of the Langevin diffusion's entropy term.
+# Whether the metastable exit-time scaling exp(ΔF/ε) transfers exactly
+# to the graph setting depends on the spectral gap of the graph Laplacian
+# (computed by wasserstein_laplace_beltrami_eigenspectrum) — when λ₁ > 0,
+# the discrete analog holds with exit time ~ exp(ΔF / (ε · λ₁)).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def entropic_penalized_scores(raw_scores, visit_counts=None, temperature=0.1,
+                               total_visits=None):
+    # type: (List[float], Optional[List[int]], float, Optional[int]) -> dict
+    """
+    Apply temperature-scaled KL regularization (entropic penalization) to a
+    vector of raw node/edge scores, preventing traversal from freezing in
+    locally coherent but globally metastable clusters.
+
+    The penalized score for node i is:
+        s_penalized(i) = s_raw(i) - ε · log(p(i) / p_uniform(i))
+
+    where:
+      - s_raw(i) is the original score (higher = more attractive)
+      - p(i) = visit_count(i) / total_visits is the empirical traversal
+        distribution (how often node i has been visited/scored)
+      - p_uniform(i) = 1/n is the maximum-entropy reference distribution
+      - ε (temperature) controls regularization strength
+
+    The KL penalty log(p(i) / p_uniform(i)) is positive for over-visited
+    nodes (reducing their score) and negative for under-visited nodes
+    (boosting their score), ensuring that the traversal explores globally
+    rather than concentrating on a locally coherent cluster.
+
+    Parameters
+    ----------
+    raw_scores : list of float
+        Raw scores for each node/edge (higher = more attractive).
+    visit_counts : list of int or None
+        Number of times each node has been visited/traversed/scored.
+        If None, all nodes are assumed to have 1 visit (uniform prior),
+        yielding zero KL penalty (scores unchanged except for normalization).
+    temperature : float
+        Entropic penalization temperature ε (default 0.1).
+        - ε = 0: no regularization (pure greedy, metastable trapping risk)
+        - ε ∈ (0, 0.5]: moderate regularization (recommended operating range)
+        - ε > 1.0: strong regularization (near-uniform exploration)
+    total_visits : int or None
+        Total number of visits across all nodes.  If None, computed as
+        sum(visit_counts).
+
+    Returns
+    -------
+    dict
+        {
+            "penalized_scores": list of float — regularized scores,
+            "raw_scores": list of float — original scores (for comparison),
+            "kl_penalties": list of float — per-node KL penalty values,
+            "total_kl_divergence": float — D_KL(p_visit ‖ p_uniform),
+            "temperature": float — ε used,
+            "traversal_distribution": list of float — p(i) = visits/total,
+            "uniform_reference": list of float — p_uniform(i) = 1/n,
+            "concentration_ratio": float — max(p) / min(p), measuring how
+                concentrated the traversal distribution is (1.0 = uniform,
+                >>1 = concentrated on few nodes = metastable risk),
+            "metastable_risk": str — "none", "low", "moderate", "high",
+            "effective_exploration_fraction": float — fraction of nodes with
+                p(i) > 0.5 / n (effectively explored),
+            "ranking_changed": bool — True if penalization changed the
+                ranking order of the top node,
+            "top_node_before": int — index of highest raw score,
+            "top_node_after": int — index of highest penalized score,
+            "o44_entropic_note": str — diagnostic for O44 challenge,
+        }
+    """
+    n = len(raw_scores)
+    if n == 0:
+        return {
+            "penalized_scores": [],
+            "raw_scores": [],
+            "kl_penalties": [],
+            "total_kl_divergence": 0.0,
+            "temperature": temperature,
+            "traversal_distribution": [],
+            "uniform_reference": [],
+            "concentration_ratio": 1.0,
+            "metastable_risk": "none",
+            "effective_exploration_fraction": 0.0,
+            "ranking_changed": False,
+            "top_node_before": -1,
+            "top_node_after": -1,
+            "o44_entropic_note": "empty_score_vector",
+        }
+
+    # Build traversal distribution from visit counts
+    if visit_counts is None:
+        visits = [1] * n
+    else:
+        visits = list(visit_counts)
+        # Ensure minimum 1 visit (Laplace smoothing for log stability)
+        visits = [max(v, 1) for v in visits]
+
+    if total_visits is None:
+        total_v = sum(visits)
+    else:
+        total_v = max(total_visits, sum(visits))
+
+    if total_v <= 0:
+        total_v = n  # fallback
+
+    # Traversal distribution p(i) and uniform reference
+    p_visit = [float(v) / float(total_v) for v in visits]
+    p_uniform = [1.0 / float(n)] * n
+
+    # KL penalty per node: log(p(i) / p_uniform(i))
+    # = log(p(i)) - log(1/n) = log(p(i)) + log(n)
+    # For numerical stability, clamp p(i) away from 0
+    eps_clamp = 1e-15
+    kl_penalties = []  # type: List[float]
+    for i in range(n):
+        pi = max(p_visit[i], eps_clamp)
+        qi = p_uniform[i]  # = 1/n, always > 0
+        kl_penalties.append(math.log(pi / qi))
+
+    # Total KL divergence: D_KL(p_visit ‖ p_uniform) = Σ p(i) log(p(i)/q(i))
+    total_kl = 0.0
+    for i in range(n):
+        pi = max(p_visit[i], eps_clamp)
+        qi = p_uniform[i]
+        total_kl += pi * math.log(pi / qi)
+    total_kl = max(0.0, total_kl)
+
+    # Penalized scores: s_penalized(i) = s_raw(i) - ε · kl_penalty(i)
+    penalized = [
+        raw_scores[i] - temperature * kl_penalties[i]
+        for i in range(n)
+    ]
+
+    # Concentration ratio: max(p) / min(p)
+    p_min = min(p_visit)
+    p_max = max(p_visit)
+    if p_min > eps_clamp:
+        concentration_ratio = p_max / p_min
+    else:
+        concentration_ratio = float('inf')
+
+    # Metastable risk assessment
+    if concentration_ratio <= 2.0:
+        metastable_risk = "none"
+    elif concentration_ratio <= 5.0:
+        metastable_risk = "low"
+    elif concentration_ratio <= 20.0:
+        metastable_risk = "moderate"
+    else:
+        metastable_risk = "high"
+
+    # Effective exploration fraction: nodes with p(i) > 0.5/n
+    exploration_threshold = 0.5 / float(n)
+    n_explored = sum(1 for pi in p_visit if pi > exploration_threshold)
+    exploration_fraction = float(n_explored) / float(n)
+
+    # Ranking change detection
+    top_before = max(range(n), key=lambda i: raw_scores[i])
+    top_after = max(range(n), key=lambda i: penalized[i])
+    ranking_changed = top_before != top_after
+
+    # O44 diagnostic
+    if metastable_risk in ("moderate", "high"):
+        o44_note = (
+            f"entropic_penalization_active:temperature={temperature}:"
+            f"total_kl={total_kl:.6f}:concentration={concentration_ratio:.2f}:"
+            f"metastable_risk={metastable_risk}:"
+            f"exit_time_scales_as_exp(delta_F/{temperature}):"
+            f"discrete_langevin_analog:spectral_gap_dependent"
+        )
+    else:
+        o44_note = (
+            f"entropic_penalization_active:temperature={temperature}:"
+            f"total_kl={total_kl:.6f}:concentration={concentration_ratio:.2f}:"
+            f"traversal_well_distributed:metastable_trapping_unlikely"
+        )
+
+    return {
+        "penalized_scores": [round(s, 10) for s in penalized],
+        "raw_scores": list(raw_scores),
+        "kl_penalties": [round(kl, 10) for kl in kl_penalties],
+        "total_kl_divergence": round(total_kl, 10),
+        "temperature": temperature,
+        "traversal_distribution": [round(p, 10) for p in p_visit],
+        "uniform_reference": [round(p, 10) for p in p_uniform],
+        "concentration_ratio": round(concentration_ratio, 4) if concentration_ratio != float('inf') else float('inf'),
+        "metastable_risk": metastable_risk,
+        "effective_exploration_fraction": round(exploration_fraction, 4),
+        "ranking_changed": ranking_changed,
+        "top_node_before": top_before,
+        "top_node_after": top_after,
+        "o44_entropic_note": o44_note,
+    }
+
+
+def entropic_penalized_node_ranking(node_ids, raw_scores, visit_counts=None,
+                                     temperature=0.1, top_k=None):
+    # type: (List[str], List[float], Optional[List[int]], float, Optional[int]) -> dict
+    """
+    Rank knowledge graph nodes with entropic penalization, returning
+    the reordered ranking and diagnostic metadata.
+
+    This is the primary integration point for preventing metastable
+    trapping in the epistemic loop: call this instead of a raw sort
+    whenever nodes are ranked for traversal, scoring, or prioritization.
+
+    Parameters
+    ----------
+    node_ids : list of str
+        Node identifiers (same order as raw_scores).
+    raw_scores : list of float
+        Raw scores for each node (higher = more attractive).
+    visit_counts : list of int or None
+        Per-node visit counts. If None, uniform (no penalty).
+    temperature : float
+        Entropic temperature ε (default 0.1).
+    top_k : int or None
+        If provided, return only the top k nodes after penalization.
+
+    Returns
+    -------
+    dict
+        {
+            "ranked_nodes": list of dict — nodes in penalized-score order:
+                {"node_id": str, "penalized_score": float, "raw_score": float,
+                 "kl_penalty": float, "visits": int, "rank": int},
+            "penalization_result": dict — full entropic_penalized_scores output,
+            "ranking_permutation": list of int — indices mapping original
+                order to penalized order,
+            "n_rank_changes": int — number of nodes whose rank changed,
+        }
+    """
+    n = len(node_ids)
+    if n == 0 or n != len(raw_scores):
+        return {
+            "ranked_nodes": [],
+            "penalization_result": entropic_penalized_scores([], temperature=temperature),
+            "ranking_permutation": [],
+            "n_rank_changes": 0,
+        }
+
+    pen_result = entropic_penalized_scores(
+        raw_scores, visit_counts=visit_counts, temperature=temperature
+    )
+    penalized = pen_result["penalized_scores"]
+    kl_pens = pen_result["kl_penalties"]
+    visits_used = visit_counts if visit_counts is not None else [1] * n
+
+    # Build index-sorted order by penalized score (descending)
+    indices = sorted(range(n), key=lambda i: penalized[i], reverse=True)
+
+    # Also compute raw ranking for comparison
+    raw_indices = sorted(range(n), key=lambda i: raw_scores[i], reverse=True)
+    raw_rank_of = {idx: rank for rank, idx in enumerate(raw_indices)}
+
+    ranked = []  # type: List[dict]
+    for rank, idx in enumerate(indices):
+        entry = {
+            "node_id": node_ids[idx],
+            "penalized_score": round(penalized[idx], 10),
+            "raw_score": round(raw_scores[idx], 10),
+            "kl_penalty": round(kl_pens[idx], 10),
+            "visits": visits_used[idx] if idx < len(visits_used) else 1,
+            "rank": rank,
+            "raw_rank": raw_rank_of.get(idx, rank),
+        }
+        ranked.append(entry)
+
+    # Count rank changes
+    n_changes = sum(
+        1 for r in ranked if r["rank"] != r["raw_rank"]
+    )
+
+    if top_k is not None and top_k < len(ranked):
+        ranked = ranked[:top_k]
+
+    return {
+        "ranked_nodes": ranked,
+        "penalization_result": pen_result,
+        "ranking_permutation": indices,
+        "n_rank_changes": n_changes,
+    }
+
+
+def score_thermodynamic_cost(edge, text_window="", full_text=""):
+    # type: (dict, str, str) -> dict
+    """
+    Score a knowledge graph edge for thermodynamic admissibility: whether
+    asserted information gain is accompanied by corresponding dissipation
+    cost, or whether accuracy and energy are implicitly treated as separable.
+
+    Following the paper's central result that neural decoding accuracy and
+    energy cost are jointly constrained by non-equilibrium thermodynamics
+    (entropy production as conserved quantity under temporal translation of
+    the decoding process), this scorer penalizes edges that assert information
+    gain without acknowledging the corresponding dissipation cost.
+
+    Parameters
+    ----------
+    edge : dict
+        A knowledge graph edge dict (as produced by extract_edges / record_feed).
+        Must have at least 'type' and 'context' fields.
+    text_window : str
+        Additional text window around the edge (e.g., kernel output excerpt).
+        Used to search for dissipation cost language beyond the edge's own
+        context field.
+    full_text : str
+        Full kernel output text for broader context search (e.g., the entire
+        FEED output).  Searched when neither edge context nor text_window
+        contain dissipation cost language.
+
+    Returns
+    -------
+    dict
+        {
+            "is_thermodynamically_admissible": bool — True if the edge either
+                (a) does not assert information gain, or (b) asserts gain AND
+                acknowledges dissipation cost, or (c) operates in a near-
+                equilibrium regime where dissipation cost is negligible,
+            "information_gain_asserted": bool — True if the edge claims
+                improved accuracy / new information,
+            "dissipation_cost_acknowledged": bool — True if the edge or
+                surrounding text mentions energy/dissipation cost,
+            "separability_assumed": bool — True if the text explicitly treats
+                accuracy and energy as independent (strongest violation),
+            "near_equilibrium_context": bool — True if the context suggests
+                a near-equilibrium regime where the joint constraint relaxes,
+            "gain_signals": list of str — matched information gain patterns,
+            "cost_signals": list of str — matched dissipation cost patterns,
+            "separability_signals": list of str — matched separability patterns,
+            "equilibrium_signals": list of str — matched equilibrium patterns,
+            "penalty": float — thermodynamic inadmissibility penalty in [0, 1]:
+                0.0 = fully admissible (cost acknowledged or no gain asserted),
+                0.5 = gain without cost but in near-equilibrium context,
+                0.75 = gain without cost, no equilibrium excuse,
+                1.0 = explicit separability assumption (strongest violation),
+            "admissibility_label": str — "admissible", "marginal",
+                "inadmissible", or "separability_violation",
+            "inv087_flag": str — challenge annotation for INV_087,
+            "noether_note": str — Noether conservation status,
+            "recommendation": str — actionable guidance for the edge,
+        }
+    """
+    edge_type = edge.get("type", "")
+    edge_context = edge.get("context", "")
+
+    # Build the combined text to search (edge context + text_window + full_text)
+    # Priority: edge context (most specific) > text_window > full_text (least specific)
+    local_text = edge_context + " " + text_window
+    broad_text = local_text + " " + full_text
+
+    # ── Detect information gain assertion ────────────────────────────────
+    gain_signals = []  # type: List[str]
+
+    # Edge type itself can assert gain
+    if edge_type in ("confirms", "supports", "extends", "advances"):
+        gain_signals.append("edge_type:" + edge_type)
+
+    for pat in _INFORMATION_GAIN_PATTERNS:
+        m = pat.search(local_text)
+        if m:
+            gain_signals.append(m.group(0)[:80])
+
+    information_gain_asserted = len(gain_signals) > 0
+
+    # ── Detect dissipation cost acknowledgement ──────────────────────────
+    cost_signals = []  # type: List[str]
+
+    # Search local text first, then broaden to full text
+    for pat in _DISSIPATION_COST_PATTERNS:
+        m = pat.search(local_text)
+        if m:
+            cost_signals.append(m.group(0)[:80])
+
+    # If no cost found locally, check broader context
+    if not cost_signals:
+        for pat in _DISSIPATION_COST_PATTERNS:
+            m = pat.search(broad_text)
+            if m:
+                cost_signals.append("broad:" + m.group(0)[:75])
+
+    dissipation_cost_acknowledged = len(cost_signals) > 0
+
+    # ── Detect explicit separability assumption ──────────────────────────
+    separability_signals = []  # type: List[str]
+    for pat in _SEPARABILITY_PATTERNS:
+        m = pat.search(broad_text)
+        if m:
+            separability_signals.append(m.group(0)[:80])
+
+    separability_assumed = len(separability_signals) > 0
+
+    # ── Detect near-equilibrium context ──────────────────────────────────
+    equilibrium_signals = []  # type: List[str]
+    for pat in _NEAR_EQUILIBRIUM_PATTERNS:
+        m = pat.search(broad_text)
+        if m:
+            equilibrium_signals.append(m.group(0)[:80])
+
+    near_equilibrium = len(equilibrium_signals) > 0
+
+    # ── Compute penalty and admissibility ────────────────────────────────
+    if separability_assumed:
+        # Strongest violation: explicitly treating accuracy and energy
+        # as separable, contradicting the paper's central result
+        penalty = 1.0
+        admissibility_label = "separability_violation"
+        is_admissible = False
+    elif information_gain_asserted and not dissipation_cost_acknowledged:
+        if near_equilibrium:
+            # Gain without cost, but in a regime where cost is negligible
+            # — marginal admissibility (the equilibrium limit is a valid
+            # special case, but the paper argues against universalizing it)
+            penalty = 0.5
+            admissibility_label = "marginal"
+            is_admissible = False  # still flagged, but with lower penalty
+        else:
+            # Gain without cost, no equilibrium excuse
+            penalty = 0.75
+            admissibility_label = "inadmissible"
+            is_admissible = False
+    elif information_gain_asserted and dissipation_cost_acknowledged:
+        # Gain with cost acknowledged — fully admissible
+        penalty = 0.0
+        admissibility_label = "admissible"
+        is_admissible = True
+    else:
+        # No information gain asserted — nothing to penalize
+        penalty = 0.0
+        admissibility_label = "admissible"
+        is_admissible = True
+
+    # ── INV_087 challenge flag ───────────────────────────────────────────
+    if near_equilibrium and not dissipation_cost_acknowledged:
+        inv087_flag = (
+            "EQUILIBRIUM_REGIME_DETECTED:"
+            "optimal_decoding_may_derive_from_equilibrium_statmech:"
+            "MaxRL_thermodynamic_correction_may_be_refinement_not_universal:"
+            "CHALLENGE_INV_087_PRESSURE"
+        )
+    elif separability_assumed:
+        inv087_flag = (
+            "SEPARABILITY_ASSUMED:accuracy_energy_treated_as_independent:"
+            "directly_contradicts_joint_constraint:"
+            "if_equilibrium_derivation_exists_separability_is_limiting_case_not_error:"
+            "INV_087_relevance_high"
+        )
+    elif not information_gain_asserted:
+        inv087_flag = "not_applicable:no_information_gain_asserted"
+    elif dissipation_cost_acknowledged:
+        inv087_flag = (
+            "cost_acknowledged:joint_constraint_respected:"
+            "INV_087_not_triggered"
+        )
+    else:
+        inv087_flag = (
+            "gain_without_cost:non_equilibrium_context:"
+            "thermodynamic_correction_required:INV_087_supports_necessity"
+        )
+
+    # ── Noether note ─────────────────────────────────────────────────────
+    noether_note = (
+        "Information Thermodynamics (rigorous): entropy production is the "
+        "conserved quantity under temporal translation of the decoding "
+        "process. Joint accuracy-cost constraint follows from non-equilibrium "
+        "statistical mechanics. Edges asserting information gain without "
+        "dissipation cost violate this conservation law unless operating "
+        "in the equilibrium (zero-entropy-production) limit."
+    )
+
+    # ── Recommendation ───────────────────────────────────────────────────
+    if admissibility_label == "separability_violation":
+        recommendation = (
+            "REJECT: This edge explicitly treats accuracy and energy as "
+            "separable, violating the joint constraint established by "
+            "non-equilibrium information thermodynamics. Rewrite to "
+            "acknowledge the dissipation cost of the claimed information "
+            "gain, or demonstrate that the equilibrium limit applies."
+        )
+    elif admissibility_label == "inadmissible":
+        recommendation = (
+            "FLAG: This edge asserts information gain without acknowledging "
+            "dissipation cost. Add dissipation cost annotation (energy cost, "
+            "entropy production, resource expenditure) to the edge context, "
+            "or explain why the equilibrium limit makes cost negligible."
+        )
+    elif admissibility_label == "marginal":
+        recommendation = (
+            "MONITOR: This edge asserts information gain in a near-equilibrium "
+            "context where dissipation cost may be negligible. The joint "
+            "constraint is weakened but not absent. Verify that the "
+            "equilibrium assumption holds for this specific claim (INV_087)."
+        )
+    else:
+        recommendation = (
+            "OK: Edge is thermodynamically admissible — either no information "
+            "gain is asserted, or the dissipation cost is acknowledged."
+        )
+
+    return {
+        "is_thermodynamically_admissible": is_admissible,
+        "information_gain_asserted": information_gain_asserted,
+        "dissipation_cost_acknowledged": dissipation_cost_acknowledged,
+        "separability_assumed": separability_assumed,
+        "near_equilibrium_context": near_equilibrium,
+        "gain_signals": gain_signals,
+        "cost_signals": cost_signals,
+        "separability_signals": separability_signals,
+        "equilibrium_signals": equilibrium_signals,
+        "penalty": round(penalty, 4),
+        "admissibility_label": admissibility_label,
+        "inv087_flag": inv087_flag,
+        "noether_note": noether_note,
+        "recommendation": recommendation,
+    }
+
+
+def score_thermodynamic_cost_batch(edges, full_text=""):
+    # type: (list, str) -> dict
+    """
+    Score a batch of edges for thermodynamic admissibility, producing
+    aggregate statistics and flagging the worst offenders.
+
+    This is the main entry point for enforcing the joint accuracy-cost
+    constraint across an entire FEED batch or graph snapshot.
+
+    Parameters
+    ----------
+    edges : list of dict
+        Knowledge graph edges to score.
+    full_text : str
+        Full kernel output text for broad context search.
+
+    Returns
+    -------
+    dict
+        {
+            "n_edges_scored": int,
+            "n_admissible": int,
+            "n_marginal": int,
+            "n_inadmissible": int,
+            "n_separability_violations": int,
+            "admissibility_ratio": float — n_admissible / n_scored,
+            "mean_penalty": float — average penalty across all edges,
+            "max_penalty": float — worst penalty,
+            "inadmissible_edges": list of dict — edges with penalty > 0,
+                each augmented with the thermodynamic score,
+            "chain_inadmissibility_risk": bool — True if > 30% of edges
+                are inadmissible (inference chain is thermodynamically
+                suspect as a whole),
+            "inv087_summary": str — aggregate challenge status,
+            "noether_status": str — "rigorous" (per Noether table),
+            "timestamp": str,
+        }
+    """
+    ts = datetime.now(timezone.utc).isoformat()
+
+    if not edges:
+        return {
+            "n_edges_scored": 0,
+            "n_admissible": 0,
+            "n_marginal": 0,
+            "n_inadmissible": 0,
+            "n_separability_violations": 0,
+            "admissibility_ratio": 1.0,
+            "mean_penalty": 0.0,
+            "max_penalty": 0.0,
+            "inadmissible_edges": [],
+            "chain_inadmissibility_risk": False,
+            "inv087_summary": "no_edges:nothing_to_score",
+            "noether_status": "rigorous",
+            "timestamp": ts,
+        }
+
+    n_admissible = 0
+    n_marginal = 0
+    n_inadmissible = 0
+    n_separability = 0
+    penalties = []  # type: List[float]
+    inadmissible_edges = []  # type: List[dict]
+    n_equilibrium = 0
+
+    for e in edges:
+        score = score_thermodynamic_cost(e, full_text=full_text)
+        penalty = score["penalty"]
+        penalties.append(penalty)
+
+        label = score["admissibility_label"]
+        if label == "admissible":
+            n_admissible += 1
+        elif label == "marginal":
+            n_marginal += 1
+            inadmissible_edges.append({
+                "edge": e,
+                "thermodynamic_score": score,
+            })
+        elif label == "inadmissible":
+            n_inadmissible += 1
+            inadmissible_edges.append({
+                "edge": e,
+                "thermodynamic_score": score,
+            })
+        elif label == "separability_violation":
+            n_separability += 1
+            inadmissible_edges.append({
+                "edge": e,
+                "thermodynamic_score": score,
+            })
+
+        if score["near_equilibrium_context"]:
+            n_equilibrium += 1
+
+    n_scored = len(edges)
+    admissibility_ratio = float(n_admissible) / float(max(n_scored, 1))
+    mean_penalty = sum(penalties) / len(penalties) if penalties else 0.0
+    max_penalty = max(penalties) if penalties else 0.0
+
+    # Chain inadmissibility: if > 30% of edges are inadmissible,
+    # the inference chain as a whole is thermodynamically suspect
+    n_flagged = n_marginal + n_inadmissible + n_separability
+    chain_risk = (float(n_flagged) / float(max(n_scored, 1))) > 0.3
+
+    # INV_087 aggregate summary
+    if n_equilibrium > 0 and n_equilibrium >= n_scored * 0.5:
+        inv087_summary = (
+            f"EQUILIBRIUM_DOMINANT:{n_equilibrium}/{n_scored}_edges_in_equilibrium_context:"
+            "MaxRL_correction_may_be_special_case_refinement:"
+            "CHALLENGE_INV_087_STRONG"
+        )
+    elif n_separability > 0:
+        inv087_summary = (
+            f"SEPARABILITY_VIOLATIONS:{n_separability}/{n_scored}:"
+            "joint_constraint_explicitly_violated:"
+            "thermodynamic_correction_clearly_needed:"
+            "INV_087_necessity_supported"
+        )
+    elif n_inadmissible > 0:
+        inv087_summary = (
+            f"INADMISSIBLE_EDGES:{n_inadmissible}/{n_scored}:"
+            "gain_without_cost_detected:"
+            "thermodynamic_correction_required_for_these_edges"
+        )
+    else:
+        inv087_summary = (
+            f"ALL_ADMISSIBLE:{n_admissible}/{n_scored}:"
+            "joint_accuracy_cost_constraint_respected"
+        )
+
+    result = {
+        "n_edges_scored": n_scored,
+        "n_admissible": n_admissible,
+        "n_marginal": n_marginal,
+        "n_inadmissible": n_inadmissible,
+        "n_separability_violations": n_separability,
+        "admissibility_ratio": round(admissibility_ratio, 4),
+        "mean_penalty": round(mean_penalty, 4),
+        "max_penalty": round(max_penalty, 4),
+        "inadmissible_edges": inadmissible_edges,
+        "chain_inadmissibility_risk": chain_risk,
+        "inv087_summary": inv087_summary,
+        "noether_status": "rigorous",
+        "timestamp": ts,
+    }
+
+    # Log summary
+    if n_flagged > 0:
+        print(
+            f"[GRAPH:THERMODYNAMIC_COST] {n_scored} edge(s) scored — "
+            f"admissible={n_admissible}, marginal={n_marginal}, "
+            f"inadmissible={n_inadmissible}, "
+            f"separability_violations={n_separability}, "
+            f"mean_penalty={mean_penalty:.4f}, "
+            f"chain_risk={chain_risk}"
+        )
+        if chain_risk:
+            print(
+                f"[GRAPH:THERMODYNAMIC_COST] 🚨 CHAIN INADMISSIBILITY — "
+                f">{30}% of edges violate joint accuracy-cost constraint. "
+                f"Inference chain is thermodynamically suspect. "
+                f"(Noether: Information Thermodynamics, status: rigorous)"
+            )
+        for ie in inadmissible_edges[:3]:
+            ts_score = ie["thermodynamic_score"]
+            edge_to = ie["edge"].get("to", "?")
+            print(
+                f"  ⚠ →{edge_to}: {ts_score['admissibility_label']}, "
+                f"penalty={ts_score['penalty']}, "
+                f"gain={ts_score['information_gain_asserted']}, "
+                f"cost={ts_score['dissipation_cost_acknowledged']}"
+            )
+        if len(inadmissible_edges) > 3:
+            print(
+                f"  ... and {len(inadmissible_edges) - 3} more flagged edge(s)"
+            )
+
+    return result
+
+
+# ─── Topology-Sensitivity Scoring Pass ────────────────────────────────────────
+# Flags knowledge graph nodes whose claimed universality class or critical
+# exponent was derived under symmetric, local-only interaction assumptions,
+# marking them for re-evaluation under long-range or asymmetric topologies.
+#
+# Motivation (INV_073 challenge): The sandpile model study demonstrates that
+# SOC universality class exponents are NOT invariant under topological
+# modification — breaking the spatial symmetry of collapse rules (asymmetric
+# toppling) or adding long-range connections shifts the power-law exponent,
+# yielding distinct universality classes under different network architectures.
+# This means the genome's formulation of ridge navigation as targeting a single
+# canonical critical state is underdetermined: the target universality class
+# depends on the interaction geometry, and the Noether assignment for SOC must
+# be qualified by topology.
+#
+# NOETHER_ROW: Self-Organized Criticality
+# NOETHER_STATUS: review
+# NOETHER_NOTE: SOC's conservation structure (avalanche size scaling) is not
+# invariant under topological modification — breaking spatial symmetry of
+# collapse rules breaks the universality-class symmetry, suggesting the
+# conserved quantity is weaker than previously assumed and the Noether
+# assignment requires qualification by interaction geometry.
+#
+# The pass scans each node for:
+#   1. Universality class claims: mentions of power-law exponents, critical
+#      exponents, scaling exponents, universality class assignments.
+#   2. Symmetric/local-only assumptions: whether the derivation assumes
+#      symmetric nearest-neighbor interactions, regular lattice topology,
+#      or homogeneous coupling (the conditions under which classical
+#      universality class results were derived).
+#   3. Long-range or asymmetric topology signals: mentions of long-range
+#      connections, small-world networks, scale-free networks, asymmetric
+#      toppling, directed percolation, or heterogeneous coupling that would
+#      invalidate the symmetric-local assumption.
+#
+# Nodes where (1) and (2) are present but (3) is absent are flagged as
+# "topology_sensitive": their universality class assignment was derived
+# under assumptions that the paper shows are insufficient, and they require
+# re-evaluation under the actual interaction geometry before being treated
+# as fixed invariants in COMPARE steps.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Patterns detecting universality class / critical exponent claims
+_UNIVERSALITY_CLASS_PATTERNS = [
+    re.compile(r'\b(?:universality\s+class|universality\s+classes)\b', re.I),
+    re.compile(r'\b(?:critical\s+exponent|scaling\s+exponent|power[-\s]?law\s+exponent)\b', re.I),
+    re.compile(r'\b(?:avalanche\s+(?:size\s+)?(?:exponent|distribution|scaling))\b', re.I),
+    re.compile(r'\b(?:mean[-\s]?field\s+(?:exponent|universality|class))\b', re.I),
+    re.compile(r'\b(?:Ising\s+universality|directed\s+percolation\s+class|BTW\s+class)\b', re.I),
+    re.compile(r'\b(?:τ\s*[=≈~]\s*\d|α\s*[=≈~]\s*\d|γ\s*[=≈~]\s*\d)', re.I),
+    re.compile(r'\b(?:power[-\s]?law\s+(?:with|having)\s+exponent)\b', re.I),
+    re.compile(r'\b(?:scale[-\s]?invariant|scale[-\s]?free\s+(?:distribution|avalanche))\b', re.I),
+    re.compile(r'\b(?:self[-\s]?organized\s+criticality|SOC)\b', re.I),
+    re.compile(r'\b(?:critical\s+(?:state|point|regime|behavior|phenomenon|phase))\b', re.I),
+]
+
+# Patterns detecting symmetric / local-only interaction assumptions
+_SYMMETRIC_LOCAL_PATTERNS = [
+    re.compile(r'\b(?:nearest[-\s]?neighbor|local\s+(?:interaction|coupling|toppling|rule))\b', re.I),
+    re.compile(r'\b(?:symmetric\s+(?:toppling|interaction|coupling|rule|neighbor))\b', re.I),
+    re.compile(r'\b(?:regular\s+(?:lattice|grid|network|graph))\b', re.I),
+    re.compile(r'\b(?:square\s+lattice|cubic\s+lattice|triangular\s+lattice|honeycomb)\b', re.I),
+    re.compile(r'\b(?:homogeneous\s+(?:coupling|network|interaction|medium))\b', re.I),
+    re.compile(r'\b(?:isotropic\s+(?:interaction|coupling|toppling|diffusion))\b', re.I),
+    re.compile(r'\b(?:uniform\s+(?:neighbor|coupling|weight|connectivity))\b', re.I),
+    re.compile(r'\b(?:translation[-\s]?invariant|spatial(?:ly)?\s+(?:homogeneous|uniform|symmetric))\b', re.I),
+    re.compile(r'\b(?:periodic\s+boundary|open\s+boundary)\b', re.I),
+    re.compile(r'\b(?:d\s*=\s*[23]\s+(?:dimension|lattice)|2[dD]\s+(?:lattice|grid|sandpile))\b', re.I),
+]
+
+# Patterns detecting long-range or asymmetric topology signals
+_LONG_RANGE_ASYMMETRIC_PATTERNS = [
+    re.compile(r'\b(?:long[-\s]?range\s+(?:connection|interaction|coupling|link|edge))\b', re.I),
+    re.compile(r'\b(?:small[-\s]?world|Watts[-\s]?Strogatz)\b', re.I),
+    re.compile(r'\b(?:scale[-\s]?free\s+(?:network|graph|topology))\b', re.I),
+    re.compile(r'\b(?:Barab[áa]si[-\s]?Albert|preferential\s+attachment)\b', re.I),
+    re.compile(r'\b(?:asymmetric\s+(?:toppling|interaction|coupling|rule|collapse))\b', re.I),
+    re.compile(r'\b(?:directed\s+(?:network|graph|edge|interaction|percolation))\b', re.I),
+    re.compile(r'\b(?:heterogeneous\s+(?:coupling|network|topology|connectivity|degree))\b', re.I),
+    re.compile(r'\b(?:anisotropic\s+(?:interaction|coupling|toppling|diffusion))\b', re.I),
+    re.compile(r'\b(?:non[-\s]?local\s+(?:interaction|coupling|connection|rule))\b', re.I),
+    re.compile(r'\b(?:random\s+(?:graph|network|rewiring))\b', re.I),
+    re.compile(r'\b(?:complex\s+(?:network|topology|graph\s+structure))\b', re.I),
+    re.compile(r'\b(?:power[-\s]?law\s+degree\s+distribution|hub[-\s]?spoke|hub\s+node)\b', re.I),
+    re.compile(r'\b(?:topology[-\s]?dependent|network[-\s]?dependent|architecture[-\s]?dependent)\b', re.I),
+    re.compile(r'\b(?:spatial\s+(?:asymmetry|anisotropy|heterogeneity))\b', re.I),
+    re.compile(r'\b(?:non[-\s]?(?:symmetric|homogeneous|uniform)\s+(?:toppling|interaction|coupling))\b', re.I),
+]
+
+
+def _match_patterns(text, patterns):
+    # type: (str, list) -> List[str]
+    """Return list of matched pattern excerpts (up to 80 chars each)."""
+    matches = []  # type: List[str]
+    for pat in patterns:
+        m = pat.search(text)
+        if m:
+            matches.append(m.group(0)[:80])
+    return matches
+
+
+def topology_sensitivity_score(text):
+    # type: (str) -> dict
+    """
+    Score a text for topology-sensitivity of universality class claims.
+
+    Detects whether the text makes universality class or critical exponent
+    claims under symmetric, local-only interaction assumptions without
+    accounting for the topology-dependence demonstrated by sandpile model
+    studies (long-range connections, asymmetric toppling).
+
+    Parameters
+    ----------
+    text : str
+        Text to analyze (typically kernel output, paper abstract, edge
+        context, or invariant description).
+
+    Returns
+    -------
+    dict
+        {
+            "has_universality_claim": bool — True if text claims a
+                universality class or critical exponent,
+            "assumes_symmetric_local": bool — True if derivation assumes
+                symmetric nearest-neighbor / regular lattice interactions,
+            "acknowledges_topology_dependence": bool — True if text mentions
+                long-range, asymmetric, or heterogeneous topology effects,
+            "is_topology_sensitive": bool — True if universality claim +
+                symmetric-local assumption WITHOUT topology acknowledgement
+                → the claim needs re-evaluation under actual topology,
+            "universality_signals": list of str — matched universality patterns,
+            "symmetric_local_signals": list of str — matched assumption patterns,
+            "topology_dependence_signals": list of str — matched topology patterns,
+            "sensitivity_level": str — "none" (no universality claim),
+                "acknowledged" (topology dependence already noted),
+                "low" (universality claim but no symmetric assumption detected),
+                "moderate" (universality + symmetric assumption, but some
+                    topology awareness present),
+                "high" (universality + symmetric assumption + NO topology
+                    acknowledgement → requires re-evaluation),
+            "inv073_flag": str — challenge diagnostic for INV_073,
+            "noether_soc_note": str — Noether table annotation for SOC,
+            "re_evaluation_required": bool — True when sensitivity_level is
+                "high" — the node's universality class should NOT be treated
+                as a fixed invariant in COMPARE steps,
+            "recommendation": str — actionable guidance,
+        }
+    """
+    if not text:
+        return {
+            "has_universality_claim": False,
+            "assumes_symmetric_local": False,
+            "acknowledges_topology_dependence": False,
+            "is_topology_sensitive": False,
+            "universality_signals": [],
+            "symmetric_local_signals": [],
+            "topology_dependence_signals": [],
+            "sensitivity_level": "none",
+            "inv073_flag": "no_text:cannot_assess",
+            "noether_soc_note": "",
+            "re_evaluation_required": False,
+            "recommendation": "No text provided for topology sensitivity analysis.",
+        }
+
+    # ── Pattern matching ─────────────────────────────────────────────────
+    univ_signals = _match_patterns(text, _UNIVERSALITY_CLASS_PATTERNS)
+    sym_signals = _match_patterns(text, _SYMMETRIC_LOCAL_PATTERNS)
+    topo_signals = _match_patterns(text, _LONG_RANGE_ASYMMETRIC_PATTERNS)
+
+    has_univ = len(univ_signals) > 0
+    has_sym = len(sym_signals) > 0
+    has_topo = len(topo_signals) > 0
+
+    # ── Sensitivity classification ───────────────────────────────────────
+    if not has_univ:
+        sensitivity = "none"
+        is_sensitive = False
+        re_eval = False
+    elif has_univ and has_topo and not has_sym:
+        # Claims universality AND acknowledges topology dependence
+        sensitivity = "acknowledged"
+        is_sensitive = False
+        re_eval = False
+    elif has_univ and not has_sym and not has_topo:
+        # Claims universality but neither assumes symmetry nor mentions topology
+        # — low risk, may be using universality loosely
+        sensitivity = "low"
+        is_sensitive = False
+        re_eval = False
+    elif has_univ and has_sym and has_topo:
+        # Claims universality, assumes symmetry, BUT also acknowledges topology
+        # — moderate: awareness present but claim may still be under-qualified
+        sensitivity = "moderate"
+        is_sensitive = True
+        re_eval = False
+    elif has_univ and has_sym and not has_topo:
+        # Claims universality + assumes symmetric local interactions
+        # + does NOT acknowledge topology dependence
+        # → HIGH SENSITIVITY: the claim is derived under assumptions that
+        #   the sandpile study shows are insufficient
+        sensitivity = "high"
+        is_sensitive = True
+        re_eval = True
+    else:
+        sensitivity = "low"
+        is_sensitive = False
+        re_eval = False
+
+    # ── INV_073 challenge flag ───────────────────────────────────────────
+    if sensitivity == "high":
+        inv073_flag = (
+            "TOPOLOGY_SENSITIVE:universality_class_derived_under_symmetric_local_assumption:"
+            "long_range_and_asymmetric_topologies_NOT_considered:"
+            "sandpile_study_shows_exponents_shift_under_topology_change:"
+            "single_canonical_critical_state_UNDERDETERMINED:"
+            "must_specify_target_universality_class_for_given_architecture:"
+            "RE_EVALUATION_REQUIRED"
+        )
+    elif sensitivity == "moderate":
+        inv073_flag = (
+            "PARTIALLY_TOPOLOGY_AWARE:universality_claim_with_symmetric_assumption:"
+            "topology_dependence_mentioned_but_not_fully_resolved:"
+            "exponent_may_shift_under_architecture_change:monitor"
+        )
+    elif sensitivity == "acknowledged":
+        inv073_flag = (
+            "TOPOLOGY_ACKNOWLEDGED:universality_claim_qualified_by_topology:"
+            "interaction_geometry_considered:claim_appropriately_conditioned"
+        )
+    elif has_univ:
+        inv073_flag = (
+            f"UNIVERSALITY_CLAIMED:sensitivity={sensitivity}:"
+            "no_symmetric_local_assumption_detected:"
+            "topology_dependence_status_unclear:low_risk"
+        )
+    else:
+        inv073_flag = "no_universality_claim:not_applicable"
+
+    # ── Noether SOC note ─────────────────────────────────────────────────
+    noether_soc_note = (
+        "Self-Organized Criticality (review): SOC's conservation structure "
+        "(avalanche size scaling exponent) is NOT invariant under topological "
+        "modification. Breaking spatial symmetry of collapse rules breaks "
+        "universality-class symmetry. The conserved quantity (power-law "
+        "exponent) is weaker than previously assumed — it is conserved only "
+        "within a given interaction-geometry equivalence class, not across "
+        "arbitrary topologies. The Noether assignment requires qualification "
+        "by interaction geometry: the symmetry group is the set of topology-"
+        "preserving transformations, not all spatial transformations."
+    )
+
+    # ── Recommendation ───────────────────────────────────────────────────
+    if sensitivity == "high":
+        recommendation = (
+            "RE-EVALUATE: This node's universality class assignment was "
+            "derived under symmetric, local-only interaction assumptions. "
+            "The sandpile model study demonstrates that adding long-range "
+            "connections or breaking toppling symmetry shifts the power-law "
+            "exponent to a DIFFERENT universality class. Before treating "
+            "this assignment as a fixed invariant in COMPARE steps: "
+            "(1) Specify the interaction topology under which the exponent "
+            "was measured. (2) Test whether the exponent is stable under "
+            "long-range connection addition (small-world rewiring). "
+            "(3) Test whether the exponent is stable under asymmetric "
+            "toppling rules. (4) If the exponent shifts, record the "
+            "topology-conditioned universality class, not the unconditioned "
+            "one. (INV_073: critical ridge is topology-dependent.)"
+        )
+    elif sensitivity == "moderate":
+        recommendation = (
+            "MONITOR: This node claims a universality class under symmetric "
+            "assumptions but shows some topology awareness. Verify that the "
+            "acknowledged topology effects have been quantitatively resolved "
+            "(not just mentioned). The sandpile study shows even partial "
+            "symmetry-breaking shifts exponents significantly."
+        )
+    elif sensitivity == "acknowledged":
+        recommendation = (
+            "OK: Universality class claim is appropriately qualified by "
+            "interaction geometry. The topology-dependence is acknowledged."
+        )
+    elif has_univ:
+        recommendation = (
+            "LOW RISK: Universality class mentioned but no symmetric-local "
+            "assumption detected. Monitor for implicit assumptions."
+        )
+    else:
+        recommendation = (
+            "N/A: No universality class or critical exponent claim detected."
+        )
+
+    return {
+        "has_universality_claim": has_univ,
+        "assumes_symmetric_local": has_sym,
+        "acknowledges_topology_dependence": has_topo,
+        "is_topology_sensitive": is_sensitive,
+        "universality_signals": univ_signals,
+        "symmetric_local_signals": sym_signals,
+        "topology_dependence_signals": topo_signals,
+        "sensitivity_level": sensitivity,
+        "inv073_flag": inv073_flag,
+        "noether_soc_note": noether_soc_note,
+        "re_evaluation_required": re_eval,
+        "recommendation": recommendation,
+    }
+
+
+def topology_sensitivity_pass(edges, all_node_ids, node_texts=None):
+    # type: (list, List[str], Optional[Dict[str, str]]) -> dict
+    """
+    Run a topology-sensitivity scoring pass over all knowledge graph nodes,
+    flagging nodes whose universality class or critical exponent claims were
+    derived under symmetric, local-only interaction assumptions.
+
+    This pass prevents the epistemic loop from treating universality-class
+    assignments as fixed invariants when they are in fact topology-dependent,
+    reducing false convergence in COMPARE steps.
+
+    Parameters
+    ----------
+    edges : list of dict
+        Current graph edges.
+    all_node_ids : list of str
+        Ordered list of all node IDs.
+    node_texts : dict or None
+        Optional mapping of node_id → descriptive text (invariant text,
+        abstract, or accumulated context).  If None, text is reconstructed
+        from edge context windows for each node.
+
+    Returns
+    -------
+    dict
+        {
+            "n_nodes_scored": int,
+            "n_topology_sensitive": int — nodes flagged for re-evaluation,
+            "n_high_sensitivity": int,
+            "n_moderate_sensitivity": int,
+            "n_acknowledged": int — nodes with proper topology qualification,
+            "sensitive_nodes": list of dict — flagged nodes, each with:
+                {"node_id": str, "sensitivity_level": str,
+                 "re_evaluation_required": bool,
+                 "universality_signals": list of str,
+                 "symmetric_local_signals": list of str,
+                 "topology_dependence_signals": list of str,
+                 "inv073_flag": str, "recommendation": str},
+            "re_evaluation_required_ids": list of str — node IDs that MUST
+                be re-evaluated before use in COMPARE steps,
+            "compare_block_list": list of str — same as re_evaluation_required_ids,
+                formatted for direct consumption by COMPARE pipeline,
+            "aggregate_topology_risk": float — fraction of universality-claiming
+                nodes that are topology-sensitive (0.0 = safe, 1.0 = all at risk),
+            "inv073_summary": str — aggregate challenge status,
+            "noether_soc_status": str — "review" (per Noether table),
+            "timestamp": str,
+        }
+    """
+    ts = datetime.now(timezone.utc).isoformat()
+    n_total = len(all_node_ids)
+
+    if n_total == 0:
+        return {
+            "n_nodes_scored": 0,
+            "n_topology_sensitive": 0,
+            "n_high_sensitivity": 0,
+            "n_moderate_sensitivity": 0,
+            "n_acknowledged": 0,
+            "sensitive_nodes": [],
+            "re_evaluation_required_ids": [],
+            "compare_block_list": [],
+            "aggregate_topology_risk": 0.0,
+            "inv073_summary": "no_nodes:nothing_to_score",
+            "noether_soc_status": "review",
+            "timestamp": ts,
+        }
+
+    # ── Build per-node text from edge context windows if not provided ────
+    node_text_map = {}  # type: Dict[str, str]
+    if node_texts:
+        for nid, txt in node_texts.items():
+            node_text_map[nid.upper()] = txt
+
+    # Augment with edge context windows for all nodes
+    node_context_parts = defaultdict(list)  # type: Dict[str, List[str]]
+    for e in edges:
+        ctx = e.get("context", "")
+        inv_text = e.get("invariant", "")
+        combined = (ctx + " " + inv_text).strip()
+        if not combined:
+            continue
+        for key in ("from", "to"):
+            nid = e.get(key, "").upper()
+            if nid:
+                node_context_parts[nid].append(combined)
+
+    # Also collect from node_edges if available
+    # (We scan edges list which may include node_edges mixed in some contexts)
+
+    for nid in all_node_ids:
+        nid_upper = nid.upper()
+        if nid_upper not in node_text_map:
+            parts = node_context_parts.get(nid_upper, [])
+            if parts:
+                node_text_map[nid_upper] = " ".join(parts[:20])  # Cap at 20 contexts
+            else:
+                node_text_map[nid_upper] = ""
+
+    # ── Score each node ──────────────────────────────────────────────────
+    sensitive_nodes = []  # type: List[dict]
+    re_eval_ids = []  # type: List[str]
+    n_high = 0
+    n_moderate = 0
+    n_acknowledged = 0
+    n_with_univ = 0
+
+    for nid in all_node_ids:
+        nid_upper = nid.upper()
+        text = node_text_map.get(nid_upper, "")
+        if not text:
+            continue
+
+        score = topology_sensitivity_score(text)
+
+        if score["has_universality_claim"]:
+            n_with_univ += 1
+
+        if score["sensitivity_level"] == "acknowledged":
+            n_acknowledged += 1
+
+        if not score["is_topology_sensitive"]:
+            continue
+
+        level = score["sensitivity_level"]
+        if level == "high":
+            n_high += 1
+        elif level == "moderate":
+            n_moderate += 1
+
+        entry = {
+            "node_id": nid_upper,
+            "sensitivity_level": level,
+            "re_evaluation_required": score["re_evaluation_required"],
+            "universality_signals": score["universality_signals"],
+            "symmetric_local_signals": score["symmetric_local_signals"],
+            "topology_dependence_signals": score["topology_dependence_signals"],
+            "inv073_flag": score["inv073_flag"],
+            "recommendation": score["recommendation"],
+        }
+        sensitive_nodes.append(entry)
+
+        if score["re_evaluation_required"]:
+            re_eval_ids.append(nid_upper)
+
+    n_sensitive = len(sensitive_nodes)
+
+    # Aggregate topology risk: fraction of universality-claiming nodes that
+    # are topology-sensitive
+    if n_with_univ > 0:
+        topo_risk = float(n_sensitive) / float(n_with_univ)
+    else:
+        topo_risk = 0.0
+
+    # ── INV_073 aggregate summary ────────────────────────────────────────
+    if n_high > 0:
+        inv073_summary = (
+            f"TOPOLOGY_SENSITIVITY_DETECTED:"
+            f"high={n_high}:moderate={n_moderate}:"
+            f"re_evaluation_required={len(re_eval_ids)}:"
+            f"topology_risk={topo_risk:.4f}:"
+            f"universality_claims={n_with_univ}:acknowledged={n_acknowledged}:"
+            "critical_ridge_is_topology_dependent:"
+            "single_canonical_critical_state_UNDERDETERMINED_for_flagged_nodes:"
+            "COMPARE_steps_must_condition_on_interaction_geometry"
+        )
+    elif n_moderate > 0:
+        inv073_summary = (
+            f"PARTIAL_TOPOLOGY_AWARENESS:"
+            f"moderate={n_moderate}:acknowledged={n_acknowledged}:"
+            f"topology_risk={topo_risk:.4f}:"
+            "some_universality_claims_partially_qualified:monitor"
+        )
+    elif n_with_univ > 0 and n_acknowledged > 0:
+        inv073_summary = (
+            f"TOPOLOGY_QUALIFIED:"
+            f"universality_claims={n_with_univ}:all_acknowledged={n_acknowledged}:"
+            "interaction_geometry_properly_conditioned"
+        )
+    elif n_with_univ > 0:
+        inv073_summary = (
+            f"UNIVERSALITY_CLAIMED_NO_TOPOLOGY_FLAG:"
+            f"claims={n_with_univ}:no_symmetric_local_assumption_detected:"
+            "low_risk"
+        )
+    else:
+        inv073_summary = "no_universality_claims:topology_sensitivity_not_applicable"
+
+    result = {
+        "n_nodes_scored": n_total,
+        "n_topology_sensitive": n_sensitive,
+        "n_high_sensitivity": n_high,
+        "n_moderate_sensitivity": n_moderate,
+        "n_acknowledged": n_acknowledged,
+        "sensitive_nodes": sensitive_nodes,
+        "re_evaluation_required_ids": re_eval_ids,
+        "compare_block_list": list(re_eval_ids),  # alias for COMPARE pipeline
+        "aggregate_topology_risk": round(topo_risk, 4),
+        "inv073_summary": inv073_summary,
+        "noether_soc_status": "review",
+        "timestamp": ts,
+    }
+
+    # ── Log results ──────────────────────────────────────────────────────
+    if n_sensitive > 0:
+        print(
+            f"[GRAPH:TOPOLOGY_SENSITIVITY] {n_total} node(s) scored — "
+            f"topology_sensitive={n_sensitive} "
+            f"(high={n_high}, moderate={n_moderate}), "
+            f"acknowledged={n_acknowledged}, "
+            f"re_evaluation_required={len(re_eval_ids)}, "
+            f"topology_risk={topo_risk:.4f}"
+        )
+        for entry in sensitive_nodes[:5]:
+            print(
+                f"  {'🚨' if entry['sensitivity_level'] == 'high' else '⚠'} "
+                f"{entry['node_id']}: sensitivity={entry['sensitivity_level']}, "
+                f"re_eval={entry['re_evaluation_required']}, "
+                f"univ_signals={len(entry['universality_signals'])}, "
+                f"sym_signals={len(entry['symmetric_local_signals'])}"
+            )
+        if len(sensitive_nodes) > 5:
+            print(
+                f"  ... and {len(sensitive_nodes) - 5} more topology-sensitive node(s)"
+            )
+        if re_eval_ids:
+            print(
+                f"[GRAPH:TOPOLOGY_SENSITIVITY] COMPARE BLOCK LIST: "
+                f"{', '.join(re_eval_ids[:10])}"
+                + (f" ... +{len(re_eval_ids) - 10} more"
+                   if len(re_eval_ids) > 10 else "")
+            )
+    elif n_with_univ > 0:
+        print(
+            f"[GRAPH:TOPOLOGY_SENSITIVITY] {n_total} node(s) scored — "
+            f"{n_with_univ} universality claim(s), "
+            f"0 topology-sensitive (all properly qualified or low-risk)"
+        )
+
+    return result
 
 
 # ── Singleton accessor ────────────────────────────────────────────────────────
