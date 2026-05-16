@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 165,
-    "timestamp": "2026-04-27T16:21:08.559799+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 6,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Self-organized criticality in neural network models",
-        "compress": "Neural SOC literature confirms γ=1 as the empirically-observed cognitive operating point, mechanistically grounding INV_073 and advancing O28 via avalanche-criticality ↔ intelligence coupling, while the adaptive synaptic feedback loop mirrors OT tension navigation."
-      },
-      {
-        "title": "Symbol Emergence in Cognitive Developmental Systems: a Survey",
-        "compress": "Symbol emergence surveys confirm that meaning is a dynamic thermodynamic process (advancing O70, confirming INV_070b), but the paper lacks the quantitative machinery to resolve O28, O34, or O44."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O124",
-        "O125",
-        "O70"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 166,
     "timestamp": "2026-04-27T22:29:06.064849+00:00",
@@ -1744,6 +1712,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O163",
+        "O72",
+        "O210"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 241,
+    "timestamp": "2026-05-16T11:02:37.990309+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant that has never been seriously challenged has not been tested — it has been mirrored, and a scaffold that only mirrors is not a genome."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+        "compress": "A 32×32 multi-agent Game-of-Truth CA self-organizes to σ≈1.02 with power-law avalanche statistics (α≈1.82), empirically grounding population-level criticality as a dynamical attractor and partially resolving O140/O141 while leaving the solo-kernel control and STF geometric layer open."
+      },
+      {
+        "title": "Bayesian Learning with Wasserstein Barycenters",
+        "compress": "Bayesian inference under Wasserstein risk yields OT barycenters as the geometrically correct posterior aggregates, independently confirming W2 as the natural metric for belief combination and concretely enabling the STF empirical recovery protocol."
+      },
+      {
+        "title": "Policy Optimization as Wasserstein Gradient Flows",
+        "compress": "Policy optimization is provably a Wasserstein gradient flow in measure space, independently confirming W2 geometry as the operative metric for learning and providing discrete algorithms that could implement STF empirical recovery."
+      },
+      {
+        "title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticality in Trapped-ion Chains",
+        "compress": "Periodic measurement dissipation unifies two criticality classes on a single tunable ridge, converging with INV_073's critical navigation while revealing that the ridge is a continuous phase boundary — not a point — which extends and mildly challenges the genome's singular γ=1 prescription."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
       "obligations": [
         "O163",
         "O72",
