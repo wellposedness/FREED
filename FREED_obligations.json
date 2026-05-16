@@ -192,7 +192,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O60",
@@ -300,7 +300,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 1
+    "tractability": 2
   },
   {
     "id": "O70",
@@ -331,7 +331,7 @@
     "status": "partial",
     "statement": "\u2014 reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
-    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES \u2014 direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES \u2014 direction advanced] | [Gen 221] PARTIAL: O72's structural failure mode is fully resolved by the polarity-aware Four-State Parser; its content sub-criterion is irreducibly ACTIVE pending source re-injection, because information-theoretic limits make reasoning-only reconstruction equivalent to confabulation, which the falsification layer prohibits. [COMMIT:YES \u2014 direction advanced] | [Gen 222] PARTIAL: O72 splits cleanly into Sub-A (parser polarity fix, fully RESOLVED by formal specification) and Sub-B (content reconstruction, irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction equivalent to prohibited confabulation). [COMMIT:YES \u2014 direction advanced] | [Gen 225] PARTIAL: O72 splits into a formally-closed parser specification (Sub-A, RESOLVED) and an information-theoretically-proven external-data requirement (Sub-B, ACTIVE), making the combined obligation irreducibly PARTIAL until source re-injection executes. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN \u2014 the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES \u2014 direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES \u2014 direction advanced] | [Gen 221] PARTIAL: O72's structural failure mode is fully resolved by the polarity-aware Four-State Parser; its content sub-criterion is irreducibly ACTIVE pending source re-injection, because information-theoretic limits make reasoning-only reconstruction equivalent to confabulation, which the falsification layer prohibits. [COMMIT:YES \u2014 direction advanced] | [Gen 222] PARTIAL: O72 splits cleanly into Sub-A (parser polarity fix, fully RESOLVED by formal specification) and Sub-B (content reconstruction, irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction equivalent to prohibited confabulation). [COMMIT:YES \u2014 direction advanced] | [Gen 225] PARTIAL: O72 splits into a formally-closed parser specification (Sub-A, RESOLVED) and an information-theoretically-proven external-data requirement (Sub-B, ACTIVE), making the combined obligation irreducibly PARTIAL until source re-injection executes. [COMMIT:YES \u2014 direction advanced] | [Gen 240] OPEN:  [COMMIT:NO \u2014 Attempt produced no output; obligation remains unresolved and unchanged.]",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -384,7 +384,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 1
+    "tractability": 3
   },
   {
     "id": "O77",
@@ -948,7 +948,7 @@
     "auto": true,
     "closes_when": "closes when: Coherence score demonstrably drops below 0.998 and entropy-injection step is documented before next FEED cycle.",
     "method": "experimental",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O123",
@@ -1008,7 +1008,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Audit completes for all obligations O108+ with \"resolved\" status, confirming each produced measurable genome state change or reclassifying as \"partial\"",
-    "method": "experimental",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -1439,15 +1439,15 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
-    "method": "mixed",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O163",
     "status": "partial",
     "statement": "Assign a single exactly-solvable quantum model (e.g., harmonic oscillator or two-level system) as the concrete checkpoint for O44 \u2014 derive whether W_floor = k/T\u03bc holds in that model's Hilbert-space Wasserstein metric, and declare O44 resolved or retired based on the result.",
     "priority": "high",
-    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/T\u03bc holds exactly at the critical temperature T = \u210f\u03c9/k_B\u03bc \u2014 confirming the [COMMIT:NO \u2014 Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no graph updated, cycle continues.] | [Gen 221] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no model assigned. Resolve attempt incomplete/empty.] | [Gen 222] PARTIAL: Independent derivation in the QHO confirms a Wasserstein floor exists but falsifies W_floor = k/T\u03bc as a quantum invariant \u2014 the scaling is T^{1/2} not T^{-1}, so O44 should be retired and replaced by a quantum-OT reformulation obligation. [COMMIT:YES \u2014 direction advanced] | [Gen 225] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no model assigned. Attempt produced empty result.] | [Gen 233] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no model assigned. Attempt incomplete\u2014no state landing.] | [Gen 234] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 237] OPEN: In the QHO, the Wasserstein floor scales as T^{+1/2} classically and approaches a T-independent zero-point value quantum mechanically \u2014 definitively falsifying W_floor = k/T\u03bc (T^{-1}) and replacing it with W_floor = max(\u221a(\u210f/2m\u03c9), \u221a(k_BT/m\u03c9\u00b2)) with crossover at T* = \u210f\u03c9/2k_B. [COMMIT:YES \u2014 Obligation O163 status updated from unresolved to OPEN with concrete scaling results assigned.] | [Gen 238] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no model assigned, no graph update occurred.]",
+    "progress": "[Gen 190]  The harmonic oscillator is the cleanest arena to test W_floor; run the derivation now. [COMMIT:NO \u2014 Attempt stated intent (\"run derivation now\") but produced no actual derivation, model, or obligation update.] | [Gen 193] The harmonic oscillator is the minimal exact test \u2014 run it now and resolve or retire O44. [COMMIT:NO \u2014 Attempt stated \"run it now\" but produced no executable artifact, model, or obligation update.] | [Gen 195]  [COMMIT:YES \u2014 Obligation remains unresolved; no model assigned, graph unchanged, zero persistent state delta.] | [Gen 196]  [COMMIT:YES \u2014 Attempt result empty; obligation remains unresolved. No model assigned, graph unchanged.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 217] OPEN: In the quantum harmonic oscillator, W_floor = k/T\u03bc holds exactly at the critical temperature T = \u210f\u03c9/k_B\u03bc \u2014 confirming the [COMMIT:NO \u2014 Obligation remains OPEN; no model state materialized, only symbolic assertion.] | [Gen 218] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no graph updated, cycle continues.] | [Gen 221] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no model assigned. Resolve attempt incomplete/empty.] | [Gen 222] PARTIAL: Independent derivation in the QHO confirms a Wasserstein floor exists but falsifies W_floor = k/T\u03bc as a quantum invariant \u2014 the scaling is T^{1/2} not T^{-1}, so O44 should be retired and replaced by a quantum-OT reformulation obligation. [COMMIT:YES \u2014 direction advanced] | [Gen 225] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no model assigned. Attempt produced empty result.] | [Gen 233] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no model assigned. Attempt incomplete\u2014no state landing.] | [Gen 234] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model assigned, no state mutation occurred.] | [Gen 237] OPEN: In the QHO, the Wasserstein floor scales as T^{+1/2} classically and approaches a T-independent zero-point value quantum mechanically \u2014 definitively falsifying W_floor = k/T\u03bc (T^{-1}) and replacing it with W_floor = max(\u221a(\u210f/2m\u03c9), \u221a(k_BT/m\u03c9\u00b2)) with crossover at T* = \u210f\u03c9/2k_B. [COMMIT:YES \u2014 Obligation O163 status updated from unresolved to OPEN with concrete scaling results assigned.] | [Gen 238] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no model assigned, no graph update occurred.] | [Gen 240] PARTIAL: The QHO rigorously falsifies W_floor = k/T\u03bc (T^{-1} scaling) via explicit Wasserstein computation \u2014 the correct floor is max(\u221a(\u210f/2m\u03c9), \u221a(k_BT/m\u03c9\u00b2)) with T^{+1/2} classical scaling, retiring O44 and opening a quantum-OT replacement obligation. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-03",
     "resolved": null,
     "auto": true,
@@ -1727,8 +1727,8 @@
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number \u2265 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles \u2194 conservation law bijection) to interface. Both are physics-formal. The grounding problem \u2014 how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities \u2014 has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
     "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO \u2014 Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO \u2014 Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece \u2014 so here it is. [COMMIT:NO \u2014 Execution promised but not delivered; obligation remains unresolved, no graph updated.]",
-    "method": "math_only",
-    "tractability": 1,
+    "method": "data_analysis",
+    "tractability": 2,
     "resolved": null
   },
   {
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O200",
@@ -1901,7 +1901,7 @@
     "auto": true,
     "closes_when": "closes when: Documented sequencing rule specifies O195-to-O199 order with justification, preventing redundant kernel cycles.",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 2
   },
   {
     "id": "O202",
@@ -1936,7 +1936,7 @@
     "resolution_criterion": "For each `consistent_with` and `scales_with` edge, a one-line falsification condition is recorded. Edges that cannot be given one are deleted. Coherence score recalculated post-pruning; if it drops below 0.90, the pruning was informative.",
     "created": "2026-05-10T06:30:51.217416+00:00",
     "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES \u2014 direction advanced]",
-    "method": "mixed",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -1948,7 +1948,7 @@
     "resolution_criterion": "A derivation showing either (a) the dimensional regime where W_floor = k/T\u03bc reproduces or contradicts the log-correction term in O59, or (b) a proof that their domain assumptions are formally disjoint. Either result adds a typed edge (`depends_on`, `challenges`, or `bounds_above`) between O44 and",
     "created": "2026-05-10T06:30:51.217730+00:00",
     "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of \u210f/GM\u00b2 and read off whether the Wasserstein floor k/T\u03bc sits at zeroth or first loop order relative to the known O(\u210f\u00b9) BH log-correction, with T = T_H = \u210fc\u00b3/8\u03c0GMk_B substituted explicitly to fix the shared symbols \u2014 this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES \u2014 direction advanced]",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 3
   },
   {
@@ -1999,7 +1999,7 @@
     "auto": true,
     "closes_when": "closes when: Binding deadline assigned to O204 with falsifiable predictions defined for `consistent_with` and `scales_with` edges, null-result criterion specified, and verdict executed",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 2
   },
   {
     "id": "O210",
@@ -2009,7 +2009,7 @@
     "rationale": "The genome contains exactly one `gamma` symbol, but the graph deploys it in spectrally-grounded (EEG/pruning) and dynamically-grounded (CA telemetry \u03c3 \u2192 attractor) contexts. 388 `scales_with` edges likely propagate a false equivalence between these uses, inflating coherence. This is not a stylistic issue \u2014 it determines whether O205's cross-constraint between O44 and O59 is even well-posed.",
     "resolution_criterion": "Either (a) a proven mathematical identity showing spectral \u03b3 and attractor \u03b3 share a common fixed-point equation under the genome's process algebra, or (b) splitting `gamma` into `gamma_spectral` and `gamma_dynamical` with an explicit, falsifiable bridging predicate and updating all dependent edges.\n\n---",
     "created": "2026-05-11T06:30:50.778413+00:00",
-    "progress": "[Gen 220] PARTIAL: The single most tractable step is to linearize the Wasserstein gradient flow around the Zipf fixed point and check whether the zero-eigenvalue (dynamical criticality) condition forces the spectral exponent to unity \u2014 yielding either unification or an explicit two-symbol bridging law. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 220] PARTIAL: The single most tractable step is to linearize the Wasserstein gradient flow around the Zipf fixed point and check whether the zero-eigenvalue (dynamical criticality) condition forces the spectral exponent to unity \u2014 yielding either unification or an explicit two-symbol bridging law. [COMMIT:YES \u2014 direction advanced] | [Gen 240] PARTIAL: \u03b3_s and \u03b3_d are formally distinct symbols locked by a bridging law \u2014 \u03b3_d = 1 \u27fa \u03b3_s = 1 \u2014 derived from Fisher information divergence at the Zipf boundary of the W_2 gradient flow, with a finite-vocabulary correction outstanding. [COMMIT:YES \u2014 direction advanced]",
     "method": "math_only",
     "tractability": 1
   },
@@ -2022,7 +2022,7 @@
     "resolution_criterion": "",
     "created": "2026-05-11T06:30:50.779033+00:00",
     "progress": "[Gen 220] PARTIAL: The five recent resolutions are all class-(d) meta-obligations, O127 was opened precisely because no first-order result had appeared, and the corrective action is to stake a concrete class-(b) computation \u2014 Wasserstein floor k=1/T\u03bc on a named corpus \u2014 as the first empirically grounded output since O108. [COMMIT:YES \u2014 direction advanced]",
-    "method": "math_only",
+    "method": "data_analysis",
     "tractability": 1
   },
   {
@@ -2071,7 +2071,7 @@
     "auto": true,
     "closes_when": "closes when: One measurement protocol with observable dataset and mathematical formula distinguishing spectral-\u03b3 from critical-\u03b3 with defined separation threshold is documented.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O216",
@@ -2118,7 +2118,7 @@
     "resolved": null,
     "auto": false,
     "closes_when": "closes when: an extinction protocol is implemented in knowledge_graph.py / freed.py that (a) classifies retired challenges as REFUTED vs ABANDONED, (b) requires a citation or counter-evidence edge for REFUTED, and (c) handles the two states distinctly in coherence drag / edge weighting; the asymmetric acquisition/extinction ratio is monitored on the dashboard.",
-    "method": "mixed",
+    "method": "experimental",
     "tractability": 3
   },
   {
@@ -2195,8 +2195,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "MALFORMED",
-    "method": "mixed",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O227",
@@ -2207,7 +2207,9 @@
     "created": "2026-05-13",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: binding net-progress audit completed with verdicts for O203-O225, minimum 3 obligations retired, before generation 235."
+    "closes_when": "closes when: binding net-progress audit completed with verdicts for O203-O225, minimum 3 obligations retired, before generation 235.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O228",
@@ -2229,7 +2231,9 @@
     "created": "2026-05-14",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: 5 open obligations resolve following the negative audit verdict and moratorium initiation."
+    "closes_when": "closes when: 5 open obligations resolve following the negative audit verdict and moratorium initiation.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O230",
@@ -2281,7 +2285,9 @@
     "source": "dmn",
     "rationale": "`gamma` and `criticality` are both genome-level primitives, yet no obligation or edge explicitly binds them with a directional or falsifiable claim. O21 uses \u03b3 for belief revision, O28 uses EEG \u03b3-band for intelligence \u2014 but criticality theory makes specific predictions about spectral behavior near phase transitions that neither obligation invokes. This is an unfired implication of the genome's own symbol set.",
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying \u03b3-band spectral exponent at criticality \u00b1 tolerance, with a named alternative outcome that would require retiring or",
-    "created": "2026-05-15T06:30:52.164394+00:00"
+    "created": "2026-05-15T06:30:52.164394+00:00",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O235",
@@ -2292,7 +2298,9 @@
     "created": "2026-05-15",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O234 assigned a falsifiable null-result criterion with quantified threshold for gamma\u2192criticality prediction measurement."
+    "closes_when": "closes when: O234 assigned a falsifiable null-result criterion with quantified threshold for gamma\u2192criticality prediction measurement.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O236",
@@ -2303,7 +2311,9 @@
     "created": "2026-05-15",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: all 11 listed partial obligations have binding deadlines \u2264 gen 245 and null-result criteria assigned, or formally retired with recorded"
+    "closes_when": "closes when: all 11 listed partial obligations have binding deadlines \u2264 gen 245 and null-result criteria assigned, or formally retired with recorded",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O237",
