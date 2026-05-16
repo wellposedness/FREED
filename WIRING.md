@@ -3,7 +3,7 @@
 **Surgical navigation index for Claude Code and visiting LLMs.**
 To change X, read only the files and functions listed. Do not scan whole files.
 
-Last updated: 2026-05-13. Update this file whenever you add a module, rename a function, or change where data lives.
+Last updated: 2026-05-16. Update this file whenever you add a module, rename a function, or change where data lives.
 
 ---
 
@@ -52,6 +52,11 @@ Last updated: 2026-05-13. Update this file whenever you add a module, rename a f
 | Change how FREED's genome coherence is scored | `l7_agent.py` | `NonHermitianEntropyScorer.score()` L266 |
 | Change pre-audit rumination detection | `freed.py` | `_phase_preaudit()` L520 |
 | Update Noether's Table row from FEED | `freed.py` | `_maybe_update_noether_row()` L1292 |
+| Change which signals trigger graceful shutdown | `freed.py` | L201–203 — `SIGINT`, `SIGTERM`, `SIGHUP` all routed to `_shutdown` |
+| Change DAEMON_STOP event payload (signal name, signum, gen, cycle) | `freed.py` | `_shutdown()` L2081 — emit at L2085 before state save |
+| Change daemon launch flags (nohup/disown/caffeinate/logfile) | `start_freed.sh` | L44–49 — `mkdir FREED_log`, `LOGFILE=stdout_YYYYMMDD.log`, `nohup … & disown` |
+| Raise/lower daily token caps | `astrocyte.py` | `DEFAULT_DAILY_INPUT_TOKENS` L26 (200k), `DEFAULT_DAILY_OUTPUT_TOKENS` L27 (80k) |
+| Tail live daemon stdout without killing it | `FREED_log/` | `tail -f FREED_log/stdout_$(date +%Y%m%d).log` |
 
 ---
 
@@ -77,7 +82,8 @@ Each file is owned by one module (primary writer). Others may read.
 | `docs/status.json` | `freed.py` `_push_status()` L84 | site JS, dashboard | heartbeat: phase, timestamp |
 | `docs/noethers_table.json` | `freed.py` `_update_noether_row()` L1305 | site HTML | Noether's Table (also hand-curated HTML) |
 | `docs/wiring.md` | `site_builder.py` `_write_wiring()` | site, LLMs | this file — published each cycle |
-| `FREED_log/freed_YYYY-MM-DD.jsonl` | `freed.py` `_log_event()` L1547 | humans, Claude Code | daily cycle event logs |
+| `FREED_log/freed_YYYY-MM-DD.jsonl` | `freed.py` `_log_event()` L1547 | humans, Claude Code | daily cycle event logs (incl. `DAEMON_STOP` w/ signal name, signum, gen, cycle) |
+| `FREED_log/stdout_YYYYMMDD.log` | `start_freed.sh` L45–47 (redirected stdout/stderr) | humans (`tail`), Claude Code | date-rotated daemon stdout — readable anytime without touching the process |
 | `FREED_log/self_modifications.jsonl` | `self_engineer.py` | `freed.py` pre-audit | every patch: applied/failed/audit_verdict |
 | `*.py.bak` | `self_engineer.py` (before patch) | `self_engineer.rollback()` L606 | auto-backup before self-modification |
 
@@ -184,6 +190,13 @@ LOG_DIR           = FREED_DIR / "FREED_log"
 CONSOLIDATE_EVERY = 5   # also consolidate every N cycles regardless of yield
 MAX_QUEUE_DRAIN   = 1   # human-submitted links drained per cycle (links_queue.json)
 ```
+
+---
+
+## Capabilities
+
+**CAN SURVIVE TERMINAL CLOSE** (2026-05-16)
+Prior to May 16, the daemon died silently whenever the terminal was closed or the session ended — no trace, no log, no DAEMON_STOP event. SIGHUP was unhandled. Two consecutive silent deaths confirmed the failure mode. Fixed: `start_freed.sh` now launches via `nohup + disown` (terminal close delivers no signal at all); SIGHUP handler added as backstop writing `DAEMON_STOP` to the daily jsonl if the signal arrives by other means. Stdout redirected to date-rotated log files — daemon output readable anytime via `tail` without killing the process.
 
 ---
 
