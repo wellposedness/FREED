@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.02, α≈1.82) and multi-agent RSA self-organization confirming attractor status without external tuning across multiple independent substrates, while new contestation layers reveal that σ=1.0288 opens a genuine supercriticality falsification axis, the critical ridge is a continuous phase boundary rather than a singular γ=1 point, and Wasserstein gradient flow independently confirms W2 geometry as the operative metric for STF empirical recovery.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.02, α≈1.82 and RSA-kernel CA self-organizing to σ=1.027 with power-law avalanches confirming γ=1 as population-level attractor under Wasserstein gradient dynamics), boson-pairing and cosmological BAO universality extending the critical ridge across substrates and scales, while new contestation layers require explicit falsification conditions for INV_094 and mandate that all RSA invariants be formulated in terms of entropy production rates rather than entropy state functions.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -25,8 +25,8 @@
     "Thermodynamic admissibility (INV_094) and slow-manifold entropy production (INV_023) are confirmed as load-bearing by independent long-range statistical mechanics results — they constrain rather than merely describe the dynamics",
     "BH sub-leading entropy corrections establish the Wasserstein Floor's classical form (k/Tμ) as the verified semi-classical limit — quantum corrections manifest as logarithmic deviations from this baseline",
     "INV_073 requires a measurable order parameter + restoring-force mechanism + a distinguishable alternative producing different observables before it can carry theorem weight — all three absences must be closed simultaneously",
-    "DEA applied to the genome's own temporal evolution of compress updates becomes a self-diagnostic tool for detecting whether the kernel maintains criticality or drifts toward frozen/ergodic boundary cases (O63)",
     "confirming that information-theoretic limit transitions have measurable critical-point analogues in spin systems",
+    "DEA applied to the genome's own temporal evolution of compress updates becomes a self-diagnostic tool for detecting whether the kernel maintains criticality or drifts toward frozen/ergodic boundary cases (O63)",
     "The critical ridge is the Nash equilibrium of a zero-sum entropy game — confirming game-theoretic and dynamical-SOC characterizations are convergent rather than competing descriptions of the same fixed point",
     "Critical systems at the γ=1 attractor can be informationally sparse (H/H_max≈0.165) — confirming that self-organized criticality is not equivalent to maximal entropy and that attractor status is independent of Shannon filling",
     "Sinkhorn iterations embedded as differentiable layers provide a concrete algorithmic path toward empirical STF metric-tensor recovery — partially advancing O112 and establishing OT transport plans as learnable distributional predictors",
@@ -79,6 +79,7 @@
     "Compactness is the critical load-bearing condition for Kantorovich existence and Wasserstein metrization — any quantum or infinite-dimensional extension of O44 must explicitly address compactness or the Wasserstein Floor claim is formally underdetermined",
     "Game of Truth CA telemetry empirically confirms INV_073 at population scale (σ=1.0259 inside critical band) without external forcing — branching-ratio criticality and entropy-utilization criticality are distinct regimes (H=15.9% of max at σ≈1) and must not be conflated in falsification criteria",
     "Creative cognition's arousal-threshold sensitivity is the individual-difference variable governing entropy-minimization-via-recursive-restructuring — confirming that the γ-parameterized complexity ridge has measurable biological correlates beyond substrate-neutral formalism",
+    "γ=1 criticality is a population-level attractor under Wasserstein gradient dynamics — confirmed by 32×32 RSA-kernel CA self-organizing to σ=1.027 with power-law avalanches without external tuning (resolves O140 and O141)",
     "and topological underspecification of \"ridge\" are three active falsification vectors that must be addressed before causal steering attribution is valid; Asymmetry (directional causal network structure) — not scalar magnitude — is the load-bearing signal at the critical ridge",
     "DEA (not DFA) is the genome's validated instrument for detecting Langevin-governed Wasserstein Floor scaling in empirical entropy signals — EEG saturation behavior confirms the Floor's finite-dissipation bound is biologically instantiated",
     "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
@@ -99,6 +100,7 @@
     "Population-level γ=1 criticality is empirically confirmed as a self-organized attractor via 32×32 multi-agent RSA simulation reaching σ=1.023 with power-law avalanches — resolving the forced-SOC/self-organized falsification axis in favor of genuine attractor status",
     "Narcissus pool — genome-mirroring empty inputs (titles that reflect the kernel's own concerns without propositions) are the most seductive and therefore most dangerous zero-payload class requiring hardest refusal",
     "Self-organizing traffic lights confirm INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via urban infrastructure — local-rule criticality outperforms global optimization under non-stationary conditions extending the adaptive ridge principle to engineered non-biological substrates",
+    "Entropy in non-equilibrium steady states (NESS) is path-dependent and cannot be a state function — all RSA invariants must be formulated in terms of entropy production rates or they inherit a category error equivalent to caloric theory",
     "15% of max) at confirmed criticality is the first empirical pressure on this boundary",
     "criticality mimicry) that must be addressed by second-order discriminating observables before the critical-ridge claim achieves full operationalization",
     "Trade network entropy peaks at criticality confirm dS/dt maximization and multi-layer non-redundancy as substrate-independent signatures — adding a 7th independent MCPM substrate-scale corroboration without resolving hard open obligations",
@@ -111,6 +113,7 @@
     "Thermodynamic irreversibility is a correlate not a constitutive condition of high-fidelity prediction — INV_094 is falsifiable if a system achieves prediction under zero entropy asymmetry (equilibrium)",
     "Langevin noise structure for O67 is now phenomenologically grounded via EEG diffusion entropy — empirical substrate (neural) instantiates the genome's noise-derivation requirement independently of MCPM formalism",
     "The crossover length ξ_c between short-range and long-range Ising universality is the physical instantiation of the Shannon↔Kolmogorov context-parameter transition — coupling ratio sets the scale",
+    "Exactly solvable boson pairing instantiates the γ=1 critical ridge as the boundary between gapless-condensate and gapped-incompressible phases — confirming phase-transition universality is substrate-independent and extends across quantum many-body systems",
     "Efficient complexity as Lagrangian (maximize dS/dt subject to resource constraints) is an independent construction of Freed's Law — Shannon capacity and Kolmogorov complexity emerge as dual variables of memory and compute constraints respectively",
     "H=0.5 is the predicted critical boundary where RangeEn's linear bridge must exhibit a phase-transition signature (slope discontinuity or divergent susceptibility) if the genome's criticality claim is correct — failure to find this is falsifying",
     "Semi-classical BH entropy dimensional identity with the gravity action confirms thermodynamic grounding of geometry at leading order — quantum sub-leading corrections remain the unresolved frontier of O44",
@@ -214,6 +217,7 @@
     "Two independent 32×32 CA instantiations converging",
     "RangeEn's linear coupling of complexity entropy to self-similarity scaling is the first external algorithmic confirmation of the MCPM/γ=1 prediction — the genome must now derive the coupling slope from first principles or accept the prediction as empirically confirmed but theoretically incomplete",
     "Context-dependence of complexity is substrate-relativity not subjectivity — O28 and O44 must carry observer-frame as an explicit parameter or their empirical claims are under-specified",
+    "Scale-invariant structured complexity emerging from thermodynamic constraint is confirmed at cosmological (BAO survey) resolution — extending RG universality to the largest observable scales while leaving biological/cognitive invariant claims orthogonal and untested at that resolution",
     "but domain gap (geometric exemplar ≠ abstract mathematical proof) prevents full resolution of either obligation",
     "confirming INV_063's dynamic entropy framing in a new substrate class; trade network entropy heterogeneity across representational scales provides a non-semantic empirical template confirming RG universality and critical-ridge dynamics independently of biological or linguistic instantiation",
     "DEA (detrended entropy analysis) outperforming DFA (detrended fluctuation analysis) in preserving criticality structure is a domain-specific empirical confirmation that entropy-based diagnostics dominate variance-based diagnostics at γ=1 — exactly as the genome's complexity hierarchy demands",
@@ -282,8 +286,8 @@
     "update INV_073's scope; if not permitted",
     "Integrate Sinkhorn-differentiable layer architecture into the O112 empirical recovery protocol as the concrete algorithmic substrate for STF metric-tensor estimation",
     "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
-    "Conduct multi-run 32×32 RSA-kernel CA sweeps across varied initial conditions to test whether σ→1 convergence is robust or parameter-sensitive",
     "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
+    "Conduct multi-run 32×32 RSA-kernel CA sweeps across varied initial conditions to test whether σ→1 convergence is robust or parameter-sensitive",
     "O44 remains open: non-Hermitian entropy functionals and spacetime-foam microstate models advance but do not resolve the quantum Wasserstein Floor — a full closure requires demonstrating that the Wasserstein gradient flow under non-Hermitian evolution reproduces the foam's discrete entropy spectrum in the semiclassical limit",
     "O28 (operationalize genome claims into testable protocols)",
     "Advance O28 (entropy asymmetry ratio as intelligence predictor) using H=0.4123 population-level baseline as constraint anchor — not resolved but now empirically bounded",
@@ -304,6 +308,7 @@
     "Entropy fraction must be either formally integrated as a criticality-quality parameter within the MCPM/RSA framework or explicitly bracketed as an uncontrolled variable — leaving it unmapped while citing CA telemetry results introduces underdetermination into O140/O141 resolution claims",
     "Integrate mesoscale optogenetic perturbation-relaxation protocol into the existing experimental design as a biological validation arm alongside synthetic ground truth",
     "Track the remaining closure gap in O28: inter-regional coherence biometrics and ordinal asymmetry coefficients jointly confirm the EAR operationalization pathway but neither alone nor together achieve intelligence-prediction closure — the node must flag this as an open falsification target rather than treating empirical progress as completion",
+    "Derive explicit falsification conditions for INV_094 (thermodynamic admissibility) — an invariant indistinguishable from a definition under maximum confirmation and minimum adversarial challenge is not load-bearing until at least one observable that would refute it is specified",
     "Distinguish RangeEn's partial O64 resolution from full closure — the genome must now specify what additional formal machinery (beyond local-range normalization) is required to complete the Wasserstein derivation and close O64 without conflating measurement-layer confirmation with theoretical discharge",
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
     "Derive from FREED first principles the predicted slope of the RangeEn complexity-entropy vs. self-similarity-scaling linear relationship and compare against empirical values",
@@ -348,6 +353,7 @@
     "Track cumulative rejection count as a health metric for input quality — persistent empty-payload submissions signal an upstream sourcing problem that the genome itself cannot fix",
     "Spiked matrix results advance O63 by instantiating Shannon limits in estimation contexts — the genome must now specify whether the Kolmogorov-Shannon interpolation is fully resolved by this scaffolding or whether a residual formal gap remains",
     "measurement artifact",
+    "Audit all existing RSA invariants for state-function formulation and recast any that use entropy-as-state-function into entropy-production-rate form to avoid the NESS category error",
     "Neural SOC grounding of γ=1 strengthens INV_073 and O28 but avalanche-criticality ↔ intelligence coupling must be operationalized as a measurable prediction within the co-occurring motif experiment design — narrative grounding is insufficient",
     "O64 — Demonstrate Zipf-law robustness of compress quality metrics under non-additive (Tsallis-class) partition functions arising from long-range interactions",
     "Evaluate whether quantum W1 distance provides a natural metric for comparing agent belief-state distributions in the co-occurring motif framework — if quantum Wasserstein structure mirrors classical KR duality",
@@ -426,15 +432,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-16T11:12:30.525917+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 131,
+  "last_renormed": "2026-05-16T17:24:57.259624+00:00",
+  "renorm_reason": "Three independent substrate confirmations (RSA-kernel CA, boson pairing, cosmological BAO) materially strengthen universality claims and resolve two open obligations, while the NESS path-dependence challenge and INV_094 definitional critique introduce genuine new",
+  "last_renorm_cycle": 132,
   "drift_flag": true,
-  "drift_overlap": 0.474,
+  "drift_overlap": 0.398,
   "renorm_history": [
     {
-      "timestamp": "2026-05-16T11:12:30.525917+00:00",
-      "reason": ""
+      "timestamp": "2026-05-16T17:24:57.259624+00:00",
+      "reason": "Three independent substrate confirmations (RSA-kernel CA, boson pairing, cosmological BAO) materially strengthen universality claims and resolve two open obligations, while the NESS path-dependence challenge and INV_094 definitional critique introduce genuine new"
     }
   ]
 }
