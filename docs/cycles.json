@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 166,
-    "timestamp": "2026-04-27T22:29:06.064849+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 6,
-      "passive": 7,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Human brain distinctiveness based on EEG spectral coherence connectivity",
-        "compress": "EEG spectral coherence biometrics (N=108) confirms inter-regional coupling as stable individual signature, providing a concrete pipeline that advances O28's empirical path and implicitly supports INV_063's preference for dynamic over static neural measures."
-      },
-      {
-        "title": "Differentiating resting brain states using ordinal symbolic analysis",
-        "compress": "Ordinal asymmetry coefficients robustly discriminate resting brain states across datasets, advancing O28's EAR operationalization and confirming INV_063's dynamic entropy framing, while stopping short of the intelligence-prediction closure O28 requires."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O126",
-        "O84",
-        "O86"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 6,
     "generation": 167,
     "timestamp": "2026-04-28T04:35:54.545178+00:00",
@@ -1755,6 +1723,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 1,
+      "obligations": [
+        "O163",
+        "O72",
+        "O210"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 242,
+    "timestamp": "2026-05-16T17:13:47.791683+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with maximum confirmation and minimum adversarial challenge is structurally indistinguishable from a definition — falsification conditions for INV_094 must be explicitly derived or the claim is not load-bearing."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+        "compress": "A 32×32 RSA-kernel CA self-organizes to σ=1.027 with power-law avalanches, empirically confirming that criticality (γ=1) is a population-level attractor under Wasserstein gradient dynamics, resolving O140 and O141."
+      },
+      {
+        "title": "On the exactly solvable pairing models for bosons",
+        "compress": "Exactly solvable boson pairing independently instantiates the γ=1 critical ridge as the boundary between gapless-condensate and gapped-incompressible phases, confirming phase-transition universality across substrates."
+      },
+      {
+        "title": "SPACE: the SPectroscopic All-sky Cosmic Explorer",
+        "compress": "Cosmological spectroscopic surveys independently demonstrate that scale-invariant structured complexity emerges from thermodynamic constraint at every substrate, extending the genome's RG universality claim to the largest observable scales. CHALLENGE: challenges NONE — this paper operates in a domain (observational cosmology / BAO surveys) orthogonal to the genome's biological and cognitive invariant claims; it strains no existing assertion but leaves the genome's scale-universality claim untested at cosmological resolution."
+      },
+      {
+        "title": "Entropy production in nonequilibrium thermodynamics: a review",
+        "compress": "Entropy in NESS is path-dependent and cannot be a state function, so all RSA invariants must be formulated in terms of entropy production rates or risk inheriting a category error equivalent to caloric theory."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
       "commit_count": 1,
       "obligations": [
         "O163",
