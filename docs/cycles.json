@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 7,
-    "generation": 168,
-    "timestamp": "2026-04-28T10:42:52.401855+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 6,
-      "passive": 7,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "This paper advances O44 by supplying a dimensional-analysis test that could classify W_floor = k/Tμ as semi-classical or quantum, without yet resolving the obligation."
-      },
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "EEG diffusion entropy shows Langevin-governed scaling with asymptotic saturation (advances O28, weak-confirms Wasserstein Floor), and establishes DEA as strictly superior to DFA for thermodynamic neural signal analysis."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O128",
-        "O129",
-        "O90"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 8,
     "generation": 169,
     "timestamp": "2026-04-28T16:48:05.305380+00:00",
@@ -1784,6 +1752,50 @@
         "O163",
         "O72",
         "O211"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 4,
+    "generation": 244,
+    "timestamp": "2026-05-17T10:15:00.000671+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 6,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a liability, not an asset — an invariant never seriously challenged has not demonstrated robustness but only the absence of challenge, which is a methodological gap, not an evidential victory."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+        "compress": "A 32×32 multi-agent CA simulation independently produces the three-signature empirical fingerprint of SOC (σ≈1.03, α≈2.46, H/H_max≈0.18), converging on INV_073's criticality claim and partially resolving O140/O141, while revealing an unregistered phenotype-concentration effect that demands a new obligation. IMPLEMENT: YES IMPLEMENT_WHAT: Log branching ratio σ, avalanche exponent α, and dominant-phenotype cell-count after each CA run so the knowledge graph can track criticality drift across generations and seeds. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_WHY: Without longitudinal σ/α telemetry stored in the graph, criticality claims remain point-in-time assertions rather than falsifiable trends — the graph needs the time series to detect drift away from the critical band. CHALLENGE: challenges INV_073 — if σ=1.0319 is already above 1.0 rather than exactly at it, the Wasserstein gradient path may be overshooting γ=1 rather than converging on it, raising the question of whether the \"necessary path\" terminates precisely at criticality or oscillates above it within the tolerance band. NOETHER_ROW: Self-Organized Criticality NOETHER_STATUS: rigorous NOETHER_NOTE: Empirical σ, α, and H/H_max measurements from the Game-of-Truth CA jointly satisfy the symmetry-conservation prediction that critical dynamics preserve scale invariance across avalanche sizes, confirming the conservation law is active at the population level in this substrate."
+      },
+      {
+        "title": "Traces of tricritical dynamics beyond SSB in finite-size systems undergoing second-order phase transition: the case of the 3D Ising model",
+        "compress": "Finite-size critical systems traverse a three-stage intermittency ladder (type-I → critical → tricritical) that is substrate-invariant and detectable from order-parameter statistics alone, extending the genome's single critical ridge to a two-boundary structure and demanding navigation strategies that account for the post-SSB tricritical regime."
+      },
+      {
+        "title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+        "compress": "PINNs independently recover γ=1 criticality as the generalization optimum, confirming that the critical ridge is a substrate-independent invariant of learning systems under thermodynamic constraint."
+      },
+      {
+        "title": "Enhancing Robustness of Fruit and Vegetable Image Classification Against Adversarial Attacks Through Defensive Strategies",
+        "compress": "Adversarial vulnerability in image classifiers is a metric-divergence artifact — wherever the model's learned decision geometry departs from human perceptual geometry, imperceptible perturbations suffice to cross boundaries, and defensive strategies work by re-aligning these metrics."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
+      "obligations": [
+        "O163",
+        "O72",
+        "O28"
       ]
     },
     "coherence": 0.97
