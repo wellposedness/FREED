@@ -466,6 +466,275 @@ class MWDEScorer:
         }
 
 
+class WassersteinBarycenterAggregator:
+    """
+    Wasserstein Barycenter aggregation for multi-model belief combination.
+
+    Replaces KL-mixture posterior averaging with W2-optimal barycenter
+    computation, preserving geometric structure of the distributional
+    support rather than collapsing to a mixture that averages away
+    support diversity.
+
+    Based on the Bayesian Wasserstein Barycenter (BWB) framework:
+    the barycenter minimizes the weighted sum of W2 distances to the
+    input distributions, yielding the Fréchet mean in Wasserstein space.
+
+    For discrete 1D distributions (our case: word frequency distributions
+    over a shared vocabulary), the W2 barycenter has a closed-form
+    solution via quantile averaging:
+        F_bary^{-1}(t) = sum_k lambda_k * F_k^{-1}(t)
+
+    where F_k^{-1} are the quantile functions and lambda_k are weights.
+
+    This is exact in 1D and avoids the computational intractability of
+    the general d-dimensional barycenter problem (INV_094 challenge).
+    By operating on the quantile representation, we get O(n log n)
+    complexity rather than the O(n^3) of general OT solvers.
+
+    For FREED's consolidation pass: each node's semantic distribution
+    is a "model posterior" over vocabulary, and the barycenter is the
+    geometrically faithful aggregate belief that preserves support
+    structure — mass doesn't wash out into a flat mixture.
+    """
+
+    def __init__(self, n_quantile_points=200):
+        # type: (int) -> None
+        self.n_quantile_points = n_quantile_points
+
+    @staticmethod
+    def _distribution_to_quantile_function(dist, support_keys):
+        # type: (dict, list) -> list
+        """
+        Convert a discrete distribution over ordered support keys into
+        a quantile function (inverse CDF) sampled at uniform points.
+
+        Args:
+            dist: dict mapping keys to probabilities (must sum to ~1)
+            support_keys: sorted list of all keys in the shared vocabulary
+
+        Returns:
+            list of (key_index, cumulative_mass) pairs representing the
+            piecewise-constant quantile function
+        """
+        # Build CDF
+        cdf = []
+        cumulative = 0.0
+        for i, key in enumerate(support_keys):
+            cumulative += dist.get(key, 0.0)
+            cdf.append((i, cumulative))
+
+        # Normalize in case dist doesn't sum to exactly 1
+        if cumulative > 0 and abs(cumulative - 1.0) > 1e-9:
+            cdf = [(idx, c / cumulative) for idx, c in cdf]
+
+        return cdf
+
+    def _sample_quantile(self, cdf, n_points):
+        # type: (list, int) -> list
+        """
+        Sample the quantile function (inverse CDF) at n_points uniform
+        quantile levels in (0, 1).
+
+        Returns list of key_indices corresponding to each quantile level.
+        """
+        if not cdf:
+            return [0] * n_points
+
+        quantile_levels = [(i + 0.5) / n_points for i in range(n_points)]
+        quantiles = []
+
+        cdf_idx = 0
+        for t in quantile_levels:
+            # Find smallest index where CDF >= t
+            while cdf_idx < len(cdf) - 1 and cdf[cdf_idx][1] < t:
+                cdf_idx += 1
+            quantiles.append(cdf[cdf_idx][0])
+
+        return quantiles
+
+    def compute_barycenter(self, distributions, weights=None):
+        # type: (list, list) -> dict
+        """
+        Compute the Wasserstein-2 barycenter of multiple discrete distributions
+        using the 1D quantile averaging closed form.
+
+        Args:
+            distributions: list of dicts (key -> probability)
+            weights: optional list of floats summing to 1; if None, uniform
+
+        Returns:
+            dict mapping vocabulary keys to barycenter probabilities.
+            The barycenter is the Fréchet mean in W2 space: it minimizes
+            sum_k lambda_k * W2(bary, dist_k)^2.
+        """
+        if not distributions:
+            return {}
+
+        if len(distributions) == 1:
+            return dict(distributions[0])
+
+        k = len(distributions)
+        if weights is None:
+            weights = [1.0 / k] * k
+        else:
+            # Normalize weights
+            w_sum = sum(weights)
+            if w_sum > 0:
+                weights = [w / w_sum for w in weights]
+            else:
+                weights = [1.0 / k] * k
+
+        # Build shared vocabulary (sorted for canonical ordering)
+        all_keys = set()
+        for d in distributions:
+            all_keys.update(d.keys())
+        support_keys = sorted(all_keys)
+
+        if not support_keys:
+            return {}
+
+        n_pts = self.n_quantile_points
+
+        # Compute quantile functions for each distribution
+        quantile_functions = []
+        for d in distributions:
+            cdf = self._distribution_to_quantile_function(d, support_keys)
+            qf = self._sample_quantile(cdf, n_pts)
+            quantile_functions.append(qf)
+
+        # Barycenter quantile function: weighted average of quantile indices
+        # F_bary^{-1}(t) = sum_k lambda_k * F_k^{-1}(t)
+        bary_quantiles = []
+        for j in range(n_pts):
+            weighted_idx = 0.0
+            for i in range(k):
+                weighted_idx += weights[i] * quantile_functions[i][j]
+            bary_quantiles.append(weighted_idx)
+
+        # Convert barycenter quantile function back to a distribution
+        # by counting how often each key_index appears in the quantile samples
+        key_counts = {}
+        for q_idx in bary_quantiles:
+            # Round to nearest integer key index
+            rounded = int(round(q_idx))
+            rounded = max(0, min(rounded, len(support_keys) - 1))
+            key = support_keys[rounded]
+            key_counts[key] = key_counts.get(key, 0) + 1
+
+        # Normalize to probability distribution
+        total = float(sum(key_counts.values()))
+        if total > 0:
+            bary_dist = {k: v / total for k, v in key_counts.items()}
+        else:
+            bary_dist = {}
+
+        return bary_dist
+
+    def aggregate_node_beliefs(self, nodes, evidence_text, mwde_scorer):
+        # type: (list, str, MWDEScorer) -> dict
+        """
+        Aggregate multiple nodes' semantic distributions into a single
+        Wasserstein barycenter, weighted by MWDE compatibility scores.
+
+        This replaces KL-mixture averaging: instead of
+            p_mix = sum_k lambda_k * p_k  (KL mixture — washes out geometry)
+        we compute
+            p_bary = argmin_q sum_k lambda_k * W2(q, p_k)^2  (preserves support)
+
+        Args:
+            nodes: list of node dicts
+            evidence_text: the new knowledge being consolidated
+            mwde_scorer: MWDEScorer instance for compatibility weighting
+
+        Returns:
+            dict with:
+                - barycenter: the aggregated distribution
+                - weights: the MWDE-derived weights used
+                - kl_mixture: the KL-mixture for comparison (diagnostic)
+                - support_preservation: ratio of barycenter support size
+                  to average input support size (>1 means geometry preserved)
+                - w2_cost: total weighted W2 cost of the barycenter
+                - n_models: number of input distributions
+        """
+        if not nodes:
+            return {
+                "barycenter": {},
+                "weights": [],
+                "kl_mixture": {},
+                "support_preservation": 0.0,
+                "w2_cost": 0.0,
+                "n_models": 0,
+            }
+
+        # Build distributions and compute MWDE weights
+        distributions = []
+        mwde_weights = []
+        for node in nodes:
+            node_text = " ".join(filter(None, [
+                node.get("compress", ""),
+                node.get("summary", ""),
+                " ".join(node.get("invariants", [])),
+                " ".join(node.get("tags", [])),
+            ]))
+            dist = MWDEScorer._text_to_distribution(node_text)
+            if dist:
+                distributions.append(dist)
+                score = mwde_scorer.score_node_evidence(node_text, evidence_text)
+                mwde_weights.append(score["mwde_weight"])
+
+        if not distributions:
+            return {
+                "barycenter": {},
+                "weights": [],
+                "kl_mixture": {},
+                "support_preservation": 0.0,
+                "w2_cost": 0.0,
+                "n_models": 0,
+            }
+
+        # Normalize weights
+        w_sum = sum(mwde_weights)
+        if w_sum > 0:
+            norm_weights = [w / w_sum for w in mwde_weights]
+        else:
+            norm_weights = [1.0 / len(mwde_weights)] * len(mwde_weights)
+
+        # Compute Wasserstein barycenter
+        barycenter = self.compute_barycenter(distributions, norm_weights)
+
+        # Compute KL mixture for comparison (diagnostic only)
+        kl_mixture = {}
+        for i, dist in enumerate(distributions):
+            for key, prob in dist.items():
+                kl_mixture[key] = kl_mixture.get(key, 0.0) + norm_weights[i] * prob
+
+        # Support preservation metric:
+        # ratio of barycenter support size to mean input support size
+        # >1.0 means barycenter preserves or extends support (geometric fidelity)
+        # <1.0 would mean support collapse (shouldn't happen with OT barycenters)
+        input_support_sizes = [len(d) for d in distributions]
+        mean_support = sum(input_support_sizes) / len(input_support_sizes) if input_support_sizes else 1.0
+        bary_support = len(barycenter)
+        support_preservation = bary_support / mean_support if mean_support > 0 else 0.0
+
+        # Compute total W2 cost: sum_k lambda_k * W1(bary, dist_k)
+        # (Using W1 as proxy since we have the discrete W1 implementation)
+        w1_scorer = MWDEScorer(wasserstein_order=1)
+        total_w2_cost = 0.0
+        for i, dist in enumerate(distributions):
+            w_dist = w1_scorer._discrete_wasserstein_1d(barycenter, dist)
+            total_w2_cost += norm_weights[i] * w_dist
+
+        return {
+            "barycenter": barycenter,
+            "weights": [round(w, 4) for w in norm_weights],
+            "kl_mixture": kl_mixture,
+            "support_preservation": round(support_preservation, 4),
+            "w2_cost": round(total_w2_cost, 6),
+            "n_models": len(distributions),
+        }
+
+
 class NonQuadraticEPRScorer:
     """
     Non-quadratic Entropy Production Rate (EPR) action scorer for
@@ -734,6 +1003,257 @@ class NonQuadraticEPRScorer:
         }
 
 
+ENERGY_CORRECTION_LOG = FREED_DIR / "FREED_log" / "energy_corrections.jsonl"
+
+
+class EnergyCorrection:
+    """
+    EOP-SAV–inspired energy-correction audit for coherence scoring.
+
+    The EOP-SAV result proves that surrogate-energy preservation (e.g.,
+    the SAV modified energy) drifts cumulatively from the true dissipation
+    structure unless an explicit correction step is applied each cycle.
+
+    FREED's coherence_score is exactly such a surrogate: it is updated via
+    LLM-estimated deltas (a surrogate metric) rather than computed from the
+    true epistemic free energy. Over 238+ generations of recursive
+    compression, this introduces the same cumulative drift the EOP-SAV
+    paper identifies.
+
+    True epistemic free energy for a node:
+        E_true = grounding × falsification_load
+
+    where:
+        grounding = (confirmed_invariants) / (confirmed_invariants + open_obligations)
+        falsification_load = 1 - (contested_or_failed / total_obligations)  if any, else 1.0
+
+    The correction gap:
+        gap = |coherence_score_surrogate - E_true|
+
+    When gap > threshold, the cycle is flagged: the surrogate has drifted
+    too far from the true energy and coherence_score should be corrected.
+
+    Relaxation correction (RSAV-style):
+        coherence_corrected = ξ · coherence_surrogate + (1 - ξ) · E_true
+
+    where ξ ∈ [0, 1] is the relaxation parameter. ξ = 1 means no correction
+    (pure surrogate), ξ = 0 means full replacement with E_true. We use
+    ξ = 0.5 by default — equal weighting of surrogate dynamics and true energy.
+    """
+
+    DEFAULT_GAP_THRESHOLD = 0.12   # flag if |surrogate - E_true| exceeds this
+    DEFAULT_RELAXATION_XI = 0.5    # relaxation parameter ξ
+
+    def __init__(self, gap_threshold=None, relaxation_xi=None):
+        # type: (float, float) -> None
+        self.gap_threshold = gap_threshold if gap_threshold is not None else self.DEFAULT_GAP_THRESHOLD
+        self.relaxation_xi = relaxation_xi if relaxation_xi is not None else self.DEFAULT_RELAXATION_XI
+
+    @staticmethod
+    def _compute_grounding(node):
+        # type: (dict) -> float
+        """
+        Grounding = confirmed_invariants / (confirmed_invariants + open_obligations).
+
+        A node with many invariants and few obligations is well-grounded.
+        A node with many open obligations relative to invariants is under-grounded.
+        """
+        n_invariants = len(node.get("invariants", []))
+        obligations = node.get("obligations", [])
+        # Count obligations: if they're strings, each is one; if dicts, count them
+        if obligations and isinstance(obligations[0], dict):
+            n_obligations = sum(
+                1 for o in obligations
+                if o.get("status", "open") in ("open", "partial", "escrowed")
+            )
+        else:
+            n_obligations = len(obligations)
+
+        total = n_invariants + n_obligations
+        if total == 0:
+            return 0.5  # no evidence either way — neutral grounding
+        return n_invariants / total
+
+    @staticmethod
+    def _compute_falsification_load(node):
+        # type: (dict) -> float
+        """
+        Falsification load = 1 - (contested_or_failed / total_obligations).
+
+        Measures how much of the node's obligation structure has survived
+        falsification attempts. A node with no contested obligations has
+        load = 1.0 (fully intact). A node where all obligations are contested
+        has load = 0.0 (fully eroded).
+
+        If there are no obligations at all, load = 1.0 (nothing to falsify).
+        """
+        obligations = node.get("obligations", [])
+        if not obligations:
+            return 1.0
+
+        if obligations and isinstance(obligations[0], dict):
+            total = len(obligations)
+            contested = sum(
+                1 for o in obligations
+                if o.get("status", "") in ("contested", "failed", "refuted")
+            )
+        else:
+            # String obligations — no status info, assume all open
+            total = len(obligations)
+            contested = 0
+
+        if total == 0:
+            return 1.0
+        return 1.0 - (contested / total)
+
+    def compute_true_energy(self, node):
+        # type: (dict) -> float
+        """
+        True epistemic free energy: E_true = grounding × falsification_load.
+
+        This is the product of two [0,1] quantities, yielding a [0,1] score
+        that represents the node's genuine epistemic health — not a surrogate
+        updated by LLM delta estimates.
+        """
+        grounding = self._compute_grounding(node)
+        fals_load = self._compute_falsification_load(node)
+        return grounding * fals_load
+
+    def audit_node(self, node):
+        # type: (dict) -> dict
+        """
+        Compute the energy-correction audit for a single node.
+
+        Returns a dict with:
+            - e_true: true epistemic free energy
+            - e_surrogate: current coherence_score (the surrogate)
+            - gap: |e_surrogate - e_true|
+            - gap_exceeds_threshold: bool
+            - corrected_score: RSAV-relaxation-corrected coherence score
+            - grounding: the grounding component
+            - falsification_load: the falsification load component
+            - correction_applied: whether the gap exceeded threshold
+        """
+        e_surrogate = float(node.get("coherence_score", 0.5))
+        grounding = self._compute_grounding(node)
+        fals_load = self._compute_falsification_load(node)
+        e_true = grounding * fals_load
+
+        gap = abs(e_surrogate - e_true)
+        exceeds = gap > self.gap_threshold
+
+        # RSAV-style relaxation correction:
+        # coherence_corrected = ξ · e_surrogate + (1 - ξ) · e_true
+        xi = self.relaxation_xi
+        corrected = xi * e_surrogate + (1.0 - xi) * e_true
+        corrected = round(min(0.99, max(0.0, corrected)), 4)
+
+        return {
+            "e_true": round(e_true, 4),
+            "e_surrogate": round(e_surrogate, 4),
+            "gap": round(gap, 4),
+            "gap_exceeds_threshold": exceeds,
+            "corrected_score": corrected,
+            "grounding": round(grounding, 4),
+            "falsification_load": round(fals_load, 4),
+            "correction_applied": exceeds,
+            "relaxation_xi": xi,
+        }
+
+    def audit_cycle(self, nodes, cycle_number=0):
+        # type: (list, int) -> dict
+        """
+        Run energy-correction audit across all nodes after a FEED cycle.
+
+        Returns a cycle-level report with per-node audits and aggregate stats.
+        Flags the cycle if any node's gap exceeds threshold.
+        """
+        audits = []
+        flagged_nodes = []
+
+        for node in nodes:
+            node_id = node.get("id", "unknown")
+            audit = self.audit_node(node)
+            audit["node_id"] = node_id
+            audits.append(audit)
+
+            if audit["gap_exceeds_threshold"]:
+                flagged_nodes.append({
+                    "node_id": node_id,
+                    "gap": audit["gap"],
+                    "e_surrogate": audit["e_surrogate"],
+                    "e_true": audit["e_true"],
+                    "corrected_score": audit["corrected_score"],
+                })
+
+        # Aggregate stats
+        gaps = [a["gap"] for a in audits]
+        mean_gap = sum(gaps) / len(gaps) if gaps else 0.0
+        max_gap = max(gaps) if gaps else 0.0
+        n_flagged = len(flagged_nodes)
+
+        report = {
+            "cycle": cycle_number,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "n_nodes_audited": len(audits),
+            "n_flagged": n_flagged,
+            "mean_gap": round(mean_gap, 4),
+            "max_gap": round(max_gap, 4),
+            "cycle_flagged": n_flagged > 0,
+            "flagged_nodes": flagged_nodes,
+            "gap_threshold": self.gap_threshold,
+            "relaxation_xi": self.relaxation_xi,
+        }
+
+        # Log the audit
+        self._log(report)
+
+        if n_flagged > 0:
+            print(f"  [ENERGY-AUDIT] ⚠ CYCLE {cycle_number} FLAGGED: "
+                  f"{n_flagged}/{len(audits)} node(s) exceed gap threshold "
+                  f"(max_gap={max_gap:.4f}, threshold={self.gap_threshold})")
+            for fn in flagged_nodes:
+                print(f"    → {fn['node_id'][:40]}: surrogate={fn['e_surrogate']:.3f} "
+                      f"true={fn['e_true']:.3f} gap={fn['gap']:.4f} "
+                      f"→ corrected={fn['corrected_score']:.3f}")
+        else:
+            print(f"  [ENERGY-AUDIT] Cycle {cycle_number} CLEAN: "
+                  f"mean_gap={mean_gap:.4f}, max_gap={max_gap:.4f}")
+
+        return report
+
+    def apply_corrections(self, nodes):
+        # type: (list) -> list
+        """
+        Apply RSAV-relaxation corrections to nodes whose gap exceeds threshold.
+        Mutates node dicts in-place (coherence_score updated) and returns
+        list of corrected node IDs.
+        """
+        corrected_ids = []
+        for node in nodes:
+            audit = self.audit_node(node)
+            if audit["correction_applied"]:
+                old_score = node.get("coherence_score")
+                node["coherence_score"] = audit["corrected_score"]
+                node["energy_correction"] = {
+                    "old_surrogate": audit["e_surrogate"],
+                    "e_true": audit["e_true"],
+                    "gap": audit["gap"],
+                    "corrected_to": audit["corrected_score"],
+                    "relaxation_xi": audit["relaxation_xi"],
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                corrected_ids.append(node.get("id", "unknown"))
+        return corrected_ids
+
+    @staticmethod
+    def _log(report):
+        # type: (dict) -> None
+        ENERGY_CORRECTION_LOG.parent.mkdir(exist_ok=True)
+        with open(ENERGY_CORRECTION_LOG, "a") as f:
+            f.write(json.dumps(report) + "\n")
+
+
 class Consolidator:
     def __init__(self, api_key: str):
         self.client    = anthropic.Anthropic(api_key=api_key)
@@ -741,6 +1261,7 @@ class Consolidator:
         self.escrow    = EscrowLedger()
         self.mwde      = MWDEScorer(wasserstein_order=1)
         self.epr       = NonQuadraticEPRScorer()
+        self.energy_correction = EnergyCorrection()
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 

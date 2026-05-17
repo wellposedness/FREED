@@ -197,9 +197,10 @@ class FREEDDaemon:
         self._load_state()
         self._load_obligations()
 
-        # Graceful shutdown on Ctrl+C
+        # Graceful shutdown on Ctrl+C, kill, or terminal close
         signal.signal(signal.SIGINT,  self._shutdown)
         signal.signal(signal.SIGTERM, self._shutdown)
+        signal.signal(signal.SIGHUP,  self._shutdown)
 
         print(f"\n[FREED] Ready. Generation {self.state['generation']}. "
               f"{len(self.obligations)} obligations loaded "
@@ -794,11 +795,12 @@ class FREEDDaemon:
                     continue
 
                 drained.append({
-                    "url":      url,
-                    "title":    data.get("title", entry.get("conv", "")),
-                    "abstract": (data.get("abstract") or data.get("content", ""))[:1500],
-                    "score":    entry.get("score", 5),
-                    "source":   "curated_queue",
+                    "url":        url,
+                    "title":      data.get("title", entry.get("conv", "")),
+                    "abstract":   (data.get("abstract") or data.get("content", ""))[:1500],
+                    "score":      entry.get("score", 5),
+                    "source":     "curated_queue",
+                    "from_human": entry.get("from") == "human",
                 })
                 entry["status"] = "fed_to_daemon"
                 seen_set.add(url)
@@ -885,18 +887,36 @@ class FREEDDaemon:
         """
         Pre-score passive sweep candidates before they reach L7.
         Targeted inputs bypass (already obligation-driven).
+        Human-curated queue entries (from: human in links_queue.json) also
+        bypass — explicit curatorial judgment supersedes ambient scoring.
         Annotates survivors with cerebellum_score and methodology_type.
         """
-        if not passive:
-            cycle_log["phases"]["cerebellum"] = {"skipped": True}
-            return targeted
+        # Split off human-curated entries — they bypass cerebellum scoring.
+        human_curated = [i for i in passive if i.get("from_human")]
+        scored_pool   = [i for i in passive if not i.get("from_human")]
+
+        if not scored_pool:
+            cycle_log["phases"]["cerebellum"] = {
+                "skipped":       True,
+                "human_bypass":  len(human_curated),
+            }
+            if human_curated:
+                print(f"\n[CEREBELLUM] {len(human_curated)} human-curated bypass; "
+                      f"no ambient items to score.")
+            return targeted + human_curated
 
         print("\n[CEREBELLUM]")
+        if human_curated:
+            print(f"[CEREBELLUM] {len(human_curated)} human-curated entry(ies) "
+                  f"bypassing scoring.")
         merged, dropped, stats = self.cerebellum.score_candidates(
-            targeted, passive, self.obligations, self.cycle_num
+            targeted, scored_pool, self.obligations, self.cycle_num
         )
+        stats = dict(stats) if isinstance(stats, dict) else {"raw": stats}
+        stats["human_bypass"] = len(human_curated)
         cycle_log["phases"]["cerebellum"] = stats
-        return merged
+        # Prepend human-curated so they keep front-of-line position.
+        return human_curated + merged
 
     # ── PREDICT ──────────────────────────────────────────────────────────────
 
@@ -1091,6 +1111,11 @@ class FREEDDaemon:
         capped_inputs = probe_list + real_inputs[:MAX_FEEDS_PER_CYCLE]
         print(f"[FEED] Processing {len(capped_inputs)} input(s) ({len(probe_list)} probe + {min(len(real_inputs), MAX_FEEDS_PER_CYCLE)} real).")
 
+        # Open branching-ratio window — σ = new_edges / papers, computed
+        # once at phase end (CA reference is a 200-step average; per-call σ
+        # is structurally incomparable).
+        get_graph().begin_feed_window()
+
         feed_results = []
         total_feeds = len(capped_inputs)
         for feed_idx, inp in enumerate(capped_inputs):
@@ -1246,7 +1271,10 @@ class FREEDDaemon:
                 "yield":    result.get("yield", 0.0),
             })
 
+        # Close branching-ratio window and stamp result into cycle log.
+        branching = get_graph().close_feed_window()
         cycle_log["phases"]["feed"] = feed_results
+        cycle_log["phases"]["feed_branching_ratio"] = branching
         return feed_results
 
     # ── CONSOLIDATE ──────────────────────────────────────────────────────────
@@ -2078,7 +2106,17 @@ Output only the classification lines, nothing else."""
     # ── Shutdown ─────────────────────────────────────────────────────────────
 
     def _shutdown(self, signum, frame):
-        print("\n\n[FREED] Shutdown signal received. Finishing gracefully...")
+        sig_name = signal.Signals(signum).name
+        print(f"\n\n[FREED] Shutdown signal received ({sig_name}). Finishing gracefully...")
+        try:
+            self._log_event("DAEMON_STOP", {
+                "signal":     sig_name,
+                "signum":     int(signum),
+                "generation": self.state.get("generation"),
+                "cycle_num":  getattr(self, "cycle_num", None),
+            })
+        except Exception as e:
+            print(f"[FREED] Failed to log DAEMON_STOP: {e}")
         self.running = False
         self._save_state()
         self._save_obligations()

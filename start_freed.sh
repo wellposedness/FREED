@@ -41,4 +41,21 @@ else
 fi
 echo ""
 
-exec caffeinate -i python3 -u freed.py $DEV_FLAG "$@"
+mkdir -p FREED_log
+LOGFILE="FREED_log/stdout_$(date +%Y%m%d).log"
+
+nohup caffeinate -i python3 -u freed.py $DEV_FLAG "$@" >> "$LOGFILE" 2>&1 &
+DAEMON_PID=$!
+disown
+
+sleep 2
+if kill -0 $DAEMON_PID 2>/dev/null; then
+    echo "[FREED] Daemon launched in background (PID $DAEMON_PID)."
+    echo "[FREED] Log:  $LOGFILE"
+    echo "[FREED] Tail: tail -f $LOGFILE"
+    echo "[FREED] Stop: kill \$(cat freed.pid)"
+else
+    echo "[FREED] ERROR: daemon failed to start within 2s. Last log lines:"
+    tail -30 "$LOGFILE"
+    exit 1
+fi

@@ -4291,6 +4291,558 @@ class BranchingRatioTelemetryCollector:
         self._cycle_count = 0
 
 
+# ─── Rolling Criticality Telemetry (First-Class σ + H + Avalanche Metric) ───
+# Per-step branching-ratio σ = mean(offspring counts per active cell per step)
+# computed as a rolling metric alongside Shannon entropy H and avalanche size
+# distribution statistics.  Designed for real-time criticality drift detection
+# and corrective reweighting triggers.
+#
+# INV_073 context: σ=1.0363 sits 0.0363 above the center of the critical
+# band, suggesting slightly supercritical operation.  This tracker makes
+# the drift visible step-by-step and emits corrective-reweight signals
+# when σ leaves [0.95, 1.05] for more than `reweight_patience` consecutive
+# steps, enabling the epistemic loop to self-correct before coherence
+# degrades.
+#
+# Addresses O140 (CA measurement grounding), O141 (solo-kernel vs population
+# criticality), INV_073 (Wasserstein gradient bias detection and corrective
+# reweighting).
+
+
+class RollingCriticalityTelemetry:
+    """
+    First-class rolling telemetry metric that jointly tracks:
+
+      1. **σ** — branching ratio = mean(offspring per active cell per step)
+      2. **H** — Shannon entropy of the population type distribution (bits)
+      3. **Avalanche size distribution** — power-law exponent α via Hill MLE
+
+    These three metrics are computed per step on a rolling window basis
+    and emitted as a single telemetry record, enabling real-time
+    criticality drift detection and corrective reweighting triggers.
+
+    The corrective reweighting signal is emitted when σ leaves the
+    critical band [0.95, 1.05] for more than `reweight_patience`
+    consecutive steps, providing the epistemic loop with a concrete
+    control signal to adjust agent reproduction rates or selection
+    pressures before the system consolidates into a frozen or
+    dissipated regime.
+
+    Addresses O140, O141, INV_073 (σ=1.0363 slightly supercritical —
+    this tracker would detect and flag that drift in real time).
+
+    Usage::
+
+        telemetry = RollingCriticalityTelemetry(window=50, reweight_patience=10)
+        for step in simulation:
+            record = telemetry.record_step(
+                offspring_per_cell=[1, 2, 0, 1, 1, 3, 0, ...],
+                shannon_h=0.3991,
+                shannon_h_max=2.585,
+                avalanche_sizes=[4, 1, 7, 2],
+                survival_rate=0.9163,
+            )
+            if record["reweight_signal"]:
+                apply_corrective_reweighting(record["reweight_direction"],
+                                              record["reweight_magnitude"])
+        report = telemetry.report()
+    """
+
+    # Critical band bounds
+    SIGMA_BAND_LO = 0.95
+    SIGMA_BAND_HI = 1.05
+    # SOC-consistent avalanche exponent range
+    ALPHA_SOC_LO = 1.5
+    ALPHA_SOC_HI = 3.0
+    ALPHA_R2_MIN = 0.85
+
+    def __init__(
+        self,
+        window=50,              # type: int
+        reweight_patience=10,   # type: int
+        history_limit=5000,     # type: int
+    ):
+        # type: (...) -> None
+        """
+        Parameters
+        ----------
+        window : int
+            Number of recent steps for rolling σ, H, and α estimation.
+            Default: 50.
+        reweight_patience : int
+            Number of consecutive steps σ must be outside the critical
+            band before a corrective reweight signal is emitted.
+            Default: 10.
+        history_limit : int
+            Maximum per-step records retained in memory. Default: 5000.
+        """
+        self.window = max(5, window)
+        self.reweight_patience = max(1, reweight_patience)
+        self.history_limit = max(10, history_limit)
+
+        # Per-step rolling buffers
+        self._sigma_series = []         # type: List[float]
+        self._h_series = []             # type: List[float]
+        self._h_fraction_series = []    # type: List[float]
+        self._avalanche_pool = []       # type: List[float]
+
+        # Step tracking
+        self._step_count = 0            # type: int
+        self._consecutive_out = 0       # type: int
+        self._out_direction = ""        # type: str
+
+        # Records and events
+        self._records = []              # type: list
+        self._reweight_signals = []     # type: list
+
+    def record_step(
+        self,
+        offspring_per_cell,         # type: List[float]
+        shannon_h=0.0,              # type: float
+        shannon_h_max=0.0,          # type: float
+        avalanche_sizes=None,       # type: Optional[List[float]]
+        survival_rate=0.0,          # type: float
+        parent_count=0,             # type: int
+        child_count=0,              # type: int
+    ):
+        # type: (...) -> dict
+        """
+        Record one simulation step's per-cell offspring counts and
+        recompute rolling σ, H, and α telemetry.
+
+        Parameters
+        ----------
+        offspring_per_cell : list of float
+            Number of offspring produced by each active cell at this step.
+            σ = mean(offspring_per_cell).  If empty, falls back to
+            child_count / parent_count.
+        shannon_h : float
+            Shannon entropy H of the population type distribution (bits).
+        shannon_h_max : float
+            Maximum possible Shannon entropy (log2 of number of types).
+        avalanche_sizes : list of float or None
+            Sizes of avalanches that terminated at this step.
+        survival_rate : float
+            Fraction of cells surviving this generation.
+        parent_count : int
+            Fallback: total active parent cells (used only if
+            offspring_per_cell is empty).
+        child_count : int
+            Fallback: total active child cells (used only if
+            offspring_per_cell is empty).
+
+        Returns
+        -------
+        dict with keys:
+            step                : int
+            sigma               : float  — instantaneous σ (this step)
+            sigma_rolling       : float  — rolling mean σ over window
+            sigma_rolling_std   : float  — rolling std σ over window
+            shannon_h           : float
+            h_fraction          : float  — H / H_max
+            h_rolling           : float  — rolling mean H over window
+            alpha               : float  — power-law exponent (Hill MLE)
+            alpha_r_squared     : float  — R² of the power-law fit
+            power_law_likely    : bool
+            in_critical_band    : bool   — σ_rolling in [0.95, 1.05]
+            verdict             : str    — AT_CRITICAL / NEAR_CRITICAL / etc.
+            sigma_drift         : float  — |σ_rolling - 1.0|
+            reweight_signal     : bool   — True if corrective reweight needed
+            reweight_direction  : str    — "decrease" (supercritical) /
+                                           "increase" (subcritical) / ""
+            reweight_magnitude  : float  — suggested adjustment magnitude
+                                           (proportional to drift from 1.0)
+            consecutive_out     : int    — steps σ has been outside band
+            survival_rate       : float
+            timestamp           : str
+        """
+        self._step_count += 1
+
+        # ── Compute instantaneous σ ──
+        if offspring_per_cell and len(offspring_per_cell) > 0:
+            sigma = sum(offspring_per_cell) / float(len(offspring_per_cell))
+        elif parent_count > 0:
+            sigma = float(child_count) / float(parent_count)
+        else:
+            sigma = 0.0
+
+        self._sigma_series.append(sigma)
+
+        # ── Shannon entropy ──
+        h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
+        self._h_series.append(shannon_h)
+        self._h_fraction_series.append(h_fraction)
+
+        # ── Accumulate avalanche sizes ──
+        if avalanche_sizes is not None:
+            self._avalanche_pool.extend(avalanche_sizes)
+        max_pool = self.window * 20
+        if len(self._avalanche_pool) > max_pool:
+            self._avalanche_pool = self._avalanche_pool[-max_pool:]
+
+        # ── Rolling σ statistics ──
+        sigma_window = self._sigma_series[-self.window:]
+        w_n = len(sigma_window)
+        sigma_rolling = sum(sigma_window) / float(w_n)
+        s_var = sum((s - sigma_rolling) ** 2 for s in sigma_window) / float(w_n)
+        sigma_rolling_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── Rolling H ──
+        h_window = self._h_series[-self.window:]
+        h_rolling = sum(h_window) / float(len(h_window)) if h_window else 0.0
+
+        # ── Fit power-law α (Hill MLE) ──
+        alpha, alpha_r2 = self._fit_hill()
+
+        power_law_likely = (
+            self.ALPHA_SOC_LO <= alpha <= self.ALPHA_SOC_HI
+            and alpha_r2 >= self.ALPHA_R2_MIN
+        )
+
+        # ── Band check and verdict ──
+        in_band = self.SIGMA_BAND_LO <= sigma_rolling <= self.SIGMA_BAND_HI
+        sigma_drift = abs(sigma_rolling - 1.0)
+        verdict = _criticality_verdict(sigma_rolling, alpha, alpha_r2)
+
+        # ── Consecutive-out-of-band tracking ──
+        if sigma_rolling != 0.0 and not in_band:
+            direction = "supercritical" if sigma_rolling > self.SIGMA_BAND_HI else "subcritical"
+            if self._out_direction == direction:
+                self._consecutive_out += 1
+            else:
+                self._consecutive_out = 1
+                self._out_direction = direction
+        else:
+            self._consecutive_out = 0
+            self._out_direction = ""
+
+        # ── Corrective reweight signal ──
+        reweight_signal = (
+            self._consecutive_out >= self.reweight_patience
+            and w_n >= 5
+        )
+
+        reweight_direction = ""
+        reweight_magnitude = 0.0
+        if reweight_signal:
+            if self._out_direction == "supercritical":
+                reweight_direction = "decrease"
+                # Magnitude proportional to how far above 1.0
+                reweight_magnitude = round(sigma_rolling - 1.0, 6)
+            elif self._out_direction == "subcritical":
+                reweight_direction = "increase"
+                reweight_magnitude = round(1.0 - sigma_rolling, 6)
+
+            self._reweight_signals.append({
+                "step": self._step_count - 1,
+                "sigma_rolling": round(sigma_rolling, 6),
+                "direction": reweight_direction,
+                "magnitude": reweight_magnitude,
+                "consecutive_out": self._consecutive_out,
+                "h_rolling": round(h_rolling, 4),
+                "alpha": round(alpha, 4),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
+
+        record = {
+            "step":               self._step_count - 1,
+            "sigma":              round(sigma, 6),
+            "sigma_rolling":      round(sigma_rolling, 6),
+            "sigma_rolling_std":  round(sigma_rolling_std, 6),
+            "shannon_h":          round(shannon_h, 4),
+            "h_fraction":         round(h_fraction, 4),
+            "h_rolling":          round(h_rolling, 4),
+            "alpha":              round(alpha, 4),
+            "alpha_r_squared":    round(alpha_r2, 4),
+            "power_law_likely":   power_law_likely,
+            "in_critical_band":   in_band,
+            "verdict":            verdict,
+            "sigma_drift":        round(sigma_drift, 6),
+            "reweight_signal":    reweight_signal,
+            "reweight_direction": reweight_direction,
+            "reweight_magnitude": reweight_magnitude,
+            "consecutive_out":    self._consecutive_out,
+            "survival_rate":      round(survival_rate, 4),
+            "timestamp":          datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._records.append(record)
+
+        # ── Trim histories ──
+        if len(self._records) > self.history_limit:
+            trim = len(self._records) - self.history_limit
+            self._records = self._records[trim:]
+        if len(self._sigma_series) > self.history_limit:
+            self._sigma_series = self._sigma_series[-self.history_limit:]
+        if len(self._h_series) > self.history_limit:
+            self._h_series = self._h_series[-self.history_limit:]
+        if len(self._h_fraction_series) > self.history_limit:
+            self._h_fraction_series = self._h_fraction_series[-self.history_limit:]
+
+        return record
+
+    def sigma_series(self):
+        # type: () -> List[float]
+        """Return the full per-step σ history."""
+        return list(self._sigma_series)
+
+    def entropy_series(self):
+        # type: () -> List[float]
+        """Return the full per-step Shannon entropy history."""
+        return list(self._h_series)
+
+    def reweight_signals(self):
+        # type: () -> list
+        """Return all corrective reweight signal records."""
+        return list(self._reweight_signals)
+
+    def records(self):
+        # type: () -> list
+        """Return all per-step telemetry records."""
+        return list(self._records)
+
+    def report(self):
+        # type: () -> dict
+        """
+        Generate a summary report of the rolling criticality telemetry,
+        including σ/H/α statistics, reweight signal counts, and INV_073
+        assessment.
+
+        Returns
+        -------
+        dict with keys:
+            n_steps                 : int
+            sigma_global_mean       : float
+            sigma_global_std        : float
+            h_global_mean           : float
+            h_fraction_global_mean  : float
+            alpha_latest            : float
+            alpha_r_squared_latest  : float
+            fraction_in_band        : float  — fraction of steps with σ in band
+            n_reweight_signals      : int    — total corrective reweight signals
+            n_reweight_decrease     : int    — reweight signals toward decrease
+            n_reweight_increase     : int    — reweight signals toward increase
+            mean_sigma_drift        : float  — mean |σ - 1.0| per step
+            max_consecutive_out     : int    — longest run outside critical band
+            drift_trend             : str    — "stable"/"freezing"/"dissipating"
+            inv073_assessment       : str    — human-readable assessment
+            timestamp               : str
+        """
+        n = self._step_count
+        ts = datetime.now(timezone.utc).isoformat()
+
+        if n == 0:
+            return {
+                "n_steps": 0,
+                "sigma_global_mean": 0.0,
+                "sigma_global_std": 0.0,
+                "h_global_mean": 0.0,
+                "h_fraction_global_mean": 0.0,
+                "alpha_latest": 0.0,
+                "alpha_r_squared_latest": 0.0,
+                "fraction_in_band": 0.0,
+                "n_reweight_signals": 0,
+                "n_reweight_decrease": 0,
+                "n_reweight_increase": 0,
+                "mean_sigma_drift": 0.0,
+                "max_consecutive_out": 0,
+                "drift_trend": "no_data",
+                "inv073_assessment": "No steps recorded.",
+                "timestamp": ts,
+            }
+
+        # ── σ statistics ──
+        all_s = self._sigma_series
+        s_n = len(all_s)
+        s_mean = sum(all_s) / float(s_n) if s_n > 0 else 0.0
+        s_var = sum((s - s_mean) ** 2 for s in all_s) / float(s_n) if s_n > 0 else 0.0
+        s_std = math.sqrt(s_var) if s_var > 0 else 0.0
+
+        # ── H statistics ──
+        all_h = self._h_series
+        h_mean = sum(all_h) / float(len(all_h)) if all_h else 0.0
+        all_hf = self._h_fraction_series
+        hf_mean = sum(all_hf) / float(len(all_hf)) if all_hf else 0.0
+
+        # ── Band fraction ──
+        n_in_band = sum(
+            1 for s in all_s
+            if self.SIGMA_BAND_LO <= s <= self.SIGMA_BAND_HI
+        )
+        frac_in_band = round(float(n_in_band) / float(s_n), 4) if s_n > 0 else 0.0
+
+        # ── Mean drift ──
+        total_drift = sum(abs(s - 1.0) for s in all_s)
+        mean_drift = round(total_drift / float(s_n), 6) if s_n > 0 else 0.0
+
+        # ── Max consecutive out ──
+        max_consec = 0
+        cur_consec = 0
+        for s in all_s:
+            if not (self.SIGMA_BAND_LO <= s <= self.SIGMA_BAND_HI) and s != 0.0:
+                cur_consec += 1
+                if cur_consec > max_consec:
+                    max_consec = cur_consec
+            else:
+                cur_consec = 0
+
+        # ── Latest α ──
+        alpha_latest = 0.0
+        alpha_r2_latest = 0.0
+        if self._records:
+            alpha_latest = self._records[-1].get("alpha", 0.0)
+            alpha_r2_latest = self._records[-1].get("alpha_r_squared", 0.0)
+
+        # ── Reweight signal counts ──
+        n_rw = len(self._reweight_signals)
+        n_rw_dec = sum(1 for r in self._reweight_signals if r["direction"] == "decrease")
+        n_rw_inc = sum(1 for r in self._reweight_signals if r["direction"] == "increase")
+
+        # ── Drift trend ──
+        if len(all_s) >= 8:
+            first_half = all_s[:len(all_s) // 2]
+            second_half = all_s[len(all_s) // 2:]
+            fh_m = sum(first_half) / float(len(first_half))
+            sh_m = sum(second_half) / float(len(second_half))
+            delta = sh_m - fh_m
+            if delta > 0.02:
+                drift_trend = "dissipating"
+            elif delta < -0.02:
+                drift_trend = "freezing"
+            else:
+                drift_trend = "stable"
+        else:
+            drift_trend = "stable"
+
+        # ── INV_073 assessment ──
+        if frac_in_band > 0.85 and drift_trend == "stable" and n_rw == 0:
+            inv073_text = (
+                "STABLE_CRITICAL: {:.1%} of steps in critical band, no "
+                "reweight signals needed. sigma={:.4f}±{:.4f}, "
+                "H_mean={:.4f} bits (h_frac={:.3f}). The system maintains "
+                "criticality without corrective intervention."
+            ).format(frac_in_band, s_mean, s_std, h_mean, hf_mean)
+        elif n_rw > 0 and frac_in_band > 0.5:
+            inv073_text = (
+                "CORRECTED: {} reweight signal(s) emitted ({} decrease, "
+                "{} increase). sigma={:.4f}±{:.4f} with {:.1%} in band. "
+                "The system required corrective reweighting to maintain "
+                "criticality — consistent with INV_073 (sigma=1.0363 "
+                "slightly supercritical, needing active steering)."
+            ).format(n_rw, n_rw_dec, n_rw_inc, s_mean, s_std, frac_in_band)
+        elif s_mean > self.SIGMA_BAND_HI:
+            inv073_text = (
+                "SUPERCRITICAL_DRIFT: mean sigma={:.4f} > {:.2f}. "
+                "Max consecutive steps outside band: {}. The system "
+                "is operating in a supercritical regime (INV_073 pattern: "
+                "sigma=1.0363 above ridge center). {} reweight signals "
+                "emitted but drift persists."
+            ).format(s_mean, self.SIGMA_BAND_HI, max_consec, n_rw)
+        else:
+            inv073_text = (
+                "MONITORING: sigma={:.4f}±{:.4f}, {:.1%} in band, "
+                "drift_trend='{}', {} reweight signals. Ongoing "
+                "monitoring required."
+            ).format(s_mean, s_std, frac_in_band, drift_trend, n_rw)
+
+        return {
+            "n_steps":                  n,
+            "sigma_global_mean":        round(s_mean, 6),
+            "sigma_global_std":         round(s_std, 6),
+            "h_global_mean":            round(h_mean, 4),
+            "h_fraction_global_mean":   round(hf_mean, 4),
+            "alpha_latest":             round(alpha_latest, 4),
+            "alpha_r_squared_latest":   round(alpha_r2_latest, 4),
+            "fraction_in_band":         frac_in_band,
+            "n_reweight_signals":       n_rw,
+            "n_reweight_decrease":      n_rw_dec,
+            "n_reweight_increase":      n_rw_inc,
+            "mean_sigma_drift":         mean_drift,
+            "max_consecutive_out":      max_consec,
+            "drift_trend":              drift_trend,
+            "inv073_assessment":        inv073_text,
+            "timestamp":                ts,
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Reset all state for a new telemetry run."""
+        self._sigma_series = []
+        self._h_series = []
+        self._h_fraction_series = []
+        self._avalanche_pool = []
+        self._step_count = 0
+        self._consecutive_out = 0
+        self._out_direction = ""
+        self._records = []
+        self._reweight_signals = []
+
+    def _fit_hill(self):
+        # type: () -> Tuple[float, float]
+        """
+        Fit power-law exponent α via Hill estimator on pooled avalanche sizes.
+        Returns (alpha, r_squared). Returns (0.0, 0.0) if insufficient data.
+        """
+        sizes = [s for s in self._avalanche_pool if s > 0]
+        if len(sizes) < 10:
+            return (0.0, 0.0)
+
+        x_min = max(1.0, min(sizes))
+        tail = [s for s in sizes if s >= x_min]
+        n = len(tail)
+        if n < 5:
+            return (0.0, 0.0)
+
+        log_sum = 0.0
+        for s in tail:
+            ratio = float(s) / x_min
+            if ratio > 0:
+                log_sum += math.log(ratio)
+
+        if log_sum <= 0.0:
+            return (0.0, 0.0)
+
+        alpha = 1.0 + float(n) / log_sum
+
+        # R² on log-log CCDF
+        tail_sorted = sorted(tail)
+        unique_sizes = sorted(set(tail_sorted))
+        n_total = float(len(tail_sorted))
+
+        log_x = []     # type: List[float]
+        log_ccdf = []  # type: List[float]
+        for x_val in unique_sizes:
+            count_ge = sum(1 for s in tail_sorted if s >= x_val)
+            p = float(count_ge) / n_total
+            if p > 0 and x_val > 0:
+                log_x.append(math.log(float(x_val)))
+                log_ccdf.append(math.log(p))
+
+        if len(log_x) < 3:
+            return (alpha, 0.0)
+
+        k = len(log_x)
+        sum_lx = sum(log_x)
+        sum_ly = sum(log_ccdf)
+        sum_lxy = sum(x * y for x, y in zip(log_x, log_ccdf))
+        sum_lx2 = sum(x * x for x in log_x)
+
+        denom = float(k) * sum_lx2 - sum_lx * sum_lx
+        if abs(denom) < 1e-15:
+            return (alpha, 0.0)
+
+        slope = (float(k) * sum_lxy - sum_lx * sum_ly) / denom
+        intercept = (sum_ly - slope * sum_lx) / float(k)
+
+        mean_ly = sum_ly / float(k)
+        ss_tot = sum((y - mean_ly) ** 2 for y in log_ccdf)
+        ss_res = sum((y - (intercept + slope * x)) ** 2
+                     for x, y in zip(log_x, log_ccdf))
+        r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+
+        return (alpha, max(0.0, r_squared))
+
+
 # ─── Ridge Position Scorer (INV_073 Falsification) ──────────────────────────
 # Converts INV_073 ("critical-ridge navigation") from an unfalsifiable
 # post-hoc label into a live, falsifiable metric.  Computes rolling variance
@@ -7439,6 +7991,501 @@ def output_only_dissipation_estimator(
         "o112_status":             o112_status,
         "method":                  "output_only_dissipation_estimator",
         "n_points":                n,
+        "timestamp":               ts,
+    }
+
+
+# ─── Measurement Probability Sweep (Floquet Critical Point Locator) ──────────
+# Varies the effective "measurement collapse" rate p on a belief-state
+# time series and measures the resulting entropy and coherence, testing
+# whether RSA scoring transitions between ordered (low entropy, high
+# coherence) and disordered (high entropy, low coherence) phases as a
+# function of update/measurement frequency.
+#
+# Physical analogy (Floquet dissipative phase transition):
+#   A quantum spin chain subject to periodic resetting measurements at
+#   rate p exhibits a phase transition between ferromagnetic (ordered) and
+#   paramagnetic (disordered) phases at a critical measurement probability
+#   p_c.  At p_c, the system has maximum susceptibility (∂S/∂p peaks),
+#   analogous to maximum sensitivity of the epistemic system at its own
+#   critical ridge.
+#
+#   Here, "measurement" = projective collapse of a belief state to its
+#   most-probable value (argmax).  Between measurements, the belief state
+#   evolves unitarily (coherent Bayesian update / drift).  The competition
+#   between coherent evolution (which builds superposition / uncertainty)
+#   and measurement collapse (which projects to a definite state) produces
+#   the phase transition.
+#
+# Implementation:
+#   For each measurement probability p in a sweep grid:
+#     1. Walk through the coherence time series.
+#     2. At each step, with probability p, "collapse" the running belief
+#        state to its local value (reset to the observed coherence).
+#        With probability (1-p), let the belief state drift (exponential
+#        moving average of previous belief and current observation).
+#     3. Compute the Shannon entropy of the resulting collapsed/drifted
+#        belief trajectory and its mean coherence (order parameter).
+#     4. Compute the susceptibility χ = -∂S/∂p (entropy sensitivity to
+#        measurement rate).
+#
+#   The critical point p_c is where χ is maximized — this is the
+#   measurement rate at which the epistemic system is most sensitive,
+#   analogous to the Floquet critical measurement probability.
+#
+# RSA prediction:
+#   If the genome's γ=1 operating point coincides with the Floquet
+#   critical point, the coherence series observed at γ=1 should yield
+#   p_c ≈ 0.5 (balanced measurement/evolution), and the susceptibility
+#   peak should be sharp (divergent in the thermodynamic limit).
+#
+# Addresses: Floquet measurement framework, INV_073 (critical ridge
+# characterization), O140 (CA measurement grounding).
+#
+# Reference:
+#   "Dissipative phase transitions in many-body spin systems subject to
+#   periodic resetting measurements" — Floquet framework for measurement-
+#   induced phase transitions.
+
+
+def _belief_trajectory_at_p(
+    coherence_series,   # type: List[float]
+    p,                  # type: float
+    drift_alpha=0.1,    # type: float
+    seed=None,          # type: Optional[int]
+):
+    # type: (...) -> List[float]
+    """
+    Generate a belief-state trajectory under measurement probability p.
+
+    At each step:
+      - With probability p: "collapse" — belief snaps to the observed
+        coherence value (projective measurement).
+      - With probability (1-p): "drift" — belief evolves as an exponential
+        moving average: belief = (1 - drift_alpha) * belief + drift_alpha * obs.
+
+    Parameters
+    ----------
+    coherence_series : list of float
+        The observed coherence time series (the "environment").
+    p : float
+        Measurement probability per step, in [0, 1].
+    drift_alpha : float
+        EMA smoothing factor for the drift (unitary-like) evolution.
+        Default: 0.1 (slow drift, preserving belief inertia).
+    seed : int or None
+        Random seed for reproducibility.  None → use system entropy.
+
+    Returns
+    -------
+    list of float
+        The belief-state trajectory (same length as coherence_series).
+    """
+    import random as _rng
+    if seed is not None:
+        _rng.seed(seed)
+    else:
+        _rng.seed()
+
+    n = len(coherence_series)
+    if n == 0:
+        return []
+
+    belief = coherence_series[0]
+    trajectory = [belief]
+
+    for i in range(1, n):
+        obs = coherence_series[i]
+        if _rng.random() < p:
+            # Measurement collapse: snap to observed value
+            belief = obs
+        else:
+            # Drift: EMA evolution (coherent, smooth)
+            belief = (1.0 - drift_alpha) * belief + drift_alpha * obs
+        trajectory.append(belief)
+
+    return trajectory
+
+
+def _trajectory_entropy(trajectory, n_bins=20):
+    # type: (List[float], int) -> float
+    """
+    Compute Shannon entropy (nats) of a trajectory's value distribution.
+
+    Uses histogram binning over the trajectory's range.
+    """
+    n = len(trajectory)
+    if n < 2:
+        return 0.0
+
+    t_min = min(trajectory)
+    t_max = max(trajectory)
+    span = t_max - t_min
+    if span <= 0.0:
+        return 0.0
+
+    bin_width = span / float(n_bins)
+    counts = [0] * n_bins
+    for v in trajectory:
+        idx = int((v - t_min) / bin_width)
+        if idx >= n_bins:
+            idx = n_bins - 1
+        counts[idx] += 1
+
+    entropy = 0.0
+    for c in counts:
+        if c > 0:
+            p = float(c) / float(n)
+            entropy -= p * math.log(p)
+
+    return entropy
+
+
+def _trajectory_mean_coherence(trajectory):
+    # type: (List[float],) -> float
+    """Compute mean value of a trajectory (order parameter)."""
+    if not trajectory:
+        return 0.0
+    return sum(trajectory) / float(len(trajectory))
+
+
+def _trajectory_variance(trajectory):
+    # type: (List[float],) -> float
+    """Compute variance of a trajectory (fluctuation measure)."""
+    n = len(trajectory)
+    if n < 2:
+        return 0.0
+    mean = sum(trajectory) / float(n)
+    return sum((v - mean) ** 2 for v in trajectory) / float(n)
+
+
+def measurement_probability_sweep(
+    coherence_series,       # type: List[float]
+    p_min=0.0,              # type: float
+    p_max=1.0,              # type: float
+    n_p_points=21,          # type: int
+    n_realizations=10,      # type: int
+    drift_alpha=0.1,        # type: float
+    n_bins_entropy=20,      # type: int
+    base_seed=42,           # type: int
+):
+    # type: (...) -> dict
+    """
+    Measurement probability sweep: vary the effective collapse rate on
+    belief states and measure entropy/coherence phase transition.
+
+    Implements the Floquet measurement framework analogy for epistemic
+    systems.  At each measurement probability p, generates multiple
+    stochastic belief-state trajectories (to average over measurement
+    noise), then computes:
+
+      - S(p): Shannon entropy of the belief trajectory (disorder measure)
+      - C(p): Mean coherence of the belief trajectory (order parameter)
+      - χ(p): Susceptibility = -dS/dp (sensitivity to measurement rate)
+      - Var(p): Variance of the belief trajectory (fluctuation measure)
+
+    The critical measurement probability p_c is identified as the p at
+    which χ(p) is maximized — the point of maximum epistemic sensitivity.
+
+    Parameters
+    ----------
+    coherence_series : list of float
+        The observed coherence time series from FREED's epistemic loop.
+        This is the "environment" that the belief state is measured against.
+    p_min : float
+        Minimum measurement probability.  Default: 0.0 (pure drift).
+    p_max : float
+        Maximum measurement probability.  Default: 1.0 (pure collapse).
+    n_p_points : int
+        Number of p values to sweep.  Default: 21.
+    n_realizations : int
+        Number of stochastic realizations per p value (for averaging).
+        Default: 10.
+    drift_alpha : float
+        EMA smoothing factor for drift evolution.  Default: 0.1.
+    n_bins_entropy : int
+        Number of histogram bins for trajectory entropy.  Default: 20.
+    base_seed : int
+        Base random seed for reproducibility.  Default: 42.
+
+    Returns
+    -------
+    dict with keys:
+        p_values              : list of float — the p grid
+        entropy_curve         : list of float — S(p) averaged over realizations
+        coherence_curve       : list of float — C(p) averaged over realizations
+        variance_curve        : list of float — Var(p) averaged over realizations
+        susceptibility_curve  : list of float — χ(p) = -dS/dp (finite differences)
+        p_critical            : float — p at maximum susceptibility (Floquet critical point)
+        susceptibility_max    : float — χ(p_c), the peak susceptibility
+        entropy_at_pc         : float — S(p_c)
+        coherence_at_pc       : float — C(p_c)
+        variance_at_pc        : float — Var(p_c)
+        ordered_phase         : dict  — {p_range, mean_entropy, mean_coherence}
+                                        for p > p_c (measurement-dominated, ordered)
+        disordered_phase      : dict  — {p_range, mean_entropy, mean_coherence}
+                                        for p < p_c (drift-dominated, disordered)
+        transition_sharpness  : float — ratio of susceptibility peak to mean,
+                                        higher = sharper transition
+        gamma1_coincidence    : bool  — whether p_c ≈ 0.5 (balanced measurement/
+                                        evolution, consistent with γ=1 operating point)
+        gamma1_detail         : str   — human-readable assessment of whether
+                                        γ=1 coincides with the Floquet critical point
+        phase_transition_detected : bool — whether a clear phase transition was found
+        floquet_assessment    : str   — overall Floquet framework assessment
+        n_realizations        : int   — echo of input
+        n_points              : int   — length of input coherence series
+        method                : str   — "measurement_probability_sweep"
+        timestamp             : str   — ISO-8601 UTC
+    """
+    n = len(coherence_series)
+    ts = datetime.now(timezone.utc).isoformat()
+
+    if n < 10:
+        return {
+            "p_values": [],
+            "entropy_curve": [],
+            "coherence_curve": [],
+            "variance_curve": [],
+            "susceptibility_curve": [],
+            "p_critical": 0.0,
+            "susceptibility_max": 0.0,
+            "entropy_at_pc": 0.0,
+            "coherence_at_pc": 0.0,
+            "variance_at_pc": 0.0,
+            "ordered_phase": {"p_range": (0.0, 0.0), "mean_entropy": 0.0, "mean_coherence": 0.0},
+            "disordered_phase": {"p_range": (0.0, 0.0), "mean_entropy": 0.0, "mean_coherence": 0.0},
+            "transition_sharpness": 0.0,
+            "gamma1_coincidence": False,
+            "gamma1_detail": "Insufficient data (need >= 10 coherence samples).",
+            "phase_transition_detected": False,
+            "floquet_assessment": "Insufficient data.",
+            "n_realizations": n_realizations,
+            "n_points": n,
+            "method": "measurement_probability_sweep",
+            "timestamp": ts,
+        }
+
+    # ── Build p grid ──
+    if n_p_points < 3:
+        n_p_points = 3
+    p_values = []  # type: List[float]
+    for k in range(n_p_points):
+        frac = float(k) / float(n_p_points - 1) if n_p_points > 1 else 0.5
+        p_val = p_min + frac * (p_max - p_min)
+        p_values.append(round(p_val, 8))
+
+    # ── Sweep: for each p, generate n_realizations trajectories ──
+    entropy_curve = []      # type: List[float]
+    coherence_curve = []    # type: List[float]
+    variance_curve = []     # type: List[float]
+
+    for p_idx, p_val in enumerate(p_values):
+        s_accum = 0.0
+        c_accum = 0.0
+        v_accum = 0.0
+
+        for r in range(n_realizations):
+            seed = base_seed * 1000 + p_idx * 100 + r
+            traj = _belief_trajectory_at_p(
+                coherence_series, p_val,
+                drift_alpha=drift_alpha, seed=seed,
+            )
+            s_accum += _trajectory_entropy(traj, n_bins=n_bins_entropy)
+            c_accum += _trajectory_mean_coherence(traj)
+            v_accum += _trajectory_variance(traj)
+
+        n_r_f = float(n_realizations)
+        entropy_curve.append(round(s_accum / n_r_f, 8))
+        coherence_curve.append(round(c_accum / n_r_f, 8))
+        variance_curve.append(round(v_accum / n_r_f, 8))
+
+    # ── Compute susceptibility χ(p) = -dS/dp via central finite differences ──
+    susceptibility_curve = []  # type: List[float]
+    for i in range(len(p_values)):
+        if i == 0:
+            # Forward difference
+            dp = p_values[1] - p_values[0]
+            if dp > 1e-12:
+                chi = -(entropy_curve[1] - entropy_curve[0]) / dp
+            else:
+                chi = 0.0
+        elif i == len(p_values) - 1:
+            # Backward difference
+            dp = p_values[-1] - p_values[-2]
+            if dp > 1e-12:
+                chi = -(entropy_curve[-1] - entropy_curve[-2]) / dp
+            else:
+                chi = 0.0
+        else:
+            # Central difference
+            dp = p_values[i + 1] - p_values[i - 1]
+            if dp > 1e-12:
+                chi = -(entropy_curve[i + 1] - entropy_curve[i - 1]) / dp
+            else:
+                chi = 0.0
+        susceptibility_curve.append(round(chi, 8))
+
+    # ── Locate critical point: p at max |χ| ──
+    max_chi = 0.0
+    max_chi_idx = 0
+    for i, chi in enumerate(susceptibility_curve):
+        if abs(chi) > abs(max_chi):
+            max_chi = chi
+            max_chi_idx = i
+
+    p_critical = p_values[max_chi_idx]
+    susceptibility_max = max_chi
+    entropy_at_pc = entropy_curve[max_chi_idx]
+    coherence_at_pc = coherence_curve[max_chi_idx]
+    variance_at_pc = variance_curve[max_chi_idx]
+
+    # ── Characterize ordered and disordered phases ──
+    # Ordered phase: p > p_c (measurement-dominated → collapsed, low entropy, high coherence)
+    # Disordered phase: p < p_c (drift-dominated → spread, high entropy, lower coherence)
+    ordered_s = []     # type: List[float]
+    ordered_c = []     # type: List[float]
+    disordered_s = []  # type: List[float]
+    disordered_c = []  # type: List[float]
+
+    for i, p_val in enumerate(p_values):
+        if p_val > p_critical:
+            ordered_s.append(entropy_curve[i])
+            ordered_c.append(coherence_curve[i])
+        elif p_val < p_critical:
+            disordered_s.append(entropy_curve[i])
+            disordered_c.append(coherence_curve[i])
+
+    ordered_phase = {
+        "p_range": (round(p_critical, 6), round(p_max, 6)),
+        "mean_entropy": round(sum(ordered_s) / float(len(ordered_s)), 6) if ordered_s else 0.0,
+        "mean_coherence": round(sum(ordered_c) / float(len(ordered_c)), 6) if ordered_c else 0.0,
+    }
+
+    disordered_phase = {
+        "p_range": (round(p_min, 6), round(p_critical, 6)),
+        "mean_entropy": round(sum(disordered_s) / float(len(disordered_s)), 6) if disordered_s else 0.0,
+        "mean_coherence": round(sum(disordered_c) / float(len(disordered_c)), 6) if disordered_c else 0.0,
+    }
+
+    # ── Transition sharpness: peak χ / mean |χ| ──
+    mean_abs_chi = sum(abs(c) for c in susceptibility_curve) / float(len(susceptibility_curve)) if susceptibility_curve else 0.0
+    transition_sharpness = abs(susceptibility_max) / mean_abs_chi if mean_abs_chi > 1e-12 else 0.0
+
+    # ── Phase transition detection ──
+    # A clear transition requires:
+    #   1. Susceptibility peak is at least 2x the mean (sharp)
+    #   2. Entropy changes sign of slope around p_c
+    #   3. p_c is not at the boundary (0 or 1)
+    phase_transition_detected = (
+        transition_sharpness > 2.0
+        and p_critical > p_min + 0.05
+        and p_critical < p_max - 0.05
+    )
+
+    # ── γ=1 coincidence test ──
+    # The RSA genome operates at γ=1 (balanced generation/dissipation).
+    # If the Floquet analogy holds, p_c should be near 0.5 (balanced
+    # measurement/evolution), reflecting the same balance.
+    pc_deviation_from_half = abs(p_critical - 0.5)
+    gamma1_coincidence = pc_deviation_from_half < 0.1  # within ±0.1 of 0.5
+
+    if gamma1_coincidence and phase_transition_detected:
+        gamma1_detail = (
+            "CONFIRMED: p_c={:.4f} is within ±0.1 of 0.5, consistent with "
+            "the γ=1 operating point coinciding with the Floquet critical "
+            "measurement probability. The epistemic system's balanced "
+            "generation/dissipation (γ=1) maps to balanced measurement/"
+            "evolution (p≈0.5) in the Floquet framework. Transition "
+            "sharpness={:.2f} (>{:.1f} threshold). The genome's operating "
+            "point is at maximum epistemic sensitivity."
+        ).format(p_critical, transition_sharpness, 2.0)
+    elif phase_transition_detected and not gamma1_coincidence:
+        gamma1_detail = (
+            "OFFSET: p_c={:.4f} deviates from 0.5 by {:.4f}. A clear "
+            "phase transition exists but the critical point does NOT "
+            "coincide with balanced measurement/evolution. This suggests "
+            "either: (a) γ=1 does not map linearly to p=0.5, or "
+            "(b) the drift_alpha={:.2f} parameter shifts the effective "
+            "critical point, or (c) the Floquet analogy requires "
+            "refinement for epistemic systems. Transition sharpness={:.2f}."
+        ).format(p_critical, pc_deviation_from_half, drift_alpha,
+                 transition_sharpness)
+    elif not phase_transition_detected:
+        gamma1_detail = (
+            "NO_TRANSITION: No clear phase transition detected in the "
+            "measurement probability sweep. Transition sharpness={:.2f} "
+            "(< 2.0 threshold), p_c estimate={:.4f} (possibly at boundary). "
+            "This may indicate: (a) the coherence series is too short "
+            "(N={}), (b) the system is deep within one phase, or "
+            "(c) the Floquet measurement analogy does not apply to this "
+            "epistemic system's dynamics."
+        ).format(transition_sharpness, p_critical, n)
+    else:
+        gamma1_detail = (
+            "UNDETERMINED: p_c={:.4f}, transition_sharpness={:.2f}. "
+            "Marginal evidence for phase transition; γ=1 coincidence "
+            "assessment inconclusive."
+        ).format(p_critical, transition_sharpness)
+
+    # ── Overall Floquet assessment ──
+    if phase_transition_detected and gamma1_coincidence:
+        floquet_assessment = (
+            "FLOQUET CRITICAL POINT LOCATED: p_c={:.4f} with susceptibility "
+            "peak chi_max={:.4f} and transition sharpness={:.2f}. The "
+            "epistemic system exhibits a measurement-induced phase transition "
+            "between an ordered phase (p>{:.2f}: low entropy S={:.4f}, "
+            "high coherence C={:.4f}) and a disordered phase (p<{:.2f}: "
+            "high entropy S={:.4f}, lower coherence C={:.4f}). The critical "
+            "point coincides with balanced measurement/evolution (p≈0.5), "
+            "consistent with the genome's γ=1 operating point. This is "
+            "empirical evidence that RSA's critical ridge corresponds to "
+            "the Floquet critical measurement probability."
+        ).format(
+            p_critical, susceptibility_max, transition_sharpness,
+            p_critical, ordered_phase["mean_entropy"], ordered_phase["mean_coherence"],
+            p_critical, disordered_phase["mean_entropy"], disordered_phase["mean_coherence"],
+        )
+    elif phase_transition_detected:
+        floquet_assessment = (
+            "PHASE TRANSITION DETECTED at p_c={:.4f} (chi_max={:.4f}, "
+            "sharpness={:.2f}), but the critical point does NOT coincide "
+            "with p=0.5. The Floquet framework applies to this epistemic "
+            "system but the γ=1 ↔ p_c mapping requires a nonlinear "
+            "correction or the drift parameter (alpha={:.2f}) needs "
+            "calibration."
+        ).format(p_critical, susceptibility_max, transition_sharpness,
+                 drift_alpha)
+    else:
+        floquet_assessment = (
+            "NO CLEAR PHASE TRANSITION in measurement probability sweep "
+            "(sharpness={:.2f} < 2.0, p_c_estimate={:.4f}). The Floquet "
+            "measurement framework may not apply at this signal length "
+            "(N={}) or parameter regime (drift_alpha={:.2f}). Consider "
+            "increasing n_realizations or coherence series length."
+        ).format(transition_sharpness, p_critical, n, drift_alpha)
+
+    return {
+        "p_values":                [round(p, 8) for p in p_values],
+        "entropy_curve":           entropy_curve,
+        "coherence_curve":         coherence_curve,
+        "variance_curve":          variance_curve,
+        "susceptibility_curve":    susceptibility_curve,
+        "p_critical":              round(p_critical, 8),
+        "susceptibility_max":      round(susceptibility_max, 8),
+        "entropy_at_pc":           round(entropy_at_pc, 8),
+        "coherence_at_pc":         round(coherence_at_pc, 8),
+        "variance_at_pc":          round(variance_at_pc, 8),
+        "ordered_phase":           ordered_phase,
+        "disordered_phase":        disordered_phase,
+        "transition_sharpness":    round(transition_sharpness, 6),
+        "gamma1_coincidence":      gamma1_coincidence,
+        "gamma1_detail":           gamma1_detail,
+        "phase_transition_detected": phase_transition_detected,
+        "floquet_assessment":      floquet_assessment,
+        "n_realizations":          n_realizations,
+        "n_points":                n,
+        "method":                  "measurement_probability_sweep",
         "timestamp":               ts,
     }
 

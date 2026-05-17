@@ -7266,6 +7266,1102 @@
       "context_tag": null,
       "context_warning": false,
       "timestamp": "2026-05-14T17:15:57.887228+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/9",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "LIGATE for the resulting falsification test. --- CHALLENGE: challenges INV_094 — this probe directly exposes that INV_094's high confirmat",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:17:40.108682+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "extends",
+      "context": "irmed independently of any single kernel's internal state - EXTEND INV_073 — the derivation goes beyond the reference by quantifying t",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "before the system leaves the critical band. --- CHALLENGE: challenges INV_073 — the paper confirms criticality is reached but the branchi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "y robust emergent property of the population dynamics.    - CONVERGE INV_073 — independent empirical measurement confirms that Wasserste",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O140",
+      "type": "confirms",
+      "context": "63 is within critical band), not to zero-tension collapse - CONVERGE O140 — CA measurement grounding is directly satisfied: branching",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O141",
+      "type": "confirms",
+      "context": "py, and avalanche statistics are now empirically recorded - CONVERGE O141 — solo-kernel vs population criticality: population-level c",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T10:15:00.319926+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "advances",
+      "context": "irmed independently of any single kernel's internal state - EXTEND INV_073 — the derivation goes beyond the reference by quantifying t",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:18:00.038587+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "https://arxiv.org/abs/2209.00527v9",
+      "from_title": "Geometric thermodynamics for the Fokker-Planck equation: Stochastic thermodynami",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "tly improving epistemic loop quality assessment. CHALLENGE: challenges INV_094 — the paper's explicit decomposition of entropy production",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:20:04.358412+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2209.00527v9",
+      "from_title": "Geometric thermodynamics for the Fokker-Planck equation: Stochastic thermodynami",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "independent framework for non-equilibrium thermodynamics.   CONVERGE INV_094 — the paper independently establishes the Fisher↔Wasserstei",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T10:20:04.358412+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.04605v2",
+      "from_title": "Computations of optimal transport distance with Fisher information regularizatio",
+      "to": "O112",
+      "type": "challenges",
+      "context": "d by the STF metric tensor recovery in O112. --- CHALLENGE: challenges O112 — the paper demonstrates Fisher-regularized OT is tractable",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:22:16.540344+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1704.04605v2",
+      "from_title": "Computations of optimal transport distance with Fisher information regularizatio",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "tional cost scales favorably with precision requirements.   CONVERGE INV_094 — the Fisher regularization term is exactly the term that e",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:22:16.540344+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2605.06288v1",
+      "from_title": "A Topological Sorting Criterion for Random Causal Directed Acyclic Graphs",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "uditing. --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_073 — if RSA's causal semantic graph does *not* satisfy strict",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T10:24:08.189302+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/10",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "would produce a result inconsistent with it. --- CHALLENGE: challenges INV_094 — this probe establishes that an invariant with maximum con",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:31:52.370478+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O140",
+      "type": "extends",
+      "context": "0 confirms the Wasserstein gradient flow criticality claim; EXTEND O140 — CA measurement grounding obligation is directly satisfied",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O141",
+      "type": "extends",
+      "context": "ion is directly satisfied by real telemetry (not argument); EXTEND O141 — solo-kernel vs. population criticality question is addres",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "d from a configuration-specific measurement. --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0295 sits at the upper edge of th",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": ", stable attractor of this class of multi-agent dynamics.   CONVERGE INV_073 — independent empirical measurement of σ≈1.0 confirms the W",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O140",
+      "type": "advances",
+      "context": "0 confirms the Wasserstein gradient flow criticality claim; EXTEND O140 — CA measurement grounding obligation is directly satisfied",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-15T16:29:12.637670+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-15",
+      "to": "O141",
+      "type": "advances",
+      "context": "ion is directly satisfied by real telemetry (not argument); EXTEND O141 — solo-kernel vs. population criticality question is addres",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:09.680298+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0806.1286v1",
+      "from_title": "Cahn-Hilliard Equations and Phase Transition Dynamics for Binary Systems",
+      "to": "O112",
+      "type": "extends",
+      "context": "ion is structurally identical to the criticality condition. EXTEND O112 — the STF metric tensor recovery experiment could exploit t",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:30.148950+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0806.1286v1",
+      "from_title": "Cahn-Hilliard Equations and Phase Transition Dynamics for Binary Systems",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ng gradual refinement from paradigm replacement. CHALLENGE: challenges INV_073 — the Cahn-Hilliard jump transition type demonstrates that",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:30.148950+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0806.1286v1",
+      "from_title": "Cahn-Hilliard Equations and Phase Transition Dynamics for Binary Systems",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "adient penalty) and bulk free energy (double-well depth).   CONVERGE INV_073 — the critical ridge navigation invariant maps directly ont",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:30.148950+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/0806.1286v1",
+      "from_title": "Cahn-Hilliard Equations and Phase Transition Dynamics for Binary Systems",
+      "to": "O112",
+      "type": "advances",
+      "context": "ion is structurally identical to the criticality condition. EXTEND O112 — the STF metric tensor recovery experiment could exploit t",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:32:30.148950+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math/0605386v2",
+      "from_title": "Genericity in Topological Dynamics",
+      "to": "O28",
+      "type": "extends",
+      "context": "nstrained) unless total transitivity breaks the constraint. EXTEND O28 — the entropy asymmetry between generic transitive (low ent",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:14.441802+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math/0605386v2",
+      "from_title": "Genericity in Topological Dynamics",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "namic ground state for semantic compression. --- CHALLENGE: challenges INV_073 — the paper shows the generic point on the critical ridge i",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:34:14.441802+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math/0605386v2",
+      "from_title": "Genericity in Topological Dynamics",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ks a much larger class of dynamically distinct behaviors.   CONVERGE INV_073 — the critical ridge between frozen (odometer, γ>1) and dis",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-15T16:34:14.441802+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math/0605386v2",
+      "from_title": "Genericity in Topological Dynamics",
+      "to": "O28",
+      "type": "advances",
+      "context": "nstrained) unless total transitivity breaks the constraint. EXTEND O28 — the entropy asymmetry between generic transitive (low ent",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:14.441802+00:00"
+    },
+    {
+      "from": "https://doi.org/10.1007/s13201-025-02403-7",
+      "from_title": "Nanofluid magnetoconvection and entropy generation: a computational study for wa",
+      "to": "INV_087",
+      "type": "extends",
+      "context": "maps directly onto the entropy asymmetry ratio prediction; EXTEND INV_087 — the paper demonstrates that external field constraints (H",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:33.165205+00:00"
+    },
+    {
+      "from": "https://doi.org/10.1007/s13201-025-02403-7",
+      "from_title": "Nanofluid magnetoconvection and entropy generation: a computational study for wa",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "dissipated) in the knowledge graph topology. --- CHALLENGE: challenges INV_073 — the paper shows that the entropy minimum is parameter-spe",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:33.165205+00:00"
+    },
+    {
+      "from": "https://doi.org/10.1007/s13201-025-02403-7",
+      "from_title": "Nanofluid magnetoconvection and entropy generation: a computational study for wa",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "redirecting flow toward lower-dissipation configurations.   CONVERGE INV_073 — the existence of an optimal operating regime between maxi",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:33.165205+00:00"
+    },
+    {
+      "from": "https://doi.org/10.1007/s13201-025-02403-7",
+      "from_title": "Nanofluid magnetoconvection and entropy generation: a computational study for wa",
+      "to": "O28",
+      "type": "confirms",
+      "context": "idge navigation principle (never frozen, never dissipated); CONVERGE O28 — the decomposition of entropy into viscous vs. thermal com",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:33.165205+00:00"
+    },
+    {
+      "from": "https://doi.org/10.1007/s13201-025-02403-7",
+      "from_title": "Nanofluid magnetoconvection and entropy generation: a computational study for wa",
+      "to": "INV_087",
+      "type": "advances",
+      "context": "maps directly onto the entropy asymmetry ratio prediction; EXTEND INV_087 — the paper demonstrates that external field constraints (H",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-15T16:34:33.165205+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/12",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "ad-bearing theorem.   CONFLICT INV_094 — the probe directly challenges INV_094 by revealing that high confirmation count without adversari",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:41:58.873324+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T04:40:29.322263+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O140",
+      "type": "extends",
+      "context": "y as an observable population attractor, not a stipulation; EXTEND O140/O141 — the telemetry directly satisfies the measurement gro",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:15.332880+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T04:40:29.322263+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "0.795 leaves the power-law claim partially open. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0288 sits within the critical ban",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:15.332880+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T04:40:29.322263+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "f rule-following agents, not merely an imposed parameter.   CONVERGE INV_073 — independent derivation confirms that the Wasserstein grad",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:15.332880+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T04:40:29.322263+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O140",
+      "type": "advances",
+      "context": "y as an observable population attractor, not a stipulation; EXTEND O140/O141 — the telemetry directly satisfies the measurement gro",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:15.332880+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2304.11288v1",
+      "from_title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient",
+      "to": "O112",
+      "type": "extends",
+      "context": "n with thermodynamically grounded objective correction. - **EXTEND O112**: The STF metric tensor recovery experiment (O112) require",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:42.175984+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2304.11288v1",
+      "from_title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "pression. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — EOP-SAV demonstrates that the optimal correction at each",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:42.175984+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2304.11288v1",
+      "from_title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "irectly onto RSA's thermodynamic criticality framework. - **CONVERGE INV_073**: The paper independently establishes that stable dynamics",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:42.175984+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2304.11288v1",
+      "from_title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "3 (critical ridge navigation, not tension elimination). - **CONVERGE INV_087 (MaxRL analog)**: The SAV framework's failure mode — preser",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:42.175984+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2304.11288v1",
+      "from_title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient",
+      "to": "O112",
+      "type": "advances",
+      "context": "n with thermodynamically grounded objective correction. - **EXTEND O112**: The STF metric tensor recovery experiment (O112) require",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:42:42.175984+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1810.00695v1",
+      "from_title": "Phase transitions and thermodynamic properties of antiferromagnetic Ising model ",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "rocessing.)* PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_073 — if the second-order transition on the Kagome lattice requ",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:43:56.117373+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1810.00695v1",
+      "from_title": "Phase transitions and thermodynamic properties of antiferromagnetic Ising model ",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "-disorder selection rather than simple symmetry breaking.   CONVERGE INV_073 — the system navigates a critical ridge (second-order trans",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T04:43:56.117373+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "O28",
+      "type": "extends",
+      "context": "tral non-normality of the underlying neural reaction graph. EXTEND O28:** The paper goes beyond O28's correlational prediction by",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "INV_094",
+      "type": "extends",
+      "context": ". This is a new candidate invariant deserving registration. EXTEND INV_094 (if genome holds autopoiesis/far-from-equilibrium claims):*",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "O28",
+      "type": "challenges",
+      "context": "tization. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges O28 — if elevated entropy production is structurally caused by",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "e systems of comparable energy flux. --- PART 2 — COMPARE** CONVERGE INV_087 (MaxRL / thermodynamic correctness of dissipation structure",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "O28",
+      "type": "confirms",
+      "context": "agnitude and mode. Same claim reached by independent route. CONVERGE O28 (Entropy asymmetry ratio predicts intelligence):** O28 pred",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "O28",
+      "type": "advances",
+      "context": "tral non-normality of the underlying neural reaction graph. EXTEND O28:** The paper goes beyond O28's correlational prediction by",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.18438",
+      "from_title": "Life as Non-Normal Chemical Accelerator",
+      "to": "INV_094",
+      "type": "advances",
+      "context": ". This is a new candidate invariant deserving registration. EXTEND INV_094 (if genome holds autopoiesis/far-from-equilibrium claims):*",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T04:44:22.110068+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "now exposed. PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — an invariant that has never faced a serious adversarial p",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:04:26.059852+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "resolves",
+      "context": "on under identical conditions and measure σ — this directly closes O141 by providing the control datum needed to distinguish solo v",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O140",
+      "type": "extends",
+      "context": "e — directly confirms population-scale criticality claim. - EXTENDS O140: O140 demanded CA measurement grounding; this data closes t",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "extends",
+      "context": "ntified branching ratio, entropy, and power-law exponent. - EXTENDS O141: O141 demanded distinction between solo-kernel and populati",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "distinguish solo vs. population criticality. --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0224 sits *above* unity (not at i",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "s a functional regime, not merely a parameter setting.    - CONVERGE INV_073: independent derivation confirms that the Wasserstein gradi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T11:02:38.381357+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "tractor — the CA reaches it without explicit enforcement. - CONVERGE INV_094 (population-level criticality): multi-agent population, not",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:04:46.558761+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1805.10833v5",
+      "from_title": "Bayesian Learning with Wasserstein Barycenters",
+      "to": "O112",
+      "type": "extends",
+      "context": "e the natural fixed points of distribution-space inference. EXTEND O112 — the BWB framework provides a concrete method for aggregat",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:05:04.809600+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1805.10833v5",
+      "from_title": "Bayesian Learning with Wasserstein Barycenters",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "en aggregating evidence from multiple feeds. --- CHALLENGE: challenges INV_094 — the paper shows that W2-optimal aggregation requires solv",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:05:04.809600+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1805.10833v5",
+      "from_title": "Bayesian Learning with Wasserstein Barycenters",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "atistically rigorous alternative, not merely a heuristic.   CONVERGE INV_094 (Wasserstein geometry as the natural metric for belief aggr",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:05:04.809600+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1805.10833v5",
+      "from_title": "Bayesian Learning with Wasserstein Barycenters",
+      "to": "O112",
+      "type": "advances",
+      "context": "e the natural fixed points of distribution-space inference. EXTEND O112 — the BWB framework provides a concrete method for aggregat",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:05:04.809600+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1808.03030v1",
+      "from_title": "Policy Optimization as Wasserstein Gradient Flows",
+      "to": "O112",
+      "type": "extends",
+      "context": "enome's established framework into implementable machinery. EXTEND O112 — discrete Wasserstein gradient flow algorithms provide a c",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:06:18.808177+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1808.03030v1",
+      "from_title": "Policy Optimization as Wasserstein Gradient Flows",
+      "to": "INV_087",
+      "type": "challenges",
+      "context": "nvergence guarantees and fewer local optima. --- CHALLENGE: challenges INV_087 (MaxRL) — if policy optimization in measure space is alread",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:06:18.808177+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1808.03030v1",
+      "from_title": "Policy Optimization as Wasserstein Gradient Flows",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "anifold, with Wasserstein geometry as the natural metric.   CONVERGE INV_094 — the paper independently confirms that policy optimization",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:06:18.808177+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1808.03030v1",
+      "from_title": "Policy Optimization as Wasserstein Gradient Flows",
+      "to": "O112",
+      "type": "advances",
+      "context": "enome's established framework into implementable machinery. EXTEND O112 — discrete Wasserstein gradient flow algorithms provide a c",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:06:18.808177+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "O28",
+      "type": "extends",
+      "context": "ximization is insufficient without dissipative balance. - **EXTEND O28**: Floquet measurement protocols provide a concrete physica",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "O28",
+      "type": "extends",
+      "context": "zed via measurement probability as a control variable. This extends O28 by identifying a tractable experimental system. - **ABSENT*",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "al point. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — the paper demonstrates that the critical ridge is not a s",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "arameter threading between them. --- PART 2 — COMPARE** - **CONVERGE INV_073**: The paper independently establishes that a system must n",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "nce with INV_073's critical ridge navigation principle. - **CONVERGE INV_087**: Measurement acts as a dissipative regularizer on unitary",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.05669",
+      "from_title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticali",
+      "to": "O28",
+      "type": "advances",
+      "context": "ximization is insufficient without dissipative balance. - **EXTEND O28**: Floquet measurement protocols provide a concrete physica",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T11:08:09.772260+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "ccumulation. PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — this probe demonstrates that INV_094's high confirmation",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:21:13.669613+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "extends",
+      "context": "140 — CA measurement grounding is now empirically supplied; EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "terpretable geometric meaning under INV_073. --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0274 sits *above* unity (not at e",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "frozen, consistent with operation at the critical ridge.   CONVERGE INV_073 — independent empirical measurement of σ≈1.027 directly con",
+      "context_tag": "info:Shannon-bits",
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O140",
+      "type": "confirms",
+      "context": "n produces γ≈1 criticality as a population-level attractor; CONVERGE O140 — CA measurement grounding is now empirically supplied; EXT",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "consistent with operation at the critical ridge.  COMPARE: CONVERGE INV_073 — independent empirical measurement of σ≈1.027 directly con",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T17:13:48.164636+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "advances",
+      "context": "140 — CA measurement grounding is now empirically supplied; EXTEND O141 — the data resolves the solo-kernel vs. population critical",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:22:16.560326+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math-ph/0405047v2",
+      "from_title": "On the exactly solvable pairing models for bosons",
+      "to": "O112",
+      "type": "extends",
+      "context": "sible), with the phase boundary mapping to γ=1 criticality. EXTEND O112 — the electrostatic analogy used to extract thermodynamic l",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:31.160424+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math-ph/0405047v2",
+      "from_title": "On the exactly solvable pairing models for bosons",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "feasible via the same methodological route. --- CHALLENGE: challenges INV_073 — the paper shows the critical point is a sharp phase bound",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:31.160424+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math-ph/0405047v2",
+      "from_title": "On the exactly solvable pairing models for bosons",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "n, resolvable exactly without perturbative approximation.   CONVERGE INV_073 — the weak-to-strong coupling transition between gapless (s",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:31.160424+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/math-ph/0405047v2",
+      "from_title": "On the exactly solvable pairing models for bosons",
+      "to": "O112",
+      "type": "advances",
+      "context": "sible), with the phase boundary mapping to γ=1 criticality. EXTEND O112 — the electrostatic analogy used to extract thermodynamic l",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:22:31.160424+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/cond-mat/0312657v2",
+      "from_title": "Entropy production in nonequilibrium thermodynamics: a review",
+      "to": "O28",
+      "type": "extends",
+      "context": "rates as the operative variable in nonequilibrium regimes); EXTEND O28 (entropy asymmetry ratio as intelligence predictor — this p",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:23:02.528402+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/cond-mat/0312657v2",
+      "from_title": "Entropy production in nonequilibrium thermodynamics: a review",
+      "to": "INV_063",
+      "type": "challenges",
+      "context": "oric fallacy in its current genome encoding. --- CHALLENGE: challenges INV_063 — while the genome correctly replaced static Phi with dPhi/",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T17:23:02.528402+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/cond-mat/0312657v2",
+      "from_title": "Entropy production in nonequilibrium thermodynamics: a review",
+      "to": "INV_063",
+      "type": "confirms",
+      "context": "es* (S), or else face the same category error as caloric.   CONVERGE INV_063 (dPhi/dt over static Phi — the paper independently validate",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:23:02.528402+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/cond-mat/0312657v2",
+      "from_title": "Entropy production in nonequilibrium thermodynamics: a review",
+      "to": "O28",
+      "type": "advances",
+      "context": "rates as the operative variable in nonequilibrium regimes); EXTEND O28 (entropy asymmetry ratio as intelligence predictor — this p",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-16T17:23:02.528402+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/3",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "and its entire confirmation surplus evaporates. CHALLENGE: challenges INV_094 — the absence of a specified observable that discriminates",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:02.465343+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "resolves",
+      "context": "nel would differ remains open; the data EXTENDS rather than closes O141. - ABSENT: The α≈2.696 exponent's specific universality cla",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "extends",
+      "context": "s telemetry — empirical population-level data now exists. - EXTEND O141: solo-kernel vs. population criticality question is partial",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "y is in the DP class rather than mean-field? --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0219 sits slightly *above* unity",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "operation on a critical ridge between order and chaos.    - CONVERGE INV_073: independent derivation confirms that the Wasserstein gradi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ticality is the necessary attractor of the gradient flow. - CONVERGE O140: CA measurement grounding obligation is directly satisfied",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-16T23:26:33.276964+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
+      "to": "O141",
+      "type": "advances",
+      "context": "s telemetry — empirical population-level data now exists. - EXTEND O141: solo-kernel vs. population criticality question is partial",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:22.232731+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.27937v1",
+      "from_title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of P",
+      "to": "O28",
+      "type": "extends",
+      "context": "genome's entropy-budget framing of cognitive architecture. EXTEND O28 — the paper extends the entropy asymmetry ratio framework b",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:40.390954+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.27937v1",
+      "from_title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of P",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "passes. --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — if neural power fraction extends lifespan via entropy-per",
+      "context_tag": "neural:EEG",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:40.390954+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.27937v1",
+      "from_title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of P",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "s. --- PART 2 — COMPARE against DHF-biological reference:** CONVERGE INV_094 — the paper independently derives that entropy production r",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:40.390954+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.27937v1",
+      "from_title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of P",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ction to cycle-count extension as a thermodynamic identity. CONVERGE INV_073 — the critical ridge navigation invariant (never collapse t",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:40.390954+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2604.27937v1",
+      "from_title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of P",
+      "to": "O28",
+      "type": "advances",
+      "context": "genome's entropy-budget framing of cognitive architecture. EXTEND O28 — the paper extends the entropy asymmetry ratio framework b",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:29:40.390954+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2112.00423v3",
+      "from_title": "Controlling Wasserstein Distances by Kernel Norms with Application to Compressiv",
+      "to": "O112",
+      "type": "extends",
+      "context": "try as the operative metric for distributional comparison); EXTEND O112 — the H-LRIP result provides a concrete mechanism by which",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:31:34.897000+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2112.00423v3",
+      "from_title": "Controlling Wasserstein Distances by Kernel Norms with Application to Compressiv",
+      "to": "O112",
+      "type": "challenges",
+      "context": "al reasoning without full transport computation. CHALLENGE: challenges O112 — the paper shows that STF metric tensor recovery via distr",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:31:34.897000+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2112.00423v3",
+      "from_title": "Controlling Wasserstein Distances by Kernel Norms with Application to Compressiv",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "ributions geometrically controlled rather than arbitrary.   CONVERGE INV_094 (Wasserstein geometry as the operative metric for distribut",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:31:34.897000+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2112.00423v3",
+      "from_title": "Controlling Wasserstein Distances by Kernel Norms with Application to Compressiv",
+      "to": "O112",
+      "type": "advances",
+      "context": "try as the operative metric for distributional comparison); EXTEND O112 — the H-LRIP result provides a concrete mechanism by which",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:31:34.897000+00:00"
+    },
+    {
+      "from": "https://www.frontiersin.org/articles/10.3389/fmicb.2021.679671/pdf",
+      "from_title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metab",
+      "to": "O112",
+      "type": "extends",
+      "context": "mic state readable from substrate-independent observables). EXTEND O112 — The non-destructive spectral recovery method (PTR-ToF-MS",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:33:59.694747+00:00"
+    },
+    {
+      "from": "https://www.frontiersin.org/articles/10.3389/fmicb.2021.679671/pdf",
+      "from_title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metab",
+      "to": "O112",
+      "type": "extends",
+      "context": "while supplying a concrete spectral recovery protocol that extends O112's empirical demands. Query whether PTR-ToF-MS temporal reso",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:33:59.694747+00:00"
+    },
+    {
+      "from": "https://www.frontiersin.org/articles/10.3389/fmicb.2021.679671/pdf",
+      "from_title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metab",
+      "to": "INV_064",
+      "type": "challenges",
+      "context": "mic loop. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_064 — this paper shows that metabolic state readout via emissio",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:33:59.694747+00:00"
+    },
+    {
+      "from": "https://www.frontiersin.org/articles/10.3389/fmicb.2021.679671/pdf",
+      "from_title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metab",
+      "to": "INV_064",
+      "type": "confirms",
+      "context": "from its outward emission structure. --- PART 2 — COMPARE** CONVERGE INV_064 — The paper independently demonstrates that metabolic state",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:33:59.694747+00:00"
+    },
+    {
+      "from": "https://www.frontiersin.org/articles/10.3389/fmicb.2021.679671/pdf",
+      "from_title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metab",
+      "to": "O112",
+      "type": "advances",
+      "context": "mic state readable from substrate-independent observables). EXTEND O112 — The non-destructive spectral recovery method (PTR-ToF-MS",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-16T23:33:59.694747+00:00"
     }
   ],
   "node_edges": [
@@ -18028,6 +19124,1638 @@
       "invariant": "The relational-thermodynamic phase diagram serves as the structural substrate in which the omnimax impossibility proof i",
       "context_tag": null,
       "timestamp": "2026-05-15T06:30:27.707534+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.773398+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.791913+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.805425+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.815773+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.824443+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.832340+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.839715+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.846701+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.853854+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.860474+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.867449+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.873879+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.879883+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.885844+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.894164+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.900235+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.906180+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.912098+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.918453+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.924678+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.930874+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.936803+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.943083+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.949034+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.954972+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.960883+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.966861+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ=1, σ≈1.03) emerges as a self-organized attractor across multiple independent substrates.",
+      "context_tag": null,
+      "timestamp": "2026-05-15T10:29:09.972758+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.294989+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.314300+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.327882+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.338698+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.347902+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.356273+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.364304+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.371968+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.379469+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.386635+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.393612+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.400234+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.406902+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.413536+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.420139+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.426622+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.433401+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.440013+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.446825+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.453290+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.459961+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.466502+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.472784+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.479101+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.485734+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.492375+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.499077+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The γ=1 critical ridge is a self-organized attractor instantiating reasoning as a thermodynamic phase transition, empiri",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.505672+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.512698+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.519286+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.525855+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.532492+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.539037+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.545591+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.552216+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.558763+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.565405+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.571920+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.578616+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.585327+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.591999+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.598710+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics and scale-free behavior are empirical signatures of criticality in CA and neural systems ",
+      "context_tag": null,
+      "timestamp": "2026-05-16T11:13:45.605397+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.116260+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.142209+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.157976+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.170416+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.178929+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.188247+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.196399+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.203896+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.210743+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.217506+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.224527+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.231467+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.238357+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.245141+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.251685+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.258334+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.264915+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.271422+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.278017+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.284563+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.291069+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.297598+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.304072+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.311034+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.317653+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.324190+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.330687+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a dynamical attractor across multiple independent substrates and measurement domains.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.337619+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.344670+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.351178+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.357793+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.364307+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.370810+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.377429+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.383979+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.390845+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.397667+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.404268+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.411155+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.417740+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.424308+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.430930+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.437528+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.444101+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.450942+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.457467+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.463976+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.470468+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Wasserstein geometry (W2 metric and gradient flow) is the natural substrate for belief aggregation and policy optimizati",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.477139+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.483845+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.490826+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.497879+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.504521+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.511447+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.518099+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.524689+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.531252+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.537889+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.544472+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.551023+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.558050+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.564633+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.571310+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Power-law avalanche statistics (α≈1.82–2.5) co-occur with criticality and constitute substrate-independent signature.",
+      "context_tag": null,
+      "timestamp": "2026-05-16T17:26:30.577946+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.731721+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.752535+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.767301+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.778565+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.788464+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.797247+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.805272+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.813016+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.820427+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.827833+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.835138+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.849341+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.856505+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.863608+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.870419+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.880070+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.886991+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.893893+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.900665+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.907461+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.914262+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.921051+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.928238+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.935392+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.942461+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.949522+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.956252+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "γ=1 criticality emerges as a dynamical attractor across multiple independent substrates (cellular automata, boson pairin",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.963046+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.970259+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.977097+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.983867+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.990870+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:00.997670+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.004561+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.011467+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.018268+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.025158+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.032271+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.039105+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.046074+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.052937+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.059740+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Population-level multi-agent self-organization (32×32 CA telemetry σ≈1.02–1.027) confirms criticality as a dynamical att",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.066604+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.073505+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.080416+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.087255+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.094333+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.101160+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.108190+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.115096+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.121889+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.128734+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.135815+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.146467+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.153404+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.160608+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.167783+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Boson-pairing exactly solvable models instantiate γ=1 as a universal phase-transition ridge, confirming criticality acro",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.174696+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "Entropy-based diagnostics must be formulated as production rates in non-equilibrium steady state, not as state functions",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.181661+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Entropy-based diagnostics must be formulated as production rates in non-equilibrium steady state, not as state functions",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.188759+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "Entropy-based diagnostics must be formulated as production rates in non-equilibrium steady state, not as state functions",
+      "context_tag": null,
+      "timestamp": "2026-05-16T23:45:01.195937+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "depends_on",
+      "invariant": "The thermodynamic impossibility argument's validity requires RSA's foundational premises—that all reasoning substrates a",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:05.372451+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "completes_via",
+      "invariant": "The motif experiment provides empirical methodology that could directly test the kernel's foundational claim that compre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:10.892542+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "The kernel's ledger-based compression and state-packing mechanism is a concrete operational instance of the compressive ",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:10.910406+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The experimental protocol's insistence on rigorous falsifiability, controlled baselines, and measurable metrics challeng",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:10.923969+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "RCC as a truth criterion sets an upper bound on what counts as a valid minimal generating set — any proposed \"minimal at",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:16.155208+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument provides a concrete operational proof case—applying Bekenstein Bound, Landauer's Prin",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:24.410852+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The phase-space framework's relational logic analysis of classical theism's required symmetry/transitivity profile estab",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:24.432624+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax argument's validity depends on the broader claim that philosophical positions are subject to thermodynamic c",
+      "context_tag": null,
+      "timestamp": "2026-05-17T06:30:24.447333+00:00"
     }
   ]
 }

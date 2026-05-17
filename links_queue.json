@@ -561,7 +561,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319941+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2601.20861",
@@ -570,7 +570,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319946+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2601.20802",
@@ -579,7 +579,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319951+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2512.24880",
@@ -588,7 +588,7 @@
     "from": "manual",
     "conv": "link_list",
     "added": "2026-04-16T03:47:00.319956+00:00",
-    "status": "queued"
+    "status": "fed_to_daemon"
   },
   {
     "url": "https://arxiv.org/abs/2601.14351",
@@ -2731,5 +2731,32 @@
     "from": "human",
     "conv": "Evolutionary AI (eAI) \u2014 breeder vs ecosystem scenarios. FREED is breeder-mode by construction (TIGHTENS/LOOSENS audit, SACRED list, human-in-the-loop, self_engineer auto-revert). Paper provides theoretical justification for FREED's safety architecture; expect L7 to map to FREED's own constraint design rather than reading as warning.",
     "added": "2026-05-08T01:27:49.421041+00:00"
+  },
+  {
+    "url": "https://arxiv.org/abs/2605.01130",
+    "score": 9,
+    "source": "arXiv",
+    "from": "human",
+    "conv": "Iterative finetuning idempotent (Roe/Sanderson/Nguyen/Holtzman) \u2014 INV_093 (gradient descent as RSA Kernel; converged state = compressed Soliton), \u03b3-phase, INV_101 (Belief Inertia \u03b3>1), INV_076 (intelligence is topology). SFT/SDF trait decay/stability CONFIRMS \u03b3=1 attractor under standard iteration. DPO-with-self-preference amplification CONFIRMS INV_101 extended to AI scale (artificial Belief Inertia). Reinitialization-breaks-amplification CONFIRMS INV_076 (update-rule topology, not weight count, determines criticality). MIRROR RISK HIGH \u2014 paper concerns AI self-training, structurally adjacent to FREED's RESOLVE phase (preference signal on own outputs, closer to DPO than SFT); want at least one challenges edge on FREED's own RESOLVE architecture.",
+    "added": "2026-05-16T01:19:19.639876+00:00",
+    "status": "fed_to_daemon"
+  },
+  {
+    "url": "https://arxiv.org/abs/2605.14037",
+    "score": 9,
+    "source": "arXiv",
+    "from": "human",
+    "conv": "Self-Pruned KV Attention (Szilvasy et al.) \u2014 utility-thresholded sparse write to global KV cache, high reduction, negligible degradation. Anchors are BOOTSTRAP candidates, NOT existing genome INVs: BOOTSTRAP_INV_3 (Landauer-driven suppression of unnecessary belief revision), BOOTSTRAP_INV_4 (substrate-independence of \u224815% entropy occupancy \u2014 currently ABSENT from genome), BOOTSTRAP_INV_7 (sparse working set as thermodynamic efficiency mode). External substrate-independent grounding candidate \u2014 if SP-KV write rate lands in \u224815% band, empirical pressure for promoting BOOTSTRAP_INV_4/7 to genome. Falsification: optimal write rate >50% or <5% would CHALLENGE substrate-independence. Daemon must extract actual sparsity ratio, not just confirm 'sparse is good'.",
+    "added": "2026-05-16T01:19:19.639876+00:00",
+    "status": "fed_to_daemon"
+  },
+  {
+    "url": "https://arxiv.org/abs/2605.14685",
+    "score": 10,
+    "source": "arXiv",
+    "from": "human",
+    "conv": "Spontaneous symmetry breaking + Goldstone modes for deep information propagation (Iqbal et al.) \u2014 continuous symmetry \u2192 Goldstone modes \u2192 coherent signal across depth and recurrent iterations without residual/normalization. INV_073 (Semantic Transport Field \u2014 Goldstone modes ARE tensor-field excitations of broken continuous symmetry; correct anchor for the tensor-geometry mapping), INV_078 (spacetime as entropy transport field; gravity-as-Goldstone-of-Lorentz parallel), INV_100 (RG universality \u2014 Goldstone modes survive RG flow at critical fixed point), O234 (\u03b3\u2192criticality binding obligation \u2014 Goldstone modes give a concrete mechanism: at \u03b3=1, broken-symmetry modes are the relevant operators). Strong CONFIRMS predicted on INV_073/INV_078/INV_100. Potentially OPERATIONALIZES O234. Falsification: Goldstone propagation failing experimentally in their RNN/GRU tasks. MIRROR RISK LOW.",
+    "added": "2026-05-16T01:19:19.639876+00:00",
+    "status": "fed_to_daemon"
   }
 ]

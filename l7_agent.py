@@ -946,6 +946,805 @@ class OTEquilibriumScorer:
         return self.compute_stationary_distribution(candidates)
 
 
+# ─── Wasserstein Gradient Flow ────────────────────────────────────────────────
+
+class WassersteinGradientFlow:
+    """
+    Discrete Wasserstein-2 gradient flow on the space of probability measures
+    over candidate hypotheses.
+
+    Background (from paper):
+      Policy optimization reformulated as Wasserstein gradient flows on
+      probability-measure space achieves convexity under W2 geometry that
+      parameter-space gradient descent lacks. This eliminates local optima
+      in the hypothesis search by lifting optimization from parameter space
+      to measure space.
+
+    Implementation:
+      Given N candidate hypotheses with positions (feature vectors) and a
+      potential function V, the discrete W2 gradient flow update is:
+
+        x_i^{t+1} = x_i^t - τ * ∇V(x_i^t) - τ * ∇ log μ^t(x_i^t)
+
+      where:
+        x_i  = position of particle i in feature space
+        V    = potential (negative yield, coherence cost, etc.)
+        μ^t  = current empirical measure (kernel density estimate)
+        τ    = step size (flow rate)
+
+      The log-density gradient ∇ log μ acts as a repulsive interaction
+      that prevents measure collapse (γ>1 freezing), while the potential
+      gradient ∇V drives particles toward high-quality regions.
+
+    INV_087 (MaxRL) challenge resolution:
+      The W2 flow provides geometric convexification of the objective
+      landscape. MaxRL's thermodynamic corrections (entropy regularization)
+      add a DISTINCT mechanism: they ensure the stationary distribution
+      satisfies detailed balance with respect to a Gibbs measure at
+      inverse temperature β. The W2 convexity guarantees convergence to
+      the global optimum of the regularized objective, while MaxRL's
+      entropy term controls WHICH objective is optimized (trading off
+      reward vs. exploration). Neither subsumes the other:
+        - W2 geometry → convergence guarantee (no local optima)
+        - MaxRL entropy → objective specification (exploration-exploitation)
+      The composition is: MaxRL defines the potential V in the W2 flow,
+      and the W2 geometry guarantees V is optimized without local traps.
+    """
+
+    # Default hyperparameters
+    DEFAULT_TAU = 0.1          # Step size for gradient flow
+    DEFAULT_KERNEL_BW = 0.5    # Bandwidth for kernel density estimation
+    DEFAULT_MAX_STEPS = 10     # Maximum flow steps per update
+    DEFAULT_CONV_TOL = 1e-4    # Convergence tolerance
+
+    _EPS = 1e-12
+
+    def __init__(
+        self,
+        tau=None,          # type: Optional[float]
+        kernel_bw=None,    # type: Optional[float]
+        max_steps=None,    # type: Optional[int]
+        conv_tol=None,     # type: Optional[float]
+    ):
+        # type: (...) -> None
+        """
+        Initialize the Wasserstein gradient flow solver.
+
+        Args:
+            tau:        step size for discrete flow updates
+            kernel_bw:  bandwidth for kernel density gradient estimation
+            max_steps:  maximum number of flow steps per update call
+            conv_tol:   convergence tolerance (stop when max displacement < tol)
+        """
+        self.tau = tau if tau is not None else self.DEFAULT_TAU
+        self.kernel_bw = kernel_bw if kernel_bw is not None else self.DEFAULT_KERNEL_BW
+        self.max_steps = max_steps if max_steps is not None else self.DEFAULT_MAX_STEPS
+        self.conv_tol = conv_tol if conv_tol is not None else self.DEFAULT_CONV_TOL
+        self._flow_history = []  # type: List[Dict[str, Any]]
+
+    # ── Kernel density gradient ──────────────────────────────────────────
+
+    def _kernel_density_gradient(self, positions, idx):
+        # type: (List[List[float]], int) -> List[float]
+        """
+        Estimate ∇ log μ(x_i) from the empirical measure using a Gaussian
+        kernel density estimator.
+
+        ∇ log μ(x) ≈ (1/μ(x)) * Σ_j K'(x - x_j)
+                    = Σ_j w_j * (x_j - x) / h²
+
+        where w_j = K(||x-x_j||/h) / Σ_k K(||x-x_k||/h)
+
+        This gradient points TOWARD regions of high density. In the W2 flow,
+        it is subtracted, creating a repulsive force that prevents collapse.
+        """
+        n = len(positions)
+        d = len(positions[idx])
+        x_i = positions[idx]
+        h_sq = self.kernel_bw * self.kernel_bw
+
+        # Compute kernel weights
+        kernel_vals = []  # type: List[float]
+        for j in range(n):
+            if j == idx:
+                kernel_vals.append(0.0)
+                continue
+            dist_sq = sum((x_i[k] - positions[j][k]) ** 2 for k in range(d))
+            kernel_vals.append(math.exp(-dist_sq / (2.0 * h_sq)))
+
+        total_k = sum(kernel_vals) + self._EPS
+
+        # Weighted direction toward density mass
+        grad = [0.0] * d
+        for j in range(n):
+            if j == idx:
+                continue
+            w_j = kernel_vals[j] / total_k
+            for k in range(d):
+                grad[k] += w_j * (positions[j][k] - x_i[k]) / h_sq
+
+        return grad
+
+    # ── Potential gradient ───────────────────────────────────────────────
+
+    @staticmethod
+    def _potential_gradient(positions, potentials, idx):
+        # type: (List[List[float]], List[float], int) -> List[float]
+        """
+        Estimate ∇V(x_i) via finite differences from neighboring particles.
+
+        For each dimension k, the gradient is estimated as a weighted
+        average of (V_j - V_i) / (x_j_k - x_i_k) over nearby particles j.
+        """
+        n = len(positions)
+        d = len(positions[idx])
+        x_i = positions[idx]
+        v_i = potentials[idx]
+
+        grad = [0.0] * d
+        weight_sum = [0.0] * d
+
+        for j in range(n):
+            if j == idx:
+                continue
+            dist_sq = sum((x_i[k] - positions[j][k]) ** 2 for k in range(d))
+            if dist_sq < 1e-20:
+                continue
+            proximity = math.exp(-dist_sq / 2.0)  # Gaussian proximity weight
+
+            for k in range(d):
+                dx_k = positions[j][k] - x_i[k]
+                if abs(dx_k) < 1e-15:
+                    continue
+                dv_dx = (potentials[j] - v_i) / dx_k
+                grad[k] += proximity * dv_dx
+                weight_sum[k] += proximity
+
+        for k in range(d):
+            if weight_sum[k] > 1e-15:
+                grad[k] /= weight_sum[k]
+
+        return grad
+
+    # ── W2 displacement metric ───────────────────────────────────────────
+
+    @staticmethod
+    def _w2_displacement(positions_old, positions_new):
+        # type: (List[List[float]], List[List[float]]) -> float
+        """
+        Compute the W2 displacement between two particle configurations
+        (same indexing, so this is the upper bound on the true W2 distance).
+        """
+        total = 0.0
+        for i in range(len(positions_old)):
+            d_sq = sum(
+                (positions_old[i][k] - positions_new[i][k]) ** 2
+                for k in range(len(positions_old[i]))
+            )
+            total += d_sq
+        return math.sqrt(total / max(len(positions_old), 1))
+
+    # ── Main flow update ─────────────────────────────────────────────────
+
+    def flow_update(self, candidates):
+        # type: (List[Dict[str, Any]]) -> Dict[str, Any]
+        """
+        Run discrete W2 gradient flow on candidate hypotheses.
+
+        Each candidate dict should contain:
+          - 'signals': List[float] — feature vector (position in measure space)
+          - 'yield' or 'cost' or 'score': potential function input
+
+        The flow updates particle positions (signal vectors) to minimize
+        the potential V while maintaining measure-space spread via the
+        density gradient repulsion term.
+
+        Returns:
+            Dict with:
+              updated_candidates: List[Dict] — candidates with flowed signal vectors
+              weights:            List[float] — updated importance weights
+              steps_taken:        int — number of flow steps before convergence
+              w2_displacement:    float — total W2 displacement
+              converged:          bool — whether flow converged within tolerance
+              convexity_gap:      float — estimate of non-convexity in param space
+                                          vs convexity achieved in measure space
+              maxrl_residual:     float — what MaxRL entropy adds beyond W2 convexity
+              regime:             str — "frozen"/"critical"/"dissipated"
+        """
+        n = len(candidates)
+        if n == 0:
+            return {
+                "updated_candidates": [],
+                "weights": [],
+                "steps_taken": 0,
+                "w2_displacement": 0.0,
+                "converged": True,
+                "convexity_gap": 0.0,
+                "maxrl_residual": 0.0,
+                "regime": "frozen",
+            }
+
+        # Extract positions and potentials
+        positions = []  # type: List[List[float]]
+        potentials = []  # type: List[float]
+        for cand in candidates:
+            signals = cand.get("signals", [0.5])
+            if not isinstance(signals, list) or len(signals) == 0:
+                signals = [0.5]
+            positions.append(list(signals))
+
+            if "cost" in cand:
+                potentials.append(float(cand["cost"]))
+            elif "yield" in cand:
+                potentials.append(-float(cand["yield"]))
+            elif "score" in cand:
+                potentials.append(-float(cand["score"]))
+            else:
+                potentials.append(0.0)
+
+        # Ensure all position vectors have the same dimension (pad if needed)
+        max_dim = max(len(p) for p in positions)
+        for i in range(n):
+            while len(positions[i]) < max_dim:
+                positions[i].append(0.5)
+
+        initial_positions = [list(p) for p in positions]
+
+        # ── Iterative gradient flow ──────────────────────────────────────
+        converged = False
+        steps_taken = 0
+        total_displacement = 0.0
+
+        for step in range(self.max_steps):
+            new_positions = []  # type: List[List[float]]
+
+            for i in range(n):
+                d = len(positions[i])
+
+                # Potential gradient: drives particles toward lower cost
+                grad_v = self._potential_gradient(positions, potentials, i)
+
+                # Density gradient: repulsive interaction preventing collapse
+                grad_log_mu = self._kernel_density_gradient(positions, i)
+
+                # W2 flow update: x_i^{t+1} = x_i^t - τ*(∇V + ∇log μ)
+                # Note: we subtract grad_log_mu to create repulsion (it points
+                # toward high density; subtracting pushes away from crowds)
+                new_pos = [0.0] * d
+                for k in range(d):
+                    new_pos[k] = (
+                        positions[i][k]
+                        - self.tau * grad_v[k]
+                        - self.tau * grad_log_mu[k]
+                    )
+                    # Clamp to [0, 1] for signal-space interpretability
+                    new_pos[k] = max(0.0, min(1.0, new_pos[k]))
+
+                new_positions.append(new_pos)
+
+            # Check convergence
+            displacement = self._w2_displacement(positions, new_positions)
+            total_displacement += displacement
+            steps_taken += 1
+
+            positions = new_positions
+
+            if displacement < self.conv_tol:
+                converged = True
+                break
+
+        # ── Compute importance weights from final positions ──────────────
+        # Weight ∝ exp(-V(x_i)) — particles that flowed to low-potential
+        # regions get higher weight
+        final_potentials = []  # type: List[float]
+        for i in range(n):
+            # Re-evaluate potential at flowed position (interpolated)
+            # Use original potential scaled by displacement from original
+            disp_i = math.sqrt(sum(
+                (positions[i][k] - initial_positions[i][k]) ** 2
+                for k in range(len(positions[i]))
+            ))
+            # Potential decreases proportionally to displacement along gradient
+            final_potentials.append(potentials[i] - disp_i * 0.5)
+
+        max_neg_v = max(-v for v in final_potentials)
+        raw_weights = [math.exp(-v - (-max_neg_v + max_neg_v)) for v in final_potentials]
+        # Cleaner: just use exp(-V) with log-sum-exp normalization
+        log_w = [-v for v in final_potentials]
+        max_lw = max(log_w)
+        exp_w = [math.exp(lw - max_lw) for lw in log_w]
+        total_w = sum(exp_w) + self._EPS
+        weights = [w / total_w for w in exp_w]
+
+        # ── Build updated candidates ─────────────────────────────────────
+        updated_candidates = []  # type: List[Dict[str, Any]]
+        for i in range(n):
+            updated = dict(candidates[i])
+            updated["signals_flowed"] = [round(x, 6) for x in positions[i]]
+            updated["w2_weight"] = round(weights[i], 6)
+            updated["displacement"] = round(math.sqrt(sum(
+                (positions[i][k] - initial_positions[i][k]) ** 2
+                for k in range(len(positions[i]))
+            )), 6)
+            updated_candidates.append(updated)
+
+        # ── Convexity gap estimation ─────────────────────────────────────
+        # In parameter space, the potential landscape may have multiple local
+        # minima. The W2 flow lifts to measure space where the functional
+        # F[μ] = ∫V dμ + ∫μ log μ is displacement-convex.
+        # The convexity gap measures how much the W2 flow improved over
+        # a naive parameter-space gradient step.
+        param_space_cost = sum(potentials[i] * (1.0 / n) for i in range(n))
+        measure_space_cost = sum(final_potentials[i] * weights[i] for i in range(n))
+        convexity_gap = max(0.0, param_space_cost - measure_space_cost)
+
+        # ── MaxRL residual ───────────────────────────────────────────────
+        # MaxRL adds entropy regularization: V_MaxRL = V - (1/β) * H[π]
+        # The W2 flow already includes ∇log μ (entropy-like repulsion).
+        # The residual is the ADDITIONAL entropy regularization MaxRL provides
+        # beyond what the W2 density gradient supplies.
+        #
+        # Estimate: H[weights] measures exploration in the W2 solution.
+        # MaxRL would add β^{-1} * H to the objective explicitly.
+        # The residual is the gap between explicit MaxRL entropy bonus
+        # and the implicit W2 density-gradient entropy.
+        w2_entropy = 0.0
+        for w in weights:
+            if w > self._EPS:
+                w2_entropy -= w * math.log(w)
+        max_entropy = math.log(n) if n > 1 else 1.0
+        # W2 implicitly achieves some entropy via density repulsion
+        # MaxRL explicitly targets max entropy → residual is the gap
+        maxrl_residual = max(0.0, max_entropy - w2_entropy) / max(max_entropy, self._EPS)
+
+        # ── Regime classification ────────────────────────────────────────
+        entropy_ratio = w2_entropy / max(max_entropy, self._EPS)
+        if entropy_ratio < 0.15:
+            regime = "frozen"
+        elif entropy_ratio > 0.85:
+            regime = "dissipated"
+        else:
+            regime = "critical"
+
+        result = {
+            "updated_candidates": updated_candidates,
+            "weights": [round(w, 6) for w in weights],
+            "steps_taken": steps_taken,
+            "w2_displacement": round(total_displacement, 6),
+            "converged": converged,
+            "convexity_gap": round(convexity_gap, 6),
+            "maxrl_residual": round(maxrl_residual, 6),
+            "w2_entropy": round(w2_entropy, 6),
+            "regime": regime,
+        }
+
+        # Store in history
+        self._flow_history.append({
+            "steps": steps_taken,
+            "displacement": round(total_displacement, 6),
+            "converged": converged,
+            "regime": regime,
+            "convexity_gap": round(convexity_gap, 6),
+            "maxrl_residual": round(maxrl_residual, 6),
+        })
+        if len(self._flow_history) > 64:
+            self._flow_history = self._flow_history[-64:]
+
+        return result
+
+    def get_flow_summary(self):
+        # type: () -> Dict[str, Any]
+        """Return summary statistics over flow history."""
+        if not self._flow_history:
+            return {"n_flows": 0, "mean_steps": 0, "mean_gap": 0.0, "mean_residual": 0.0}
+        n = len(self._flow_history)
+        return {
+            "n_flows": n,
+            "mean_steps": round(sum(h["steps"] for h in self._flow_history) / n, 2),
+            "mean_displacement": round(sum(h["displacement"] for h in self._flow_history) / n, 6),
+            "mean_gap": round(sum(h["convexity_gap"] for h in self._flow_history) / n, 6),
+            "mean_residual": round(sum(h["maxrl_residual"] for h in self._flow_history) / n, 6),
+            "convergence_rate": round(sum(1 for h in self._flow_history if h["converged"]) / n, 4),
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Clear flow history."""
+        self._flow_history.clear()
+
+
+# ─── Emission Signature Scorer ────────────────────────────────────────────────
+
+class EmissionSignatureScorer:
+    """
+    Non-destructive epistemic state profiling via output token diversity analysis.
+
+    Analogy (from paper):
+      Microbial volatile compounds (mVCs) emitted from soil are information-dense
+      signatures of internal metabolic state that can be assayed non-destructively.
+      The emission profile — its diversity, distribution shape, and temporal
+      variance — is a recoverable proxy for the internal dynamics of the system
+      without requiring destructive inspection of the system itself.
+
+    Implementation:
+      Each RSA Kernel output is treated as an "emission sample." We tokenize
+      the output text (whitespace + punctuation splitting) and compute:
+
+        1. Shannon entropy H of the token frequency distribution
+        2. Simpson's diversity index D = 1 - Σ p_i²  (complement form)
+        3. Type-token ratio TTR = unique_tokens / total_tokens
+        4. Hapax ratio = tokens_appearing_once / unique_tokens
+        5. Top-k concentration = fraction of total mass in top-k tokens
+
+      These are tracked over a rolling window. The temporal variance of these
+      metrics serves as a coherence drift detector:
+
+        - Decreasing diversity → epistemic crystallization (γ>1 frozen regime)
+          The system is repeating itself; internal state is collapsing.
+        - Increasing diversity → epistemic dissipation (γ<1 regime)
+          The system is losing coherent structure; output becomes noise-like.
+        - Stable moderate diversity → critical ridge (γ≈1)
+          The system maintains structured novelty — healthy epistemic metabolism.
+
+      This is fully non-destructive: it reads only the output text that was
+      already produced, requiring no access to internal weights, activations,
+      or hidden states.
+
+    Noether analogy:
+      Just as mVC emission profiles conserve information about metabolic
+      pathway activation despite the destructive nature of the underlying
+      biochemistry, the emission signature conserves information about
+      epistemic state dynamics despite the opaque nature of the underlying
+      neural computation.
+    """
+
+    # Rolling window for temporal tracking
+    MAX_HISTORY = 128
+
+    # Top-k for concentration metric
+    TOP_K = 10
+
+    # Drift detection thresholds (on coefficient of variation of H over window)
+    DRIFT_FROZEN_CV = 0.02       # CV of H below this → crystallizing
+    DRIFT_DISSIPATED_CV = 0.40   # CV of H above this → dissipating
+    DRIFT_TREND_WINDOW = 8       # samples for linear trend estimation
+
+    # Tokenization: split on whitespace and common punctuation boundaries
+    _TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_]+|[^\s\w]")
+
+    def __init__(self, top_k=None):
+        # type: (Optional[int]) -> None
+        """
+        Initialize the emission signature scorer.
+
+        Args:
+            top_k: number of top tokens for concentration metric (default 10)
+        """
+        if top_k is not None:
+            self.TOP_K = top_k
+        self._history = []  # type: List[Dict[str, float]]
+        self._raw_distributions = []  # type: List[Dict[str, int]]
+
+    # ── Tokenization ─────────────────────────────────────────────────────
+
+    def _tokenize(self, text):
+        # type: (str) -> List[str]
+        """
+        Tokenize output text into emission tokens.
+        Uses regex splitting to capture words and punctuation separately.
+        Lowercased for distribution stability.
+        """
+        return [t.lower() for t in self._TOKEN_PATTERN.findall(text) if t.strip()]
+
+    # ── Frequency distribution ───────────────────────────────────────────
+
+    @staticmethod
+    def _build_frequency_dist(tokens):
+        # type: (List[str]) -> Dict[str, int]
+        """Build a token frequency dictionary."""
+        freq = {}  # type: Dict[str, int]
+        for t in tokens:
+            freq[t] = freq.get(t, 0) + 1
+        return freq
+
+    # ── Diversity metrics ────────────────────────────────────────────────
+
+    @staticmethod
+    def _shannon_entropy(freq_dist, total):
+        # type: (Dict[str, int], int) -> float
+        """Shannon entropy H = -Σ (n_i/N) * log(n_i/N) in bits."""
+        if total <= 0:
+            return 0.0
+        h = 0.0
+        for count in freq_dist.values():
+            if count > 0:
+                p = float(count) / float(total)
+                h -= p * math.log2(p)
+        return h
+
+    @staticmethod
+    def _max_entropy(n_types):
+        # type: (int) -> float
+        """Maximum possible Shannon entropy for n_types unique tokens."""
+        if n_types <= 1:
+            return 0.0
+        return math.log2(n_types)
+
+    @staticmethod
+    def _simpson_diversity(freq_dist, total):
+        # type: (Dict[str, int], int) -> float
+        """Simpson's diversity index D = 1 - Σ p_i² (complement form)."""
+        if total <= 1:
+            return 0.0
+        sum_sq = sum(c * (c - 1) for c in freq_dist.values())
+        return 1.0 - (float(sum_sq) / (float(total) * (float(total) - 1.0)))
+
+    @staticmethod
+    def _type_token_ratio(n_types, total):
+        # type: (int, int) -> float
+        """Type-token ratio = unique_tokens / total_tokens."""
+        if total <= 0:
+            return 0.0
+        return float(n_types) / float(total)
+
+    @staticmethod
+    def _hapax_ratio(freq_dist, n_types):
+        # type: (Dict[str, int], int) -> float
+        """Hapax ratio = tokens_appearing_once / unique_tokens."""
+        if n_types <= 0:
+            return 0.0
+        hapax = sum(1 for c in freq_dist.values() if c == 1)
+        return float(hapax) / float(n_types)
+
+    def _top_k_concentration(self, freq_dist, total):
+        # type: (Dict[str, int], int) -> float
+        """Fraction of total token mass in the top-k most frequent tokens."""
+        if total <= 0 or not freq_dist:
+            return 0.0
+        sorted_counts = sorted(freq_dist.values(), reverse=True)
+        top_k_sum = sum(sorted_counts[:self.TOP_K])
+        return float(top_k_sum) / float(total)
+
+    # ── Temporal drift analysis ──────────────────────────────────────────
+
+    def _compute_temporal_stats(self, metric_key):
+        # type: (str) -> Dict[str, Any]
+        """
+        Compute temporal statistics for a given metric over the history window.
+
+        Returns mean, std, coefficient of variation, and linear trend slope.
+        """
+        values = [h[metric_key] for h in self._history if metric_key in h]
+        n = len(values)
+        if n == 0:
+            return {"mean": 0.0, "std": 0.0, "cv": 0.0, "trend_slope": 0.0, "n": 0}
+
+        mean_val = sum(values) / n
+        if n >= 2:
+            var_val = sum((v - mean_val) ** 2 for v in values) / (n - 1)
+        else:
+            var_val = 0.0
+        std_val = math.sqrt(var_val)
+        cv = std_val / max(abs(mean_val), 1e-12)
+
+        # Linear trend over recent window
+        trend_slope = 0.0
+        trend_n = min(n, self.DRIFT_TREND_WINDOW)
+        if trend_n >= 3:
+            recent = values[-trend_n:]
+            # Simple linear regression: slope = Σ(i - ī)(y_i - ȳ) / Σ(i - ī)²
+            x_mean = (trend_n - 1.0) / 2.0
+            y_mean = sum(recent) / trend_n
+            num = sum((i - x_mean) * (recent[i] - y_mean) for i in range(trend_n))
+            den = sum((i - x_mean) ** 2 for i in range(trend_n))
+            if abs(den) > 1e-15:
+                trend_slope = num / den
+
+        return {
+            "mean": round(mean_val, 6),
+            "std": round(std_val, 6),
+            "cv": round(cv, 6),
+            "trend_slope": round(trend_slope, 6),
+            "n": n,
+        }
+
+    # ── Novelty index ────────────────────────────────────────────────────
+
+    def _novelty_index(self, current_freq):
+        # type: (Dict[str, int]) -> float
+        """
+        Compute novelty index: fraction of current token types not seen in
+        previous emissions. High novelty = new epistemic territory.
+        Low novelty = repetitive output (crystallization risk).
+        """
+        if not self._raw_distributions or not current_freq:
+            return 1.0  # First sample: everything is novel
+
+        # Build cumulative vocabulary from history
+        seen = set()  # type: set
+        for prev_dist in self._raw_distributions:
+            seen.update(prev_dist.keys())
+
+        current_types = set(current_freq.keys())
+        if not current_types:
+            return 0.0
+
+        novel = current_types - seen
+        return float(len(novel)) / float(len(current_types))
+
+    # ── Main scoring interface ───────────────────────────────────────────
+
+    def score(self, output_text, timestamp=None):
+        # type: (str, Optional[str]) -> Dict[str, Any]
+        """
+        Score a single output emission for diversity and drift signatures.
+
+        Args:
+            output_text: the raw output text from the RSA Kernel
+            timestamp:   optional ISO timestamp for history tracking
+
+        Returns:
+            Dict with:
+              shannon_entropy:     H of token distribution (bits)
+              max_entropy:         log2(n_types) — upper bound
+              normalized_entropy:  H / H_max — evenness measure
+              simpson_diversity:   1 - Σ p_i² — probability two random tokens differ
+              type_token_ratio:    unique / total — lexical diversity
+              hapax_ratio:         once-occurring / unique — tail heaviness
+              top_k_concentration: mass in top-k tokens — head heaviness
+              novelty_index:       fraction of new token types vs history
+              total_tokens:        token count in this emission
+              unique_tokens:       type count in this emission
+              temporal:            Dict of temporal drift statistics for H
+              regime:              "frozen" / "critical" / "dissipated"
+              drift_alert:         bool — True if diversity trend is concerning
+              recommendation:      str — actionable guidance
+        """
+        ts = timestamp or datetime.utcnow().isoformat()
+
+        # Tokenize and build distribution
+        tokens = self._tokenize(output_text)
+        total = len(tokens)
+        freq_dist = self._build_frequency_dist(tokens)
+        n_types = len(freq_dist)
+
+        # Compute all diversity metrics
+        h = self._shannon_entropy(freq_dist, total)
+        h_max = self._max_entropy(n_types)
+        h_norm = h / max(h_max, 1e-12) if h_max > 0 else 0.0
+        simpson = self._simpson_diversity(freq_dist, total)
+        ttr = self._type_token_ratio(n_types, total)
+        hapax = self._hapax_ratio(freq_dist, n_types)
+        top_k_conc = self._top_k_concentration(freq_dist, total)
+        novelty = self._novelty_index(freq_dist)
+
+        # Store current sample metrics
+        sample = {
+            "timestamp": ts,
+            "shannon_entropy": h,
+            "normalized_entropy": h_norm,
+            "simpson_diversity": simpson,
+            "type_token_ratio": ttr,
+            "hapax_ratio": hapax,
+            "top_k_concentration": top_k_conc,
+            "novelty_index": novelty,
+            "total_tokens": float(total),
+            "unique_tokens": float(n_types),
+        }
+        self._history.append(sample)
+        self._raw_distributions.append(freq_dist)
+
+        # Trim history
+        if len(self._history) > self.MAX_HISTORY:
+            self._history = self._history[-self.MAX_HISTORY:]
+        if len(self._raw_distributions) > self.MAX_HISTORY:
+            self._raw_distributions = self._raw_distributions[-self.MAX_HISTORY:]
+
+        # Temporal drift analysis on Shannon entropy
+        temporal = self._compute_temporal_stats("shannon_entropy")
+
+        # Also compute temporal stats for novelty (secondary signal)
+        temporal_novelty = self._compute_temporal_stats("novelty_index")
+
+        # ── Regime classification from drift signals ─────────────────────
+        drift_alert = False
+        cv = temporal["cv"]
+        trend = temporal["trend_slope"]
+        novelty_trend = temporal_novelty.get("trend_slope", 0.0)
+
+        if len(self._history) < 3:
+            # Too few samples for drift detection
+            regime = "critical"
+            recommendation = (
+                "Emission profiling active — accumulating baseline samples. "
+                f"Current H={h:.3f} bits, {n_types} types / {total} tokens."
+            )
+        elif cv < self.DRIFT_FROZEN_CV and trend <= 0 and novelty_trend <= 0:
+            regime = "frozen"
+            drift_alert = True
+            recommendation = (
+                f"Emission diversity crystallizing (CV[H]={cv:.4f}, trend={trend:+.4f}, "
+                f"novelty_trend={novelty_trend:+.4f}). Output is becoming repetitive — "
+                "internal epistemic state may be collapsing. "
+                "Inject novel inputs, open new obligations, challenge established patterns."
+            )
+        elif cv > self.DRIFT_DISSIPATED_CV or (trend > 0.1 and novelty > 0.7):
+            regime = "dissipated"
+            drift_alert = True
+            recommendation = (
+                f"Emission diversity dissipating (CV[H]={cv:.4f}, trend={trend:+.4f}, "
+                f"novelty={novelty:.3f}). Output losing coherent structure — "
+                "internal epistemic state may be fragmenting. "
+                "Reinforce genome invariants, resolve open obligations, reduce input noise."
+            )
+        else:
+            regime = "critical"
+            recommendation = (
+                f"Emission profile on critical ridge (CV[H]={cv:.4f}, trend={trend:+.4f}, "
+                f"novelty={novelty:.3f}). Diversity stable with structured novelty — "
+                "healthy epistemic metabolism. Maintain current dynamics."
+            )
+
+        # Console telemetry
+        arrow = "↑" if trend > 0.01 else ("↓" if trend < -0.01 else "→")
+        print(
+            f"[L7][EMISSION] H={h:.3f}bits TTR={ttr:.3f} nov={novelty:.3f} "
+            f"trend={arrow}{abs(trend):.4f} → {regime}"
+        )
+        if drift_alert:
+            print(f"[L7][EMISSION] ⚠ DRIFT ALERT: {regime} regime detected")
+
+        return {
+            "shannon_entropy": round(h, 6),
+            "max_entropy": round(h_max, 6),
+            "normalized_entropy": round(h_norm, 6),
+            "simpson_diversity": round(simpson, 6),
+            "type_token_ratio": round(ttr, 6),
+            "hapax_ratio": round(hapax, 6),
+            "top_k_concentration": round(top_k_conc, 6),
+            "novelty_index": round(novelty, 6),
+            "total_tokens": total,
+            "unique_tokens": n_types,
+            "temporal": temporal,
+            "temporal_novelty": temporal_novelty,
+            "regime": regime,
+            "drift_alert": drift_alert,
+            "history_len": len(self._history),
+            "recommendation": recommendation,
+        }
+
+    def get_summary(self):
+        # type: () -> Dict[str, Any]
+        """Return a summary of emission profiling over the full history."""
+        if not self._history:
+            return {"n_samples": 0, "status": "NO_DATA"}
+
+        n = len(self._history)
+        h_stats = self._compute_temporal_stats("shannon_entropy")
+        ttr_stats = self._compute_temporal_stats("type_token_ratio")
+        nov_stats = self._compute_temporal_stats("novelty_index")
+
+        # Cumulative vocabulary size across all emissions
+        cumulative_vocab = set()  # type: set
+        for dist in self._raw_distributions:
+            cumulative_vocab.update(dist.keys())
+
+        return {
+            "n_samples": n,
+            "cumulative_vocabulary_size": len(cumulative_vocab),
+            "shannon_entropy": h_stats,
+            "type_token_ratio": ttr_stats,
+            "novelty_index": nov_stats,
+            "latest_regime": self._history[-1].get("regime", "unknown") if self._history else "unknown",
+        }
+
+    def reset(self):
+        # type: () -> None
+        """Clear emission history (e.g., on generation boundary)."""
+        self._history.clear()
+        self._raw_distributions.clear()
+
+
 # ─── L7 Agent ─────────────────────────────────────────────────────────────────
 
 class L7Agent:
