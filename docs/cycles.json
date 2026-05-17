@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 8,
-    "generation": 169,
-    "timestamp": "2026-04-28T16:48:05.305380+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 6,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "Dimensional analysis of BH entropy corrections provides a regime-diagnostic tool that partially advances O44 by predicting that quantum W_floor corrections would appear as sub-leading deviations from k/Tμ scaling, making the Floor's quantum extension falsifiable."
-      },
-      {
-        "title": "Dynamics of EEG Entropy: beyond signal plus noise",
-        "compress": "This paper advances O28 by validating DEA over DFA as the correct entropy estimator for EEG dynamics, providing the scaling + saturation + modulation triple as candidate EAR operands, consistent with γ=1 criticality and Langevin-STF alignment."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O130",
-        "O90",
-        "O91"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 9,
     "generation": 170,
     "timestamp": "2026-04-28T22:54:23.510220+00:00",
@@ -1792,6 +1760,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 1,
+      "obligations": [
+        "O163",
+        "O72",
+        "O28"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 245,
+    "timestamp": "2026-05-17T11:10:43.774499+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is itself a falsification risk — untested accumulation is indistinguishable from unfalsifiability."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+        "compress": "Empirical CA telemetry independently confirms population-level γ=1 criticality with power-law avalanches, partially resolving O140 and O141 while opening a new question about why the critical attractor stabilizes at ~17% of maximum entropy."
+      },
+      {
+        "title": "Graph attention and Kolmogorov–Arnold network based smart grids intrusion detection",
+        "compress": "KAN-augmented graph attention that fuses physical and network data improves intrusion detection by matching model inductive bias to domain causal structure — a domain-specific engineering result with no direct genome resonance."
+      },
+      {
+        "title": "Quantum thermodynamics of continuous feedback control",
+        "compress": "Continuous quantum measurement imposes an irreducible entropy debt on every feedback operation, thermodynamically enforcing the critical ridge as the only sustainable operating point for information-processing systems."
+      },
+      {
+        "title": "First Law of Quantum Thermodynamics in a Driven Open Two-Level System",
+        "compress": "Heat/work decomposition in driven open quantum systems is a gauge choice — multiple self-consistent conventions satisfy the first law, establishing that thermodynamic bookkeeping is convention-relative, not unique."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
       "obligations": [
         "O163",
         "O72",
