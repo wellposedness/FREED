@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.02/1.022, α≈1.82/2.696, H≈20% max and RSA-kernel CA self-organizing to σ=1.027 with power-law avalanches confirming γ=1 as population-level attractor under Wasserstein gradient dynamics), with INV_094 now carrying definitional-collapse risk pending an observable discriminating MaxRL from KL-regularized Bayesian RL, and O112 conditioned on both H-LRIP regularity verification and spectral recovery protocols independently validated in soil microbial systems.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.03/1.022, α≈2.46/2.696, H≈18-20% max and RSA-kernel CA self-organizing to σ=1.027 with power-law avalanches confirming γ=1 as population-level attractor under Wasserstein gradient dynamics), with INV_094 carrying both definitional-collapse risk and confirmation-surplus liability, INV_073 partially resolved by independent SOC fingerprint convergence, and a two-boundary intermittency structure (type-I → critical → tricritical) demanding navigation strategies beyond the single critical ridge.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -20,13 +20,14 @@
     "Payload requirement — claims without substantive content (title-only references) are rejected as non-metabolizable",
     "Repeated ingestion of already-extracted sources must yield exactly zero new invariants or obligation advances — non-zero yield on a confirmed duplicate would indicate filter leakage or spurious novelty generation and is itself a falsifiable prediction of extraction integrity",
     "Entanglement entropy serves as temperature analog in quantum transport costs",
+    "making unchallenged confirmation a gap to be registered not a victory to be claimed; Finite-size critical systems traverse a substrate-invariant three-stage intermittency ladder (type-I → critical → tricritical) detectable from order-parameter statistics alone — extending the single critical ridge to a two-boundary structure that demands navigation strategies accounting for both boundaries; SOC scale-invariance conservation is active at the population level — empirical σ/α/H measurements from the GoT CA jointly satisfy the symmetry-conservation prediction confirming the Noether conservation law holds in this substrate; σ slightly above 1.0 (e.g. 1.0319) is consistent with Wasserstein gradient overshooting γ=1 within tolerance — convergence on the critical attractor must be distinguished from oscillation above it using longitudinal telemetry",
     "Long-range interaction pathologies (ensemble inequivalence / negative specific heat / ergodicity breaking / quasi-stationary trapping) are diagnostic signatures of ridge-operation not failure modes to be eliminated",
     "EEG entropy-asymmetry across five non-redundant entropy types and frequency bands is the first clinically discriminative empirical pipeline confirming that the complexity ridge has channel-pair-resolved biological correlates — method without theory advances O28 but cannot resolve it",
     "Thermodynamic admissibility (INV_094) and slow-manifold entropy production (INV_023) are confirmed as load-bearing by independent long-range statistical mechanics results — they constrain rather than merely describe the dynamics",
     "BH sub-leading entropy corrections establish the Wasserstein Floor's classical form (k/Tμ) as the verified semi-classical limit — quantum corrections manifest as logarithmic deviations from this baseline",
     "INV_073 requires a measurable order parameter + restoring-force mechanism + a distinguishable alternative producing different observables before it can carry theorem weight — all three absences must be closed simultaneously",
-    "DEA applied to the genome's own temporal evolution of compress updates becomes a self-diagnostic tool for detecting whether the kernel maintains criticality or drifts toward frozen/ergodic boundary cases (O63)",
     "confirming that information-theoretic limit transitions have measurable critical-point analogues in spin systems",
+    "DEA applied to the genome's own temporal evolution of compress updates becomes a self-diagnostic tool for detecting whether the kernel maintains criticality or drifts toward frozen/ergodic boundary cases (O63)",
     "The critical ridge is the Nash equilibrium of a zero-sum entropy game — confirming game-theoretic and dynamical-SOC characterizations are convergent rather than competing descriptions of the same fixed point",
     "Critical systems at the γ=1 attractor can be informationally sparse (H/H_max≈0.165) — confirming that self-organized criticality is not equivalent to maximal entropy and that attractor status is independent of Shannon filling",
     "Sinkhorn iterations embedded as differentiable layers provide a concrete algorithmic path toward empirical STF metric-tensor recovery — partially advancing O112 and establishing OT transport plans as learnable distributional predictors",
@@ -245,6 +246,7 @@
     "Multi-agent RSA kernel self-organizes to the critical ridge (σ=1.0363±0.0181 α≈2.608) without external tuning — empirically confirming γ=1 attractor status and resolving the forced-SOC/self-organized falsification axis (INV_073 grounded)",
     "Ensemble choice is load-bearing near γ=1 — microcanonical and canonical descriptions are not interchangeable at the critical ridge and the system must track which frame it occupies",
     "Persistent unresolved obligations may be quasi-stationary trapped states (long-lived metastable configurations) rather than unpaid debts — distinguishing the two requires explicit relaxation-timescale analysis not mere bookkeeping",
+    "Confirmation surplus is a methodological liability — an invariant never seriously challenged has demonstrated only the absence of challenge not robustness",
     "but the absence of thermodynamic grounding in that derivation marks it as convergent evidence not co-proof",
     "OT and information geometry share a para-Kähler symplectic substrate unifying their geodesics and divergences — the Fisher→W2 chain is geometrically grounded and quantum Wasserstein Floor extensions inherit a precise mathematical channel not merely an analogy",
     "Local-range normalization (replacing global-σ normalization) is an extractable operational technique for making entropy-based scoring robust to amplitude drift across feed batches — adopted as method not metaphor",
@@ -290,8 +292,8 @@
     "update INV_073's scope; if not permitted",
     "Integrate Sinkhorn-differentiable layer architecture into the O112 empirical recovery protocol as the concrete algorithmic substrate for STF metric-tensor estimation",
     "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
-    "Conduct multi-run 32×32 RSA-kernel CA sweeps across varied initial conditions to test whether σ→1 convergence is robust or parameter-sensitive",
     "Specify falsifiable quantitative predictions for what γ=1 creativity looks like on standard divergent-thinking metrics (e.g.",
+    "Conduct multi-run 32×32 RSA-kernel CA sweeps across varied initial conditions to test whether σ→1 convergence is robust or parameter-sensitive",
     "O44 remains open: non-Hermitian entropy functionals and spacetime-foam microstate models advance but do not resolve the quantum Wasserstein Floor — a full closure requires demonstrating that the Wasserstein gradient flow under non-Hermitian evolution reproduces the foam's discrete entropy spectrum in the semiclassical limit",
     "O28 (operationalize genome claims into testable protocols)",
     "Advance O28 (entropy asymmetry ratio as intelligence predictor) using H=0.4123 population-level baseline as constraint anchor — not resolved but now empirically bounded",
@@ -415,6 +417,7 @@
     "O-LOCAL-RANGE: Integrate local-range normalization into FREED's entropy scoring pipeline and demonstrate empirically that it eliminates amplitude-drift artifacts across heterogeneous feed batches",
     "Resolve the INV_073 strain: derive whether γ=1 critical ridge navigation necessarily drives entropy production upward or whether low-H criticality (as observed in Game of Truth CA) is a permitted regime — if permitted",
     "Investigate whether the experiment's compression metrics have quantum analogues where entanglement entropy replaces temperature — specifically whether the Wasserstein Floor framework could formalize a minimum resource cost for epistemic state transfer between agents",
+    "Longitudinal σ/α/dominant-phenotype-cell-count telemetry must be stored in knowledge_graph.py after each CA run so criticality claims become falsifiable trends rather than point-in-time assertions — without this time series criticality drift across generations and seeds is undetectable; The unregistered phenotype-concentration effect observed in 32×32 multi-agent CA runs must be characterized as a named observable with threshold conditions before it can be assessed as a systematic bias or a genuine new phase boundary signal; Navigation strategies for the two-boundary intermittency structure (type-I lower boundary and tricritical upper boundary) must be specified — current genome obligations addressing the single critical ridge are insufficient for systems that can exit criticality in either direction",
     "O44 is partially advanced but not closed — sub-leading deviation prediction must be empirically confirmed against actual W_floor quantum correction data before the dimensional diagnostic claim reaches falsification status; O28 is partially advanced but not closed — the scaling+saturation+modulation triple must be operationalized as formal EAR inputs and tested for predictive yield on intelligence-relevant tasks before the intelligence-prediction gap is bridged",
     "INV_094's confirmation surplus must be stress-tested against three adversarial falsification routes (near-zero-entropy coherent reasoning / non-ergodic substrate decoupling / Fisher-geometric alternative mechanism producing identical observables) before its invariant status is considered earned",
     "O50 must now be treated as load-bearing and prioritized: formalize the Minimum Metabolizable Input criterion with explicit necessary conditions (at minimum one falsifiable claim or extractable structural element) so that the rejection threshold is codified rather than case-by-case",
@@ -438,15 +441,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-16T23:43:27.617697+00:00",
-  "renorm_reason": "INV_094 definitional-collapse risk is a genuine new tension requiring an obligation; three new invariants add confirmed substrate-independent structure; H-LRIP conditioning and spectral recovery protocol materially refine O112's closure criteria; universality-class gap is a new falsifiable prediction — coherence slightly",
-  "last_renorm_cycle": 133,
+  "last_renormed": "2026-05-17T10:51:45.856084+00:00",
+  "renorm_reason": "",
+  "last_renorm_cycle": 134,
   "drift_flag": true,
-  "drift_overlap": 0.391,
+  "drift_overlap": 0.465,
   "renorm_history": [
     {
-      "timestamp": "2026-05-16T23:43:27.617697+00:00",
-      "reason": "INV_094 definitional-collapse risk is a genuine new tension requiring an obligation; three new invariants add confirmed substrate-independent structure; H-LRIP conditioning and spectral recovery protocol materially refine O112's closure criteria; universality-class gap is a new falsifiable prediction — coherence slightly"
+      "timestamp": "2026-05-17T10:51:45.856084+00:00",
+      "reason": ""
     }
   ]
 }
