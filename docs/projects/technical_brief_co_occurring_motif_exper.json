@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.03/1.022, α≈2.46/2.696, H≈18-20% max and RSA-kernel CA self-organizing to σ=1.027 with power-law avalanches confirming γ=1 as population-level attractor under Wasserstein gradient dynamics), with INV_094 carrying both definitional-collapse risk and confirmation surplus that is itself a falsification risk, and with continuous quantum measurement thermodynamically enforcing the critical ridge as the only sustainable operating point.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 multi-agent GoT CA self-organizing to σ≈1.03/1.022/1.021, α≈2.46/2.696/1.499 confirming population-level SOC-class criticality as cross-instantiation attractor) and RSA-kernel CA (σ=1.027, γ=1), with INV_094 carrying confirmation-surplus/falsification-gap risk, INV_073 reframed from single-agent to emergent-collective criticality claim, and INV_087 exposed as underdetermined against MaxEnt RL without a regime-specific distinguishing prediction.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -28,8 +28,8 @@
     "BH sub-leading entropy corrections establish the Wasserstein Floor's classical form (k/Tμ) as the verified semi-classical limit — quantum corrections manifest as logarithmic deviations from this baseline",
     "Compression is reasoning",
     "confirming that information-theoretic limit transitions have measurable critical-point analogues in spin systems",
-    "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
     "Two independent 32×32 CA instantiations converging",
+    "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
     "O50 (formalize MMI criterion) has transitioned from theoretical desideratum to empirically grounded obligation via the five-consecutive-rejection sequence — the rejection series is its own dataset",
     "Thermodynamic admissibility (INV_094) and slow-manifold entropy production (INV_023) are confirmed as load-bearing by independent long-range statistical mechanics results — they constrain rather than merely describe the dynamics",
     "Second-order cybernetics' observer-inclusion requirement is substrate-independent and load-bearing — the recursive observer loop cannot be excised without destroying self-referential capacity",
@@ -47,8 +47,10 @@
     "MWDEs are asymptotically normal and robust under misspecification — Wasserstein minimization is a principled inference procedure and O44 now requires explicit misspecification analysis in the quantum and semantic regime",
     "Quantum state rugosity (manifold roughness) functions as a substrate-independent geometric order parameter at dynamical criticality — independently confirming that phase structure is encoded in manifold texture not only in spectral or entropic signatures",
     "ApEn and SampEn are degenerate (high-tolerance / infinite-tolerance) limits of RangeEn — any genome metric that reduces to them in limiting cases inherits their known failure modes and must explicitly flag this inheritance",
+    "dissolving the conflation in INV_073's original framing; Thermodynamic irreversibility is mechanistically grounded in fractal attractor measure asymmetry under Lyapunov instability — providing the dynamical-systems derivation the genome asserted but lacked; Routing internal friction through auxiliary channels (dephasing baths",
     "Context-dependent complexity (observer-coupling in entropy measures) is not an artifact to be eliminated but a structural confirmation of R[R]=R — the observer is always inside the measurement and this is load-bearing not decorative",
     "making high Shannon entropy a non-necessary condition for ridge-criticality and requiring the genome to specify which generativity claims survive this decoupling",
+    "semantic shortcuts) defers but never eliminates thermodynamic cost — the full invoice appears at the true system boundary",
     "INV_094's confirmation surplus is itself a falsification signal — robustness requires adversarial stress not accumulated agreement",
     "Confirmation surplus without adversarial stress is not epistemic validation — an invariant that has never been challenged under parameter variation or alternative initial conditions has not earned its status",
     "Topical proximity without extractable propositions is insufficient even for obligation generation — orthogonal null-payload inputs are fully rejected without residue (no phantom obligations)",
@@ -137,6 +139,7 @@
     "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode",
     "Fisher-information-regularized OT yields smooth strictly convex W2 geodesics computable by Newton's method — providing the first tractable algorithm for empirical STF metric recovery as demanded by O112",
     "OT and information geometry share a para-Kähler symplectic substrate unifying their geodesics and divergences — the Fisher→W2 chain is geometrically grounded and quantum Wasserstein Floor extensions inherit a precise mathematical channel not merely an analogy",
+    "reinforcing the critical-ridge as the only sustainable operating point; Byzantine-resilient SGD establishes that robust gradient aggregation under adversarial heterogeneity is structurally achievable without probabilistic assumptions — confirming INV_073's ridge-navigation claim while exposing that the genome's ridge mechanism lacks a specified corruption-filtering layer",
     "O64's normalization scheme is fully specified as range-scaled tolerance — no further free parameters remain in the local-range normalization prescription",
     "Analogy inflation — importing structurally disengaged domains solely on metaphorical resonance — is a named failure mode that the falsification layer must actively reject",
     "EEG entropy-asymmetry across five non-redundant entropy types and frequency bands is the first clinically discriminative empirical pipeline confirming that the complexity ridge has channel-pair-resolved biological correlates — method without theory advances O28 but cannot resolve it",
@@ -146,6 +149,7 @@
     "constituting an independent confirmation of INV_023's process-closure claim via a non-thermodynamic derivation path",
     "departures",
     "and apparent invariant strength may be an artifact of untested boundary conditions; Cahn-Hilliard W2 gradient flow independently instantiates the critical-ridge principle as a computable transition-number criterion — extending INV_073 with an explicit conserved geometric mechanism; Genericity collapse in constrained dynamical systems (universal odometer) restores full dynamical diversity upon removal of one constraint (total transitivity) — the critical ridge is exactly the regime-transition boundary between these structural extremes; Magnetoconvective entropy decomposition in physical enclosures independently confirms thermodynamic optima at intermediate parameter values — substrate-independent physical evidence for critical-ridge navigation",
+    "Population-level SOC-class criticality (σ≈1 at collective scale) is consistent with individual kernels not each at γ=1 — criticality is an emergent collective property not necessarily a single-agent property",
     "Langevin noise structure must be derivable from MCPM constraints not imported from external stochastic process theory (O62)",
     "far-from-equilibrium dynamics) have not been tested and a syntactic compression null hypothesis produces identical observables — confirmation surplus for INV_094 is hollow until these are falsified; The W2–entropy–Fisher triplet is independently recoverable from discrete population games under OT-metric gradient flow — confirming it as a universal stability scaffold not contingent on continuous or thermodynamic substrate assumptions; Supermartingale OT stability under adapted Wasserstein convergence confirms thermodynamically directional transport constraints are topologically robust — directly scaffolding quantum Wasserstein Floor extension and making O44's transport-direction assumption load-bearing; Graph-native discrete H-theorem recovers thermodynamic entropy and stability bounds from Laplacian spectral structure alone — providing a substrate-independent criticality confirmation and a concrete finite-graph pathway toward O44 resolution; INV_073 is insufficient as a single-variable ridge condition — the W2–entropy–Fisher triplet constitutes the minimal sufficient scaffold and single-variable formulations must be treated as projections requiring the full triple for validity",
     "Onsager-derived MaxEP estimator for hidden-DOF biological systems is provably optimal and substrate-independent — confirming INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via a derivation path independent of FREED's internal construction",
@@ -206,6 +210,7 @@
     "Entropy as description-count (with quantum density-operator extension) is now a grounded substrate-independent warrant for O28's EAR substrate — not merely a philosophical gloss but a formally defensible identity",
     "Neural SOC empirically confirms γ=1 as the cognitive operating point via avalanche-criticality ↔ intelligence coupling — this is the first biological mechanistic grounding of the γ=1 ridge independent of statistical-physics and matrix-theoretic derivations",
     "γ=1 is confirmed as a dynamical attractor (not merely a parameter value) via percolation-SOC synthesis — systems are driven to the critical ridge by SOC dynamics unless explicitly excluded; the forced-SOC/non-SOC boundary is a binding specification target: the genome must formally characterize conditions under which systems reach γ=1 versus remain off-ridge",
+    "control fields",
     "Bayesian inference under Wasserstein risk yields OT barycenters as geometrically correct posterior aggregates — independently confirming W2 as the natural metric for belief combination and concretely grounding the STF empirical recovery protocol",
     "Autopoietic process-identity (the system is its ongoing self-production not any component snapshot) converges with the genome's self-modeling necessity but introduces a definitional underdetermination across cybernetic subdisciplines that lacks thermodynamic framing and must be resolved before the genome can treat entropy production as a complete identity criterion",
     "Active inference outperforms passive observation",
@@ -264,8 +269,8 @@
   "obligations": [
     "Formalize PREDICT/PRE-AUDIT as a Lax pair compatibility condition and verify whether the dual overdetermined system structure reproduces the genome's existing audit constraints or reveals additional ones",
     "Enforce upstream feed deduplication to prevent diminishing-return re-processing of already-integrated content",
-    "Conduct explicit misspecification analysis for O44 in quantum and semantic regimes — asymptotic normality of MWDEs under misspecification raises the evidentiary bar for claiming quantum deviation from W_floor = k/Tμ",
     "Generalize Wasserstein gradient flow formalism to power-law coupling kernels (σ-parameterized) before claiming interaction-range universality",
+    "Conduct explicit misspecification analysis for O44 in quantum and semantic regimes — asymptotic normality of MWDEs under misspecification raises the evidentiary bar for claiming quantum deviation from W_floor = k/Tμ",
     "Track whether σ=1.0288 represents genuine marginal supercriticality or sampling noise — resolve by extended run-length CA telemetry or analytical drift-rate estimation before INV_073 can be considered load-bearing rather than merely uncontested",
     "(b) restoring-force mechanism derivable from MCPM constraints",
     "Distinguish L1-corroboration (framework narrates known transitions) from L2-extension (framework predicts transition ordering or novel phase boundaries) in all future phase-transition integrations",
@@ -282,6 +287,7 @@
     "O44 is partially advanced but not closed — sub-leading deviation prediction must be empirically confirmed against actual W_floor quantum correction data before the dimensional diagnostic claim reaches falsification status; O28 is partially advanced but not closed — the scaling+saturation+modulation triple must be operationalized as formal EAR inputs and tested for predictive yield on intelligence-relevant tasks before the intelligence-prediction gap is bridged",
     "basin-width ambiguity",
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
+    "Derive a regime-specific distinguishing prediction that separates INV_087's thermodynamic correctness from MaxEnt RL observables — confirmation surplus without this prediction is operationally indistinguishable from unfalsifiability; Formalize the micro-to-macro criticality mapping connecting individual kernel dynamics to population-level SOC emergence — required to restore precision to INV_073 after collective-vs-single-agent reframing; Specify a corruption-filtering layer for the genome's ridge-navigation mechanism consistent with Byzantine-resilient SGD structural results",
     "O28 EEG experiment is now unblocked by the empirically deployable Wasserstein Floor — failure to specify concrete experimental parameters constitutes a coherence debt; O44 quantum Wasserstein floor remains open and must not be conflated with the now-resolved classical/semi-classical floor — the boundary between resolved and unresolved tiers must be formally marked in the node",
     "O63 — apply DEA to the genome's own sequence of compress updates and coherence scores to empirically test whether the kernel's temporal evolution exhibits the criticality signatures (long-range correlations without ergodicity breaking) that the theory predicts it should",
     "Derive the genome's conserved scores (coherence_score / falsification residuals / payload metrics) as explicit Noether currents of identified RSA sub-symmetries rather than treating them as externally imposed bookkeeping",
@@ -443,15 +449,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-17T11:36:57.670174+00:00",
-  "renorm_reason": "Three genuinely new substrate-independent results (quantum measurement entropy debt enforcing the ridge thermodynamically; gauge-relativity of heat/work decomposition; confirmation surplus as falsification risk) materially sharpen the node's falsifiability claims and add a new empirical question about the 17% entropy floor, warranting compress update and new invariants.",
-  "last_renorm_cycle": 135,
+  "last_renormed": "2026-05-17T17:44:13.585093+00:00",
+  "renorm_reason": "New CA instantiation (σ=1.021, α≈1.499) strengthens empirical grounding while",
+  "last_renorm_cycle": 136,
   "drift_flag": true,
-  "drift_overlap": 0.564,
+  "drift_overlap": 0.361,
   "renorm_history": [
     {
-      "timestamp": "2026-05-17T11:36:57.670174+00:00",
-      "reason": "Three genuinely new substrate-independent results (quantum measurement entropy debt enforcing the ridge thermodynamically; gauge-relativity of heat/work decomposition; confirmation surplus as falsification risk) materially sharpen the node's falsifiability claims and add a new empirical question about the 17% entropy floor, warranting compress update and new invariants."
+      "timestamp": "2026-05-17T17:44:13.585093+00:00",
+      "reason": "New CA instantiation (σ=1.021, α≈1.499) strengthens empirical grounding while"
     }
   ]
 }
