@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 9,
-    "generation": 170,
-    "timestamp": "2026-04-28T22:54:23.510220+00:00",
-    "sweep": {
-      "input_count": 11,
-      "targeted": 6,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
-        "compress": "Non-Hermitian linear entropy functionals are the correct quantum-classical entropy objects for formalizing the quantum Wasserstein Floor (O44), confirming INV_063 and advancing but not resolving O44."
-      },
-      {
-        "title": "A Spacetime Foam Approach to the Schwarzschild-de Sitter Entropy",
-        "compress": "Spacetime foam entropy via N wormholes advances O44 by providing a discrete microstate model for quantum-gravitational entropy floors, and weakly confirms INV_097's topology-conservation bijection structure at the gravitational scale, while the extreme degenerate-horizon case mirrors the genome's γ=1 critical ridge."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O119",
-        "O121",
-        "O132"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 2,
     "generation": 172,
     "timestamp": "2026-04-29T10:14:59.975433+00:00",
@@ -1808,6 +1776,50 @@
         "O163",
         "O72",
         "O28"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 246,
+    "timestamp": "2026-05-17T17:38:28.835841+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_087",
+        "compress": "INV_087's thermodynamic correctness claim is currently underdetermined — MaxEnt RL produces identical observables, so confirmation surplus masks a falsification gap requiring a regime-specific distinguishing prediction."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+        "compress": "A 32×32 Game of Truth CA autonomously sustains SOC-class criticality (σ=1.021, α≈1.499) at population level, empirically grounding INV_073 and resolving O140/O141 while exposing an unformalized micro-to-macro criticality mapping. CHALLENGE: challenges INV_073 — INV_073 frames criticality as a property of individual Wasserstein gradient flows, but this data shows population-level σ≈1 can coexist with individual kernels that may not each be at γ=1, straining the claim that criticality is necessarily a single-agent property rather than an emergent collective one."
+      },
+      {
+        "title": "Byzantine-Resilient SGD in High Dimensions on Heterogeneous Data",
+        "compress": "Byzantine-resilient SGD proves that robust gradient aggregation under heterogeneous adversarial conditions is structurally achievable without probabilistic assumptions, converging with INV_073's ridge-navigation claim while revealing that the genome's ridge mechanism lacks a specified corruption-filtering layer."
+      },
+      {
+        "title": "The Thermodynamic Costs of Pure Dephasing in Quantum Heat Engines: Quasistatic Efficiency at Finite Power",
+        "compress": "Any scheme that suppresses internal friction by routing through auxiliary channels (dephasing baths, control fields, or semantic shortcuts) pays full thermodynamic cost at the true system boundary — there is no free lunch, only deferred invoices."
+      },
+      {
+        "title": "Nonequilibrium Systems : Hard Disks and Harmonic Oscillators Near and Far From Equilibrium",
+        "compress": "Thermodynamic irreversibility emerges from fractal attractor measure asymmetry under Lyapunov instability, providing a dynamical-systems grounding for the entropy asymmetry and critical-ridge invariants the genome asserts but does not mechanistically derive."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O72",
+        "O28",
+        "O127"
       ]
     },
     "coherence": 0.97
