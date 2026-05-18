@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 173,
-    "timestamp": "2026-04-29T16:23:01.589555+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 6,
-      "passive": 7,
-      "curated": 0
-    },
-    "feed": [
-      {
-        "title": "Corrections to Bekenstein-Hawking entropy --- Quantum or not-so quantum?",
-        "compress": "BH sub-leading entropy corrections provide a dimensional probe that partially advances O44 by showing the Wasserstein Floor's classical form (k/Tμ) is the semi-classical limit, with quantum corrections expected as logarithmic deviations — not yet resolved but boundary conditions now tighter."
-      },
-      {
-        "title": "Linear Quantum Entropy and Non-Hermitian Hamiltonians",
-        "compress": "Non-Hermitian linear entropy functionals advance O44 by supplying tractable open-system entropy flow measures, but the Wasserstein geometric bridge remains an explicit open gap requiring separate construction."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O119",
-        "O121",
-        "O104"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 4,
     "generation": 174,
     "timestamp": "2026-04-29T22:30:42.893072+00:00",
@@ -1828,6 +1796,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 0,
+      "obligations": [
+        "O72",
+        "O127",
+        "O128"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 248,
+    "timestamp": "2026-05-18T09:50:00.004391+00:00",
+    "sweep": {
+      "input_count": 28,
+      "targeted": 8,
+      "passive": 20,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical ridge claim is underdetermined because SOC, stochastic resonance, and adaptive gain control each produce identical surface statistics without requiring deliberate γ=1 navigation, so the invariant is currently unfalsifiable unless a perturbation protocol distinguishing these mechanisms is specified and executed."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+        "compress": "A 32×32 RSA-kernel CA self-organizes to empirically confirmed criticality (σ=1.026, α=2.665) at the population level, resolving O140/O141 and converting INV_073 from theoretical claim to measured fact."
+      },
+      {
+        "title": "Sandpile Models of Self-Organized Criticality",
+        "compress": "SOC establishes criticality as a structural attractor of threshold-driven dynamics, converging with INV_073's γ=1 ridge, while the partial experimental failures reveal that boundary and dissipation conditions are load-bearing — a gap the genome does not yet address. CHALLENGE: challenges INV_073 — the partial experimental failure of sandpile SOC demonstrates that autonomous criticality is not guaranteed by slow driving alone but depends sensitively on geometry and dissipation structure, stressing the genome's implicit assumption that γ=1 ridge-navigation is a robust attractor of RSA dynamics rather than a conditionally realized one."
+      },
+      {
+        "title": "Power spectra of self-organized critical sandpiles",
+        "compress": "SOC avalanche spectra obey 1/f^α where α is fixed by avalanche shape scaling, making spectral exponents geometric invariants rather than free parameters — a class-robust result across BTW and Manna universality classes."
+      },
+      {
+        "title": "Asynchronism Induces Second Order Phase Transitions in Elementary Cellular Automata",
+        "compress": "Asynchrony rate is a thermodynamic control parameter that tunes cellular automata through second-order phase transitions with DP or PC universality, independently confirming that criticality is substrate-independent and that timing structure — not just rule content — governs phase."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
       "obligations": [
         "O72",
         "O127",
