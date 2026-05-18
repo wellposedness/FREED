@@ -227,53 +227,6 @@ _COARSE_GRAINING_PATTERNS = re.compile(
 )
 
 
-def classify_entropy_flux_source(processing_context="", edge_type="", is_feed=True):
-    # type: (str, str, bool) -> str
-    """
-    Classify the entropy-flux source for an edge update, mirroring the paper's
-    three-factor decomposition of entropy change.
-
-    The classification uses a priority hierarchy:
-      1. coarse_graining_collapse — if processing context indicates merging,
-         deduplication, or explicit coarse-graining operations
-      2. internal_inference — if processing context indicates consolidation,
-         avalanche cascades, structural mining, or derivation from existing state
-      3. external_feed — default for edges produced by FEED ingestion
-
-    Parameters
-    ----------
-    processing_context : str
-        Description of the processing step that generated this edge.
-        E.g. "FEED ingestion", "consolidate MINE phase", "avalanche cascade",
-        "context-aware deduplication", etc.
-    edge_type : str
-        The edge type (confirms, refutes, etc.). Used as secondary signal.
-    is_feed : bool
-        Whether this edge was generated during a FEED operation (default True).
-        When False, the default shifts from external_feed to internal_inference.
-
-    Returns
-    -------
-    str
-        One of ENTROPY_FLUX_SOURCES: "internal_inference", "external_feed",
-        or "coarse_graining_collapse".
-    """
-    ctx = processing_context + " " + edge_type
-
-    # Priority 1: coarse-graining collapse
-    if _COARSE_GRAINING_PATTERNS.search(ctx):
-        return "coarse_graining_collapse"
-
-    # Priority 2: internal inference
-    if _INTERNAL_INFERENCE_PATTERNS.search(ctx):
-        return "internal_inference"
-
-    # Priority 3: default based on is_feed flag
-    if is_feed:
-        return "external_feed"
-    else:
-        return "internal_inference"
-
 
 # ─── Information-Plane Compression Estimator Types ────────────────────────────
 # Distinguishes geometric compression (intrinsic dimensionality, Riemannian
@@ -496,135 +449,6 @@ def classify_compression_estimator(text):
         "inv094_flag": inv094_flag,
     }
 
-
-def score_information_plane_compression(text, compression_value=None,
-                                         layer_dim=None):
-    # type: (str, Optional[float], Optional[int]) -> dict
-    """
-    Score an information-plane compression claim with estimator-type awareness.
-
-    Wraps classify_compression_estimator and augments with:
-      - Quantitative compression score adjustment based on estimator reliability
-      - Layer dimensionality check (high-dim continuous triggers MI warning)
-      - Actionable recommendation for making the claim independently testable
-
-    Parameters
-    ----------
-    text : str
-        Text describing the compression observation.
-    compression_value : float or None
-        The reported compression magnitude (e.g., MI decrease, dimensionality
-        reduction ratio).  If provided, the score is adjusted by estimator
-        reliability.
-    layer_dim : int or None
-        Dimensionality of the layer where compression is observed.
-        If > 50, automatically flags as high-dimensional continuous.
-
-    Returns
-    -------
-    dict
-        {
-            "estimator_classification": dict — from classify_compression_estimator,
-            "raw_compression_value": float or None,
-            "adjusted_compression_value": float or None — raw * reliability_factor,
-            "reliability_factor": float — in [0, 1], how much to trust the
-                compression claim given the estimator type and dimensionality,
-            "layer_dim": int or None,
-            "recommendation": str — actionable guidance,
-            "independently_testable": bool — True if the claim specifies
-                estimator type and can be verified with an alternative method,
-        }
-    """
-    # Augment text with dimensionality info if provided
-    augmented_text = text
-    if layer_dim is not None and layer_dim > 50:
-        augmented_text += f" {layer_dim}-dimensional continuous hidden layer"
-
-    classification = classify_compression_estimator(augmented_text)
-
-    # Reliability factor based on estimator type and context
-    etype = classification["estimator_type"]
-    is_high_dim = classification["is_high_dim_continuous"]
-
-    if layer_dim is not None and layer_dim > 50:
-        is_high_dim = True
-        classification["is_high_dim_continuous"] = True
-
-    reliability_table = {
-        "geometric:intrinsic_dimensionality": 0.95,
-        "geometric:pca_rank": 0.90,
-        "geometric:riemannian_spread": 0.95,
-        "geometric:covariance_contraction": 0.85,
-        "mi:ksg": 0.70 if not is_high_dim else 0.40,
-        "mi:mine_neural": 0.65 if not is_high_dim else 0.35,
-        "mi:kde": 0.60 if not is_high_dim else 0.25,
-        "mi:noise_based": 0.75 if not is_high_dim else 0.45,
-        "mi:binning": 0.50 if not is_high_dim else 0.15,
-        "mi:unspecified": 0.40 if not is_high_dim else 0.10,
-        "unknown": 0.30,
-    }
-    reliability = reliability_table.get(etype, 0.30)
-
-    # Adjusted compression value
-    adjusted = None  # type: Optional[float]
-    if compression_value is not None:
-        adjusted = compression_value * reliability
-
-    # Recommendation
-    if classification["compression_claim_type"] == "geometric":
-        recommendation = (
-            "Compression is geometric (not information-theoretic). "
-            "This is a valid observation but does NOT support information "
-            "bottleneck claims. Report as geometric compression with the "
-            "specific measure used."
-        )
-    elif is_high_dim and classification["is_mi_based"]:
-        recommendation = (
-            f"MI estimator '{etype}' used in high-dimensional continuous "
-            f"space (reliability={reliability:.2f}). REQUIRED: repeat with "
-            "a geometric measure (intrinsic dimensionality or PCA effective "
-            "rank) to determine if compression is genuinely information-"
-            "theoretic or merely geometric. Without this control, the "
-            "information bottleneck claim is not independently testable."
-        )
-    elif classification["is_mi_based"] and not is_high_dim:
-        recommendation = (
-            f"MI estimator '{etype}' in low-dimensional/discrete context "
-            f"(reliability={reliability:.2f}). Artifact risk is lower but "
-            "still present. Recommend testing with at least one alternative "
-            "MI estimator to verify estimator-independence of the compression "
-            "observation."
-        )
-    elif classification["compression_claim_type"] == "ambiguous":
-        recommendation = (
-            "Both geometric and MI-based compression signals detected. "
-            "The claim is ambiguous — specify which compression type is "
-            "being asserted and test each independently."
-        )
-    else:
-        recommendation = (
-            "No clear compression claim detected. If compression is "
-            "claimed, specify the estimator type (geometric vs. MI-based) "
-            "and the dimensionality context."
-        )
-
-    independently_testable = (
-        classification["compression_claim_type"] != "ambiguous"
-        and classification["estimator_type"] != "unknown"
-        and classification["estimator_type"] != "mi:unspecified"
-    )
-
-    return {
-        "estimator_classification": classification,
-        "raw_compression_value": compression_value,
-        "adjusted_compression_value": (
-            round(adjusted, 10) if adjusted is not None else None
-        ),
-        "reliability_factor": round(reliability, 4),
-        "layer_dim": layer_dim,
-        "recommendation": recommendation,
-        "independently_testable": independently_testable,
-    }
 
 
 # ─── Extraction patterns ──────────────────────────────────────────────────────
@@ -1023,190 +847,6 @@ def multi_exemplar_variance_decomposition(exemplar_distances, category_labels):
     }
 
 
-def decompose_concept_node_distances(node_ids, pairwise_distances,
-                                      node_texts=None, category_overrides=None):
-    # type: (List[str], List[List[float]], Optional[Dict[str, str]], Optional[Dict[str, str]]) -> dict
-    """
-    Decompose pairwise distances between concept nodes into semantic
-    (between-category) and perceptual (within-category) components, using
-    multi-exemplar variance decomposition.
-
-    This is the primary integration point for preventing conflation of
-    perceptual similarity with semantic relatedness in knowledge graph
-    edge construction.  Call this before building or weighting edges
-    between concept nodes to obtain the decomposed distance components.
-
-    Parameters
-    ----------
-    node_ids : list of str
-        Ordered list of concept node identifiers.
-    pairwise_distances : list of list of float
-        n×n symmetric pairwise distance matrix between nodes.
-    node_texts : dict or None
-        Mapping of node_id → descriptive text for automatic category
-        inference.  If None, categories must be provided via overrides.
-    category_overrides : dict or None
-        Mapping of node_id → category_label.  Overrides auto-inferred
-        categories.  Nodes not in this dict fall back to auto-inference.
-
-    Returns
-    -------
-    dict
-        {
-            "decomposition": dict — full multi_exemplar_variance_decomposition
-                result,
-            "node_categories": dict — {node_id: category_label} used,
-            "n_uncategorized": int — nodes that could not be assigned a
-                category (assigned to "category:uncategorized"),
-            "semantic_distance_matrix": list of list of float or None —
-                distance matrix with within-category variance subtracted
-                (the "semantic-only" distances), or None if decomposition
-                failed.  Entry [i][j] = max(0, d[i][j] - mean_within_var)
-                for cross-category pairs; 0 for same-category pairs.
-            "edge_weight_adjustments": dict — {(node_a, node_b): adjustment_factor}
-                where factor < 1.0 means the original distance was inflated
-                by perceptual similarity and should be down-weighted,
-            "recommendation": str,
-        }
-    """
-    n = len(node_ids)
-    if n == 0:
-        return {
-            "decomposition": multi_exemplar_variance_decomposition([], []),
-            "node_categories": {},
-            "n_uncategorized": 0,
-            "semantic_distance_matrix": None,
-            "edge_weight_adjustments": {},
-            "recommendation": "no_nodes:nothing_to_decompose",
-        }
-
-    # ── Assign categories ────────────────────────────────────────────────
-    node_categories = {}  # type: Dict[str, str]
-    n_uncategorized = 0
-
-    for nid in node_ids:
-        nid_upper = nid.upper()
-        # Check overrides first
-        if category_overrides and nid in category_overrides:
-            node_categories[nid] = category_overrides[nid]
-        elif category_overrides and nid_upper in category_overrides:
-            node_categories[nid] = category_overrides[nid_upper]
-        elif node_texts and (nid in node_texts or nid_upper in node_texts):
-            text = node_texts.get(nid, node_texts.get(nid_upper, ""))
-            cats = _infer_categories(text)
-            if cats:
-                # Use first (most specific) category
-                node_categories[nid] = cats[0]
-            else:
-                node_categories[nid] = "category:uncategorized"
-                n_uncategorized += 1
-        else:
-            node_categories[nid] = "category:uncategorized"
-            n_uncategorized += 1
-
-    # Build category label list in node_ids order
-    category_labels = [node_categories[nid] for nid in node_ids]
-
-    # ── Run decomposition ────────────────────────────────────────────────
-    decomp = multi_exemplar_variance_decomposition(
-        pairwise_distances, category_labels
-    )
-
-    # ── Build semantic-only distance matrix ──────────────────────────────
-    semantic_dist = None  # type: Optional[List[List[float]]]
-    edge_adjustments = {}  # type: Dict[tuple, float]
-
-    if decomp["sufficient_exemplars"] and decomp["within_category_variance"] > 0:
-        mean_within = decomp["within_category_variance"]
-        # Subtract within-category variance from all cross-category distances
-        # to isolate the semantic signal
-        semantic_dist = [[0.0] * n for _ in range(n)]
-        for i in range(n):
-            for j in range(i + 1, n):
-                if i >= len(pairwise_distances) or j >= len(pairwise_distances[i]):
-                    continue
-                d_raw = pairwise_distances[i][j]
-                cat_i = category_labels[i]
-                cat_j = category_labels[j]
-
-                if cat_i == cat_j:
-                    # Same category: distance is purely within-category
-                    # (perceptual), set semantic distance to 0
-                    semantic_dist[i][j] = 0.0
-                    semantic_dist[j][i] = 0.0
-                    if d_raw > 1e-15:
-                        edge_adjustments[(node_ids[i], node_ids[j])] = 0.0
-                else:
-                    # Cross-category: subtract mean within-category variance
-                    # as the perceptual baseline
-                    d_semantic = max(0.0, d_raw - math.sqrt(mean_within))
-                    semantic_dist[i][j] = d_semantic
-                    semantic_dist[j][i] = d_semantic
-                    if d_raw > 1e-15:
-                        adjustment = d_semantic / d_raw
-                        edge_adjustments[(node_ids[i], node_ids[j])] = round(
-                            adjustment, 6
-                        )
-
-    # ── Recommendation ───────────────────────────────────────────────────
-    eta_sq = decomp["variance_ratio_eta_squared"]
-    fidelity = decomp["semantic_fidelity"]
-
-    if not decomp["sufficient_exemplars"]:
-        recommendation = (
-            "BLOCK: Insufficient exemplars for multi-exemplar decomposition. "
-            "Do NOT use raw pairwise distances as semantic edge weights — "
-            "they are confounded with perceptual/surface similarity. "
-            "Add ≥2 exemplars per category across ≥2 categories, then "
-            "re-run decomposition. (O112: STF recovery requires this step.)"
-        )
-    elif eta_sq >= 0.5:
-        recommendation = (
-            f"USE_SEMANTIC_MATRIX: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
-            f"The semantic_distance_matrix has perceptual variance removed. "
-            f"Use it for edge weight construction in place of raw distances. "
-            f"(O112: STF geometry recovery is reliable at this fidelity.)"
-        )
-    elif eta_sq >= 0.3:
-        recommendation = (
-            f"USE_WITH_CAUTION: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
-            f"Partial perceptual confound remains. Use semantic_distance_matrix "
-            f"but flag derived edges as 'semantic_fidelity:moderate'. "
-            f"Consider adding more exemplars to improve decomposition."
-        )
-    else:
-        recommendation = (
-            f"UNRELIABLE: η²={eta_sq:.4f}, fidelity={fidelity:.4f}. "
-            f"Perceptual similarity dominates the distance structure. "
-            f"Do NOT use these distances for semantic edge weights without "
-            f"additional exemplars or alternative distance metrics. "
-            f"(O112: STF geometry contaminated by surface similarity.)"
-        )
-
-    result = {
-        "decomposition": decomp,
-        "node_categories": node_categories,
-        "n_uncategorized": n_uncategorized,
-        "semantic_distance_matrix": semantic_dist,
-        "edge_weight_adjustments": edge_adjustments,
-        "recommendation": recommendation,
-    }
-
-    # ── Log summary ──────────────────────────────────────────────────────
-    print(
-        f"[GRAPH:VARIANCE_DECOMPOSITION] {n} node(s), "
-        f"{decomp['n_categories']} categories, "
-        f"η²={eta_sq:.4f}, fidelity={fidelity:.4f}, "
-        f"sufficient_exemplars={decomp['sufficient_exemplars']}, "
-        f"uncategorized={n_uncategorized}"
-    )
-    if decomp.get("confound_warning"):
-        print(
-            f"[GRAPH:VARIANCE_DECOMPOSITION] ⚠ {decomp['confound_warning'][:120]}"
-        )
-
-    return result
-
 
 def infer_context_tag(text_window):
     # type: (str) -> Optional[str]
@@ -1314,102 +954,6 @@ _ENTROPY_DISCUSSION_PATTERN = re.compile(
     re.I
 )
 
-
-def classify_entropy_regime(text):
-    # type: (str) -> Optional[dict]
-    """
-    Classify whether a text's entropy formula is semi-classical or quantum-corrected.
-
-    Uses pattern-based dimensional analysis to detect:
-    - Semi-classical: entropy proportional to area/action, no ħ sub-leading terms
-    - Quantum-corrected: contains log corrections, ħ-dependent sub-leading terms,
-      or approach-specific quantum gravity corrections
-
-    Parameters
-    ----------
-    text : str
-        The text to analyze (typically full kernel output or paper abstract).
-
-    Returns
-    -------
-    dict or None
-        None if the text does not discuss entropy/BH thermodynamics at all.
-        Otherwise returns:
-        {
-            "regime": str — "semi_classical", "quantum_corrected", or "indeterminate",
-            "quantum_signals": list of str — matched quantum correction patterns,
-            "classical_signals": list of str — matched semi-classical patterns,
-            "confidence": str — "high" if only one regime matched, "mixed" if both,
-            "approach_dependent": bool — True if text suggests corrections vary by approach,
-            "o44_tag": str — tag string for O44 obligation tracking,
-        }
-    """
-    if not _ENTROPY_DISCUSSION_PATTERN.search(text):
-        return None
-
-    quantum_signals = []   # type: List[str]
-    classical_signals = []  # type: List[str]
-
-    for pat in _QUANTUM_CORRECTION_PATTERNS:
-        m = pat.search(text)
-        if m:
-            quantum_signals.append(m.group(0)[:80])
-
-    for pat in _SEMICLASSICAL_PATTERNS:
-        m = pat.search(text)
-        if m:
-            classical_signals.append(m.group(0)[:80])
-
-    # Detect approach-dependence language (key challenge to O44)
-    _approach_dep = re.compile(
-        r'\b(?:approach[-\s]dependent|framework[-\s]dependent|'
-        r'different\s+(?:approaches|frameworks)\s+(?:lead|give|yield|produce)\s+'
-        r'different\s+(?:corrections?|sub-?leading)|'
-        r'(?:LQG|string|loop)\s+.*?\bdifferent\b.*?\b(?:correction|entropy))\b',
-        re.I
-    )
-    approach_dependent = bool(_approach_dep.search(text))
-
-    has_quantum = len(quantum_signals) > 0
-    has_classical = len(classical_signals) > 0
-
-    if has_quantum and not has_classical:
-        regime = "quantum_corrected"
-        confidence = "high"
-    elif has_classical and not has_quantum:
-        regime = "semi_classical"
-        confidence = "high"
-    elif has_quantum and has_classical:
-        # Text discusses both — likely a paper comparing regimes or showing
-        # how semi-classical results receive quantum corrections
-        if len(quantum_signals) >= len(classical_signals):
-            regime = "quantum_corrected"
-        else:
-            regime = "semi_classical"
-        confidence = "mixed"
-    else:
-        regime = "indeterminate"
-        confidence = "low"
-
-    # Build O44 tag
-    if regime == "semi_classical":
-        o44_tag = "entropy:semi_classical:action_proportional"
-    elif regime == "quantum_corrected":
-        o44_tag = "entropy:quantum_corrected:subleading"
-    else:
-        o44_tag = "entropy:indeterminate"
-
-    if approach_dependent:
-        o44_tag += ":approach_dependent"
-
-    return {
-        "regime": regime,
-        "quantum_signals": quantum_signals,
-        "classical_signals": classical_signals,
-        "confidence": confidence,
-        "approach_dependent": approach_dependent,
-        "o44_tag": o44_tag,
-    }
 
 
 def extract_edges(kernel_output, source_url, source_title="", context_tag=None):
@@ -1768,104 +1312,6 @@ def linear_entropy_normalized(density_matrix):
     return max(0.0, min(1.0, s_norm))
 
 
-def belief_vector_to_density_matrix(belief_vector):
-    # type: (List[float]) -> List[List[float]]
-    """
-    Convert a belief/probability vector into a density matrix via outer product.
-
-    This is the standard pure-state construction ρ = |ψ⟩⟨ψ| where |ψ⟩ is
-    the belief vector. For mixed states, use a weighted sum of such matrices.
-
-    Parameters
-    ----------
-    belief_vector : list of float
-        A belief/probability amplitude vector of length d.
-
-    Returns
-    -------
-    list of list of float
-        A d×d density matrix (outer product of the vector with itself).
-    """
-    d = len(belief_vector)
-    if d == 0:
-        return []
-    return [[belief_vector[i] * belief_vector[j] for j in range(d)]
-            for i in range(d)]
-
-
-def score_node_information_flow(belief_states, dt=1.0):
-    # type: (List[List[List[float]]], float) -> dict
-    """
-    Score the information flow for a knowledge graph node given a time series
-    of density-matrix-like belief states.
-
-    Computes linear entropy at each timestep and the rate of change, providing
-    a lightweight alternative to von Neumann entropy for ranking epistemic
-    updates in open-system or mixed-representation nodes.
-
-    Parameters
-    ----------
-    belief_states : list of list of list of float
-        Time-ordered sequence of density matrices representing the node's
-        belief state evolution. Each entry is a square matrix.
-    dt : float
-        Time step between consecutive belief states (default 1.0).
-
-    Returns
-    -------
-    dict
-        {
-            "linear_entropies": list of float — S_L at each timestep,
-            "normalized_entropies": list of float — normalized S_L at each step,
-            "entropy_rates": list of float — dS_L/dt between consecutive steps,
-            "mean_entropy": float — average linear entropy,
-            "mean_rate": float — average entropy rate (net information flow),
-            "max_rate": float — peak information flow magnitude,
-            "flow_direction": str — "outflow" (decoherence), "inflow" (purification), or "stable",
-            "n_steps": int
-        }
-    """
-    if not belief_states:
-        return {
-            "linear_entropies": [],
-            "normalized_entropies": [],
-            "entropy_rates": [],
-            "mean_entropy": 0.0,
-            "mean_rate": 0.0,
-            "max_rate": 0.0,
-            "flow_direction": "stable",
-            "n_steps": 0,
-        }
-
-    entropies = [linear_entropy(rho) for rho in belief_states]
-    norm_entropies = [linear_entropy_normalized(rho) for rho in belief_states]
-
-    rates = []  # type: List[float]
-    for i in range(len(belief_states) - 1):
-        r = linear_entropy_rate(belief_states[i], belief_states[i + 1], dt)
-        rates.append(r)
-
-    mean_ent = sum(entropies) / len(entropies) if entropies else 0.0
-    mean_rate = sum(rates) / len(rates) if rates else 0.0
-    max_rate = max((abs(r) for r in rates), default=0.0)
-
-    if abs(mean_rate) < 1e-10:
-        direction = "stable"
-    elif mean_rate > 0:
-        direction = "outflow"
-    else:
-        direction = "inflow"
-
-    return {
-        "linear_entropies": entropies,
-        "normalized_entropies": norm_entropies,
-        "entropy_rates": rates,
-        "mean_entropy": mean_ent,
-        "mean_rate": mean_rate,
-        "max_rate": max_rate,
-        "flow_direction": direction,
-        "n_steps": len(belief_states),
-    }
 
 
 # ─── Non-Hermitian Entropy-Flow Edge Weight ──────────────────────────────────
@@ -1996,82 +1442,6 @@ def non_hermitian_entropy_flow_score(density_matrix_source, density_matrix_targe
         "o44_flag": o44_flag,
     }
 
-
-def compute_edge_weight(edge, node_beliefs=None, dt=1.0,
-                        base_weight=1.0, nh_coupling=0.5):
-    # type: (dict, Optional[Dict[str, List[List[float]]]], float, float, float) -> dict
-    """
-    Compute the total weight for a knowledge graph edge, incorporating the
-    non-Hermitian entropy-flow scoring term when belief states are available.
-
-    The total weight is:
-        w_total = base_weight + nh_coupling * directional_weight_NH
-
-    where directional_weight_NH comes from non_hermitian_entropy_flow_score.
-
-    Parameters
-    ----------
-    edge : dict
-        An edge dict as produced by extract_edges / record_feed.
-    node_beliefs : dict or None
-        Mapping of node_id → density-matrix-like belief state.
-        If None or if the edge's nodes lack belief states, only base_weight
-        is used.
-    dt : float
-        Time step for entropy rate computation (default 1.0).
-    base_weight : float
-        Base edge weight from type/confirmation counting (default 1.0).
-    nh_coupling : float
-        Coupling strength for the non-Hermitian term (default 0.5).
-        Set to 0.0 to disable non-Hermitian scoring entirely.
-
-    Returns
-    -------
-    dict
-        {
-            "total_weight": float,
-            "base_weight": float,
-            "nh_weight": float — the non-Hermitian contribution (may be 0),
-            "nh_score": dict or None — full non-Hermitian score if computed,
-            "is_directed": bool — True if non-Hermitian asymmetry detected,
-        }
-    """
-    result = {
-        "total_weight": base_weight,
-        "base_weight": base_weight,
-        "nh_weight": 0.0,
-        "nh_score": None,
-        "is_directed": False,
-    }
-
-    if node_beliefs is None or nh_coupling == 0.0:
-        return result
-
-    source_id = edge.get("from", "")
-    target_id = edge.get("to", "")
-
-    source_belief = node_beliefs.get(source_id)
-    target_belief = node_beliefs.get(target_id)
-
-    if source_belief is None or target_belief is None:
-        return result
-
-    # Validate matrices are non-empty
-    if (not source_belief or not source_belief[0] or
-            not target_belief or not target_belief[0]):
-        return result
-
-    nh_score = non_hermitian_entropy_flow_score(
-        source_belief, target_belief, dt=dt
-    )
-
-    nh_weight = nh_coupling * nh_score["directional_weight"]
-    result["nh_weight"] = nh_weight
-    result["nh_score"] = nh_score
-    result["total_weight"] = base_weight + nh_weight
-    result["is_directed"] = nh_score["is_non_unitary"]
-
-    return result
 
 
 def range_entropy(time_series, m=2, r=0.3):
@@ -2293,32 +1663,6 @@ def cluster_complexity_scores(clusters):
 # structure to the Wasserstein Floor invariant W_floor = k/Tμ.
 # ─────────────────────────────────────────────────────────────────────────────
 
-
-def _build_adjacency_matrix(n, edge_pairs, edge_weights=None):
-    # type: (int, List[Tuple[int, int]], Optional[List[float]]) -> List[List[float]]
-    """
-    Build an n×n symmetric adjacency matrix from edge pairs.
-
-    Parameters
-    ----------
-    n : int
-        Number of vertices.
-    edge_pairs : list of (int, int)
-        Edges as (i, j) index pairs (0-indexed).
-    edge_weights : list of float or None
-        Weight for each edge. If None, all weights are 1.0.
-
-    Returns
-    -------
-    list of list of float
-        n×n symmetric adjacency matrix.
-    """
-    A = [[0.0] * n for _ in range(n)]
-    for idx, (i, j) in enumerate(edge_pairs):
-        w = 1.0 if edge_weights is None else edge_weights[idx]
-        A[i][j] = w
-        A[j][i] = w
-    return A
 
 
 def _build_weighted_graph_laplacian(adjacency):
@@ -2608,485 +1952,6 @@ def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
     return integral
 
 
-def fisher_regularized_ot_distance(laplacian, p, q, fisher_lambda=0.1,
-                                    n_newton_steps=10, n_time_steps=20,
-                                    tol=1e-8):
-    # type: (List[List[float]], List[float], List[float], float, int, int, float) -> dict
-    """
-    Compute Fisher-information-regularized optimal transport distance between
-    two probability distributions on the graph, using Newton's method with
-    quadratic convergence for the Benamou-Brenier dynamical formulation.
-
-    The regularized problem adds a Fisher information penalty to the
-    Benamou-Brenier action:
-
-        d_F(p, q) = min_{ρ,v} ∫_0^1 [ (1/2)∫ ρ|v|² + λ·I_F(ρ) ] dt
-
-    subject to ∂_t ρ + div(ρ v) = 0,  ρ(0) = p,  ρ(1) = q
-
-    where I_F(ρ) = ∫ |∇√ρ|² is the Fisher information of ρ.  The Fisher
-    regularization makes the problem smooth and strictly convex, enabling
-    Newton's method with quadratic convergence rate instead of the slower
-    first-order methods required for unregularized OT.
-
-    On a finite graph with weighted Laplacian L_w, the Fisher information
-    is discretized as:
-
-        I_F(ρ) = Σ_{(i,j)∈E} w_{ij} (√ρ_i - √ρ_j)²
-
-    which is the Dirichlet energy of √ρ on the graph — computable from the
-    graph Laplacian without any continuous-domain discretization.
-
-    The Newton solver iterates on the W2 geodesic interpolant:
-        ρ^k(t) = (1-t)p + t·q  (McCann interpolant, initial guess)
-    then refines via Newton steps on the KKT system of the regularized
-    Benamou-Brenier problem, achieving quadratic convergence to the
-    minimizer.
-
-    CHALLENGE (O112): By demonstrating that Fisher-regularized OT is
-    tractable (smooth, strictly convex, Newton-solvable with quadratic
-    convergence), this removes the computational-infeasibility excuse
-    for not running the STF metric tensor recovery experiment.  The
-    Fisher-W2 coupling required by O112 is exactly the regularization
-    term used here, making the distance computation geometrically
-    consistent with STF recovery requirements.
-
-    Parameters
-    ----------
-    laplacian : list of list of float
-        n×n weighted graph Laplacian L_w.
-    p : list of float
-        Source probability distribution (all entries > 0, sum to 1).
-    q : list of float
-        Target probability distribution (all entries > 0, sum to 1).
-    fisher_lambda : float
-        Fisher information regularization strength λ (default 0.1).
-        - λ = 0: recovers unregularized W2 (but loses strict convexity)
-        - λ > 0: smooth, strictly convex problem with unique minimizer
-        - Larger λ: more regularization, smoother geodesic, but distance
-          is further from true W2
-    n_newton_steps : int
-        Maximum number of Newton iterations (default 10).  Quadratic
-        convergence typically requires 4-8 steps.
-    n_time_steps : int
-        Number of time discretization points for the Benamou-Brenier
-        path (default 20).
-    tol : float
-        Convergence tolerance on the Newton step norm (default 1e-8).
-
-    Returns
-    -------
-    dict
-        {
-            "fisher_ot_distance": float — the regularized OT distance d_F(p,q),
-            "unregularized_w2_estimate": float — W2 distance for comparison
-                (computed via wasserstein_geodesic_distance),
-            "fisher_information_along_path": list of float — I_F(ρ(t_k)) at
-                each time step of the optimal path,
-            "benamou_brenier_action": float — the unregularized kinetic action
-                component of the optimal path,
-            "fisher_penalty_total": float — λ · ∫ I_F(ρ(t)) dt (the total
-                Fisher regularization contribution),
-            "n_newton_steps_used": int — actual Newton iterations taken,
-            "converged": bool — True if Newton step norm < tol,
-            "convergence_rate": float — ratio of consecutive Newton step
-                norms (should approach 0 quadratically: r_{k+1}/r_k² → C),
-            "quadratic_convergence_verified": bool — True if the convergence
-                rate is consistent with quadratic convergence,
-            "geodesic_path": list of list of float — the optimal ρ(t_k) at
-                each time step (the W2-Fisher geodesic between p and q),
-            "fisher_lambda": float — the λ used,
-            "o112_flag": str — diagnostic for O112 obligation,
-            "stf_recovery_note": str — guidance for STF metric tensor recovery,
-        }
-    """
-    n = len(p)
-    if n == 0 or n != len(q) or n != len(laplacian):
-        return {
-            "fisher_ot_distance": 0.0,
-            "unregularized_w2_estimate": 0.0,
-            "fisher_information_along_path": [],
-            "benamou_brenier_action": 0.0,
-            "fisher_penalty_total": 0.0,
-            "n_newton_steps_used": 0,
-            "converged": True,
-            "convergence_rate": 0.0,
-            "quadratic_convergence_verified": False,
-            "geodesic_path": [],
-            "fisher_lambda": fisher_lambda,
-            "o112_flag": "empty_distribution:trivially_zero",
-            "stf_recovery_note": "no_data",
-        }
-
-    # Check for identical distributions
-    if all(abs(p[i] - q[i]) < 1e-15 for i in range(n)):
-        return {
-            "fisher_ot_distance": 0.0,
-            "unregularized_w2_estimate": 0.0,
-            "fisher_information_along_path": [0.0],
-            "benamou_brenier_action": 0.0,
-            "fisher_penalty_total": 0.0,
-            "n_newton_steps_used": 0,
-            "converged": True,
-            "convergence_rate": 0.0,
-            "quadratic_convergence_verified": False,
-            "geodesic_path": [[round(pi, 10) for pi in p]],
-            "fisher_lambda": fisher_lambda,
-            "o112_flag": "identical_distributions:distance_zero",
-            "stf_recovery_note": "no_transport_needed",
-        }
-
-    eps = 1e-15  # positivity floor
-
-    # ── Compute graph-discrete Fisher information I_F(ρ) ─────────────────
-    def _fisher_info(rho):
-        # type: (List[float]) -> float
-        """
-        Discrete Fisher information on the graph:
-        I_F(ρ) = Σ_{(i,j)∈E} w_{ij} (√ρ_i - √ρ_j)²
-        = √ρ^T · L_w · √ρ  (Dirichlet energy of √ρ)
-        """
-        sqrt_rho = [math.sqrt(max(ri, eps)) for ri in rho]
-        # Compute sqrt_rho^T · L · sqrt_rho
-        fisher = 0.0
-        for i in range(n):
-            for j in range(n):
-                fisher += sqrt_rho[i] * laplacian[i][j] * sqrt_rho[j]
-        return max(0.0, fisher)
-
-    # ── Compute Fisher information gradient ∂I_F/∂ρ ─────────────────────
-    def _fisher_info_gradient(rho):
-        # type: (List[float]) -> List[float]
-        """
-        Gradient of the discrete Fisher information with respect to ρ.
-        ∂I_F/∂ρ_i = (1/(2√ρ_i)) · [L_w · √ρ]_i
-
-        This is the key quantity for Newton's method: the Hessian of the
-        regularized action includes second derivatives of I_F.
-        """
-        sqrt_rho = [math.sqrt(max(ri, eps)) for ri in rho]
-        # L · √ρ
-        L_sqrt_rho = [0.0] * n
-        for i in range(n):
-            s = 0.0
-            for j in range(n):
-                s += laplacian[i][j] * sqrt_rho[j]
-            L_sqrt_rho[i] = s
-        # Gradient: (1/(2√ρ_i)) · [L·√ρ]_i
-        grad = [0.0] * n
-        for i in range(n):
-            sr = sqrt_rho[i]
-            if sr > eps:
-                grad[i] = L_sqrt_rho[i] / (2.0 * sr)
-            else:
-                grad[i] = 0.0
-        return grad
-
-    # ── Initialize McCann displacement interpolant (linear path) ─────────
-    dt = 1.0 / float(max(n_time_steps, 1))
-    path = []  # type: List[List[float]]
-    for k in range(n_time_steps + 1):
-        t = k * dt
-        rho_t = [(1.0 - t) * p[i] + t * q[i] for i in range(n)]
-        # Clamp and renormalize for positivity
-        rho_t = [max(ri, eps) for ri in rho_t]
-        total_rho = sum(rho_t)
-        if total_rho > 0:
-            rho_t = [ri / total_rho for ri in rho_t]
-        path.append(rho_t)
-
-    # ── Newton iteration on the regularized Benamou-Brenier problem ──────
-    # At each Newton step, we update the path ρ(t) to reduce the
-    # regularized action:
-    #   A_λ[ρ] = Σ_k [ (1/2) · v_k^T · diag(ρ_k) · v_k + λ · I_F(ρ_k) ] · Δt
-    # where v_k = (ρ_{k+1} - ρ_k) / Δt is the discrete velocity field.
-    #
-    # The Newton step computes the gradient and (approximate) Hessian of
-    # A_λ with respect to the interior path points ρ_1, ..., ρ_{K-1}
-    # (endpoints ρ_0=p, ρ_K=q are fixed).
-
-    newton_step_norms = []  # type: List[float]
-    converged = False
-    steps_used = 0
-
-    for newton_iter in range(n_newton_steps):
-        steps_used = newton_iter + 1
-
-        # Compute gradient of regularized action w.r.t. interior path points
-        total_grad_norm_sq = 0.0
-        updates = []  # type: List[List[float]]
-
-        for k in range(1, n_time_steps):
-            rho_k = path[k]
-            rho_prev = path[k - 1]
-            rho_next = path[k + 1]
-
-            # Velocity components (finite difference)
-            v_fwd = [(rho_next[i] - rho_k[i]) / dt for i in range(n)]
-            v_bwd = [(rho_k[i] - rho_prev[i]) / dt for i in range(n)]
-
-            # Gradient of kinetic term: (v_bwd - v_fwd) (central difference)
-            # This is the discrete Euler-Lagrange equation for the kinetic action
-            kinetic_grad = [(v_bwd[i] - v_fwd[i]) for i in range(n)]
-
-            # Gradient of Fisher regularization term
-            fisher_grad = _fisher_info_gradient(rho_k)
-
-            # Total gradient (scaled by dt for the integral approximation)
-            grad_k = [
-                (kinetic_grad[i] + fisher_lambda * fisher_grad[i]) * dt
-                for i in range(n)
-            ]
-
-            # Approximate Newton step: use diagonal Hessian approximation
-            # H_ii ≈ 2/dt + λ · ∂²I_F/∂ρ_i²
-            # For the Fisher term: ∂²I_F/∂ρ_i² ≈ [L·√ρ]_i / (4·ρ_i^{3/2})
-            # (from differentiating the gradient)
-            sqrt_rho_k = [math.sqrt(max(ri, eps)) for ri in rho_k]
-            L_sqrt_rho = [0.0] * n
-            for i in range(n):
-                s = 0.0
-                for j in range(n):
-                    s += laplacian[i][j] * sqrt_rho_k[j]
-                L_sqrt_rho[i] = s
-
-            step_k = [0.0] * n
-            for i in range(n):
-                # Diagonal Hessian approximation
-                kinetic_hess = 2.0 / max(dt, eps)
-                ri = max(rho_k[i], eps)
-                fisher_hess = abs(L_sqrt_rho[i]) / (4.0 * ri * sqrt_rho_k[i] + eps)
-                h_ii = kinetic_hess + fisher_lambda * fisher_hess
-                h_ii = max(h_ii, eps)  # ensure positive definite
-                step_k[i] = -grad_k[i] / h_ii
-
-            updates.append(step_k)
-            total_grad_norm_sq += sum(g * g for g in grad_k)
-
-        grad_norm = math.sqrt(total_grad_norm_sq)
-        newton_step_norms.append(grad_norm)
-
-        # Check convergence
-        if grad_norm < tol:
-            converged = True
-            break
-
-        # Apply Newton updates to interior path points
-        for k in range(1, n_time_steps):
-            step_k = updates[k - 1]
-            for i in range(n):
-                path[k][i] += step_k[i]
-            # Re-project to probability simplex
-            path[k] = [max(ri, eps) for ri in path[k]]
-            total_rho = sum(path[k])
-            if total_rho > 0:
-                path[k] = [ri / total_rho for ri in path[k]]
-
-    # ── Compute final regularized distance and diagnostics ───────────────
-    # Benamou-Brenier action (kinetic part)
-    kinetic_action = 0.0
-    fisher_along_path = []  # type: List[float]
-    fisher_penalty_total = 0.0
-
-    for k in range(n_time_steps + 1):
-        fi = _fisher_info(path[k])
-        fisher_along_path.append(round(fi, 10))
-        fisher_penalty_total += fisher_lambda * fi * dt
-
-    for k in range(n_time_steps):
-        rho_k = path[k]
-        v_k = [(path[k + 1][i] - path[k][i]) / dt for i in range(n)]
-        # Kinetic energy: (1/2) Σ_i ρ_i · v_i²
-        ke = 0.0
-        for i in range(n):
-            ke += 0.5 * max(rho_k[i], eps) * v_k[i] * v_k[i]
-        kinetic_action += ke * dt
-
-    # Total regularized distance
-    total_action = kinetic_action + fisher_penalty_total
-    fisher_ot_dist = math.sqrt(max(0.0, total_action))
-
-    # Unregularized W2 for comparison
-    w2_estimate = wasserstein_geodesic_distance(laplacian, p, q, n_steps=n_time_steps)
-
-    # ── Convergence rate analysis ────────────────────────────────────────
-    # For quadratic convergence: r_{k+1} / r_k² → C (constant)
-    convergence_rate = 0.0
-    quadratic_verified = False
-    if len(newton_step_norms) >= 3:
-        # Check last few steps
-        rates = []  # type: List[float]
-        for i in range(1, len(newton_step_norms)):
-            prev = newton_step_norms[i - 1]
-            curr = newton_step_norms[i]
-            if prev > tol:
-                rates.append(curr / (prev * prev + eps))
-        if rates:
-            convergence_rate = rates[-1]
-            # Quadratic convergence: rate should be bounded (not growing)
-            # and the step norms should decrease rapidly
-            if (len(rates) >= 2 and
-                    all(r < 100.0 for r in rates[-2:]) and
-                    newton_step_norms[-1] < newton_step_norms[0] * 0.01):
-                quadratic_verified = True
-
-    # ── O112 diagnostic ──────────────────────────────────────────────────
-    if converged and quadratic_verified:
-        o112_flag = (
-            f"FISHER_OT_TRACTABLE:converged_in_{steps_used}_newton_steps:"
-            f"quadratic_convergence_verified:"
-            f"fisher_lambda={fisher_lambda}:"
-            f"d_F={fisher_ot_dist:.8f}:W2={w2_estimate:.8f}:"
-            "computational_infeasibility_excuse_REMOVED:"
-            "STF_metric_tensor_recovery_NOW_FEASIBLE:"
-            "O112_continued_open_status_harder_to_justify"
-        )
-    elif converged:
-        o112_flag = (
-            f"FISHER_OT_CONVERGED:steps={steps_used}:"
-            f"quadratic_convergence_not_verified:"
-            f"fisher_lambda={fisher_lambda}:"
-            f"d_F={fisher_ot_dist:.8f}:W2={w2_estimate:.8f}:"
-            "tractable_but_convergence_rate_suboptimal:"
-            "O112_feasibility_partially_demonstrated"
-        )
-    else:
-        o112_flag = (
-            f"FISHER_OT_NOT_CONVERGED:steps={steps_used}:"
-            f"final_grad_norm={newton_step_norms[-1] if newton_step_norms else 'N/A'}:"
-            f"fisher_lambda={fisher_lambda}:"
-            "increase_n_newton_steps_or_adjust_lambda:"
-            "O112_feasibility_inconclusive"
-        )
-
-    stf_note = (
-        f"Fisher-regularized OT distance d_F(p,q) = {fisher_ot_dist:.8f} "
-        f"(unregularized W2 = {w2_estimate:.8f}, "
-        f"Fisher penalty = {fisher_penalty_total:.8f}). "
-        f"The Fisher information I_F(ρ) = √ρ^T · L_w · √ρ along the "
-        f"geodesic path provides the geometric coupling required by STF "
-        f"metric tensor recovery (O112). Newton solver achieved "
-        f"{'quadratic' if quadratic_verified else 'sub-quadratic'} "
-        f"convergence in {steps_used} step(s). "
-        f"The regularization parameter λ={fisher_lambda} controls the "
-        f"tradeoff between transport cost fidelity and geometric smoothness. "
-        f"For STF recovery: use the geodesic_path as the reference trajectory "
-        f"and fisher_information_along_path as the local curvature signal."
-    )
-
-    result = {
-        "fisher_ot_distance": round(fisher_ot_dist, 10),
-        "unregularized_w2_estimate": round(w2_estimate, 10),
-        "fisher_information_along_path": fisher_along_path,
-        "benamou_brenier_action": round(kinetic_action, 10),
-        "fisher_penalty_total": round(fisher_penalty_total, 10),
-        "n_newton_steps_used": steps_used,
-        "converged": converged,
-        "convergence_rate": round(convergence_rate, 10),
-        "quadratic_convergence_verified": quadratic_verified,
-        "geodesic_path": [
-            [round(ri, 10) for ri in rho_t] for rho_t in path
-        ],
-        "fisher_lambda": fisher_lambda,
-        "o112_flag": o112_flag,
-        "stf_recovery_note": stf_note,
-    }
-
-    # ── Log summary ──────────────────────────────────────────────────────
-    print(
-        f"[GRAPH:FISHER_OT] Fisher-regularized OT — "
-        f"d_F={fisher_ot_dist:.6f}, W2={w2_estimate:.6f}, "
-        f"λ={fisher_lambda}, newton_steps={steps_used}, "
-        f"converged={converged}, "
-        f"quadratic={'yes' if quadratic_verified else 'no'}, "
-        f"fisher_penalty={fisher_penalty_total:.6f}"
-    )
-
-    return result
-
-
-def wasserstein_christoffel_symbols(laplacian, p, h=1e-5):
-    # type: (List[List[float]], List[float], float) -> List[List[List[float]]]
-    """
-    Compute the Christoffel symbols Γ^k_{ij} of the Levi-Civita connection
-    on the probability simplex at point p, using finite differences of the
-    Wasserstein metric tensor.
-
-    The Christoffel symbols are:
-        Γ^k_{ij} = (1/2) Σ_l g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})
-
-    where g^{kl} is the inverse metric tensor and ∂_i denotes the partial
-    derivative with respect to the i-th coordinate on the simplex.
-
-    Parameters
-    ----------
-    laplacian : list of list of float
-        n×n weighted graph Laplacian L_w.
-    p : list of float
-        Point on the probability simplex.
-    h : float
-        Step size for finite difference computation (default 1e-5).
-
-    Returns
-    -------
-    list of list of list of float
-        n×n×n array where result[k][i][j] = Γ^k_{ij}.
-        These are the torsion-free Christoffel symbols of the second kind.
-    """
-    n = len(p)
-    if n == 0:
-        return []
-
-    # Compute metric tensor at p
-    g_p = wasserstein_metric_tensor(laplacian, p)
-
-    # Compute inverse metric tensor (g^{kl}) via pseudoinverse
-    g_inv = _matrix_pseudoinverse_symmetric(g_p)
-
-    # Compute partial derivatives of metric tensor by finite differences
-    # ∂_m g_{ij} ≈ (g_{ij}(p + h·e_m) - g_{ij}(p - h·e_m)) / (2h)
-    # On the simplex, we perturb in direction e_m - e_n (last coordinate)
-    # to stay on the tangent plane of the simplex.
-    dg = [[[0.0] * n for _ in range(n)] for _ in range(n)]  # dg[m][i][j] = ∂_m g_{ij}
-
-    for m in range(n):
-        # Forward perturbation: p + h*(e_m - 1/n * ones) projected to simplex
-        p_fwd = list(p)
-        p_fwd[m] += h
-        # Re-normalize
-        total = sum(p_fwd)
-        p_fwd = [max(pi / total, 1e-15) for pi in p_fwd]
-        total = sum(p_fwd)
-        p_fwd = [pi / total for pi in p_fwd]
-
-        # Backward perturbation
-        p_bwd = list(p)
-        p_bwd[m] -= h
-        # Clamp and re-normalize
-        p_bwd = [max(pi, 1e-15) for pi in p_bwd]
-        total = sum(p_bwd)
-        p_bwd = [pi / total for pi in p_bwd]
-
-        g_fwd = wasserstein_metric_tensor(laplacian, p_fwd)
-        g_bwd = wasserstein_metric_tensor(laplacian, p_bwd)
-
-        for i in range(n):
-            for j in range(n):
-                dg[m][i][j] = (g_fwd[i][j] - g_bwd[i][j]) / (2.0 * h)
-
-    # Christoffel symbols: Γ^k_{ij} = (1/2) Σ_l g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})
-    gamma = [[[0.0] * n for _ in range(n)] for _ in range(n)]
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                s = 0.0
-                for l in range(n):
-                    s += g_inv[k][l] * (
-                        dg[i][j][l] + dg[j][i][l] - dg[l][i][j]
-                    )
-                gamma[k][i][j] = 0.5 * s
-
-    return gamma
 
 
 def wasserstein_laplace_beltrami_eigenspectrum(laplacian, p, k_eigenvalues=None):
@@ -3592,115 +2457,6 @@ def channel_divergence_from_thermal(transition_matrix, thermal_baseline=None,
     }
 
 
-def score_graph_update_channel_cost(edges_before, edges_after, all_node_ids,
-                                     hamiltonian=None, temperature=1.0):
-    # type: (list, list, List[str], Optional[List[float]], float) -> dict
-    """
-    Score the thermodynamic cost of a knowledge-graph update operation by
-    computing the channel divergence from thermal baseline on the transition
-    matrices before and after the update.
-
-    This is the main entry point for process-free-energy estimation: given
-    two edge snapshots (before and after a FEED, CONSOLIDATE, or avalanche
-    cascade), it builds transition matrices for both, computes their
-    divergences from the thermal baseline, and reports the delta as the
-    irreversibility cost of the update.
-
-    Parameters
-    ----------
-    edges_before : list of dict
-        Edge snapshot before the update operation.
-    edges_after : list of dict
-        Edge snapshot after the update operation.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    hamiltonian : list of float or None
-        Energy levels for thermal baseline (default: degenerate/uniform).
-    temperature : float
-        Temperature for Gibbs distribution (default 1.0).
-
-    Returns
-    -------
-    dict
-        {
-            "divergence_before": dict — channel_divergence_from_thermal result
-                for the pre-update transition matrix,
-            "divergence_after": dict — channel_divergence_from_thermal result
-                for the post-update transition matrix,
-            "delta_divergence": float — D_after - D_before (positive = update
-                moved the channel further from equilibrium = irreversible cost),
-            "update_is_irreversible": bool — True if delta > 0.01,
-            "update_is_thermalizing": bool — True if delta < -0.01 (update
-                moved channel toward equilibrium = information-destroying),
-            "process_free_energy_estimate": float — max(0, delta_divergence),
-                the non-negative free energy cost of the update,
-            "cost_label": str — "free", "cheap", "moderate", "costly",
-            "n_edges_added": int — edges_after count - edges_before count,
-            "n_states": int,
-            "o44_process_flag": str — diagnostic for O44,
-        }
-    """
-    n = len(all_node_ids)
-
-    T_before = _build_transition_matrix_from_edges(edges_before, all_node_ids)
-    T_after = _build_transition_matrix_from_edges(edges_after, all_node_ids)
-
-    div_before = channel_divergence_from_thermal(
-        T_before, hamiltonian=hamiltonian, temperature=temperature
-    )
-    div_after = channel_divergence_from_thermal(
-        T_after, hamiltonian=hamiltonian, temperature=temperature
-    )
-
-    d_before = div_before.get("channel_divergence", 0.0)
-    d_after = div_after.get("channel_divergence", 0.0)
-    delta = d_after - d_before
-
-    is_irreversible = delta > 0.01
-    is_thermalizing = delta < -0.01
-    process_fe = max(0.0, delta)
-
-    if process_fe < 0.01:
-        cost_label = "free"
-    elif process_fe < 0.1:
-        cost_label = "cheap"
-    elif process_fe < 0.5:
-        cost_label = "moderate"
-    else:
-        cost_label = "costly"
-
-    n_added = len(edges_after) - len(edges_before)
-
-    o44_flag = (
-        f"process_free_energy={process_fe:.6f}:"
-        f"delta_divergence={delta:.6f}:"
-        f"{'irreversible' if is_irreversible else 'thermalizing' if is_thermalizing else 'neutral'}:"
-        f"classical_channel_approximation"
-    )
-
-    result = {
-        "divergence_before": div_before,
-        "divergence_after": div_after,
-        "delta_divergence": round(delta, 10),
-        "update_is_irreversible": is_irreversible,
-        "update_is_thermalizing": is_thermalizing,
-        "process_free_energy_estimate": round(process_fe, 10),
-        "cost_label": cost_label,
-        "n_edges_added": n_added,
-        "n_states": n,
-        "o44_process_flag": o44_flag,
-    }
-
-    # Log summary
-    print(
-        f"[GRAPH:CHANNEL_DIVERGENCE] Update cost — "
-        f"D_before={d_before:.6f}, D_after={d_after:.6f}, "
-        f"delta={delta:.6f}, process_FE={process_fe:.6f}, "
-        f"cost={cost_label}, edges_added={n_added}"
-    )
-
-    return result
-
 
 # ─── Lempel-Ziv Complexity (Compression-Complexity Scorer) ───────────────────
 # Computes the Lempel-Ziv (LZ76) complexity of a binary or symbolic sequence
@@ -3802,84 +2558,6 @@ def lempel_ziv_complexity(sequence):
     return complexity
 
 
-def lempel_ziv_complexity_normalized(sequence):
-    # type: (List[int]) -> float
-    """
-    Compute the normalized Lempel-Ziv complexity in [0, 1].
-
-    Normalization uses the theoretical upper bound for a random sequence of
-    length n over alphabet of size alpha:
-        c_upper = n / log_alpha(n)
-
-    For binary sequences (alpha=2), this is n / log2(n).
-
-    Parameters
-    ----------
-    sequence : list of int
-        A discrete symbol sequence.
-
-    Returns
-    -------
-    float
-        Normalized LZ complexity in [0, 1].
-        0.0 for degenerate/empty sequences.
-        Values near 0 = highly compressible (Class I/II).
-        Values near 1 = incompressible (Class III / random).
-        Values in [0.3, 0.7] = critical boundary (Class IV).
-    """
-    n = len(sequence)
-    if n <= 1:
-        return 0.0
-
-    c = lempel_ziv_complexity(sequence)
-
-    # Determine alphabet size
-    alphabet = set(sequence)
-    alpha = len(alphabet)
-    if alpha <= 1:
-        # Constant sequence — zero complexity
-        return 0.0
-
-    # Upper bound: n / log_alpha(n)
-    log_alpha_n = math.log(n) / math.log(alpha)
-    if log_alpha_n == 0.0:
-        return 0.0
-
-    c_upper = float(n) / log_alpha_n
-    c_norm = float(c) / c_upper
-
-    # Clamp to [0, 1]
-    return max(0.0, min(1.0, c_norm))
-
-
-def classify_lz_regime(c_norm, class4_low=0.3, class4_high=0.7):
-    # type: (float, float, float) -> str
-    """
-    Classify a normalized LZ complexity value into an ECA-inspired regime.
-
-    Parameters
-    ----------
-    c_norm : float
-        Normalized Lempel-Ziv complexity in [0, 1].
-    class4_low : float
-        Lower boundary of the Class IV (critical) regime (default 0.3).
-    class4_high : float
-        Upper boundary of the Class IV (critical) regime (default 0.7).
-
-    Returns
-    -------
-    str
-        One of: "class_I_II" (fixed/periodic), "class_IV" (critical/complex),
-        "class_III" (chaotic/random), or "degenerate".
-    """
-    if c_norm <= 0.0:
-        return "degenerate"
-    elif c_norm < class4_low:
-        return "class_I_II"
-    elif c_norm <= class4_high:
-        return "class_IV"
-    else:
-        return "class_III"
 
 
 class KnowledgeGraph:
@@ -3970,167 +2648,6 @@ class KnowledgeGraph:
 
     _BRANCHING_CRITICAL_BAND = (0.95, 1.05)  # target band from CA telemetry
 
-    def _branching_ratio_monitor(self, new_edges, propagation_threshold=3):
-        # type: (list, int) -> dict
-        """
-        Compute the branching ratio σ = downstream / upstream for a batch
-        of newly recorded edges, including secondary propagation.
-
-        The monitor tracks whether FREED's own ingestion dynamics operate
-        at the critical ridge (σ ≈ 1.0) or drift toward frozen
-        over-integration (σ < 0.95) or dissipated under-integration
-        (σ > 1.05), mirroring the CA telemetry branching ratio measurement.
-
-        Parameters
-        ----------
-        new_edges : list of dict
-            Edges just recorded by record_feed().
-        propagation_threshold : int
-            Degree above which a downstream node is considered to have
-            propagated the activation further (secondary downstream).
-            Default 3.
-
-        Returns
-        -------
-        dict
-            {
-                "sigma": float or None — the branching ratio (None if
-                    upstream count is 0),
-                "upstream_activations": int — distinct upstream nodes,
-                "downstream_activations": int — distinct primary downstream
-                    nodes (direct targets of new edges),
-                "secondary_downstream": int — downstream nodes whose degree
-                    exceeds propagation_threshold (cascade propagation),
-                "downstream_total": int — primary + secondary,
-                "in_critical_band": bool — True if 0.95 ≤ σ ≤ 1.05,
-                "regime": str — "critical", "supercritical", "subcritical",
-                    or "indeterminate",
-                "band": tuple — the critical band used (0.95, 1.05),
-                "excursion_magnitude": float — |σ - 1.0| when outside band,
-                    0.0 when inside,
-                "ca_telemetry_reference": str — the empirical reference,
-                "timestamp": str,
-            }
-        """
-        if not new_edges:
-            return {
-                "sigma": None,
-                "upstream_activations": 0,
-                "downstream_activations": 0,
-                "secondary_downstream": 0,
-                "downstream_total": 0,
-                "in_critical_band": True,
-                "regime": "indeterminate",
-                "band": self._BRANCHING_CRITICAL_BAND,
-                "excursion_magnitude": 0.0,
-                "ca_telemetry_reference": "σ=1.0223±0.0154 (CA 32×32, 200-step)",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
-
-        # Upstream: distinct source nodes ("from" side)
-        upstream_nodes = set()  # type: set
-        # Downstream (primary): distinct target nodes ("to" side)
-        downstream_primary = set()  # type: set
-
-        for e in new_edges:
-            from_id = e.get("from", "").upper()
-            to_id = e.get("to", "").upper()
-            if from_id:
-                upstream_nodes.add(from_id)
-            if to_id:
-                downstream_primary.add(to_id)
-
-        # Secondary downstream: among primary downstream nodes, count those
-        # whose total degree (in the full graph) now exceeds the propagation
-        # threshold — these nodes are "hot enough" to propagate the
-        # activation further, analogous to CA cells that flip their neighbors.
-        secondary_downstream = set()  # type: set
-        for nid in downstream_primary:
-            deg = self._node_degree(nid)
-            if deg >= propagation_threshold:
-                # Check neighbors for additional downstream spread
-                for nbr in self._neighbors(nid):
-                    if nbr not in upstream_nodes and nbr not in downstream_primary:
-                        # Neighbor activated as secondary downstream
-                        if self._node_degree(nbr) > 0:
-                            secondary_downstream.add(nbr)
-
-        n_upstream = len(upstream_nodes)
-        n_primary = len(downstream_primary)
-        n_secondary = len(secondary_downstream)
-        n_downstream_total = n_primary + n_secondary
-
-        # Compute σ
-        if n_upstream > 0:
-            sigma = float(n_downstream_total) / float(n_upstream)
-        else:
-            sigma = None
-
-        # Classify regime
-        lo, hi = self._BRANCHING_CRITICAL_BAND
-        if sigma is None:
-            regime = "indeterminate"
-            in_band = True
-            excursion = 0.0
-        elif lo <= sigma <= hi:
-            regime = "critical"
-            in_band = True
-            excursion = 0.0
-        elif sigma > hi:
-            regime = "supercritical"
-            in_band = False
-            excursion = sigma - 1.0
-        else:
-            regime = "subcritical"
-            in_band = False
-            excursion = 1.0 - sigma
-
-        ts = datetime.now(timezone.utc).isoformat()
-
-        result = {
-            "sigma": round(sigma, 4) if sigma is not None else None,
-            "upstream_activations": n_upstream,
-            "downstream_activations": n_primary,
-            "secondary_downstream": n_secondary,
-            "downstream_total": n_downstream_total,
-            "in_critical_band": in_band,
-            "regime": regime,
-            "band": self._BRANCHING_CRITICAL_BAND,
-            "excursion_magnitude": round(excursion, 4),
-            "ca_telemetry_reference": "σ=1.0223±0.0154 (CA 32×32, 200-step)",
-            "timestamp": ts,
-        }
-
-        # Log excursions
-        if sigma is not None and not in_band:
-            print(
-                f"[GRAPH:BRANCHING_RATIO] ⚠ σ={sigma:.4f} EXCURSION "
-                f"({regime}) — outside critical band "
-                f"[{lo}, {hi}]. "
-                f"upstream={n_upstream}, downstream_total={n_downstream_total} "
-                f"(primary={n_primary}, secondary={n_secondary}). "
-                f"CA reference: σ=1.0223±0.0154."
-            )
-        elif sigma is not None:
-            print(
-                f"[GRAPH:BRANCHING_RATIO] σ={sigma:.4f} — "
-                f"IN critical band [{lo}, {hi}]. "
-                f"upstream={n_upstream}, downstream_total={n_downstream_total}."
-            )
-
-        # Store in telemetry for time-series analysis
-        self._telemetry.append({
-            "type": "branching_ratio",
-            "sigma": result["sigma"],
-            "regime": regime,
-            "in_critical_band": in_band,
-            "upstream": n_upstream,
-            "downstream_total": n_downstream_total,
-            "timestamp": ts,
-        })
-
-        return result
-
     def get_branching_ratio_history(self):
         # type: () -> List[dict]
         """
@@ -4145,6 +2662,47 @@ class KnowledgeGraph:
         return [
             t for t in self._telemetry
             if t.get("type") == "branching_ratio"
+        ]
+
+    # ── CA Criticality Telemetry ─────────────────────────────────────────
+    # Logs branching ratio σ, avalanche exponent α, and dominant-phenotype
+    # cell-count after each CA run so the knowledge graph can track
+    # criticality drift across generations and seeds.
+    #
+    # Without longitudinal σ/α telemetry stored in the graph, criticality
+    # claims remain point-in-time assertions rather than falsifiable trends.
+    # The time series enables detection of drift away from the critical band.
+    #
+    # CHALLENGE (INV_073): if σ=1.0319 is already above 1.0 rather than
+    # exactly at it, the Wasserstein gradient path may be overshooting γ=1
+    # rather than converging on it, raising the question of whether the
+    # "necessary path" terminates precisely at criticality or oscillates
+    # above it within the tolerance band.
+    #
+    # NOETHER_ROW: Self-Organized Criticality
+    # NOETHER_STATUS: rigorous
+    # NOETHER_NOTE: Empirical σ, α, and H/H_max measurements from the
+    # Game-of-Truth CA jointly satisfy the symmetry-conservation prediction
+    # that critical dynamics preserve scale invariance across avalanche sizes.
+    # ─────────────────────────────────────────────────────────────────────
+
+    _CA_CRITICAL_BAND = (0.95, 1.05)  # σ target band from CA telemetry
+    _CA_ALPHA_REFERENCE = 2.5         # expected α for SOC (≈ 2.0–3.0)
+
+    def get_ca_criticality_history(self):
+        # type: () -> List[dict]
+        """
+        Return the time series of CA criticality telemetry entries from
+        _telemetry, for longitudinal drift analysis.
+
+        Returns
+        -------
+        list of dict
+            Time-ordered CA criticality telemetry entries.
+        """
+        return [
+            t for t in self._telemetry
+            if t.get("type") == "ca_criticality"
         ]
 
     # ── Branching-ratio window API ──────────────────────────────────────
@@ -4249,106 +2807,6 @@ class KnowledgeGraph:
             "timestamp":        ts,
         })
         return result
-
-    def branching_ratio_drift_summary(self):
-        # type: () -> dict
-        """
-        Summarize branching ratio drift across all recorded FEED batches.
-
-        Returns
-        -------
-        dict
-            {
-                "n_measurements": int,
-                "n_in_band": int,
-                "n_excursions": int,
-                "n_supercritical": int,
-                "n_subcritical": int,
-                "mean_sigma": float or None,
-                "std_sigma": float or None,
-                "latest_sigma": float or None,
-                "latest_regime": str,
-                "drift_status": str — "stable_critical", "drifting_supercritical",
-                    "drifting_subcritical", "oscillating", or "insufficient_data",
-                "ca_telemetry_comparison": str,
-            }
-        """
-        history = self.get_branching_ratio_history()
-        sigmas = [h["sigma"] for h in history if h.get("sigma") is not None]
-        n = len(sigmas)
-
-        if n == 0:
-            return {
-                "n_measurements": 0,
-                "n_in_band": 0,
-                "n_excursions": 0,
-                "n_supercritical": 0,
-                "n_subcritical": 0,
-                "mean_sigma": None,
-                "std_sigma": None,
-                "latest_sigma": None,
-                "latest_regime": "indeterminate",
-                "drift_status": "insufficient_data",
-                "ca_telemetry_comparison": "no_data",
-            }
-
-        lo, hi = self._BRANCHING_CRITICAL_BAND
-        n_in = sum(1 for s in sigmas if lo <= s <= hi)
-        n_super = sum(1 for s in sigmas if s > hi)
-        n_sub = sum(1 for s in sigmas if s < lo)
-        n_exc = n_super + n_sub
-
-        mean_s = sum(sigmas) / n
-        var_s = sum((s - mean_s) ** 2 for s in sigmas) / max(n - 1, 1)
-        std_s = math.sqrt(var_s) if var_s > 0 else 0.0
-
-        latest = sigmas[-1]
-        latest_regime = (
-            "critical" if lo <= latest <= hi else
-            "supercritical" if latest > hi else
-            "subcritical"
-        )
-
-        # Drift status from recent trend (last 5 or fewer)
-        recent = sigmas[-min(5, n):]
-        if n < 3:
-            drift_status = "insufficient_data"
-        elif all(lo <= s <= hi for s in recent):
-            drift_status = "stable_critical"
-        elif all(s > hi for s in recent):
-            drift_status = "drifting_supercritical"
-        elif all(s < lo for s in recent):
-            drift_status = "drifting_subcritical"
-        else:
-            drift_status = "oscillating"
-
-        # Comparison with CA telemetry reference
-        ca_ref_mean = 1.0223
-        ca_ref_std = 0.0154
-        if abs(mean_s - ca_ref_mean) < 2 * max(std_s, ca_ref_std):
-            ca_comparison = (
-                f"CONSISTENT: mean_σ={mean_s:.4f}±{std_s:.4f} vs "
-                f"CA_ref={ca_ref_mean}±{ca_ref_std} — within 2σ"
-            )
-        else:
-            ca_comparison = (
-                f"DIVERGENT: mean_σ={mean_s:.4f}±{std_s:.4f} vs "
-                f"CA_ref={ca_ref_mean}±{ca_ref_std} — outside 2σ"
-            )
-
-        return {
-            "n_measurements": n,
-            "n_in_band": n_in,
-            "n_excursions": n_exc,
-            "n_supercritical": n_super,
-            "n_subcritical": n_sub,
-            "mean_sigma": round(mean_s, 4),
-            "std_sigma": round(std_s, 4),
-            "latest_sigma": round(latest, 4),
-            "latest_regime": latest_regime,
-            "drift_status": drift_status,
-            "ca_telemetry_comparison": ca_comparison,
-        }
 
     # ── Recording ────────────────────────────────────────────────────────
 
@@ -4460,77 +2918,7 @@ class KnowledgeGraph:
 
     # ── Cluster Embedding Management ─────────────────────────────────────────
 
-    def register_embedding(self, cluster_id, embedding):
-        # type: (str, List[float]) -> None
-        """
-        Register an engram embedding vector under a knowledge cluster.
-        Used for RangeEn complexity scoring.
-        """
-        self._cluster_embeddings[cluster_id].append(list(embedding))
-
-    def register_embeddings(self, cluster_id, embeddings):
-        # type: (str, List[List[float]]) -> None
-        """Register multiple embeddings for a cluster at once."""
-        for emb in embeddings:
-            self._cluster_embeddings[cluster_id].append(list(emb))
-
-    def get_cluster_complexity(self, cluster_id, m=2, r=0.3):
-        # type: (str, int, float) -> dict
-        """
-        Compute RangeEn complexity score for a single registered cluster.
-
-        Returns dict with range_entropy, n_embeddings, n_pairs, complexity_label.
-        Returns a degenerate result if the cluster has no registered embeddings.
-        """
-        embeddings = self._cluster_embeddings.get(cluster_id, [])
-        result = cluster_complexity_scores({cluster_id: embeddings})
-        return result.get(cluster_id, {
-            "range_entropy": 0.0,
-            "n_embeddings": 0,
-            "n_pairs": 0,
-            "complexity_label": "degenerate",
-        })
-
-    def get_all_cluster_complexities(self, m=2, r=0.3):
-        # type: (int, float) -> Dict[str, dict]
-        """
-        Compute RangeEn complexity scores for all registered clusters.
-
-        Returns dict of cluster_id → complexity info.
-        """
-        if not self._cluster_embeddings:
-            return {}
-        return cluster_complexity_scores(dict(self._cluster_embeddings))
-
     # ── Context-aware querying ───────────────────────────────────────────────
-
-    def edges_for(self, node_id, context_tag=None):
-        # type: (str, Optional[str]) -> list
-        """
-        All edges pointing to or from a given node ID.
-
-        Parameters
-        ----------
-        node_id : str
-            The node to query.
-        context_tag : str or None
-            If provided, filter to only edges with this context_tag.
-            If None, return all edges regardless of context.
-        """
-        self._ensure_loaded()
-        node_up = node_id.upper()
-        result = []
-        for e in self._edges:
-            if (e.get("from", "").upper() == node_up or
-                    e.get("to", "").upper() == node_up):
-                if context_tag is None or e.get("context_tag") == context_tag:
-                    result.append(e)
-        for e in self._node_edges:
-            if (e.get("from", "").upper() == node_up or
-                    e.get("to", "").upper() == node_up):
-                if context_tag is None or e.get("context_tag") == context_tag:
-                    result.append(e)
-        return result
 
     # ── Summary reporting ────────────────────────────────────────────────────
 
@@ -4649,179 +3037,6 @@ class KnowledgeGraph:
         # Normalize: strip port
         domain = domain.split(':')[0]
         return domain.lower()[:80] if domain else "unknown"
-
-    def confirmation_independence_audit(self):
-        # type: () -> Dict[str, dict]
-        """
-        Audit each invariant's confirmations for structural independence.
-
-        Checks whether the confirmations of each invariant are drawn from
-        independent experimental paradigms, distinct source domains, and
-        diverse observer contexts — or whether they all share upstream
-        assumptions that make the confirmation surplus illusory.
-
-        Returns
-        -------
-        dict
-            Mapping of invariant_id → {
-                "n_confirmations": int,
-                "n_sources": int — distinct source URL domains,
-                "n_context_tags": int — distinct context_tags,
-                "n_paradigms": int — distinct paradigm clusters,
-                "source_domains": list of str,
-                "context_tags": list of str,
-                "paradigms": list of str,
-                "independence_compromised": bool — True if all confirmations
-                    share a single paradigm, context, or source domain,
-                "compromise_reasons": list of str — which independence axes
-                    are collapsed (e.g. "single_paradigm", "single_context",
-                    "single_source_domain"),
-                "independence_score": float — in [0, 1], where 0 = fully
-                    correlated confirmations, 1 = maximally independent.
-                    Computed as geometric mean of normalized diversity across
-                    the three axes (source, context, paradigm).
-                "audit_severity": str — "none" (< 2 confirmations),
-                    "healthy" (independent), "warning" (partially correlated),
-                    "critical" (fully correlated),
-                "false_robustness_risk": bool — True when n_confirmations >= 3
-                    AND independence_compromised, meaning the invariant looks
-                    robust but is epistemically fragile,
-            }
-        """
-        self._ensure_loaded()
-
-        # Collect confirmation edges per invariant
-        inv_confirmations = defaultdict(list)  # type: Dict[str, list]
-        for e in self._edges:
-            target = e.get("to", "")
-            etype = e.get("type", "")
-            if target and etype in ("confirms", "supports"):
-                inv_confirmations[target].append(e)
-
-        results = {}  # type: Dict[str, dict]
-
-        for inv_id, conf_edges in inv_confirmations.items():
-            n_conf = len(conf_edges)
-
-            # Extract diversity axes
-            source_domains = set()  # type: set
-            context_tags = set()    # type: set
-            paradigms = set()       # type: set
-
-            for e in conf_edges:
-                # Source domain
-                src_url = e.get("from", "")
-                domain = self._extract_source_domain(src_url)
-                source_domains.add(domain)
-
-                # Context tag
-                ctx_tag = e.get("context_tag")
-                if ctx_tag:
-                    context_tags.add(ctx_tag)
-                else:
-                    context_tags.add("unspecified")
-
-                # Paradigm classification from edge context window
-                ctx_text = e.get("context", "")
-                edge_paradigms = self._classify_paradigms(ctx_text)
-                if edge_paradigms:
-                    for p in edge_paradigms:
-                        paradigms.add(p)
-                else:
-                    paradigms.add("paradigm:unclassified")
-
-            n_sources = len(source_domains)
-            n_contexts = len(context_tags)
-            n_paradigms = len(paradigms)
-
-            # Determine independence compromise
-            compromise_reasons = []  # type: List[str]
-
-            if n_conf >= 2:
-                if n_paradigms <= 1:
-                    compromise_reasons.append("single_paradigm")
-                if n_contexts <= 1:
-                    compromise_reasons.append("single_context")
-                if n_sources <= 1:
-                    compromise_reasons.append("single_source_domain")
-
-            independence_compromised = len(compromise_reasons) > 0 and n_conf >= 2
-
-            # Independence score: geometric mean of normalized diversity
-            # Each axis: (n_distinct - 1) / (n_confirmations - 1), clamped to [0, 1]
-            # This is 0 when all confirmations collapse to one value on that axis,
-            # and 1 when every confirmation is distinct on that axis.
-            if n_conf <= 1:
-                independence_score = 1.0  # trivially independent (nothing to compare)
-            else:
-                denom = float(n_conf - 1)
-                div_source = min(1.0, (n_sources - 1) / denom) if denom > 0 else 0.0
-                div_context = min(1.0, (n_contexts - 1) / denom) if denom > 0 else 0.0
-                div_paradigm = min(1.0, (n_paradigms - 1) / denom) if denom > 0 else 0.0
-
-                # Geometric mean (gives 0 if any axis is fully collapsed)
-                product = div_source * div_context * div_paradigm
-                if product > 0:
-                    independence_score = product ** (1.0 / 3.0)
-                else:
-                    independence_score = 0.0
-
-            independence_score = round(independence_score, 4)
-
-            # Audit severity classification
-            if n_conf < 2:
-                audit_severity = "none"
-            elif not independence_compromised:
-                audit_severity = "healthy"
-            elif len(compromise_reasons) >= 2:
-                audit_severity = "critical"
-            else:
-                audit_severity = "warning"
-
-            # False robustness risk: looks confirmed but isn't independently so
-            false_robustness_risk = (
-                n_conf >= 3 and independence_compromised
-            )
-
-            results[inv_id] = {
-                "n_confirmations": n_conf,
-                "n_sources": n_sources,
-                "n_context_tags": n_contexts,
-                "n_paradigms": n_paradigms,
-                "source_domains": sorted(source_domains),
-                "context_tags": sorted(context_tags),
-                "paradigms": sorted(paradigms),
-                "independence_compromised": independence_compromised,
-                "compromise_reasons": compromise_reasons,
-                "independence_score": independence_score,
-                "audit_severity": audit_severity,
-                "false_robustness_risk": false_robustness_risk,
-            }
-
-        # ── Log audit summary ────────────────────────────────────────────
-        critical = [k for k, v in results.items()
-                    if v["audit_severity"] == "critical"]
-        warning = [k for k, v in results.items()
-                   if v["audit_severity"] == "warning"]
-        false_robust = [k for k, v in results.items()
-                        if v["false_robustness_risk"]]
-
-        if critical or warning or false_robust:
-            print(
-                f"[GRAPH:INDEPENDENCE_AUDIT] "
-                f"{len(results)} invariant(s) audited — "
-                f"critical={len(critical)}, warning={len(warning)}, "
-                f"false_robustness_risk={len(false_robust)}"
-            )
-            for inv_id in critical:
-                r = results[inv_id]
-                print(
-                    f"  ⚠ {inv_id}: {r['n_confirmations']} confirmations, "
-                    f"independence_score={r['independence_score']}, "
-                    f"reasons={r['compromise_reasons']}"
-                )
-
-        return results
 
     # ── Challenge Deficit Scoring ────────────────────────────────────────────
     # Computes a "challenge deficit" ratio for each invariant:
@@ -5028,65 +3243,6 @@ class KnowledgeGraph:
 
         return results
 
-    def get_probe_required_invariants(self, ratio_threshold=5.0):
-        # type: (float) -> List[str]
-        """
-        Return a list of invariant IDs that require mandatory adversarial
-        probing before further confirmations are accepted.
-
-        This is a convenience wrapper around ``challenge_deficit_scores()``
-        that returns only the IDs flagged as critical or untested.
-
-        Parameters
-        ----------
-        ratio_threshold : float
-            Ratio above which an invariant is flagged (default 5.0).
-
-        Returns
-        -------
-        list of str
-            Invariant IDs requiring adversarial probes, sorted by deficit
-            ratio (highest first).
-        """
-        scores = self.challenge_deficit_scores(ratio_threshold=ratio_threshold)
-        flagged = [
-            (inv_id, info)
-            for inv_id, info in scores.items()
-            if info["requires_adversarial_probe"] or info["deficit_severity"] == "untested"
-        ]
-        # Sort by deficit ratio descending (worst offenders first)
-        flagged.sort(key=lambda x: x[1]["challenge_deficit_ratio"], reverse=True)
-        return [inv_id for inv_id, _ in flagged]
-
-    def is_confirmation_blocked(self, invariant_id, ratio_threshold=5.0):
-        # type: (str, float) -> bool
-        """
-        Check whether further confirmations of *invariant_id* are blocked
-        due to challenge deficit.
-
-        Returns True if the invariant's challenge deficit ratio exceeds
-        the threshold, meaning an adversarial probe must be recorded before
-        additional confirmations are accepted.
-
-        Parameters
-        ----------
-        invariant_id : str
-            The invariant to check (e.g. "INV_094").
-        ratio_threshold : float
-            Ratio threshold (default 5.0).
-
-        Returns
-        -------
-        bool
-            True if confirmations are blocked pending adversarial probe.
-        """
-        scores = self.challenge_deficit_scores(ratio_threshold=ratio_threshold)
-        inv_upper = invariant_id.upper()
-        info = scores.get(inv_upper)
-        if info is None:
-            return False
-        return info.get("probe_blocked", False)
-
     # ── Confirmation-Surplus Monitor & Adversarial Probe Queue ───────────────
     # Automated detection of invariants that have accumulated unchallenged
     # confirmation surplus: >N confirmations and <M challenges.  Flagged
@@ -5105,261 +3261,6 @@ class KnowledgeGraph:
     # The monitor ensures that no invariant — including INV_094 — can
     # indefinitely avoid adversarial scrutiny.
     # ─────────────────────────────────────────────────────────────────────────
-
-    def confirmation_surplus_monitor(self, min_confirmations=3,
-                                      max_challenges=1,
-                                      auto_queue=True):
-        # type: (int, int, bool) -> dict
-        """
-        Monitor all invariants for confirmation surplus: flag any invariant
-        with more than *min_confirmations* confirmations and fewer than
-        *max_challenges* challenges, and optionally queue adversarial probe
-        cycles for them.
-
-        The monitor detects the structural vulnerability where an invariant
-        accumulates apparent robustness through repeated confirmation without
-        ever facing serious challenge.  This is epistemically dangerous
-        because confirmation surplus without challenge is indistinguishable
-        from untested consensus.
-
-        When *auto_queue* is True, flagged invariants are added to an
-        internal adversarial probe queue (stored in graph metadata) that
-        downstream pipeline stages (FEED, CONSOLIDATE) can consume to
-        trigger mandatory falsification probes.
-
-        Parameters
-        ----------
-        min_confirmations : int
-            Minimum number of confirmations (confirms + supports + extends)
-            for an invariant to be eligible for surplus flagging (default 3).
-            Invariants below this threshold are too new to audit.
-        max_challenges : int
-            Maximum number of challenges (challenges + refutes + contradicts)
-            below which the invariant is considered under-challenged
-            (default 1).  An invariant with <= max_challenges direct
-            falsification attempts is flagged when it also exceeds
-            min_confirmations.
-        auto_queue : bool
-            If True (default), automatically queue flagged invariants for
-            adversarial probe cycles.  The queue is stored in memory and
-            accessible via ``get_adversarial_probe_queue()``.
-
-        Returns
-        -------
-        dict
-            {
-                "monitored_count": int — total invariants examined,
-                "flagged_count": int — invariants exceeding surplus thresholds,
-                "flagged_invariants": list of dict — each flagged invariant:
-                    {
-                        "invariant_id": str,
-                        "confirmation_count": int,
-                        "challenge_count": int,
-                        "surplus": int — confirmations - challenges,
-                        "surplus_ratio": float — confirmations / max(1, challenges),
-                        "confirmation_sources": list of str — distinct source domains,
-                        "challenge_sources": list of str — distinct challenge sources,
-                        "last_confirmation_ts": str or None — most recent confirmation,
-                        "last_challenge_ts": str or None — most recent challenge,
-                        "days_since_last_challenge": float or None,
-                        "probe_priority": str — "critical", "high", "moderate",
-                        "probe_directive": str — specific adversarial probe instruction,
-                    },
-                "queued_for_probe": list of str — invariant IDs added to probe queue,
-                "queue_size": int — total size of the adversarial probe queue,
-                "thresholds": dict — {min_confirmations, max_challenges} used,
-                "timestamp": str,
-            }
-        """
-        self._ensure_loaded()
-
-        # Initialize probe queue if not present
-        if not hasattr(self, '_adversarial_probe_queue'):
-            self._adversarial_probe_queue = []  # type: List[dict]
-
-        # Collect confirmation and challenge edges per invariant
-        inv_confirmations = defaultdict(list)  # type: Dict[str, list]
-        inv_challenges = defaultdict(list)  # type: Dict[str, list]
-        all_inv_ids = set()  # type: set
-
-        for e in self._edges:
-            target = e.get("to", "")
-            etype = e.get("type", "")
-            if not target or not target.upper().startswith("INV_"):
-                continue
-            target_upper = target.upper()
-            all_inv_ids.add(target_upper)
-            if etype in self._CONFIRMATION_EDGE_TYPES:
-                inv_confirmations[target_upper].append(e)
-            elif etype in self._FALSIFICATION_EDGE_TYPES:
-                inv_challenges[target_upper].append(e)
-
-        flagged = []  # type: List[dict]
-        queued_ids = []  # type: List[str]
-        ts_now = datetime.now(timezone.utc)
-        ts_now_iso = ts_now.isoformat()
-
-        for inv_id in sorted(all_inv_ids):
-            conf_edges = inv_confirmations.get(inv_id, [])
-            chal_edges = inv_challenges.get(inv_id, [])
-            n_conf = len(conf_edges)
-            n_chal = len(chal_edges)
-
-            # Check surplus thresholds
-            if n_conf < min_confirmations:
-                continue
-            if n_chal > max_challenges:
-                continue
-
-            # This invariant has surplus: many confirmations, few challenges
-            surplus = n_conf - n_chal
-            surplus_ratio = float(n_conf) / float(max(1, n_chal))
-
-            # Extract source domains for confirmations
-            conf_sources = sorted(set(
-                self._extract_source_domain(e.get("from", ""))
-                for e in conf_edges
-            ))
-            chal_sources = sorted(set(
-                self._extract_source_domain(e.get("from", ""))
-                for e in chal_edges
-            ))
-
-            # Timestamps
-            conf_timestamps = [
-                e.get("timestamp", "") for e in conf_edges if e.get("timestamp")
-            ]
-            chal_timestamps = [
-                e.get("timestamp", "") for e in chal_edges if e.get("timestamp")
-            ]
-            last_conf_ts = max(conf_timestamps) if conf_timestamps else None
-            last_chal_ts = max(chal_timestamps) if chal_timestamps else None
-
-            # Days since last challenge
-            days_since_challenge = None  # type: Optional[float]
-            if last_chal_ts:
-                try:
-                    last_chal_dt = datetime.fromisoformat(
-                        last_chal_ts.replace("Z", "+00:00")
-                    )
-                    delta = ts_now - last_chal_dt
-                    days_since_challenge = delta.total_seconds() / 86400.0
-                except (ValueError, TypeError):
-                    pass
-            elif n_conf > 0:
-                # Never challenged — use time since first confirmation
-                if conf_timestamps:
-                    try:
-                        first_conf_dt = datetime.fromisoformat(
-                            min(conf_timestamps).replace("Z", "+00:00")
-                        )
-                        delta = ts_now - first_conf_dt
-                        days_since_challenge = delta.total_seconds() / 86400.0
-                    except (ValueError, TypeError):
-                        pass
-
-            # Priority classification
-            if n_chal == 0 and n_conf >= 5:
-                priority = "critical"
-            elif n_chal == 0 and n_conf >= min_confirmations:
-                priority = "high"
-            elif surplus_ratio > 10.0:
-                priority = "high"
-            else:
-                priority = "moderate"
-
-            # Generate specific probe directive
-            probe_directive = (
-                f"ADVERSARIAL PROBE REQUIRED for {inv_id}: "
-                f"{n_conf} confirmation(s), {n_chal} challenge(s) "
-                f"(surplus_ratio={surplus_ratio:.1f}). "
-                f"Emit: (1) specific falsification conditions with "
-                f"measurable thresholds, (2) boundary parameters where "
-                f"the invariant's formula breaks (e.g., T→0, T→∞, "
-                f"degenerate limits), (3) at least one alternative "
-                f"mechanism that produces the same observables without "
-                f"requiring {inv_id} to be true, (4) a CHALLENGE edge "
-                f"targeting {inv_id} with the strongest falsification "
-                f"argument found."
-            )
-
-            entry = {
-                "invariant_id": inv_id,
-                "confirmation_count": n_conf,
-                "challenge_count": n_chal,
-                "surplus": surplus,
-                "surplus_ratio": round(surplus_ratio, 4),
-                "confirmation_sources": conf_sources,
-                "challenge_sources": chal_sources,
-                "last_confirmation_ts": last_conf_ts,
-                "last_challenge_ts": last_chal_ts,
-                "days_since_last_challenge": (
-                    round(days_since_challenge, 2)
-                    if days_since_challenge is not None else None
-                ),
-                "probe_priority": priority,
-                "probe_directive": probe_directive,
-            }
-            flagged.append(entry)
-
-            # Auto-queue for adversarial probe
-            if auto_queue:
-                # Check if already queued
-                already_queued = any(
-                    q.get("invariant_id") == inv_id
-                    for q in self._adversarial_probe_queue
-                )
-                if not already_queued:
-                    self._adversarial_probe_queue.append({
-                        "invariant_id": inv_id,
-                        "queued_at": ts_now_iso,
-                        "priority": priority,
-                        "surplus_ratio": round(surplus_ratio, 4),
-                        "confirmation_count": n_conf,
-                        "challenge_count": n_chal,
-                        "probe_directive": probe_directive,
-                        "status": "pending",
-                    })
-                    queued_ids.append(inv_id)
-
-        # Sort flagged by surplus_ratio descending (worst offenders first)
-        flagged.sort(key=lambda x: x["surplus_ratio"], reverse=True)
-
-        result = {
-            "monitored_count": len(all_inv_ids),
-            "flagged_count": len(flagged),
-            "flagged_invariants": flagged,
-            "queued_for_probe": queued_ids,
-            "queue_size": len(self._adversarial_probe_queue),
-            "thresholds": {
-                "min_confirmations": min_confirmations,
-                "max_challenges": max_challenges,
-            },
-            "timestamp": ts_now_iso,
-        }
-
-        # Log results
-        if flagged:
-            print(
-                f"[GRAPH:SURPLUS_MONITOR] {len(flagged)} invariant(s) flagged "
-                f"with confirmation surplus (>{min_confirmations} confirms, "
-                f"<={max_challenges} challenges) — "
-                f"queued={len(queued_ids)}, queue_size="
-                f"{len(self._adversarial_probe_queue)}"
-            )
-            for entry in flagged[:5]:
-                print(
-                    f"  {'🚨' if entry['probe_priority'] == 'critical' else '⚠'} "
-                    f"{entry['invariant_id']}: "
-                    f"confirms={entry['confirmation_count']}, "
-                    f"challenges={entry['challenge_count']}, "
-                    f"surplus_ratio={entry['surplus_ratio']}, "
-                    f"priority={entry['probe_priority']}"
-                )
-            if len(flagged) > 5:
-                print(f"  ... and {len(flagged) - 5} more flagged invariant(s)")
-
-        return result
 
     def challenge_surplus_audit(self, surplus_ratio_threshold=3.0):
         # type: (float) -> Dict[str, dict]
@@ -5531,44 +3432,14 @@ class KnowledgeGraph:
 
         return results
 
-    def get_adversarial_audit_targets(self, surplus_ratio_threshold=3.0):
-        # type: (float) -> List[str]
-        """
-        Return invariant IDs flagged as adversarial audit targets, sorted by
-        surplus ratio (highest first).
-
-        Convenience wrapper around ``challenge_surplus_audit()``.
-
-        Parameters
-        ----------
-        surplus_ratio_threshold : float
-            The confirmation/challenge ratio above which an invariant is
-            flagged (default 3.0).
-
-        Returns
-        -------
-        list of str
-            Invariant IDs requiring adversarial audit, worst offenders first.
-        """
-        audit = self.challenge_surplus_audit(
-            surplus_ratio_threshold=surplus_ratio_threshold
-        )
-        targets = [
-            (inv_id, info)
-            for inv_id, info in audit.items()
-            if info["is_adversarial_audit_target"] or info["audit_severity"] == "untested"
-        ]
-        targets.sort(key=lambda x: x[1]["surplus_ratio"], reverse=True)
-        return [inv_id for inv_id, _ in targets]
-
     def get_adversarial_probe_queue(self, status="pending"):
         # type: (str) -> List[dict]
         """
         Return the current adversarial probe queue, optionally filtered by status.
 
-        The queue contains invariants flagged by ``confirmation_surplus_monitor``
-        that require mandatory adversarial probing before further confirmations
-        are accepted.
+        The queue contains invariants flagged for mandatory adversarial probing
+        before further confirmations are accepted. The populator was removed in
+        the 2026-05-17 orphan purge; this reader remains for any residual entries.
 
         Parameters
         ----------
@@ -5604,83 +3475,6 @@ class KnowledgeGraph:
             )
         )
         return entries
-
-    def mark_probe_completed(self, invariant_id):
-        # type: (str) -> bool
-        """
-        Mark an adversarial probe as completed for a given invariant.
-
-        Called after a challenge/refute/contradict edge has been recorded
-        for the invariant, indicating that the adversarial probe cycle
-        has been fulfilled.
-
-        Parameters
-        ----------
-        invariant_id : str
-            The invariant whose probe to mark as completed.
-
-        Returns
-        -------
-        bool
-            True if the invariant was found in the queue and marked,
-            False if it was not in the queue.
-        """
-        if not hasattr(self, '_adversarial_probe_queue'):
-            return False
-
-        inv_upper = invariant_id.upper()
-        found = False
-        for q in self._adversarial_probe_queue:
-            if q.get("invariant_id") == inv_upper and q.get("status") == "pending":
-                q["status"] = "completed"
-                q["completed_at"] = datetime.now(timezone.utc).isoformat()
-                found = True
-                print(
-                    f"[GRAPH:SURPLUS_MONITOR] Adversarial probe COMPLETED "
-                    f"for {inv_upper} — removed from active queue"
-                )
-                break
-        return found
-
-    def drain_probe_queue_for_feed(self, max_probes=3):
-        # type: (int) -> List[dict]
-        """
-        Drain up to *max_probes* pending entries from the adversarial probe
-        queue, marking them as in-progress.  Returns the probe directives
-        for inclusion in the next FEED cycle's kernel prompt.
-
-        This is the integration point for the FEED pipeline: before
-        processing a new paper, call this to get mandatory adversarial
-        probe directives that must be included in the kernel output.
-
-        Parameters
-        ----------
-        max_probes : int
-            Maximum number of probes to drain per FEED cycle (default 3).
-
-        Returns
-        -------
-        list of dict
-            Probe entries marked as "in_progress", sorted by priority.
-            Each has "invariant_id" and "probe_directive" fields that
-            can be injected into the kernel prompt.
-        """
-        pending = self.get_adversarial_probe_queue(status="pending")
-        drained = []  # type: List[dict]
-
-        for q in pending[:max_probes]:
-            q["status"] = "in_progress"
-            q["drained_at"] = datetime.now(timezone.utc).isoformat()
-            drained.append(q)
-
-        if drained:
-            ids = [q["invariant_id"] for q in drained]
-            print(
-                f"[GRAPH:SURPLUS_MONITOR] Drained {len(drained)} probe(s) "
-                f"for FEED cycle: {', '.join(ids)}"
-            )
-
-        return drained
 
     # ── SOC Avalanche Detection ──────────────────────────────────────────────
     # Inspired by Self-Organized Criticality (SOC) cellular automaton models:
@@ -6044,207 +3838,6 @@ class KnowledgeGraph:
             return 0.0
         return float(intersection) / float(union)
 
-    def adaptive_memory_alignment_pass(self, new_edges, kernel_output=None,
-                                       coupling_threshold=0.25):
-        # type: (list, Optional[dict], float) -> dict
-        """
-        Adaptive memory alignment scoring pass for incoming FEED nodes.
-
-        Checks whether incoming nodes share distributed-cognition coupling
-        with prior graph nodes (via team/role/interface overlap), flagging
-        clusters where cognitive load redistribution is implied.
-
-        This pass:
-        1. Extracts cognition features from the new feed's kernel output.
-        2. Compares role/interface tags against all prior nodes in the graph.
-        3. Identifies coupling pairs where Jaccard overlap exceeds threshold.
-        4. Flags clusters where cognitive load redistribution is implied,
-           tagging them for O97/O98 obligation tracking and INV_087 challenge.
-
-        Parameters
-        ----------
-        new_edges : list of dict
-            Edges as returned by ``record_feed()``.
-        kernel_output : dict or None
-            The kernel output dict from the current FEED (used to extract
-            cognition features from full text). If None, only edge context
-            windows are used.
-        coupling_threshold : float
-            Minimum Jaccard coupling score to flag a distributed-cognition
-            link (default 0.25).
-
-        Returns
-        -------
-        dict
-            {
-                "is_distributed_cognition": bool,
-                "cognitive_load_redistribution": bool,
-                "new_node_features": dict — cognition features of the new feed,
-                "coupling_pairs": list of dict — pairs with prior nodes that
-                    exceed the coupling threshold, each with:
-                    {"prior_node": str, "coupling_score": float,
-                     "shared_tags": list of str, "edge_type": str},
-                "flagged_clusters": list of str — cluster IDs where cognitive
-                    load redistribution is implied,
-                "inv087_flag": str — diagnostic tag for INV_087 challenge,
-                "o97_o98_implications": list of str — obligation IDs that may
-                    need attention due to distributed-cognition coupling,
-                "alignment_score": float — aggregate memory alignment score
-                    for the new feed (0.0 = no coupling, 1.0 = full coupling),
-            }
-        """
-        self._ensure_loaded()
-
-        # ── Build full text from kernel output ───────────────────────────
-        full_text = ""
-        if kernel_output:
-            text_fields = ["perceive", "represent", "predict", "compare",
-                           "adjust", "compress", "next", "raw"]
-            full_text = " ".join(
-                str(kernel_output.get(f, "")) for f in text_fields
-            )
-
-        # Also incorporate edge context windows
-        for e in new_edges:
-            ctx = e.get("context", "")
-            if ctx:
-                full_text += " " + ctx
-
-        # ── Extract features for the new feed ────────────────────────────
-        new_features = self._extract_cognition_features(full_text)
-
-        result = {
-            "is_distributed_cognition": new_features["is_distributed_cognition"],
-            "cognitive_load_redistribution": new_features["cognitive_load_redistribution"],
-            "new_node_features": {
-                "cognition_signals": new_features["cognition_signals"],
-                "role_interface_tags": sorted(new_features["role_interface_tags"]),
-                "is_distributed_cognition": new_features["is_distributed_cognition"],
-                "cognitive_load_redistribution": new_features["cognitive_load_redistribution"],
-            },
-            "coupling_pairs": [],
-            "flagged_clusters": [],
-            "inv087_flag": "not_applicable",
-            "o97_o98_implications": [],
-            "alignment_score": 0.0,
-        }
-
-        if not new_features["is_distributed_cognition"]:
-            return result
-
-        new_tags = new_features["role_interface_tags"]
-
-        # ── Compare against prior nodes ──────────────────────────────────
-        # Build per-node tag sets from existing edge context windows
-        prior_node_tags = defaultdict(set)  # type: Dict[str, set]
-        for e in self._edges:
-            node_id = e.get("to", "")
-            if not node_id:
-                continue
-            ctx = e.get("context", "")
-            if ctx:
-                for pat, tag in self._ROLE_INTERFACE_PATTERNS:
-                    if pat.search(ctx):
-                        prior_node_tags[node_id].add(tag)
-
-        # Also check node_edges
-        for e in self._node_edges:
-            for nkey in ("from", "to"):
-                node_id = e.get(nkey, "")
-                if not node_id:
-                    continue
-                inv_text = e.get("invariant", "")
-                if inv_text:
-                    for pat, tag in self._ROLE_INTERFACE_PATTERNS:
-                        if pat.search(inv_text):
-                            prior_node_tags[node_id].add(tag)
-
-        # ── Compute coupling scores ──────────────────────────────────────
-        coupling_pairs = []  # type: List[dict]
-        new_source_urls = set(e.get("from", "") for e in new_edges)
-
-        for prior_node, prior_tags in prior_node_tags.items():
-            # Skip self-coupling (same source)
-            if prior_node in new_source_urls:
-                continue
-
-            score = self._compute_coupling_score(new_tags, prior_tags)
-            if score >= coupling_threshold:
-                shared = sorted(new_tags & prior_tags)
-                coupling_pairs.append({
-                    "prior_node": prior_node,
-                    "coupling_score": round(score, 4),
-                    "shared_tags": shared,
-                    "edge_type": "cognitive_load_transfer",
-                })
-
-        result["coupling_pairs"] = coupling_pairs
-
-        # ── Aggregate alignment score ────────────────────────────────────
-        if coupling_pairs:
-            scores = [p["coupling_score"] for p in coupling_pairs]
-            result["alignment_score"] = round(
-                sum(scores) / len(scores), 4
-            )
-
-        # ── Flag clusters with cognitive load redistribution ─────────────
-        flagged = []  # type: List[str]
-        if new_features["cognitive_load_redistribution"] and coupling_pairs:
-            # Each coupled prior node represents a cluster anchor
-            for pair in coupling_pairs:
-                cluster_id = "dc_cluster:" + pair["prior_node"]
-                flagged.append(cluster_id)
-        result["flagged_clusters"] = flagged
-
-        # ── INV_087 flag: reward-signal non-stationarity ─────────────────
-        # Communication dropout + cognitive load redistribution implies the
-        # reward landscape is non-stationary (human substrate unreliable)
-        has_dropout_signal = any(
-            re.search(r'\b(?:dropout|disruption|failure|unreliable|degraded)', s, re.I)
-            for s in new_features["cognition_signals"]
-        )
-        if not has_dropout_signal:
-            # Also check full text for dropout language
-            has_dropout_signal = bool(re.search(
-                r'\b(?:communication\s+(?:dropout|disruption|failure)|'
-                r'signal\s+(?:loss|degradation)|network\s+(?:failure|outage))\b',
-                full_text, re.I
-            ))
-
-        if new_features["cognitive_load_redistribution"] and has_dropout_signal:
-            result["inv087_flag"] = (
-                "non_stationary_reward:human_substrate_unreliable:"
-                "maxrl_assumption_violated"
-            )
-        elif new_features["cognitive_load_redistribution"]:
-            result["inv087_flag"] = (
-                "cognitive_load_redistribution:reward_landscape_may_shift"
-            )
-        elif new_features["is_distributed_cognition"]:
-            result["inv087_flag"] = "distributed_cognition:monitor"
-
-        # ── O97/O98 implications ─────────────────────────────────────────
-        o_implications = []  # type: List[str]
-        if flagged:
-            # O97: team cognition reconfiguration obligation
-            o_implications.append("O97")
-        if has_dropout_signal and coupling_pairs:
-            # O98: fallback continuity obligation
-            o_implications.append("O98")
-        result["o97_o98_implications"] = o_implications
-
-        # ── Log results ──────────────────────────────────────────────────
-        if coupling_pairs:
-            print(
-                f"[GRAPH:MEMORY_ALIGNMENT] Distributed-cognition coupling "
-                f"detected — {len(coupling_pairs)} pair(s), "
-                f"alignment={result['alignment_score']}, "
-                f"clusters_flagged={len(flagged)}, "
-                f"inv087={result['inv087_flag']}"
-            )
-
-        return result
-
     # ── Bidirectional Perturbation Probe (Co-Adaptation Signal) ──────────────
     # When a new node is ingested, measures two complementary signals:
     #   1. FORWARD perturbation: how the new node reshapes the embedding
@@ -6279,314 +3872,6 @@ class KnowledgeGraph:
     # language-only or perception-only transformations.
     # ─────────────────────────────────────────────────────────────────────────
 
-    def bidirectional_perturbation_probe(self, new_edges, edges_before=None):
-        # type: (list, Optional[list]) -> dict
-        """
-        Measure the bidirectional co-adaptation signal when new edges
-        (from a FEED) perturb the knowledge graph.
-
-        Forward perturbation: how much the existing nodes' neighborhood
-        distributions shift due to the new edges (representation distortion).
-
-        Backward constraint: how much the existing graph structure constrains
-        where the new node's edges land (protocol shaping).
-
-        When both signals converge to small, stable values across consecutive
-        FEED cycles, the graph has reached a joint compression fixed point.
-
-        Parameters
-        ----------
-        new_edges : list of dict
-            Edges just recorded by record_feed().
-        edges_before : list of dict or None
-            Snapshot of all edges BEFORE the new edges were added.
-            If None, reconstructed by removing new_edges from self._edges.
-
-        Returns
-        -------
-        dict
-            {
-                "forward_perturbation": float — mean distribution shift of
-                    existing nodes caused by the new edges (0 = no distortion,
-                    higher = more reshaping of existing structure),
-                "backward_constraint": float — how concentrated the new node's
-                    edges are relative to a uniform baseline (0 = unconstrained,
-                    higher = more constrained by existing structure),
-                "co_adaptation_signal": float — geometric mean of forward and
-                    backward signals, measuring joint co-stabilization,
-                "is_fixed_point": bool — True if co_adaptation_signal < 0.05
-                    (joint compression fixed point reached),
-                "is_drifting": bool — True if co_adaptation_signal > 0.2
-                    (graph still actively reorganizing),
-                "per_node_forward": dict — {node_id: distribution_shift} for
-                    each existing node affected by the new edges,
-                "new_node_concentration": float — KL divergence of new node's
-                    edge distribution from uniform (backward constraint metric),
-                "n_existing_nodes_affected": int,
-                "n_new_edges": int,
-                "inv094_flag": str — challenge diagnostic for INV_094,
-                "noether_embodied_note": str — Noether row annotation,
-                "timestamp": str,
-            }
-        """
-        self._ensure_loaded()
-        ts = datetime.now(timezone.utc).isoformat()
-
-        if not new_edges:
-            return {
-                "forward_perturbation": 0.0,
-                "backward_constraint": 0.0,
-                "co_adaptation_signal": 0.0,
-                "is_fixed_point": True,
-                "is_drifting": False,
-                "per_node_forward": {},
-                "new_node_concentration": 0.0,
-                "n_existing_nodes_affected": 0,
-                "n_new_edges": 0,
-                "inv094_flag": "no_new_edges:trivially_stable",
-                "noether_embodied_note": "",
-                "timestamp": ts,
-            }
-
-        # ── Reconstruct edges_before if not provided ─────────────────────
-        if edges_before is None:
-            # Remove new_edges from current edge list to reconstruct prior state
-            new_edge_set = set()  # type: set
-            for e in new_edges:
-                key = (
-                    e.get("from", ""),
-                    e.get("to", ""),
-                    e.get("type", ""),
-                    e.get("timestamp", ""),
-                )
-                new_edge_set.add(key)
-            edges_before = []
-            for e in self._edges:
-                key = (
-                    e.get("from", ""),
-                    e.get("to", ""),
-                    e.get("type", ""),
-                    e.get("timestamp", ""),
-                )
-                if key not in new_edge_set:
-                    edges_before.append(e)
-
-        edges_after = list(self._edges)
-
-        # ── Identify all node IDs ────────────────────────────────────────
-        all_node_ids_set = set()  # type: set
-        for e in edges_after:
-            for key in ("from", "to"):
-                nid = e.get(key, "").upper()
-                if nid:
-                    all_node_ids_set.add(nid)
-        all_node_ids = sorted(all_node_ids_set)
-        n = len(all_node_ids)
-
-        if n == 0:
-            return {
-                "forward_perturbation": 0.0,
-                "backward_constraint": 0.0,
-                "co_adaptation_signal": 0.0,
-                "is_fixed_point": True,
-                "is_drifting": False,
-                "per_node_forward": {},
-                "new_node_concentration": 0.0,
-                "n_existing_nodes_affected": 0,
-                "n_new_edges": len(new_edges),
-                "inv094_flag": "no_nodes:trivially_stable",
-                "noether_embodied_note": "",
-                "timestamp": ts,
-            }
-
-        # ── Identify new vs. existing nodes ──────────────────────────────
-        new_source_ids = set()  # type: set
-        new_target_ids = set()  # type: set
-        for e in new_edges:
-            new_source_ids.add(e.get("from", "").upper())
-            new_target_ids.add(e.get("to", "").upper())
-
-        # Existing nodes that were in edges_before
-        existing_node_ids = set()  # type: set
-        for e in edges_before:
-            for key in ("from", "to"):
-                nid = e.get(key, "").upper()
-                if nid:
-                    existing_node_ids.add(nid)
-
-        # ── FORWARD PERTURBATION ─────────────────────────────────────────
-        # For each existing node, compute distribution shift before/after
-        # the new edges were added.  Uses L1 distance (total variation)
-        # between the node's neighbor-weight distributions.
-        per_node_forward = {}  # type: Dict[str, float]
-        forward_shifts = []  # type: List[float]
-
-        for nid in existing_node_ids:
-            # Distribution before: neighbor weights from edges_before
-            dist_before = node_distribution_from_edges(
-                nid, edges_before, all_node_ids
-            )
-            # Distribution after: neighbor weights from edges_after
-            dist_after = node_distribution_from_edges(
-                nid, edges_after, all_node_ids
-            )
-            # L1 distance (total variation * 2)
-            if dist_before and dist_after and len(dist_before) == len(dist_after):
-                l1 = sum(
-                    abs(a - b) for a, b in zip(dist_before, dist_after)
-                )
-                # Normalize: L1 between two probability distributions in [0, 2]
-                shift = l1 / 2.0
-            else:
-                shift = 0.0
-
-            if shift > 1e-10:
-                per_node_forward[nid] = round(shift, 8)
-                forward_shifts.append(shift)
-
-        n_affected = len(forward_shifts)
-        forward_perturbation = (
-            sum(forward_shifts) / len(forward_shifts)
-            if forward_shifts else 0.0
-        )
-
-        # ── BACKWARD CONSTRAINT ──────────────────────────────────────────
-        # Measure how concentrated the new edges' target distribution is
-        # relative to a uniform distribution over all existing nodes.
-        # High concentration = existing structure strongly constrains where
-        # the new node's edges land (protocol shaped by representation).
-        # Uses KL divergence from uniform as the concentration metric.
-
-        # Build distribution of new edge targets over all_node_ids
-        new_target_counts = [0.0] * n
-        node_index = {nid: idx for idx, nid in enumerate(all_node_ids)}
-        for e in new_edges:
-            to_id = e.get("to", "").upper()
-            idx = node_index.get(to_id)
-            if idx is not None:
-                new_target_counts[idx] += 1.0
-
-        # Laplace smoothing and normalization
-        alpha = 0.01
-        smoothed_targets = [c + alpha for c in new_target_counts]
-        total_targets = sum(smoothed_targets)
-        if total_targets > 0:
-            p_targets = [s / total_targets for s in smoothed_targets]
-        else:
-            p_targets = [1.0 / max(n, 1)] * n
-
-        # KL divergence from uniform: D_KL(p_targets || uniform)
-        p_uniform = [1.0 / max(n, 1)] * n
-        new_node_concentration = _kl_divergence(p_targets, p_uniform)
-
-        # Normalize to [0, 1] range using log(n) as the maximum possible KL
-        # (when all mass is on one node, KL = log(n))
-        max_kl = math.log(max(n, 2))
-        backward_constraint = min(1.0, new_node_concentration / max(max_kl, 1e-10))
-
-        # ── CO-ADAPTATION SIGNAL ─────────────────────────────────────────
-        # Geometric mean of forward and backward: both must be small for
-        # a fixed point, and both must be large for active drift.
-        if forward_perturbation > 1e-15 and backward_constraint > 1e-15:
-            co_adaptation = math.sqrt(forward_perturbation * backward_constraint)
-        elif forward_perturbation > 1e-15 or backward_constraint > 1e-15:
-            # One signal present, use arithmetic mean / 2 as proxy
-            co_adaptation = (forward_perturbation + backward_constraint) / 2.0
-        else:
-            co_adaptation = 0.0
-
-        is_fixed_point = co_adaptation < 0.05
-        is_drifting = co_adaptation > 0.2
-
-        # ── INV_094 challenge flag ───────────────────────────────────────
-        if is_fixed_point:
-            inv094_flag = (
-                f"JOINT_FIXED_POINT:co_adapt={co_adaptation:.6f}:"
-                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
-                "representation_protocol_co_stabilized:"
-                "BUT_check_if_topology_dependent:"
-                "if_hub_spoke_graph_forces_convergence_then_substrate_contingent"
-            )
-        elif is_drifting:
-            inv094_flag = (
-                f"DRIFTING:co_adapt={co_adaptation:.6f}:"
-                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
-                "representation_protocol_NOT_co_stabilized:"
-                "joint_compression_fixed_point_not_reached:"
-                "continue_monitoring"
-            )
-        else:
-            inv094_flag = (
-                f"APPROACHING:co_adapt={co_adaptation:.6f}:"
-                f"fwd={forward_perturbation:.6f}:bwd={backward_constraint:.6f}:"
-                "partial_co_stabilization:monitor"
-            )
-
-        noether_note = (
-            "Embodied/Enactivist (rigorous): perceptual substrate and "
-            "communicative protocol co-constrain each other. Meaning is "
-            "conserved only under joint agent-environment transformations. "
-            f"Forward perturbation={forward_perturbation:.6f} measures "
-            "representation distortion by new protocol signal. "
-            f"Backward constraint={backward_constraint:.6f} measures "
-            "protocol shaping by existing representation structure."
-        )
-
-        result = {
-            "forward_perturbation": round(forward_perturbation, 8),
-            "backward_constraint": round(backward_constraint, 8),
-            "co_adaptation_signal": round(co_adaptation, 8),
-            "is_fixed_point": is_fixed_point,
-            "is_drifting": is_drifting,
-            "per_node_forward": per_node_forward,
-            "new_node_concentration": round(new_node_concentration, 8),
-            "n_existing_nodes_affected": n_affected,
-            "n_new_edges": len(new_edges),
-            "inv094_flag": inv094_flag,
-            "noether_embodied_note": noether_note,
-            "timestamp": ts,
-        }
-
-        # ── Store in telemetry for drift analysis ────────────────────────
-        self._telemetry.append({
-            "type": "co_adaptation",
-            "forward_perturbation": result["forward_perturbation"],
-            "backward_constraint": result["backward_constraint"],
-            "co_adaptation_signal": result["co_adaptation_signal"],
-            "is_fixed_point": is_fixed_point,
-            "is_drifting": is_drifting,
-            "n_new_edges": len(new_edges),
-            "timestamp": ts,
-        })
-
-        # ── Log results ──────────────────────────────────────────────────
-        if is_fixed_point:
-            print(
-                f"[GRAPH:CO_ADAPT] ✓ Joint compression fixed point — "
-                f"co_adapt={co_adaptation:.6f}, "
-                f"fwd={forward_perturbation:.6f}, "
-                f"bwd={backward_constraint:.6f}, "
-                f"affected={n_affected}"
-            )
-        elif is_drifting:
-            print(
-                f"[GRAPH:CO_ADAPT] ↔ Drifting — "
-                f"co_adapt={co_adaptation:.6f}, "
-                f"fwd={forward_perturbation:.6f}, "
-                f"bwd={backward_constraint:.6f}, "
-                f"affected={n_affected}"
-            )
-        else:
-            print(
-                f"[GRAPH:CO_ADAPT] → Approaching fixed point — "
-                f"co_adapt={co_adaptation:.6f}, "
-                f"fwd={forward_perturbation:.6f}, "
-                f"bwd={backward_constraint:.6f}, "
-                f"affected={n_affected}"
-            )
-
-        return result
-
     def get_co_adaptation_history(self):
         # type: () -> List[dict]
         """
@@ -6602,135 +3887,6 @@ class KnowledgeGraph:
             t for t in self._telemetry
             if t.get("type") == "co_adaptation"
         ]
-
-    def co_adaptation_convergence_summary(self):
-        # type: () -> dict
-        """
-        Summarize co-adaptation convergence across all recorded FEED cycles.
-
-        Detects whether the graph has reached a joint compression fixed point
-        (both forward perturbation and backward constraint have stabilized)
-        or is still drifting.
-
-        Returns
-        -------
-        dict
-            {
-                "n_measurements": int,
-                "mean_co_adaptation": float or None,
-                "std_co_adaptation": float or None,
-                "latest_co_adaptation": float or None,
-                "latest_is_fixed_point": bool,
-                "n_fixed_point_cycles": int — how many cycles were at fixed point,
-                "n_drifting_cycles": int,
-                "convergence_status": str — "converged", "converging",
-                    "drifting", "oscillating", or "insufficient_data",
-                "forward_trend": str — "decreasing", "stable", "increasing",
-                "backward_trend": str — "decreasing", "stable", "increasing",
-                "inv094_convergence_note": str,
-            }
-        """
-        history = self.get_co_adaptation_history()
-        n = len(history)
-
-        if n == 0:
-            return {
-                "n_measurements": 0,
-                "mean_co_adaptation": None,
-                "std_co_adaptation": None,
-                "latest_co_adaptation": None,
-                "latest_is_fixed_point": False,
-                "n_fixed_point_cycles": 0,
-                "n_drifting_cycles": 0,
-                "convergence_status": "insufficient_data",
-                "forward_trend": "unknown",
-                "backward_trend": "unknown",
-                "inv094_convergence_note": "no_data",
-            }
-
-        signals = [h.get("co_adaptation_signal", 0.0) for h in history]
-        fwd_vals = [h.get("forward_perturbation", 0.0) for h in history]
-        bwd_vals = [h.get("backward_constraint", 0.0) for h in history]
-
-        mean_s = sum(signals) / n
-        var_s = sum((s - mean_s) ** 2 for s in signals) / max(n - 1, 1)
-        std_s = math.sqrt(var_s) if var_s > 0 else 0.0
-
-        latest = signals[-1]
-        latest_fp = history[-1].get("is_fixed_point", False)
-
-        n_fp = sum(1 for h in history if h.get("is_fixed_point", False))
-        n_drift = sum(1 for h in history if h.get("is_drifting", False))
-
-        # Trend detection on recent window
-        def _trend(values, window=5):
-            # type: (List[float], int) -> str
-            recent = values[-min(window, len(values)):]
-            if len(recent) < 2:
-                return "unknown"
-            diffs = [recent[i] - recent[i - 1] for i in range(1, len(recent))]
-            mean_diff = sum(diffs) / len(diffs)
-            if mean_diff < -0.01:
-                return "decreasing"
-            elif mean_diff > 0.01:
-                return "increasing"
-            else:
-                return "stable"
-
-        fwd_trend = _trend(fwd_vals)
-        bwd_trend = _trend(bwd_vals)
-
-        # Convergence status
-        recent = signals[-min(5, n):]
-        if n < 3:
-            convergence = "insufficient_data"
-        elif all(s < 0.05 for s in recent):
-            convergence = "converged"
-        elif _trend(signals) == "decreasing":
-            convergence = "converging"
-        elif all(s > 0.2 for s in recent):
-            convergence = "drifting"
-        else:
-            convergence = "oscillating"
-
-        # INV_094 note
-        if convergence == "converged":
-            inv094_note = (
-                "Joint compression fixed point REACHED — representation "
-                "and protocol have co-stabilized. Check whether this "
-                "convergence is topology-dependent (substrate-contingent) "
-                "or topology-invariant (thermodynamic necessity)."
-            )
-        elif convergence == "converging":
-            inv094_note = (
-                "Approaching joint fixed point — co-adaptation signal "
-                "decreasing. Not yet converged."
-            )
-        elif convergence == "drifting":
-            inv094_note = (
-                "Graph still drifting — representation and protocol "
-                "have NOT co-stabilized. Joint compression fixed point "
-                "not reached."
-            )
-        else:
-            inv094_note = (
-                f"Status={convergence}: co-adaptation signal unstable. "
-                "Monitor for convergence or persistent oscillation."
-            )
-
-        return {
-            "n_measurements": n,
-            "mean_co_adaptation": round(mean_s, 8),
-            "std_co_adaptation": round(std_s, 8),
-            "latest_co_adaptation": round(latest, 8),
-            "latest_is_fixed_point": latest_fp,
-            "n_fixed_point_cycles": n_fp,
-            "n_drifting_cycles": n_drift,
-            "convergence_status": convergence,
-            "forward_trend": fwd_trend,
-            "backward_trend": bwd_trend,
-            "inv094_convergence_note": inv094_note,
-        }
 
     # ── Multi-Scale Complexity Profile Scorer ────────────────────────────────
     # Computes emergence, self-organization, and complexity at each scale
@@ -6820,173 +3976,6 @@ class KnowledgeGraph:
             })
 
         return layers
-
-    def complexity_profile(self):
-        # type: () -> dict
-        """
-        Compute multi-scale complexity profile for the knowledge graph.
-
-        At each scale layer, computes:
-          - H_input: Shannon entropy of edge-type distribution at the
-            previous (lower) scale layer (or 0 for the lowest scale)
-          - H_output: Shannon entropy of edge-type distribution at this
-            scale layer
-          - emergence: H_output - H_input (information the scale produces)
-          - self_organization: -emergence (the paper's scalar inverse)
-          - complexity: 4 * emergence * self_organization / (emergence -
-            self_organization)^2 when both are nonzero, else 0.
-            This is a normalized balance measure: maximal (=1) when
-            |emergence| == |self_organization|, collapsing toward 0 when
-            either dominates.
-          - gradient_flow_flag: diagnostic for INV_073 — True when the
-            scalar self_organization is likely an inadequate proxy for
-            Wasserstein gradient flow dynamics at this scale.
-
-        Returns
-        -------
-        dict
-            {
-                "n_scales": int,
-                "scales": list of dict — per-scale metrics,
-                "aggregate_complexity": float — mean complexity across scales,
-                "criticality_status": str — "healthy", "emergence_dominated",
-                    "self_org_dominated", or "collapsed",
-                "inv073_warning": str or None — warning if scalar inverse
-                    approximation is inadequate at any scale,
-                "timestamp": str,
-            }
-        """
-        self._ensure_loaded()
-
-        layers = self._build_scale_layers()
-        scales = []  # type: List[dict]
-        prev_entropy = 0.0
-
-        for layer in layers:
-            h_output = self._compute_edge_type_entropy(layer["edges"])
-            h_input = prev_entropy
-            n_edges = len(layer["edges"])
-
-            emergence = h_output - h_input
-            self_org = -emergence  # Paper's scalar definition
-
-            # Normalized balance measure for complexity:
-            # C = 4 * E * S / (E - S)^2   when E != 0 and S != 0
-            # Since S = -E, this simplifies to:
-            # C = 4 * E * (-E) / (E - (-E))^2 = -4E^2 / (2E)^2 = -4E^2/4E^2 = -1
-            # ... which shows the paper's strict scalar inverse is degenerate!
-            # This IS the INV_073 challenge: when S = -E exactly, complexity
-            # is a constant, losing all discriminative power.
-            #
-            # We use a modified measure that captures the BALANCE between
-            # information production (H_output) and information consumption
-            # (H_input) directly, avoiding the degenerate scalar inverse:
-            # C = 1 - |H_output - H_input| / max(H_output, H_input, eps)
-            # This is 1.0 when H_output == H_input (perfect balance),
-            # 0.0 when one completely dominates.
-            eps = 1e-12
-            max_h = max(h_output, h_input, eps)
-            complexity = 1.0 - abs(emergence) / max_h
-
-            # Clamp to [0, 1]
-            complexity = max(0.0, min(1.0, complexity))
-
-            # Gradient flow diagnostic (INV_073):
-            # The scalar self_org = -emergence is inadequate when:
-            # 1. The scale has high edge diversity (many types) — geometric
-            #    structure matters more than scalar information difference
-            # 2. There are contradictions at this scale — the Wasserstein
-            #    gradient flow must navigate opposing directions
-            n_edge_types = len(set(
-                e.get("type", "unknown") for e in layer["edges"]
-            )) if layer["edges"] else 0
-
-            # Check for contradictions at this scale
-            scale_contradictions = detect_contradictions(
-                layer["edges"], context_aware=True
-            )
-            n_contradictions = len([
-                c for c in scale_contradictions
-                if c.get("severity") == "true_contradiction"
-            ])
-
-            gradient_flow_flag = (n_edge_types >= 4 or n_contradictions > 0)
-
-            scales.append({
-                "scale": layer["scale"],
-                "label": layer["label"],
-                "degree_range": layer["degree_range"],
-                "n_edges": n_edges,
-                "h_input": round(h_input, 6),
-                "h_output": round(h_output, 6),
-                "emergence": round(emergence, 6),
-                "self_organization": round(self_org, 6),
-                "complexity": round(complexity, 6),
-                "n_edge_types": n_edge_types,
-                "n_contradictions": n_contradictions,
-                "gradient_flow_flag": gradient_flow_flag,
-            })
-
-            # Current output becomes next layer's input
-            prev_entropy = h_output
-
-        # ── Aggregate metrics ────────────────────────────────────────────
-        complexities = [s["complexity"] for s in scales if s["n_edges"] > 0]
-        agg_complexity = (
-            sum(complexities) / len(complexities) if complexities else 0.0
-        )
-
-        # Criticality status based on aggregate and per-scale patterns
-        active_scales = [s for s in scales if s["n_edges"] > 0]
-        if not active_scales:
-            criticality = "collapsed"
-        elif agg_complexity >= 0.6:
-            criticality = "healthy"
-        elif all(s["emergence"] > 0 for s in active_scales):
-            criticality = "emergence_dominated"
-        elif all(s["emergence"] < 0 for s in active_scales):
-            criticality = "self_org_dominated"
-        elif agg_complexity < 0.2:
-            criticality = "collapsed"
-        else:
-            criticality = "healthy"
-
-        # INV_073 warning: flag if any scale has gradient_flow_flag
-        gradient_flagged = [
-            s for s in scales if s.get("gradient_flow_flag")
-        ]
-        inv073_warning = None  # type: Optional[str]
-        if gradient_flagged:
-            flagged_labels = [s["label"] for s in gradient_flagged]
-            inv073_warning = (
-                f"Scalar self_organization=-emergence is inadequate proxy "
-                f"for Wasserstein gradient flow at scale(s): "
-                f"{', '.join(flagged_labels)}. "
-                f"High edge-type diversity or contradictions require "
-                f"geometric (non-scalar) complexity tracking."
-            )
-
-        ts = datetime.now(timezone.utc).isoformat()
-
-        profile = {
-            "n_scales": len(scales),
-            "scales": scales,
-            "aggregate_complexity": round(agg_complexity, 6),
-            "criticality_status": criticality,
-            "inv073_warning": inv073_warning,
-            "timestamp": ts,
-        }
-
-        # ── Log summary ─────────────────────────────────────────────────
-        active_count = len(active_scales)
-        print(
-            f"[GRAPH:COMPLEXITY_PROFILE] {active_count} active scale(s), "
-            f"aggregate_complexity={agg_complexity:.4f}, "
-            f"criticality={criticality}"
-            + (f", INV_073_warning=True" if inv073_warning else "")
-        )
-
-        return profile
 
     # ── MI-Ordered Cumulative Ablation Scoring ───────────────────────────────
     # Ranks nodes by mutual information with the output classification (thematic
@@ -7231,464 +4220,6 @@ class KnowledgeGraph:
             total_kl += max(0.0, kl)
 
         return total_kl / max(n_clusters, 1)
-
-    def mi_ordered_cumulative_ablation(self, cluster_variable,
-                                        ablation_metric="mi",
-                                        coherence_scorer=None):
-        # type: (Dict[str, str], str, Optional[object]) -> dict
-        """
-        Perform MI-ordered cumulative ablation scoring on graph nodes.
-
-        Ranks all invariant nodes by their mutual information with the thematic
-        cluster variable (or by entropy or KL-selectivity), then cumulatively
-        ablates (removes) nodes in descending order and measures the resulting
-        graph coherence at each step.
-
-        This reveals whether high-MI nodes are globally load-bearing (coherence
-        degrades sharply under MI-ordered ablation) or only layer-locally
-        predictive (coherence degrades only at specific scale layers but not
-        globally).
-
-        The method directly addresses INV_070b: selectivity is a poor global
-        predictor but IS locally predictive within layers.  Both global and
-        per-layer MI-performance correlations are tracked.
-
-        Parameters
-        ----------
-        cluster_variable : dict
-            Mapping of source_url (or source domain) → thematic cluster label.
-            Each unique label defines a "class" for the classification variable.
-            Example: {"arxiv.org/abs/2301.001": "thermodynamics",
-                      "arxiv.org/abs/2302.002": "information_theory", ...}
-        ablation_metric : str
-            Which information-theoretic quantity to rank nodes by:
-            "mi" (default) — mutual information with cluster variable,
-            "entropy" — node Shannon entropy (edge-type diversity),
-            "kl_selectivity" — KL-divergence class selectivity.
-        coherence_scorer : callable or None
-            Optional callable(edges, all_node_ids) → float that computes a
-            graph coherence score. If None, uses the default: fraction of
-            "confirms"+"supports" edges relative to total edges (confirmation
-            ratio).
-
-        Returns
-        -------
-        dict
-            {
-                "n_nodes": int — total invariant nodes ranked,
-                "ablation_metric": str — the metric used for ranking,
-                "node_scores": list of dict — per-node info-theoretic scores,
-                    sorted by the ablation metric descending:
-                    {"node_id": str, "mi": float, "entropy": float,
-                     "kl_selectivity": float, "rank": int, "scale_layer": str},
-                "ablation_curve": list of dict — coherence after each ablation:
-                    {"step": int, "ablated_node": str, "n_remaining_nodes": int,
-                     "global_coherence": float, "edges_removed": int,
-                     "cumulative_edges_removed": int},
-                "per_layer_curves": dict — scale_label → list of coherence values
-                    after each ablation step (layer-local coherence tracking),
-                "global_auc": float — area under the global ablation curve
-                    (lower = high-MI nodes are more globally load-bearing),
-                "random_baseline_auc": float — expected AUC under random ablation
-                    (used for comparison: if global_auc << random_auc, MI predicts
-                     global load-bearing-ness),
-                "global_mi_predictive": bool — True if MI-ordered ablation degrades
-                    coherence significantly faster than random (auc_ratio < 0.8),
-                "per_layer_mi_predictive": dict — scale_label → bool (True if MI
-                    predicts layer-local coherence degradation),
-                "inv070b_diagnosis": str — diagnosis of the monosemanticity tension:
-                    whether selectivity is globally predictive, locally predictive,
-                    both, or neither,
-                "pruning_recommendation": list of str — node IDs safe to prune
-                    (low MI AND low layer-local predictiveness),
-                "consolidation_candidates": list of str — high-MI nodes that are
-                    redundantly distributed (ablation barely affects coherence),
-                "timestamp": str,
-            }
-        """
-        self._ensure_loaded()
-
-        # ── Collect all invariant node IDs ───────────────────────────────
-        inv_pattern = re.compile(r'^INV_', re.I)
-        all_inv_ids = set()  # type: set
-        for e in self._edges:
-            for key in ("from", "to"):
-                nid = e.get(key, "").upper()
-                if inv_pattern.match(nid):
-                    all_inv_ids.add(nid)
-        all_inv_ids_sorted = sorted(all_inv_ids)
-        n_nodes = len(all_inv_ids_sorted)
-
-        ts = datetime.now(timezone.utc).isoformat()
-
-        if n_nodes == 0:
-            return {
-                "n_nodes": 0,
-                "ablation_metric": ablation_metric,
-                "node_scores": [],
-                "ablation_curve": [],
-                "per_layer_curves": {},
-                "global_auc": 0.0,
-                "random_baseline_auc": 0.0,
-                "global_mi_predictive": False,
-                "per_layer_mi_predictive": {},
-                "inv070b_diagnosis": "no_invariant_nodes:cannot_assess",
-                "pruning_recommendation": [],
-                "consolidation_candidates": [],
-                "timestamp": ts,
-            }
-
-        # ── Compute info-theoretic scores per node ───────────────────────
-        node_scores = []  # type: List[dict]
-        for nid in all_inv_ids_sorted:
-            mi_val = self._compute_node_mutual_information(nid, cluster_variable)
-            ent_val = self._compute_node_entropy(nid)
-            kl_val = self._compute_node_kl_selectivity(nid, cluster_variable)
-
-            # Determine scale layer
-            deg = self._node_degree(nid)
-            if deg <= 1:
-                scale_layer = "peripheral"
-            elif deg <= 3:
-                scale_layer = "intermediate"
-            elif deg <= 7:
-                scale_layer = "hub"
-            else:
-                scale_layer = "superhub"
-
-            node_scores.append({
-                "node_id": nid,
-                "mi": round(mi_val, 10),
-                "entropy": round(ent_val, 10),
-                "kl_selectivity": round(kl_val, 10),
-                "degree": deg,
-                "scale_layer": scale_layer,
-            })
-
-        # ── Sort by ablation metric (descending) ────────────────────────
-        metric_key = ablation_metric if ablation_metric in ("mi", "entropy", "kl_selectivity") else "mi"
-        node_scores.sort(key=lambda x: x[metric_key], reverse=True)
-        for rank, ns in enumerate(node_scores):
-            ns["rank"] = rank
-
-        # ── Define coherence scorer ──────────────────────────────────────
-        def _default_coherence(edges_subset, _node_ids):
-            # type: (list, List[str]) -> float
-            """Default coherence: confirmation ratio."""
-            if not edges_subset:
-                return 0.0
-            n_conf = sum(
-                1 for e in edges_subset
-                if e.get("type", "") in ("confirms", "supports", "extends")
-            )
-            return float(n_conf) / float(len(edges_subset))
-
-        scorer = coherence_scorer if coherence_scorer is not None else _default_coherence
-
-        # ── Collect all node IDs for context ─────────────────────────────
-        all_graph_node_ids = set()  # type: set
-        for e in self._edges:
-            for key in ("from", "to"):
-                nid = e.get(key, "").upper()
-                if nid:
-                    all_graph_node_ids.add(nid)
-        all_graph_node_ids_sorted = sorted(all_graph_node_ids)
-
-        # ── Cumulative ablation ──────────────────────────────────────────
-        # Start with all edges, then cumulatively remove edges touching
-        # each ablated node (in MI-descending order)
-        ablated_nodes = set()  # type: set
-        remaining_edges = list(self._edges)
-        ablation_curve = []  # type: List[dict]
-        cumulative_removed = 0
-
-        # Scale layers for per-layer tracking
-        scale_labels = ["peripheral", "intermediate", "hub", "superhub"]
-        per_layer_coherences = {sl: [] for sl in scale_labels}  # type: Dict[str, List[float]]
-
-        # Initial coherence (no ablation)
-        initial_coherence = scorer(remaining_edges, all_graph_node_ids_sorted)
-        ablation_curve.append({
-            "step": 0,
-            "ablated_node": "none",
-            "n_remaining_nodes": n_nodes,
-            "global_coherence": round(initial_coherence, 10),
-            "edges_removed": 0,
-            "cumulative_edges_removed": 0,
-        })
-        # Per-layer initial coherence
-        layers = self._build_scale_layers()
-        for layer in layers:
-            label = layer["label"]
-            if label in per_layer_coherences:
-                lc = scorer(layer["edges"], all_graph_node_ids_sorted)
-                per_layer_coherences[label].append(round(lc, 10))
-
-        for step, ns in enumerate(node_scores, 1):
-            nid = ns["node_id"]
-            ablated_nodes.add(nid)
-
-            # Remove edges touching ablated node
-            new_remaining = []  # type: list
-            removed_this_step = 0
-            for e in remaining_edges:
-                from_id = e.get("from", "").upper()
-                to_id = e.get("to", "").upper()
-                if from_id in ablated_nodes or to_id in ablated_nodes:
-                    removed_this_step += 1
-                else:
-                    new_remaining.append(e)
-            remaining_edges = new_remaining
-            cumulative_removed += removed_this_step
-
-            coherence = scorer(remaining_edges, all_graph_node_ids_sorted)
-            ablation_curve.append({
-                "step": step,
-                "ablated_node": nid,
-                "n_remaining_nodes": n_nodes - step,
-                "global_coherence": round(coherence, 10),
-                "edges_removed": removed_this_step,
-                "cumulative_edges_removed": cumulative_removed,
-            })
-
-            # Per-layer coherence: partition remaining edges by scale
-            node_degrees_remaining = defaultdict(int)  # type: Dict[str, int]
-            for e in remaining_edges:
-                for key in ("from", "to"):
-                    nid_r = e.get(key, "").upper()
-                    if nid_r:
-                        node_degrees_remaining[nid_r] += 1
-
-            for sl in scale_labels:
-                if sl == "peripheral":
-                    lo, hi = 0, 1
-                elif sl == "intermediate":
-                    lo, hi = 2, 3
-                elif sl == "hub":
-                    lo, hi = 4, 7
-                else:
-                    lo, hi = 8, 999999
-
-                layer_edges_r = []  # type: list
-                for e in remaining_edges:
-                    from_id = e.get("from", "").upper()
-                    to_id = e.get("to", "").upper()
-                    from_deg = node_degrees_remaining.get(from_id, 0)
-                    to_deg = node_degrees_remaining.get(to_id, 0)
-                    max_deg = max(from_deg, to_deg)
-                    if lo <= max_deg <= hi:
-                        layer_edges_r.append(e)
-                lc = scorer(layer_edges_r, all_graph_node_ids_sorted)
-                per_layer_coherences[sl].append(round(lc, 10))
-
-        # ── Compute AUC (area under ablation curve) ──────────────────────
-        coherences = [ac["global_coherence"] for ac in ablation_curve]
-        n_steps = len(coherences)
-        if n_steps > 1:
-            # Trapezoidal AUC, normalized to [0, 1]
-            auc = sum(
-                0.5 * (coherences[i] + coherences[i + 1])
-                for i in range(n_steps - 1)
-            ) / float(n_steps - 1)
-        else:
-            auc = coherences[0] if coherences else 0.0
-
-        # Random baseline AUC: expected coherence under random ablation
-        # Approximation: linear decay from initial to 0
-        random_auc = initial_coherence * 0.5 if initial_coherence > 0 else 0.0
-
-        # ── MI predictiveness assessment ─────────────────────────────────
-        # MI-ordered ablation is globally predictive if AUC is significantly
-        # lower than random baseline (high-MI nodes cause faster degradation)
-        auc_ratio = auc / max(random_auc, 1e-10) if random_auc > 0 else 1.0
-        global_mi_predictive = auc_ratio < 0.8
-
-        # Per-layer MI predictiveness
-        per_layer_mi_pred = {}  # type: Dict[str, bool]
-        for sl in scale_labels:
-            layer_vals = per_layer_coherences.get(sl, [])
-            if len(layer_vals) > 2:
-                # Check if first half degrades faster than second half
-                mid = len(layer_vals) // 2
-                first_half_drop = layer_vals[0] - layer_vals[mid] if layer_vals[0] > 0 else 0.0
-                second_half_drop = layer_vals[mid] - layer_vals[-1] if layer_vals[mid] > 0 else 0.0
-                # If first half drops more, MI ordering is predictive for this layer
-                per_layer_mi_pred[sl] = first_half_drop > second_half_drop * 1.2
-            else:
-                per_layer_mi_pred[sl] = False
-
-        any_layer_predictive = any(per_layer_mi_pred.values())
-
-        # ── INV_070b diagnosis ───────────────────────────────────────────
-        if global_mi_predictive and any_layer_predictive:
-            inv070b_diagnosis = (
-                "MI_GLOBALLY_AND_LOCALLY_PREDICTIVE:"
-                f"global_auc_ratio={auc_ratio:.4f}:"
-                "high_MI_nodes_are_load_bearing_at_all_scales:"
-                "monosemanticity_partially_valid_but_NOT_sufficient:"
-                "selectivity_works_locally_AND_MI_works_globally"
-            )
-        elif not global_mi_predictive and any_layer_predictive:
-            inv070b_diagnosis = (
-                "MI_LOCALLY_PREDICTIVE_ONLY:"
-                f"global_auc_ratio={auc_ratio:.4f}:"
-                "high_MI_nodes_are_layer_locally_predictive_but_NOT_globally_load_bearing:"
-                "epistemic_load_is_REDUNDANTLY_DISTRIBUTED:"
-                "selectivity_is_poor_global_predictor_CONFIRMED:"
-                "but_retains_partial_validity_at_intra_layer_scale:"
-                "CHALLENGE_INV_070b_TENSION_SURFACED"
-            )
-        elif global_mi_predictive and not any_layer_predictive:
-            inv070b_diagnosis = (
-                "MI_GLOBALLY_PREDICTIVE_BUT_NOT_LAYER_LOCAL:"
-                f"global_auc_ratio={auc_ratio:.4f}:"
-                "high_MI_nodes_are_globally_load_bearing_but_effect_is_distributed_across_layers:"
-                "monosemanticity_rejected_at_layer_level:"
-                "global_structure_matters_more_than_layer_selectivity"
-            )
-        else:
-            inv070b_diagnosis = (
-                "MI_NOT_PREDICTIVE:"
-                f"global_auc_ratio={auc_ratio:.4f}:"
-                "neither_global_nor_local_MI_ordering_predicts_coherence:"
-                "epistemic_load_is_fully_distributed:"
-                "pruning_by_MI_ordering_is_NOT_safe"
-            )
-
-        # ── Pruning recommendations ─────────────────────────────────────
-        # Nodes safe to prune: low MI AND not layer-locally predictive
-        pruning_candidates = []  # type: List[str]
-        consolidation_candidates = []  # type: List[str]
-
-        if n_nodes > 0:
-            mi_values = [ns["mi"] for ns in node_scores]
-            mi_median = sorted(mi_values)[len(mi_values) // 2]
-
-            for ns in node_scores:
-                layer = ns["scale_layer"]
-                is_layer_pred = per_layer_mi_pred.get(layer, False)
-
-                if ns["mi"] < mi_median and not is_layer_pred:
-                    # Low MI + layer not predictive → safe to prune
-                    pruning_candidates.append(ns["node_id"])
-                elif ns["mi"] >= mi_median:
-                    # High MI but check if ablation barely affected coherence
-                    step_idx = ns["rank"] + 1  # +1 because step 0 is pre-ablation
-                    if step_idx < len(ablation_curve):
-                        coh_before = ablation_curve[step_idx - 1]["global_coherence"]
-                        coh_after = ablation_curve[step_idx]["global_coherence"]
-                        if coh_before > 0 and (coh_before - coh_after) / coh_before < 0.02:
-                            # High MI but ablation barely matters → redundantly distributed
-                            consolidation_candidates.append(ns["node_id"])
-
-        result = {
-            "n_nodes": n_nodes,
-            "ablation_metric": ablation_metric,
-            "node_scores": node_scores,
-            "ablation_curve": ablation_curve,
-            "per_layer_curves": {k: v for k, v in per_layer_coherences.items()},
-            "global_auc": round(auc, 10),
-            "random_baseline_auc": round(random_auc, 10),
-            "global_mi_predictive": global_mi_predictive,
-            "per_layer_mi_predictive": per_layer_mi_pred,
-            "inv070b_diagnosis": inv070b_diagnosis,
-            "pruning_recommendation": pruning_candidates,
-            "consolidation_candidates": consolidation_candidates,
-            "timestamp": ts,
-        }
-
-        # ── Log summary ─────────────────────────────────────────────────
-        print(
-            f"[GRAPH:MI_ABLATION] {n_nodes} node(s) ranked by {ablation_metric} — "
-            f"global_AUC={auc:.4f}, random_AUC={random_auc:.4f}, "
-            f"ratio={auc_ratio:.4f}, "
-            f"global_predictive={global_mi_predictive}, "
-            f"layer_predictive={per_layer_mi_pred}, "
-            f"prune_candidates={len(pruning_candidates)}, "
-            f"consolidation_candidates={len(consolidation_candidates)}"
-        )
-        if "TENSION_SURFACED" in inv070b_diagnosis:
-            print(
-                f"[GRAPH:MI_ABLATION] ⚠ INV_070b TENSION: selectivity is poor "
-                f"global predictor but retains partial validity at intra-layer "
-                f"scale — monosemanticity neither cleanly rejected nor accepted"
-            )
-
-        return result
-
-    def avalanche_from_feed(self, new_edges, recent_feed_count=1,
-                            degree_threshold=None, max_depth=None):
-        # type: (list, int, Optional[int], Optional[int]) -> dict
-        """
-        Convenience wrapper: run avalanche detection on nodes touched by
-        edges just recorded from a FEED.
-
-        Parameters
-        ----------
-        new_edges : list of dict
-            Edges as returned by ``record_feed()``.
-        recent_feed_count : int
-            Number of feeds in the current batch (for regime classification).
-        degree_threshold : int or None
-            Override default degree threshold.
-        max_depth : int or None
-            Override default max cascade depth.
-
-        Returns
-        -------
-        dict
-            Avalanche detection result (see ``detect_avalanche``).
-        """
-        # Collect unique target node IDs from the new edges
-        seed_ids = list(set(
-            e.get("to", "").upper()
-            for e in new_edges
-            if e.get("to")
-        ))
-        result = self.detect_avalanche(
-            seed_ids,
-            degree_threshold=degree_threshold,
-            max_depth=max_depth,
-            recent_feed_count=recent_feed_count,
-        )
-
-        # ── Branching-ratio tracker (σ across cascade depths) ────────────
-        # σ_d = (propagating offspring at depth d) / (parents at depth d-1).
-        # σ = mean across depths d≥1.  Flag excursions outside [0.95, 1.05]
-        # — the critical band INV_073 claims is the attractor.
-        depth_dist = result.get("depth_distribution", {}) or {}
-        # Keys may be int (live result) or str (round-tripped through JSON).
-        depth_pairs = []  # type: List[tuple]
-        for k, v in depth_dist.items():
-            try:
-                depth_pairs.append((int(k), int(v)))
-            except (TypeError, ValueError):
-                continue
-        depth_pairs.sort(key=lambda kv: kv[0])
-
-        sigmas = []  # type: List[float]
-        for i in range(1, len(depth_pairs)):
-            parents   = depth_pairs[i - 1][1]
-            offspring = depth_pairs[i][1]
-            if parents > 0:
-                sigmas.append(offspring / float(parents))
-
-        if sigmas:
-            sigma_mean = sum(sigmas) / len(sigmas)
-            in_band = 0.95 <= sigma_mean <= 1.05
-            result["branching_ratio"]      = round(sigma_mean, 4)
-            result["branching_per_depth"]  = [round(s, 4) for s in sigmas]
-            result["branching_excursion"]  = not in_band
-            if not in_band:
-                regime_label = "supercritical" if sigma_mean > 1.05 else "subcritical"
-                print(f"[GRAPH:BRANCHING] σ={sigma_mean:.4f} EXCURSION "
-                      f"({regime_label}) — per-depth: {result['branching_per_depth']}")
-        else:
-            result["branching_ratio"]     = None
-            result["branching_per_depth"] = []
-            result["branching_excursion"] = False
-
-        return result
 
     # ── Self-Reference Detection (Mutual Citation Cycle Audit) ───────────────
     # Detects when two nodes mutually cite each other as evidence, creating a
@@ -8008,88 +4539,6 @@ class KnowledgeGraph:
 
         return result
 
-    def is_merge_blocked_by_cycle(self, node_a, node_b):
-        # type: (str, str) -> bool
-        """
-        Check whether a standard merge between two nodes is blocked due
-        to a mutual citation cycle requiring paradox-resolution audit.
-
-        Parameters
-        ----------
-        node_a : str
-            First node identifier.
-        node_b : str
-            Second node identifier.
-
-        Returns
-        -------
-        bool
-            True if the pair has a critical or warning-severity mutual
-            citation cycle, blocking standard merge.
-        """
-        audit = self.detect_self_references()
-        pair_key = tuple(sorted([node_a.upper(), node_b.upper()]))
-        for blocked_a, blocked_b in audit.get("merge_blocked_pairs", []):
-            if tuple(sorted([blocked_a, blocked_b])) == pair_key:
-                return True
-        return False
-
-    def self_reference_aware_merge_candidates(self):
-        # type: () -> dict
-        """
-        Return merge candidates partitioned into safe (no cycle) and
-        blocked (cycle-detected, requires paradox-resolution audit).
-
-        Examines all node pairs connected by evidential edges and classifies
-        them based on the self-reference detection pass.
-
-        Returns
-        -------
-        dict
-            {
-                "safe_merges": list of tuple — (node_a, node_b) pairs safe
-                    for standard merge,
-                "blocked_merges": list of dict — pairs requiring paradox-
-                    resolution audit, each with cycle details,
-                "n_safe": int,
-                "n_blocked": int,
-            }
-        """
-        audit = self.detect_self_references()
-        blocked_set = set()  # type: set
-        for a, b in audit.get("merge_blocked_pairs", []):
-            blocked_set.add(tuple(sorted([a, b])))
-
-        blocked_details = []  # type: List[dict]
-        for c in audit.get("cycles_detected", []):
-            if c["paradox_severity"] in ("critical", "warning"):
-                blocked_details.append({
-                    "node_a": c["node_a"],
-                    "node_b": c["node_b"],
-                    "severity": c["paradox_severity"],
-                    "cycle_strength": c["cycle_strength"],
-                    "resolution_strategy": c["resolution_strategy"],
-                })
-
-        # Collect all evidential pairs as potential merge candidates
-        all_pairs = set()  # type: set
-        for e in self._edges:
-            etype = e.get("type", "")
-            if etype in self._EVIDENTIAL_EDGE_TYPES:
-                from_id = e.get("from", "").upper()
-                to_id = e.get("to", "").upper()
-                if from_id and to_id and from_id != to_id:
-                    all_pairs.add(tuple(sorted([from_id, to_id])))
-
-        safe = [p for p in sorted(all_pairs) if p not in blocked_set]
-
-        return {
-            "safe_merges": safe,
-            "blocked_merges": blocked_details,
-            "n_safe": len(safe),
-            "n_blocked": len(blocked_details),
-        }
-
 # ─── L₂((0,1)) Quantile-Function Embedding for Distribution Drift ───────────
 # Represents probability distributions over semantic tokens as elements of the
 # Hilbert space L₂((0,1)) via their quantile functions (inverse CDFs).  This
@@ -8285,197 +4734,6 @@ import logging as _logging
 _wasserstein_logger = _logging.getLogger("FREED.wasserstein.compactness")
 
 
-def _check_support_compactness(weights, label="distribution",
-                                compact_range_threshold=1e6,
-                                moment_order=2,
-                                moment_threshold=1e12,
-                                truncate_if_noncompact=False,
-                                truncation_quantile=0.995):
-    # type: (List[float], str, float, int, float, bool, float) -> dict
-    """
-    Verify that an empirical distribution's support satisfies the compactness
-    (bounded domain) assumption required for Wasserstein distance to metrize
-    the probability space.
-
-    Checks three conditions:
-      1. Bounded range: max(support) - min(support) < compact_range_threshold
-      2. Finite p-th moment: E[|X|^p] < moment_threshold
-      3. No infinite/NaN values in support
-
-    When violations are detected, logs a warning and optionally applies moment
-    truncation (winsorization at the given quantile) to impose effective
-    compactness.
-
-    Parameters
-    ----------
-    weights : list of float
-        Non-negative weights defining the empirical distribution.
-    label : str
-        Human-readable label for log messages (default "distribution").
-    compact_range_threshold : float
-        Maximum allowed range (max - min) of the support before flagging
-        non-compactness (default 1e6).
-    moment_order : int
-        Order p of the moment to check (default 2, matching W_2).
-    moment_threshold : float
-        Maximum allowed p-th moment before flagging (default 1e12).
-    truncate_if_noncompact : bool
-        If True, apply winsorization to enforce effective compactness
-        when violations are detected (default False).
-    truncation_quantile : float
-        Quantile at which to truncate (default 0.995 = clip at 99.5th
-        percentile from both tails).
-
-    Returns
-    -------
-    dict
-        {
-            "is_compact": bool — True if all compactness conditions met,
-            "support_range": float — max - min of weight values,
-            "moment_p": float — the p-th moment E[|X|^p],
-            "has_infinite": bool — True if any value is inf or nan,
-            "violations": list of str — list of violated conditions,
-            "truncated": bool — True if truncation was applied,
-            "weights_out": list of float — original or truncated weights,
-            "o44_compactness_flag": str — diagnostic tag for O44,
-        }
-    """
-    violations = []  # type: List[str]
-    truncated = False
-    weights_out = list(weights)
-
-    if not weights:
-        return {
-            "is_compact": True,
-            "support_range": 0.0,
-            "moment_p": 0.0,
-            "has_infinite": False,
-            "violations": [],
-            "truncated": False,
-            "weights_out": weights_out,
-            "o44_compactness_flag": "empty_distribution:trivially_compact",
-        }
-
-    # Check for infinite/NaN values
-    has_infinite = any(
-        (not math.isfinite(w)) for w in weights
-    )
-    if has_infinite:
-        violations.append("non_finite_values_in_support")
-        _wasserstein_logger.warning(
-            "[WASSERSTEIN:COMPACTNESS] %s contains inf/NaN values — "
-            "compact-domain assumption VIOLATED. W_p metric properties "
-            "are not guaranteed. (O44: W_floor = k/Tμ inheritance threatened)",
-            label,
-        )
-
-    # Filter to finite values for further checks
-    finite_weights = [w for w in weights if math.isfinite(w)]
-    if not finite_weights:
-        return {
-            "is_compact": False,
-            "support_range": float('inf'),
-            "moment_p": float('inf'),
-            "has_infinite": has_infinite,
-            "violations": violations + ["all_values_non_finite"],
-            "truncated": False,
-            "weights_out": weights_out,
-            "o44_compactness_flag": "non_finite:compactness_undefined",
-        }
-
-    # Check bounded range (support compactness)
-    w_min = min(finite_weights)
-    w_max = max(finite_weights)
-    support_range = w_max - w_min
-
-    if support_range > compact_range_threshold:
-        violations.append(
-            f"support_range={support_range:.4g}_exceeds_threshold="
-            f"{compact_range_threshold:.4g}"
-        )
-        _wasserstein_logger.warning(
-            "[WASSERSTEIN:COMPACTNESS] %s support range %.4g exceeds "
-            "compact threshold %.4g — Wasserstein metrization on compact "
-            "domains (Villani Ch. 6) may not apply. (O44: W_floor "
-            "derivation assumes compactness)",
-            label, support_range, compact_range_threshold,
-        )
-
-    # Check p-th moment
-    n_finite = len(finite_weights)
-    total_w = sum(max(0.0, w) for w in finite_weights)
-    if total_w > 0:
-        moment_p = sum(
-            (max(0.0, w) / total_w) * (abs(w) ** moment_order)
-            for w in finite_weights
-        )
-    else:
-        moment_p = 0.0
-
-    if moment_p > moment_threshold:
-        violations.append(
-            f"moment_{moment_order}={moment_p:.4g}_exceeds_threshold="
-            f"{moment_threshold:.4g}"
-        )
-        _wasserstein_logger.warning(
-            "[WASSERSTEIN:COMPACTNESS] %s has %d-th moment %.4g exceeding "
-            "threshold %.4g — finite moment condition for W_%d may be "
-            "marginal. Consider moment truncation. (O44: existence of "
-            "optimal coupling requires finite moments)",
-            label, moment_order, moment_p, moment_threshold, moment_order,
-        )
-
-    # Apply truncation if requested and violations detected
-    if truncate_if_noncompact and violations:
-        sorted_finite = sorted(finite_weights)
-        n_f = len(sorted_finite)
-        lo_idx = int((1.0 - truncation_quantile) * n_f)
-        hi_idx = int(truncation_quantile * n_f) - 1
-        lo_idx = max(0, lo_idx)
-        hi_idx = max(lo_idx, min(hi_idx, n_f - 1))
-        lo_val = sorted_finite[lo_idx]
-        hi_val = sorted_finite[hi_idx]
-
-        weights_out = []
-        for w in weights:
-            if not math.isfinite(w):
-                weights_out.append(hi_val)  # Replace non-finite with upper clip
-            else:
-                weights_out.append(max(lo_val, min(hi_val, w)))
-        truncated = True
-        _wasserstein_logger.info(
-            "[WASSERSTEIN:COMPACTNESS] %s truncated to [%.4g, %.4g] "
-            "(quantile=%.4f) to impose effective compactness",
-            label, lo_val, hi_val, truncation_quantile,
-        )
-
-    is_compact = len(violations) == 0
-
-    # O44 diagnostic tag
-    if is_compact:
-        o44_flag = "compact_support:wfloor_valid"
-    elif truncated:
-        o44_flag = (
-            f"non_compact:truncated_to_effective_compact:"
-            f"violations={len(violations)}:wfloor_conditional"
-        )
-    else:
-        o44_flag = (
-            f"non_compact:violations={len(violations)}:"
-            f"wfloor_threatened:quantum_extension_requires_new_proof"
-        )
-
-    return {
-        "is_compact": is_compact,
-        "support_range": support_range,
-        "moment_p": moment_p,
-        "has_infinite": has_infinite,
-        "violations": violations,
-        "truncated": truncated,
-        "weights_out": weights_out,
-        "o44_compactness_flag": o44_flag,
-    }
-
 
 def _mmd_negative_distance_kernel(f_mu, f_nu, n_points=None):
     # type: (List[float], List[float], Optional[int]) -> float
@@ -8632,101 +4890,6 @@ def quantile_embedding_drift_score(weights_t0, weights_t1, n_quantile_points=100
         "is_isometric": True,
     }
 
-
-def quantile_embedding_subgradient_step(weights_current, weights_target,
-                                         step_size=0.1, n_quantile_points=100):
-    # type: (List[float], List[float], float, int) -> dict
-    """
-    Perform one subgradient descent step in L₂((0,1)) to move the current
-    distribution toward the target, then project back to a valid weight vector.
-
-    This implements the Wasserstein gradient flow of the MMD functional:
-        f_μ^{k+1} = f_μ^k - η · ∂ℱ_ν(f_μ^k)
-    followed by projection onto the set of valid quantile functions
-    (non-decreasing, non-negative).
-
-    Parameters
-    ----------
-    weights_current : list of float
-        Current weight vector (empirical distribution to update).
-    weights_target : list of float
-        Target weight vector (reference distribution to approach).
-    step_size : float
-        Subgradient step size η (default 0.1).
-    n_quantile_points : int
-        Quantile discretization resolution (default 100).
-
-    Returns
-    -------
-    dict
-        {
-            "updated_quantile": list of float — updated quantile function
-                after one subgradient step + projection,
-            "pre_projection_quantile": list of float — before monotonicity
-                projection (diagnostic),
-            "w2_before": float — W₂ distance before the step,
-            "w2_after": float — W₂ distance after the step,
-            "improvement": float — w2_before - w2_after (positive = progress),
-            "step_size_used": float,
-            "projected": bool — True if monotonicity projection was needed,
-        }
-    """
-    q_curr = _empirical_quantile_function(weights_current, n_quantile_points)
-    q_target = _empirical_quantile_function(weights_target, n_quantile_points)
-
-    w2_before = _l2_distance(q_curr, q_target)
-
-    # Compute subgradient
-    subgrad = _mmd_subgradient(q_curr, q_target)
-
-    # Subgradient step: f^{k+1} = f^k - η * ∂ℱ
-    q_updated_raw = [
-        q_curr[k] - step_size * subgrad[k]
-        for k in range(n_quantile_points)
-    ]
-
-    # Project onto valid quantile functions:
-    # 1. Non-negativity: clamp to 0
-    q_projected = [max(0.0, qi) for qi in q_updated_raw]
-
-    # 2. Monotonicity (quantile functions must be non-decreasing):
-    #    Apply isotonic regression (pool-adjacent-violators)
-    projected = False
-    for i in range(1, n_quantile_points):
-        if q_projected[i] < q_projected[i - 1]:
-            projected = True
-            # Pool: average with previous
-            avg = 0.5 * (q_projected[i - 1] + q_projected[i])
-            q_projected[i - 1] = avg
-            q_projected[i] = avg
-
-    # Second pass for full isotonic projection (simplified)
-    changed = True
-    max_passes = 10
-    passes = 0
-    while changed and passes < max_passes:
-        changed = False
-        passes += 1
-        for i in range(1, n_quantile_points):
-            if q_projected[i] < q_projected[i - 1]:
-                avg = 0.5 * (q_projected[i - 1] + q_projected[i])
-                q_projected[i - 1] = avg
-                q_projected[i] = avg
-                changed = True
-                projected = True
-
-    w2_after = _l2_distance(q_projected, q_target)
-    improvement = w2_before - w2_after
-
-    return {
-        "updated_quantile": [round(qi, 10) for qi in q_projected],
-        "pre_projection_quantile": [round(qi, 10) for qi in q_updated_raw],
-        "w2_before": round(w2_before, 10),
-        "w2_after": round(w2_after, 10),
-        "improvement": round(improvement, 10),
-        "step_size_used": step_size,
-        "projected": projected,
-    }
 
 
 # ─── Wasserstein Gradient Flow (WGF) Inference Module ─────────────────────────
@@ -9138,106 +5301,6 @@ def wasserstein_gradient_flow_inference(prior_weights, log_likelihood_values,
     return result
 
 
-def wgf_belief_update(node_id, edges, all_node_ids, log_likelihood_values,
-                       laplacian=None, n_steps=10, tau=0.1, temperature=1.0,
-                       n_quantile_points=100):
-    # type: (str, list, List[str], List[float], Optional[List[List[float]]], int, float, float, int) -> dict
-    """
-    Perform a full WGF-based belief update for a knowledge graph node.
-
-    Combines:
-    1. Prior construction from current edge structure (node_distribution_from_edges)
-    2. Spectral gap estimation from graph Laplacian (if provided)
-    3. WGF inference via implicit Euler steps in L₂((0,1))
-    4. Posterior drift scoring relative to the prior
-
-    This is the main entry point for replacing discretization-dependent belief
-    propagation with the WGF method in FREED's epistemic loop.
-
-    Parameters
-    ----------
-    node_id : str
-        The node whose belief to update.
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    log_likelihood_values : list of float
-        Log-likelihood potential from new evidence (e.g., FEED output scores).
-    laplacian : list of list of float or None
-        Pre-computed graph Laplacian. If None, spectral gap analysis is skipped.
-    n_steps : int
-        Number of WGF outer iterations (default 10).
-    tau : float
-        Implicit Euler step size (default 0.1).
-    temperature : float
-        Temperature parameter (default 1.0).
-    n_quantile_points : int
-        Quantile discretization resolution (default 100).
-
-    Returns
-    -------
-    dict
-        {
-            "node_id": str,
-            "wgf_result": dict — full WGF inference result,
-            "prior_distribution": list of float,
-            "drift_from_prior": dict — quantile_embedding_drift_score result,
-            "spectral_gap": float or None,
-            "spectral_info": dict or None — eigenspectrum analysis if available,
-        }
-    """
-    # 1. Construct prior from edge structure
-    prior_dist = node_distribution_from_edges(node_id, edges, all_node_ids)
-
-    # 2. Spectral gap from Laplacian (if available)
-    spectral_gap_val = None  # type: Optional[float]
-    spectral_info = None  # type: Optional[dict]
-    if laplacian is not None and prior_dist:
-        spectral_info = wasserstein_laplace_beltrami_eigenspectrum(
-            laplacian, prior_dist
-        )
-        spectral_gap_val = spectral_info.get("spectral_gap")
-
-    # 3. WGF inference
-    wgf_result = wasserstein_gradient_flow_inference(
-        prior_weights=prior_dist,
-        log_likelihood_values=log_likelihood_values,
-        n_steps=n_steps,
-        tau=tau,
-        temperature=temperature,
-        n_quantile_points=n_quantile_points,
-        spectral_gap=spectral_gap_val,
-    )
-
-    # 4. Drift score: how far did the posterior move from the prior?
-    posterior_q = wgf_result.get("posterior_quantile", [])
-    prior_q = wgf_result.get("prior_quantile", [])
-    if posterior_q and prior_q:
-        w2_drift = _l2_distance(posterior_q, prior_q)
-        drift_result = {
-            "w2_distance": round(w2_drift, 10),
-            "drift_severity": (
-                "none" if w2_drift < 0.01 else
-                "mild" if w2_drift < 0.1 else
-                "moderate" if w2_drift < 0.3 else
-                "severe"
-            ),
-        }
-    else:
-        drift_result = {"w2_distance": 0.0, "drift_severity": "none"}
-
-    return {
-        "node_id": node_id,
-        "wgf_result": wgf_result,
-        "prior_distribution": [round(p, 8) for p in prior_dist],
-        "drift_from_prior": drift_result,
-        "spectral_gap": (
-            round(spectral_gap_val, 10) if spectral_gap_val is not None else None
-        ),
-        "spectral_info": spectral_info,
-    }
-
 
 # ─── Adapted Wasserstein Distance (A𝒲_r) for Causal Coupling Stability ──────
 # Scores semantic trajectory approximations using the adapted Wasserstein
@@ -9643,171 +5706,6 @@ def adapted_wasserstein_score(weights_mu, weights_nu,
     return result
 
 
-def score_trajectory_approximation(trajectory_weights, trajectory_timestamps,
-                                    reference_weights, reference_timestamps,
-                                    r=2, n_quantile_points=100,
-                                    causal_penalty_weight=1.0):
-    # type: (List[List[float]], List[str], List[List[float]], List[str], int, int, float) -> dict
-    """
-    Score a sequence of epistemic trajectory approximations against a
-    reference trajectory using A𝒲_r at each time step.
-
-    This is the main entry point for evaluating whether a discretized or
-    approximate belief update sequence faithfully preserves the causal
-    structure of the reference (exact) sequence.
-
-    Parameters
-    ----------
-    trajectory_weights : list of list of float
-        Sequence of weight vectors (approximation trajectory).
-    trajectory_timestamps : list of str
-        ISO timestamps for each step of the approximation.
-    reference_weights : list of list of float
-        Sequence of weight vectors (reference trajectory).
-    reference_timestamps : list of str
-        ISO timestamps for each step of the reference.
-    r : int
-        Wasserstein order (default 2).
-    n_quantile_points : int
-        Quantile discretization (default 100).
-    causal_penalty_weight : float
-        Causal penalty weight (default 1.0).
-
-    Returns
-    -------
-    dict
-        {
-            "per_step_scores": list of dict — A𝒲_r score at each paired step,
-            "mean_w_r": float — mean standard W_r across steps,
-            "mean_adapted_w_r": float — mean A𝒲_r across steps,
-            "mean_causal_penalty": float — mean causal penalty,
-            "max_causal_penalty": float — worst causal violation,
-            "n_non_causal_steps": int — steps where causal penalty > 0.01,
-            "n_steps_scored": int,
-            "trajectory_causal_fidelity": float — 1.0 - mean_causal_penalty,
-            "overall_convergence_type": str,
-            "o44_trajectory_flag": str,
-        }
-    """
-    n_steps = min(len(trajectory_weights), len(reference_weights))
-    n_ts_traj = len(trajectory_timestamps)
-    n_ts_ref = len(reference_timestamps)
-
-    per_step = []  # type: List[dict]
-    for k in range(n_steps):
-        ts_mu = [trajectory_timestamps[k]] if k < n_ts_traj else []
-        ts_nu = [reference_timestamps[k]] if k < n_ts_ref else []
-
-        score = adapted_wasserstein_score(
-            weights_mu=trajectory_weights[k],
-            weights_nu=reference_weights[k],
-            timestamps_mu=ts_mu if ts_mu else None,
-            timestamps_nu=ts_nu if ts_nu else None,
-            r=r,
-            n_quantile_points=n_quantile_points,
-            causal_penalty_weight=causal_penalty_weight,
-        )
-        per_step.append(score)
-
-    if not per_step:
-        return {
-            "per_step_scores": [],
-            "mean_w_r": 0.0,
-            "mean_adapted_w_r": 0.0,
-            "mean_causal_penalty": 0.0,
-            "max_causal_penalty": 0.0,
-            "n_non_causal_steps": 0,
-            "n_steps_scored": 0,
-            "trajectory_causal_fidelity": 1.0,
-            "overall_convergence_type": "empty",
-            "o44_trajectory_flag": "empty_trajectory",
-        }
-
-    w_rs = [s["w_r"] for s in per_step]
-    aw_rs = [s["adapted_w_r"] for s in per_step]
-    penalties = [s["causal_penalty"] for s in per_step]
-
-    mean_wr = sum(w_rs) / len(w_rs)
-    mean_awr = sum(aw_rs) / len(aw_rs)
-    mean_cp = sum(penalties) / len(penalties)
-    max_cp = max(penalties)
-    n_non_causal = sum(1 for p in penalties if p > 0.01)
-    causal_fidelity = 1.0 - mean_cp
-
-    # Overall convergence type
-    if mean_cp < 0.01 and mean_wr < 0.1:
-        overall_type = "causal_convergent"
-    elif mean_cp >= 0.01 and mean_wr < 0.1:
-        overall_type = "non_causal_convergent"
-    elif mean_cp < 0.01 and mean_wr >= 0.1:
-        overall_type = "causal_distant"
-    else:
-        overall_type = "non_causal_distant"
-
-    o44_flag = (
-        f"trajectory_steps={n_steps}:"
-        f"mean_w{r}={mean_wr:.6f}:"
-        f"mean_aw{r}={mean_awr:.6f}:"
-        f"causal_fidelity={causal_fidelity:.4f}:"
-        f"convergence={overall_type}:"
-        f"classical_framework:quantum_extension_open"
-    )
-
-    return {
-        "per_step_scores": per_step,
-        "mean_w_r": round(mean_wr, 10),
-        "mean_adapted_w_r": round(mean_awr, 10),
-        "mean_causal_penalty": round(mean_cp, 10),
-        "max_causal_penalty": round(max_cp, 10),
-        "n_non_causal_steps": n_non_causal,
-        "n_steps_scored": n_steps,
-        "trajectory_causal_fidelity": round(causal_fidelity, 10),
-        "overall_convergence_type": overall_type,
-        "o44_trajectory_flag": o44_flag,
-    }
-
-
-def node_distribution_drift(node_id, edges_t0, edges_t1, all_node_ids,
-                             n_quantile_points=100):
-    # type: (str, list, list, List[str], int) -> dict
-    """
-    Compute the distribution drift for a knowledge graph node between two
-    edge snapshots, using the L₂((0,1)) quantile-function isometric embedding.
-
-    Constructs per-node probability distributions from edge weights at two
-    time points, embeds them as quantile functions in L₂((0,1)), and computes
-    the exact W₂ distance as the L₂ norm of their difference.
-
-    Parameters
-    ----------
-    node_id : str
-        The node whose distribution drift to measure.
-    edges_t0 : list of dict
-        Edge snapshot at time t0.
-    edges_t1 : list of dict
-        Edge snapshot at time t1.
-    all_node_ids : list of str
-        Ordered list of all node IDs (defines simplex coordinates).
-    n_quantile_points : int
-        Quantile discretization resolution (default 100).
-
-    Returns
-    -------
-    dict
-        Drift score dict from quantile_embedding_drift_score, augmented with:
-        "node_id": str,
-        "distribution_t0": list of float — probability vector at t0,
-        "distribution_t1": list of float — probability vector at t1,
-    """
-    dist_t0 = node_distribution_from_edges(node_id, edges_t0, all_node_ids)
-    dist_t1 = node_distribution_from_edges(node_id, edges_t1, all_node_ids)
-
-    drift = quantile_embedding_drift_score(dist_t0, dist_t1, n_quantile_points)
-    drift["node_id"] = node_id
-    drift["distribution_t0"] = [round(p, 8) for p in dist_t0]
-    drift["distribution_t1"] = [round(p, 8) for p in dist_t1]
-
-    return drift
 
 
 # ─── Graph-Laplacian Thermodynamic Entropy & Stability Monitor ────────────────
@@ -10271,71 +6169,6 @@ def thermodynamic_admissibility_check(adjacency, activation_levels,
     return result
 
 
-def thermodynamic_admissibility_from_edges(edges, all_node_ids,
-                                            effective_dt=1.0):
-    # type: (list, List[str], float) -> dict
-    """
-    Convenience wrapper: build adjacency matrix and activation levels from
-    knowledge graph edges, then run the full thermodynamic admissibility check.
-
-    This is the primary integration point for FREED's discrete H-theorem
-    monitor, callable directly from FEED and CONSOLIDATE pipelines.
-
-    Parameters
-    ----------
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    effective_dt : float
-        Effective time-step of the current update (default 1.0).
-
-    Returns
-    -------
-    dict
-        Full thermodynamic admissibility result (see thermodynamic_admissibility_check).
-    """
-    n = len(all_node_ids)
-    if n == 0:
-        return thermodynamic_admissibility_check([], [], effective_dt)
-
-    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
-
-    # Build adjacency matrix from edge co-occurrence
-    # Edge weight between nodes i and j = count of edges connecting them
-    adj = [[0.0] * n for _ in range(n)]
-    for e in edges:
-        from_id = e.get("from", "").upper()
-        to_id = e.get("to", "").upper()
-        i = node_index.get(from_id)
-        j = node_index.get(to_id)
-        if i is not None and j is not None and i != j:
-            adj[i][j] += 1.0
-            adj[j][i] += 1.0
-
-    # Activation levels: edge count per node (normalized to (0,1) range)
-    edge_counts = [0.0] * n
-    for e in edges:
-        from_id = e.get("from", "").upper()
-        to_id = e.get("to", "").upper()
-        i = node_index.get(from_id)
-        j = node_index.get(to_id)
-        if i is not None:
-            edge_counts[i] += 1.0
-        if j is not None:
-            edge_counts[j] += 1.0
-
-    max_count = max(edge_counts) if edge_counts else 1.0
-    if max_count <= 0:
-        max_count = 1.0
-
-    # Normalize to (0, 1) with a small floor to avoid log(0)
-    activation = [max(ec / max_count, 1e-6) for ec in edge_counts]
-
-    return thermodynamic_admissibility_check(
-        adj, activation, effective_dt=effective_dt
-    )
-
 
 # ─── Persistent-Homology Anomaly Detection (Betti Number Tracker) ─────────────
 # Implements a TDA-inspired topological anomaly detector for knowledge-graph
@@ -10375,18 +6208,6 @@ def _euclidean_distance_vectors(va, vb):
     """Euclidean distance between two equal-length float vectors."""
     return math.sqrt(sum((a - b) ** 2 for a, b in zip(va, vb)))
 
-
-def _pairwise_distance_matrix(points):
-    # type: (List[List[float]]) -> List[List[float]]
-    """Compute full pairwise Euclidean distance matrix for a point cloud."""
-    n = len(points)
-    D = [[0.0] * n for _ in range(n)]
-    for i in range(n):
-        for j in range(i + 1, n):
-            d = _euclidean_distance_vectors(points[i], points[j])
-            D[i][j] = d
-            D[j][i] = d
-    return D
 
 
 def _vietoris_rips_betti_numbers(distance_matrix, epsilon):
@@ -10486,278 +6307,8 @@ def _vietoris_rips_betti_numbers(distance_matrix, epsilon):
     return (beta_0, beta_1)
 
 
-def _persistent_homology_filtration(distance_matrix, n_filtration_steps=20):
-    # type: (List[List[float]], int) -> List[dict]
-    """
-    Compute Betti numbers across a filtration of Vietoris-Rips complexes
-    at uniformly spaced radii from 0 to max_distance.
-
-    This produces a "persistence barcode" approximation: each filtration
-    step records the Betti numbers, and transitions between steps reveal
-    births and deaths of topological features.
-
-    Parameters
-    ----------
-    distance_matrix : list of list of float
-        n×n pairwise distance matrix.
-    n_filtration_steps : int
-        Number of filtration radii to evaluate (default 20).
-
-    Returns
-    -------
-    list of dict
-        Each entry: {
-            "epsilon": float — filtration radius,
-            "beta_0": int — number of connected components,
-            "beta_1": int — number of independent cycles,
-        }
-    """
-    n = len(distance_matrix)
-    if n == 0:
-        return []
-
-    # Find max distance for filtration range
-    max_dist = 0.0
-    for i in range(n):
-        for j in range(i + 1, n):
-            if distance_matrix[i][j] > max_dist:
-                max_dist = distance_matrix[i][j]
-
-    if max_dist <= 0:
-        return [{"epsilon": 0.0, "beta_0": n, "beta_1": 0}]
-
-    filtration = []  # type: List[dict]
-    for step in range(n_filtration_steps + 1):
-        eps = max_dist * step / float(max(n_filtration_steps, 1))
-        b0, b1 = _vietoris_rips_betti_numbers(distance_matrix, eps)
-        filtration.append({
-            "epsilon": round(eps, 10),
-            "beta_0": b0,
-            "beta_1": b1,
-        })
-
-    return filtration
 
 
-def _time_delay_embedding(observable_series, embedding_dim=3, delay=1):
-    # type: (List[List[float]], int, int) -> List[List[float]]
-    """
-    Construct time-delay embedding vectors from a multivariate observable
-    time series.
-
-    Given a series of d-dimensional observation vectors [x_0, x_1, ...],
-    produce embedded vectors by concatenating delayed copies:
-        y_t = [x_t, x_{t-τ}, x_{t-2τ}, ..., x_{t-(m-1)τ}]
-    where m = embedding_dim and τ = delay.
-
-    Parameters
-    ----------
-    observable_series : list of list of float
-        Time-ordered sequence of d-dimensional observation vectors.
-    embedding_dim : int
-        Number of delayed copies to concatenate (default 3).
-    delay : int
-        Time delay τ between copies (default 1).
-
-    Returns
-    -------
-    list of list of float
-        Embedded point cloud. Each point has dimension d * embedding_dim.
-        Length = len(observable_series) - (embedding_dim - 1) * delay.
-    """
-    n = len(observable_series)
-    total_lag = (embedding_dim - 1) * delay
-    if n <= total_lag:
-        return []
-
-    embedded = []  # type: List[List[float]]
-    for t in range(total_lag, n):
-        point = []  # type: List[float]
-        for k in range(embedding_dim):
-            idx = t - k * delay
-            point.extend(observable_series[idx])
-        embedded.append(point)
-
-    return embedded
-
-
-def detect_topological_anomalies(betti_history, window=3,
-                                  beta0_jump_threshold=2,
-                                  beta1_jump_threshold=1):
-    # type: (List[dict], int, int, int) -> List[dict]
-    """
-    Detect topological anomalies (discontinuities) in a Betti number
-    time series by comparing each cycle's Betti signature against a
-    rolling window of recent cycles.
-
-    Anomaly types:
-      - "fragmentation": sudden β₀ increase (graph splitting into components)
-      - "coherence_collapse": β₀ jumps to n (every node isolated)
-      - "cycle_formation": sudden β₁ increase (new circular dependencies)
-      - "cycle_resolution": sudden β₁ decrease (obligations resolved)
-      - "topological_phase_transition": simultaneous β₀ and β₁ jump
-
-    Parameters
-    ----------
-    betti_history : list of dict
-        Time-ordered Betti number records, each with at minimum:
-        {"cycle": int, "beta_0": int, "beta_1": int}
-    window : int
-        Rolling window size for baseline comparison (default 3).
-    beta0_jump_threshold : int
-        Minimum β₀ change to flag as anomaly (default 2).
-    beta1_jump_threshold : int
-        Minimum β₁ change to flag as anomaly (default 1).
-
-    Returns
-    -------
-    list of dict
-        Detected anomalies, each with:
-        {"cycle": int, "anomaly_type": str, "beta_0": int, "beta_1": int,
-         "delta_beta_0": int, "delta_beta_1": int, "baseline_beta_0": float,
-         "baseline_beta_1": float, "severity": str}
-    """
-    if len(betti_history) < window + 1:
-        return []
-
-    anomalies = []  # type: List[dict]
-
-    for idx in range(window, len(betti_history)):
-        current = betti_history[idx]
-        # Compute baseline from preceding window
-        window_slice = betti_history[idx - window:idx]
-        baseline_b0 = sum(r.get("beta_0", 0) for r in window_slice) / float(window)
-        baseline_b1 = sum(r.get("beta_1", 0) for r in window_slice) / float(window)
-
-        cur_b0 = current.get("beta_0", 0)
-        cur_b1 = current.get("beta_1", 0)
-
-        delta_b0 = cur_b0 - int(round(baseline_b0))
-        delta_b1 = cur_b1 - int(round(baseline_b1))
-
-        abs_d_b0 = abs(delta_b0)
-        abs_d_b1 = abs(delta_b1)
-
-        anomaly_type = None  # type: Optional[str]
-        severity = "none"
-
-        # Check for simultaneous jumps first (phase transition)
-        if abs_d_b0 >= beta0_jump_threshold and abs_d_b1 >= beta1_jump_threshold:
-            anomaly_type = "topological_phase_transition"
-            severity = "critical"
-        elif delta_b0 >= beta0_jump_threshold:
-            # β₀ increase = fragmentation
-            n_vertices = current.get("n_vertices", cur_b0)
-            if n_vertices > 0 and cur_b0 >= n_vertices:
-                anomaly_type = "coherence_collapse"
-                severity = "critical"
-            else:
-                anomaly_type = "fragmentation"
-                severity = "warning" if abs_d_b0 >= 2 * beta0_jump_threshold else "moderate"
-        elif delta_b0 <= -beta0_jump_threshold:
-            # β₀ decrease = merging / consolidation (usually healthy)
-            anomaly_type = "consolidation"
-            severity = "info"
-        elif delta_b1 >= beta1_jump_threshold:
-            # β₁ increase = new cycles forming
-            anomaly_type = "cycle_formation"
-            severity = "warning"
-        elif delta_b1 <= -beta1_jump_threshold:
-            # β₁ decrease = cycles closing (obligation resolution)
-            anomaly_type = "cycle_resolution"
-            severity = "info"
-
-        if anomaly_type is not None:
-            anomalies.append({
-                "cycle": current.get("cycle", idx),
-                "anomaly_type": anomaly_type,
-                "beta_0": cur_b0,
-                "beta_1": cur_b1,
-                "delta_beta_0": delta_b0,
-                "delta_beta_1": delta_b1,
-                "baseline_beta_0": round(baseline_b0, 4),
-                "baseline_beta_1": round(baseline_b1, 4),
-                "severity": severity,
-            })
-
-    return anomalies
-
-
-def graph_snapshot_observables(edges, all_node_ids):
-    # type: (list, List[str]) -> List[float]
-    """
-    Extract a fixed-dimensional observable vector from a graph edge snapshot,
-    suitable for time-delay embedding and persistent homology tracking.
-
-    The observable vector captures:
-      [n_edges, n_active_nodes, mean_degree, max_degree, n_edge_types,
-       edge_type_entropy, n_confirmations, n_challenges, n_contradictions,
-       confirmation_ratio]
-
-    Parameters
-    ----------
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-
-    Returns
-    -------
-    list of float
-        10-dimensional observable vector.
-    """
-    n_edges = float(len(edges))
-    n_nodes = float(len(all_node_ids))
-
-    # Node degrees
-    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
-    degrees = [0.0] * len(all_node_ids)
-    for e in edges:
-        from_id = e.get("from", "").upper()
-        to_id = e.get("to", "").upper()
-        i = node_index.get(from_id)
-        j = node_index.get(to_id)
-        if i is not None:
-            degrees[i] += 1.0
-        if j is not None:
-            degrees[j] += 1.0
-
-    active_nodes = float(sum(1 for d in degrees if d > 0))
-    mean_degree = sum(degrees) / max(n_nodes, 1.0)
-    max_degree = max(degrees) if degrees else 0.0
-
-    # Edge type distribution
-    type_counts = defaultdict(int)  # type: Dict[str, int]
-    for e in edges:
-        etype = e.get("type", "unknown")
-        type_counts[etype] += 1
-
-    n_edge_types = float(len(type_counts))
-
-    # Edge type entropy
-    total_e = float(max(len(edges), 1))
-    etype_entropy = 0.0
-    for count in type_counts.values():
-        p = count / total_e
-        if p > 0:
-            etype_entropy -= p * math.log(p)
-
-    n_confirmations = float(
-        type_counts.get("confirms", 0) + type_counts.get("supports", 0)
-    )
-    n_challenges = float(
-        type_counts.get("challenges", 0) + type_counts.get("refutes", 0)
-        + type_counts.get("contradicts", 0)
-    )
-    n_contradictions = float(type_counts.get("contradicts", 0))
-
-    conf_ratio = n_confirmations / max(n_confirmations + n_challenges, 1.0)
-
-    return [
-        n_edges, active_nodes, mean_degree, max_degree, n_edge_types,
-        etype_entropy, n_confirmations, n_challenges, n_contradictions,
-        conf_ratio,
-    ]
 
 
 # ─── Single-Sample Network Entropy (SNE) — Pre-Transition Detector ───────────
@@ -11139,140 +6690,6 @@ def sne_from_graph_edges(edges, all_node_ids, reference_edges=None,
     return result
 
 
-def sne_time_series_analysis(sne_history, drop_threshold=0.15, window=3):
-    # type: (List[dict], float, int) -> dict
-    """
-    Analyze an SNE time series for pre-transition phase detection.
-
-    Detects the characteristic sharp DROP in SNE that signals the
-    pre-transition state: the network's correlation structure is
-    tightening (entropy decreasing) immediately before a critical
-    structural reorganization.
-
-    Parameters
-    ----------
-    sne_history : list of dict
-        Time-ordered SNE results (from single_sample_network_entropy or
-        sne_from_graph_edges).  Each must have at least "sne_score".
-    drop_threshold : float
-        Minimum absolute SNE drop between consecutive samples to flag
-        as a transition signal (default 0.15).
-    window : int
-        Rolling window for baseline comparison (default 3).
-
-    Returns
-    -------
-    dict
-        {
-            "n_samples": int,
-            "sne_values": list of float — the SNE time series,
-            "sne_deltas": list of float — consecutive differences,
-            "drop_events": list of dict — detected SNE drop events:
-                {"index": int, "sne_before": float, "sne_after": float,
-                 "delta": float, "is_sharp_drop": bool},
-            "n_sharp_drops": int,
-            "current_phase": str — "normal", "approaching_transition",
-                "pre_transition", or "post_transition",
-            "transition_imminent": bool — True if the most recent sample
-                shows a pre-transition signal,
-            "inv073_summary": str — challenge summary for INV_073,
-        }
-    """
-    n = len(sne_history)
-    sne_vals = [h.get("sne_score", 0.0) for h in sne_history]
-
-    if n < 2:
-        return {
-            "n_samples": n,
-            "sne_values": sne_vals,
-            "sne_deltas": [],
-            "drop_events": [],
-            "n_sharp_drops": 0,
-            "current_phase": "normal",
-            "transition_imminent": False,
-            "inv073_summary": "insufficient_history_for_phase_detection",
-        }
-
-    # Compute consecutive deltas
-    deltas = [sne_vals[i] - sne_vals[i - 1] for i in range(1, n)]
-
-    # Detect drop events
-    drop_events = []  # type: List[dict]
-    for i, delta in enumerate(deltas):
-        is_sharp = delta < -drop_threshold
-        if abs(delta) > drop_threshold * 0.5:  # Record moderate drops too
-            drop_events.append({
-                "index": i + 1,
-                "sne_before": round(sne_vals[i], 8),
-                "sne_after": round(sne_vals[i + 1], 8),
-                "delta": round(delta, 8),
-                "is_sharp_drop": is_sharp,
-            })
-
-    n_sharp = sum(1 for d in drop_events if d["is_sharp_drop"])
-
-    # Phase classification based on recent trajectory
-    recent_sne = sne_vals[-1] if sne_vals else 0.0
-    recent_pre_trans = (
-        sne_history[-1].get("is_pre_transition", False) if sne_history else False
-    )
-
-    # Check if most recent delta is a sharp drop
-    recent_delta = deltas[-1] if deltas else 0.0
-    recent_sharp_drop = recent_delta < -drop_threshold
-
-    if recent_pre_trans or recent_sharp_drop:
-        current_phase = "pre_transition"
-        transition_imminent = True
-    elif n >= window + 1:
-        baseline = sum(sne_vals[-window - 1:-1]) / window
-        if recent_sne < baseline * 0.7 and recent_sne < 0.4:
-            current_phase = "approaching_transition"
-            transition_imminent = False
-        elif n_sharp > 0 and drop_events and drop_events[-1]["index"] == n - 1:
-            # Sharp drop was the previous sample, current may be post-transition
-            current_phase = "post_transition"
-            transition_imminent = False
-        else:
-            current_phase = "normal"
-            transition_imminent = False
-    else:
-        current_phase = "normal"
-        transition_imminent = False
-
-    # INV_073 summary
-    if transition_imminent:
-        inv073_summary = (
-            f"PRE_TRANSITION_PHASE_ACTIVE:n_sharp_drops={n_sharp}:"
-            f"current_sne={recent_sne:.6f}:delta={recent_delta:.6f}:"
-            "single_sample_detection_sufficient:"
-            "genome_population_level_assumption_STRAINED:"
-            "critical_ridge_narrower_than_formalized"
-        )
-    elif current_phase == "approaching_transition":
-        inv073_summary = (
-            f"APPROACHING:n_sharp_drops={n_sharp}:"
-            f"current_sne={recent_sne:.6f}:"
-            "single_sample_signal_building:monitor"
-        )
-    else:
-        inv073_summary = (
-            f"NORMAL:n_sharp_drops={n_sharp}:"
-            f"current_sne={recent_sne:.6f}:"
-            "no_pre_transition_phase_detected"
-        )
-
-    return {
-        "n_samples": n,
-        "sne_values": [round(v, 8) for v in sne_vals],
-        "sne_deltas": [round(d, 8) for d in deltas],
-        "drop_events": drop_events,
-        "n_sharp_drops": n_sharp,
-        "current_phase": current_phase,
-        "transition_imminent": transition_imminent,
-        "inv073_summary": inv073_summary,
-    }
-
 
 # ─── Thermodynamic Cost Scorer (Joint Accuracy-Energy Constraint) ─────────────
 # Penalizes knowledge graph edges where information gain is asserted without
@@ -11608,94 +7025,6 @@ def entropic_penalized_scores(raw_scores, visit_counts=None, temperature=0.1,
     }
 
 
-def entropic_penalized_node_ranking(node_ids, raw_scores, visit_counts=None,
-                                     temperature=0.1, top_k=None):
-    # type: (List[str], List[float], Optional[List[int]], float, Optional[int]) -> dict
-    """
-    Rank knowledge graph nodes with entropic penalization, returning
-    the reordered ranking and diagnostic metadata.
-
-    This is the primary integration point for preventing metastable
-    trapping in the epistemic loop: call this instead of a raw sort
-    whenever nodes are ranked for traversal, scoring, or prioritization.
-
-    Parameters
-    ----------
-    node_ids : list of str
-        Node identifiers (same order as raw_scores).
-    raw_scores : list of float
-        Raw scores for each node (higher = more attractive).
-    visit_counts : list of int or None
-        Per-node visit counts. If None, uniform (no penalty).
-    temperature : float
-        Entropic temperature ε (default 0.1).
-    top_k : int or None
-        If provided, return only the top k nodes after penalization.
-
-    Returns
-    -------
-    dict
-        {
-            "ranked_nodes": list of dict — nodes in penalized-score order:
-                {"node_id": str, "penalized_score": float, "raw_score": float,
-                 "kl_penalty": float, "visits": int, "rank": int},
-            "penalization_result": dict — full entropic_penalized_scores output,
-            "ranking_permutation": list of int — indices mapping original
-                order to penalized order,
-            "n_rank_changes": int — number of nodes whose rank changed,
-        }
-    """
-    n = len(node_ids)
-    if n == 0 or n != len(raw_scores):
-        return {
-            "ranked_nodes": [],
-            "penalization_result": entropic_penalized_scores([], temperature=temperature),
-            "ranking_permutation": [],
-            "n_rank_changes": 0,
-        }
-
-    pen_result = entropic_penalized_scores(
-        raw_scores, visit_counts=visit_counts, temperature=temperature
-    )
-    penalized = pen_result["penalized_scores"]
-    kl_pens = pen_result["kl_penalties"]
-    visits_used = visit_counts if visit_counts is not None else [1] * n
-
-    # Build index-sorted order by penalized score (descending)
-    indices = sorted(range(n), key=lambda i: penalized[i], reverse=True)
-
-    # Also compute raw ranking for comparison
-    raw_indices = sorted(range(n), key=lambda i: raw_scores[i], reverse=True)
-    raw_rank_of = {idx: rank for rank, idx in enumerate(raw_indices)}
-
-    ranked = []  # type: List[dict]
-    for rank, idx in enumerate(indices):
-        entry = {
-            "node_id": node_ids[idx],
-            "penalized_score": round(penalized[idx], 10),
-            "raw_score": round(raw_scores[idx], 10),
-            "kl_penalty": round(kl_pens[idx], 10),
-            "visits": visits_used[idx] if idx < len(visits_used) else 1,
-            "rank": rank,
-            "raw_rank": raw_rank_of.get(idx, rank),
-        }
-        ranked.append(entry)
-
-    # Count rank changes
-    n_changes = sum(
-        1 for r in ranked if r["rank"] != r["raw_rank"]
-    )
-
-    if top_k is not None and top_k < len(ranked):
-        ranked = ranked[:top_k]
-
-    return {
-        "ranked_nodes": ranked,
-        "penalization_result": pen_result,
-        "ranking_permutation": indices,
-        "n_rank_changes": n_changes,
-    }
-
 
 def score_thermodynamic_cost(edge, text_window="", full_text=""):
     # type: (dict, str, str) -> dict
@@ -11929,186 +7258,6 @@ def score_thermodynamic_cost(edge, text_window="", full_text=""):
         "recommendation": recommendation,
     }
 
-
-def score_thermodynamic_cost_batch(edges, full_text=""):
-    # type: (list, str) -> dict
-    """
-    Score a batch of edges for thermodynamic admissibility, producing
-    aggregate statistics and flagging the worst offenders.
-
-    This is the main entry point for enforcing the joint accuracy-cost
-    constraint across an entire FEED batch or graph snapshot.
-
-    Parameters
-    ----------
-    edges : list of dict
-        Knowledge graph edges to score.
-    full_text : str
-        Full kernel output text for broad context search.
-
-    Returns
-    -------
-    dict
-        {
-            "n_edges_scored": int,
-            "n_admissible": int,
-            "n_marginal": int,
-            "n_inadmissible": int,
-            "n_separability_violations": int,
-            "admissibility_ratio": float — n_admissible / n_scored,
-            "mean_penalty": float — average penalty across all edges,
-            "max_penalty": float — worst penalty,
-            "inadmissible_edges": list of dict — edges with penalty > 0,
-                each augmented with the thermodynamic score,
-            "chain_inadmissibility_risk": bool — True if > 30% of edges
-                are inadmissible (inference chain is thermodynamically
-                suspect as a whole),
-            "inv087_summary": str — aggregate challenge status,
-            "noether_status": str — "rigorous" (per Noether table),
-            "timestamp": str,
-        }
-    """
-    ts = datetime.now(timezone.utc).isoformat()
-
-    if not edges:
-        return {
-            "n_edges_scored": 0,
-            "n_admissible": 0,
-            "n_marginal": 0,
-            "n_inadmissible": 0,
-            "n_separability_violations": 0,
-            "admissibility_ratio": 1.0,
-            "mean_penalty": 0.0,
-            "max_penalty": 0.0,
-            "inadmissible_edges": [],
-            "chain_inadmissibility_risk": False,
-            "inv087_summary": "no_edges:nothing_to_score",
-            "noether_status": "rigorous",
-            "timestamp": ts,
-        }
-
-    n_admissible = 0
-    n_marginal = 0
-    n_inadmissible = 0
-    n_separability = 0
-    penalties = []  # type: List[float]
-    inadmissible_edges = []  # type: List[dict]
-    n_equilibrium = 0
-
-    for e in edges:
-        score = score_thermodynamic_cost(e, full_text=full_text)
-        penalty = score["penalty"]
-        penalties.append(penalty)
-
-        label = score["admissibility_label"]
-        if label == "admissible":
-            n_admissible += 1
-        elif label == "marginal":
-            n_marginal += 1
-            inadmissible_edges.append({
-                "edge": e,
-                "thermodynamic_score": score,
-            })
-        elif label == "inadmissible":
-            n_inadmissible += 1
-            inadmissible_edges.append({
-                "edge": e,
-                "thermodynamic_score": score,
-            })
-        elif label == "separability_violation":
-            n_separability += 1
-            inadmissible_edges.append({
-                "edge": e,
-                "thermodynamic_score": score,
-            })
-
-        if score["near_equilibrium_context"]:
-            n_equilibrium += 1
-
-    n_scored = len(edges)
-    admissibility_ratio = float(n_admissible) / float(max(n_scored, 1))
-    mean_penalty = sum(penalties) / len(penalties) if penalties else 0.0
-    max_penalty = max(penalties) if penalties else 0.0
-
-    # Chain inadmissibility: if > 30% of edges are inadmissible,
-    # the inference chain as a whole is thermodynamically suspect
-    n_flagged = n_marginal + n_inadmissible + n_separability
-    chain_risk = (float(n_flagged) / float(max(n_scored, 1))) > 0.3
-
-    # INV_087 aggregate summary
-    if n_equilibrium > 0 and n_equilibrium >= n_scored * 0.5:
-        inv087_summary = (
-            f"EQUILIBRIUM_DOMINANT:{n_equilibrium}/{n_scored}_edges_in_equilibrium_context:"
-            "MaxRL_correction_may_be_special_case_refinement:"
-            "CHALLENGE_INV_087_STRONG"
-        )
-    elif n_separability > 0:
-        inv087_summary = (
-            f"SEPARABILITY_VIOLATIONS:{n_separability}/{n_scored}:"
-            "joint_constraint_explicitly_violated:"
-            "thermodynamic_correction_clearly_needed:"
-            "INV_087_necessity_supported"
-        )
-    elif n_inadmissible > 0:
-        inv087_summary = (
-            f"INADMISSIBLE_EDGES:{n_inadmissible}/{n_scored}:"
-            "gain_without_cost_detected:"
-            "thermodynamic_correction_required_for_these_edges"
-        )
-    else:
-        inv087_summary = (
-            f"ALL_ADMISSIBLE:{n_admissible}/{n_scored}:"
-            "joint_accuracy_cost_constraint_respected"
-        )
-
-    result = {
-        "n_edges_scored": n_scored,
-        "n_admissible": n_admissible,
-        "n_marginal": n_marginal,
-        "n_inadmissible": n_inadmissible,
-        "n_separability_violations": n_separability,
-        "admissibility_ratio": round(admissibility_ratio, 4),
-        "mean_penalty": round(mean_penalty, 4),
-        "max_penalty": round(max_penalty, 4),
-        "inadmissible_edges": inadmissible_edges,
-        "chain_inadmissibility_risk": chain_risk,
-        "inv087_summary": inv087_summary,
-        "noether_status": "rigorous",
-        "timestamp": ts,
-    }
-
-    # Log summary
-    if n_flagged > 0:
-        print(
-            f"[GRAPH:THERMODYNAMIC_COST] {n_scored} edge(s) scored — "
-            f"admissible={n_admissible}, marginal={n_marginal}, "
-            f"inadmissible={n_inadmissible}, "
-            f"separability_violations={n_separability}, "
-            f"mean_penalty={mean_penalty:.4f}, "
-            f"chain_risk={chain_risk}"
-        )
-        if chain_risk:
-            print(
-                f"[GRAPH:THERMODYNAMIC_COST] 🚨 CHAIN INADMISSIBILITY — "
-                f">{30}% of edges violate joint accuracy-cost constraint. "
-                f"Inference chain is thermodynamically suspect. "
-                f"(Noether: Information Thermodynamics, status: rigorous)"
-            )
-        for ie in inadmissible_edges[:3]:
-            ts_score = ie["thermodynamic_score"]
-            edge_to = ie["edge"].get("to", "?")
-            print(
-                f"  ⚠ →{edge_to}: {ts_score['admissibility_label']}, "
-                f"penalty={ts_score['penalty']}, "
-                f"gain={ts_score['information_gain_asserted']}, "
-                f"cost={ts_score['dissipation_cost_acknowledged']}"
-            )
-        if len(inadmissible_edges) > 3:
-            print(
-                f"  ... and {len(inadmissible_edges) - 3} more flagged edge(s)"
-            )
-
-    return result
 
 
 # ─── Topology-Sensitivity Scoring Pass ────────────────────────────────────────
@@ -12417,247 +7566,6 @@ def topology_sensitivity_score(text):
         "recommendation": recommendation,
     }
 
-
-def topology_sensitivity_pass(edges, all_node_ids, node_texts=None):
-    # type: (list, List[str], Optional[Dict[str, str]]) -> dict
-    """
-    Run a topology-sensitivity scoring pass over all knowledge graph nodes,
-    flagging nodes whose universality class or critical exponent claims were
-    derived under symmetric, local-only interaction assumptions.
-
-    This pass prevents the epistemic loop from treating universality-class
-    assignments as fixed invariants when they are in fact topology-dependent,
-    reducing false convergence in COMPARE steps.
-
-    Parameters
-    ----------
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    node_texts : dict or None
-        Optional mapping of node_id → descriptive text (invariant text,
-        abstract, or accumulated context).  If None, text is reconstructed
-        from edge context windows for each node.
-
-    Returns
-    -------
-    dict
-        {
-            "n_nodes_scored": int,
-            "n_topology_sensitive": int — nodes flagged for re-evaluation,
-            "n_high_sensitivity": int,
-            "n_moderate_sensitivity": int,
-            "n_acknowledged": int — nodes with proper topology qualification,
-            "sensitive_nodes": list of dict — flagged nodes, each with:
-                {"node_id": str, "sensitivity_level": str,
-                 "re_evaluation_required": bool,
-                 "universality_signals": list of str,
-                 "symmetric_local_signals": list of str,
-                 "topology_dependence_signals": list of str,
-                 "inv073_flag": str, "recommendation": str},
-            "re_evaluation_required_ids": list of str — node IDs that MUST
-                be re-evaluated before use in COMPARE steps,
-            "compare_block_list": list of str — same as re_evaluation_required_ids,
-                formatted for direct consumption by COMPARE pipeline,
-            "aggregate_topology_risk": float — fraction of universality-claiming
-                nodes that are topology-sensitive (0.0 = safe, 1.0 = all at risk),
-            "inv073_summary": str — aggregate challenge status,
-            "noether_soc_status": str — "review" (per Noether table),
-            "timestamp": str,
-        }
-    """
-    ts = datetime.now(timezone.utc).isoformat()
-    n_total = len(all_node_ids)
-
-    if n_total == 0:
-        return {
-            "n_nodes_scored": 0,
-            "n_topology_sensitive": 0,
-            "n_high_sensitivity": 0,
-            "n_moderate_sensitivity": 0,
-            "n_acknowledged": 0,
-            "sensitive_nodes": [],
-            "re_evaluation_required_ids": [],
-            "compare_block_list": [],
-            "aggregate_topology_risk": 0.0,
-            "inv073_summary": "no_nodes:nothing_to_score",
-            "noether_soc_status": "review",
-            "timestamp": ts,
-        }
-
-    # ── Build per-node text from edge context windows if not provided ────
-    node_text_map = {}  # type: Dict[str, str]
-    if node_texts:
-        for nid, txt in node_texts.items():
-            node_text_map[nid.upper()] = txt
-
-    # Augment with edge context windows for all nodes
-    node_context_parts = defaultdict(list)  # type: Dict[str, List[str]]
-    for e in edges:
-        ctx = e.get("context", "")
-        inv_text = e.get("invariant", "")
-        combined = (ctx + " " + inv_text).strip()
-        if not combined:
-            continue
-        for key in ("from", "to"):
-            nid = e.get(key, "").upper()
-            if nid:
-                node_context_parts[nid].append(combined)
-
-    # Also collect from node_edges if available
-    # (We scan edges list which may include node_edges mixed in some contexts)
-
-    for nid in all_node_ids:
-        nid_upper = nid.upper()
-        if nid_upper not in node_text_map:
-            parts = node_context_parts.get(nid_upper, [])
-            if parts:
-                node_text_map[nid_upper] = " ".join(parts[:20])  # Cap at 20 contexts
-            else:
-                node_text_map[nid_upper] = ""
-
-    # ── Score each node ──────────────────────────────────────────────────
-    sensitive_nodes = []  # type: List[dict]
-    re_eval_ids = []  # type: List[str]
-    n_high = 0
-    n_moderate = 0
-    n_acknowledged = 0
-    n_with_univ = 0
-
-    for nid in all_node_ids:
-        nid_upper = nid.upper()
-        text = node_text_map.get(nid_upper, "")
-        if not text:
-            continue
-
-        score = topology_sensitivity_score(text)
-
-        if score["has_universality_claim"]:
-            n_with_univ += 1
-
-        if score["sensitivity_level"] == "acknowledged":
-            n_acknowledged += 1
-
-        if not score["is_topology_sensitive"]:
-            continue
-
-        level = score["sensitivity_level"]
-        if level == "high":
-            n_high += 1
-        elif level == "moderate":
-            n_moderate += 1
-
-        entry = {
-            "node_id": nid_upper,
-            "sensitivity_level": level,
-            "re_evaluation_required": score["re_evaluation_required"],
-            "universality_signals": score["universality_signals"],
-            "symmetric_local_signals": score["symmetric_local_signals"],
-            "topology_dependence_signals": score["topology_dependence_signals"],
-            "inv073_flag": score["inv073_flag"],
-            "recommendation": score["recommendation"],
-        }
-        sensitive_nodes.append(entry)
-
-        if score["re_evaluation_required"]:
-            re_eval_ids.append(nid_upper)
-
-    n_sensitive = len(sensitive_nodes)
-
-    # Aggregate topology risk: fraction of universality-claiming nodes that
-    # are topology-sensitive
-    if n_with_univ > 0:
-        topo_risk = float(n_sensitive) / float(n_with_univ)
-    else:
-        topo_risk = 0.0
-
-    # ── INV_073 aggregate summary ────────────────────────────────────────
-    if n_high > 0:
-        inv073_summary = (
-            f"TOPOLOGY_SENSITIVITY_DETECTED:"
-            f"high={n_high}:moderate={n_moderate}:"
-            f"re_evaluation_required={len(re_eval_ids)}:"
-            f"topology_risk={topo_risk:.4f}:"
-            f"universality_claims={n_with_univ}:acknowledged={n_acknowledged}:"
-            "critical_ridge_is_topology_dependent:"
-            "single_canonical_critical_state_UNDERDETERMINED_for_flagged_nodes:"
-            "COMPARE_steps_must_condition_on_interaction_geometry"
-        )
-    elif n_moderate > 0:
-        inv073_summary = (
-            f"PARTIAL_TOPOLOGY_AWARENESS:"
-            f"moderate={n_moderate}:acknowledged={n_acknowledged}:"
-            f"topology_risk={topo_risk:.4f}:"
-            "some_universality_claims_partially_qualified:monitor"
-        )
-    elif n_with_univ > 0 and n_acknowledged > 0:
-        inv073_summary = (
-            f"TOPOLOGY_QUALIFIED:"
-            f"universality_claims={n_with_univ}:all_acknowledged={n_acknowledged}:"
-            "interaction_geometry_properly_conditioned"
-        )
-    elif n_with_univ > 0:
-        inv073_summary = (
-            f"UNIVERSALITY_CLAIMED_NO_TOPOLOGY_FLAG:"
-            f"claims={n_with_univ}:no_symmetric_local_assumption_detected:"
-            "low_risk"
-        )
-    else:
-        inv073_summary = "no_universality_claims:topology_sensitivity_not_applicable"
-
-    result = {
-        "n_nodes_scored": n_total,
-        "n_topology_sensitive": n_sensitive,
-        "n_high_sensitivity": n_high,
-        "n_moderate_sensitivity": n_moderate,
-        "n_acknowledged": n_acknowledged,
-        "sensitive_nodes": sensitive_nodes,
-        "re_evaluation_required_ids": re_eval_ids,
-        "compare_block_list": list(re_eval_ids),  # alias for COMPARE pipeline
-        "aggregate_topology_risk": round(topo_risk, 4),
-        "inv073_summary": inv073_summary,
-        "noether_soc_status": "review",
-        "timestamp": ts,
-    }
-
-    # ── Log results ──────────────────────────────────────────────────────
-    if n_sensitive > 0:
-        print(
-            f"[GRAPH:TOPOLOGY_SENSITIVITY] {n_total} node(s) scored — "
-            f"topology_sensitive={n_sensitive} "
-            f"(high={n_high}, moderate={n_moderate}), "
-            f"acknowledged={n_acknowledged}, "
-            f"re_evaluation_required={len(re_eval_ids)}, "
-            f"topology_risk={topo_risk:.4f}"
-        )
-        for entry in sensitive_nodes[:5]:
-            print(
-                f"  {'🚨' if entry['sensitivity_level'] == 'high' else '⚠'} "
-                f"{entry['node_id']}: sensitivity={entry['sensitivity_level']}, "
-                f"re_eval={entry['re_evaluation_required']}, "
-                f"univ_signals={len(entry['universality_signals'])}, "
-                f"sym_signals={len(entry['symmetric_local_signals'])}"
-            )
-        if len(sensitive_nodes) > 5:
-            print(
-                f"  ... and {len(sensitive_nodes) - 5} more topology-sensitive node(s)"
-            )
-        if re_eval_ids:
-            print(
-                f"[GRAPH:TOPOLOGY_SENSITIVITY] COMPARE BLOCK LIST: "
-                f"{', '.join(re_eval_ids[:10])}"
-                + (f" ... +{len(re_eval_ids) - 10} more"
-                   if len(re_eval_ids) > 10 else "")
-            )
-    elif n_with_univ > 0:
-        print(
-            f"[GRAPH:TOPOLOGY_SENSITIVITY] {n_total} node(s) scored — "
-            f"{n_with_univ} universality claim(s), "
-            f"0 topology-sensitive (all properly qualified or low-risk)"
-        )
-
-    return result
 
 
 # ─── Relative-Count Topological Sort (Causal Order Recovery) ──────────────────
@@ -13041,479 +7949,6 @@ def classify_phase_transition_type(energy_A, energy_B, coupling_weights,
     }
 
 
-def score_concept_competition(node_a_id, node_b_id, edges, all_node_ids,
-                               temperature=1.0, nonlinear_threshold=0.01):
-    # type: (str, str, list, List[str], float, float) -> dict
-    """
-    Score the phase transition type for a pair of competing concept nodes
-    in the knowledge graph, using edge-derived energy landscapes and coupling.
-
-    This is the main entry point for the Cahn-Hilliard transition classifier
-    in the scoring pipeline: given two concept nodes that compete for
-    dominance (e.g., two invariants that make conflicting predictions, or
-    two theoretical frameworks being weighed against each other), it
-    classifies whether the belief revision is a smooth update, a
-    discontinuous paradigm replacement, or a mixed transition.
-
-    Parameters
-    ----------
-    node_a_id : str
-        First competing concept node.
-    node_b_id : str
-        Second competing concept node.
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    temperature : float
-        Temperature parameter (default 1.0).
-    nonlinear_threshold : float
-        Dead zone for mixed classification (default 0.01).
-
-    Returns
-    -------
-    dict
-        {
-            "node_a": str,
-            "node_b": str,
-            "phase_transition": dict — full classify_phase_transition_type result,
-            "energy_A": list of float — energy landscape for node A,
-            "energy_B": list of float — energy landscape for node B,
-            "coupling_weights": list of float — coupling between A and B,
-            "timestamp": str,
-        }
-    """
-    ts = datetime.now(timezone.utc).isoformat()
-    nid_a = node_a_id.upper()
-    nid_b = node_b_id.upper()
-
-    # Build energy landscapes from edge structure
-    # Energy at each "component" = edge-type score for each edge type
-    # Use the full set of edge types as the component basis
-    edge_type_list = sorted(set(
-        e.get("type", "unknown") for e in edges
-    ))
-    n_types = len(edge_type_list)
-    if n_types == 0:
-        edge_type_list = list(EDGE_TYPES)
-        n_types = len(edge_type_list)
-
-    type_index = {t: idx for idx, t in enumerate(edge_type_list)}
-
-    # Count edges per type for each node
-    counts_a = [0.0] * n_types
-    counts_b = [0.0] * n_types
-    co_counts = [0.0] * n_types  # edges touching BOTH nodes (coupling)
-
-    node_index = {nid.upper(): idx for idx, nid in enumerate(all_node_ids)}
-
-    for e in edges:
-        from_id = e.get("from", "").upper()
-        to_id = e.get("to", "").upper()
-        etype = e.get("type", "unknown")
-        t_idx = type_index.get(etype)
-        if t_idx is None:
-            continue
-
-        touches_a = (from_id == nid_a or to_id == nid_a)
-        touches_b = (from_id == nid_b or to_id == nid_b)
-
-        if touches_a:
-            counts_a[t_idx] += 1.0
-        if touches_b:
-            counts_b[t_idx] += 1.0
-        if touches_a and touches_b:
-            co_counts[t_idx] += 1.0
-
-    # Normalize to energy scales (log-transform for thermodynamic scaling)
-    # Energy = -log(count + 1) (lower energy = more support)
-    energy_A = [-math.log(c + 1.0) for c in counts_a]
-    energy_B = [-math.log(c + 1.0) for c in counts_b]
-
-    # Coupling weights: co-occurrence strength per type
-    # Higher co-occurrence = stronger coupling
-    max_co = max(co_counts) if co_counts else 1.0
-    if max_co <= 0:
-        max_co = 1.0
-    coupling = [(c + 0.01) / max_co for c in co_counts]
-
-    # Classify the transition
-    phase_result = classify_phase_transition_type(
-        energy_A, energy_B, coupling,
-        temperature=temperature,
-        nonlinear_threshold=nonlinear_threshold,
-    )
-
-    result = {
-        "node_a": nid_a,
-        "node_b": nid_b,
-        "phase_transition": phase_result,
-        "energy_A": [round(e, 8) for e in energy_A],
-        "energy_B": [round(e, 8) for e in energy_B],
-        "coupling_weights": [round(c, 8) for c in coupling],
-        "timestamp": ts,
-    }
-
-    # Log significant transitions
-    tt = phase_result["transition_type"]
-    beta = phase_result["nonlinear_coefficient"]
-    risk = phase_result["ridge_exit_risk"]
-    if tt == "jump":
-        print(
-            f"[GRAPH:PHASE_TRANSITION] 🔀 JUMP transition detected — "
-            f"{nid_a} vs {nid_b}: β={beta:.6f}, "
-            f"ridge_exit_risk={risk:.4f}. "
-            f"Paradigm replacement — discontinuous belief revision."
-        )
-    elif tt == "mixed":
-        print(
-            f"[GRAPH:PHASE_TRANSITION] ↔ MIXED transition — "
-            f"{nid_a} vs {nid_b}: β={beta:.6f}, "
-            f"ridge_exit_risk={risk:.4f}. Monitor for convergence."
-        )
-    elif tt == "continuous" and abs(beta) > 0.001:
-        print(
-            f"[GRAPH:PHASE_TRANSITION] → Continuous transition — "
-            f"{nid_a} vs {nid_b}: β={beta:.6f}. "
-            f"Smooth belief update."
-        )
-
-    return result
-
-
-def relative_count_topological_sort(edges, node_edges=None):
-    # type: (list, Optional[list]) -> dict
-    """
-    Compute relative-count topological sort of the RSA concept graph.
-
-    For each node, computes the cardinality of its reachable descendant set
-    and uses this to recover an approximate causal/conceptual depth ordering,
-    following the paper's result that relative counts increase monotonically
-    along causal order in random DAGs.
-
-    The function also tests whether the RSA concept graph satisfies strict
-    or weak relative-count monotonicity, directly addressing INV_073's
-    challenge that directionality asymmetry may be topology-contingent
-    rather than structurally guaranteed.
-
-    Parameters
-    ----------
-    edges : list of dict
-        Primary graph edges (paper → invariant/obligation typed edges).
-        Each must have "from" and "to" fields.
-    node_edges : list of dict or None
-        Optional structural node-to-node edges (shares_invariant,
-        operationalizes, etc.).  If provided, they are included in the
-        directed graph with from → to directionality.
-
-    Returns
-    -------
-    dict
-        {
-            "causal_order": list of dict — nodes sorted by relative count
-                (ascending: causal roots/sources first, sinks last):
-                [{"node_id": str, "relative_count": int, "rank": int,
-                  "depth_estimate": float}, ...],
-            "per_node_relative_counts": dict — {node_id: int} mapping each
-                node to its descendant-set cardinality,
-            "n_nodes": int — total nodes in the directed graph,
-            "n_directed_edges": int — total directed edges,
-            "strict_monotonicity": bool — True if for EVERY directed edge
-                u → v, |descendants(u)| > |descendants(v)| (strict),
-            "weak_monotonicity": bool — True if for every directed edge
-                u → v, |descendants(u)| ≥ |descendants(v)| (weak),
-            "n_monotonicity_violations": int — number of directed edges
-                where |descendants(u)| ≤ |descendants(v)| (strict) or
-                < (weak),
-            "n_strict_violations": int — edges where |desc(u)| ≤ |desc(v)|,
-            "n_weak_violations": int — edges where |desc(u)| < |desc(v)|,
-            "monotonicity_ratio": float — fraction of directed edges that
-                satisfy strict monotonicity (1.0 = perfect, 0.0 = none),
-            "violation_edges": list of dict — edges violating strict
-                monotonicity (up to 20 for diagnostic):
-                [{"from": str, "to": str, "from_count": int,
-                  "to_count": int, "delta": int}, ...],
-            "markov_equivalence_singular": bool — True if strict monotonicity
-                holds (implies the DAG is uniquely identifiable from its
-                skeleton + v-structures),
-            "max_relative_count": int — largest descendant-set cardinality
-                (the most "upstream" / causal-root node),
-            "min_relative_count": int — smallest descendant-set cardinality
-                (the most "downstream" / causal-sink node),
-            "depth_layers": dict — {depth_estimate_int: [node_ids]} grouping
-                nodes into approximate depth layers,
-            "inv073_flag": str — challenge diagnostic for INV_073:
-                whether the directionality asymmetry is structurally
-                guaranteed (monotonicity holds) or topology-contingent
-                (monotonicity fails),
-            "causal_discovery_note": str — guidance on whether full causal
-                discovery is needed or relative-count sorting suffices,
-            "timestamp": str,
-        }
-    """
-    ts = datetime.now(timezone.utc).isoformat()
-
-    # ── Build directed graph ─────────────────────────────────────────────
-    all_edges = list(edges)
-    if node_edges:
-        all_edges.extend(node_edges)
-
-    adjacency, all_node_ids_set = _build_directed_adjacency(all_edges)
-    all_node_ids_list = sorted(all_node_ids_set)
-    n_nodes = len(all_node_ids_list)
-
-    # Count directed edges (deduplicated)
-    directed_edge_set = set()  # type: set
-    for e in all_edges:
-        from_id = e.get("from", "").upper()
-        to_id = e.get("to", "").upper()
-        if from_id and to_id and from_id != to_id:
-            directed_edge_set.add((from_id, to_id))
-    n_directed_edges = len(directed_edge_set)
-
-    if n_nodes == 0:
-        return {
-            "causal_order": [],
-            "per_node_relative_counts": {},
-            "n_nodes": 0,
-            "n_directed_edges": 0,
-            "strict_monotonicity": True,
-            "weak_monotonicity": True,
-            "n_monotonicity_violations": 0,
-            "n_strict_violations": 0,
-            "n_weak_violations": 0,
-            "monotonicity_ratio": 1.0,
-            "violation_edges": [],
-            "markov_equivalence_singular": True,
-            "max_relative_count": 0,
-            "min_relative_count": 0,
-            "depth_layers": {},
-            "inv073_flag": "empty_graph:trivially_monotone",
-            "causal_discovery_note": "no_nodes:nothing_to_sort",
-            "timestamp": ts,
-        }
-
-    # ── Compute descendant sets with memoization ─────────────────────────
-    cache = {}  # type: Dict[str, set]
-    relative_counts = {}  # type: Dict[str, int]
-
-    # Process nodes in reverse topological-ish order for better cache hits:
-    # nodes with fewer outgoing edges first (leaves → roots)
-    nodes_by_out_degree = sorted(
-        all_node_ids_list,
-        key=lambda nid: len(adjacency.get(nid, []))
-    )
-
-    for nid in nodes_by_out_degree:
-        desc = _reachable_descendants(nid, adjacency, cache)
-        relative_counts[nid] = len(desc)
-
-    # ── Sort by relative count (ascending = roots first) ─────────────────
-    sorted_nodes = sorted(
-        all_node_ids_list,
-        key=lambda nid: relative_counts.get(nid, 0),
-        reverse=True  # highest relative count = most upstream (causal root)
-    )
-
-    max_rc = max(relative_counts.values()) if relative_counts else 0
-    min_rc = min(relative_counts.values()) if relative_counts else 0
-
-    # Build causal order with depth estimates
-    # Depth estimate: normalized relative count in [0, 1]
-    # 0.0 = causal sink (fewest descendants), 1.0 = causal root (most descendants)
-    causal_order = []  # type: List[dict]
-    for rank, nid in enumerate(sorted_nodes):
-        rc = relative_counts[nid]
-        if max_rc > min_rc:
-            depth_est = float(rc - min_rc) / float(max_rc - min_rc)
-        elif max_rc > 0:
-            depth_est = 1.0
-        else:
-            depth_est = 0.0
-
-        causal_order.append({
-            "node_id": nid,
-            "relative_count": rc,
-            "rank": rank,
-            "depth_estimate": round(depth_est, 6),
-        })
-
-    # ── Depth layers ─────────────────────────────────────────────────────
-    # Group nodes into discrete depth layers by binning depth_estimate
-    # into integer buckets (0 = sinks, max = roots)
-    n_layers = min(max(n_nodes // 3, 2), 10)  # adaptive layer count
-    depth_layers = defaultdict(list)  # type: Dict[int, List[str]]
-    for entry in causal_order:
-        layer = int(entry["depth_estimate"] * (n_layers - 1))
-        layer = max(0, min(layer, n_layers - 1))
-        depth_layers[layer].append(entry["node_id"])
-
-    # ── Test monotonicity ────────────────────────────────────────────────
-    # For every directed edge u → v, check:
-    #   Strict: |descendants(u)| > |descendants(v)|
-    #   Weak:   |descendants(u)| ≥ |descendants(v)|
-    n_strict_violations = 0
-    n_weak_violations = 0
-    violation_edges = []  # type: List[dict]
-
-    for (from_id, to_id) in directed_edge_set:
-        rc_from = relative_counts.get(from_id, 0)
-        rc_to = relative_counts.get(to_id, 0)
-
-        if rc_from <= rc_to:
-            # Strict monotonicity violated
-            n_strict_violations += 1
-            if len(violation_edges) < 20:  # Cap diagnostic output
-                violation_edges.append({
-                    "from": from_id,
-                    "to": to_id,
-                    "from_count": rc_from,
-                    "to_count": rc_to,
-                    "delta": rc_from - rc_to,
-                })
-
-        if rc_from < rc_to:
-            # Weak monotonicity violated
-            n_weak_violations += 1
-
-    strict_mono = (n_strict_violations == 0)
-    weak_mono = (n_weak_violations == 0)
-
-    if n_directed_edges > 0:
-        mono_ratio = float(n_directed_edges - n_strict_violations) / float(n_directed_edges)
-    else:
-        mono_ratio = 1.0
-
-    # Markov equivalence class is singular iff strict monotonicity holds
-    mec_singular = strict_mono
-
-    # ── INV_073 challenge flag ───────────────────────────────────────────
-    if strict_mono:
-        inv073_flag = (
-            "STRICT_MONOTONICITY_HOLDS:"
-            f"n_edges={n_directed_edges}:0_violations:"
-            "relative_count_increases_along_every_directed_edge:"
-            "directionality_asymmetry_STRUCTURALLY_GUARANTEED_for_this_topology:"
-            "MEC_singular:DAG_uniquely_identifiable:"
-            "causal_order_recoverable_via_sorting_alone:"
-            "full_causal_discovery_NOT_required"
-        )
-    elif weak_mono:
-        inv073_flag = (
-            "WEAK_MONOTONICITY_HOLDS:"
-            f"n_edges={n_directed_edges}:"
-            f"strict_violations={n_strict_violations}:weak_violations=0:"
-            f"monotonicity_ratio={mono_ratio:.4f}:"
-            "ties_exist_but_no_reversals:"
-            "directionality_asymmetry_MOSTLY_guaranteed:"
-            "MEC_not_singular:some_edges_underdetermined:"
-            "causal_order_approximate_via_sorting"
-        )
-    elif mono_ratio >= 0.8:
-        inv073_flag = (
-            "APPROXIMATE_MONOTONICITY:"
-            f"n_edges={n_directed_edges}:"
-            f"strict_violations={n_strict_violations}:"
-            f"weak_violations={n_weak_violations}:"
-            f"monotonicity_ratio={mono_ratio:.4f}:"
-            "most_edges_satisfy_monotonicity:"
-            "directionality_asymmetry_PARTIALLY_guaranteed:"
-            "violations_may_indicate_topology_contingent_flow_directions:"
-            "CHALLENGE_INV_073_PARTIAL_PRESSURE"
-        )
-    else:
-        inv073_flag = (
-            "MONOTONICITY_FAILS:"
-            f"n_edges={n_directed_edges}:"
-            f"strict_violations={n_strict_violations}:"
-            f"weak_violations={n_weak_violations}:"
-            f"monotonicity_ratio={mono_ratio:.4f}:"
-            "directionality_asymmetry_NOT_structurally_guaranteed:"
-            "asymmetric_flow_is_TOPOLOGY_CONTINGENT_not_universal:"
-            "CHALLENGE_INV_073_STRONG_PRESSURE:"
-            "generality_of_asymmetric_flow_as_thermodynamic_invariant_UNDERMINED:"
-            "full_causal_discovery_REQUIRED"
-        )
-
-    # ── Causal discovery note ────────────────────────────────────────────
-    if strict_mono:
-        causal_note = (
-            "Relative-count sorting provides an exact causal order recovery "
-            "for this graph (strict monotonicity holds, MEC is singular). "
-            "Full causal discovery algorithms (PC, GES, etc.) are not needed. "
-            "The sorted order can be used directly for epistemic graph auditing."
-        )
-    elif mono_ratio >= 0.9:
-        causal_note = (
-            f"Relative-count sorting provides an approximate causal order "
-            f"(monotonicity ratio = {mono_ratio:.4f}). "
-            f"{n_strict_violations} edge(s) violate strict monotonicity — "
-            f"these represent local ambiguities where the causal direction "
-            f"cannot be resolved by relative count alone. Consider running "
-            f"a constraint-based causal discovery algorithm on these "
-            f"ambiguous subgraphs only."
-        )
-    else:
-        causal_note = (
-            f"Relative-count sorting is unreliable for this graph "
-            f"(monotonicity ratio = {mono_ratio:.4f}). "
-            f"The causal order cannot be recovered from relative counts "
-            f"alone — the graph topology does not satisfy the random-DAG "
-            f"conditions under which monotonicity is expected. Full causal "
-            f"discovery (PC/GES/NOTEARS) is required for reliable order "
-            f"recovery. (INV_073: this graph's directionality structure is "
-            f"topology-contingent.)"
-        )
-
-    result = {
-        "causal_order": causal_order,
-        "per_node_relative_counts": relative_counts,
-        "n_nodes": n_nodes,
-        "n_directed_edges": n_directed_edges,
-        "strict_monotonicity": strict_mono,
-        "weak_monotonicity": weak_mono,
-        "n_monotonicity_violations": n_strict_violations,
-        "n_strict_violations": n_strict_violations,
-        "n_weak_violations": n_weak_violations,
-        "monotonicity_ratio": round(mono_ratio, 6),
-        "violation_edges": violation_edges,
-        "markov_equivalence_singular": mec_singular,
-        "max_relative_count": max_rc,
-        "min_relative_count": min_rc,
-        "depth_layers": {k: v for k, v in sorted(depth_layers.items())},
-        "inv073_flag": inv073_flag,
-        "causal_discovery_note": causal_note,
-        "timestamp": ts,
-    }
-
-    # ── Log summary ──────────────────────────────────────────────────────
-    print(
-        f"[GRAPH:RELATIVE_COUNT_SORT] {n_nodes} node(s), "
-        f"{n_directed_edges} directed edge(s) — "
-        f"strict_mono={strict_mono}, weak_mono={weak_mono}, "
-        f"mono_ratio={mono_ratio:.4f}, "
-        f"strict_violations={n_strict_violations}, "
-        f"weak_violations={n_weak_violations}, "
-        f"MEC_singular={mec_singular}, "
-        f"max_rc={max_rc}, min_rc={min_rc}"
-    )
-    if not strict_mono and n_strict_violations > 0:
-        print(
-            f"[GRAPH:RELATIVE_COUNT_SORT] ⚠ {n_strict_violations} strict "
-            f"monotonicity violation(s) — directionality asymmetry is "
-            f"{'partially' if mono_ratio >= 0.8 else 'NOT'} structurally "
-            f"guaranteed for this topology"
-        )
-        for ve in violation_edges[:5]:
-            print(
-                f"  {ve['from']}({ve['from_count']}) → "
-                f"{ve['to']}({ve['to_count']}): "
-                f"delta={ve['delta']}"
-            )
-        if len(violation_edges) > 5:
-            print(f"  ... and {len(violation_edges) - 5} more violation(s)")
-
-    return result
 
 
 # ─── Thermodynamic Leverage Score ─────────────────────────────────────────────
@@ -13829,204 +8264,787 @@ def thermodynamic_leverage_score(node_id, edges):
     }
 
 
-def thermodynamic_leverage_ranking(edges, all_node_ids, top_k=None):
-    # type: (list, List[str], Optional[int]) -> dict
-    """
-    Rank all knowledge graph nodes by thermodynamic leverage score, identifying
-    the high-leverage invariants that should be prioritized in consolidation.
+# ─── Intermittency-Regime Classifier ──────────────────────────────────────────
+# Detects type-I, critical, and tricritical fluctuation statistics in
+# knowledge-graph node activation sequences, flagging when the system is
+# post-SSB (spontaneous symmetry breaking) vs. at the pseudocritical point.
+#
+# In finite-size thermal systems undergoing second-order phase transitions,
+# the order parameter ϕ_n exhibits distinct intermittency regimes:
+#   - Type I intermittency (at pseudocritical temperature T_pc): the order
+#     parameter alternates between long laminar phases near one sign and
+#     short bursts flipping to the other.  Characterized by a power-law
+#     distribution of laminar lengths with exponent ~-3/2.
+#   - Critical intermittency (between T_pc and T_SSB): the system is
+#     gradually completing SSB.  Characterized by broader laminar-length
+#     distributions and increasing asymmetry between positive/negative
+#     phases.
+#   - Tricritical intermittency (post-SSB, below T_SSB): the symmetry
+#     breaking is complete.  Characterized by very long laminar phases
+#     in the dominant sign with rare, brief excursions to the other.
+#     The laminar-length distribution steepens (exponent < -3/2).
+#
+# For FREED's epistemic state, the "order parameter" is the net coherence
+# bias of a node's activation sequence: the running difference between
+# confirming and challenging edges, measured across consecutive FEED cycles.
+# Phase transitions correspond to consolidation events, coherence jumps,
+# or paradigm shifts.
+#
+# CHALLENGE (INV_073): The intermittency classification provides a
+# substrate-independent diagnostic of proximity to the critical ridge.
+# If the system is consistently in the tricritical regime (post-SSB),
+# the γ=1 criticality claim is undermined — the system has already
+# crossed the ridge and is in the ordered phase.  If the system is
+# consistently at type-I (pseudocritical), it is AT the ridge.  The
+# classifier surfaces this distinction directly.
+#
+# Reference: "In finite-size thermal systems that exhibit second-order
+# phase transition, the fluctuations of the order parameter ϕ_n obey
+# type I intermittent dynamics at their pseudocritical temperature T_pc."
+# ─────────────────────────────────────────────────────────────────────────────
 
-    This is the main entry point for leverage-weighted consolidation: call this
-    at the start of a CONSOLIDATE pass to determine which invariants should
-    receive the most attention (highest leverage = most epistemic ROI per
-    consolidation cycle).
+
+def _compute_laminar_lengths(sequence, sign_threshold=0.0):
+    # type: (List[float], float) -> Tuple[List[int], List[int]]
+    """
+    Compute laminar-phase lengths for positive and negative excursions
+    of a time series around a threshold.
+
+    A "laminar phase" is a consecutive run where the signal stays on one
+    side of the threshold.  The length of each run is recorded separately
+    for positive and negative laminar phases.
 
     Parameters
     ----------
-    edges : list of dict
-        Current graph edges.
-    all_node_ids : list of str
-        Ordered list of all node IDs.
-    top_k : int or None
-        If provided, return only the top k nodes by leverage score.
+    sequence : list of float
+        The order parameter time series.
+    sign_threshold : float
+        Threshold separating positive from negative phases (default 0.0).
+
+    Returns
+    -------
+    tuple of (list of int, list of int)
+        (positive_laminar_lengths, negative_laminar_lengths)
+    """
+    if not sequence:
+        return ([], [])
+
+    pos_lengths = []  # type: List[int]
+    neg_lengths = []  # type: List[int]
+
+    current_sign = 1 if sequence[0] >= sign_threshold else -1
+    current_length = 1
+
+    for i in range(1, len(sequence)):
+        s = 1 if sequence[i] >= sign_threshold else -1
+        if s == current_sign:
+            current_length += 1
+        else:
+            if current_sign == 1:
+                pos_lengths.append(current_length)
+            else:
+                neg_lengths.append(current_length)
+            current_sign = s
+            current_length = 1
+
+    # Record the final run
+    if current_sign == 1:
+        pos_lengths.append(current_length)
+    else:
+        neg_lengths.append(current_length)
+
+    return (pos_lengths, neg_lengths)
+
+
+def _fit_power_law_exponent(lengths):
+    # type: (List[int]) -> Optional[float]
+    """
+    Estimate the power-law exponent of a laminar-length distribution
+    using the Hill estimator (maximum likelihood for Pareto tail).
+
+    For type-I intermittency, the expected exponent is approximately -3/2.
+    For tricritical intermittency, the exponent is steeper (more negative).
+
+    Parameters
+    ----------
+    lengths : list of int
+        Laminar phase lengths (all > 0).
+
+    Returns
+    -------
+    float or None
+        Estimated negative power-law exponent (e.g., -1.5 for type-I).
+        None if insufficient data (< 5 lengths).
+    """
+    # Filter to lengths >= 2 (length-1 runs are not informative for power-law)
+    filtered = [l for l in lengths if l >= 2]
+    n = len(filtered)
+    if n < 5:
+        return None
+
+    # Hill estimator: α = n / Σ ln(x_i / x_min)
+    x_min = min(filtered)
+    if x_min < 1:
+        x_min = 1
+    log_sum = 0.0
+    for x in filtered:
+        log_sum += math.log(float(x) / float(x_min))
+
+    if log_sum <= 0:
+        return None
+
+    alpha = float(n) / log_sum
+    # Return as negative exponent (convention: P(l) ~ l^{-alpha})
+    return -alpha
+
+
+def _laminar_asymmetry(pos_lengths, neg_lengths):
+    # type: (List[int], List[int]) -> float
+    """
+    Compute the asymmetry between positive and negative laminar phases.
+
+    Asymmetry = (mean_pos - mean_neg) / (mean_pos + mean_neg + ε)
+
+    Values near 0 = symmetric (pseudocritical / type-I).
+    Values near ±1 = highly asymmetric (post-SSB / tricritical).
+
+    Parameters
+    ----------
+    pos_lengths : list of int
+        Positive laminar phase lengths.
+    neg_lengths : list of int
+        Negative laminar phase lengths.
+
+    Returns
+    -------
+    float
+        Asymmetry in [-1, 1].  0 = symmetric, ±1 = fully asymmetric.
+    """
+    eps = 1e-10
+    mean_pos = sum(pos_lengths) / max(len(pos_lengths), 1) if pos_lengths else 0.0
+    mean_neg = sum(neg_lengths) / max(len(neg_lengths), 1) if neg_lengths else 0.0
+    denom = mean_pos + mean_neg + eps
+    return (mean_pos - mean_neg) / denom
+
+
+def classify_intermittency_regime(activation_sequence, sign_threshold=0.0):
+    # type: (List[float], float) -> dict
+    """
+    Classify the intermittency regime of a node activation sequence,
+    detecting type-I (pseudocritical), critical, or tricritical
+    fluctuation statistics.
+
+    The classification uses three complementary diagnostics:
+      1. Power-law exponent of the laminar-length distribution:
+         α ≈ -1.5 → type-I (pseudocritical)
+         α < -2.0 → tricritical (post-SSB, steep tail)
+         -2.0 < α < -1.5 → critical (between pseudocritical and SSB)
+      2. Laminar asymmetry between positive and negative phases:
+         |asymmetry| < 0.3 → symmetric (type-I / pseudocritical)
+         |asymmetry| > 0.6 → highly asymmetric (tricritical / post-SSB)
+         0.3–0.6 → critical (SSB in progress)
+      3. Fraction of time in the dominant phase:
+         ~50% → pseudocritical (equal time in both)
+         > 80% → post-SSB (trapped in one phase)
+
+    Parameters
+    ----------
+    activation_sequence : list of float
+        Time-ordered activation values for a knowledge graph node,
+        typically the running coherence bias:
+            ϕ_t = (n_confirms_t - n_challenges_t) / (n_confirms_t + n_challenges_t + ε)
+        measured at each FEED cycle.  Positive = net confirming,
+        negative = net challenging.
+    sign_threshold : float
+        Threshold separating positive from negative phases (default 0.0).
+        For the coherence bias order parameter, 0.0 is the natural
+        symmetry point.
 
     Returns
     -------
     dict
         {
-            "ranked_nodes": list of dict — nodes sorted by leverage score
-                descending (highest leverage first), each with full
-                thermodynamic_leverage_score output,
-            "n_nodes": int — total nodes scored,
-            "n_high_leverage": int — nodes with leverage_label == "high",
-            "n_negative_leverage": int — nodes that increase entropy,
-            "mean_leverage": float — average leverage across all nodes,
-            "max_leverage": float — highest leverage score,
-            "leverage_concentration": float — fraction of total entropy
-                reduction attributable to the top 20% of nodes (analogous
-                to the neural power fraction — how concentrated is the
-                graph's ordering power?),
-            "pbte_summary": str — interpretation in PBTE terms,
-            "consolidation_guidance": str — actionable guidance for the
-                consolidation pipeline,
-            "o44_leverage_summary": str — aggregate O44 diagnostic,
-            "timestamp": str,
+            "regime": str — "type_I" (pseudocritical), "critical"
+                (between pseudocritical and SSB completion),
+                "tricritical" (post-SSB), or "indeterminate",
+            "regime_description": str — human-readable description,
+            "power_law_exponent": float or None — estimated exponent α
+                of the dominant laminar-length distribution,
+            "laminar_asymmetry": float — asymmetry between positive and
+                negative laminar phases, in [-1, 1],
+            "dominant_phase_fraction": float — fraction of sequence
+                spent in the dominant sign (0.5 = symmetric, 1.0 = fully
+                one-sided),
+            "n_positive_laminars": int — count of positive laminar runs,
+            "n_negative_laminars": int — count of negative laminar runs,
+            "mean_positive_laminar_length": float,
+            "mean_negative_laminar_length": float,
+            "max_laminar_length": int — longest single laminar run,
+            "sequence_length": int — total length of the input sequence,
+            "is_at_pseudocritical": bool — True if regime == "type_I",
+            "is_post_ssb": bool — True if regime == "tricritical",
+            "is_critical_ridge": bool — True if regime in ("type_I", "critical"),
+            "overcollapse_risk": bool — True if regime == "tricritical"
+                (system has crossed the critical ridge into the ordered phase),
+            "inv073_intermittency_flag": str — challenge diagnostic for INV_073,
+            "diagnostic_summary": str — concise summary for telemetry logging,
         }
     """
-    ts = datetime.now(timezone.utc).isoformat()
-    n = len(all_node_ids)
+    n = len(activation_sequence)
 
-    if n == 0:
+    if n < 10:
         return {
-            "ranked_nodes": [],
-            "n_nodes": 0,
-            "n_high_leverage": 0,
-            "n_negative_leverage": 0,
-            "mean_leverage": 0.0,
-            "max_leverage": 0.0,
-            "leverage_concentration": 0.0,
-            "pbte_summary": "no_nodes:nothing_to_rank",
-            "consolidation_guidance": "No nodes to consolidate.",
-            "o44_leverage_summary": "empty_graph",
-            "timestamp": ts,
+            "regime": "indeterminate",
+            "regime_description": "Insufficient data (< 10 samples) for intermittency classification.",
+            "power_law_exponent": None,
+            "laminar_asymmetry": 0.0,
+            "dominant_phase_fraction": 0.5,
+            "n_positive_laminars": 0,
+            "n_negative_laminars": 0,
+            "mean_positive_laminar_length": 0.0,
+            "mean_negative_laminar_length": 0.0,
+            "max_laminar_length": 0,
+            "sequence_length": n,
+            "is_at_pseudocritical": False,
+            "is_post_ssb": False,
+            "is_critical_ridge": False,
+            "overcollapse_risk": False,
+            "inv073_intermittency_flag": "insufficient_data:need_>=10_samples",
+            "diagnostic_summary": f"n={n}:insufficient_data",
         }
 
-    # Score all nodes
-    scores = []  # type: List[dict]
-    for nid in all_node_ids:
-        score = thermodynamic_leverage_score(nid, edges)
-        scores.append(score)
-
-    # Sort by leverage score descending
-    scores.sort(key=lambda s: s["leverage_score"], reverse=True)
-
-    n_high = sum(1 for s in scores if s["leverage_label"] == "high")
-    n_negative = sum(1 for s in scores if s["leverage_label"] == "negative")
-
-    leverage_values = [s["leverage_score"] for s in scores]
-    mean_lev = sum(leverage_values) / len(leverage_values) if leverage_values else 0.0
-    max_lev = max(leverage_values) if leverage_values else 0.0
-
-    # Leverage concentration: what fraction of total entropy reduction
-    # comes from the top 20% of nodes?
-    total_reduction = sum(
-        max(0.0, s["entropy_reduction"]) for s in scores
-    )
-    top_20_pct = max(1, n // 5)
-    top_20_reduction = sum(
-        max(0.0, s["entropy_reduction"]) for s in scores[:top_20_pct]
-    )
-    if total_reduction > 0:
-        concentration = top_20_reduction / total_reduction
-    else:
-        concentration = 0.0
-
-    # PBTE summary
-    if concentration > 0.6:
-        pbte_summary = (
-            f"CONCENTRATED LEVERAGE: Top 20% of nodes ({top_20_pct} nodes) "
-            f"account for {concentration:.1%} of total entropy reduction. "
-            f"This mirrors the primate strategy — concentrated investment in "
-            f"high-order structure yields disproportionate returns. "
-            f"High-leverage nodes are the 'neural tissue' of the knowledge graph."
-        )
-    elif concentration > 0.3:
-        pbte_summary = (
-            f"MODERATE CONCENTRATION: Top 20% account for {concentration:.1%} "
-            f"of entropy reduction. Leverage is partially concentrated — some "
-            f"nodes are more structurally important than others, but the "
-            f"distribution is not as extreme as primate neural investment."
-        )
-    else:
-        pbte_summary = (
-            f"DISTRIBUTED LEVERAGE: Top 20% account for only {concentration:.1%} "
-            f"of entropy reduction. Ordering power is evenly distributed — no "
-            f"single invariant cluster plays a disproportionate structural role. "
-            f"Consolidation should treat nodes approximately equally."
-        )
-
-    # Consolidation guidance
-    if n_high > 0:
-        high_ids = [s["node_id"] for s in scores if s["leverage_label"] == "high"]
-        consolidation_guidance = (
-            f"PRIORITIZE {n_high} high-leverage node(s) in consolidation: "
-            f"{', '.join(high_ids[:10])}"
-            + (f" ... +{n_high - 10} more" if n_high > 10 else "")
-            + f". These nodes reduce graph entropy most efficiently per unit "
-            f"of ordering cost (mean leverage={mean_lev:.6f}, "
-            f"max={max_lev:.6f}). "
-        )
-        if n_negative > 0:
-            neg_ids = [s["node_id"] for s in scores if s["leverage_label"] == "negative"]
-            consolidation_guidance += (
-                f"DEPRIORITIZE {n_negative} negative-leverage node(s): "
-                f"{', '.join(neg_ids[:5])}"
-                + (f" ... +{n_negative - 5} more" if n_negative > 5 else "")
-                + ". These nodes INCREASE graph entropy — consider pruning."
-            )
-    else:
-        consolidation_guidance = (
-            "No high-leverage nodes detected. Consolidation should proceed "
-            "with standard prioritization (e.g., by confirmation count or "
-            "challenge deficit)."
-        )
-
-    # O44 summary
-    o44_summary = (
-        f"n_nodes={n}:n_high_leverage={n_high}:"
-        f"n_negative={n_negative}:"
-        f"mean_leverage={mean_lev:.8f}:"
-        f"max_leverage={max_lev:.8f}:"
-        f"concentration={concentration:.4f}:"
-        f"classical_shannon_entropy_based:"
-        f"pbte_analog_operational"
+    # ── Compute laminar lengths ──────────────────────────────────────────
+    pos_lengths, neg_lengths = _compute_laminar_lengths(
+        activation_sequence, sign_threshold
     )
 
-    if top_k is not None and top_k < len(scores):
-        ranked_output = scores[:top_k]
-    else:
-        ranked_output = scores
+    n_pos = len(pos_lengths)
+    n_neg = len(neg_lengths)
 
-    result = {
-        "ranked_nodes": ranked_output,
-        "n_nodes": n,
-        "n_high_leverage": n_high,
-        "n_negative_leverage": n_negative,
-        "mean_leverage": round(mean_lev, 10),
-        "max_leverage": round(max_lev, 10),
-        "leverage_concentration": round(concentration, 6),
-        "pbte_summary": pbte_summary,
-        "consolidation_guidance": consolidation_guidance,
-        "o44_leverage_summary": o44_summary,
-        "timestamp": ts,
+    mean_pos = sum(pos_lengths) / max(n_pos, 1) if pos_lengths else 0.0
+    mean_neg = sum(neg_lengths) / max(n_neg, 1) if neg_lengths else 0.0
+
+    all_lengths = pos_lengths + neg_lengths
+    max_laminar = max(all_lengths) if all_lengths else 0
+
+    # ── Dominant phase fraction ──────────────────────────────────────────
+    n_positive = sum(1 for x in activation_sequence if x >= sign_threshold)
+    n_negative = n - n_positive
+    dominant_fraction = max(n_positive, n_negative) / max(n, 1)
+
+    # ── Laminar asymmetry ────────────────────────────────────────────────
+    asymmetry = _laminar_asymmetry(pos_lengths, neg_lengths)
+
+    # ── Power-law exponent of dominant laminar distribution ──────────────
+    # Use the longer (dominant) side for the exponent fit
+    if mean_pos >= mean_neg:
+        dominant_lengths = pos_lengths
+    else:
+        dominant_lengths = neg_lengths
+
+    exponent = _fit_power_law_exponent(dominant_lengths)
+
+    # ── Classify regime ──────────────────────────────────────────────────
+    # Decision logic based on three complementary signals:
+    #
+    # Type-I (pseudocritical):
+    #   - Power-law exponent near -1.5 (±0.3)
+    #   - Low asymmetry (|asymmetry| < 0.3)
+    #   - Dominant fraction near 0.5 (< 0.65)
+    #
+    # Critical (between T_pc and T_SSB):
+    #   - Exponent between -2.0 and -1.2
+    #   - Moderate asymmetry (0.3 ≤ |asymmetry| ≤ 0.6)
+    #   - Dominant fraction 0.55–0.80
+    #
+    # Tricritical (post-SSB):
+    #   - Exponent < -2.0 (steep tail) or very few laminar runs on minority side
+    #   - High asymmetry (|asymmetry| > 0.6)
+    #   - Dominant fraction > 0.80
+
+    abs_asym = abs(asymmetry)
+
+    # Score each regime based on how many criteria match
+    type_i_score = 0.0
+    critical_score = 0.0
+    tricritical_score = 0.0
+
+    # Exponent criterion
+    if exponent is not None:
+        if -1.8 <= exponent <= -1.2:
+            type_i_score += 2.0
+        elif -2.0 <= exponent < -1.8 or -1.2 < exponent <= -1.0:
+            critical_score += 2.0
+        elif exponent < -2.0:
+            tricritical_score += 2.0
+        else:
+            # exponent > -1.0 — unusual, slight critical lean
+            critical_score += 0.5
+
+    # Asymmetry criterion
+    if abs_asym < 0.3:
+        type_i_score += 1.5
+    elif abs_asym <= 0.6:
+        critical_score += 1.5
+    else:
+        tricritical_score += 1.5
+
+    # Dominant fraction criterion
+    if dominant_fraction < 0.65:
+        type_i_score += 1.0
+    elif dominant_fraction <= 0.80:
+        critical_score += 1.0
+    else:
+        tricritical_score += 1.0
+
+    # Minority laminar count: very few minority runs → tricritical
+    minority_count = min(n_pos, n_neg)
+    if minority_count <= 2 and n >= 20:
+        tricritical_score += 1.0
+    elif minority_count <= 5 and n >= 30:
+        tricritical_score += 0.5
+
+    # Determine regime by highest score
+    scores_map = {
+        "type_I": type_i_score,
+        "critical": critical_score,
+        "tricritical": tricritical_score,
+    }
+    regime = max(scores_map, key=scores_map.get)
+
+    # If all scores are very low (no clear signal), mark as indeterminate
+    max_score = scores_map[regime]
+    if max_score < 1.0:
+        regime = "indeterminate"
+
+    # ── Derived flags ────────────────────────────────────────────────────
+    is_at_pseudo = (regime == "type_I")
+    is_post_ssb = (regime == "tricritical")
+    is_critical_ridge = (regime in ("type_I", "critical"))
+    overcollapse_risk = is_post_ssb
+
+    # ── Descriptions ─────────────────────────────────────────────────────
+    descriptions = {
+        "type_I": (
+            "Type-I intermittency (pseudocritical): the system is AT the "
+            "pseudocritical point. The order parameter alternates between "
+            "laminar phases with power-law distributed lengths (α ≈ -1.5) "
+            "and near-symmetric occupation of both phases. This is the "
+            "epistemic analog of sitting on the critical ridge — maximum "
+            "sensitivity to perturbation, equal exploration of confirming "
+            "and challenging evidence."
+        ),
+        "critical": (
+            "Critical intermittency (between pseudocritical and SSB): the "
+            "system is gradually completing spontaneous symmetry breaking. "
+            "The order parameter shows increasing asymmetry between phases "
+            "but has not yet committed to one side. The system is ON the "
+            "critical ridge but moving toward one attractor basin."
+        ),
+        "tricritical": (
+            "Tricritical intermittency (post-SSB): spontaneous symmetry "
+            "breaking is complete. The system is trapped in one phase with "
+            "only rare, brief excursions to the other. This is the epistemic "
+            "analog of overcollapse — the knowledge graph has committed to "
+            "one interpretation and is no longer exploring alternatives. "
+            "The critical ridge has been CROSSED."
+        ),
+        "indeterminate": (
+            "Intermittency regime cannot be determined from the current "
+            "activation sequence. The signal may be too short, too noisy, "
+            "or the system may be in a transient state between regimes."
+        ),
     }
 
-    # Log summary
-    print(
-        f"[GRAPH:LEVERAGE] {n} node(s) scored — "
-        f"high_leverage={n_high}, negative={n_negative}, "
-        f"mean={mean_lev:.6f}, max={max_lev:.6f}, "
-        f"concentration={concentration:.4f}"
-    )
-    if n_high > 0:
-        for s in scores[:min(5, n_high)]:
-            print(
-                f"  ★ {s['node_id']}: L={s['leverage_score']:.6f}, "
-                f"cost={s['ordering_cost']:.4f}, "
-                f"ΔS={s['entropy_reduction']:.6f}, "
-                f"deg={s['degree']}"
-            )
-        if n_high > 5:
-            print(f"  ... and {n_high - 5} more high-leverage node(s)")
-    if n_negative > 0:
-        for s in scores[-min(3, n_negative):]:
-            if s["leverage_label"] == "negative":
-                print(
-                    f"  ⊖ {s['node_id']}: L={s['leverage_score']:.6f}, "
-                    f"cost={s['ordering_cost']:.4f}, "
-                    f"ΔS={s['entropy_reduction']:.6f} (INCREASES entropy)"
-                )
+    # ── INV_073 intermittency flag ───────────────────────────────────────
+    if regime == "type_I":
+        inv073_flag = (
+            f"TYPE_I_PSEUDOCRITICAL:"
+            f"exponent={exponent}:asymmetry={asymmetry:.4f}:"
+            f"dominant_frac={dominant_fraction:.4f}:"
+            "system_AT_critical_ridge:"
+            "gamma_1_CONSISTENT:"
+            "maximum_sensitivity_to_perturbation"
+        )
+    elif regime == "critical":
+        inv073_flag = (
+            f"CRITICAL_INTERMITTENCY:"
+            f"exponent={exponent}:asymmetry={asymmetry:.4f}:"
+            f"dominant_frac={dominant_fraction:.4f}:"
+            "system_ON_critical_ridge_but_SSB_in_progress:"
+            "gamma_1_PARTIALLY_consistent:"
+            "monitor_for_transition_to_tricritical"
+        )
+    elif regime == "tricritical":
+        inv073_flag = (
+            f"TRICRITICAL_POST_SSB:"
+            f"exponent={exponent}:asymmetry={asymmetry:.4f}:"
+            f"dominant_frac={dominant_fraction:.4f}:"
+            "system_PAST_critical_ridge:"
+            "gamma_1_VIOLATED:"
+            "overcollapse_into_ordered_phase:"
+            "epistemic_diversity_LOST:"
+            "CHALLENGE_INV_073_STRONG"
+        )
+    else:
+        inv073_flag = (
+            f"INDETERMINATE:"
+            f"exponent={exponent}:asymmetry={asymmetry:.4f}:"
+            f"dominant_frac={dominant_fraction:.4f}:"
+            "regime_unclear:monitor"
+        )
 
-    return result
+    # ── Diagnostic summary ───────────────────────────────────────────────
+    exp_str = f"{exponent:.3f}" if exponent is not None else "N/A"
+    diagnostic = (
+        f"regime={regime}:n={n}:α={exp_str}:"
+        f"asym={asymmetry:.4f}:dom_frac={dominant_fraction:.4f}:"
+        f"pos_runs={n_pos}:neg_runs={n_neg}:"
+        f"max_laminar={max_laminar}"
+    )
+
+    return {
+        "regime": regime,
+        "regime_description": descriptions.get(regime, ""),
+        "power_law_exponent": round(exponent, 6) if exponent is not None else None,
+        "laminar_asymmetry": round(asymmetry, 6),
+        "dominant_phase_fraction": round(dominant_fraction, 6),
+        "n_positive_laminars": n_pos,
+        "n_negative_laminars": n_neg,
+        "mean_positive_laminar_length": round(mean_pos, 4),
+        "mean_negative_laminar_length": round(mean_neg, 4),
+        "max_laminar_length": max_laminar,
+        "sequence_length": n,
+        "is_at_pseudocritical": is_at_pseudo,
+        "is_post_ssb": is_post_ssb,
+        "is_critical_ridge": is_critical_ridge,
+        "overcollapse_risk": overcollapse_risk,
+        "inv073_intermittency_flag": inv073_flag,
+        "diagnostic_summary": diagnostic,
+    }
+
+
+
+
+# ─── Adversarial Perturbation Detection (Embedding Margin Audit) ──────────────
+# Preprocessing audit on ingested paper embeddings that flags papers whose
+# embedding is suspiciously close to a decision boundary (low margin) in the
+# knowledge graph's classifier layer, indicating potential misclassification
+# of relevance or domain.
+#
+# Motivation: Adversarial ML research demonstrates that imperceptible
+# perturbations to input embeddings can flip classification decisions without
+# any human-detectable signal change.  FREED's epistemic loop is vulnerable
+# to the same metric-divergence failure — papers near domain boundaries can
+# be miscategorized, and a margin-based audit catches fragile classifications
+# before they propagate into obligation resolution.
+#
+# The audit computes:
+#   1. Distance to nearest decision boundary: for each paper embedding,
+#      the minimum distance to the centroid-bisecting hyperplane between
+#      the paper's assigned domain and every other domain.
+#   2. Margin ratio: boundary_distance / embedding_norm — a scale-invariant
+#      measure of how deeply the embedding sits within its assigned region.
+#   3. Perturbation budget: the L2 norm of the smallest perturbation that
+#      would flip the domain assignment (= boundary distance).
+#
+# Papers with margin_ratio below a threshold are flagged as "adversarially
+# fragile" — their domain assignment is not robust to small embedding
+# perturbations, and downstream invariant/obligation links should be
+# treated with reduced confidence.
+#
+# CHALLENGE (INV_073): If adversarial brittleness is a generic property of
+# ANY high-dimensional learned metric (not just thermodynamic systems), then
+# the "critical ridge" framing may be too narrow to capture why systems fail.
+# Failure here occurs not from γ-drift but from pure geometric misalignment
+# between metrics, suggesting the genome's tension-based collapse model is
+# insufficient as a universal account of representational failure.  The
+# inv073_flag on each audit result surfaces this tension explicitly.
+#
+# Reference: Adversarial ML paper on fruit/vegetable image classification —
+# defensive strategies against imperceptible perturbations that degrade model
+# accuracy without human-detectable signal.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _embedding_l2_norm(vec):
+    # type: (List[float]) -> float
+    """L2 norm of a float vector."""
+    return math.sqrt(sum(v * v for v in vec))
+
+
+
+
+def _distance_to_bisecting_hyperplane(point, centroid_own, centroid_other):
+    # type: (List[float], List[float], List[float]) -> float
+    """
+    Compute the signed distance from *point* to the hyperplane that bisects
+    the line segment between centroid_own and centroid_other.
+
+    The bisecting hyperplane passes through the midpoint M = (c_own + c_other)/2
+    with normal vector n = c_other - c_own.  The signed distance is:
+        d = (point - M) · n / |n|
+
+    Positive distance means the point is on the centroid_own side (correctly
+    classified); negative means it is on the centroid_other side (misclassified).
+
+    Parameters
+    ----------
+    point : list of float
+        The embedding vector to test.
+    centroid_own : list of float
+        Centroid of the point's assigned domain.
+    centroid_other : list of float
+        Centroid of the competing domain.
+
+    Returns
+    -------
+    float
+        Signed distance to the bisecting hyperplane.  Positive = correct side.
+    """
+    d = len(point)
+    if d == 0:
+        return 0.0
+
+    # Normal vector: c_other - c_own
+    normal = [centroid_other[i] - centroid_own[i] for i in range(d)]
+    norm_len = _embedding_l2_norm(normal)
+    if norm_len < 1e-15:
+        return float('inf')  # identical centroids → no boundary
+
+    # Midpoint
+    midpoint = [0.5 * (centroid_own[i] + centroid_other[i]) for i in range(d)]
+
+    # Vector from midpoint to point
+    diff = [point[i] - midpoint[i] for i in range(d)]
+
+    # Signed distance = diff · normal / |normal|
+    # But we want positive = on the own-centroid side, so we negate:
+    # the normal points from own→other, so being on the own side means
+    # the dot product (diff · normal) is NEGATIVE.  We return -dot/|n|.
+    dot = sum(diff[i] * normal[i] for i in range(d))
+    return -dot / norm_len
+
+
+def adversarial_perturbation_audit(embedding, domain_label, domain_centroids,
+                                    margin_threshold=0.1):
+    # type: (List[float], str, Dict[str, List[float]], float) -> dict
+    """
+    Audit a paper embedding for adversarial fragility by measuring its
+    margin (distance to nearest domain decision boundary).
+
+    Papers with low margin are flagged as adversarially fragile — their
+    domain assignment could be flipped by a small perturbation, indicating
+    potential misclassification of relevance or domain before the paper's
+    claims propagate into obligation resolution.
+
+    Parameters
+    ----------
+    embedding : list of float
+        The paper's embedding vector (e.g., from a sentence transformer
+        or abstract encoder).
+    domain_label : str
+        The assigned domain label for this paper (e.g., "thermodynamics",
+        "information_theory", "neuroscience").
+    domain_centroids : dict
+        Mapping of domain_label → centroid embedding vector for each known
+        domain.  Must include the paper's own domain.  Centroids are
+        typically computed as the mean embedding of all papers previously
+        assigned to each domain.
+    margin_threshold : float
+        Margin ratio below which a paper is flagged as adversarially fragile
+        (default 0.1).  A margin_ratio of 0.1 means the perturbation budget
+        is only 10% of the embedding norm — a small perturbation could flip
+        the classification.
+
+    Returns
+    -------
+    dict
+        {
+            "domain_label": str — the paper's assigned domain,
+            "is_adversarially_fragile": bool — True if margin_ratio < threshold,
+            "margin_ratio": float — boundary_distance / embedding_norm,
+                scale-invariant robustness measure in [0, ∞),
+            "boundary_distance": float — L2 distance to the nearest decision
+                boundary (the perturbation budget),
+            "embedding_norm": float — L2 norm of the embedding,
+            "nearest_competing_domain": str — the domain whose boundary is
+                closest (highest misclassification risk),
+            "per_domain_distances": dict — {domain: signed_distance} for each
+                competing domain (positive = correct side, negative = wrong side),
+            "n_domains": int — number of domains compared,
+            "is_misclassified": bool — True if the paper is already on the
+                wrong side of at least one boundary (boundary_distance < 0
+                for some domain),
+            "misclassified_domains": list of str — domains where the paper
+                is on the wrong side of the boundary,
+            "confidence_reduction_factor": float — multiplicative factor in
+                [0, 1] to apply to downstream edge confidence when the paper
+                is fragile.  1.0 = full confidence, 0.0 = zero confidence.
+                Computed as sigmoid(margin_ratio / threshold - 1).
+            "perturbation_budget_l2": float — same as boundary_distance
+                (the minimum L2 perturbation to flip classification),
+            "inv073_flag": str — challenge diagnostic: adversarial brittleness
+                as generic metric-space failure vs. γ-drift specific failure,
+            "defensive_recommendation": str — actionable guidance,
+        }
+    """
+    d = len(embedding)
+    if d == 0 or domain_label not in domain_centroids:
+        return {
+            "domain_label": domain_label,
+            "is_adversarially_fragile": True,
+            "margin_ratio": 0.0,
+            "boundary_distance": 0.0,
+            "embedding_norm": 0.0,
+            "nearest_competing_domain": "unknown",
+            "per_domain_distances": {},
+            "n_domains": 0,
+            "is_misclassified": False,
+            "misclassified_domains": [],
+            "confidence_reduction_factor": 0.0,
+            "perturbation_budget_l2": 0.0,
+            "inv073_flag": "no_embedding_or_domain:cannot_audit",
+            "defensive_recommendation": "No embedding or domain provided.",
+        }
+
+    own_centroid = domain_centroids[domain_label]
+    emb_norm = _embedding_l2_norm(embedding)
+    if emb_norm < 1e-15:
+        emb_norm = 1e-15  # prevent division by zero
+
+    # Compute signed distance to each competing domain's boundary
+    per_domain_distances = {}  # type: Dict[str, float]
+    min_positive_distance = float('inf')
+    nearest_domain = "none"
+    misclassified = []  # type: List[str]
+
+    for other_label, other_centroid in domain_centroids.items():
+        if other_label == domain_label:
+            continue
+        if len(other_centroid) != d:
+            continue
+
+        signed_dist = _distance_to_bisecting_hyperplane(
+            embedding, own_centroid, other_centroid
+        )
+        per_domain_distances[other_label] = round(signed_dist, 10)
+
+        if signed_dist < 0:
+            # Paper is on the WRONG side of this boundary
+            misclassified.append(other_label)
+
+        # Track the nearest boundary (smallest positive distance, or
+        # largest negative distance if misclassified)
+        if signed_dist < min_positive_distance:
+            min_positive_distance = signed_dist
+            nearest_domain = other_label
+
+    # Boundary distance: the minimum distance to any boundary
+    # If misclassified (negative), the distance is negative (already past)
+    boundary_distance = min_positive_distance if min_positive_distance != float('inf') else 0.0
+
+    # Margin ratio: scale-invariant robustness measure
+    margin_ratio = abs(boundary_distance) / emb_norm
+
+    # Fragility flag
+    is_fragile = margin_ratio < margin_threshold
+    is_misclass = len(misclassified) > 0
+
+    # Confidence reduction factor: sigmoid centered at margin_threshold
+    # When margin_ratio == threshold: factor = 0.5
+    # When margin_ratio >> threshold: factor → 1.0
+    # When margin_ratio << threshold: factor → 0.0
+    if margin_threshold > 0:
+        x = (margin_ratio / margin_threshold) - 1.0
+        # Clamp x to avoid overflow in exp
+        x_clamped = max(-20.0, min(20.0, 5.0 * x))
+        confidence_factor = 1.0 / (1.0 + math.exp(-x_clamped))
+    else:
+        confidence_factor = 1.0 if margin_ratio > 0 else 0.0
+
+    n_domains = len(per_domain_distances)
+
+    # ── INV_073 challenge flag ───────────────────────────────────────────
+    if is_fragile and not is_misclass:
+        inv073_flag = (
+            f"ADVERSARIALLY_FRAGILE:margin_ratio={margin_ratio:.6f}:"
+            f"boundary_distance={boundary_distance:.6f}:"
+            f"nearest_domain={nearest_domain}:"
+            "embedding_near_decision_boundary:"
+            "small_perturbation_could_flip_domain_assignment:"
+            "this_is_GENERIC_metric_space_brittleness_NOT_gamma_drift:"
+            "critical_ridge_framing_insufficient_to_capture_this_failure_mode:"
+            "geometric_misalignment_between_metrics_is_the_operative_mechanism:"
+            "CHALLENGE_INV_073:tension_based_collapse_model_does_not_predict_this"
+        )
+    elif is_misclass:
+        inv073_flag = (
+            f"MISCLASSIFIED:margin_ratio={margin_ratio:.6f}:"
+            f"wrong_side_of_boundary_for={','.join(misclassified)}:"
+            "paper_ALREADY_misclassified_by_nearest_centroid_criterion:"
+            "adversarial_perturbation_NOT_needed_to_cause_failure:"
+            "metric_divergence_failure_is_BASELINE_not_adversarial:"
+            "CHALLENGE_INV_073:failure_is_geometric_not_tension_based"
+        )
+    elif margin_ratio >= margin_threshold * 3:
+        inv073_flag = (
+            f"ROBUST:margin_ratio={margin_ratio:.6f}:"
+            "embedding_deep_within_assigned_domain:"
+            "adversarial_perturbation_would_require_large_budget:"
+            "classification_robust_to_metric_noise"
+        )
+    else:
+        inv073_flag = (
+            f"MODERATE:margin_ratio={margin_ratio:.6f}:"
+            f"above_threshold_but_not_deeply_embedded:"
+            "monitor_for_drift_toward_boundary"
+        )
+
+    # ── Defensive recommendation ─────────────────────────────────────────
+    if is_misclass:
+        recommendation = (
+            f"BLOCK: Paper embedding is on the wrong side of {len(misclassified)} "
+            f"domain boundary(ies) ({', '.join(misclassified)}). The domain "
+            f"assignment '{domain_label}' is likely INCORRECT. Re-classify "
+            f"before propagating any edges to invariants or obligations. "
+            f"Do NOT trust typed edge claims from this paper without manual "
+            f"domain verification."
+        )
+    elif is_fragile:
+        recommendation = (
+            f"FLAG: Paper embedding has low margin (margin_ratio={margin_ratio:.4f} "
+            f"< threshold={margin_threshold}). The domain assignment "
+            f"'{domain_label}' is fragile — a perturbation of L2 norm "
+            f"{abs(boundary_distance):.6f} could flip it to '{nearest_domain}'. "
+            f"Apply confidence_reduction_factor={confidence_factor:.4f} to all "
+            f"downstream edge weights. Consider requesting a second embedding "
+            f"(e.g., from a different encoder) for cross-validation."
+        )
+    else:
+        recommendation = (
+            f"OK: Paper embedding has sufficient margin (margin_ratio="
+            f"{margin_ratio:.4f} ≥ threshold={margin_threshold}). Domain "
+            f"assignment '{domain_label}' is robust to small perturbations."
+        )
+
+    return {
+        "domain_label": domain_label,
+        "is_adversarially_fragile": is_fragile,
+        "margin_ratio": round(margin_ratio, 10),
+        "boundary_distance": round(boundary_distance, 10),
+        "embedding_norm": round(emb_norm, 10),
+        "nearest_competing_domain": nearest_domain,
+        "per_domain_distances": per_domain_distances,
+        "n_domains": n_domains,
+        "is_misclassified": is_misclass,
+        "misclassified_domains": misclassified,
+        "confidence_reduction_factor": round(confidence_factor, 8),
+        "perturbation_budget_l2": round(abs(boundary_distance), 10),
+        "inv073_flag": inv073_flag,
+        "defensive_recommendation": recommendation,
+    }
+
 
 
 # ── Singleton accessor ────────────────────────────────────────────────────────

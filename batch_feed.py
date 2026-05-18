@@ -813,6 +813,371 @@ def compute_criticality_monitor(text):
     }
 
 
+# ─── Phase-Transition Monitor: Spectral Gap & Loss Curvature Inflection ──────
+# Tracks whether FREED's own learning dynamics are passing through a critical
+# boundary versus settling into frozen (overcooled) or dissipated (overheated)
+# regimes.  Inspired by INV_073's observation that the critical ridge in PINNs
+# is sharp and potentially narrow.
+#
+# Two indicators are computed from the token-frequency time series:
+#
+#   1. JACOBIAN SPECTRAL GAP (λ₁ - λ₂):
+#      We construct a lag-1 covariance matrix from windowed segments of the
+#      token-frequency series and compute the gap between its two largest
+#      eigenvalues.  At a phase transition the spectral gap closes (→ 0),
+#      indicating the system is at a critical boundary where multiple modes
+#      compete.  A large gap indicates a single dominant mode (frozen if
+#      low-entropy, dissipated if high-entropy).
+#
+#   2. LOSS CURVATURE INFLECTION:
+#      We compute the second derivative (discrete curvature) of the local
+#      RangeEn complexity across sliding windows.  Sign changes in the
+#      curvature indicate inflection points — the series is transitioning
+#      between convex (accelerating complexity growth = dissipating) and
+#      concave (decelerating = freezing) regimes.  A high density of
+#      inflection points signals the system is near a critical boundary.
+#
+# INVARIANT CHALLENGE — INV_073:
+#   The PINNs paper shows that the critical ridge (γ=1) is sharp and
+#   potentially narrow, suggesting that maintaining criticality operationally
+#   requires active control.  This monitor provides the DETECTION half of
+#   that control loop: it flags when processing dynamics cross a phase
+#   boundary so that downstream scoring can adjust.  The CORRECTION half
+#   (steering back to the ridge) is delegated to the arousal proxy's
+#   TRACE-depth modulation and the criticality monitor's regime classification.
+
+# Phase-transition monitor configuration
+PT_WINDOW_SIZE = 30          # window size for local spectral analysis
+PT_WINDOW_STEP = 15          # step between successive spectral windows
+PT_MIN_SERIES_LEN = 60       # minimum series length for reliable estimation
+PT_SPECTRAL_GAP_CRITICAL_LOW = 0.05   # gap below this → near phase transition
+PT_SPECTRAL_GAP_CRITICAL_HIGH = 0.15  # gap above this → single-mode dominant
+PT_INFLECTION_DENSITY_HIGH = 0.3      # inflection fraction above this → critical
+PT_INFLECTION_DENSITY_LOW = 0.05      # inflection fraction below this → settled
+
+# Phase-transition regime labels
+PT_REGIME_CRITICAL_BOUNDARY = 'CRITICAL_BOUNDARY'
+PT_REGIME_FROZEN_SETTLED = 'FROZEN_SETTLED'
+PT_REGIME_DISSIPATED_SETTLED = 'DISSIPATED_SETTLED'
+PT_REGIME_TRANSIENT = 'TRANSIENT'
+
+
+def _compute_spectral_gap_from_windows(series, window_size, window_step):
+    """
+    Compute Jacobian spectral gap proxy from windowed covariance analysis.
+
+    For each pair of consecutive windows, form a 2D vector (mean, variance)
+    and accumulate a lag-1 cross-covariance matrix.  The eigenvalues of this
+    matrix approximate the local Jacobian spectrum; the gap between the two
+    largest eigenvalues indicates proximity to a phase transition.
+
+    Args:
+        series: list of float — token-frequency time series
+        window_size: int — window length
+        window_step: int — step between windows
+
+    Returns:
+        dict with keys:
+            'spectral_gaps': list of float — per-window-pair spectral gaps
+            'mean_gap': float — mean spectral gap
+            'min_gap': float — minimum gap (closest to phase transition)
+            'num_pairs': int — number of window pairs analyzed
+        or None if insufficient data.
+    """
+    n = len(series)
+    if n < 2 * window_size:
+        return None
+
+    # Extract windowed feature vectors: (mean, variance, range) per window
+    features = []
+    start = 0
+    while start + window_size <= n:
+        win = series[start:start + window_size]
+        w_mean = sum(win) / len(win)
+        w_var = sum((x - w_mean) ** 2 for x in win) / len(win)
+        w_range = max(win) - min(win)
+        features.append((w_mean, w_var, w_range))
+        start += window_step
+
+    if len(features) < 3:
+        return None
+
+    spectral_gaps = []
+    for i in range(len(features) - 1):
+        # Form a 2x2 outer-product approximation of the local Jacobian
+        # using consecutive feature vectors
+        f_curr = features[i]
+        f_next = features[i + 1]
+
+        # Difference vector (approximates Jacobian action)
+        dx = [f_next[k] - f_curr[k] for k in range(3)]
+
+        # 2x2 covariance from the 3D feature: use first two components
+        # (mean, variance) as the primary dynamical variables
+        a11 = dx[0] * dx[0]
+        a12 = dx[0] * dx[1]
+        a21 = dx[1] * dx[0]
+        a22 = dx[1] * dx[1]
+
+        # Eigenvalues of 2x2 matrix [[a11, a12], [a21, a22]]
+        trace = a11 + a22
+        det = a11 * a22 - a12 * a21
+        discriminant = trace * trace - 4.0 * det
+
+        if discriminant < 0:
+            # Complex eigenvalues — oscillatory dynamics, treat gap as 0
+            spectral_gaps.append(0.0)
+        else:
+            sqrt_disc = math.sqrt(discriminant)
+            lam1 = (trace + sqrt_disc) / 2.0
+            lam2 = (trace - sqrt_disc) / 2.0
+            gap = abs(lam1 - lam2)
+            # Normalize by the larger eigenvalue to get relative gap
+            max_lam = max(abs(lam1), abs(lam2))
+            if max_lam > 1e-12:
+                gap_normalized = gap / max_lam
+            else:
+                gap_normalized = 0.0
+            spectral_gaps.append(gap_normalized)
+
+    if not spectral_gaps:
+        return None
+
+    return {
+        'spectral_gaps': [round(g, 6) for g in spectral_gaps],
+        'mean_gap': sum(spectral_gaps) / len(spectral_gaps),
+        'min_gap': min(spectral_gaps),
+        'num_pairs': len(spectral_gaps),
+    }
+
+
+def _compute_loss_curvature_inflections(series, window_size, window_step):
+    """
+    Compute loss curvature inflection density from windowed RangeEn values.
+
+    For each window, compute a local complexity proxy (coefficient of
+    variation = std/mean).  Then compute the second discrete derivative
+    (curvature) of this complexity series.  Sign changes in the curvature
+    are inflection points — boundaries between convex (accelerating) and
+    concave (decelerating) complexity regimes.
+
+    At a phase transition, inflection density is high (the system oscillates
+    between regimes).  In a settled state (frozen or dissipated), inflection
+    density is low.
+
+    Args:
+        series: list of float — token-frequency time series
+        window_size: int — window length for local complexity
+        window_step: int — step between windows
+
+    Returns:
+        dict with keys:
+            'complexity_series': list of float — per-window complexity values
+            'curvature_series': list of float — second derivatives
+            'inflection_count': int — number of sign changes in curvature
+            'inflection_density': float — inflection_count / len(curvature)
+            'mean_curvature': float — mean absolute curvature
+            'num_windows': int — number of complexity windows
+        or None if insufficient data.
+    """
+    n = len(series)
+    if n < window_size + 2 * window_step:
+        return None
+
+    # Compute local complexity (coefficient of variation) per window
+    complexity = []
+    start = 0
+    while start + window_size <= n:
+        win = series[start:start + window_size]
+        w_mean = sum(win) / len(win)
+        if w_mean < 1e-12:
+            complexity.append(0.0)
+        else:
+            w_var = sum((x - w_mean) ** 2 for x in win) / len(win)
+            complexity.append(math.sqrt(w_var) / w_mean)
+        start += window_step
+
+    if len(complexity) < 3:
+        return None
+
+    # First derivative (discrete)
+    first_deriv = [complexity[i + 1] - complexity[i]
+                   for i in range(len(complexity) - 1)]
+
+    # Second derivative (curvature)
+    curvature = [first_deriv[i + 1] - first_deriv[i]
+                 for i in range(len(first_deriv) - 1)]
+
+    if not curvature:
+        return None
+
+    # Count sign changes (inflection points)
+    inflection_count = 0
+    for i in range(len(curvature) - 1):
+        if curvature[i] * curvature[i + 1] < 0:
+            inflection_count += 1
+
+    inflection_density = inflection_count / len(curvature) if curvature else 0.0
+    mean_abs_curvature = sum(abs(c) for c in curvature) / len(curvature)
+
+    return {
+        'complexity_series': [round(c, 6) for c in complexity],
+        'curvature_series': [round(c, 6) for c in curvature],
+        'inflection_count': inflection_count,
+        'inflection_density': round(inflection_density, 4),
+        'mean_curvature': round(mean_abs_curvature, 6),
+        'num_windows': len(complexity),
+    }
+
+
+def compute_phase_transition_monitor(text):
+    """
+    Phase-transition monitor: tracks spectral gap and loss curvature inflection
+    to detect when FREED's learning dynamics pass through a critical boundary
+    rather than settling into a frozen or dissipated regime.
+
+    Combines two indicators:
+      1. Jacobian spectral gap — closing gap signals proximity to phase transition
+      2. Loss curvature inflection density — high density signals critical boundary
+
+    The combined classification:
+      CRITICAL_BOUNDARY  — low spectral gap AND high inflection density:
+                           system is at or crossing a phase transition
+      FROZEN_SETTLED     — high spectral gap AND low inflection density AND
+                           low mean complexity: single-mode, low-entropy settled
+      DISSIPATED_SETTLED — high spectral gap AND low inflection density AND
+                           high mean complexity: single-mode, high-entropy settled
+      TRANSIENT          — mixed signals: system between regimes
+
+    INV_073 annotation: the PINNs paper shows the critical ridge is sharp.
+    This monitor's CRITICAL_BOUNDARY flag indicates the system is ON or NEAR
+    that ridge.  The spectral gap magnitude estimates distance from the ridge.
+    Active control (via TRACE depth modulation, arousal proxy steering, and
+    criticality monitor feedback) can use this distance signal to maintain
+    γ=1 operationally despite the ridge's narrowness.
+
+    Args:
+        text: str — input text to analyze
+
+    Returns:
+        dict with keys:
+            'pt_regime': str — phase-transition regime classification
+            'spectral_gap_result': dict — from _compute_spectral_gap_from_windows
+            'curvature_result': dict — from _compute_loss_curvature_inflections
+            'mean_spectral_gap': float — mean spectral gap across windows
+            'min_spectral_gap': float — minimum spectral gap (closest to transition)
+            'inflection_density': float — fraction of curvature sign changes
+            'near_critical_boundary': bool — True if spectral gap is closing
+            'ridge_distance_proxy': float — estimated distance from critical ridge
+                in [0, 1] where 0 = on the ridge, 1 = far from ridge
+            'inv073_note': str — challenge annotation
+            'diagnostic_summary': str — human-readable one-line summary
+        or None if text is too short for reliable estimation.
+    """
+    if not text or len(text) < PT_MIN_SERIES_LEN:
+        return None
+
+    series = _build_token_frequency_series(text)
+    if len(series) < PT_MIN_SERIES_LEN:
+        return None
+
+    # For very long series, subsample to keep computation tractable
+    max_len = 800
+    if len(series) > max_len:
+        step = len(series) / max_len
+        series = [series[int(i * step)] for i in range(max_len)]
+
+    # ── Indicator 1: Spectral gap ─────────────────────────────────────────
+    sg_result = _compute_spectral_gap_from_windows(
+        series, PT_WINDOW_SIZE, PT_WINDOW_STEP
+    )
+
+    # ── Indicator 2: Loss curvature inflection ───────────────────────────
+    lc_result = _compute_loss_curvature_inflections(
+        series, PT_WINDOW_SIZE, PT_WINDOW_STEP
+    )
+
+    # Handle insufficient data from either indicator
+    if sg_result is None and lc_result is None:
+        return None
+
+    # Extract key metrics with defaults
+    mean_gap = sg_result['mean_gap'] if sg_result else 0.5
+    min_gap = sg_result['min_gap'] if sg_result else 0.5
+    infl_density = lc_result['inflection_density'] if lc_result else 0.0
+    mean_complexity = 0.0
+    if lc_result and lc_result['complexity_series']:
+        cs = lc_result['complexity_series']
+        mean_complexity = sum(cs) / len(cs)
+
+    # ── Regime classification ─────────────────────────────────────────────
+    gap_is_closing = mean_gap < PT_SPECTRAL_GAP_CRITICAL_HIGH
+    gap_is_narrow = mean_gap < PT_SPECTRAL_GAP_CRITICAL_LOW
+    infl_is_high = infl_density > PT_INFLECTION_DENSITY_HIGH
+    infl_is_low = infl_density < PT_INFLECTION_DENSITY_LOW
+
+    if (gap_is_narrow or gap_is_closing) and infl_is_high:
+        pt_regime = PT_REGIME_CRITICAL_BOUNDARY
+    elif not gap_is_closing and infl_is_low:
+        if mean_complexity < 0.3:
+            pt_regime = PT_REGIME_FROZEN_SETTLED
+        else:
+            pt_regime = PT_REGIME_DISSIPATED_SETTLED
+    else:
+        pt_regime = PT_REGIME_TRANSIENT
+
+    near_critical = pt_regime == PT_REGIME_CRITICAL_BOUNDARY
+
+    # ── Ridge distance proxy ──────────────────────────────────────────────
+    # Combine spectral gap (lower = closer to ridge) and inflection density
+    # (higher = closer to ridge) into a single distance metric in [0, 1]
+    # where 0 = on the ridge, 1 = far from ridge.
+    gap_component = min(1.0, mean_gap / 0.5)  # normalized: 0 at gap=0, 1 at gap≥0.5
+    infl_component = 1.0 - min(1.0, infl_density / 0.5)  # 0 at high density, 1 at low
+    ridge_distance = 0.6 * gap_component + 0.4 * infl_component
+    ridge_distance = min(1.0, max(0.0, ridge_distance))
+
+    # ── INV_073 annotation ────────────────────────────────────────────────
+    inv073_note = (
+        "INV_073: PINNs paper shows the critical ridge (γ=1) is sharp and "
+        "narrow. This monitor's spectral gap tracks distance from the ridge: "
+        "closing gap = approaching phase transition = near γ=1. Loss curvature "
+        "inflection density tracks how rapidly the system oscillates between "
+        "freezing and dissipating regimes. High inflection density + low "
+        "spectral gap = system is navigating the narrow critical ridge. "
+        "Active control via TRACE-depth modulation and arousal steering can "
+        "use ridge_distance_proxy to maintain criticality operationally."
+    )
+
+    # ── Diagnostic summary ────────────────────────────────────────────────
+    diagnostic_summary = (
+        "pt_regime={regime}, spectral_gap={gap:.4f} (min={mingap:.4f}), "
+        "inflection_density={infl:.4f}, ridge_distance={rd:.4f}, "
+        "mean_complexity={mc:.4f}"
+    ).format(
+        regime=pt_regime,
+        gap=mean_gap,
+        mingap=min_gap,
+        infl=infl_density,
+        rd=ridge_distance,
+        mc=mean_complexity,
+    )
+
+    return {
+        'pt_regime': pt_regime,
+        'spectral_gap_result': sg_result,
+        'curvature_result': lc_result,
+        'mean_spectral_gap': round(mean_gap, 6),
+        'min_spectral_gap': round(min_gap, 6),
+        'inflection_density': round(infl_density, 4),
+        'near_critical_boundary': near_critical,
+        'ridge_distance_proxy': round(ridge_distance, 4),
+        'mean_complexity': round(mean_complexity, 4),
+        'inv073_note': inv073_note,
+        'diagnostic_summary': diagnostic_summary,
+    }
+
+
 # ─── Dissonance Delay: Tension-Lifetime Gate ─────────────────────────────────
 # Implements a "dissonance delay" scoring pass inspired by CD-AI's insight
 # that fast closure signals shallow processing.  Nodes that achieve coherence

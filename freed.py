@@ -49,7 +49,10 @@ LINKS_QUEUE_FILE  = FREED_DIR / "links_queue.json"
 SEEN_FILE         = FREED_DIR / "tamura_seen.json"
 
 # ─── Cycle configuration ──────────────────────────────────────────────────────
-CYCLE_INTERVAL_SECONDS = 6 * 60 * 60   # 6 hours between cycles
+# Fixed wall-clock cycle times (local time). The schedule does not shift on
+# restart — the daemon looks at the clock and sleeps until the next scheduled
+# slot, regardless of when it was last started or last completed a cycle.
+CYCLE_TIMES = [(5, 50), (12, 30), (22, 30)]   # 5:50am, 12:30pm, 10:30pm local
 MAX_FEEDS_PER_CYCLE    = 4             # max SWEEP inputs to process per cycle (raised from 2; revert after 3-4 cycles of PREDICT→ACTUAL stats)
 MAX_TARGETED_PER_CYCLE = 2             # max targeted-sweep results per cycle
 MAX_RESOLVES_PER_CYCLE = 3             # max obligations to attempt per active cycle
@@ -108,10 +111,6 @@ EST_TOKENS_TRIAGE       = 800   # Haiku triage — cheap classification pass
 EST_TOKENS_CEREBELLUM   = 200   # per Haiku pre-score call (only fires on ambiguous band)
 EST_TOKENS_DMN          = 8000  # DMN cross-connect + internal-oblige (Opus, once per dead zone)
 EST_TOKENS_COMMIT       = 100   # Haiku commit check — fires on unresolved RESOLVE attempts
-
-# ─── Active hours (local time) ────────────────────────────────────────────────
-ACTIVE_HOUR_START = 6.25   # 6:15am
-ACTIVE_HOUR_END   = 1.0    # 1:00am  (window wraps midnight)
 
 # ─── GitHub status push ───────────────────────────────────────────────────────
 _GH_TOKEN  = os.environ.get("GITHUB_TOKEN", "")
@@ -306,27 +305,19 @@ class FREEDDaemon:
 
     def _next_wake_time(self) -> datetime:
         """
-        Calculate the next wake time respecting active hours (6:15am–1:00am local).
-        Window wraps midnight: dead zone is 1:00am–6:15am.
-        If the next cycle falls in the dead zone, push it to 6:15am same day.
+        Return the next scheduled cycle time from CYCLE_TIMES (local time).
+        Schedule is wall-clock fixed; restarting the daemon does not realign it.
+        If all of today's slots have passed, return the first slot tomorrow.
         """
-        now       = datetime.now()   # local time
-        candidate = now + timedelta(seconds=CYCLE_INTERVAL_SECONDS)
-        hour_frac = candidate.hour + candidate.minute / 60.0
-
-        # Active if >= 6:15am OR <= 1:00am (wraps midnight)
-        in_active = (hour_frac >= ACTIVE_HOUR_START or hour_frac <= ACTIVE_HOUR_END)
-        if in_active:
-            return candidate
-
-        # Dead zone: 1:00am–6:15am — wake at 6:15am same day
-        wake_day = candidate.date()
-        wake_local = datetime(
-            wake_day.year, wake_day.month, wake_day.day,
-            int(ACTIVE_HOUR_START),
-            int((ACTIVE_HOUR_START % 1) * 60),
-        )
-        return wake_local
+        now   = datetime.now()
+        today = now.date()
+        for h, m in CYCLE_TIMES:
+            slot = datetime(today.year, today.month, today.day, h, m)
+            if slot > now:
+                return slot
+        tomorrow = today + timedelta(days=1)
+        h, m = CYCLE_TIMES[0]
+        return datetime(tomorrow.year, tomorrow.month, tomorrow.day, h, m)
 
     def _next_dmn_time(self):
         """Return the next 2:30am (DMN_HOUR) after now."""
@@ -423,12 +414,46 @@ class FREEDDaemon:
 
     def run(self):
         """Main daemon loop. Runs until interrupted."""
-        print(f"[FREED] Entering main loop. Active hours: "
-              f"{int(ACTIVE_HOUR_START)}:{int((ACTIVE_HOUR_START%1)*60):02d}–"
-              f"{int(ACTIVE_HOUR_END)}:{int((ACTIVE_HOUR_END%1)*60):02d} local "
-              f"(dead zone 1:00am–6:15am, DMN at 2:30am).\n")
+        schedule_str = ", ".join(f"{h:02d}:{m:02d}" for h, m in CYCLE_TIMES)
+        print(f"[FREED] Entering main loop. Scheduled cycles (local): {schedule_str}. "
+              f"DMN at 2:30am.\n")
 
         while self.running:
+            # Sleep until the next scheduled cycle. If 2:30am DMN falls inside
+            # the sleep window and hasn't fired yet, wake at 2:30am, run DMN,
+            # then resume sleeping until the scheduled cycle.
+            wake     = self._next_wake_time()
+            now      = datetime.now()
+            wake_str = wake.strftime('%I:%M %p')
+
+            dmn_time = self._next_dmn_time()
+            if dmn_time < wake and not self._dmn_fired_today:
+                dmn_secs = max(0, (dmn_time - now).total_seconds())
+                dmn_str  = dmn_time.strftime('%I:%M %p')
+                print(f"\n[FREED] Sleeping. DMN at {dmn_str}, then cycle at {wake_str}. "
+                      f"(Ctrl+C to stop)\n")
+                time.sleep(dmn_secs)
+                if self.running:
+                    self._dmn_fired_today = True
+                    self._run_dmn()
+                    self._git_backup()
+                remaining = max(0, (wake - datetime.now()).total_seconds())
+                if remaining > 0 and self.running:
+                    print(f"[FREED] DMN done. Sleeping until {wake_str}.\n")
+                    time.sleep(remaining)
+            else:
+                secs = max(0, (wake - now).total_seconds())
+                print(f"\n[FREED] Sleeping until next cycle at {wake_str}. "
+                      f"(Ctrl+C to stop)\n")
+                time.sleep(secs)
+
+            if not self.running:
+                break
+
+            # Cycle is about to run — reset the once-per-overnight DMN flag so
+            # the next overnight window can fire DMN again.
+            self._dmn_fired_today = False
+
             try:
                 self._run_cycle()
             except Exception as e:
@@ -436,45 +461,7 @@ class FREEDDaemon:
                     "error": str(e),
                     "traceback": traceback.format_exc(),
                 })
-                print(f"[FREED] Cycle error: {e}. Sleeping before retry.")
-
-            if not self.running:
-                break
-
-            wake     = self._next_wake_time()
-            now      = datetime.now()
-            secs     = max(0, (wake - now).total_seconds())
-            wake_str = wake.strftime('%I:%M %p')
-
-            if secs > CYCLE_INTERVAL_SECONDS:
-                # Entering dead zone — check if DMN fires before active hours resume
-                dmn_time  = self._next_dmn_time()
-                dmn_secs  = max(0, (dmn_time - datetime.now()).total_seconds())
-                dmn_str   = dmn_time.strftime('%I:%M %p')
-
-                if dmn_time < wake and not self._dmn_fired_today:
-                    print(f"\n[FREED] Dead zone. DMN at {dmn_str}, "
-                          f"then active at {wake_str}. (Ctrl+C to stop)\n")
-                    time.sleep(dmn_secs)
-                    if self.running:
-                        self._dmn_fired_today = True
-                        self._run_dmn()
-                        self._git_backup()
-                    # Sleep remaining dead-zone time
-                    remaining = max(0, (wake - datetime.now()).total_seconds())
-                    if remaining > 0 and self.running:
-                        print(f"[FREED] DMN done. Sleeping until {wake_str}.\n")
-                        time.sleep(remaining)
-                else:
-                    print(f"\n[FREED] Outside active hours. Sleeping until {wake_str}. "
-                          f"(Ctrl+C to stop)\n")
-                    time.sleep(secs)
-            else:
-                # Normal inter-cycle sleep — reset DMN flag at start of new active window
-                self._dmn_fired_today = False
-                print(f"\n[FREED] Cycle complete. Next cycle at {wake_str}. "
-                      f"(Ctrl+C to stop)\n")
-                time.sleep(secs)
+                print(f"[FREED] Cycle error: {e}.")
 
     # ── Cycle phases ─────────────────────────────────────────────────────────
 

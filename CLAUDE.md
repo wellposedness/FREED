@@ -6,7 +6,7 @@
 **Author**: David Harry Freed, mail carrier, Olney Maryland  
 **Repo**: wellposedness/FREED (GitHub Pages at wellposedness.github.io/FREED/)
 
-Autonomous science daemon. Reads external papers → maps against RSA/Freed's Law → updates knowledge graph → publishes static site. Runs every 6 hours unattended.
+Autonomous science daemon. Reads external papers → maps against RSA/Freed's Law → updates knowledge graph → publishes static site. Runs on a fixed wall-clock schedule unattended: **05:50, 12:30, 22:30 local**, with DMN at 02:30. Schedule is set in `freed.py:CYCLE_TIMES` and does not shift on restart — the daemon sleeps to the next scheduled slot regardless of when it was launched.
 
 ---
 
@@ -27,7 +27,7 @@ Full theoretical seed: `FREED_genome.md` (v20 canonical, ~35k chars). Core claim
 ## Architecture
 
 ```
-freed.py            — Main daemon. 6h cycle: PRE-AUDIT → SWEEP → FEED → ENGINEER → CONSOLIDATE → OBLIGATE → RESOLVE → UPDATE → PUBLISH
+freed.py            — Main daemon. Cycle: PRE-AUDIT → SWEEP → FEED → ENGINEER → CONSOLIDATE → OBLIGATE → RESOLVE → UPDATE → PUBLISH. Fires at fixed wall-clock times (CYCLE_TIMES = 05:50, 12:30, 22:30 local).
 l7_agent.py         — Cognitive core. Claude Sonnet 4.6. Engram bank with semantic (relevance-based) retrieval. max_tokens=2048.
 astrocyte.py        — Metabolic governor. Daily token budget (100k in / 40k out).
 tamura_sweep.py     — Passive sensory surface. Tamura/Lifeboat + arXiv biophysics RSS feeds.

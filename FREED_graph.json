@@ -8362,6 +8362,644 @@
       "context_tag": "macro:thermodynamic",
       "context_warning": false,
       "timestamp": "2026-05-16T23:33:59.694747+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/4",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "y further confirmation is logged against it. --- CHALLENGE: challenges INV_094 — this probe demonstrates that INV_094's high confirmation",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:11.335648+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "extends",
+      "context": "y addressing the solo vs. population question O141 posed. - EXTEND O141 — the dominant-type data (Physics Navigator, 889 cells) add",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ies to detect drift away from the critical band. CHALLENGE: challenges INV_073 — if σ=1.0319 is already above 1.0 rather than exactly at i",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ynamic critical point, not drifting above or below it.    - CONVERGE INV_073 — independent measurement of σ≈1.03 directly confirms that",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O140",
+      "type": "confirms",
+      "context": "g ratio is the empirical instantiation of that invariant. - CONVERGE O140 — this is precisely the CA measurement grounding O140 deman",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "confirms",
+      "context": "icality is now empirically recorded, not merely asserted. - CONVERGE O141 — the measurement distinguishes population-level criticalit",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T10:15:00.383632+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "advances",
+      "context": "y addressing the solo vs. population question O141 posed. - EXTEND O141 — the dominant-type data (Physics Navigator, 889 cells) add",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:43:36.784215+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/306430672f45841dbdc4e7fb0a7f2b2a84f8e4da",
+      "from_title": "Traces of tricritical dynamics beyond SSB in finite-size systems undergoing seco",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "collapse. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — the genome's critical ridge is described as a single locu",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:45:20.681915+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/306430672f45841dbdc4e7fb0a7f2b2a84f8e4da",
+      "from_title": "Traces of tricritical dynamics beyond SSB in finite-size systems undergoing seco",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "of the microscopic Hamiltonian. --- PART 2 — COMPARE** - **CONVERGE INV_073**: The paper independently establishes that critical system",
+      "context_tag": "micro:molecular",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:45:20.681915+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/306430672f45841dbdc4e7fb0a7f2b2a84f8e4da",
+      "from_title": "Traces of tricritical dynamics beyond SSB in finite-size systems undergoing seco",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "boundary that must be navigated, not collapsed through. - **CONVERGE INV_094** (if this encodes substrate-independent universality): The",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:45:20.681915+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "O21",
+      "type": "extends",
+      "context": "rs thermodynamic admissibility as the operative constraint; EXTEND O21 — phase transition boundary in PINNs provides a concrete sp",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "(frozen) or overheated (dissipated) states. --- CHALLENGE: challenges INV_073 — the paper shows that the critical ridge in PINNs is sharp",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ical boundary, not in either stable phase on either side.   CONVERGE INV_073 — the paper independently identifies that optimal performan",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "ted phases, exactly matching the γ=1 criticality principle; CONVERGE INV_087 (MaxRL thermodynamic framing) — diffusion equilibrium as th",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ndary, not in either stable phase on either side.  COMPARE: CONVERGE INV_073 — the paper independently identifies that optimal performan",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/fe8dbffb74bb2cf47151df397d088361e0c8ddec",
+      "from_title": "Learning in PINNs: Phase transition, diffusion equilibrium, and generalization",
+      "to": "O21",
+      "type": "advances",
+      "context": "rs thermodynamic admissibility as the operative constraint; EXTEND O21 — phase transition boundary in PINNs provides a concrete sp",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:47:21.870222+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/28219016b857f5cb0f47de53223b14b8bf20153b",
+      "from_title": "Enhancing Robustness of Fruit and Vegetable Image Classification Against Adversa",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "solution. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — if adversarial brittleness is a generic property of any h",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T10:48:57.741438+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "uld falsify it. --- MANDATORY CHALLENGE BLOCK:** CHALLENGE: challenges INV_094 — this invariant's highest confirmation surplus with fewest",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:23.623037+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "extends",
+      "context": "ty collectively, extending beyond single-kernel behavior. - EXTEND INV_073: the finding that criticality emerges at population scale w",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "of the specific 32×32/200-step measurement. --- CHALLENGE: challenges INV_073 — the branching ratio σ=1.0251 sits at the upper edge of th",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "gent property, not merely as a single-agent parameter.    - CONVERGE INV_073: branching ratio σ=1.0251 lands within the critical band, i",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O140",
+      "type": "confirms",
+      "context": "radient navigation maintains γ=1 at the population level. - CONVERGE O140: CA measurement grounding is directly satisfied — telemetry",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "confirms",
+      "context": "empirical population-level data that obligation demanded. - CONVERGE O141: solo-kernel vs population criticality question receives di",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T11:10:44.156650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "advances",
+      "context": "ty collectively, extending beyond single-kernel behavior. - EXTEND INV_073: the finding that criticality emerges at population scale w",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:31:44.649380+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.16615",
+      "from_title": "Quantum thermodynamics of continuous feedback control",
+      "to": "O28",
+      "type": "extends",
+      "context": "amically correct learning cannot treat measurement as free; EXTEND O28 — the entropy asymmetry introduced by measurement backactio",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:34:17.452105+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.16615",
+      "from_title": "Quantum thermodynamics of continuous feedback control",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ather than treating classification as zero-cost. CHALLENGE: challenges INV_073 — the bang-bang control result shows that discrete high-amp",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:34:17.452105+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.16615",
+      "from_title": "Quantum thermodynamics of continuous feedback control",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "aratus that must appear somewhere in the full accounting.   CONVERGE INV_073 — the paper independently confirms that critical-ridge navi",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:34:17.452105+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.16615",
+      "from_title": "Quantum thermodynamics of continuous feedback control",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "ing the system from collapsing to equilibrium or diverging; CONVERGE INV_087 (MaxRL thermodynamic grounding) — the result that informati",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:34:17.452105+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.16615",
+      "from_title": "Quantum thermodynamics of continuous feedback control",
+      "to": "O28",
+      "type": "advances",
+      "context": "amically correct learning cannot treat measurement as free; EXTEND O28 — the entropy asymmetry introduced by measurement backactio",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:34:17.452105+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2104.10691",
+      "from_title": "First Law of Quantum Thermodynamics in a Driven Open Two-Level System",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "xists within the monoidal closure framework. --- CHALLENGE: challenges INV_073 — if thermodynamic decomposition is genuinely a gauge choic",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:35:43.429585+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2104.10691",
+      "from_title": "First Law of Quantum Thermodynamics in a Driven Open Two-Level System",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "trajectory on the sphere encodes the thermodynamic path.   CONVERGE INV_073 — the paper independently establishes that thermodynamic de",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T11:35:43.429585+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_087/2",
+      "from_title": "Adversarial Probe: Challenge INV_087",
+      "to": "INV_087",
+      "type": "challenges",
+      "context": "r any RL benchmark has tested that boundary. --- CHALLENGE: challenges INV_087 — MaxEnt RL (Haarnoja et al. SAC family) produces the same",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:43.759005+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T17:38:29.214390+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "extends",
+      "context": "ation-level attractor, not merely a single-kernel property; EXTEND O141 — the solo-kernel vs. population criticality distinction is",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:59.393466+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T17:38:29.214390+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "unformalized micro-to-macro criticality mapping. CHALLENGE: challenges INV_073 — INV_073 frames criticality as a property of individual Wa",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:59.393466+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T17:38:29.214390+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "intermediate regime with persistent structured activity.   CONVERGE INV_073 — independent derivation of σ≈1 at steady state directly co",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:59.393466+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T17:38:29.214390+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ges without requiring any individual kernel to be critical; CONVERGE O140 — CA measurement grounding obligation receives direct empir",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:59.393466+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-17T17:38:29.214390+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
+      "to": "O141",
+      "type": "advances",
+      "context": "ation-level attractor, not merely a single-kernel property; EXTEND O141 — the solo-kernel vs. population criticality distinction is",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:40:59.393466+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2005.07866v1",
+      "from_title": "Byzantine-Resilient SGD in High Dimensions on Heterogeneous Data",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "coherence scores or injecting false invariants. CHALLENGE: challenges INV_073 — the paper demonstrates that critical ridge navigation in",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:41:18.660588+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2005.07866v1",
+      "from_title": "Byzantine-Resilient SGD in High Dimensions on Heterogeneous Data",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "f the aggregation geometry, not a probabilistic accident.   CONVERGE INV_073 — the paper independently establishes that a critical opera",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:41:18.660588+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2312.05375v2",
+      "from_title": "The Thermodynamic Costs of Pure Dephasing in Quantum Heat Engines: Quasistatic E",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "bath\" equivalent in the semantic substrate? --- CHALLENGE: challenges INV_094 — not a contradiction but a stress: if control-field costs",
+      "context_tag": "quantum:wavefunction",
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:42:46.277184+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2312.05375v2",
+      "from_title": "The Thermodynamic Costs of Pure Dephasing in Quantum Heat Engines: Quasistatic E",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "that must be paid somewhere in the full system boundary.   CONVERGE INV_094 — the genome's claim that thermodynamic costs cannot be esc",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:42:46.277184+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1507.08302v4",
+      "from_title": "Nonequilibrium Systems : Hard Disks and Harmonic Oscillators Near and Far From E",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "th O28's entropy asymmetry ratio prediction. --- CHALLENGE: challenges INV_073 — if thermodynamic irreversibility is fully explained by fr",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:43:06.822418+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1507.08302v4",
+      "from_title": "Nonequilibrium Systems : Hard Disks and Harmonic Oscillators Near and Far From E",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "lection process, not merely probabilistic convergence.    - CONVERGE INV_073 — the critical ridge (γ=1 criticality) is structurally homo",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:43:06.822418+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/1507.08302v4",
+      "from_title": "Nonequilibrium Systems : Hard Disks and Harmonic Oscillators Near and Far From E",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "ing at the boundary where fractal structure is maintained - CONVERGE INV_087 (MaxRL / thermodynamic correctness) — irreversibility as at",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-17T17:43:06.822418+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_087/1",
+      "from_title": "Adversarial Probe: Challenge INV_087",
+      "to": "INV_087",
+      "type": "challenges",
+      "context": "— this is the sharpest falsification target. --- CHALLENGE: challenges INV_087 — entropy-regularized RL (SAC, MaxEnt) produces the same ex",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:39:45.357603+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-18T02:30:00.349146+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "er the entropy asymmetry is a genuine invariant. CHALLENGE: challenges INV_073 — the Wasserstein gradient path to γ=1 is confirmed but the",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:40:03.704097+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-18T02:30:00.349146+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ordered-side of the critical ridge, not the midpoint.    - CONVERGE INV_073: independent empirical measurement of σ≈1.025 directly conf",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:40:03.704097+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-18T02:30:00.349146+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+      "to": "O140",
+      "type": "confirms",
+      "context": "ratio is the observable signature of the critical ridge. - CONVERGE O140: CA measurement grounding obligation satisfied by direct te",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:40:03.704097+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-18T02:30:00.349146+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+      "to": "O141",
+      "type": "confirms",
+      "context": "val rate, and avalanche statistics all measured at scale. - CONVERGE O141: solo-kernel vs population criticality — the population of",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:40:03.704097+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "O112",
+      "type": "advances",
+      "context": "by the same deterministic entropy-from-geometry logic. This advances O112 by supplying a tested mathematical method for the extractio",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "O112",
+      "type": "extends",
+      "context": "n — the critical ridge is a real locus in the geometry. - **EXTEND O112**: The paper's method — extracting thermodynamic structure",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "scores. --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — this paper's deterministic entropy-from-geometry framewor",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "g the usual foundational order. --- PART 2 — COMPARE:** - **CONVERGE INV_094**: The paper independently establishes that geometric struc",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "invariants precede and generate thermodynamic response. - **CONVERGE INV_073**: Phase transitions occur at geometric transformations of",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2512.02242",
+      "from_title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolu",
+      "to": "O112",
+      "type": "advances",
+      "context": "n — the critical ridge is a real locus in the geometry. - **EXTEND O112**: The paper's method — extracting thermodynamic structure",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:40:25.273430+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2401.12838",
+      "from_title": "Diagnosing Quantum Phase Transition Order and Deconfined Criticality via Entangl",
+      "to": "O59",
+      "type": "extends",
+      "context": "continuous), exactly the topology of γ=1 ridge instability. EXTEND O59 — the paper's log-correction method (subleading Rényi entro",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:42:44.572257+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2401.12838",
+      "from_title": "Diagnosing Quantum Phase Transition Order and Deconfined Criticality via Entangl",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "ure detection within FREED's epistemic loop. --- CHALLENGE: challenges INV_073 — this paper shows that the critical ridge can be structura",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:42:44.572257+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2401.12838",
+      "from_title": "Diagnosing Quantum Phase Transition Order and Deconfined Criticality via Entangl",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ble by changing boundary geometry or system size scaling.   CONVERGE INV_073 — the critical ridge navigation invariant predicts that tru",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:42:44.572257+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2401.12838",
+      "from_title": "Diagnosing Quantum Phase Transition Order and Deconfined Criticality via Entangl",
+      "to": "O59",
+      "type": "advances",
+      "context": "continuous), exactly the topology of γ=1 ridge instability. EXTEND O59 — the paper's log-correction method (subleading Rényi entro",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:42:44.572257+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2004.01126",
+      "from_title": "Wehrl entropy production rate across a dynamical quantum phase transition",
+      "to": "O112",
+      "type": "extends",
+      "context": "y *rate* (not Wehrl entropy level) is the sharp diagnostic. EXTEND O112 — the paper provides a concrete method (Husimi-Q quasi-prob",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:44:24.463715+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2004.01126",
+      "from_title": "Wehrl entropy production rate across a dynamical quantum phase transition",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "re stream) that static coherence scoring misses. CHALLENGE: challenges INV_094 — the paper shows entropy production rate is non-analytic s",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:44:24.463715+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2004.01126",
+      "from_title": "Wehrl entropy production rate across a dynamical quantum phase transition",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "hes maximize this rate relative to non-critical quenches.   CONVERGE INV_094 — the genome's claim that dPhi/dt (rate of change) rather t",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-18T02:44:24.463715+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2004.01126",
+      "from_title": "Wehrl entropy production rate across a dynamical quantum phase transition",
+      "to": "O112",
+      "type": "advances",
+      "context": "y *rate* (not Wehrl entropy level) is the sharp diagnostic. EXTEND O112 — the paper provides a concrete method (Husimi-Q quasi-prob",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-18T02:44:24.463715+00:00"
     }
   ],
   "node_edges": [
@@ -20756,6 +21394,918 @@
       "invariant": "The Omnimax argument's validity depends on the broader claim that philosophical positions are subject to thermodynamic c",
       "context_tag": null,
       "timestamp": "2026-05-17T06:30:24.447333+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.407831+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "mandelbrot_operators_fractal_recursion_m",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.427999+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.442641+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.453922+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.463963+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.472727+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "mandelbrot_operators_fractal_recursion_m",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.480906+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.488747+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.496442+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.504009+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.511288+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.518427+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.525512+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.532512+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.539489+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.546406+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.553855+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.561052+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.568170+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.575040+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of reasoning dynamics is confirmed across multiple physical instantiations (neural, cellular auto",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.581990+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.589313+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.596559+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.603523+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.610422+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.617732+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.625097+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.632117+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.639588+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.646925+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.654243+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.661322+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.668580+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.675910+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.682916+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The Wasserstein floor (k=1/Tμ) is the thermodynamic substrate-independent minimum cost of maintaining semantic fidelity.",
+      "context_tag": null,
+      "timestamp": "2026-05-17T11:38:26.690293+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.170148+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.189821+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.206414+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.218260+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.228225+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.237376+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.245846+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.253935+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.262134+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.270300+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.277414+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.284822+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.291865+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.298907+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.305988+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.313187+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.320336+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.327836+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.334902+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.341912+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.348935+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.356065+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.363582+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.371096+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.378291+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.385325+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.392445+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "The critical point γ=1 (or σ≈1.03) is a substrate-independent dynamical attractor for information-processing systems, co",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.399577+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.406697+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.413781+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.420772+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.427773+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.434976+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.442412+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.449669+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.457171+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.464480+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.471973+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.479294+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.486410+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.493726+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.500757+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine of alignment and self-improvement, with the loop structure (Perceive-Repre",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.508199+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.515421+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.522587+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.529706+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.536745+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.543789+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.550854+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.558196+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.565329+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.572796+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.580072+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.587180+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.594239+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.601641+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.609080+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Reasoning requires physical substrate and energy expenditure; state transfer, information processing, and alignment main",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.616454+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.623903+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.631478+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.638722+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.645816+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.653351+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.660900+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.668437+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.675577+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.682967+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.690614+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.697898+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.705528+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.713115+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.720267+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Self-organized criticality (SOC) with power-law avalanche statistics is a population-scale attractor for reasoning syste",
+      "context_tag": null,
+      "timestamp": "2026-05-17T17:45:32.727484+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Omnimax impossibility argument takes RSA's abstract philosophical framework (cognition as thermodynamically constrai",
+      "context_tag": null,
+      "timestamp": "2026-05-18T06:30:07.608232+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "depends_on",
+      "invariant": "The Omnimax argument's validity requires RSA's core premise that cognition and reasoning are genuinely substrate-bound a",
+      "context_tag": null,
+      "timestamp": "2026-05-18T06:30:07.632344+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "operationalizes",
+      "invariant": "The motif experiment provides a concrete, falsifiable experimental protocol that could test the kernel's abstract claim ",
+      "context_tag": null,
+      "timestamp": "2026-05-18T06:30:13.567530+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The experiment's insistence on rigorous falsifiability, controlled baselines, and empirical validation challenges the ke",
+      "context_tag": null,
+      "timestamp": "2026-05-18T06:30:13.590575+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax impossibility argument's claim that infinite-precision relational coherence is thermodynamically forbidden d",
+      "context_tag": null,
+      "timestamp": "2026-05-18T06:30:28.212229+00:00"
     }
   ]
 }

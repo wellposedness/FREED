@@ -465,6 +465,38 @@ class SelfEngineer:
                            "error": sym_check.stderr[:300], "timestamp": ts})
                 return {"failed": True, "reason": f"symbol check — '{sym}' removed or renamed, backup restored"}
 
+        # Step 4c — orphan wiring check (deterministic, pre-audit)
+        # If a patch adds a new def with zero call sites anywhere, it's dead code.
+        # The Haiku audit sees only the diff, not the full file, so it cannot detect this.
+        # Reject orphan patches here before they accrete in knowledge_graph.py et al.
+        is_orphan, orphan_names, orphan_reason = self._check_orphan_patch(
+            target_path.name, original_content, new_content
+        )
+        if is_orphan:
+            print(f"[ENGINEER]   ORPHAN check FAILED — {orphan_reason}. Reverting.")
+            shutil.copy2(bak_path, target_path)
+            self._log({
+                "status":        "orphan_reverted",
+                "file":          target_path.name,
+                "what":          what,
+                "why":           why,
+                "paper_url":     paper_url,
+                "timestamp":     ts,
+                "orphan_names":  orphan_names,
+                "orphan_reason": orphan_reason,
+            })
+            return {
+                "failed":          True,
+                "reason":          f"ORPHAN: {orphan_reason}",
+                "needs_obligation": True,
+                "ob_statement":    (
+                    f"Self-engineer attempted to add unwired function(s) to "
+                    f"{target_path.name}: {', '.join(orphan_names[:5])}. "
+                    f"Either wire each new def into a call site in the same patch, "
+                    f"or revise the IMPLEMENT signal to extend an existing call path."
+                ),
+            }
+
         # Step 5 — epistemic audit
         diff_summary = self._make_diff_summary(original_content, new_content)
         audit_verdict, audit_reason = self._audit_patch(
@@ -518,6 +550,80 @@ class SelfEngineer:
             "what":          what,
             "audit_verdict": audit_verdict,
         }
+
+    # ── Orphan wiring check ──────────────────────────────────────────────────
+
+    def _check_orphan_patch(self, filename: str, original: str, new: str):
+        """
+        Deterministic gate: reject patches that add a def with no call site anywhere.
+
+        Returns (is_orphan: bool, orphan_names: list, reason: str).
+        Fails open: any internal error returns False (do not block valid patches).
+
+        Detects functions added at module scope and methods added inside any class.
+        For each newly-added name, scans:
+          - the new content of the patched file (def line subtracted), and
+          - every other *.py in FREED_DIR
+        If zero references total, the def is an orphan.
+        """
+        import re as _re
+        try:
+            old_tree = ast.parse(original)
+            new_tree = ast.parse(new)
+
+            def collect_defs(tree):
+                names = set()
+                # Module-level functions
+                for node in tree.body:
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        names.add(node.name)
+                # Class methods (one level deep is sufficient — KG class et al)
+                for node in tree.body:
+                    if isinstance(node, ast.ClassDef):
+                        for sub in node.body:
+                            if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                                names.add(sub.name)
+                return names
+
+            added = collect_defs(new_tree) - collect_defs(old_tree)
+            # Skip dunder methods (they are dispatched implicitly by Python)
+            added = {n for n in added if not n.startswith("__")}
+            if not added:
+                return False, [], ""
+
+            # Build cross-module caller blob (all other .py files in FREED_DIR)
+            callers_blob = ""
+            for fp in FREED_DIR.glob("*.py"):
+                if fp.name == filename:
+                    continue
+                try:
+                    callers_blob += fp.read_text(encoding="utf-8")
+                except Exception:
+                    pass
+
+            orphans = []
+            for name in added:
+                # References inside the newly-patched file, minus the def line itself
+                in_self = len(_re.findall(r'\b' + _re.escape(name) + r'\b', new))
+                if _re.search(r'^\s*(?:async\s+)?def\s+' + _re.escape(name) + r'\b',
+                              new, _re.MULTILINE):
+                    in_self -= 1
+                # References anywhere else in the project
+                in_ext = len(_re.findall(r'\b' + _re.escape(name) + r'\b', callers_blob))
+                if in_self == 0 and in_ext == 0:
+                    orphans.append(name)
+
+            if orphans:
+                reason = (
+                    f"patch adds {len(orphans)} unwired def(s) with zero call sites: "
+                    f"{', '.join(sorted(orphans)[:5])}"
+                )
+                return True, sorted(orphans), reason
+            return False, [], ""
+        except Exception as e:
+            # Fail open — orphan check must never block valid patches on its own bug
+            print(f"[ENGINEER]   Orphan check error (failing open): {e}")
+            return False, [], ""
 
     # ── Epistemic audit ──────────────────────────────────────────────────────
 
