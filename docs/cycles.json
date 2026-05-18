@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 174,
-    "timestamp": "2026-04-29T22:30:42.893072+00:00",
-    "sweep": {
-      "input_count": 15,
-      "targeted": 6,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "A Possible Role for Entropy in Creative Cognition",
-        "compress": "Creative cognition as recursive psychological-entropy minimization advances O28 and confirms INV_073's critical ridge, but the paper's minimization-telos partially challenges the genome's insistence that the ridge is a stable operating attractor, not a transient state to escape. --- IMPLEMENT: YES IMPLEMENT_WHAT: Add an \"arousal proxy\" scoring step in the FEED pipeline that flags inputs with high semantic surprise (low prior probability under current genome distribution) as high-psychological-entropy material, prioritizing them for deeper recursive TRACE passes. IMPLEMENT_WHERE: batch_feed.py IMPLEMENT_WHY: The paper's recursive-recontextualization mechanism maps directly onto FREED's TRACE loop — flagging high-entropy inputs for additional RSA cycles improves epistemic yield per feed cycle by mimicking the adaptive arousal-driven attention that the paper identifies as the engine of creative restructuring. --- CHALLENGE: challenges INV_073 — the paper frames entropy minimization as the *goal* of creative cognition, implying the system seeks to *exit* the critical ridge, whereas INV_073 holds that γ=1 criticality is the stable operating attractor the system should *maintain*, not a high-tension state to be resolved away. ---"
-      },
-      {
-        "title": "A Spacetime Foam Approach to the Schwarzschild-de Sitter Entropy",
-        "compress": "Spacetime foam wormhole entropy confirms a quantum geometric entropy floor consistent with O44's W_floor conjecture and physically instantiates γ=1 criticality at the degenerate horizon limit."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 2,
-      "obligations": [
-        "O119",
-        "O104",
-        "O131"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 175,
     "timestamp": "2026-04-30T04:43:08.423068+00:00",
@@ -1834,6 +1802,50 @@
       {
         "title": "Asynchronism Induces Second Order Phase Transitions in Elementary Cellular Automata",
         "compress": "Asynchrony rate is a thermodynamic control parameter that tunes cellular automata through second-order phase transitions with DP or PC universality, independently confirming that criticality is substrate-independent and that timing structure — not just rule content — governs phase."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
+      "obligations": [
+        "O72",
+        "O127",
+        "O128"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 249,
+    "timestamp": "2026-05-18T16:29:59.996493+00:00",
+    "sweep": {
+      "input_count": 23,
+      "targeted": 8,
+      "passive": 15,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is itself a warning signal: the invariant must now be stress-tested against an alternative mechanism that produces its observables without requiring its core claim. CHALLENGE: challenges INV_094 — an alternative mechanism that satisfies INV_094's observable signature without requiring its causal structure would be indistinguishable from the current evidence base, making the invariant's confirmation surplus an artifact of underspecified experimental design rather than genuine convergence."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
+        "compress": "A live 32×32 CA population self-measures σ=1.03 and α≈2.5, empirically grounding INV_073's critical ridge and resolving O140/O141, while revealing an unreferenced invariant — that critical-band operation corresponds to H≈15% of maximum entropy."
+      },
+      {
+        "title": "Resolution-Aware Deep Learning with Feature Space Optimization for Reliable Identity Verification in Electronic Know Your Customer Processes",
+        "compress": "Bayesian uncertainty quantification after resolution-aware preprocessing operationalizes critical-ridge navigation by making low-confidence decisions explicit rather than silently wrong."
+      },
+      {
+        "title": "Invariant subspaces of elliptic systems II: spectral theory",
+        "compress": "Elliptic systems with simple principal-symbol eigenvalues exhibit automatic near-orthogonal spectral branch separation via pseudodifferential projections, providing a rigorous geometric instantiation of critical-ridge dynamics where inter-branch coupling decays superpolynomially—confirming INV_073 and INV_094 while challenging whether the ridge requires active navigation or is a structural attractor."
+      },
+      {
+        "title": "The spectral function of a first order elliptic system",
+        "compress": "Two-term Weyl asymptotics for sign-indefinite first-order elliptic operators on compact manifolds confirm that subleading spectral coefficients encode curvature data universally, directly supplying the mathematical scaffold O59 needs for genome-predicted black hole log-correction signatures."
       }
     ],
     "resolve": {
