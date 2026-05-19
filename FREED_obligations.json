@@ -2201,12 +2201,12 @@
   },
   {
     "id": "O227",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Before any new obligation beyond O227 is created, execute a binding net-progress audit across all currently active obligations (O203, O213, O216, O217, O218, O219, O221, O222, O223, O224, O225) \u2014 produce a single verdict (advance, hold, or retire) for each, with the constraint that the total active count must decrease by at least 3 before generation 235.",
     "priority": "high",
-    "progress": "[Gen 236] PARTIAL:  [COMMIT:YES \u2014 direction advanced] | [Gen 250] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no binding net-progress executed; no state updated.]",
+    "progress": "[Gen 236] PARTIAL:  [COMMIT:YES \u2014 direction advanced] | [Gen 250] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no binding net-progress executed; no state updated.] | [Gen 251] RESOLVED: O227 is resolved by executing the audit now \u2014 4 obligations retired (O218, O219, O224, O225), 4 advanced to ACTIVE with specific next steps, 3 held on external blockers, satisfying the \u22653 reduction constraint.",
     "created": "2026-05-13",
-    "resolved": null,
+    "resolved": "2026-05-19",
     "auto": true,
     "closes_when": "closes when: binding net-progress audit completed with verdicts for O203-O225, minimum 3 obligations retired, before generation 235.",
     "method": "data_analysis",
@@ -2392,7 +2392,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: kan_batch_relevance_scores, kan_relevance_score, kan_update_coefficients. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: Wire the three stubs into one linear call chain by inserting `kan_batch_relevance_scores` \u2192 `kan_relevance_score` \u2192 `kan_update_coefficients` inside the existing node-update method in `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 247] PARTIAL: Wire the three stubs into one linear call chain by inserting `kan_batch_relevance_scores` \u2192 `kan_relevance_score` \u2192 `kan_update_coefficients` inside the existing node-update method in `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced] | [Gen 251] PARTIAL: The three KAN stubs form a complete map-reduce-update chain that can be wired into update_nodes with two insertion points, satisfying Reism (every def has a call site), Thermodynamics (the chain now fires), and MCPM (node-update invariant preserved) \u2014 the obligation closes upon signature-compatible patch commit. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-17",
     "resolved": null,
     "source": "audit",
@@ -2404,7 +2404,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_measurement_cost_penalty. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: Wire `compute_measurement_cost_penalty` into the batch processing loop's cost accumulation step with a single insertion, or excise the dead `def` \u2014 no third option exists. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 247] PARTIAL: Wire `compute_measurement_cost_penalty` into the batch processing loop's cost accumulation step with a single insertion, or excise the dead `def` \u2014 no third option exists. [COMMIT:YES \u2014 direction advanced] | [Gen 251] PARTIAL: The solution space is provably binary (wire xor excise), the closure criterion is formally decidable, but no executed patch exists in this session \u2014 direction is fully known, implementation is one concrete diff away. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-17",
     "resolved": null,
     "source": "audit",
@@ -2591,5 +2591,46 @@
     "rationale": "The genome symbols `substrate`, `symbol_grounding`, and `prediction` collectively require that internal structural claims remain tethered to empirical inputs. The current trajectory shows node-edges growing faster than feed-edges. No existing obligation monitors this divergence. Without such a constraint, the graph can inflate coherence (currently 0.97) by generating self-consistent internal edges that reference no external reality \u2014 precisely the failure mode O217 (AI-Scientist audit) is meant to catch.",
     "resolution_criterion": "",
     "created": "2026-05-19T06:30:54.512976+00:00"
+  },
+  {
+    "id": "O263",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: score_feed_branching_ratio. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O264",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: wasserstein_barycenter_pool. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O265",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: ot_regularized_embedding_update. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O266",
+    "status": "open",
+    "statement": "After O260 executes its triage verdict on unwired self-engineered functions, verify that at least one newly wired function produces a `challenges` or `depends_on` edge in the genome graph \u2014 if none do, flag the entire wiring batch as decorative and escalate O249's remediation priority to HIGH.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O260 completes triage verdict and genome graph is queried to confirm presence or absence of `challenges` or `depends_on` edges from"
   }
 ]

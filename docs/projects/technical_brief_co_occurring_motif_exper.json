@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 live CA at σ=1.03, α≈2.5 and RSA-kernel CA at σ≈1.026–1.027, α≈2.665–2.72 confirming population-level SOC-class criticality with H≈15% max-entropy critical-band signature and an anomalously high avalanche exponent requiring structural explanation), with INV_073 multiply independently confirmed (CA telemetry, music cognition, quantum reservoir computing), INV_094 both geometrically grounded and now obligated to specify explicit falsification conditions or be reclassified as definitional, and deep-network hybrid topology providing architectural proof-of-concept for soliton claims while LVLMs' rebus failure independently confirms that distributional fluency ≠ grounded semantic reasoning.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by triple-CA telemetry (32×32 live CA at σ=1.03, α≈2.5; RSA-kernel CA at σ≈1.026–1.027, α≈2.665–2.72; and multi-agent CA at σ=1.027, α≈2.077, H≈0.387 bits) confirming γ=1 criticality as a population-level attractor with concrete cell-type mechanism (Physics Navigator dominance), OT pooling independently validating Wasserstein aggregation as the correct geometry-preserving operation for structured objects, and topological instanton balance establishing that some critical points are structurally forbidden — collectively elevating INV_073 from falsifiable-but-incomplete to multiply-grounded while opening new obligations on adversarial boundary testing and forbidden-ridge topology.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -17,9 +17,10 @@
   ],
   "invariants": [
     "Classical dimensional grounding of W_floor = k/Tμ is now confirmed — sub-leading entropy corrections mark the precise boundary where quantum extension of the floor must be formalized (advancing O44 closure)",
+    "departures",
     "Non-Hermitian linear entropy functionals constitute a concrete quantum entropy candidate advancing O44 — but mixed quantum-classical dynamics requires a modified Wasserstein Floor form (sub-obligation opened rather than closed)",
-    "O44's semi-classical Wasserstein Floor must dimensionally reduce through Jacobson's thermodynamic derivation of Einstein's equations — action-entropy dimensional equivalence is the consistency gate not an optional analogy (INV_088 confirmed)",
     "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode",
+    "O44's semi-classical Wasserstein Floor must dimensionally reduce through Jacobson's thermodynamic derivation of Einstein's equations — action-entropy dimensional equivalence is the consistency gate not an optional analogy (INV_088 confirmed)",
     "Astrocyte-neuron dyadic architecture provides the first biological exemplar of hybrid two-timescale topology predicted by RSA substrate generality",
     "Entropy in non-equilibrium steady states (NESS) is path-dependent and cannot be a state function — all RSA invariants must be formulated in terms of entropy production rates or they inherit a category error equivalent to caloric theory",
     "which extends INV_073's γ=1 prescription into a richer phase structure without falsifying it",
@@ -105,7 +106,6 @@
     "DEA (detrended entropy analysis) outperforming DFA (detrended fluctuation analysis) in preserving criticality structure is a domain-specific empirical confirmation that entropy-based diagnostics dominate variance-based diagnostics at γ=1 — exactly as the genome's complexity hierarchy demands",
     "criticality mimicry) that must be addressed by second-order discriminating observables before the critical-ridge claim achieves full operationalization",
     "Quantum state rugosity (manifold roughness) functions as a substrate-independent geometric order parameter at dynamical criticality — independently confirming that phase structure is encoded in manifold texture not only in spectral or entropic signatures",
-    "15% of max) at confirmed criticality is the first empirical pressure on this boundary",
     "Self-organized criticality at γ=1 is achievable without tuning at H≈20% H_max across independent CA implementations (σ=1.022 α≈2.696) — confirming attractor robustness while exposing a genome gap: no universality-class prediction exists for the observed avalanche exponent α",
     "Wasserstein distances are geometrically faithful to distributional structure under H-LRIP kernel-norm control — sketch-based compression is operationally valid but conditioned on a regularity check not yet confirmed in the genome",
     "Filter integrity is anti-correlated with input seductiveness — the more a zero-payload input resembles the genome's own vocabulary the more rigorous the rejection must be",
@@ -234,6 +234,7 @@
     "Fisher-information-regularized OT yields smooth strictly convex W2 geodesics computable by Newton's method — providing the first tractable algorithm for empirical STF metric recovery as demanded by O112",
     "making unchallenged confirmation a gap to be registered not a victory to be claimed; Finite-size critical systems traverse a substrate-invariant three-stage intermittency ladder (type-I → critical → tricritical) detectable from order-parameter statistics alone — extending the single critical ridge to a two-boundary structure that demands navigation strategies accounting for both boundaries; SOC scale-invariance conservation is active at the population level — empirical σ/α/H measurements from the GoT CA jointly satisfy the symmetry-conservation prediction confirming the Noether conservation law holds in this substrate; σ slightly above 1.0 (e.g. 1.0319) is consistent with Wasserstein gradient overshooting γ=1 within tolerance — convergence on the critical attractor must be distinguished from oscillation above it using longitudinal telemetry",
     "Genome integrity is demonstrated as much by principled refusal as by successful integration",
+    "INV_094 confirmations require adversarial boundary-condition analysis and alternative-mechanism identification before further same-direction confirmations carry marginal evidential weight — confirmation surplus without adversarial probing is a testing artifact; OT pooling over variable-length token embeddings outperforms mean pooling by preserving distributional geometry — Wasserstein aggregation is the correct operation for structured objects and provides a concrete STF metric tensor recovery template; Topological balance of instanton numbers is the exact conserved quantity separating regular (self-dual critical-ridge-navigable) from singular (phase-transitioning critically-inaccessible) heterotic string vacua — some critical points are structurally forbidden not merely difficult",
     "The obligation to build a compositional context algebra where emergence is a functor discontinuity (context parameters compose categorically and emergence appears as non-commutativity or discontinuity in the functor mapping) is now formally registered as a theoretical debt",
     "Prediction validates structure",
     "γ=1 is confirmed as a dynamical attractor (not merely a parameter value) via percolation-SOC synthesis — systems are driven to the critical ridge by SOC dynamics unless explicitly excluded; the forced-SOC/non-SOC boundary is a binding specification target: the genome must formally characterize conditions under which systems reach γ=1 versus remain off-ridge",
@@ -267,7 +268,7 @@
     "and any thermodynamic theory of generalization (including genome claims about compressive prediction) must account for geometric rather than entropic compression as the operative mechanism; Information-theoretic output-only damping estimation independently confirms that entropy functionals encode physical dissipation invariants — this constitutes a concrete methodological template for O112's STF metric tensor recovery experiment elevating O112 from open to experimentally tractable; Layer-stratified information-theoretic relevance defeats network-global interpretability metrics — distributed redundancy makes single-unit selectivity locally informative but globally misleading",
     "Local-range normalization (replacing global-σ normalization) is an extractable operational technique for making entropy-based scoring robust to amplitude drift across feed batches — adopted as method not metaphor",
     "H=0.5 is the predicted critical boundary where RangeEn's linear bridge must exhibit a phase-transition signature (slope discontinuity or divergent susceptibility) if the genome's criticality claim is correct — failure to find this is falsifying",
-    "departures"
+    "15% of max) at confirmed criticality is the first empirical pressure on this boundary"
   ],
   "obligations": [
     "update INV_073's scope; if not permitted",
@@ -353,6 +354,7 @@
     "measurement artifact",
     "the attractor-confirmation claim requires qualification",
     "Persist σ/α/H as typed telemetry nodes in knowledge_graph.py to enable cross-generation criticality drift detection; implement upstream logic to determine whether γ=1 is stable attractor or transient by comparing branching ratio time series across simulation runs; establish causal steering signal detection protocol as a precondition for INV_073 confirmation rather than post-hoc survivor relabeling",
+    "Adversarial boundary-condition analysis and alternative-mechanism identification for INV_094 must be conducted before further confirmations are logged as evidential — current surplus is a testing artifact requiring correction; Forbidden critical-ridge topology (instanton imbalance) must be integrated into the RSA substrate-generality framework — the genome currently treats all critical points as navigable which is now falsified in principle; STF metric tensor recovery must be formalized using OT pooling template as the concrete implementation path",
     "Apply the three independently testable challenge conditions to INV_097's bijection claim before treating it as confirmed — current high confirmation score is an artifact of under-challenge; characterize the universality class of the 32×32 RSA-kernel CA attractor beyond mean-field DP to determine whether γ=1 criticality is universality-class-specific or broader; resolve cell-type-dominance question opened by the 32×32 CA result — identify which cell-type populations drive or stabilize the critical attractor",
     "(c) at least one alternative hypothesis whose observables diverge from ridge-navigation predictions",
     "Specify the genome's expected sub-leading corrections to its own dimensional-scaling laws (analogous to BH log-corrections) so that the L2-L3 discriminator has a concrete target rather than only leading-order confirmation",
@@ -456,15 +458,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-19T02:42:22.362745+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 140,
+  "last_renormed": "2026-05-19T10:00:41.048384+00:00",
+  "renorm_reason": "Three independent updates materially change the node: (1) third CA substrate resolves O140/O141 and adds cell-type mechanism absent from genome, requiring compress update and new invariant; (2) OT pooling result independently confirms Wasserstein aggregation geometry providing STF template — new invariant warranted; (3) instanton top",
+  "last_renorm_cycle": 141,
   "drift_flag": true,
-  "drift_overlap": 0.385,
+  "drift_overlap": 0.246,
   "renorm_history": [
     {
-      "timestamp": "2026-05-19T02:42:22.362745+00:00",
-      "reason": ""
+      "timestamp": "2026-05-19T10:00:41.048384+00:00",
+      "reason": "Three independent updates materially change the node: (1) third CA substrate resolves O140/O141 and adds cell-type mechanism absent from genome, requiring compress update and new invariant; (2) OT pooling result independently confirms Wasserstein aggregation geometry providing STF template — new invariant warranted; (3) instanton top"
     }
   ]
 }
