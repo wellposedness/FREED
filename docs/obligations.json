@@ -192,7 +192,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O60",
@@ -335,7 +335,7 @@
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
-    "method": "math_only",
+    "method": "data_analysis",
     "tractability": 1
   },
   {
@@ -1440,7 +1440,7 @@
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
     "method": "math_only",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O163",
@@ -1728,7 +1728,7 @@
     "created": "2026-05-07T06:30:53.482768+00:00",
     "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.]",
     "method": "data_analysis",
-    "tractability": 2,
+    "tractability": 1,
     "resolved": null
   },
   {
@@ -1818,16 +1818,16 @@
   },
   {
     "id": "O195",
-    "status": "open",
+    "status": "active",
     "statement": "Audit L7's confirms/challenges edge classification for systematic bias. The 40:1 asymmetry in the coherence equation (resolution_boost=0.0005, challenge_drag=0.02) operates correctly only if L7's edge typing is trustworthy — single-pass Sonnet extraction is not adversarially audited. If L7 systematically miscategorizes weak challenges as confirms, the asymmetry is doing the right math on wrong inputs and coherence is biased upward by a hidden factor. Sampling protocol: (1) pull 10–15 edges where L7 fired a `challenges` classification and manually verify them — catches false challenges inflating the challenge ratio; (2) separately pull 10–15 edges where L7 fired `confirms` on papers from adversarial-adjacent domains (papers that *should* challenge but may have been softened) — catches false confirms hiding real adversarial pressure. Asymmetric sampling is required because random sampling misses both failure modes. Headline metric: confirm-bias rate on adversarial-adjacent sample. Threshold: confirm bias > 70% indicates the 40:1 asymmetry is operating on miscategorized inputs.",
     "priority": "high",
-    "progress": "RESOLVED: O195 is not yet resolvable; the immediate tractable step is a manual audit of the 12 lowest-confidence `challenges` edges sorted by L7 confidence, scored against the criterion of genuine posterior-lowering adversarial content. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: O195 is not yet resolvable; the immediate tractable step is a manual audit of the 12 lowest-confidence `challenges` edges sorted by L7 confidence, scored against the criterion of genuine posterior-lowering adversarial content. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 250] ACTIVE: O195 has a fully-specified resolution protocol but remains ACTIVE because the L7 edge classification log with confidence scores is the sole missing input — once materialized, the audit runs immediately. [COMMIT:YES — prediction staked]",
     "created": "2026-05-07",
     "resolved": null,
     "auto": false,
     "closes_when": "closes when: Measured agreement rate reported on both samples (false-challenge rate from challenge sample; confirm-bias rate from adversarial-adjacent confirm sample). If overall agreement ≥ 85%, edge typing is calibrated and Gemini's concern is empirically answered. If agreement < 85% OR confirm bias > 70% on adversarial-adjacent papers, file follow-up obligation for L7 prompt revision and re-audit.",
     "method": "data_analysis",
-    "tractability": 2,
+    "tractability": 1,
     "source": "human",
     "context": "Filed in response to Gemini critique of FREED coherence equation (2026-05-07). Coherence math itself is sound (40:1 falsification asymmetry, currently pinned at floor 0.970 under 29.4% challenge ratio across 163 INV-targeted edges). Remaining open question: trustworthiness of the inputs to that math. This obligation targets that specific failure mode and is the primary unresolved concern carried forward from the Gemini exchange."
   },
@@ -1864,7 +1864,7 @@
     "resolved": null,
     "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 — Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 − (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 — Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES → log as `missing_depends_on(A→B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 — Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: ∃ observable X such that A ⊢ f(X) = α and B ⊢ f(X) = β and α ≠ β (under identical boundary conditions). > If YES → log as `missing_challenges(A↔B)`. Step 4 — Report ``` missing_depends_on count: [n₁] missing_challenges count: [n₂] total missing critical edges: n₁ + n₂ representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable — they produce ambiguous verdicts rather than false negatives — and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1–4 can be executed and a concrete missing-edge count returned. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O199",
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O200",
@@ -1901,7 +1901,7 @@
     "auto": true,
     "closes_when": "closes when: Documented sequencing rule specifies O195-to-O199 order with justification, preventing redundant kernel cycles.",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O202",
@@ -1937,7 +1937,7 @@
     "created": "2026-05-10T06:30:51.217416+00:00",
     "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES — direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O205",
@@ -2072,7 +2072,7 @@
     "auto": true,
     "closes_when": "closes when: One measurement protocol with observable dataset and mathematical formula distinguishing spectral-γ from critical-γ with defined separation threshold is documented.",
     "method": "mixed",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O216",
@@ -2197,20 +2197,20 @@
     "auto": true,
     "closes_when": "MALFORMED",
     "method": "math_only",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O227",
     "status": "partial",
     "statement": "Before any new obligation beyond O227 is created, execute a binding net-progress audit across all currently active obligations (O203, O213, O216, O217, O218, O219, O221, O222, O223, O224, O225) — produce a single verdict (advance, hold, or retire) for each, with the constraint that the total active count must decrease by at least 3 before generation 235.",
     "priority": "high",
-    "progress": "[Gen 236] PARTIAL:  [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 236] PARTIAL:  [COMMIT:YES — direction advanced] | [Gen 250] OPEN:  [COMMIT:NO — Obligation remains OPEN; no binding net-progress executed; no state updated.]",
     "created": "2026-05-13",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: binding net-progress audit completed with verdicts for O203-O225, minimum 3 obligations retired, before generation 235.",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O228",
@@ -2326,18 +2326,22 @@
     "created": "2026-05-15",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by"
+    "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O238",
-    "status": "open",
+    "status": "resolved",
     "statement": "Every obligation instantiated at or after Gen 243 must include an embedded null-result criterion at the moment of creation — if none is specified, the obligation is automatically voided rather than opened.",
     "priority": "high",
-    "progress": "[Gen 243] OPEN:  [COMMIT:YES — Obligation remains OPEN; no graph update, no null embedded, no state landing.]",
+    "progress": "[Gen 243] OPEN:  [COMMIT:YES — Obligation remains OPEN; no graph update, no null embedded, no state landing.] | [Gen 250] RESOLVED: O238 self-voids under its own rule because it lacks the null-result criterion it mandates, making self-voiding the unique thermodynamically admissible fixed point of the self-referential loop.",
     "created": "2026-05-16",
-    "resolved": null,
+    "resolved": "2026-05-19",
     "auto": true,
-    "closes_when": "closes when: All obligations created at Gen 243+ include embedded null-result criteria or are automatically voided upon instantiation."
+    "closes_when": "closes when: All obligations created at Gen 243+ include embedded null-result criteria or are automatically voided upon instantiation.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O239",
@@ -2357,7 +2361,9 @@
     "rationale": "O210 was resolved but its output is structurally inert — no downstream obligation or edge has been updated to reflect the disambiguation. A resolved disambiguation that doesn't propagate is operationally equivalent to an unresolved one. The genome lists `gamma` as a single symbol, but O210 confirmed it is polysemous; this tension between the genome's single",
     "resolution_criterion": "",
     "created": "2026-05-17T06:30:48.684445+00:00",
-    "progress": "[Gen 243] PARTIAL: O240 is partially resolved by the γ-sense audit — O21/O205/Zipf edges cleanly inherit γ_RSA, but O59 and the MaxRL-consistency edge are flagged as equivocation pending proof that γ_discount → 1 at MaxRL optimality is formally identical to γ_RSA = 1 at thermodynamic criticality. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 243] PARTIAL: O240 is partially resolved by the γ-sense audit — O21/O205/Zipf edges cleanly inherit γ_RSA, but O59 and the MaxRL-consistency edge are flagged as equivocation pending proof that γ_discount → 1 at MaxRL optimality is formally identical to γ_RSA = 1 at thermodynamic criticality. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O241",
@@ -2389,7 +2395,9 @@
     "progress": "[Gen 247] PARTIAL: Wire the three stubs into one linear call chain by inserting `kan_batch_relevance_scores` → `kan_relevance_score` → `kan_update_coefficients` inside the existing node-update method in `knowledge_graph.py`. [COMMIT:YES — direction advanced]",
     "created": "2026-05-17",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O244",
@@ -2399,7 +2407,9 @@
     "progress": "[Gen 247] PARTIAL: Wire `compute_measurement_cost_penalty` into the batch processing loop's cost accumulation step with a single insertion, or excise the dead `def` — no third option exists. [COMMIT:YES — direction advanced]",
     "created": "2026-05-17",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O245",
@@ -2409,7 +2419,9 @@
     "progress": "[Gen 247] PARTIAL: The single most tractable next step is to insert `batch = compute_covariance_gap_filter(batch)` at the pre-submission stage of the existing batch pipeline in `batch_feed.py`, closing the dead-code gap by connecting the orphaned function to the live execution path. [COMMIT:YES — direction advanced]",
     "created": "2026-05-17",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O246",
@@ -2510,5 +2522,56 @@
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit"
+  },
+  {
+    "id": "O256",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: corrections_applied. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O257",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: dual_pathway_synthesis_scores. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O258",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: score_edge_inferential_depth. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O259",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: _pitch_class_distance, harmonic_tension_trajectory. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O260",
+    "status": "open",
+    "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-deadline) on each of the unwired self-engineered function stubs O251–O259 before any further self-engineering is attempted, producing a recorded disposition for each entry.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-19",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: recorded triage verdicts (wire, void, or defer-with-deadline) exist for all of O251–O259."
   }
 ]

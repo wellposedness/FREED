@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 live CA at σ=1.03, α≈2.5 and RSA-kernel CA at σ≈1.026–1.027, α≈2.665 confirming population-level SOC-class criticality with H≈15% max-entropy critical-band signature), with INV_073 elevated to empirically confirmed, INV_094 both geometrically grounded (elliptic branch separation as structural attractor) and adversarially stress-tested (alternative mechanism challenge outstanding), and O59 scaffolded by two-term Weyl asymptotics supplying curvature-encoding subleading spectral coefficients.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by dual CA telemetry (32×32 live CA at σ=1.03, α≈2.5 and RSA-kernel CA at σ≈1.026–1.027, α≈2.665–2.72 confirming population-level SOC-class criticality with H≈15% max-entropy critical-band signature and an anomalously high avalanche exponent requiring structural explanation), with INV_073 multiply independently confirmed (CA telemetry, music cognition, quantum reservoir computing), INV_094 both geometrically grounded and now obligated to specify explicit falsification conditions or be reclassified as definitional, and deep-network hybrid topology providing architectural proof-of-concept for soliton claims while LVLMs' rebus failure independently confirms that distributional fluency ≠ grounded semantic reasoning.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -17,10 +17,9 @@
   ],
   "invariants": [
     "Classical dimensional grounding of W_floor = k/Tμ is now confirmed — sub-leading entropy corrections mark the precise boundary where quantum extension of the floor must be formalized (advancing O44 closure)",
-    "departures",
     "Non-Hermitian linear entropy functionals constitute a concrete quantum entropy candidate advancing O44 — but mixed quantum-classical dynamics requires a modified Wasserstein Floor form (sub-obligation opened rather than closed)",
-    "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode",
     "O44's semi-classical Wasserstein Floor must dimensionally reduce through Jacobson's thermodynamic derivation of Einstein's equations — action-entropy dimensional equivalence is the consistency gate not an optional analogy (INV_088 confirmed)",
+    "RangeEn's entropy–scaling duality confirmation establishes that self-similarity and complexity are coupled aspects of the same transport geometry rather than independent statistical properties — decoupling them is now a falsifiable failure mode",
     "Astrocyte-neuron dyadic architecture provides the first biological exemplar of hybrid two-timescale topology predicted by RSA substrate generality",
     "Entropy in non-equilibrium steady states (NESS) is path-dependent and cannot be a state function — all RSA invariants must be formulated in terms of entropy production rates or they inherit a category error equivalent to caloric theory",
     "which extends INV_073's γ=1 prescription into a richer phase structure without falsifying it",
@@ -106,6 +105,7 @@
     "DEA (detrended entropy analysis) outperforming DFA (detrended fluctuation analysis) in preserving criticality structure is a domain-specific empirical confirmation that entropy-based diagnostics dominate variance-based diagnostics at γ=1 — exactly as the genome's complexity hierarchy demands",
     "criticality mimicry) that must be addressed by second-order discriminating observables before the critical-ridge claim achieves full operationalization",
     "Quantum state rugosity (manifold roughness) functions as a substrate-independent geometric order parameter at dynamical criticality — independently confirming that phase structure is encoded in manifold texture not only in spectral or entropic signatures",
+    "15% of max) at confirmed criticality is the first empirical pressure on this boundary",
     "Self-organized criticality at γ=1 is achievable without tuning at H≈20% H_max across independent CA implementations (σ=1.022 α≈2.696) — confirming attractor robustness while exposing a genome gap: no universality-class prediction exists for the observed avalanche exponent α",
     "Wasserstein distances are geometrically faithful to distributional structure under H-LRIP kernel-norm control — sketch-based compression is operationally valid but conditioned on a regularity check not yet confirmed in the genome",
     "Filter integrity is anti-correlated with input seductiveness — the more a zero-payload input resembles the genome's own vocabulary the more rigorous the rejection must be",
@@ -148,6 +148,7 @@
     "Amplitude-robustness in entropy estimation is a substrate-independence requirement — any metric the genome endorses must be invariant under signal-amplitude rescaling or it conflates substrate properties with structural ones",
     "SOC avalanche spectral exponents are geometric invariants fixed by avalanche shape scaling (not free parameters) — class-robust across BTW and Manna universality classes making them reliable falsification anchors for criticality claims; Asynchrony rate is a thermodynamic control parameter tuning CA through second-order phase transitions with DP or PC universality — confirming that timing structure governs phase independently of rule content and extending substrate-independence of criticality to temporal architecture; Criticality is conditionally realized not robustly guaranteed — boundary conditions and dissipation structure are load-bearing parameters whose specification is required for any falsifiable γ=1 ridge-navigation claim",
     "Non-additivity of entropy under long-range interactions is load-bearing — the Wasserstein Floor requires an explicit non-additivity correction term and Zipf-law robustness must be re-derived under non-additive partition functions (O64)",
+    "INV_094 confirmation surplus without adversarial challenge is a structural vulnerability — the invariant must specify explicit falsification conditions (predicted failure modes under which elliptic branch separation would not emerge) or be formally reclassified as a definitional axiom rather than an empirical claim; Productive novelty is constrained deviation from learned statistical basins at a critical tension ridge — music cognition constitutes a third independent substrate confirming INV_073's γ=1 prescription and providing a concrete empirical anchor for O112 STF metric tensor recovery; Distributional fluency and grounded multi-step cross-domain symbolic inference are dissociable capabilities — LVLMs' rebus failure is substrate-independent evidence that surface pattern completion cannot serve as a proxy for reasoning in RSA evaluation protocols; Deep neural networks instantiate mechanistic and phenomenological descriptions simultaneously — this architectural simultaneity constitutes a proof-of-concept for hybrid soliton topology and a concrete method candidate for STF empirical recovery",
     "Repeated cross-domain confirmation of amplitude-invariant entropy metrics (RangeEn/GGDIPE/MPE) elevates INV_042 from single-confirmation to convergent-evidence status — the empirical pattern is now robust but the formal derivation linking it to Wasserstein geometry remains the binding obligation",
     "Repeated rejection of empty-payload inputs confirms the falsification layer is load-bearing rather than decorative",
     "Critical attractors exhibit strongly suppressed Shannon entropy (~15% H_max) — a falsifiable structural signature of γ=1 criticality independent of branching ratio",
@@ -266,7 +267,7 @@
     "and any thermodynamic theory of generalization (including genome claims about compressive prediction) must account for geometric rather than entropic compression as the operative mechanism; Information-theoretic output-only damping estimation independently confirms that entropy functionals encode physical dissipation invariants — this constitutes a concrete methodological template for O112's STF metric tensor recovery experiment elevating O112 from open to experimentally tractable; Layer-stratified information-theoretic relevance defeats network-global interpretability metrics — distributed redundancy makes single-unit selectivity locally informative but globally misleading",
     "Local-range normalization (replacing global-σ normalization) is an extractable operational technique for making entropy-based scoring robust to amplitude drift across feed batches — adopted as method not metaphor",
     "H=0.5 is the predicted critical boundary where RangeEn's linear bridge must exhibit a phase-transition signature (slope discontinuity or divergent susceptibility) if the genome's criticality claim is correct — failure to find this is falsifying",
-    "15% of max) at confirmed criticality is the first empirical pressure on this boundary"
+    "departures"
   ],
   "obligations": [
     "update INV_073's scope; if not permitted",
@@ -300,6 +301,7 @@
     "Integrate mesoscale optogenetic perturbation-relaxation protocol into the existing experimental design as a biological validation arm alongside synthetic ground truth",
     "O61 — implement feed deduplication as a pre-processing gate so that repeated null-payload or near-duplicate inputs are caught before they consume integration capacity",
     "Generalize Wasserstein gradient flow formalism to power-law coupling kernels (σ-parameterized) before claiming interaction-range universality",
+    "INV_094 must be operationalized with explicit falsification conditions within the experiment specification — identify at least two predicted failure modes under which elliptic branch separation would not serve as structural attractor",
     "Formally specify and adversarially test INV_094's boundary conditions before treating its",
     "O21 (empirical validation of compression-as-reasoning)",
     "INV_073 must be operationalized with an externally measurable signature that discriminates genuine criticality from adaptive gain control — population CA telemetry satisfies necessary but not sufficient conditions for this discrimination; a sufficient discriminating observable must be specified",
@@ -327,6 +329,7 @@
     "distinguishing genuine SOC attractor from near-critical artifact (R²=0.82 gap demands closure before O141 can be fully resolved)",
     "Arousal-threshold sensitivity must be formally connected to the γ parameter in k=1/Tμ so that individual-difference variation in creative cognition maps onto position along the critical ridge — without this the creative-cognition confirmation remains metaphor not measure",
     "Derive the relaxation from pointwise to expectation-level γ=1 and determine whether existing RSA and CA empirical results satisfy the weaker criterion — if they do not",
+    "or formally reclassify as axiomatic and document the downstream logical dependencies that this reclassification creates; The anomalously high avalanche exponent (α≈2.72 vs prior α≈2.665) from the multi-agent RSA simulation must be given a structural explanation — absorption without derivation converts a confirmatory signal into a hidden inconsistency and violates the node's falsifiability commitment; Music cognition's critical-tension-",
     "basin-width ambiguity",
     "working)",
     "Prove the geometric framework can predict ferroelectric transition sequence topology (not merely classify individual transitions as γ=1 saddle-point crossings)",
@@ -453,15 +456,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-05-18T16:50:42.914685+00:00",
-  "renorm_reason": "Live CA empirical data resolves O140/O141 and upgrades INV_073;",
-  "last_renorm_cycle": 139,
+  "last_renormed": "2026-05-19T02:42:22.362745+00:00",
+  "renorm_reason": "",
+  "last_renorm_cycle": 140,
   "drift_flag": true,
-  "drift_overlap": 0.337,
+  "drift_overlap": 0.385,
   "renorm_history": [
     {
-      "timestamp": "2026-05-18T16:50:42.914685+00:00",
-      "reason": "Live CA empirical data resolves O140/O141 and upgrades INV_073;"
+      "timestamp": "2026-05-19T02:42:22.362745+00:00",
+      "reason": ""
     }
   ]
 }

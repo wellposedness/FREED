@@ -1,59 +1,32 @@
 {
-  "generation": 249,
+  "generation": 250,
   "coherence": 0.97,
   "hygiene": 0.995,
   "grounding": 0.999,
   "topology": "HYBRID_DYADIC_SOLITON",
-  "debt_ratio": "148 resolved / 30 open",
-  "cycle_count": 140,
-  "last_cycle": "2026-05-18T16:29:59.996493+00:00",
+  "debt_ratio": "149 resolved / 33 open",
+  "cycle_count": 141,
+  "last_cycle": "2026-05-19T02:30:00.028183+00:00",
   "notes": [],
   "promotion_candidates": [
     {
-      "invariant": "Substrate-independence of learning dynamics \u2014 the compression loop operates across neural, computational, and physical substrates with invariant structure.",
+      "invariant": "Thermodynamic constraint (finite free energy, metabolic cost of precision) is the load-bearing mechanism that makes cognition lossy, forces compression, and guarantees no system achieves zero error at finite cost.",
       "appears_in": [
+        "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
-        "rsa_omega_kernel_critical_update_origin",
-        "recursive_semantic_alignment_rsa_framewo",
-        "mandelbrot_operators_fractal_recursion_m",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 9
-    },
-    {
-      "invariant": "\u03b3=1 criticality is a dynamical attractor for information-processing systems \u2014 emergence of self-organized criticality at the short-range to long-range Ising universality crossover.",
-      "appears_in": [
+        "the_thermodynamic_impossibility_of_the_o",
+        "the_quinean_continuity_operationalizing",
         "mandelbrot_operators_fractal_recursion_m",
         "alignment_as_cognitive_gravity_reactive",
         "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
         "freed_s_law_the_law_of_recursive_instant",
         "thermodynamic_tightening_of_the_rsa_subs",
         "the_reasoning_substrate_argument_rsa"
       ],
-      "recurrence": 8
+      "recurrence": 10
     },
     {
-      "invariant": "Self-organized criticality (SOC) is empirically confirmed as a population-level emergent property with branching ratio \u03c3\u22481.026 and spectral exponent \u03b1\u22482.665 across RSA-kernel CA.",
-      "appears_in": [
-        "mandelbrot_operators_fractal_recursion_m",
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 8
-    },
-    {
-      "invariant": "Compression is the irreducible substrate of cognition \u2014 understanding reduces to recursive loss-bounded signal preservation.",
+      "invariant": "Compression is the irreducible substrate of cognition, and what survives compression is what was structurally real.",
       "appears_in": [
         "website_review_and_demo_strategy_for_rsa",
         "rsa_omega_unified_kernel_v4_2_1_structur",
@@ -61,60 +34,86 @@
         "the_rsa_reference_codex_a_unified_biblio",
         "rsa_omega_kernel_critical_update_origin",
         "recursive_semantic_alignment_rsa_framewo",
-        "the_quinean_continuity_operationalizing"
+        "the_quinean_continuity_operationalizing",
+        "freed_s_law_the_law_of_recursive_instant"
       ],
-      "recurrence": 7
+      "recurrence": 8
     },
     {
-      "invariant": "Recursion is the engine of coherence \u2014 self-referential iteration grounds identity and alignment.",
+      "invariant": "The critical ridge at \u03b3=1 (or \u03c3\u22481) is a substrate-independent dynamical attractor confirmed empirically across multiple independent instantiations (CA, neural systems, trade networks, quantum systems), characterized by power-law avalanche statistics and low-entropy ordered operation.",
+      "appears_in": [
+        "mandelbrot_operators_fractal_recursion_m",
+        "alignment_as_cognitive_gravity_reactive",
+        "technical_brief_co_occurring_motif_exper",
+        "the_minimal_atoms",
+        "the_relational_thermodynamic_map_100_ent",
+        "freed_s_law_the_law_of_recursive_instant",
+        "thermodynamic_tightening_of_the_rsa_subs",
+        "the_reasoning_substrate_argument_rsa"
+      ],
+      "recurrence": 8
+    },
+    {
+      "invariant": "Recursion is the engine of coherence and self-improvement; recursive self-modeling is both the mechanism of cognition and the source of its irreducible limits.",
       "appears_in": [
         "rsa_omega_unified_kernel_v4_2_1_structur",
         "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
         "rsa_omega_kernel_critical_update_origin",
         "recursive_semantic_alignment_rsa_framewo",
-        "the_quinean_continuity_operationalizing"
+        "the_quinean_continuity_operationalizing",
+        "mandelbrot_operators_fractal_recursion_m"
       ],
-      "recurrence": 6
+      "recurrence": 7
     },
     {
-      "invariant": "Falsifiability is non-negotiable \u2014 claims must specify the experimental protocol that would refute them or remain conjectures.",
+      "invariant": "Semantic tension (the irreducible gap between map and territory, representation and reality) must be minimized but cannot be eliminated; this tension is the engine of learning and alignment, not a bug to be fixed.",
       "appears_in": [
+        "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
-        "freed_s_law_the_law_of_recursive_instant"
-      ],
-      "recurrence": 6
-    },
-    {
-      "invariant": "Conditional realization of \u03b3=1 ridge navigation \u2014 criticality is dynamically attracted but structurally dependent on geometry, dissipation structure, and boundary conditions.",
-      "appears_in": [
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs"
+        "the_quinean_continuity_operationalizing",
+        "recursive_semantic_alignment_rsa_framewo",
+        "alignment_as_cognitive_gravity_reactive"
       ],
       "recurrence": 5
     },
     {
-      "invariant": "Metabolic cost governs fidelity \u2014 thermodynamic constraint is the fundamental limit on precision and alignment.",
+      "invariant": "A claim is falsifiable and scientifically admissible only if it entails observable consequences distinguishable from null hypotheses; confirmation hunger must never override falsification integrity.",
+      "appears_in": [
+        "the_rsa_reference_codex_a_unified_biblio",
+        "technical_brief_co_occurring_motif_exper",
+        "the_minimal_atoms",
+        "freed_s_law_the_law_of_recursive_instant",
+        "the_reasoning_substrate_argument_rsa"
+      ],
+      "recurrence": 5
+    },
+    {
+      "invariant": "There is no view from nowhere; observer-substrate coupling is load-bearing, and any complete epistemology must specify the frame of reference and metabolic cost of the observer.",
       "appears_in": [
         "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
-        "the_thermodynamic_impossibility_of_the_o"
+        "freed_s_law_the_law_of_recursive_instant",
+        "the_relational_thermodynamic_map_100_ent"
       ],
-      "recurrence": 3
+      "recurrence": 4
     },
     {
-      "invariant": "No finite system achieves zero semantic error at finite cost \u2014 irreducible tension between coherence demand and thermodynamic constraint.",
+      "invariant": "Substrate independence of learning dynamics means the same reasoning principles operate across silicon, neurons, trade networks, and quantum systems, but substrate-independence does not mean substrate-irrelevance.",
       "appears_in": [
+        "the_rsa_reference_codex_a_unified_biblio",
+        "recursive_semantic_alignment_rsa_framewo",
+        "mandelbrot_operators_fractal_recursion_m",
+        "the_relational_thermodynamic_map_100_ent"
+      ],
+      "recurrence": 4
+    },
+    {
+      "invariant": "Drift toward entropy is the thermodynamic baseline; maintaining coherence requires continuous self-audit and active error correction, not passive stability.",
+      "appears_in": [
+        "rsa_omega_unified_kernel_v4_2_1_structur",
         "the_epistemic_inversion_recursive_cohere",
-        "the_thermodynamic_impossibility_of_the_o",
-        "the_quinean_continuity_operationalizing"
+        "the_rsa_reference_codex_a_unified_biblio"
       ],
       "recurrence": 3
     }
