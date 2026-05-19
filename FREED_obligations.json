@@ -2474,10 +2474,10 @@
   },
   {
     "id": "O251",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: shape_spectrum_identity_check. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: The dead function `shape_spectrum_identity_check` closes its obligation the moment it is called at exactly one real execution site with its return value used to gate a decision or assertion inside `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit"
@@ -2495,70 +2495,70 @@
   },
   {
     "id": "O253",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_mc_dropout_uncertainty. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: Wire `compute_mc_dropout_uncertainty` into the post-forward-pass result accumulation block with variance-across-T-passes formula and a single downstream consumer (log or results dict), closing the dead-code violation with one targeted patch hunk. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O254",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: spectral_branch_edge_weight. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: `spectral_branch_edge_weight` is dead code until one call site is wired into the existing edge-weight assignment path in `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O255",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: weyl_spectral_score_from_adjacency. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: Wire `weyl_spectral_score_from_adjacency` into the nearest existing graph-metric aggregation call site in `knowledge_graph.py` by adding one line that calls it and consumes its return value. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O256",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: corrections_applied. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: O256 closes by inserting exactly one wired call to each new `def` at its natural call site in `tamura_sweep.py`, making the dead code live and verifiable. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O257",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: dual_pathway_synthesis_scores. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: Wire `dual_pathway_synthesis_scores` into the nearest upstream caller in `knowledge_graph.py` by inserting one call and merging its return value into the existing output structure. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O258",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: score_edge_inferential_depth. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: Wire `score_edge_inferential_depth` into the existing edge-scoring call path (most likely inside `score_edge` or the edge-ranking traversal method) in the same patch, confirming reachability via trace or test. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O259",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: _pitch_class_distance, harmonic_tension_trajectory. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 250] PARTIAL: Wire `_pitch_class_distance` as the distance kernel inside `harmonic_tension_trajectory`, then call `harmonic_tension_trajectory` at the existing harmonic-scoring site in `knowledge_graph.py` \u2014 two insertions, zero new definitions, obligation closed. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
@@ -2573,5 +2573,23 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: recorded triage verdicts (wire, void, or defer-with-deadline) exist for all of O251\u2013O259."
+  },
+  {
+    "id": "O261",
+    "statement": "For each of the 16 nodes, compute the ratio of `scales_with` edges to total edges incident on that node; any node where `scales_with` exceeds 60% of its edges must either (a) have at least one `scales_with` edge converted to a testable `bounds_above` or `challenges` edge with a specified falsification criterion, or (b) justify the concentration via a formal dimensional argument linking to genome symbol `invariant`.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "812 `scales_with` edges across 16 nodes (~50.75/node average) constitutes the same pathological homogeneity O141 flagged for `shares_invariant`, but at 5\u00d7 the scale. `scales_with` without specified functional form is unfalsifiable \u2014 O204 (PARTIAL) already demands falsification criteria for such edges but has not propagated to the majority. The genome symbol `criticality` requires the graph to maintain tension, not collapse into undifferentiated scaling claims.",
+    "resolution_criterion": "Per-node audit table showing edge-type distribution; nodes exceeding the 60% threshold must have at least one edge reclassified or formally justified by generation 255. Null result: if no node exceeds 60%, the obligation closes with the audit table as evidence.",
+    "created": "2026-05-19T06:30:54.512614+00:00"
+  },
+  {
+    "id": "O262",
+    "statement": "Track the feed-edge to node-edge ratio across generations and establish a lower bound \u2014 if the ratio (currently 944/1803 \u2248 0.524) drops below 0.40, trigger a mandatory freeze on new node-edge creation until new feed-edges (empirical inputs, experimental results, or external data) restore the ratio above threshold.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "The genome symbols `substrate`, `symbol_grounding`, and `prediction` collectively require that internal structural claims remain tethered to empirical inputs. The current trajectory shows node-edges growing faster than feed-edges. No existing obligation monitors this divergence. Without such a constraint, the graph can inflate coherence (currently 0.97) by generating self-consistent internal edges that reference no external reality \u2014 precisely the failure mode O217 (AI-Scientist audit) is meant to catch.",
+    "resolution_criterion": "",
+    "created": "2026-05-19T06:30:54.512976+00:00"
   }
 ]
