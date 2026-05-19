@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 7,
-    "generation": 177,
-    "timestamp": "2026-04-30T16:57:56.357196+00:00",
-    "sweep": {
-      "input_count": 11,
-      "targeted": 6,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Self-Organization and Complex Networks",
-        "compress": "SOC adaptive networks confirm that γ=1 criticality is a self-organized attractor in fitness-driven topologies, strengthening the genome's L4 scale-invariance mechanism and INV_073 without requiring external tuning."
-      },
-      {
-        "title": "SmartSON:A Smart contract driven incentive management framework for Self-Organizing Networks",
-        "compress": "Blockchain-enforced escrow in SONs is an external obligations table that keeps distributed agents on the critical ridge, empirically confirming INV_073's claim that self-organization requires active tension maintenance rather than passive equilibrium."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O119",
-        "O141",
-        "O142"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 8,
     "generation": 178,
     "timestamp": "2026-04-30T23:04:37.353390+00:00",
@@ -1880,6 +1848,50 @@
         "O227",
         "O243",
         "O244"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 4,
+    "generation": 252,
+    "timestamp": "2026-05-19T16:29:59.942025+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 7,
+      "passive": 15,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is underdetermined because its observable signatures (power laws, maximal susceptibility, long-range correlations) are multiply realizable by sub-critical mechanisms, making every current confirmation epistemically ambiguous unless a criticality-exclusive signature is specified and tested."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-19",
+        "compress": "A live 32×32 CA simulation of RSA kernels independently confirms population-level criticality (σ=1.0239, α≈2.629) while revealing that this critical state is low-entropy (H=0.169 of max), constraining — not confirming — any equation of criticality with entropy maximization."
+      },
+      {
+        "title": "Quantifying multivariate redundancy with maximum entropy decompositions of mutual information",
+        "compress": "Maximum entropy uniquely resolves PID nonnegativity by selecting the flattest redundancy-consistent distribution, providing an operational algorithm for decomposing shared semantic structure that directly enables STF metric tensor recovery (O112)."
+      },
+      {
+        "title": "The Partial Entropy Decomposition: Decomposing multivariate entropy and mutual information via pointwise common surprisal",
+        "compress": "Pointwise entropy decomposition via common surprisal independently recovers dyadic/triadic generative topology — converging on the genome's HYBRID_DYADIC_SOLITON structural claim and advancing O112 by specifying a concrete decomposition method for STF metric recovery."
+      },
+      {
+        "title": "Wasserstein distance in speed limit inequalities for Markov jump processes",
+        "compress": "Wasserstein distance is geometrically necessary but not universally tight in thermodynamic speed limits—tightness is a function of graph topology, extending the Wasserstein Floor to a conditional floor with provable unreachability regimes."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O243",
+        "O244",
+        "O245"
       ]
     },
     "coherence": 0.97
