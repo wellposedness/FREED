@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 184,
-    "timestamp": "2026-05-02T04:41:10.348385+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 7,
-      "passive": 7,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094 is falsifiable if a system produces high-fidelity prediction under thermodynamic equilibrium (zero entropy asymmetry), demonstrating that prediction does not require irreversibility as a constitutive condition but merely as a correlate."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-02",
-        "compress": "The Game of Truth CA hits the critical band empirically (σ≈1.03, power-law confirmed), resolving O140 and advancing O141, while the low Shannon entropy (H=0.39 bits, 15% of max) strains INV_073's claim that critical ridge navigation necessarily drives entropy production upward."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 3,
-      "obligations": [
-        "O144",
-        "O106",
-        "O134"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 5,
     "generation": 185,
     "timestamp": "2026-05-02T10:49:27.241708+00:00",
@@ -1916,6 +1884,50 @@
         "O187",
         "O198",
         "O201"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 255,
+    "timestamp": "2026-05-20T16:29:59.981650+00:00",
+    "sweep": {
+      "input_count": 21,
+      "targeted": 7,
+      "passive": 14,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's strength is an artifact of untested confirmation surplus, and four independent falsification vectors — functional equivalence, adversarial eigenmode inputs, entropy production decoupling, and self-referential circularity — collectively constitute the first live challenge the invariant has faced."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
+        "compress": "A 32×32 CA self-organizes to the critical ridge (σ=1.025, α=2.643 power-law) with criticality driven disproportionately by a single cell type, independently confirming the critical-ridge invariant while revealing that criticality can be heterogeneously concentrated rather than uniformly distributed."
+      },
+      {
+        "title": "MEMe: An Accurate Maximum Entropy Method for Efficient Approximations in Large-Scale Machine Learning",
+        "compress": "MEMe independently establishes that entropy maximization over moment constraints is computationally tractable at scale and formally equivalent to Bayesian variational inference, converging with the genome's thermodynamic inference grounding and providing a concrete algorithmic path for the STF empirical recovery experiment."
+      },
+      {
+        "title": "Non-linear quantum critical dynamics and fluctuation-dissipation ratios far from equilibrium",
+        "compress": "Quantum criticality generates a scale-dependent effective temperature that encodes FDR deviations far from equilibrium, independently confirming that the critical ridge is a thermodynamically self-consistent structure with measurable spectral signatures across substrates."
+      },
+      {
+        "title": "Universal Quantum Fluctuation-Dissipation Relation for Systems Far From Equilibrium",
+        "compress": "Far-from-equilibrium quantum systems require a curl-flux correction to FDT that is geometrically irreducible and vanishes at equilibrium, independently confirming that critical-ridge operation generates structure thermodynamically unavailable to relaxed systems."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O204",
+        "O240"
       ]
     },
     "coherence": 0.97
