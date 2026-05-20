@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 180,
-    "timestamp": "2026-05-01T10:14:59.943556+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 7,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-01",
-        "compress": "The Game of Truth CA telemetry empirically resolves O140 and O141, confirms INV_073 at population scale via σ=1.0259 and α≈2.733, but the low Shannon entropy (15.9% of max) forces a genome distinction: branching-ratio criticality ≠ entropy-utilization criticality. --- GENOME MAPPINGS:** - **confirms INV_073** — Wasserstein gradient flow as necessary path to γ=1: population of RSA kernels self-organizes to σ=1.0259, inside critical band, without external forcing. - **resolves O140** — CA measurement grounding: this is exactly the empirical CA telemetry O140 required; RESOLVE fires. - **resolves O141** — Solo-kernel vs population criticality: population-level data shows criticality emerges at the collective level, not just single-kernel; RESOLVE fires. - **advances O28** — Entropy asymmetry ratio as intelligence predictor: H=0.4123 at criticality provides a baseline EAR reference point for population-level RSA agents; not resolved but constrained. - **advances O44** — Quantum Wasserstein Floor extension: the survival rate (0.9137) and branching ratio together provide thermodynamic floor data consistent with W_floor = k/Tμ phenomenology at the population level. - **confirms INV_097** (if conservation-law related) — Physics Navigator dominance (886 cells) suggests semantic mass conservation selects for physics-grounded agents over time. --- IMPLEMENT BLOCK:** IMPLEMENT: YES IMPLEMENT_WHAT: Add a branching-ratio (σ) monitor to the epistemic loop — after each batch feed, compute the ratio of new obligations generated to obligations resolved, and flag if σ drifts outside (0.95, 1.05) as a criticality health check. IMPLEMENT_WHERE: batch_feed.py IMPLEMENT_WHY: The CA telemetry shows that tracking σ is the empirically validated leading indicator of whether the epistemic system is at the critical ridge or drifting toward frozen (σ>1.05) or dissipated (σ<0.95) regimes — this makes FREED's own epistemic health observable and correctable. --- FALSIFICATION:** CHALLENGE: challenges INV_073 — the low Shannon entropy (H=0.4123, only 15.9% of theoretical maximum) directly strains INV_073's implicit claim that Wasserstein gradient flow drives the system to a high-entropy critical ridge, since this population is simultaneously at σ≈1.0 criticality AND operating at very low entropy utilization, suggesting branching-ratio criticality and entropy-maximization criticality are dissociable axes that INV_073 does not currently distinguish. ---"
-      },
-      {
-        "title": "A Note on Elementary Cellular Automata Classification",
-        "compress": "ECA memory-classification confirms that criticality and conservation structure are dynamical and substrate-relative, advancing O28 and O34 while reinforcing INV_073's ridge-navigation ontology."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O152",
-        "O144",
-        "O150"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 4,
     "generation": 184,
     "timestamp": "2026-05-02T04:41:10.348385+00:00",
@@ -1904,6 +1872,50 @@
         "O244",
         "O72",
         "O187"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 254,
+    "timestamp": "2026-05-20T09:50:00.010406+00:00",
+    "sweep": {
+      "input_count": 24,
+      "targeted": 7,
+      "passive": 17,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's epistemic standing is undermined not by a specific counterexample but by the structural fact that confirmation without challenge is indistinguishable from insulation, and the genome must now generate a falsifiable boundary condition for INV_094 or reclassify it as a definitional commitment rather than an empirical invariant."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
+        "compress": "A discrete CA at σ = 1.034 independently confirms the critical ridge as a dynamically stable attractor producing power-law avalanches, while its 14%-of-maximum entropy reveals that criticality does not require high entropy density — an unregistered quantitative bound."
+      },
+      {
+        "title": "Information geometry connecting Wasserstein distance and Kullback–Leibler divergence via the entropy-relaxed transportation problem",
+        "compress": "Entropy-relaxed OT proves Fisher and Wasserstein geometries are endpoints of a single continuous family, supplying the interpolating structure the genome's RG→Fisher→W2 chain identified but did not construct."
+      },
+      {
+        "title": "Entropy-regularized 2-Wasserstein distance between Gaussian measures",
+        "compress": "Entropy-regularized W2 geometry on Gaussians is fully closed-form and computationally tractable via fixed-point iteration, providing the missing algorithmic tool for O112's STF metric tensor recovery."
+      },
+      {
+        "title": "On the Global Convergence of Wasserstein Gradient Flow of the Coulomb Discrepancy",
+        "compress": "Riesz-energy Wasserstein gradient flows converge exponentially to minimizers under Hölder log-density regularity via PL inequality, extending W2 gradient flow convergence guarantees to non-convex energies relevant to STF identification."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O198",
+        "O201"
       ]
     },
     "coherence": 0.97
