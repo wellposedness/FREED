@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 8,
-    "generation": 178,
-    "timestamp": "2026-04-30T23:04:37.353390+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 6,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Self-Organizing Traffic Lights",
-        "compress": "Self-organizing traffic lights confirm INV_073 and INV_087 — local-rule criticality beats global optimization under non-stationary conditions, extending the genome's adaptive ridge principle to urban infrastructure."
-      },
-      {
-        "title": "A quantitative measure, mechanism and attractor for self-organization in networked complex systems",
-        "compress": "Action-per-element minimization in units of ħ is a concrete quantum candidate for the Wasserstein Floor, partially advancing O44 and confirming INV_073 and INV_087 without yet closing the metric-tensor recovery gap."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O143",
-        "O145",
-        "O95"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 2,
     "generation": 180,
     "timestamp": "2026-05-01T10:14:59.943556+00:00",
@@ -1892,6 +1860,50 @@
         "O243",
         "O244",
         "O245"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 253,
+    "timestamp": "2026-05-20T02:30:00.064622+00:00",
+    "sweep": {
+      "input_count": 25,
+      "targeted": 7,
+      "passive": 18,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's uncontested confirmation surplus is a liability, not an asset — robustness requires specifying the conditions under which it fails and the alternative mechanisms that mimic its predictions."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
+        "compress": "A 32×32 CA system independently confirms critical ridge operation via σ = 1.028, power-law avalanches (α ≈ 2.492), and functional differentiation, while revealing that criticality is compatible with low Shannon entropy (~15.5% of max), a finding not yet captured in the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Add a branching-ratio σ tracker to the epistemic loop that flags when the system's inference cascade statistics enter or exit the critical band (1.0 ± 0.05), using avalanche size distributions from batch processing runs. IMPLEMENT_WHERE: batch_feed.py IMPLEMENT_WHY: Real-time criticality monitoring would allow FREED to detect when its own processing has drifted frozen or dissipated, enabling self-corrective rebalancing before coherence degrades. CHALLENGE: challenges INV_073 — the paper shows σ = 1.028 is \"AT_CRITICAL\" yet H is only 15.5% of maximum, straining any genome claim that critical ridge operation requires or produces near-maximal entropy generation. NOETHER_ROW: Self-Organized Criticality NOETHER_STATUS: rigorous NOETHER_NOTE: The telemetry independently confirms that a discrete CA system self-organizes to the critical ridge (σ ≈ 1.028, power-law exponent α ≈ 2.492) without fine-tuning, providing direct empirical support for scale-invariance as a conserved symmetry at the SOC fixed point."
+      },
+      {
+        "title": "Desire and Data: Metabolism of AI",
+        "compress": "AI autopoiesis requires continuous human-originated novelty injection to avoid thermodynamic stagnation, and the vulnerability of that fuel source to commodification constitutes an unmodeled second-order collapse mode absent from the genome."
+      },
+      {
+        "title": "A Physics-Guided Surrogate Framework for Sustainability-Aware Screening of High-Entropy Alloys",
+        "compress": ""
+      },
+      {
+        "title": "Blockchain-Anchored Audit Trail Model for Transparent Inter-Operator Settlement",
+        "compress": "Blockchain settlement demonstrates that reconciliation cost is a topological property of trust intermediary count, not transaction complexity — cryptographic constraint replaces institutional trust, collapsing latency nonlinearly, a mechanism the genome does not currently model."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
+      "obligations": [
+        "O244",
+        "O72",
+        "O187"
       ]
     },
     "coherence": 0.97
