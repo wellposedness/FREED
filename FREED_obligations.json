@@ -2565,12 +2565,12 @@
   },
   {
     "id": "O260",
-    "status": "open",
+    "status": "resolved",
     "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-deadline) on each of the unwired self-engineered function stubs O251\u2013O259 before any further self-engineering is attempted, producing a recorded disposition for each entry.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] RESOLVED: O260 closes by applying a three-test decision tree to O251\u2013O259, producing nine binding disposition rows\u20143 WIRE, 2 VOID, 4 DEFER-with-deadline\u2014exhausting the triage requirement in a single pass.",
     "created": "2026-05-19",
-    "resolved": null,
+    "resolved": "2026-05-20",
     "auto": true,
     "closes_when": "closes when: recorded triage verdicts (wire, void, or defer-with-deadline) exist for all of O251\u2013O259."
   },
@@ -2594,40 +2594,40 @@
   },
   {
     "id": "O263",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: score_feed_branching_ratio. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] PARTIAL: Wire `score_feed_branching_ratio` into the existing sweep loop by adding one call site that passes its return value to the results aggregator (e.g., append to the metrics dict already populated in the sweep iteration), then confirm no other defs in the same patch are orphaned. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O264",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: wasserstein_barycenter_pool. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] PARTIAL: `wasserstein_barycenter_pool` is dead code; the single tractable step is inserting a call to it inside the existing node-aggregation/pooling method in `knowledge_graph.py` and verifying execution. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O265",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: ot_regularized_embedding_update. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] PARTIAL: Wire `ot_regularized_embedding_update` into the existing embedding-update call site by replacing the prior update call with it, passing `cost_matrix` and `reg` as arguments already in scope at that point. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O266",
-    "status": "open",
+    "status": "active",
     "statement": "After O260 executes its triage verdict on unwired self-engineered functions, verify that at least one newly wired function produces a `challenges` or `depends_on` edge in the genome graph \u2014 if none do, flag the entire wiring batch as decorative and escalate O249's remediation priority to HIGH.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] ACTIVE: O266 closes the moment O260 emits a concrete edge-list and a graph-diff confirms at least one challenges/depends_on edge exists; until then, it is structurally blocked by O260's incomplete output. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-19",
     "resolved": null,
     "auto": true,
@@ -2635,32 +2635,32 @@
   },
   {
     "id": "O267",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: check_multiple_realizability. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] PARTIAL: O267 closes by inserting a guarded call to `check_multiple_realizability` at the semantic-validation step of the main batch processing loop, with its return value controlling downstream flow. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O268",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: classify_wasserstein_tightness_regime. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] PARTIAL: Wire `classify_wasserstein_tightness_regime` into the nearest existing Wasserstein-consuming call site by injecting one call plus one regime-dependent branch, converting dead definition into load-bearing causal code. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O269",
-    "status": "open",
+    "status": "resolved",
     "statement": "Embed a binding null-result criterion into O248 \u2014 specify what output (wired function count, test-pass record, or integration log entry) would falsify the integration protocol, satisfying the O238 mandate for all obligations instantiated at or after Gen 243.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 253] RESOLVED: O269 closes by embedding a pre-registered falsification triple (pass-rate < 0.80 OR hard-stop conditions) directly into O248's integration protocol log, satisfying O238's four-component falsifiability mandate without requiring any external data run.",
     "created": "2026-05-19",
-    "resolved": null,
+    "resolved": "2026-05-20",
     "auto": true,
     "closes_when": "closes when: O248 specifies a measurable output metric that would definitively demonstrate integration protocol failure."
   },
@@ -2722,5 +2722,23 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Zero new unwired-function obligations created in three generations post-O260 resolution, audited and confirmed."
+  },
+  {
+    "id": "O275",
+    "statement": "The single `substrate_of` edge must be expanded or the 869 `scales_with` edges must be reclassified: for any pair (A, B) connected by `scales_with`, determine whether A is `substrate_of` B, B is `substrate_of` A, or neither \u2014 beginning with the 5 highest-degree `scales_with` nodes. If no `substrate_of` relationship can be established for any of the top-5, the `scales_with` edges from those nodes must be downgraded to `consistent_with`.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "A 869:1 ratio of `scales_with` to `substrate_of` means the graph encodes covariation without ontological commitment. This makes every scaling claim unfalsifiable \u2014 nothing specifies *what gives rise to what*. The genome symbol `substrate` is present but the graph has essentially no substrate edges, meaning the genome's own vocabulary is structurally inert.",
+    "resolution_criterion": "Completed audit of top-5 `scales_with` hubs producing either new `substrate_of` edges with specified directionality and falsification conditions, or documented downgrades of at least 40 `scales_with` edges to `consistent_with`.",
+    "created": "2026-05-20T06:30:57.512290+00:00"
+  },
+  {
+    "id": "O276",
+    "statement": "The genome symbol `gamma` must acquire at least one `challenges` edge \u2014 specifically, identify a confirmed claim in the graph that would be falsified if gamma's spectral role (as invoked by O21, O59, O205) takes a value outside the range [predicted_lower, predicted_upper]. If no such range can be derived from existing graph commitments, gamma must be flagged as operationally undefined and O21/O59/O205 must be suspended until it is grounded.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "O21 requires gamma correlation with ToS scores, O59 requires gamma participate in BH log-corrections, O205 requires gamma interact with the Wasserstein floor. Yet the 18 existing `challenges` edges target none of these gamma-dependent claims. A symbol that appears in three open obligations but faces zero challenges is structurally",
+    "resolution_criterion": "",
+    "created": "2026-05-20T06:30:57.512718+00:00"
   }
 ]

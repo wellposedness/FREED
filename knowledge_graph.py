@@ -31,6 +31,7 @@ Context Tags (context_tag field):
 Graph file: FREED_graph.json (alongside FREED_state.json)
 """
 
+import hashlib
 import json
 import math
 import re

@@ -301,7 +301,7 @@ If FREED produces only confirms on the CLS paper, file a new obligation: *"Audit
 1. **Dashboard update** — bring `docs/dashboard.html`. Add to event chains: bootstrap derivation, coherence formula fix, IMPLEMENTATION_CLASS routing, edge monoculture fix, falsification probe, simulation_observer, the two seeds. Major week.
 2. **Substrate-typed evidence** — `methodology_type` field on graph edges: theoretical/computational/experimental/physical.
 3. **recover_skipped.py** — `python3 recover_skipped.py` (dry-run) then `--apply`. Recovers ~109 skipped Scholar URLs.
-4. **O156 MIRROR_SUSPECT audit** — find independent derivation for σ=1.03, Wasserstein metric, Zipf=1 or explicitly downgrade.
+4. **MIRROR_SUSPECT audit** (now O270, was mis-labeled O156; audit completed 2026-05-19 — see `FREED_log/ca_telemetry_audit_2026-05-19.md`. Layer 1 boilerplate cut in `simulation_observer.py`; Layer 2 parameter surgery and retroactive edge marking still open under O270.)
 5. **O157 SEED integration** — asymmetric Landauer commitment rule + topological restatement filter into genome candidates.
 
 ---
