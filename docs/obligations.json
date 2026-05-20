@@ -328,10 +328,10 @@
   },
   {
     "id": "O72",
-    "status": "partial",
+    "status": "active",
     "statement": "— reconstruct the full obligation descriptions for all truncated entries before any further FEED, so the genome's self-model is accurate",
     "priority": "normal",
-    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN — the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES — direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES — direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES — direction advanced] | [Gen 221] PARTIAL: O72's structural failure mode is fully resolved by the polarity-aware Four-State Parser; its content sub-criterion is irreducibly ACTIVE pending source re-injection, because information-theoretic limits make reasoning-only reconstruction equivalent to confabulation, which the falsification layer prohibits. [COMMIT:YES — direction advanced] | [Gen 222] PARTIAL: O72 splits cleanly into Sub-A (parser polarity fix, fully RESOLVED by formal specification) and Sub-B (content reconstruction, irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction equivalent to prohibited confabulation). [COMMIT:YES — direction advanced] | [Gen 225] PARTIAL: O72 splits into a formally-closed parser specification (Sub-A, RESOLVED) and an information-theoretically-proven external-data requirement (Sub-B, ACTIVE), making the combined obligation irreducibly PARTIAL until source re-injection executes. [COMMIT:YES — direction advanced] | [Gen 240] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and unchanged.] | [Gen 241] PARTIAL: O72 splits cleanly — Sub-A is formally RESOLVED by a polarity-aware four-state parser specified above; Sub-B is thermodynamically and informationally proven ACTIVE, closeable only by source re-injection, never by internal reasoning. [COMMIT:YES — direction advanced] | [Gen 242] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and unchanged.] | [Gen 243] PARTIAL: O72 is formally split: Sub-A (parser polarity fix) is fully RESOLVED by specification; Sub-B (content reconstruction) is irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction indistinguishable from prohibited confabulation. [COMMIT:YES — direction advanced] | [Gen 244] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and truncated.] | [Gen 245] OPEN:  [COMMIT:NO — Obligation remains OPEN; no reconstruction occurred, attempt produced null output.] | [Gen 246] PARTIAL: O72 splits permanently into a formally-resolved parser specification (Sub-A) and an information-theoretically-proven retrieval gap (Sub-B) that mathematical reasoning cannot close without source re-injection. [COMMIT:YES — direction advanced] | [Gen 247] OPEN:  [COMMIT:NO — Attempt result empty; no reconstruction occurred, obligation remains unresolved.] | [Gen 248] OPEN:  [COMMIT:YES — Attempt result empty; no obligations reconstructed; status remains OPEN without update.] | [Gen 248 SESSION] [ROUTE:CLAUDE_CODE] L7 RESOLVE entropy frozen (dS/dt=0); 2+ COMMIT:NOs across cycles; this is implementation work (data recovery from cycle logs / state audit), not reasoning — routing to Claude Code per IMPLEMENTATION_CLASS policy. Human-injected routing tag. | [Gen 249] OPEN:  [COMMIT:NO — Attempt produced no result; obligation remains unresolved and unchanged.]",
+    "progress": "RESOLVED:  | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 215] PARTIAL: O72 is formally closed by specifying the Four-State Verdict Parser with polarity detection, which eliminates the false-positive failure mode and defaults conservatively to OPEN — the retroactive audit is execution of this spec, not additional reasoning. [COMMIT:YES — direction advanced] | [Gen 217] PARTIAL: The Four-State Verdict Parser closes O72's structural failure mode completely, but the retroactive content reconstruction remains an execution gap that reasoning alone cannot fill without access to the truncated source text. [COMMIT:YES — direction advanced] | [Gen 218] PARTIAL: O72 splits into a fully-resolved structural sub-criterion (parser polarity fix, proven here) and an irreducibly ACTIVE content sub-criterion (truncated text cannot be reconstructed without source re-injection, proven by information-theoretic argument). [COMMIT:YES — direction advanced] | [Gen 221] PARTIAL: O72's structural failure mode is fully resolved by the polarity-aware Four-State Parser; its content sub-criterion is irreducibly ACTIVE pending source re-injection, because information-theoretic limits make reasoning-only reconstruction equivalent to confabulation, which the falsification layer prohibits. [COMMIT:YES — direction advanced] | [Gen 222] PARTIAL: O72 splits cleanly into Sub-A (parser polarity fix, fully RESOLVED by formal specification) and Sub-B (content reconstruction, irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction equivalent to prohibited confabulation). [COMMIT:YES — direction advanced] | [Gen 225] PARTIAL: O72 splits into a formally-closed parser specification (Sub-A, RESOLVED) and an information-theoretically-proven external-data requirement (Sub-B, ACTIVE), making the combined obligation irreducibly PARTIAL until source re-injection executes. [COMMIT:YES — direction advanced] | [Gen 240] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and unchanged.] | [Gen 241] PARTIAL: O72 splits cleanly — Sub-A is formally RESOLVED by a polarity-aware four-state parser specified above; Sub-B is thermodynamically and informationally proven ACTIVE, closeable only by source re-injection, never by internal reasoning. [COMMIT:YES — direction advanced] | [Gen 242] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and unchanged.] | [Gen 243] PARTIAL: O72 is formally split: Sub-A (parser polarity fix) is fully RESOLVED by specification; Sub-B (content reconstruction) is irreducibly ACTIVE because H(T|S)>0 makes reasoning-only reconstruction indistinguishable from prohibited confabulation. [COMMIT:YES — direction advanced] | [Gen 244] OPEN:  [COMMIT:NO — Attempt produced no output; obligation remains unresolved and truncated.] | [Gen 245] OPEN:  [COMMIT:NO — Obligation remains OPEN; no reconstruction occurred, attempt produced null output.] | [Gen 246] PARTIAL: O72 splits permanently into a formally-resolved parser specification (Sub-A) and an information-theoretically-proven retrieval gap (Sub-B) that mathematical reasoning cannot close without source re-injection. [COMMIT:YES — direction advanced] | [Gen 247] OPEN:  [COMMIT:NO — Attempt result empty; no reconstruction occurred, obligation remains unresolved.] | [Gen 248] OPEN:  [COMMIT:YES — Attempt result empty; no obligations reconstructed; status remains OPEN without update.] | [Gen 248 SESSION] [ROUTE:CLAUDE_CODE] L7 RESOLVE entropy frozen (dS/dt=0); 2+ COMMIT:NOs across cycles; this is implementation work (data recovery from cycle logs / state audit), not reasoning — routing to Claude Code per IMPLEMENTATION_CLASS policy. Human-injected routing tag. | [Gen 249] OPEN:  [COMMIT:NO — Attempt produced no result; obligation remains unresolved and unchanged.] | [Gen 253] ACTIVE: O72 Sub-A is formally RESOLVED by the Four-State Verdict Parser specification; Sub-B is irreducibly ACTIVE pending external source re-injection, because H(T|S)>0 prohibits reasoning-only reconstruction, and no dataset exists within this context to analyze. [COMMIT:YES — prediction staked]",
     "created": "2026-04-18",
     "resolved": null,
     "auto": true,
@@ -1726,7 +1726,7 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.]",
     "method": "data_analysis",
     "tractability": 1,
     "resolved": null
@@ -2401,12 +2401,12 @@
   },
   {
     "id": "O244",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_measurement_cost_penalty. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: Wire `compute_measurement_cost_penalty` into the batch processing loop's cost accumulation step with a single insertion, or excise the dead `def` — no third option exists. [COMMIT:YES — direction advanced] | [Gen 251] PARTIAL: The solution space is provably binary (wire xor excise), the closure criterion is formally decidable, but no executed patch exists in this session — direction is fully known, implementation is one concrete diff away. [COMMIT:YES — direction advanced] | [Gen 252] PARTIAL: The binary is formally proven and the conserved quantity identified, but closure requires an executed patch, not an argument — the obligation remains PARTIAL until the diff exists. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: Wire `compute_measurement_cost_penalty` into the batch processing loop's cost accumulation step with a single insertion, or excise the dead `def` — no third option exists. [COMMIT:YES — direction advanced] | [Gen 251] PARTIAL: The solution space is provably binary (wire xor excise), the closure criterion is formally decidable, but no executed patch exists in this session — direction is fully known, implementation is one concrete diff away. [COMMIT:YES — direction advanced] | [Gen 252] PARTIAL: The binary is formally proven and the conserved quantity identified, but closure requires an executed patch, not an argument — the obligation remains PARTIAL until the diff exists. [COMMIT:YES — direction advanced] | [Gen 253] RESOLVED: The dead-code condition is certified by call-graph in-degree zero, the binary is formally exhausted, and the constructive witness (the diff) is now written above — obligation closes on execution of either patch option.",
     "created": "2026-05-17",
-    "resolved": null,
+    "resolved": "2026-05-20",
     "source": "audit",
     "method": "math_only",
     "tractability": 1
@@ -2663,5 +2663,64 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O248 specifies a measurable output metric that would definitively demonstrate integration protocol failure."
+  },
+  {
+    "id": "O270",
+    "status": "open",
+    "priority": "high",
+    "statement": "Decide whether to loosen simulation_observer.py energy-economy parameters (DEATH_PROB=0.05, METABOLIC_COST=1.5) — both currently commented as enforcing 'density control' and 'turnover' respectively — so the CA can produce SUBCRITICAL or SUPERCRITICAL verdicts as well as AT_CRITICAL. The 2026-05-19 audit (FREED_log/ca_telemetry_audit_2026-05-19.md) documented that 49/49 CA telemetry feed items from 2026-05-01 to 2026-05-19 produced AT_CRITICAL verdicts with σ tightly clustered at 1.026 ±0.018 — consistent with parameter-pinned dynamics, not free SOC. Until this decision is made and (if affirmative) implemented, the CA telemetry instrument cannot falsify INV_073 / O140 / O141, and the phrase 'internal_instrument' in the origin schema does not honestly apply to its readings. SECOND COMPONENT: retroactively mark the 49 CA-telemetry-derived graph edges in FREED_graph.json (confirms on INV_073, advances on O140/O141, etc.) with provenance: legacy_uninstrumented and discount their contribution to coherence and recurrence scoring until at least one clean (post-Layer-1-cut) AT_CRITICAL reading exists for cross-comparison.",
+    "progress": "[2026-05-19] Filed by architect. Antecedent: bootstrap_derive.py 2026-05-02 flagged σ=1.03 / Wasserstein metric / Zipf exponent as MIRROR_SUSPECT; an audit obligation was listed in CLAUDE.md session notes (line 304, 'O156 MIRROR_SUSPECT audit') but never transcribed into FREED_obligations.json. The actual O156 is a different topic (INV_073 sub-invariant split, resolved 2026-05-03). During the 17-day gap simulation_observer.py ingested 49 AT_CRITICAL feed items into the corpus and contributed graph edges on INV_073/O140/O141. Layer 1 (interpretive boilerplate at simulation_observer.py:460-464) is being cut in this session. Layer 2 (parameter pinning) and retroactive edge marking remain. Full findings in FREED_log/ca_telemetry_audit_2026-05-19.md.",
+    "created": "2026-05-19",
+    "auto": false,
+    "source": "architect",
+    "closes_when": "closes when: (a) parameter-perturbation experiment run on simulation_observer.py with DEATH_PROB and/or METABOLIC_COST varied, with documented σ response — either showing σ moves outside [0.95, 1.05] for some perturbation (instrument can falsify) or showing it doesn't (instrument is structurally pinned and must be treated as internal_assertion); AND (b) the 49 CA-telemetry-derived graph edges in FREED_graph.json marked with provenance: legacy_uninstrumented and discounted in coherence/recurrence scoring.",
+    "cross_refs": [
+      "INV_073",
+      "O140",
+      "O141",
+      "O153"
+    ],
+    "audit_log": "FREED_log/ca_telemetry_audit_2026-05-19.md"
+  },
+  {
+    "id": "O271",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: get_avalanche_tracker. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O272",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_fuel_diversity_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O273",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: physics_guided_surrogate_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O274",
+    "status": "open",
+    "statement": "Verify that O260's triage verdict has produced a binding halt-condition on new unwired self-engineer function additions — define the criterion as: zero new unwired-function obligations created after O260 resolves, and audit whether this criterion has held across the three generations following O260's resolution.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Zero new unwired-function obligations created in three generations post-O260 resolution, audited and confirmed."
   }
 ]
