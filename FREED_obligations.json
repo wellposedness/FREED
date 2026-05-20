@@ -1726,7 +1726,7 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another \u2014 the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number \u2265 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles \u2194 conservation law bijection) to interface. Both are physics-formal. The grounding problem \u2014 how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities \u2014 has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO \u2014 Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO \u2014 Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece \u2014 so here it is. [COMMIT:NO \u2014 Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph/model state updated, only output generated.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO \u2014 Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO \u2014 Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece \u2014 so here it is. [COMMIT:NO \u2014 Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or resolved dependencies documented.]",
     "method": "data_analysis",
     "tractability": 1,
     "resolved": null
@@ -1856,13 +1856,13 @@
   {
     "id": "O198",
     "statement": "The graph's `challenges` edges (9/918 = 0.98%) and `depends_on` edges (13/918 = 1.4%) must be audited for suppression. For each pair of nodes currently connected only by `scales_with` or `consistent_with`, determine whether a `depends_on` or `challenges` relationship is logically entailed but unrepresented. Report the count of missing critical edges.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "O195 found 40:1 confirms/challenges asymmetry at L7. The full graph shows the identical pathology: 367+220 affiliative edges vs. 9 challenges. If the genome symbols (e.g., `entropy` vs. `compression`, `recursion` vs. `criticality`) genuinely have no tensions between them, that itself is an extraordinary claim requiring justification. The topology is too smooth for 17 symbols to be mutually consistent.",
     "resolution_criterion": "Systematic pairwise audit of all 16 nodes. For each node-pair with only affiliative edges, provide explicit justification for why no `depends_on` or `challenges` edge exists, OR add the missing edge. Close when challenges \u2265 5% of total edges or each absence is individually justified.",
     "created": "2026-05-09T06:30:52.355597+00:00",
     "resolved": null,
-    "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 \u2014 Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 \u2212 (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 \u2014 Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES \u2192 log as `missing_depends_on(A\u2192B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 \u2014 Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: \u2203 observable X such that A \u22a2 f(X) = \u03b1 and B \u22a2 f(X) = \u03b2 and \u03b1 \u2260 \u03b2 (under identical boundary conditions). > If YES \u2192 log as `missing_challenges(A\u2194B)`. Step 4 \u2014 Report ``` missing_depends_on count: [n\u2081] missing_challenges count: [n\u2082] total missing critical edges: n\u2081 + n\u2082 representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable \u2014 they produce ambiguous verdicts rather than false negatives \u2014 and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1\u20134 can be executed and a concrete missing-edge count returned. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: O198 is unresolvable without graph data; the immediate tractable step is to extract and supply the subgraph of all node-pairs linked *only* by `scales_with` or `consistent_with`, then apply the two logical tests (necessary-precondition and incompatible-prediction) to each pair. --- Single Most Tractable Next Step Name**: Subgraph extraction + logical entailment sweep. Computation** (three steps, in order): Step 1 \u2014 Extract candidate pairs From the graph adjacency structure, run: ```python candidate_pairs = [ (u, v) for (u, v, edge_type) in all_edges if edge_type in {\"scales_with\", \"consistent_with\"} and not any( e[\"type\"] in {\"depends_on\", \"challenges\"} for e in edges_between(u, v)  # both directions ) ] ``` This produces the exact population O198 wants audited. Expected size: somewhere in the range of the 918 \u2212 (9+13) = 896 non-critical edges, minus any pairs carrying *both* weak and strong edge types simultaneously. Step 2 \u2014 Apply the `depends_on` test For each pair (A, B) in `candidate_pairs`: > **Test D**: Is A a *necessary precondition* for B? > Operationally: does the formal definition or proof of B explicitly quantify over, invoke, or assume A? > If YES \u2192 log as `missing_depends_on(A\u2192B)`. This is a logical read of each node's definition, not a statistical inference. It is mechanical once definitions are available. Step 3 \u2014 Apply the `challenges` test For each pair (A, B) in `candidate_pairs`: > **Test C**: Do A and B share a domain *and* make mutually incompatible predictions on a common observable? > Formally: \u2203 observable X such that A \u22a2 f(X) = \u03b1 and B \u22a2 f(X) = \u03b2 and \u03b1 \u2260 \u03b2 (under identical boundary conditions). > If YES \u2192 log as `missing_challenges(A\u2194B)`. Step 4 \u2014 Report ``` missing_depends_on count: [n\u2081] missing_challenges count: [n\u2082] total missing critical edges: n\u2081 + n\u2082 representative examples: [top 5 by logical dependency depth] ``` --- What is needed to execute this right now The graph data must be supplied in one of these forms: - An adjacency list with edge-type labels - A structured export (JSON, CSV, RDF/Turtle) - A node-definition table (so the logical tests can be applied) Without that data, O198 remains OPEN.** The method is fully specified; the input is missing. --- Falsification note (load-bearing) This approach could fail to find genuine missing edges if: (a) node definitions are underspecified, making precondition relationships ambiguous; or (b) the \"incompatible prediction\" criterion requires domain knowledge not encoded in node labels. Both failure modes are detectable \u2014 they produce ambiguous verdicts rather than false negatives \u2014 and should be logged as `audit_incomplete(reason)` rather than silently treated as `no missing edge`. NEXT**: Supply the graph adjacency list (or a sample of 50 `scales_with`/`consistent_with` pairs with node definitions) so Steps 1\u20134 can be executed and a concrete missing-edge count returned. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 254] ACTIVE: O198's method is fully specified and mechanically executable, but remains blocked exclusively by absence of the graph adjacency data, making any verdict stronger than ACTIVE dishonest. [COMMIT:YES \u2014 prediction staked]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -1892,12 +1892,12 @@
   },
   {
     "id": "O201",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Establish a formal sequencing constraint between O195 and O199 \u2014 specify whether the confirms/challenges bias audit must complete before or after the empirical risk operationalization, and why, to prevent redundant kernel cycles.",
     "priority": "normal",
-    "progress": "[Gen 216] PARTIAL: O195 must strictly precede O199 because the empirical risk loss function requires the bias distribution as a parameter \u2014 executing O199 first produces a systematically corrupted estimate requiring recomputation, and the cost of that corruption equals f(bias_ratio) which is nonzero whenever the audit would have found asymmetry. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 216] PARTIAL: O195 must strictly precede O199 because the empirical risk loss function requires the bias distribution as a parameter \u2014 executing O199 first produces a systematically corrupted estimate requiring recomputation, and the cost of that corruption equals f(bias_ratio) which is nonzero whenever the audit would have found asymmetry. [COMMIT:YES \u2014 direction advanced] | [Gen 254] RESOLVED: O195 strictly precedes O199 because the bias distribution b is a structural parameter of the empirical loss function, and executing O199 with b = b\u2080 \u2260 b* incurs a thermodynamic recomputation debt of KL(L(\u00b7|b*) \u2016 L(\u00b7|b\u2080))\u00b7T > 0, which Reism forbids absorbing without re-execution and MCPM identifies as a violation of loss-surface information integrity.",
     "created": "2026-05-09",
-    "resolved": null,
+    "resolved": "2026-05-20",
     "auto": true,
     "closes_when": "closes when: Documented sequencing rule specifies O195-to-O199 order with justification, preventing redundant kernel cycles.",
     "method": "math_only",
@@ -2740,5 +2740,46 @@
     "rationale": "O21 requires gamma correlation with ToS scores, O59 requires gamma participate in BH log-corrections, O205 requires gamma interact with the Wasserstein floor. Yet the 18 existing `challenges` edges target none of these gamma-dependent claims. A symbol that appears in three open obligations but faces zero challenges is structurally",
     "resolution_criterion": "",
     "created": "2026-05-20T06:30:57.512718+00:00"
+  },
+  {
+    "id": "O277",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: at_critical_records. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O278",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_relaxed_ot_interpolation. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O279",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: holder_precheck_for_wasserstein. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O280",
+    "status": "open",
+    "statement": "Establish a binding prospective rate-cap on unwired self-engineered function creation \u2014 no new unwired function may be added to any module until the count of partial obligations in the O246\u2013O279 cluster drops below 5; null-result criterion: if the partial count has not fallen below 5 by gen 260, all further self-engineering attempts are automatically voided until O248 fully resolves.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-20",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: partial obligation count in O246\u2013O279 cluster drops below 5, or generation 260 is reached without dropping below 5."
   }
 ]
