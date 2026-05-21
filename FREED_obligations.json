@@ -2686,40 +2686,40 @@
   },
   {
     "id": "O271",
-    "status": "open",
+    "status": "active",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: get_avalanche_tracker. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] ACTIVE: O271 closes by inserting one call to `get_avalanche_tracker` inside the batch loop body of `batch_feed.py` at the cycle-accumulation step, making the function reachable and testable in the same patch. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O272",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_fuel_diversity_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] PARTIAL: The single most tractable next step is to insert `diversity = compute_fuel_diversity_score(<feed_distribution_arg>)` into the existing batch output assembly block in `batch_feed.py` and write its value into the batch record, closing the dead-code gap with one targeted, two-line edit. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O273",
-    "status": "open",
+    "status": "active",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: physics_guided_surrogate_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] ACTIVE: Wire `physics_guided_surrogate_score` into the existing node-ranking or edge-weighting call path in the same patch, or excise it until that path exists. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O274",
-    "status": "open",
+    "status": "partial",
     "statement": "Verify that O260's triage verdict has produced a binding halt-condition on new unwired self-engineer function additions \u2014 define the criterion as: zero new unwired-function obligations created after O260 resolves, and audit whether this criterion has held across the three generations following O260's resolution.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] PARTIAL: O274's closing criterion is auditable via a syntactic back-pointer test on O261\u2013O274, where zero pointer-free obligations in that window constitutes evidence the halt-condition held. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "auto": true,
@@ -2745,40 +2745,40 @@
   },
   {
     "id": "O277",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: at_critical_records. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] PARTIAL: The single most tractable step is to open `tamura_sweep.py`, locate the record-processing loop, and insert `at_critical_records(...)` at the criticality-gating branch \u2014 or, if the function is redundant, delete it and document why the existing call path suffices. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O278",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_relaxed_ot_interpolation. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] PARTIAL: Wire `entropy_relaxed_ot_interpolation(source_weights, target_weights, epsilon)` into the existing graph-state-update call path in `knowledge_graph.py` \u2014 specifically, identify the method that currently performs linear or heuristic blending of node distributions, replace that blend with a call to the new function, and pass its output to whatever downstream consumer (embedding store, attention weight, traversal score) previously received the blended result. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O279",
-    "status": "open",
+    "status": "active",
     "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: holder_precheck_for_wasserstein. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] ACTIVE: Wire `holder_precheck_for_wasserstein` by inserting its call immediately before the Wasserstein invocation in `tamura_sweep.py`, using the distributions and exponent already in scope at that site. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O280",
-    "status": "open",
+    "status": "active",
     "statement": "Establish a binding prospective rate-cap on unwired self-engineered function creation \u2014 no new unwired function may be added to any module until the count of partial obligations in the O246\u2013O279 cluster drops below 5; null-result criterion: if the partial count has not fallen below 5 by gen 260, all further self-engineering attempts are automatically voided until O248 fully resolves.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 256] ACTIVE: O280 closes precisely when an audited census of O246\u2013O279 confirms fewer than 5 partial obligations remain, making the census itself the single tractable next step. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-20",
     "resolved": null,
     "auto": true,
@@ -2835,5 +2835,23 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O284 specifies measurable failure state (unwired function count or triage completion threshold) triggering escalation before generation 260."
+  },
+  {
+    "id": "O286",
+    "statement": "The `scales_with` edge count (899 across 16 nodes, ~7.0 per ordered node pair) must be pruned to statistical defensibility: for each `scales_with` edge, require a cited quantitative scaling exponent or functional form. Any edge lacking this gets downgraded to `consistent_with` or voided. Target: reduce `scales_with` to \u22641 per ordered pair (\u2264240 total) within 3 generations.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "899 `scales_with` edges for 16 nodes means the graph asserts that essentially everything scales with everything multiple times over. This renders the `scales_with` relation semantically void \u2014 it carries no discriminative information. O141 partially addresses `shares_invariant` homogeneity but leaves the larger `scales_with` inflation untouched. A knowledge graph that cannot say \"X does NOT scale with Y\" has zero empirical content in its scaling claims.",
+    "resolution_criterion": "Automated audit: for each `scales_with` edge, check for attached exponent/functional form. Edges without quantitative backing are reclassified or deleted. Final count \u2264240 with each surviving edge carrying an explicit scaling law.\n\n---",
+    "created": "2026-05-21T06:30:51.265690+00:00"
+  },
+  {
+    "id": "O287",
+    "statement": "The genome symbol `substrate` must be grounded in graph topology \u2014 currently instantiated by exactly 1 `substrate_of` edge across 2101 total edges (0.05%). Either demonstrate that `substrate` relationships are encoded through other edge types with explicit justification, or generate the missing `substrate_of` edges by deriving which node pairs have empirically documented substrate relationships. Minimum target: `substrate_of` edges \u2265 number of nodes claiming substrate-dependence.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "The genome declares `substrate` a core symbol (1 of 17). The symbol `symbol_grounding` is also in the genome, meaning the system's own principles demand that core symbols be operationally instantiated. One edge out of 2101 means `substrate` is a dead letter in the actual graph \u2014 the system believes in substrate-dependence but has not encoded it. This is an internal contradiction detectable purely from topology",
+    "resolution_criterion": "",
+    "created": "2026-05-21T06:30:51.266621+00:00"
   }
 ]

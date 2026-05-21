@@ -2861,6 +2861,47 @@ class KnowledgeGraph:
                 print(f"[GRAPH] ⚠ {len(warnings)} complexity-related edge(s) "
                       f"lack context_tag — claims may be context-dependent")
 
+        # ── Confirmation surplus flag (ADVERSARIAL_DEBT) ─────────────────
+        # Whenever a new 'confirms' edge is added, check whether the target
+        # invariant's confirmation count now exceeds its challenge count by
+        # more than the configurable threshold (default 5:1).  If so, tag
+        # the edge and print a warning so adversarial debt is visible at
+        # write-time, not post-hoc.
+        _CONF_SURPLUS_THRESHOLD = 5.0  # configurable ratio ceiling
+        _CONF_TYPES = {"confirms", "supports", "extends"}
+        _CHAL_TYPES = {"challenges", "refutes", "contradicts"}
+        for ne in new_edges:
+            if ne.get("type") not in _CONF_TYPES:
+                continue
+            target = ne.get("to", "").upper()
+            if not target.startswith("INV_"):
+                continue
+            # Count confirmations and challenges for this target across
+            # the full edge list (which already includes the new edges).
+            n_conf = sum(
+                1 for e in self._edges
+                if e.get("to", "").upper() == target
+                and e.get("type") in _CONF_TYPES
+            )
+            n_chal = sum(
+                1 for e in self._edges
+                if e.get("to", "").upper() == target
+                and e.get("type") in _CHAL_TYPES
+            )
+            surplus_ratio = float(n_conf) / float(max(1, n_chal))
+            if surplus_ratio > _CONF_SURPLUS_THRESHOLD:
+                ne["confirmation_surplus_flag"] = "ADVERSARIAL_DEBT"
+                ne["surplus_ratio"] = round(surplus_ratio, 4)
+                print(
+                    f"[GRAPH:ADVERSARIAL_DEBT] ⚠ {target}: "
+                    f"confirmation surplus ratio {surplus_ratio:.1f}:1 "
+                    f"exceeds threshold {_CONF_SURPLUS_THRESHOLD}:1 "
+                    f"(confirms={n_conf}, challenges={n_chal}). "
+                    f"Edge tagged ADVERSARIAL_DEBT — schedule "
+                    f"adversarial probe before accepting further "
+                    f"confirmations."
+                )
+
         # ── Branching ratio window accumulator ───────────────────────────
         # Per-call σ was structurally biased (upstream=1 per paper, secondary
         # downstream walked static graph degree → σ tracked centrality of hit

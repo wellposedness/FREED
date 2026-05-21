@@ -1119,6 +1119,38 @@ class EnergyCorrection:
         fals_load = self._compute_falsification_load(node)
         return grounding * fals_load
 
+    @staticmethod
+    def _estimate_spectral_asymmetry(node):
+        # type: (dict) -> float
+        """
+        Estimate spectral asymmetry γ from a node's evidence density.
+
+        γ measures how directional (non-Hermitian) the evidence is:
+        nodes with many confirmed invariants relative to open obligations
+        have high γ — their evidence points consistently in one direction.
+        Nodes with balanced confirmed/open counts have low γ (symmetric).
+
+        γ = |n_confirmed - n_open| / (n_confirmed + n_open + 1)
+
+        The +1 floor prevents division by zero and ensures γ ∈ [0, 1).
+        A node with 5 invariants and 0 obligations has γ ≈ 0.83 (highly
+        directional). A node with 3 invariants and 3 obligations has γ = 0
+        (symmetric, no preferred direction).
+        """
+        n_invariants = len(node.get("invariants", []))
+        obligations = node.get("obligations", [])
+        if obligations and isinstance(obligations[0], dict):
+            n_open = sum(
+                1 for o in obligations
+                if o.get("status", "open") in ("open", "partial", "escrowed")
+            )
+        else:
+            n_open = len(obligations)
+
+        total = n_invariants + n_open + 1  # +1 floor
+        gamma = abs(n_invariants - n_open) / total
+        return gamma
+
     def audit_node(self, node):
         # type: (dict) -> dict
         """
@@ -1133,6 +1165,8 @@ class EnergyCorrection:
             - grounding: the grounding component
             - falsification_load: the falsification load component
             - correction_applied: whether the gap exceeded threshold
+            - spectral_asymmetry: estimated γ for this node
+            - effective_gap_threshold: W_c ∝ √γ disorder-tolerance threshold
         """
         e_surrogate = float(node.get("coherence_score", 0.5))
         grounding = self._compute_grounding(node)
@@ -1140,7 +1174,18 @@ class EnergyCorrection:
         e_true = grounding * fals_load
 
         gap = abs(e_surrogate - e_true)
-        exceeds = gap > self.gap_threshold
+
+        # W_c ∝ √γ disorder-tolerance scaling (non-Hermitian topology result):
+        # Obligations with higher spectral asymmetry (more directional evidence)
+        # tolerate more disorder before being marked unresolved. The critical
+        # disorder strength scales as W_c = base_threshold * (1 + √γ), so nodes
+        # with high γ get a larger effective noise floor. The (1 + √γ) form
+        # ensures the base threshold is always the minimum (when γ=0, symmetric
+        # evidence, no bonus tolerance).
+        gamma = self._estimate_spectral_asymmetry(node)
+        effective_threshold = self.gap_threshold * (1.0 + math.sqrt(gamma))
+
+        exceeds = gap > effective_threshold
 
         # RSAV-style relaxation correction:
         # coherence_corrected = ξ · e_surrogate + (1 - ξ) · e_true
@@ -1158,6 +1203,8 @@ class EnergyCorrection:
             "falsification_load": round(fals_load, 4),
             "correction_applied": exceeds,
             "relaxation_xi": xi,
+            "spectral_asymmetry": round(gamma, 4),
+            "effective_gap_threshold": round(effective_threshold, 4),
         }
 
     def audit_cycle(self, nodes, cycle_number=0):

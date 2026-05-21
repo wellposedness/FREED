@@ -103,14 +103,16 @@ class SelfEngineer:
         if not signal:
             return {}
 
-        what   = signal["what"]
-        where  = signal["where"]
-        why    = signal["why"]
+        what       = signal["what"]
+        where      = signal["where"]
+        why        = signal["why"]
+        call_site  = signal.get("call_site", "")
 
         print(f"\n[ENGINEER] Implementation signal detected.")
-        print(f"[ENGINEER]   What:  {what}")
-        print(f"[ENGINEER]   Where: {where}")
-        print(f"[ENGINEER]   Why:   {why}")
+        print(f"[ENGINEER]   What:      {what}")
+        print(f"[ENGINEER]   Where:     {where}")
+        print(f"[ENGINEER]   Call site: {call_site}")
+        print(f"[ENGINEER]   Why:       {why}")
 
         # Safety: is the target module on the whitelist?
         if where not in MODIFIABLE:
@@ -133,6 +135,7 @@ class SelfEngineer:
             why=why,
             paper_content=paper_content,
             target_path=target_path,
+            call_site=call_site,
         )
 
         if not patch:
@@ -159,7 +162,11 @@ class SelfEngineer:
           IMPLEMENT: YES
           IMPLEMENT_WHAT: [one sentence — what to build]
           IMPLEMENT_WHERE: [filename.py]
+          IMPLEMENT_CALL_SITE: [EXTEND <fn> | <fn> | <Class.method>]
           IMPLEMENT_WHY: [one sentence — why this improves FREED]
+
+        Signals missing CALL_SITE are rejected — they produce orphan patches
+        that the wiring gate reverts anyway, so we drop them earlier.
 
         Returns dict or None.
         """
@@ -187,19 +194,32 @@ class SelfEngineer:
         where_m   = re.search(r'([\w_]+\.py)', where_raw, re.I)
         where     = where_m.group(1).lower() if where_m else ""
 
+        # IMPLEMENT_CALL_SITE — required. "EXTEND <fn>" means modify in place;
+        # plain "<fn>" or "<Class.method>" means add new code and wire from that caller.
+        call_site_raw = field("IMPLEMENT_CALL_SITE")
+        cs_m = re.search(
+            r'(?:EXTEND\s+)?([A-Za-z_][\w]*(?:\.[A-Za-z_][\w]*)?)',
+            call_site_raw,
+        )
+        call_site = cs_m.group(0).strip() if cs_m else ""
+
         if not what or not where:
+            return None
+        if not call_site:
+            print(f"[ENGINEER]   IMPLEMENT signal rejected — no CALL_SITE field. "
+                  f"Standalone helpers are auto-reverted; signal dropped at parse.")
             return None
 
         # Normalize filename
         if not where.endswith(".py"):
             where += ".py"
 
-        return {"what": what, "where": where, "why": why}
+        return {"what": what, "where": where, "why": why, "call_site": call_site}
 
     # ── Patch generation ──────────────────────────────────────────────────────
 
     def _generate_patch(self, what: str, why: str, paper_content: str,
-                        target_path: Path) -> str:
+                        target_path: Path, call_site: str = "") -> str:
         """
         Ask Claude Opus to generate a surgical str_replace patch.
 
@@ -213,6 +233,10 @@ class SelfEngineer:
         caused 71% syntax errors: files >400 lines exhausted the token
         budget mid-generation, producing truncated or malformed output.
         Surgical patches cap output at ~50-100 lines regardless of file size.
+
+        call_site: L7's stated invocation point. "EXTEND <fn>" → modify that
+        function in place. Otherwise the patch must add the new code AND a
+        call to it from <fn>/<Class.method> in the same SEARCH/REPLACE block.
         """
         current_code = target_path.read_text(encoding="utf-8")
         lines = current_code.splitlines()
@@ -255,12 +279,38 @@ class SelfEngineer:
             - For a new method on a class: SEARCH for the last few lines of the
               preceding method + first line of the next, splice in the new method
             - If the change is unsafe or nonsensical, output exactly: REFUSE
+
+            ORPHAN-WIRING GATE (deterministic, runs before the audit):
+            A patch that adds any new `def` with zero call sites in the project
+            is auto-reverted. To pass the gate, your single SEARCH/REPLACE block
+            MUST contain both the new code AND its invocation.
+
+            Two acceptable shapes:
+              1. EXTEND <fn>: SEARCH the existing function body. REPLACE with the
+                 modified body that performs the new behavior in line. No new def.
+              2. ADD + WIRE: SEARCH a span that includes (a) the insertion point
+                 for the new def AND (b) the existing caller. REPLACE inserts the
+                 new def AND adds the call from the existing caller. One block,
+                 wider scope. The orphan checker counts references file-wide, so
+                 wiring in the same patch satisfies it.
+
+            Do not propose standalone scoring/diagnostic helpers — they have no
+            caller and will be reverted on sight.
         """).strip()
+
+        call_site_directive = (
+            f"\nCALL SITE (from L7): {call_site}\n"
+            f"If prefixed EXTEND, modify that function in place.\n"
+            f"Otherwise, your REPLACE block must invoke the new code from that "
+            f"function/method.\n"
+            if call_site else ""
+        )
 
         prompt = (
             f"FILE: {target_path.name} ({len(lines)} lines)\n"
             f"WHAT TO IMPLEMENT: {what}\n"
-            f"WHY: {why}\n\n"
+            f"WHY: {why}\n"
+            f"{call_site_directive}\n"
             f"PAPER EXCERPT (technique source):\n{paper_content[:800]}\n\n"
             f"FILE STRUCTURE (use to locate your patch):\n{structure_map[:2500]}\n\n"
             f"FULL FILE:\n{current_code}\n\n"

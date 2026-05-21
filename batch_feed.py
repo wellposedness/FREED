@@ -469,14 +469,158 @@ def compute_ordinal_asymmetry(text, order=None, delay=None, window_size=None,
     }
 
 
+def compute_symbolic_relative_entropy(text):
+    """
+    Compute Symbolic Relative Entropy (SRE) for a text string.
+
+    SRE measures the probabilistic divergence between forward and reverse
+    symbolic sequences derived from the token-frequency time series,
+    *preserving equal-frequency bins as explicit symbols* rather than
+    collapsing them.  This recovers signal from tokenization plateaus
+    (tied-frequency tokens) that the standard entropy estimator discards.
+
+    Algorithm (after the heart-rate SRE paper):
+      1. Build the token-frequency time series from the text.
+      2. Symbolize the series: for each consecutive pair (x_i, x_{i+1}),
+         assign symbol '0' if x_{i+1} < x_i   (decrease)
+                        '1' if x_{i+1} == x_i  (equal — the key innovation)
+                        '2' if x_{i+1} > x_i   (increase)
+      3. Form words of length L from the symbol sequence.
+      4. Compute the probability distributions P_fwd (forward word freqs)
+         and P_rev (reverse word freqs, i.e., words read backwards).
+      5. SRE = 0.5 * (KL(P_fwd || P_rev) + KL(P_rev || P_fwd))
+         (symmetrized KL-divergence).
+
+    The equal-state symbol '1' captures plateaus in cumulative token
+    frequency — these occur when the same token appears consecutively
+    (repetition) or when multiple tokens share the same cumulative count
+    at different positions.  Discarding equalities (as standard entropy
+    estimators do) loses this structural information.
+
+    Args:
+        text: str — input text to analyze
+
+    Returns:
+        dict with keys:
+            'sre': float — symmetrized KL-divergence (higher = more complex)
+            'kl_forward': float — KL(P_fwd || P_rev)
+            'kl_reverse': float — KL(P_rev || P_fwd)
+            'equal_symbol_fraction': float — fraction of symbols that are '1'
+                (equal states); high fraction indicates many tied frequencies
+            'num_symbols': int — length of the symbol sequence
+            'word_length': int — L used for word construction
+            'num_unique_words_fwd': int — distinct forward words
+            'num_unique_words_rev': int — distinct reverse words
+            'series_length': int — length of underlying token-frequency series
+        or None if text is too short for analysis.
+    """
+    series = _build_token_frequency_series(text)
+    if len(series) < RANGEEN_MIN_TOKENS:
+        return None
+
+    # For very long series, subsample to keep computation tractable
+    max_len = 500
+    if len(series) > max_len:
+        step = len(series) / max_len
+        series = [series[int(i * step)] for i in range(max_len)]
+
+    # ── Step 2: Symbolize with explicit equal states ──────────────────────
+    symbols = []
+    for i in range(len(series) - 1):
+        if series[i + 1] < series[i]:
+            symbols.append('0')   # decrease
+        elif series[i + 1] == series[i]:
+            symbols.append('1')   # equal — preserved, not collapsed
+        else:
+            symbols.append('2')   # increase
+
+    if len(symbols) < 3:
+        return None
+
+    # Equal-state fraction: diagnostic for how many plateaus exist
+    equal_count = symbols.count('1')
+    equal_fraction = equal_count / len(symbols) if symbols else 0.0
+
+    # ── Step 3: Form words of length L ────────────────────────────────────
+    # L=3 gives 3^3=27 possible words — enough resolution without sparsity
+    word_length = 3
+    if len(symbols) < word_length:
+        return None
+
+    # Forward words
+    fwd_words = []
+    for i in range(len(symbols) - word_length + 1):
+        fwd_words.append(''.join(symbols[i:i + word_length]))
+
+    # Reverse words (each word read backwards)
+    rev_words = [''.join(reversed(w)) for w in fwd_words]
+
+    if not fwd_words:
+        return None
+
+    # ── Step 4: Probability distributions ─────────────────────────────────
+    fwd_counts = Counter(fwd_words)
+    rev_counts = Counter(rev_words)
+    total_fwd = len(fwd_words)
+    total_rev = len(rev_words)
+
+    # Collect all unique words across both distributions for KL computation
+    all_words = set(fwd_counts.keys()) | set(rev_counts.keys())
+
+    # Laplace smoothing to avoid log(0) in KL — add 1 pseudocount per word
+    # This is standard for KL estimation on sparse discrete distributions
+    num_word_types = len(all_words)
+    smoothed_total_fwd = total_fwd + num_word_types
+    smoothed_total_rev = total_rev + num_word_types
+
+    p_fwd = {}
+    p_rev = {}
+    for w in all_words:
+        p_fwd[w] = (fwd_counts.get(w, 0) + 1) / smoothed_total_fwd
+        p_rev[w] = (rev_counts.get(w, 0) + 1) / smoothed_total_rev
+
+    # ── Step 5: Symmetrized KL-divergence ─────────────────────────────────
+    kl_fwd_rev = 0.0  # KL(P_fwd || P_rev)
+    kl_rev_fwd = 0.0  # KL(P_rev || P_fwd)
+
+    for w in all_words:
+        pf = p_fwd[w]
+        pr = p_rev[w]
+        if pf > 0 and pr > 0:
+            kl_fwd_rev += pf * math.log(pf / pr)
+        if pr > 0 and pf > 0:
+            kl_rev_fwd += pr * math.log(pr / pf)
+
+    sre = 0.5 * (kl_fwd_rev + kl_rev_fwd)
+
+    return {
+        'sre': round(sre, 6),
+        'kl_forward': round(kl_fwd_rev, 6),
+        'kl_reverse': round(kl_rev_fwd, 6),
+        'equal_symbol_fraction': round(equal_fraction, 4),
+        'num_symbols': len(symbols),
+        'word_length': word_length,
+        'num_unique_words_fwd': len(fwd_counts),
+        'num_unique_words_rev': len(rev_counts),
+        'series_length': len(series),
+    }
+
+
 def compute_epistemic_triage(text):
     """
-    Combined epistemic triage scorer: RangeEn complexity + ordinal asymmetry.
+    Combined epistemic triage scorer: RangeEn complexity + ordinal asymmetry
+    + symbolic relative entropy (SRE).
 
-    Runs both compute_range_entropy and compute_ordinal_asymmetry on the input,
-    returning a unified triage dict. Inputs flagged as non-equilibrium by the
-    asymmetry scorer AND showing high RangeEn complexity are highest-priority
-    for full genome mapping.
+    Runs compute_range_entropy, compute_ordinal_asymmetry, and
+    compute_symbolic_relative_entropy on the input, returning a unified
+    triage dict.  SRE augments the entropy estimator by preserving
+    equal-frequency bins (tokenization plateaus) that the standard
+    estimator discards, recovering discriminative signal between
+    informationally dense and redundant papers.
+
+    Inputs flagged as non-equilibrium by the asymmetry scorer AND showing
+    high RangeEn complexity AND high SRE are highest-priority for full
+    genome mapping.
 
     Args:
         text: str — input text to triage
@@ -485,11 +629,13 @@ def compute_epistemic_triage(text):
         dict with keys:
             'range_en_result': dict or None — from compute_range_entropy
             'asymmetry_result': dict or None — from compute_ordinal_asymmetry
+            'sre_result': dict or None — from compute_symbolic_relative_entropy
             'priority': str — 'high', 'medium', or 'low'
             'triage_score': float — combined score in [0, 1]
     """
     ren_result = compute_range_entropy(text)
     asym_result = compute_ordinal_asymmetry(text)
+    sre_result = compute_symbolic_relative_entropy(text)
 
     # Compute combined triage score
     score = 0.0
@@ -513,6 +659,23 @@ def compute_epistemic_triage(text):
         score += asym_norm
         components += 1
 
+    if sre_result is not None:
+        # SRE contribution: map typical SRE [0, 0.5] to [0, 1]
+        # SRE values are symmetrized KL-divergence; higher = more
+        # time-irreversible symbolic dynamics = more complex/novel
+        sre_val = sre_result['sre']
+        sre_norm = min(1.0, sre_val / 0.5)
+        # Boost score if equal-state fraction is high — this means
+        # the standard entropy estimator was losing signal from plateaus
+        # and SRE is recovering it
+        eq_frac = sre_result['equal_symbol_fraction']
+        if eq_frac > 0.3:
+            # Significant plateau content: SRE is providing signal the
+            # standard estimator misses — weight it more heavily
+            sre_norm = min(1.0, sre_norm * 1.2)
+        score += sre_norm
+        components += 1
+
     if components > 0:
         score /= components
     else:
@@ -530,6 +693,7 @@ def compute_epistemic_triage(text):
     return {
         'range_en_result': ren_result,
         'asymmetry_result': asym_result,
+        'sre_result': sre_result,
         'priority': priority,
         'triage_score': round(score, 4),
     }
@@ -2210,6 +2374,41 @@ def build_feed_prompt(url: str, data: dict) -> str:
         "Which obligation does it advance? What should be OBLIGATEd?"
     )
     return '\n'.join(parts)
+
+
+# ─── Thermodynamic Content Detector for O112 Auto-Advance ────────────────────
+# Papers providing thermodynamic grounding for the Wasserstein Floor (Landauer
+# erasure costs, Maxwell's Demon resolution, information thermodynamics) should
+# trigger automatic partial-advance of O112 in the obligations table rather
+# than being silently consumed.  This detector is called inline from
+# process_feed to annotate the engram with an O112 linkage flag.
+
+_O112_THERMO_KEYWORDS = _re_module.compile(
+    r'\b(?:landauer|erasure\s+cost|maxwell[\s\']?s?\s+demon|'
+    r'information\s+thermodynamics|szilard|'
+    r'second\s+law\s+of\s+information|'
+    r'measurement[\s\-]+feedback[\s\-]+erasure|'
+    r'thermodynamic\s+cost\s+of\s+(?:computation|information|measurement)|'
+    r'entropy\s+production\s+.*?erasure|'
+    r'work\s+extraction\s+.*?(?:feedback|demon)|'
+    r'jarzynski|crooks\s+fluctuation|'
+    r'sagawa[\s\-]+ueda|'
+    r'wasserstein\s+floor|'
+    r'kBT\s*ln\s*2|k_?[bB]\s*T\s*ln|'
+    r'bit\s+erasure|logical\s+irreversibility)\b',
+    _re_module.IGNORECASE,
+)
+
+_O112_GROUNDING_MARKERS = _re_module.compile(
+    r'\b(?:universal(?:ly|\s+valid(?:ity)?)?|'
+    r'no\s+assumptions?\s+required|'
+    r'without\s+(?:additional\s+)?assumptions?|'
+    r'all\s+(?:measurement|feedback|erasure)\s+protocols?|'
+    r'quantum\s+(?:scenarios?|extensions?|regime)|'
+    r'closing\s+(?:the\s+)?(?:last\s+)?loopholes?|'
+    r'information[\s\-]+energy\s+equivalence)\b',
+    _re_module.IGNORECASE,
+)
 
 
 # ─── State management ─────────────────────

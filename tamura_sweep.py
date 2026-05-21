@@ -912,14 +912,38 @@ ALPHA_SOC_HIGH      = 3.0
 ALPHA_R2_THRESHOLD  = 0.85
 
 
-def _criticality_verdict(sigma, alpha, r_squared):
-    # type: (float, float, float) -> str
+def _criticality_verdict(sigma, alpha, r_squared, power_law_likely=None):
+    # type: (float, float, float, Optional[bool]) -> str
     """
     Classify criticality state from branching ratio and power-law exponent.
 
+    Requires BOTH branching-ratio criterion (σ in critical band) AND
+    power-law fit quality (R² ≥ 0.80, power_law_likely=True) to emit
+    AT_CRITICAL.  Emits NEAR_CRITICAL if only one criterion passes.
+
+    This prevents false-positive criticality verdicts when σ sits within
+    the critical band but avalanche statistics do not confirm SOC
+    (the dissociable-criteria pattern from INV_073 telemetry:
+    σ=1.0275 in band, R²=0.687, power_law_likely=False → was incorrectly
+    AT_CRITICAL, now correctly NEAR_CRITICAL).
+
+    Parameters
+    ----------
+    sigma : float
+        Branching ratio σ.
+    alpha : float
+        Power-law exponent α from avalanche size distribution.
+    r_squared : float
+        R² goodness-of-fit for the power-law regression.
+    power_law_likely : bool or None
+        Whether the power-law hypothesis passed a statistical test.
+        If None (legacy callers), inferred from α-in-range AND R² ≥ 0.80.
+
     Returns one of:
-        AT_CRITICAL   — σ in critical band, power-law confirmed
-        NEAR_CRITICAL — σ in band but power-law weak, or σ near band edge
+        AT_CRITICAL   — σ in critical band AND power-law confirmed
+                        (both R² ≥ 0.80 and power_law_likely=True)
+        NEAR_CRITICAL — only one criterion passes (σ in band but power-law
+                        weak, or power-law confirmed but σ near band edge)
         SUPERCRITICAL — σ > 1.05 (γ<1 dissipation risk)
         SUBCRITICAL   — σ < 0.95 (γ>1 freeze risk)
         UNDETERMINED  — insufficient data
@@ -927,13 +951,30 @@ def _criticality_verdict(sigma, alpha, r_squared):
     if sigma == 0.0 and alpha == 0.0:
         return "UNDETERMINED"
 
-    in_band = SIGMA_CRITICAL_LOW <= sigma <= SIGMA_CRITICAL_HIGH
-    power_law_ok = (ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
-                    and r_squared >= ALPHA_R2_THRESHOLD)
+    # Dual-criterion R² threshold: 0.80 (tighter than legacy 0.85 for
+    # the alpha-in-SOC-range check, but now ALSO requiring power_law_likely)
+    _R2_DUAL_THRESHOLD = 0.80
 
-    if in_band and power_law_ok:
+    in_band = SIGMA_CRITICAL_LOW <= sigma <= SIGMA_CRITICAL_HIGH
+    alpha_in_range = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+    r2_ok = r_squared >= _R2_DUAL_THRESHOLD
+
+    # Infer power_law_likely for legacy callers that don't pass it
+    if power_law_likely is None:
+        power_law_likely = alpha_in_range and r2_ok
+
+    # Power-law is confirmed only when ALL three sub-criteria pass:
+    # α in SOC range, R² ≥ 0.80, and statistical test (power_law_likely)
+    power_law_confirmed = (alpha_in_range and r2_ok and power_law_likely)
+
+    if in_band and power_law_confirmed:
         return "AT_CRITICAL"
-    elif in_band:
+    elif in_band or power_law_confirmed:
+        # Only one criterion passes → near-critical, not confirmed
+        if sigma > SIGMA_CRITICAL_HIGH:
+            return "SUPERCRITICAL"
+        elif sigma < SIGMA_CRITICAL_LOW and not in_band:
+            return "SUBCRITICAL"
         return "NEAR_CRITICAL"
     elif sigma > SIGMA_CRITICAL_HIGH:
         return "SUPERCRITICAL"

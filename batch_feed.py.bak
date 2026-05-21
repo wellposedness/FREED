@@ -2212,4 +2212,39 @@ def build_feed_prompt(url: str, data: dict) -> str:
     return '\n'.join(parts)
 
 
+# ─── Thermodynamic Content Detector for O112 Auto-Advance ────────────────────
+# Papers providing thermodynamic grounding for the Wasserstein Floor (Landauer
+# erasure costs, Maxwell's Demon resolution, information thermodynamics) should
+# trigger automatic partial-advance of O112 in the obligations table rather
+# than being silently consumed.  This detector is called inline from
+# process_feed to annotate the engram with an O112 linkage flag.
+
+_O112_THERMO_KEYWORDS = _re_module.compile(
+    r'\b(?:landauer|erasure\s+cost|maxwell[\s\']?s?\s+demon|'
+    r'information\s+thermodynamics|szilard|'
+    r'second\s+law\s+of\s+information|'
+    r'measurement[\s\-]+feedback[\s\-]+erasure|'
+    r'thermodynamic\s+cost\s+of\s+(?:computation|information|measurement)|'
+    r'entropy\s+production\s+.*?erasure|'
+    r'work\s+extraction\s+.*?(?:feedback|demon)|'
+    r'jarzynski|crooks\s+fluctuation|'
+    r'sagawa[\s\-]+ueda|'
+    r'wasserstein\s+floor|'
+    r'kBT\s*ln\s*2|k_?[bB]\s*T\s*ln|'
+    r'bit\s+erasure|logical\s+irreversibility)\b',
+    _re_module.IGNORECASE,
+)
+
+_O112_GROUNDING_MARKERS = _re_module.compile(
+    r'\b(?:universal(?:ly|\s+valid(?:ity)?)?|'
+    r'no\s+assumptions?\s+required|'
+    r'without\s+(?:additional\s+)?assumptions?|'
+    r'all\s+(?:measurement|feedback|erasure)\s+protocols?|'
+    r'quantum\s+(?:scenarios?|extensions?|regime)|'
+    r'closing\s+(?:the\s+)?(?:last\s+)?loopholes?|'
+    r'information[\s\-]+energy\s+equivalence)\b',
+    _re_module.IGNORECASE,
+)
+
+
 # ─── State management ─────────────────────
