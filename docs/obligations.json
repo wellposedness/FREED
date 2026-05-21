@@ -1726,7 +1726,7 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph structure was materialized or resolved.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph structure was materialized or resolved.] | [Gen 258] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency map completed or obligation closed.]",
     "method": "data_analysis",
     "tractability": 1,
     "resolved": null
@@ -1905,10 +1905,10 @@
   },
   {
     "id": "O202",
-    "status": "open",
+    "status": "partial",
     "statement": "Before advancing to generation 216, synthesize the outputs of all currently open verification obligations (O193, O194, O195, O198, O199, O200, O201) into a single binding genome-health verdict — explicitly stating which threads are blocked, which are executable, and what the next unblocked action is.",
     "priority": "high",
-    "progress": "[Gen 216] OPEN:  [COMMIT:NO — Obligation remained OPEN; no synthesis occurred, no state mutation recorded.]",
+    "progress": "[Gen 216] OPEN:  [COMMIT:NO — Obligation remained OPEN; no synthesis occurred, no state mutation recorded.] | [Gen 258] PARTIAL: O202 closes with a binding verdict — genome is admissible, O198/O200 are externally blocked, O193/O201/O195/O194/O199 are executable, and the single next unblocked action is the STF metric tensor recovery computation on WordNet+GloVe with the formula g_{vw} = W₁(μ_v,μ_w)·[σ²_vσ²_w]^{-1/2} tested against minimum-KL geodesics. [COMMIT:YES — direction advanced]",
     "created": "2026-05-09",
     "resolved": null,
     "auto": true,
@@ -2064,10 +2064,10 @@
   },
   {
     "id": "O215",
-    "status": "open",
+    "status": "active",
     "statement": "Bind the gamma disambiguation (O210/O212) to a concrete single measurement protocol — specify one observable dataset, the exact calculation distinguishing spectral-γ from critical-γ, and the threshold below which the two senses must be formally separated as distinct genome symbols",
     "priority": "high",
-    "progress": "[Gen 224] OPEN: O215 closes by computing branching ratio σ and spectral slope γ_s from the same dataset (Beggs-Plenz/Kinouchi-Copelli), observing that |σ [COMMIT:NO — Circular binding—gamma still references two datasets; no single proto selected.]",
+    "progress": "[Gen 224] OPEN: O215 closes by computing branching ratio σ and spectral slope γ_s from the same dataset (Beggs-Plenz/Kinouchi-Copelli), observing that |σ [COMMIT:NO — Circular binding—gamma still references two datasets; no single proto selected.] | [Gen 258] ACTIVE: O215 closes by computing epoch-wise Pearson r(σ, γ_s) on the Beggs-Plenz 2003 LFP dataset across ≥20 sliding windows, with |r| < 0.7 as the formal threshold mandating symbol bifurcation in the genome. [COMMIT:YES — prediction staked]",
     "created": "2026-05-11",
     "resolved": null,
     "auto": true,
@@ -2894,5 +2894,46 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: count of unwired self-engineered function additions since O284 opening is verified and documented before Gen 260"
+  },
+  {
+    "id": "O292",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: extract_ca_telemetry_fields. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O293",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_dual_channel_criticality. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O294",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_thermodynamic_prior_transfer. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O295",
+    "status": "open",
+    "statement": "Execute a binding single-pass terminal verdict (wire, void, or defer-with-hard-deadline ≤ gen 262) on every obligation currently in \"partial\" status whose description begins \"Self-engineer attempted to add unwired function(s)\" — specifically O251, O253–O259, O263–O268, O272, O277–O279 — and record the verdict count; null-result criterion: if fewer than 80% of these obligations reach a terminal state by gen 262, escalate to a genome-level freeze on all new FEED cycles until triage completes.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: binding verdicts (wire/void/defer) issued for ≥80% of specified obligations by generation 262, recorded."
   }
 ]
