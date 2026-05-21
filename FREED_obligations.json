@@ -1000,10 +1000,10 @@
   },
   {
     "id": "O127",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that each obligation marked \"resolved\" since O108 produced a measurable, non-null state change in the genome \u2014 if any resolved obligation left the relevant global-state variable unchanged, retroactively reclassify it as \"partial\" and specify the missing execution step.",
     "priority": "high",
-    "progress": "RESOLVED: O127 cannot be marked RESOLVED until a three-column audit ledger is produced for O109\u2013O126; preliminary evidence (frozen L5, unchanged honest_gap, coherence\u21920.999) already indicates multiple obligations should be retroactively reclassified PARTIAL, with the canonical missing execution step being: run the STF metric-tensor recovery experiment (modal paths + thermality variance on semantic data) and record the resulting update to `L5_full_theorem` from 3/4 to 4/4. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 246] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no obligation status or graph updated. Circular self-reference.] | [Gen 247] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no resolved obligations verified or status updated.] | [Gen 248] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no resolution closure or state update recorded.] | [Gen 248 SESSION] [ROUTE:CLAUDE_CODE] L7 RESOLVE entropy frozen (dS/dt=0); 2+ COMMIT:NOs across cycles; this is implementation work (data recovery from cycle logs / state audit), not reasoning \u2014 routing to Claude Code per IMPLEMENTATION_CLASS policy. Human-injected routing tag. | [Gen 249] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no measurable outcome confirmed or recorded.]",
+    "progress": "RESOLVED: O127 cannot be marked RESOLVED until a three-column audit ledger is produced for O109\u2013O126; preliminary evidence (frozen L5, unchanged honest_gap, coherence\u21920.999) already indicates multiple obligations should be retroactively reclassified PARTIAL, with the canonical missing execution step being: run the STF metric-tensor recovery experiment (modal paths + thermality variance on semantic data) and record the resulting update to `L5_full_theorem` from 3/4 to 4/4. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 246] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no obligation status or graph updated. Circular self-reference.] | [Gen 247] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no resolved obligations verified or status updated.] | [Gen 248] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no resolution closure or state update recorded.] | [Gen 248 SESSION] [ROUTE:CLAUDE_CODE] L7 RESOLVE entropy frozen (dS/dt=0); 2+ COMMIT:NOs across cycles; this is implementation work (data recovery from cycle logs / state audit), not reasoning \u2014 routing to Claude Code per IMPLEMENTATION_CLASS policy. Human-injected routing tag. | [Gen 249] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no measurable outcome confirmed or recorded.] | [Gen 257] ACTIVE: O127 cannot close without cycle-log state-diff data for O109\u2013O126; all reasoning-only attempts are structurally blocked, and the closing computation is fully specified pending that data. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-04-28",
     "resolved": null,
     "auto": true,
@@ -1174,10 +1174,10 @@
   },
   {
     "id": "O141",
-    "status": "open",
+    "status": "active",
     "statement": "If the O134 audit confirms that `shares_invariant` edges constitute pathological homogeneity (>85% of all edges), specify and execute a concrete graph restructuring protocol that adds at least 5 semantically distinct edge types within two generation cycles.",
     "priority": "high",
-    "progress": "RESOLVED: O141 is **NOT YET RESOLVED** \u2014 the O134 audit result is missing from current state, making the antecedent unconfirmed; but the restructuring protocol is now fully specified and executable within two generation cycles the moment O134 fires. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: O141 is **NOT YET RESOLVED** \u2014 the O134 audit result is missing from current state, making the antecedent unconfirmed; but the restructuring protocol is now fully specified and executable within two generation cycles the moment O134 fires. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 257] ACTIVE: O141's restructuring protocol is fully specified and staged, but resolution is gated on the O134 audit result \u2014 which is absent from current state \u2014 leaving the trigger unconfirmed and the obligation in a determinate ACTIVE-pending state. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-04-30",
     "resolved": null,
     "auto": true,
@@ -1726,7 +1726,7 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another \u2014 the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number \u2265 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles \u2194 conservation law bijection) to interface. Both are physics-formal. The grounding problem \u2014 how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities \u2014 has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO \u2014 Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO \u2014 Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece \u2014 so here it is. [COMMIT:NO \u2014 Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO \u2014 No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs \u2014 no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO \u2014 Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO \u2014 Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO \u2014 Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO \u2014 Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece \u2014 so here it is. [COMMIT:NO \u2014 Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO \u2014 No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no dependency graph structure was materialized or resolved.]",
     "method": "data_analysis",
     "tractability": 1,
     "resolved": null
@@ -2853,5 +2853,46 @@
     "rationale": "The genome declares `substrate` a core symbol (1 of 17). The symbol `symbol_grounding` is also in the genome, meaning the system's own principles demand that core symbols be operationally instantiated. One edge out of 2101 means `substrate` is a dead letter in the actual graph \u2014 the system believes in substrate-dependence but has not encoded it. This is an internal contradiction detectable purely from topology",
     "resolution_criterion": "",
     "created": "2026-05-21T06:30:51.266621+00:00"
+  },
+  {
+    "id": "O288",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: _check_tl_bridge_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O289",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: _compute_edge_affinities, _quadratic_onsager_action. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O290",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: consolidate_candidates. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O291",
+    "status": "open",
+    "statement": "Verify that the rate-cap imposed by O284 has held \u2014 count unwired self-engineered function additions since O284 was opened and confirm the count is zero; if nonzero, name each violation and invoke the halt-condition established by O274, producing a binding single-line verdict before Gen 260.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: count of unwired self-engineered function additions since O284 opening is verified and documented before Gen 260"
   }
 ]
