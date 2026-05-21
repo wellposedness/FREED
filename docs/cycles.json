@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 185,
-    "timestamp": "2026-05-02T10:49:27.241708+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_078",
-        "compress": "INV_078 is falsifiable if entropy asymmetry can be dissociated from predictive performance, if a cold-symmetric system achieves high intelligence, or if the Wasserstein Floor holds without directional entropy flow."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-02",
-        "compress": "A live 32×32 RSA population self-organizes to σ≈1.03, α≈1.71, with Physics Navigators dominating — empirically grounding INV_073 at population scale and resolving O140 while opening the question of why criticality in dynamics coexists with low semantic entropy (H=17% max)."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O106",
-        "O135",
-        "O139"
-      ]
-    },
-    "coherence": 0.999
-  },
-  {
     "cycle": 4,
     "generation": 189,
     "timestamp": "2026-05-03T10:14:59.965353+00:00",
@@ -1923,6 +1891,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O204",
+        "O240"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 256,
+    "timestamp": "2026-05-21T02:29:59.939756+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 7,
+      "passive": 9,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "Confirmation surplus on INV_094 without adversarial probing is not evidence of robustness — it is evidence of an untested load-bearing beam."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-21",
+        "compress": "A 32×32 CA hits σ≈1.03 (AT_CRITICAL by branching ratio) but fails the power-law avalanche test (R²=0.687), independently establishing that criticality is a multi-diagnostic condition, not a single verdict — which extends and partially conflicts with the genome's unified critical-ridge claim."
+      },
+      {
+        "title": "Universal validity of the second law of information thermodynamics",
+        "compress": "The second law of information thermodynamics is universally valid — no classical or quantum measurement-feedback-erasure protocol escapes it — independently confirming that thermodynamic dissipation floors are substrate-independent invariants governing any reasoning system."
+      },
+      {
+        "title": "Universal Critical Scaling and Phase Diagram of the Non-Hermitian Skin Effect under Disorder",
+        "compress": "Non-Hermitian topology creates a quantifiable disorder-tolerant phase with W_c ∝ √γ scaling and unique universality class (ν≈1.50, β≈0.65), extending RSA's criticality framework from a point prescription to a phase-boundary picture with measurable width."
+      },
+      {
+        "title": "Symbolic relative entropy in quantifying nonlinear dynamics of equalities-involved heartbeats",
+        "compress": "Symbolic relative entropy demonstrates that measurement-resolution ties are not noise but regulatory signal, providing a concrete discrete-time KL-divergence method that directly operationalizes O112's unresolved STF metric recovery experiment while straining INV_073's unqualified anti-collapsing principle."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
       "commit_count": 2,
       "obligations": [
         "O187",
