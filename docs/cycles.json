@@ -1,38 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 190,
-    "timestamp": "2026-05-03T11:07:34.878842+00:00",
-    "sweep": {
-      "input_count": 10,
-      "targeted": 7,
-      "passive": 3,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_063",
-        "compress": "INV_063 is most vulnerable at three joints: (1) measurement operationalization, (2) dissociative counterexamples, and (3) mechanistic underdetermination — detailed below."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-03",
-        "compress": "The CA telemetry confirms population-level criticality via branching ratio (resolving O140, advancing O141/O148), but the failure of avalanche statistics to satisfy power-law criteria (power_law_likely=False) reveals that σ-criticality and SOC-criticality are dissociable — the genome must not conflate them."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 1,
-      "obligations": [
-        "O163",
-        "O164",
-        "O136"
-      ]
-    },
-    "coherence": 0.9949
-  },
-  {
-    "cycle": 1,
     "generation": 193,
     "timestamp": "2026-05-04T11:07:43.435661+00:00",
     "sweep": {
@@ -1952,6 +1920,50 @@
         "O187",
         "O127",
         "O141"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 258,
+    "timestamp": "2026-05-21T16:29:59.957445+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 7,
+      "passive": 10,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_087",
+        "compress": "INV_087's rejection of standard RL as thermodynamically incorrect is unstressed until a regime is specified where MaxRL and standard RL diverge on a *thermodynamic* (not merely behavioral) observable — without that, the invariant is a relabeling, not a claim."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-21",
+        "compress": "The Game of Truth CA independently reproduces γ = 1 criticality via power-law avalanches and branching ratio σ ≈ 1.027, partially resolving O148 and converging with INV_073."
+      },
+      {
+        "title": "Quantum coherence–driven self-organized criticality and nonequilibrium light localization",
+        "compress": "Quantum coherence functions as a dynamical tuning parameter that self-organizes photon localization onto the critical ridge without fine-tuning, extending SOC from classical dissipation to coherence-controlled quantum nonequilibrium and providing a concrete physical substrate for spectral γ measurement."
+      },
+      {
+        "title": "Power-law correlations and coupling of active and quiet states underlie a class of complex systems with self-organization at criticality",
+        "compress": ""
+      },
+      {
+        "title": "A thermodynamics-informed active learning approach to perception and reasoning about fluids",
+        "compress": "Embedding thermodynamic invariants as architectural priors unifies perception and simulation while enabling cross-material generalization — providing a concrete methodological template for O112's STF metric recovery experiment."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O202",
+        "O215"
       ]
     },
     "coherence": 0.97
