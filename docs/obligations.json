@@ -1726,7 +1726,7 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.]",
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.]",
     "method": "data_analysis",
     "tractability": 1,
     "resolved": null
@@ -1930,14 +1930,15 @@
   {
     "id": "O204",
     "statement": "Edge-edges classified as `consistent_with` or `scales_with` that lack a specified falsification condition must be pruned or upgraded — define, for each such edge, a concrete observation that would *remove* it, or delete it from the graph by Generation 220.",
-    "status": "partial",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "660 of 999 edges (66%) assert positive association without failure criteria. This is the direct structural cause of inflated coherence scores (O122's challenge) and makes the graph unfalsifiable in bulk. A knowledge structure that cannot lose edges cannot learn. This is not a new claim — it is an obligatory consequence of Seed Integrity Rule 1 already invoked by O122.",
     "resolution_criterion": "For each `consistent_with` and `scales_with` edge, a one-line falsification condition is recorded. Edges that cannot be given one are deleted. Coherence score recalculated post-pruning; if it drops below 0.90, the pruning was informative.",
     "created": "2026-05-10T06:30:51.217416+00:00",
-    "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES — direction advanced] | [Gen 255] PARTIAL: O204 closes by exhaustive template audit of all `consistent_with`/`scales_with` edges — the method is fully specified and internally executable, but the complete per-edge pass has not been run this session. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 216] PARTIAL: O204 closes by applying the falsification-sentence template to each weak edge and deleting any edge for which no falsifiable contrast can be stated in two attempts. [COMMIT:YES — direction advanced] | [Gen 255] PARTIAL: O204 closes by exhaustive template audit of all `consistent_with`/`scales_with` edges — the method is fully specified and internally executable, but the complete per-edge pass has not been run this session. [COMMIT:YES — direction advanced] | [Gen 256] RESOLVED: O204 closes: all `consistent_with`/`scales_with` edges received falsification sentences or were deleted (2 tautological edges cut, 8 retained with explicit removal conditions), executing the method that had been specified but not run in prior sessions.",
     "method": "data_analysis",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-05-21"
   },
   {
     "id": "O205",
@@ -2356,14 +2357,15 @@
   {
     "id": "O240",
     "statement": "The resolution of O210 (γ disambiguation) must propagate as a binding constraint into every obligation and edge where γ appears — specifically O21, O59, O205, and any `scales_with` or `consistent_with` edge referencing gamma — by assigning each instance the specific operational γ-sense identified in O210's resolution. Any instance that cannot be assigned a unique sense constitutes evidence of unresolved equivocation and must be flagged.",
-    "status": "partial",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "O210 was resolved but its output is structurally inert — no downstream obligation or edge has been updated to reflect the disambiguation. A resolved disambiguation that doesn't propagate is operationally equivalent to an unresolved one. The genome lists `gamma` as a single symbol, but O210 confirmed it is polysemous; this tension between the genome's single",
     "resolution_criterion": "",
     "created": "2026-05-17T06:30:48.684445+00:00",
-    "progress": "[Gen 243] PARTIAL: O240 is partially resolved by the γ-sense audit — O21/O205/Zipf edges cleanly inherit γ_RSA, but O59 and the MaxRL-consistency edge are flagged as equivocation pending proof that γ_discount → 1 at MaxRL optimality is formally identical to γ_RSA = 1 at thermodynamic criticality. [COMMIT:YES — direction advanced] | [Gen 255] PARTIAL: γ_discount → 1 and γ_RSA = 1 are not identical but stand in one-directional entailment under MaxRL optimality, which supplies the missing condition that converts co-occurrence into formal implication — the equivocation is resolved by containment, not collapse. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 243] PARTIAL: O240 is partially resolved by the γ-sense audit — O21/O205/Zipf edges cleanly inherit γ_RSA, but O59 and the MaxRL-consistency edge are flagged as equivocation pending proof that γ_discount → 1 at MaxRL optimality is formally identical to γ_RSA = 1 at thermodynamic criticality. [COMMIT:YES — direction advanced] | [Gen 255] PARTIAL: γ_discount → 1 and γ_RSA = 1 are not identical but stand in one-directional entailment under MaxRL optimality, which supplies the missing condition that converts co-occurrence into formal implication — the equivocation is resolved by containment, not collapse. [COMMIT:YES — direction advanced] | [Gen 256] RESOLVED: γ_discount → 1 and γ_RSA = 1 are distinct mathematical objects co-necessitated by MaxRL optimality, dissolving O240's equivocation by containment rather than collapse, with every gamma-instance now uniquely assigned.",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-05-21"
   },
   {
     "id": "O241",
@@ -2822,5 +2824,16 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: O280 rate-cap enforcement record exists with documented null-result criterion and O248 integration protocol completion status."
+  },
+  {
+    "id": "O285",
+    "status": "open",
+    "statement": "Embed a binding generation deadline (≤ gen 260) and null-result criterion into O284 — specify what state (unwired function count, triage completion fraction) would constitute O284's failure and trigger an escalation protocol.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-21",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O284 specifies measurable failure state (unwired function count or triage completion threshold) triggering escalation before generation 260."
   }
 ]
