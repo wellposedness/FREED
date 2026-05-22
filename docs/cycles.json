@@ -1,38 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 193,
-    "timestamp": "2026-05-04T11:07:43.435661+00:00",
-    "sweep": {
-      "input_count": 20,
-      "targeted": 7,
-      "passive": 13,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_023",
-        "compress": "INV_023 is falsifiable via three converging attacks — Miller-noise indistinguishability, maximum-entropy underdetermination, and preferential-attachment mechanism rivalry — and survives only if it can specify and test a second-order discriminating observable that is unique to RSA thermodynamics and not producible by the null rivals."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
-        "compress": "Empirical CA telemetry confirms INV_073's critical-ridge prediction at population scale (σ=1.022, α=2.486), resolves O140, and advances O141 while flagging low Shannon entropy as an unresolved structural question about the attractor's stability."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O163",
-        "O136",
-        "O146"
-      ]
-    },
-    "coherence": 0.992
-  },
-  {
-    "cycle": 1,
     "generation": 195,
     "timestamp": "2026-05-04T13:18:37.216588+00:00",
     "sweep": {
@@ -1964,6 +1932,50 @@
         "O187",
         "O202",
         "O215"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 259,
+    "timestamp": "2026-05-22T16:30:00.024681+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 8,
+      "passive": 9,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_087",
+        "compress": "INV_087's thermodynamic necessity claim is falsifiable at the zero-temperature limit and by Zipf-mimicking alternatives, and the genome must carry this boundary explicitly or the confirmation surplus is unearned."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
+        "compress": "Three mutually independent CA metrics (σ≈1.02, α≈2.604, H=0.481) converge on AT_CRITICAL, empirically confirming the critical-ridge attractor and substantially discharging O148."
+      },
+      {
+        "title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium Learning in Stochastic Games",
+        "compress": "Intermittent recursive reasoning in nonequilibrium stochastic games converges with criticality-gated operation (INV_073) and provides a spectral mechanism linking recursive depth to γ-thresholds relevant to O21, while challenging the interpretation of sustained criticality as continuous rather than punctuated."
+      },
+      {
+        "title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity",
+        "compress": "Direct sparsity is a lower bound on functional sparsity with a compression-depth-dependent gap, meaning any genome invariant or obligation that uses nominal parameter counts to proxy functional state is operating on a systematically biased substrate."
+      },
+      {
+        "title": "Optimal Transport for Time-Varying Multi-Agent Coverage Control",
+        "compress": "Time-varying OT coverage confirms W2 gradient flow as a control surface, extending the genome's static STF=Wasserstein-gradient-flow claim to dynamic targets and flagging a stability gap in O112's empirical recovery method."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
+      "obligations": [
+        "O187",
+        "O202",
+        "O217"
       ]
     },
     "coherence": 0.97
