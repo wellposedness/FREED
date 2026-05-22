@@ -2902,6 +2902,66 @@ class KnowledgeGraph:
                     f"confirmations."
                 )
 
+        # ── Thermodynamic divergence flag (CONFIRMATION_SURPLUS_UNGROUNDED) ──
+        # Prevents INV_087-class accumulation of confirmation surplus from
+        # behaviorally-indistinguishable evidence that does not actually test
+        # the thermodynamic claim.  When a 'confirms'/'supports'/'extends'
+        # edge targets an INV_ node, check whether ANY thermodynamic
+        # observable key appears in the edge context or surrounding kernel
+        # output.  If the confirmation evidence is exclusively behavioral
+        # (reward, accuracy, performance) with zero thermodynamic grounding
+        # (entropy production, free energy, Wasserstein distance, dissipation,
+        # temperature, partition function), mark as UNGROUNDED.
+        _THERMODYNAMIC_OBSERVABLE_RE = re.compile(
+            r'\b(?:entropy\s+produc\w*|free\s+energy|Wasserstein|dissipat\w*|'
+            r'partition\s+function|Boltzmann|thermodynamic\s+(?:cost|bound|limit)|'
+            r'k[_]?B\s*T|thermal\s+fluctuation|Landauer|entropy\s+(?:rate|change|flow)|'
+            r'heat\s+capacity|temperature\s+(?:param|scal)|non[-\s]?equilibrium|'
+            r'second\s+law|2nd\s+law|entropy\s+increase|irreversib)',
+            re.I
+        )
+        _BEHAVIORAL_ONLY_RE = re.compile(
+            r'\b(?:reward|accuracy|performance|return|regret|score|benchmark|'
+            r'success\s+rate|win\s+rate|loss\s+function|training\s+loss|'
+            r'test\s+accuracy|validation|F1|precision|recall|AUC|ROC)\b',
+            re.I
+        )
+        for ne in new_edges:
+            if ne.get("type") not in _CONF_TYPES:
+                continue
+            target = ne.get("to", "").upper()
+            if not target.startswith("INV_"):
+                continue
+            # Gather all available text for this edge
+            edge_ctx = ne.get("context", "")
+            combined_text = edge_ctx + " " + " ".join(
+                str(kernel_output.get(f, ""))
+                for f in ("perceive", "represent", "predict", "compare",
+                          "adjust", "compress", "next", "raw")
+            )
+            has_thermo = bool(_THERMODYNAMIC_OBSERVABLE_RE.search(combined_text))
+            has_behavioral = bool(_BEHAVIORAL_ONLY_RE.search(combined_text))
+            if not has_thermo and has_behavioral:
+                ne["thermodynamic_divergence_flag"] = "CONFIRMATION_SURPLUS_UNGROUNDED"
+                ne["grounding_deficit"] = (
+                    "behavioral_only:no_thermodynamic_observable_keys:"
+                    "evidence_does_not_test_thermodynamic_claim"
+                )
+                print(
+                    f"[GRAPH:THERMO_DIVERGENCE] ⚠ {target}: confirmation "
+                    f"evidence is exclusively behavioral (reward/accuracy) "
+                    f"with NO thermodynamic observables (entropy production, "
+                    f"free energy, Wasserstein distance). Edge flagged "
+                    f"CONFIRMATION_SURPLUS_UNGROUNDED — does not test the "
+                    f"thermodynamic claim. (INV_087 falsification layer)"
+                )
+            elif not has_thermo and not has_behavioral:
+                # Neither behavioral nor thermodynamic — ambiguous grounding
+                ne["thermodynamic_divergence_flag"] = "GROUNDING_AMBIGUOUS"
+                ne["grounding_deficit"] = (
+                    "no_behavioral_no_thermodynamic:evidence_type_unclear"
+                )
+
         # ── Branching ratio window accumulator ───────────────────────────
         # Per-call σ was structurally biased (upstream=1 per paper, secondary
         # downstream walked static graph degree → σ tracked centrality of hit
@@ -2912,6 +2972,39 @@ class KnowledgeGraph:
         if self._branching_window is not None:
             self._branching_window["papers"] += 1
             self._branching_window["new_edges"] += len(new_edges)
+
+        # ── Criticality-proximity scoring (SOC coherence-driven) ─────────
+        # For each target node touched by new edges, compute the criticality-
+        # proximity score from its local edge weight distribution.  This
+        # flags nodes whose spectral gap variance signature approaches
+        # power-law (critical γ≈1), exponential (subcritical γ<1), or
+        # delta (supercritical γ>1) regimes.  Derived from the paper's
+        # finding that proximity to the critical ridge is detectable via
+        # synchronization signatures in spectral structure.
+        touched_targets = set()  # type: set
+        for ne in new_edges:
+            t = ne.get("to", "").upper()
+            if t:
+                touched_targets.add(t)
+        for target_id in touched_targets:
+            cps = _criticality_proximity_score(target_id, self._edges)
+            if cps["n_weights"] >= 3:
+                # Attach score to the most recent edge targeting this node
+                for ne in reversed(new_edges):
+                    if ne.get("to", "").upper() == target_id:
+                        ne["criticality_proximity"] = {
+                            "regime": cps["regime"],
+                            "gamma_hat": cps["gamma_hat"],
+                            "spectral_gap_variance": cps["spectral_gap_variance"],
+                        }
+                        break
+                if cps["regime"] != "critical":
+                    print(
+                        f"[GRAPH:CRITICALITY] ⚠ {target_id}: "
+                        f"regime={cps['regime']}, γ̂={cps['gamma_hat']:.4f}, "
+                        f"sgv={cps['spectral_gap_variance']:.6f} — "
+                        f"drifting from γ=1 critical operating regime."
+                    )
 
         return new_edges
 

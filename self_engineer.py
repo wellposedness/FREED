@@ -46,7 +46,7 @@ MODIFIABLE = {
     "l7_agent.py",
     "consolidate.py",
     "site_builder.py",
-    "batch_feed.py",
+    # "batch_feed.py",  # SURGICAL PAUSE 2026-05-21 — 5/6 reverts since fix-restart hit this file. Re-add after reading the reverted patches to diagnose root cause.
     "voice.py",
     "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
     "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve

@@ -1910,6 +1910,27 @@ class BranchingRatioTracker:
         in_band = self.sigma_band_low <= s_mean <= self.sigma_band_high
         verdict = _criticality_verdict(s_mean, alpha, r_squared)
 
+        # ── Structured-criticality detection (INV_073) ──
+        # When σ is within the critical band, check whether Shannon entropy
+        # H is < 0.2 of maximum.  If so, flag as "structured criticality"
+        # to distinguish from uniform criticality where H ≈ H_max.
+        # Low H at confirmed criticality signals frozen-but-tipping dynamics
+        # rather than genuine SOC with high information throughput.
+        structured_criticality = False
+        h_fraction_latest = 0.0
+        if self._h_fraction_history:
+            h_fraction_latest = self._h_fraction_history[-1]
+
+        if in_band and h_fraction_latest < 0.2 and h_fraction_latest > 0.0:
+            structured_criticality = True
+            print(
+                "[CRITICALITY] structured criticality detected: "
+                "sigma={:.4f} in critical band, H/H_max={:.4f} (<0.2). "
+                "Low entropy alongside critical branching ratio indicates "
+                "ordered/frozen-but-tipping dynamics, not uniform SOC."
+                .format(s_mean, h_fraction_latest)
+            )
+
         return {
             "sigma_mean": round(s_mean, 6),
             "sigma_std": round(s_std, 6),
@@ -1921,6 +1942,8 @@ class BranchingRatioTracker:
             "n_steps": n_steps,
             "n_avalanches": len(self._avalanche_sizes),
             "verdict": verdict,
+            "structured_criticality": structured_criticality,
+            "h_fraction_latest": round(h_fraction_latest, 4),
         }
 
     def _fit_power_law(self):
