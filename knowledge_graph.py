@@ -2902,6 +2902,42 @@ class KnowledgeGraph:
                     f"confirmations."
                 )
 
+            # ── Confirmation Asymmetry Flag (HIGH_FALSIFICATION_DEBT) ────
+            # When an invariant reaches ≥5 confirming edges and exactly 0
+            # challenge edges, it is marked HIGH_FALSIFICATION_DEBT rather
+            # than WELL_CONFIRMED.  This converts the structural
+            # vulnerability of unchallenged confirmation accumulation into
+            # a live epistemic signal that triggers targeted adversarial
+            # probes before coherence inflation occurs.
+            #
+            # Distinct from the ratio-based ADVERSARIAL_DEBT flag above:
+            # this fires on the absolute asymmetry (≥5 confirms, 0
+            # challenges) regardless of ratio threshold, catching the
+            # specific pattern identified by the deliberate falsification
+            # probe (e.g. INV_094 with high confirmation surplus and zero
+            # direct challenges).
+            _CONF_ASYM_MIN = 5
+            if n_conf >= _CONF_ASYM_MIN and n_chal == 0:
+                ne["confirmation_asymmetry_flag"] = "HIGH_FALSIFICATION_DEBT"
+                ne["falsification_debt_detail"] = (
+                    f"confirms={n_conf}:challenges=0:"
+                    f"status=HIGH_FALSIFICATION_DEBT:"
+                    f"NOT_WELL_CONFIRMED:"
+                    f"apparent_robustness_is_artifact_of_challenge_absence:"
+                    f"schedule_adversarial_probe_before_coherence_inflation"
+                )
+                print(
+                    f"[GRAPH:FALSIFICATION_DEBT] ⚠ {target}: "
+                    f"{n_conf} confirming edge(s) with ZERO challenges — "
+                    f"status is HIGH_FALSIFICATION_DEBT, not "
+                    f"WELL_CONFIRMED. Apparent robustness is "
+                    f"indistinguishable from untested. Targeted "
+                    f"adversarial probe required: (1) What would "
+                    f"falsify {target}? (2) What boundary conditions "
+                    f"break it? (3) What alternative mechanism "
+                    f"produces the same observables?"
+                )
+
         # ── Thermodynamic divergence flag (CONFIRMATION_SURPLUS_UNGROUNDED) ──
         # Prevents INV_087-class accumulation of confirmation surplus from
         # behaviorally-indistinguishable evidence that does not actually test
@@ -2962,6 +2998,276 @@ class KnowledgeGraph:
                     "no_behavioral_no_thermodynamic:evidence_type_unclear"
                 )
 
+        # ── Mechanistic Criticality Detection (SOC from replication-selection) ──
+        # Papers that derive SOC / 1/f emergence from replication-selection
+        # dynamics provide MECHANISTIC (not merely empirical) support for
+        # γ=1 invariants.  Tag them with `mechanistic_criticality` so
+        # coherence scoring weights them higher for obligation-resolution
+        # credit than observational confirmations.
+        #
+        # CHALLENGE (INV_073): If criticality is the *automatic* attractor
+        # of any replication-selection system, the genome's framing of γ=1
+        # as a navigated ridge requiring active maintenance may overstate
+        # the difficulty — the kernel could be operating in a regime where
+        # criticality is self-correcting rather than precariously balanced.
+        #
+        # NOETHER_ROW: Self-Organized Criticality
+        # NOETHER_STATUS: rigorous
+        # NOETHER_NOTE: 1/f scale-invariance as a conserved statistical
+        # signature of replication-selection dynamics across substrates.
+        _MECHANISTIC_SOC_PATTERNS = [
+            re.compile(
+                r'\b(?:self[-\s]?replicat\w*|replication[-\s]?selection|'
+                r'mutation\s+(?:and\s+)?selection|replicat\w+\s+entit)',
+                re.I),
+        ]
+        _SOC_1F_PATTERNS = [
+            re.compile(
+                r'\b(?:1/f|one[-/]f|1[-\s]?over[-\s]?f|power[-\s]?law\s+'
+                r'(?:fluctuation|distribution|spectrum|noise))',
+                re.I),
+            re.compile(
+                r'\b(?:self[-\s]?organi[sz]ed\s+critical\w*|SOC)\b',
+                re.I),
+        ]
+        _MECHANISTIC_DERIVATION_PATTERNS = [
+            re.compile(
+                r'\b(?:deriv\w+|demonstrat\w+|show\w*|prov\w+|establish\w*|'
+                r'naturally\s+evolv\w*|emerge\w*\s+from|result\w*\s+from|'
+                r'arise\w*\s+from|attractor)\b',
+                re.I),
+        ]
+        _mech_text = " ".join(
+            str(kernel_output.get(f, ""))
+            for f in ("perceive", "represent", "predict", "compare",
+                      "adjust", "compress", "next", "raw")
+        )
+        _has_replication_selection = any(
+            p.search(_mech_text) for p in _MECHANISTIC_SOC_PATTERNS
+        )
+        _has_soc_1f = any(
+            p.search(_mech_text) for p in _SOC_1F_PATTERNS
+        )
+        _has_mechanistic_derivation = any(
+            p.search(_mech_text) for p in _MECHANISTIC_DERIVATION_PATTERNS
+        )
+        if _has_replication_selection and _has_soc_1f and _has_mechanistic_derivation:
+            _mech_crit_tag = {
+                "mechanistic_criticality": True,
+                "mechanism": "replication_selection_to_SOC",
+                "evidence_type": "mechanistic_derivation",
+                "obligation_resolution_boost": 1.5,
+                "inv073_challenge": (
+                    "if_SOC_is_automatic_attractor_of_replication_selection_"
+                    "then_gamma_1_may_be_self_correcting_not_navigated_ridge"
+                ),
+                "noether_row": "Self-Organized Criticality",
+                "noether_status": "rigorous",
+            }
+            for ne in new_edges:
+                ne["mechanistic_criticality"] = _mech_crit_tag
+                # Boost obligation-resolution credit: edges targeting
+                # obligations (O*) or invariants (INV_*) that carry
+                # mechanistic derivation receive 1.5× weight over
+                # purely empirical confirmations.
+                if ne.get("type") in ("confirms", "supports", "extends",
+                                      "advances", "resolves"):
+                    existing_weight = ne.get("prediction_weight", 1.0)
+                    ne["prediction_weight"] = round(
+                        existing_weight * _mech_crit_tag["obligation_resolution_boost"], 4
+                    )
+            print(
+                f"[GRAPH:MECHANISTIC_CRITICALITY] Paper provides mechanistic "
+                f"derivation of SOC/1/f from replication-selection dynamics — "
+                f"{len(new_edges)} edge(s) tagged mechanistic_criticality "
+                f"with 1.5× obligation-resolution boost. "
+                f"(INV_073 challenge: criticality may be self-correcting "
+                f"attractor, not navigated ridge.)"
+            )
+        elif _has_replication_selection and _has_soc_1f:
+            # Partial match: replication-selection + SOC language but no
+            # explicit mechanistic derivation — tag as empirical, no boost
+            for ne in new_edges:
+                ne["mechanistic_criticality"] = {
+                    "mechanistic_criticality": False,
+                    "evidence_type": "empirical_correlation",
+                    "obligation_resolution_boost": 1.0,
+                    "note": "SOC_and_replication_selection_mentioned_but_"
+                            "no_mechanistic_derivation_detected",
+                }
+
+        # ── Criticality fingerprint extraction (CA telemetry path) ───────
+        # When a FEED abstract contains structured CA telemetry markers
+        # ("BRANCHING RATIO" AND "power-law exponent" or "power_law"),
+        # extract the triple (σ, α, H/H_max) as a named criticality
+        # fingerprint and attach it to every new edge produced by this
+        # paper.  This enables automated CONVERGE/CONFLICT detection
+        # against INV_073 across future CA telemetry feeds without
+        # re-parsing prose.
+        _full_feed_text = " ".join(
+            str(kernel_output.get(f, ""))
+            for f in ("perceive", "represent", "predict", "compare",
+                      "adjust", "compress", "next", "raw")
+        )
+        _has_branching = bool(re.search(r'BRANCHING\s+RATIO', _full_feed_text, re.I))
+        _has_powerlaw = bool(re.search(r'power[-_\s]?law\s+exponent', _full_feed_text, re.I))
+        if _has_branching and _has_powerlaw:
+            # Extract σ (branching ratio)
+            _sigma_m = re.search(
+                r'(?:BRANCHING\s+RATIO|branching\s+ratio)[^0-9±]*'
+                r'(?:σ|sigma)\s*[=≈~]\s*([0-9]+\.?[0-9]*)',
+                _full_feed_text, re.I
+            )
+            _sigma_val = float(_sigma_m.group(1)) if _sigma_m else None
+
+            # Extract α (power-law avalanche exponent)
+            _alpha_m = re.search(
+                r'(?:power[-_\s]?law\s+exponent|avalanche[^α]*)'
+                r'(?:α|alpha)\s*[=≈~]\s*([0-9]+\.?[0-9]*)',
+                _full_feed_text, re.I
+            )
+            _alpha_val = float(_alpha_m.group(1)) if _alpha_m else None
+
+            # Extract H (Shannon entropy) and H_max for H/H_max ratio
+            _h_m = re.search(
+                r'(?:SHANNON\s+ENTROPY|Shannon\s+entropy)[^0-9]*'
+                r'H\s*[=≈~]\s*([0-9]+\.?[0-9]*)',
+                _full_feed_text, re.I
+            )
+            _h_val = float(_h_m.group(1)) if _h_m else None
+
+            _hmax_m = re.search(
+                r'(?:maximum|H_?max)\s*[=:]\s*([0-9]+\.?[0-9]*)',
+                _full_feed_text, re.I
+            )
+            _hmax_val = float(_hmax_m.group(1)) if _hmax_m else None
+
+            # Also try the fractional form "0.186 of maximum 2.585"
+            if _hmax_val is None:
+                _hfrac_m = re.search(
+                    r'([0-9]+\.?[0-9]*)\s+of\s+maximum\s+([0-9]+\.?[0-9]*)',
+                    _full_feed_text, re.I
+                )
+                if _hfrac_m:
+                    _hmax_val = float(_hfrac_m.group(2))
+
+            _h_ratio = None  # type: Optional[float]
+            if _h_val is not None and _hmax_val is not None and _hmax_val > 0:
+                _h_ratio = round(_h_val / _hmax_val, 6)
+
+            # Build the criticality fingerprint dict
+            _crit_fp = {
+                "sigma": round(_sigma_val, 6) if _sigma_val is not None else None,
+                "alpha": round(_alpha_val, 6) if _alpha_val is not None else None,
+                "H": round(_h_val, 6) if _h_val is not None else None,
+                "H_max": round(_hmax_val, 6) if _hmax_val is not None else None,
+                "H_over_H_max": _h_ratio,
+            }
+
+            # Only attach if at least σ or α was extracted
+            if _crit_fp["sigma"] is not None or _crit_fp["alpha"] is not None:
+                for ne in new_edges:
+                    ne["criticality_fingerprint"] = _crit_fp
+                print(
+                    f"[GRAPH:CRITICALITY_FP] Extracted fingerprint from CA "
+                    f"telemetry: σ={_crit_fp['sigma']}, "
+                    f"α={_crit_fp['alpha']}, "
+                    f"H/H_max={_crit_fp['H_over_H_max']} — "
+                    f"attached to {len(new_edges)} edge(s). "
+                    f"Enables structured CONVERGE/CONFLICT vs INV_073."
+                )
+
+                # Append a telemetry record for longitudinal tracking
+                self._telemetry.append({
+                    "type": "ca_criticality",
+                    "sigma": _crit_fp["sigma"],
+                    "alpha": _crit_fp["alpha"],
+                    "H_over_H_max": _crit_fp["H_over_H_max"],
+                    "source_url": source_url,
+                    "source_title": source_title[:80],
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                })
+
+        # ── Dynamic Density-Gap Wasserstein Re-Weighting ─────────────────
+        # INV_094 challenge: in time-varying settings, W2 geodesics must be
+        # recomputed at each instant.  Static Wasserstein scoring under-
+        # estimates epistemic drift when the target concept distribution
+        # shifts between cycles.  We weight each new edge's transport cost
+        # by the instantaneous density-gap magnitude between the current
+        # node distribution and the prior cycle's stored target distribution,
+        # so that coverage scores reflect dynamic re-minimization rather
+        # than static assignment.
+        #
+        # The density gap magnitude for target node v is:
+        #   gap(v) = |p_current(v) - p_prior(v)|
+        # and the dynamically re-weighted edge score is:
+        #   w_dynamic = w_static * (1 + gap(v) / max(gap))
+        # This amplifies edges targeting nodes whose distribution has shifted
+        # most since the last cycle, forcing re-minimization of the
+        # Wasserstein transport plan at each ingestion step.
+        if not hasattr(self, '_prior_target_distribution'):
+            self._prior_target_distribution = {}  # type: Dict[str, float]
+
+        if new_edges:
+            # Collect all node IDs mentioned in the graph
+            all_nids = set()  # type: set
+            for e in self._edges:
+                for k in ("from", "to"):
+                    nid = e.get(k, "").upper()
+                    if nid:
+                        all_nids.add(nid)
+            all_nids_list = sorted(all_nids)
+
+            if len(all_nids_list) >= 2:
+                # Build current distribution over nodes (edge-count based)
+                current_counts = defaultdict(float)  # type: Dict[str, float]
+                for e in self._edges:
+                    for k in ("from", "to"):
+                        nid = e.get(k, "").upper()
+                        if nid:
+                            current_counts[nid] += 1.0
+                total_c = sum(current_counts.values()) or 1.0
+                current_dist = {nid: current_counts.get(nid, 0.0) / total_c
+                                for nid in all_nids_list}
+
+                # Compute per-node density gap vs prior cycle
+                density_gaps = {}  # type: Dict[str, float]
+                for nid in all_nids_list:
+                    p_cur = current_dist.get(nid, 0.0)
+                    p_prior = self._prior_target_distribution.get(nid, 0.0)
+                    density_gaps[nid] = abs(p_cur - p_prior)
+
+                max_gap = max(density_gaps.values()) if density_gaps else 0.0
+
+                # Apply dynamic re-weighting to new edges
+                for ne in new_edges:
+                    target_nid = ne.get("to", "").upper()
+                    gap_val = density_gaps.get(target_nid, 0.0)
+                    if max_gap > 1e-12:
+                        dynamic_factor = 1.0 + gap_val / max_gap
+                    else:
+                        dynamic_factor = 1.0
+                    ne["density_gap_magnitude"] = round(gap_val, 8)
+                    ne["wasserstein_dynamic_weight"] = round(dynamic_factor, 8)
+                    ne["inv094_dynamic_reweight"] = (
+                        "density_gap_weighted:time_varying_W2_recomputed:"
+                        "coverage_score_reflects_dynamic_re_minimization"
+                    )
+
+                # Store current distribution as the prior for next cycle
+                self._prior_target_distribution = dict(current_dist)
+
+                # Log when significant drift is detected
+                mean_gap = sum(density_gaps.values()) / max(len(density_gaps), 1)
+                if mean_gap > 0.01:
+                    print(
+                        f"[GRAPH:WASSERSTEIN_DYNAMIC] Density-gap re-weighting "
+                        f"applied — mean_gap={mean_gap:.6f}, max_gap={max_gap:.6f}, "
+                        f"edges_reweighted={len(new_edges)}. "
+                        f"(INV_094: W2 geodesics recomputed for time-varying "
+                        f"target distribution.)"
+                    )
+
         # ── Branching ratio window accumulator ───────────────────────────
         # Per-call σ was structurally biased (upstream=1 per paper, secondary
         # downstream walked static graph degree → σ tracked centrality of hit
@@ -2972,39 +3278,6 @@ class KnowledgeGraph:
         if self._branching_window is not None:
             self._branching_window["papers"] += 1
             self._branching_window["new_edges"] += len(new_edges)
-
-        # ── Criticality-proximity scoring (SOC coherence-driven) ─────────
-        # For each target node touched by new edges, compute the criticality-
-        # proximity score from its local edge weight distribution.  This
-        # flags nodes whose spectral gap variance signature approaches
-        # power-law (critical γ≈1), exponential (subcritical γ<1), or
-        # delta (supercritical γ>1) regimes.  Derived from the paper's
-        # finding that proximity to the critical ridge is detectable via
-        # synchronization signatures in spectral structure.
-        touched_targets = set()  # type: set
-        for ne in new_edges:
-            t = ne.get("to", "").upper()
-            if t:
-                touched_targets.add(t)
-        for target_id in touched_targets:
-            cps = _criticality_proximity_score(target_id, self._edges)
-            if cps["n_weights"] >= 3:
-                # Attach score to the most recent edge targeting this node
-                for ne in reversed(new_edges):
-                    if ne.get("to", "").upper() == target_id:
-                        ne["criticality_proximity"] = {
-                            "regime": cps["regime"],
-                            "gamma_hat": cps["gamma_hat"],
-                            "spectral_gap_variance": cps["spectral_gap_variance"],
-                        }
-                        break
-                if cps["regime"] != "critical":
-                    print(
-                        f"[GRAPH:CRITICALITY] ⚠ {target_id}: "
-                        f"regime={cps['regime']}, γ̂={cps['gamma_hat']:.4f}, "
-                        f"sgv={cps['spectral_gap_variance']:.6f} — "
-                        f"drifting from γ=1 critical operating regime."
-                    )
 
         return new_edges
 

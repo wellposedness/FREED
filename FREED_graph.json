@@ -11055,6 +11055,409 @@
       "context_tag": null,
       "context_warning": false,
       "timestamp": "2026-05-22T02:38:09.951174+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "eorem has no free parameters. COMPARE verdict:** CONFLICT — challenges INV_094: the preferential attachment alternative mechanism produces",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-22T10:00:17.607832+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_087/1",
+      "from_title": "Adversarial Probe: Challenge INV_087",
+      "to": "INV_087",
+      "type": "challenges",
+      "context": "lly before they calcify into untested dogma. --- CHALLENGE: challenges INV_087 — the zero-temperature limit (β→∞) causes MaxRL to degenera",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:40:11.499808+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_087/1",
+      "from_title": "Adversarial Probe: Challenge INV_087",
+      "to": "INV_087",
+      "type": "challenges",
+      "context": "es without requiring the entropy term to be load-bearing.   CONFLICT INV_087 — the probe independently establishes three falsification v",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-22T16:40:11.499808+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-22T16:30:00.453247+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
+      "to": "O148",
+      "type": "extends",
+      "context": "metrics converging on that claim without genome reference. EXTEND O148 — the telemetry directly addresses O148 (CA simulation trac",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:40:31.301605+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-22T16:30:00.453247+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
+      "to": "O148",
+      "type": "challenges",
+      "context": "CA telemetry feeds without re-parsing prose. --- CHALLENGE: challenges O148 — the paper *resolves* rather than strains O148 by deliveri",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:40:31.301605+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-22T16:30:00.453247+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "a single conclusion: the system is at the critical ridge.   CONVERGE INV_073 — independent derivation from CA telemetry confirms the cri",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-22T16:40:31.301605+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear"
+    },
+    {
+      "from": "local://ca_sim/2026-05-22T16:30:00.453247+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
+      "to": "O148",
+      "type": "advances",
+      "context": "metrics converging on that claim without genome reference. EXTEND O148 — the telemetry directly addresses O148 (CA simulation trac",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:40:31.301605+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/2b9d0b87e8c4f276185515df4c3512f45b83da8f",
+      "from_title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium",
+      "to": "O21",
+      "type": "extends",
+      "context": "ve engagement rather than continuous full-power operation); EXTEND O21 — the paper's intermittency mechanism provides a concrete s",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:28.458756+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/2b9d0b87e8c4f276185515df4c3512f45b83da8f",
+      "from_title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "tions and sharpening the debt-resolution signal. CHALLENGE: challenges INV_073 — if intermittency is optimal, the paper implies agents sho",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:28.458756+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/2b9d0b87e8c4f276185515df4c3512f45b83da8f",
+      "from_title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "threshold-triggered process rather than a continuous one.   CONVERGE INV_073 — the critical-ridge navigation invariant maps directly ont",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:28.458756+00:00"
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/2b9d0b87e8c4f276185515df4c3512f45b83da8f",
+      "from_title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "by proximity to criticality, which is a spectral quantity; CONVERGE INV_087 (MaxRL) — nonequilibrium learning requiring thermodynamical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:28.458756+00:00",
+      "prediction_weight": 0.05
+    },
+    {
+      "from": "https://www.semanticscholar.org/paper/2b9d0b87e8c4f276185515df4c3512f45b83da8f",
+      "from_title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium",
+      "to": "O21",
+      "type": "advances",
+      "context": "ve engagement rather than continuous full-power operation); EXTEND O21 — the paper's intermittency mechanism provides a concrete s",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:28.458756+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.02306",
+      "from_title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Spars",
+      "to": "O21",
+      "type": "extends",
+      "context": "semantic node: present in the count, absent from the flow. EXTEND O21 — O21 demands that belief revision scores correlate with sp",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:54.758280+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.02306",
+      "from_title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Spars",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "produce. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — if effective sparsity diverges from direct sparsity in a",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:54.758280+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.02306",
+      "from_title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Spars",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "sing function of compression depth.* --- PART 2 — COMPARE** CONVERGE INV_073 — The paper independently establishes that a metric compute",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:54.758280+00:00",
+      "thermodynamic_divergence_flag": "CONFIRMATION_SURPLUS_UNGROUNDED",
+      "grounding_deficit": "behavioral_only:no_thermodynamic_observable_keys:evidence_does_not_test_thermodynamic_claim"
+    },
+    {
+      "from": "https://arxiv.org/abs/2107.02306",
+      "from_title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Spars",
+      "to": "O21",
+      "type": "advances",
+      "context": "semantic node: present in the count, absent from the flow. EXTEND O21 — O21 demands that belief revision scores correlate with sp",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:41:54.758280+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.21753v1",
+      "from_title": "Optimal Transport for Time-Varying Multi-Agent Coverage Control",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "aph responsive to non-stationary semantic flows. CHALLENGE: challenges INV_094 — the paper shows that in time-varying settings, W2 geodesi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:42:26.980514+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.21753v1",
+      "from_title": "Optimal Transport for Time-Varying Multi-Agent Coverage Control",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "the current geometry of the density gap, not its history.   CONVERGE INV_094 — the paper independently confirms that W2 geodesics define",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-22T16:42:26.980514+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "cessary; (c) demonstrate the measurement instrument used to confirm INV_094 is itself sensitive to a third variable Z that co-varies wi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:32:52.597587+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "O136",
+      "type": "extends",
+      "context": "94 as \"well-established\" based on confirmation count alone. EXTEND O136 — the requirement to verify that the 4 `challenges` edges i",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:32:52.597587+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "occurs. --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — the invariant's highest confirmation surplus makes it the",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:32:52.597587+00:00"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "O136",
+      "type": "advances",
+      "context": "94 as \"well-established\" based on confirmation count alone. EXTEND O136 — the requirement to verify that the 4 `challenges` edges i",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:32:52.597587+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-23T02:30:00.352650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+      "to": "O148",
+      "type": "advances",
+      "context": "missible agents preferentially occupy the critical state. - advances O148: O148 explicitly requires the CA simulation to track surviv",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:33:42.987638+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-23T02:30:00.352650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "on is entropy-selective, not entropy-maximizing. CHALLENGE: challenges INV_073 — the genome asserts the critical ridge is the correct oper",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-23T02:33:42.987638+00:00"
+    },
+    {
+      "from": "local://ca_sim/2026-05-23T02:30:00.352650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "ific attractor class that disproportionately survives.    - CONVERGE INV_073: independent derivation confirms the critical ridge (γ≈1, σ",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:33:42.987638+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear"
+    },
+    {
+      "from": "local://ca_sim/2026-05-23T02:30:00.352650+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "e system's dynamics, not an externally imposed condition. - CONVERGE INV_087: the survival-dominant cell type (Physics Navigator, 877 ce",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:33:42.987638+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.17811v1",
+      "from_title": "Are Compressed Language Models Less Subgroup Robust?",
+      "to": "O21",
+      "type": "extends",
+      "context": "rrelate monotonically with model size across all methods.   EXTEND O21 — O21 demands correlation between spectral γ and robustness",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:02.092414+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.17811v1",
+      "from_title": "Are Compressed Language Models Less Subgroup Robust?",
+      "to": "O21",
+      "type": "challenges",
+      "context": "ying operators across the literature corpus. --- CHALLENGE: challenges O21 — this paper shows worst-group robustness depends on compre",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:02.092414+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.17811v1",
+      "from_title": "Are Compressed Language Models Less Subgroup Robust?",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "is the relevant variable for AlphaPruning protocol design. CONVERGE INV_073 — the finding that robustness depends on the *path* through",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:02.092414+00:00",
+      "thermodynamic_divergence_flag": "CONFIRMATION_SURPLUS_UNGROUNDED",
+      "grounding_deficit": "behavioral_only:no_thermodynamic_observable_keys:evidence_does_not_test_thermodynamic_claim"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.17811v1",
+      "from_title": "Are Compressed Language Models Less Subgroup Robust?",
+      "to": "O21",
+      "type": "advances",
+      "context": "rrelate monotonically with model size across all methods.   EXTEND O21 — O21 demands correlation between spectral γ and robustness",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:02.092414+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2402.09977v1",
+      "from_title": "Fast Vocabulary Transfer for Language Model Compression",
+      "to": "O112",
+      "type": "extends",
+      "context": "elf a thermodynamic partition function over domain symbols. EXTEND O112 — vocabulary alignment as a technique for modal path recove",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:22.329146+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2402.09977v1",
+      "from_title": "Fast Vocabulary Transfer for Language Model Compression",
+      "to": "INV_070",
+      "type": "challenges",
+      "context": "n/high-risk feeds before they distort coherence. CHALLENGE: challenges INV_070b — if vocabulary transfer achieves near-lossless compressio",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:22.329146+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2402.09977v1",
+      "from_title": "Fast Vocabulary Transfer for Language Model Compression",
+      "to": "INV_070",
+      "type": "confirms",
+      "context": "ssion is partially separable from parametric compression.   CONVERGE INV_070b — vocabulary transfer confirms that semantic death occurs",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:22.329146+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/2402.09977v1",
+      "from_title": "Fast Vocabulary Transfer for Language Model Compression",
+      "to": "O112",
+      "type": "advances",
+      "context": "elf a thermodynamic partition function over domain symbols. EXTEND O112 — vocabulary alignment as a technique for modal path recove",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:22.329146+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/adap-org/9401001v1",
+      "from_title": "Self-organized Criticality in Living Systems",
+      "to": "O21",
+      "type": "extends",
+      "context": "ural attractor of self-replicating systems under selection; EXTEND O21 — the paper provides a mechanistic grounding (SOC as replic",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:45.612051+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/adap-org/9401001v1",
+      "from_title": "Self-organized Criticality in Living Systems",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "resolution of obligation-closure decisions. --- CHALLENGE: challenges INV_073 — if criticality is the *automatic* attractor of any replic",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:45.612051+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/adap-org/9401001v1",
+      "from_title": "Self-organized Criticality in Living Systems",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "on-selection dynamic itself, not of biological chemistry.   CONVERGE INV_073 — independent derivation confirms that critical-ridge navig",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:45.612051+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/adap-org/9401001v1",
+      "from_title": "Self-organized Criticality in Living Systems",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "tion beyond empirical correlation into derivable necessity; CONVERGE INV_094 (if genome contains scale-invariance as substrate-independe",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-05-23T02:34:45.612051+00:00"
+    },
+    {
+      "from": "https://arxiv.org/abs/adap-org/9401001v1",
+      "from_title": "Self-organized Criticality in Living Systems",
+      "to": "O21",
+      "type": "advances",
+      "context": "ural attractor of self-replicating systems under selection; EXTEND O21 — the paper provides a mechanistic grounding (SOC as replic",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-05-23T02:34:45.612051+00:00"
     }
   ],
   "node_edges": [
@@ -28433,6 +28836,534 @@
       "invariant": "The Omnimax impossibility argument's framing of philosophical positions as having thermodynamic signatures depends on th",
       "context_tag": null,
       "timestamp": "2026-05-22T06:30:31.231467+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.444807+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.478795+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.498818+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.513924+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.526294+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.537080+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.546794+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.556613+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.566416+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.576240+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.585839+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.595661+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.605744+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.615980+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.625598+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.635393+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.645058+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.654708+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.664714+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.674279+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.684060+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.693848+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.703375+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.713105+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.722766+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.732678+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.742117+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 is a multi-diagnostic attractor confirmed across multiple independent substrates including cellular a",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.751935+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Falsifiability and empirical testability are non-negotiable criteria for claims to hold theoretical weight.",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.762062+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "operationalizes",
+      "invariant": "Falsifiability and empirical testability are non-negotiable criteria for claims to hold theoretical weight.",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.771723+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "The critical ridge is a measurable phase band with finite width, not a point prescription.",
+      "context_tag": null,
+      "timestamp": "2026-05-22T16:46:32.781444+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.628818+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.662462+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.681936+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.696883+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.709018+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.720098+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.729830+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.739570+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.749261+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.758977+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.768811+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.778445+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.788123+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.797754+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.807339+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.816938+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.826575+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.836216+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.845963+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.855783+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.865537+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.875138+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.884709+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.894253+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.903824+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.913406+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.923065+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality (γ≈1, σ≈1) is an empirically confirmed multi-diagnostic attractor across multiple independent substrates (ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.932858+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "operationalizes",
+      "invariant": "Self-audit, verification, or sovereignty of measurement is non-optional and structurally load-bearing.",
+      "context_tag": null,
+      "timestamp": "2026-05-23T02:39:09.942865+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "depends_on",
+      "invariant": "The formal argument's validity requires RSA's foundational claims to hold — specifically that cognition is genuinely the",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:08.305955+00:00"
+    },
+    {
+      "from": "the_reasoning_substrate_argument_rsa",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "RSA's broader epistemological framework (empirically-grounded, naturalistic systems thinking) sets the methodological ce",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:08.344081+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "challenges",
+      "invariant": "The motif experiment's rigorous falsifiability requirements (matched compute controls, explicit null hypotheses, ablatio",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:16.411587+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_minimal_atoms",
+      "type": "bounds_above",
+      "invariant": "The epistemic inversion's RCC criterion constrains which minimal generating sets count as valid: a proposed set of \"atom",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:22.321082+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_thermodynamic_impossibility_of_the_o",
+      "type": "bounds_above",
+      "invariant": "The Relational-Thermodynamic Map's phase-space framework provides the broader constraint landscape within which the Omni",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:32.591202+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax argument's force depends on the validity of treating philosophical commitments as thermodynamically constrai",
+      "context_tag": null,
+      "timestamp": "2026-05-23T06:30:32.626782+00:00"
     }
   ]
 }
