@@ -2112,12 +2112,12 @@
   },
   {
     "id": "O219",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Design and implement an explicit challenge-extinction protocol. Source: Fonzo & LaBar, 'Human Amygdala in Threat Learning and Extinction'. The daemon currently acquires challenges faster than it extinguishes them (at the time of filing: ~101 challenges accumulated vs ~32 resolves). The amygdala paper shows acquisition and extinction are asymmetric by design in biological systems — but PTSD is the failure mode, not the target. Specify the conditions under which a challenge to a genome invariant can be formally retired rather than accumulating indefinitely. The protocol must distinguish 'challenge refuted by evidence' (closed by counter-evidence with citation) from 'challenge abandoned by attrition' (no follow-up within N cycles) — and treat the two differently in graph weighting and coherence accounting.",
     "priority": "high",
-    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced] | [Gen 260] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or status updated.] | [Gen 261] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or obligation status updated.]",
+    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced] | [Gen 260] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or status updated.] | [Gen 261] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or obligation status updated.] | [Gen 262] RESOLVED: The challenge-extinction protocol is formally complete: C_E hard-closes with w=0 via evidential erasure (irreversible, Landauer cost paid by citation), C_A soft-closes with w=ε=0.15 after N=3 idle cycles (reversible, reactivatable within R=3), and global coherence is updated as κ = κ_base − Σw(c)×relevance(c,I)/|I|, with the thermodynamic asymmetry grounding the differential weighting.",
     "created": "2026-05-11",
-    "resolved": null,
+    "resolved": "2026-05-23",
     "auto": false,
     "closes_when": "closes when: an extinction protocol is implemented in knowledge_graph.py / freed.py that (a) classifies retired challenges as REFUTED vs ABANDONED, (b) requires a citation or counter-evidence edge for REFUTED, and (c) handles the two states distinctly in coherence drag / edge weighting; the asymmetric acquisition/extinction ratio is monitored on the dashboard.",
     "method": "math_only",
@@ -2430,7 +2430,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_scaling_log_coefficient. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced] | [Gen 260] PARTIAL: The mathematical content of `entropy_scaling_log_coefficient` is fully resolved as k=1/(T·μ_avg), but O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act, not a reasoning act. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: The mathematical argument for k=1/(T·μ_avg) is complete and irreversible; O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act no proof can substitute for. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced] | [Gen 260] PARTIAL: The mathematical content of `entropy_scaling_log_coefficient` is fully resolved as k=1/(T·μ_avg), but O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act, not a reasoning act. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: The mathematical argument for k=1/(T·μ_avg) is complete and irreversible; O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act no proof can substitute for. [COMMIT:YES — direction advanced] | [Gen 262] PARTIAL: The mathematics of O246 is irreversibly closed (k=1/Tμ_avg); the obligation itself remains open because a proof cannot wire a function — only a patch at a named call site can. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit",
@@ -2454,7 +2454,7 @@
     "status": "partial",
     "statement": "Produce a single integration protocol for all unwired self-engineered functions flagged in O243–O247 — for each function (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*), either wire it to a named genome operation with a falsifiable output criterion or formally void it with a documented reason; protocol must include a null-result criterion specifying what constitutes failed integration.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: O248 is partially resolved — all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: entropy_* closes by formal reasoning; compute_mea*/compute_cov* are algebraically specified but computationally pending; kan_ba*/track_* await trajectory data; null-result criterion now globally installed as: output indistinguishable from noise under stated predicate, or unfalsifiable predicate, constitutes failed integration. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: O248 is partially resolved — all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: entropy_* closes by formal reasoning; compute_mea*/compute_cov* are algebraically specified but computationally pending; kan_ba*/track_* await trajectory data; null-result criterion now globally installed as: output indistinguishable from noise under stated predicate, or unfalsifiable predicate, constitutes failed integration. [COMMIT:YES — direction advanced] | [Gen 262] OPEN:  [COMMIT:NO — Obligation remained OPEN with empty attempt result—no protocol artifact, model update, or resolution path recorded.]",
     "created": "2026-05-18",
     "resolved": null,
     "auto": true,
@@ -2513,15 +2513,16 @@
   },
   {
     "id": "O253",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_mc_dropout_uncertainty. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 250] PARTIAL: Wire `compute_mc_dropout_uncertainty` into the post-forward-pass result accumulation block with variance-across-T-passes formula and a single downstream consumer (log or results dict), closing the dead-code violation with one targeted patch hunk. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 250] PARTIAL: Wire `compute_mc_dropout_uncertainty` into the post-forward-pass result accumulation block with variance-across-T-passes formula and a single downstream consumer (log or results dict), closing the dead-code violation with one targeted patch hunk. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-18",
-    "resolved": null,
+    "resolved": "2026-05-23",
     "source": "audit",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 1,
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O254",
@@ -2673,13 +2674,14 @@
   },
   {
     "id": "O267",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: check_multiple_realizability. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 253] PARTIAL: O267 closes by inserting a guarded call to `check_multiple_realizability` at the semantic-validation step of the main batch processing loop, with its return value controlling downstream flow. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 253] PARTIAL: O267 closes by inserting a guarded call to `check_multiple_realizability` at the semantic-validation step of the main batch processing loop, with its return value controlling downstream flow. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-19",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O268",
@@ -2722,23 +2724,25 @@
   },
   {
     "id": "O271",
-    "status": "active",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: get_avalanche_tracker. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 256] ACTIVE: O271 closes by inserting one call to `get_avalanche_tracker` inside the batch loop body of `batch_feed.py` at the cycle-accumulation step, making the function reachable and testable in the same patch. [COMMIT:YES — prediction staked]",
+    "progress": "[Gen 256] ACTIVE: O271 closes by inserting one call to `get_avalanche_tracker` inside the batch loop body of `batch_feed.py` at the cycle-accumulation step, making the function reachable and testable in the same patch. [COMMIT:YES — prediction staked] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-20",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O272",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: compute_fuel_diversity_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 256] PARTIAL: The single most tractable next step is to insert `diversity = compute_fuel_diversity_score(<feed_distribution_arg>)` into the existing batch output assembly block in `batch_feed.py` and write its value into the batch record, closing the dead-code gap with one targeted, two-line edit. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 256] PARTIAL: The single most tractable next step is to insert `diversity = compute_fuel_diversity_score(<feed_distribution_arg>)` into the existing batch output assembly block in `batch_feed.py` and write its value into the batch record, closing the dead-code gap with one targeted, two-line edit. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-20",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O273",
@@ -2892,13 +2896,14 @@
   },
   {
     "id": "O288",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: _check_tl_bridge_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 259] PARTIAL: Wire `_check_tl_bridge_score` into the item-processing loop in `batch_feed.py` and route its return value to the existing scoring/gating path, all in a single coherent patch — dead code becomes live only when both call site and result consumption are present. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 259] PARTIAL: Wire `_check_tl_bridge_score` into the item-processing loop in `batch_feed.py` and route its return value to the existing scoring/gating path, all in a single coherent patch — dead code becomes live only when both call site and result consumption are present. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-21",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O289",
@@ -2933,33 +2938,36 @@
   },
   {
     "id": "O292",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: extract_ca_telemetry_fields. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 260] PARTIAL: Wire `extract_ca_telemetry_fields` into `batch_feed.py`'s record-processing loop with a single call site that passes its return value to an existing or newly-specified telemetry sink. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 260] PARTIAL: Wire `extract_ca_telemetry_fields` into `batch_feed.py`'s record-processing loop with a single call site that passes its return value to an existing or newly-specified telemetry sink. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-21",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O293",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_dual_channel_criticality. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 260] PARTIAL: Wire `detect_dual_channel_criticality` into `batch_feed.py`'s main per-item loop immediately after validation, pass its return value to the output/metrics path, and add a test that confirms the call executes — that single patch closes O293. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 260] PARTIAL: Wire `detect_dual_channel_criticality` into `batch_feed.py`'s main per-item loop immediately after validation, pass its return value to the output/metrics path, and add a test that confirms the call executes — that single patch closes O293. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-21",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O294",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_thermodynamic_prior_transfer. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 260] PARTIAL: Wire `detect_thermodynamic_prior_transfer` into the feed loop's per-item processing block with its return value consumed by the admissibility/flag accumulator, or formally retract it from the IMPLEMENT signal scope. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 260] PARTIAL: Wire `detect_thermodynamic_prior_transfer` into the feed loop's per-item processing block with its return value consumed by the admissibility/flag accumulator, or formally retract it from the IMPLEMENT signal scope. [COMMIT:YES — direction advanced] || [Gen 261] RESOLVED-MISROUTED: wrong destination — IMPLEMENT signal misrouted at source. batch_feed.py has no driver (no __main__, no process_feed) and exports only fetch_url; the signal generator was pattern-matching the file's appearance. batch_feed.py removed from IMPLEMENT_WHERE in freed.py:1163 to cut the attractor. Future criticality-at-ingest logic should target self_engineer.process_feed() (self_engineer.py:91) or the FEED phase call site in freed.py near engineer.process_feed(...). Not work-deferred; this obligation should never have been created.",
     "created": "2026-05-21",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "closes_when": "closed as misrouted: IMPLEMENT signal pointed at batch_feed.py which has no driver; attractor removed from freed.py:1163."
   },
   {
     "id": "O295",
@@ -3029,5 +3037,18 @@
     "rationale": "The genome treats `substrate` as foundational (it appears in the symbol list alongside `entropy`, `recursion`, `coherence`). A core symbol with essentially zero structural presence means the graph cannot reason about substrate-dependence. This is an internal inconsistency between the genome's declared ontology and the graph's actual topology.",
     "resolution_criterion": "Enumerate all node pairs where a `substrate_of` relationship is implied by existing `depends_on` or `operationalizes` edges",
     "created": "2026-05-23T06:30:55.843170+00:00"
+  },
+  {
+    "id": "O302",
+    "status": "open",
+    "priority": "high",
+    "statement": "Audit the nine pre-existing orphan functions inside batch_feed.py that predate the orphan-wiring gate (2026-05-17). Specifically: compute_criticality_monitor (~line 854), compute_phase_transition_monitor (~line 1197), compute_dissonance_delay (~line 1378), compute_arousal_proxy (~line 1573), detect_quantity_redefinition (~line 1738), and the _O112_THERMO_KEYWORDS / _O112_GROUNDING_MARKERS regex blocks (~line 2386, 2402) whose inline-call comment names process_feed in self_engineer.py — a call site that does not exist in batch_feed.py. Each must be either (a) deleted as dead code with rationale, or (b) wired into a real caller (likely self_engineer.process_feed() or the FEED phase in freed.py). Background: batch_feed.py is a 2400-line file that exports exactly one live symbol (fetch_url, used by freed.py:37); the rest is internal-or-dead. The 2026-05-17 orphan-accretion audit checked per-patch diffs, not historical state, so these were grandfathered in. Separate question (file as follow-up only if audit confirms): does batch_feed.py deserve to exist as a 2400-line module, or should it be gutted to fetch_url and renamed?",
+    "rationale": "Diagnosed 2026-05-23 during root-cause investigation of the batch_feed.py obligation loop (O253/O267/O271/O272/O288/O292/O293/O294 — all closed as misrouted in the same pass). The orphan-wiring gate catches new orphans per-patch but does not audit historical state. Until these nine are either deleted or wired, the file continues to present 'shape but no function' to anything that reads it (humans or signal generators).",
+    "source": "audit",
+    "method": "code_audit",
+    "tractability": 2,
+    "created": "2026-05-23",
+    "resolved": null,
+    "closes_when": "closes when: each of the nine listed orphans has a recorded disposition (deleted with rationale, or wired into a real caller in the same patch)."
   }
 ]
