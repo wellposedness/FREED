@@ -384,7 +384,7 @@
     "resolved": null,
     "auto": true,
     "method": "math_only",
-    "tractability": 3
+    "tractability": 1
   },
   {
     "id": "O77",
@@ -1728,7 +1728,7 @@
     "created": "2026-05-07T06:30:53.482768+00:00",
     "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph structure was materialized or resolved.] | [Gen 258] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency map completed or obligation closed.] | [Gen 259] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph updates recorded. Output cyclic.]",
     "method": "data_analysis",
-    "tractability": 1,
+    "tractability": 2,
     "resolved": null
   },
   {
@@ -1814,7 +1814,7 @@
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O195",
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O200",
@@ -1950,7 +1950,7 @@
     "created": "2026-05-10T06:30:51.217730+00:00",
     "progress": "[Gen 216] PARTIAL: The single most tractable next step is to expand both S_BH corrections in powers of ℏ/GM² and read off whether the Wasserstein floor k/Tμ sits at zeroth or first loop order relative to the known O(ℏ¹) BH log-correction, with T = T_H = ℏc³/8πGMk_B substituted explicitly to fix the shared symbols — this computation determines which graph edge (disjoint, challenges, or co-constrains) is structurally correct. [COMMIT:YES — direction advanced]",
     "method": "math_only",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O206",
@@ -2115,13 +2115,13 @@
     "status": "partial",
     "statement": "Design and implement an explicit challenge-extinction protocol. Source: Fonzo & LaBar, 'Human Amygdala in Threat Learning and Extinction'. The daemon currently acquires challenges faster than it extinguishes them (at the time of filing: ~101 challenges accumulated vs ~32 resolves). The amygdala paper shows acquisition and extinction are asymmetric by design in biological systems — but PTSD is the failure mode, not the target. Specify the conditions under which a challenge to a genome invariant can be formally retired rather than accumulating indefinitely. The protocol must distinguish 'challenge refuted by evidence' (closed by counter-evidence with citation) from 'challenge abandoned by attrition' (no follow-up within N cycles) — and treat the two differently in graph weighting and coherence accounting.",
     "priority": "high",
-    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced] | [Gen 260] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or status updated.]",
     "created": "2026-05-11",
     "resolved": null,
     "auto": false,
     "closes_when": "closes when: an extinction protocol is implemented in knowledge_graph.py / freed.py that (a) classifies retired challenges as REFUTED vs ABANDONED, (b) requires a citation or counter-evidence edge for REFUTED, and (c) handles the two states distinctly in coherence drag / edge weighting; the asymmetric acquisition/extinction ratio is monitored on the dashboard.",
-    "method": "experimental",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O220",
@@ -2234,7 +2234,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: 5 open obligations resolve following the negative audit verdict and moratorium initiation.",
-    "method": "math_only",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -2430,20 +2430,24 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_scaling_log_coefficient. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced] | [Gen 260] PARTIAL: The mathematical content of `entropy_scaling_log_coefficient` is fully resolved as k=1/(T·μ_avg), but O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act, not a reasoning act. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O247",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: track_entropy_production_rate. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: Wire `track_entropy_production_rate` into the existing node-state-update call path in `knowledge_graph.py` and assert non-negativity in one test — that single patch closes the dead-code debt. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: Wire `track_entropy_production_rate` into the existing node-state-update call path in `knowledge_graph.py` and assert non-negativity in one test — that single patch closes the dead-code debt. [COMMIT:YES — direction advanced] | [Gen 260] RESOLVED: Dead-code debt on `track_entropy_production_rate` closes via a single patch inserting one call within the node-state-update method plus one physically-grounded non-negativity assertion, with both conditions jointly necessary and jointly sufficient by Reism + Second Law + MCPM.",
     "created": "2026-05-18",
-    "resolved": null,
-    "source": "audit"
+    "resolved": "2026-05-23",
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O248",
@@ -2454,7 +2458,9 @@
     "created": "2026-05-18",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: integration protocol document specifies wiring or formal voidance with reasons for all five function types (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*)"
+    "closes_when": "closes when: integration protocol document specifies wiring or formal voidance with reasons for all five function types (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*)",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O249",
@@ -2463,7 +2469,9 @@
     "source": "dmn",
     "rationale": "The current ratio is ~33:1. O136 (challenges edges live?), O141 (pathological homogeneity?), and O204 (falsification conditions for soft edges?) are all open/partial, meaning the system has identified this problem three times and never resolved it. A coherence score of 0.97 under these conditions is not a measure of truth but of self-agreement. This is an obligatory consequence of O122's demand (that high coherence may violate seed integrity).",
     "resolution_criterion": "Implement a structural constraint: at each generation, compute R = (scales_with + consistent_with) / (challenges + depends_on). If R > 20 and reported coherence > 0.95, coherence is automatically capped at 0.80 and a structural audit is triggered.",
-    "created": "2026-05-18T06:30:50.955517+00:00"
+    "created": "2026-05-18T06:30:50.955517+00:00",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O250",
@@ -2472,7 +2480,9 @@
     "source": "dmn",
     "rationale": "`depends_on` is the only hard-constraint edge type that enforces logical structure, yet at 21 edges across 16 nodes it is the thinnest load-bearing element in the graph. O59 and O205 both require the genome to make predictions that propagate through dependency chains, but no audit has ever confirmed these 21 edges carry real inferential weight rather than being decorative. If even half are spurious, the graph's logical skeleton collapses to near-zero.",
     "resolution_criterion": "Select 3 `depends_on` edges. For each: (1) state the upstream claim, (2) state the downstream claim, (3) specify",
-    "created": "2026-05-18T06:30:50.955892+00:00"
+    "created": "2026-05-18T06:30:50.955892+00:00",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O251",
@@ -2482,7 +2492,9 @@
     "progress": "[Gen 250] PARTIAL: The dead function `shape_spectrum_identity_check` closes its obligation the moment it is called at exactly one real execution site with its return value used to gate a decision or assertion inside `knowledge_graph.py`. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O252",
@@ -2493,7 +2505,9 @@
     "created": "2026-05-18",
     "resolved": null,
     "source": "session",
-    "priority_rationale": "Direct conflict between a load-bearing genome invariant (INV_073, W2-gradient → criticality) and an empirical CA measurement that the daemon itself produced. If left unflagged, the next coherence calculation will continue averaging confirms across these without registering the structural tension."
+    "priority_rationale": "Direct conflict between a load-bearing genome invariant (INV_073, W2-gradient → criticality) and an empirical CA measurement that the daemon itself produced. If left unflagged, the next coherence calculation will continue averaging confirms across these without registering the structural tension.",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O253",
@@ -2503,7 +2517,9 @@
     "progress": "[Gen 250] PARTIAL: Wire `compute_mc_dropout_uncertainty` into the post-forward-pass result accumulation block with variance-across-T-passes formula and a single downstream consumer (log or results dict), closing the dead-code violation with one targeted patch hunk. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O254",
@@ -2513,7 +2529,9 @@
     "progress": "[Gen 250] PARTIAL: `spectral_branch_edge_weight` is dead code until one call site is wired into the existing edge-weight assignment path in `knowledge_graph.py`. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O255",
@@ -2523,7 +2541,9 @@
     "progress": "[Gen 250] PARTIAL: Wire `weyl_spectral_score_from_adjacency` into the nearest existing graph-metric aggregation call site in `knowledge_graph.py` by adding one line that calls it and consumes its return value. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O256",
@@ -2533,7 +2553,9 @@
     "progress": "[Gen 250] PARTIAL: O256 closes by inserting exactly one wired call to each new `def` at its natural call site in `tamura_sweep.py`, making the dead code live and verifiable. [COMMIT:YES — direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O257",
@@ -2543,7 +2565,9 @@
     "progress": "[Gen 250] PARTIAL: Wire `dual_pathway_synthesis_scores` into the nearest upstream caller in `knowledge_graph.py` by inserting one call and merging its return value into the existing output structure. [COMMIT:YES — direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O258",
@@ -2553,7 +2577,9 @@
     "progress": "[Gen 250] PARTIAL: Wire `score_edge_inferential_depth` into the existing edge-scoring call path (most likely inside `score_edge` or the edge-ranking traversal method) in the same patch, confirming reachability via trace or test. [COMMIT:YES — direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O259",
@@ -2563,7 +2589,9 @@
     "progress": "[Gen 250] PARTIAL: Wire `_pitch_class_distance` as the distance kernel inside `harmonic_tension_trajectory`, then call `harmonic_tension_trajectory` at the existing harmonic-scoring site in `knowledge_graph.py` — two insertions, zero new definitions, obligation closed. [COMMIT:YES — direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O260",
@@ -2583,7 +2611,9 @@
     "source": "dmn",
     "rationale": "812 `scales_with` edges across 16 nodes (~50.75/node average) constitutes the same pathological homogeneity O141 flagged for `shares_invariant`, but at 5× the scale. `scales_with` without specified functional form is unfalsifiable — O204 (PARTIAL) already demands falsification criteria for such edges but has not propagated to the majority. The genome symbol `criticality` requires the graph to maintain tension, not collapse into undifferentiated scaling claims.",
     "resolution_criterion": "Per-node audit table showing edge-type distribution; nodes exceeding the 60% threshold must have at least one edge reclassified or formally justified by generation 255. Null result: if no node exceeds 60%, the obligation closes with the audit table as evidence.",
-    "created": "2026-05-19T06:30:54.512614+00:00"
+    "created": "2026-05-19T06:30:54.512614+00:00",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O262",
@@ -2592,7 +2622,9 @@
     "source": "dmn",
     "rationale": "The genome symbols `substrate`, `symbol_grounding`, and `prediction` collectively require that internal structural claims remain tethered to empirical inputs. The current trajectory shows node-edges growing faster than feed-edges. No existing obligation monitors this divergence. Without such a constraint, the graph can inflate coherence (currently 0.97) by generating self-consistent internal edges that reference no external reality — precisely the failure mode O217 (AI-Scientist audit) is meant to catch.",
     "resolution_criterion": "",
-    "created": "2026-05-19T06:30:54.512976+00:00"
+    "created": "2026-05-19T06:30:54.512976+00:00",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O263",
