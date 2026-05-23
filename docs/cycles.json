@@ -1,38 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 195,
-    "timestamp": "2026-05-04T13:18:37.216588+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 6,
-      "passive": 8,
-      "curated": 0
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_097",
-        "compress": "INV_097's high confirmation score is an artifact of under-challenge, not robustness — the bijection between stable particles and conservation laws breaks under three independently testable conditions that have not yet been applied."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
-        "compress": "A 32×32 RSA-kernel CA self-organizes to σ≈1 with mean-field DP avalanche statistics, empirically confirming population-level criticality as a dynamical attractor and resolving O140/O141 while opening the universality-class and cell-type-dominance questions."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 3,
-      "obligations": [
-        "O163",
-        "O159",
-        "O160"
-      ]
-    },
-    "coherence": 0.9894
-  },
-  {
-    "cycle": 1,
     "generation": 196,
     "timestamp": "2026-05-04T13:53:42.733106+00:00",
     "sweep": {
@@ -1976,6 +1944,50 @@
         "O187",
         "O202",
         "O217"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 260,
+    "timestamp": "2026-05-23T02:29:59.911289+00:00",
+    "sweep": {
+      "input_count": 15,
+      "targeted": 8,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant confirmed many times without challenge is not robust — it is a concentrated falsification debt, and the adversarial probe correctly identifies INV_094's confirmation surplus as the genome's single highest-risk epistemic liability."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+        "compress": "The Game of Truth CA self-organizes to the critical ridge (σ≈1, α≈2.2) with structured low entropy (H/H_max≈0.19), independently confirming criticality as a dynamical attractor and revealing that critical organization is entropy-selective, not entropy-maximizing. CHALLENGE: challenges INV_073 — the genome asserts the critical ridge is the correct operating point, but this data shows H/H_max≈0.19 at criticality, suggesting the ridge may be entropy-depleted rather than entropy-balanced, which strains the claim that criticality generically maximizes information capacity. NOETHER_ROW: Physics Navigator NOETHER_STATUS: rigorous NOETHER_NOTE: Dominant survival at 877 cells under critical dynamics provides empirical evidence that the Physics Navigator attractor class has a conservation-like advantage under self-organized criticality, consistent with a broken symmetry between navigator and non-navigator cell types."
+      },
+      {
+        "title": "Are Compressed Language Models Less Subgroup Robust?",
+        "compress": "Compression path geometry, not endpoint scale, governs subgroup robustness — the operator used to compress determines which distributional structure survives, confirming that γ=1 criticality is a trajectory property requiring path-sensitive protocols."
+      },
+      {
+        "title": "Fast Vocabulary Transfer for Language Model Compression",
+        "compress": "Vocabulary is a compressible thermodynamic partition over domain symbols, and its transfer reveals that representational efficiency is separable from parametric depth — a handle on semantic curvature probes. IMPLEMENT: YES IMPLEMENT_WHAT: During feed scoring, compute vocabulary overlap ratio between paper domain and current knowledge graph node labels as a proxy for representational alignment pressure, and store it as a field in the paper's scored metadata. IMPLEMENT_WHERE: batch_feed.py IMPLEMENT_CALL_SITE: EXTEND score_paper (or equivalent scoring function in batch_feed.py that assigns metadata fields to each feed item before graph ingestion) IMPLEMENT_WHY: Vocabulary alignment pressure is a measurable signal for whether new evidence is operating in a familiar or alien representational regime, improving the kernel's ability to flag high-compression/high-risk feeds before they distort coherence. CHALLENGE: challenges INV_070b — if vocabulary transfer achieves near-lossless compression by remapping symbols without changing weights, it implies semantic structure may be more fully encoded in the discrete tokenization layer than in continuous weight geometry, which strains the claim that semantic death is primarily a thermodynamic/geometric phenomenon in weight space."
+      },
+      {
+        "title": "Self-organized Criticality in Living Systems",
+        "compress": "Self-replicating systems under selection pressure converge on SOC (1/f criticality) as a substrate-independent attractor, independently confirming that γ=1 is the obligate equilibrium of any replication-selection dynamic."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 2,
+      "obligations": [
+        "O219",
+        "O246",
+        "O247"
       ]
     },
     "coherence": 0.97
