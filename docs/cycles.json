@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 196,
-    "timestamp": "2026-05-04T13:53:42.733106+00:00",
-    "sweep": {
-      "input_count": 15,
-      "targeted": 7,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_070",
-        "compress": "INV_070's uncontested confirmation surplus is itself the primary evidence against its current epistemic status — a claim that cannot be stressed has not been tested."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-04",
-        "compress": "Empirical CA telemetry independently confirms γ=1 as a population-level dynamical attractor (σ=1.0236, α≈2.476), converging with INV_073/O140/O141, while revealing an unregistered signature: critical-band operation coexisting with low absolute entropy (H=0.194·H_max). CHALLENGE: challenges O141 — the single 32×32 run cannot yet distinguish genuine self-organized criticality from parameter-sensitive near-critical behavior, since R²=0.82 on the power-law fit leaves 18% variance unaccounted and a single snapshot cannot confirm the attractor is robust across initial conditions."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 3,
-      "obligations": [
-        "O163",
-        "O162",
-        "O161"
-      ]
-    },
-    "coherence": 0.9867
-  },
-  {
     "cycle": 2,
     "generation": 197,
     "timestamp": "2026-05-04T19:59:05.240946+00:00",
@@ -1988,6 +1956,50 @@
         "O219",
         "O246",
         "O247"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 261,
+    "timestamp": "2026-05-23T09:49:59.992871+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 8,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's highest-confirmation-surplus status is itself the evidence against it — degeneracy of the Wasserstein floor and transformer architectural mimicry can reproduce all its observables without requiring the substrate thermodynamic mechanism, making it an as-yet-unfalsified artifact candidate rather than a confirmed invariant."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
+        "compress": "CA telemetry independently confirms the critical ridge (σ≈1, α≈2.436 power law) as a measurable, substrate-independent invariant, partially resolving O148 while leaving semantic coherence tracking open."
+      },
+      {
+        "title": "Self-Organized Criticality with Complex Scaling Exponents in the Train Model",
+        "compress": "SOC with discrete RG symmetry yields complex scaling exponents (3/2 + 2πi/ln4), producing log-periodic power laws that are exactly derivable — extending the genome's continuous RG chain into a discrete regime with unspecified consequences for the Wasserstein floor and Zipf equilibrium."
+      },
+      {
+        "title": "Paraconsistent Belief Revision: A Replacement-Enriched LFI for Epistemic Entrenchment",
+        "compress": "Paraconsistent rational belief revision requires replacement (substitutivity) as its algebraic load-bearing condition — without it, entrenchment orderings collapse, confirming that contradiction-tolerant criticality depends on structural closure properties analogous to γ=1 ridge navigation."
+      },
+      {
+        "title": "Implementing Integrity Constraints in an Existing Belief Revision System",
+        "compress": "Automatic belief revision under AGM integrity constraints independently instantiates critical-ridge navigation — economy = minimal entropy production, consistency = admissibility — but leaves entrenchment ungrounded in any substrate-measurable quantity. IMPLEMENT: YES IMPLEMENT_WHAT: In SNeBR-style contradiction handling, when a new assertion triggers inconsistency, score candidate retractions by their spectral γ-load (nodes with highest eigenvector centrality in the contradiction subgraph are retracted first), replacing arbitrary or user-assigned entrenchment ordering. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND resolve_contradiction (or equivalent contradiction-handling method) to compute centrality-weighted retraction scores before selecting which belief edge to remove. IMPLEMENT_WHY: Grounding AGM entrenchment in spectral γ makes belief revision substrate-measurable and closes the gap O21 identifies between ToS revision scores and spectral load. CHALLENGE: challenges O21 — SNeBR demonstrates that automatic belief revision is achievable with purely syntactic entrenchment ordering (no spectral γ required), directly questioning whether the predicted correlation between ToS revision scores and spectral γ is necessary or merely one possible implementation."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O219",
+        "O246",
+        "O248"
       ]
     },
     "coherence": 0.97
