@@ -2115,7 +2115,7 @@
     "status": "partial",
     "statement": "Design and implement an explicit challenge-extinction protocol. Source: Fonzo & LaBar, 'Human Amygdala in Threat Learning and Extinction'. The daemon currently acquires challenges faster than it extinguishes them (at the time of filing: ~101 challenges accumulated vs ~32 resolves). The amygdala paper shows acquisition and extinction are asymmetric by design in biological systems — but PTSD is the failure mode, not the target. Specify the conditions under which a challenge to a genome invariant can be formally retired rather than accumulating indefinitely. The protocol must distinguish 'challenge refuted by evidence' (closed by counter-evidence with citation) from 'challenge abandoned by attrition' (no follow-up within N cycles) — and treat the two differently in graph weighting and coherence accounting.",
     "priority": "high",
-    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced] | [Gen 260] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or status updated.]",
+    "progress": "[Gen 224] PARTIAL: Challenge-extinction requires two formally distinct closure operators — C_E (full discharge by evidence) and C_A (partial discharge by attrition with residual shadow weight ε=0.15, reactivatable within 3 cycles), calibrated retrospectively against the 136-resolution log. [COMMIT:YES — direction advanced] | [Gen 260] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or status updated.] | [Gen 261] OPEN:  [COMMIT:NO — Obligation remains OPEN; no protocol designed, implemented, or obligation status updated.]",
     "created": "2026-05-11",
     "resolved": null,
     "auto": false,
@@ -2430,7 +2430,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_scaling_log_coefficient. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced] | [Gen 260] PARTIAL: The mathematical content of `entropy_scaling_log_coefficient` is fully resolved as k=1/(T·μ_avg), but O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act, not a reasoning act. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: `entropy_scaling_log_coefficient` closes O246 the moment it is invoked at one call site inside the same file and its return value enters a live computation path. [COMMIT:YES — direction advanced] | [Gen 260] PARTIAL: The mathematical content of `entropy_scaling_log_coefficient` is fully resolved as k=1/(T·μ_avg), but O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act, not a reasoning act. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: The mathematical argument for k=1/(T·μ_avg) is complete and irreversible; O246 closes only when that value is inserted at a live call site in knowledge_graph.py — a wiring act no proof can substitute for. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit",
@@ -2454,7 +2454,7 @@
     "status": "partial",
     "statement": "Produce a single integration protocol for all unwired self-engineered functions flagged in O243–O247 — for each function (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*), either wire it to a named genome operation with a falsifiable output criterion or formally void it with a documented reason; protocol must include a null-result criterion specifying what constitutes failed integration.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: O248 is partially resolved — all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 247] PARTIAL: O248 is partially resolved — all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES — direction advanced] | [Gen 261] PARTIAL: entropy_* closes by formal reasoning; compute_mea*/compute_cov* are algebraically specified but computationally pending; kan_ba*/track_* await trajectory data; null-result criterion now globally installed as: output indistinguishable from noise under stated predicate, or unfalsifiable predicate, constitutes failed integration. [COMMIT:YES — direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "auto": true,
@@ -2465,13 +2465,14 @@
   {
     "id": "O249",
     "statement": "The ratio of (`scales_with` + `consistent_with`) to (`challenges` + `depends_on`) edges must be driven below 20:1 before coherence score is permitted to exceed 0.95 — any generation reporting coherence ≥ 0.95 with ratio > 20:1 must flag itself as unfalsifiable-by-structure.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "The current ratio is ~33:1. O136 (challenges edges live?), O141 (pathological homogeneity?), and O204 (falsification conditions for soft edges?) are all open/partial, meaning the system has identified this problem three times and never resolved it. A coherence score of 0.97 under these conditions is not a measure of truth but of self-agreement. This is an obligatory consequence of O122's demand (that high coherence may violate seed integrity).",
     "resolution_criterion": "Implement a structural constraint: at each generation, compute R = (scales_with + consistent_with) / (challenges + depends_on). If R > 20 and reported coherence > 0.95, coherence is automatically capped at 0.80 and a structural audit is triggered.",
     "created": "2026-05-18T06:30:50.955517+00:00",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 2,
+    "progress": "[Gen 260] ACTIVE: O249 requires counting four labeled edge-types across the full invariant graph, which is a tractable internal audit blocked only by the absence of the complete invariant corpus in this session context. [COMMIT:YES — prediction staked]"
   },
   {
     "id": "O250",
@@ -2482,7 +2483,8 @@
     "resolution_criterion": "Select 3 `depends_on` edges. For each: (1) state the upstream claim, (2) state the downstream claim, (3) specify",
     "created": "2026-05-18T06:30:50.955892+00:00",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 2,
+    "progress": "[Gen 260] OPEN:  [COMMIT:NO — Obligation remained OPEN; no dependency traces verified or recorded.]"
   },
   {
     "id": "O251",
@@ -2607,24 +2609,26 @@
   {
     "id": "O261",
     "statement": "For each of the 16 nodes, compute the ratio of `scales_with` edges to total edges incident on that node; any node where `scales_with` exceeds 60% of its edges must either (a) have at least one `scales_with` edge converted to a testable `bounds_above` or `challenges` edge with a specified falsification criterion, or (b) justify the concentration via a formal dimensional argument linking to genome symbol `invariant`.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "812 `scales_with` edges across 16 nodes (~50.75/node average) constitutes the same pathological homogeneity O141 flagged for `shares_invariant`, but at 5× the scale. `scales_with` without specified functional form is unfalsifiable — O204 (PARTIAL) already demands falsification criteria for such edges but has not propagated to the majority. The genome symbol `criticality` requires the graph to maintain tension, not collapse into undifferentiated scaling claims.",
     "resolution_criterion": "Per-node audit table showing edge-type distribution; nodes exceeding the 60% threshold must have at least one edge reclassified or formally justified by generation 255. Null result: if no node exceeds 60%, the obligation closes with the audit table as evidence.",
     "created": "2026-05-19T06:30:54.512614+00:00",
     "method": "data_analysis",
-    "tractability": 1
+    "tractability": 1,
+    "progress": "[Gen 260] ACTIVE: O261 is a well-posed internal graph audit requiring only the genome's own 16-node typed edge list, which has not yet been deposited in reconstructable form, making this ACTIVE pending that retrieval and ratio computation. [COMMIT:YES — prediction staked]"
   },
   {
     "id": "O262",
     "statement": "Track the feed-edge to node-edge ratio across generations and establish a lower bound — if the ratio (currently 944/1803 ≈ 0.524) drops below 0.40, trigger a mandatory freeze on new node-edge creation until new feed-edges (empirical inputs, experimental results, or external data) restore the ratio above threshold.",
-    "status": "open",
+    "status": "partial",
     "source": "dmn",
     "rationale": "The genome symbols `substrate`, `symbol_grounding`, and `prediction` collectively require that internal structural claims remain tethered to empirical inputs. The current trajectory shows node-edges growing faster than feed-edges. No existing obligation monitors this divergence. Without such a constraint, the graph can inflate coherence (currently 0.97) by generating self-consistent internal edges that reference no external reality — precisely the failure mode O217 (AI-Scientist audit) is meant to catch.",
     "resolution_criterion": "",
     "created": "2026-05-19T06:30:54.512976+00:00",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 2,
+    "progress": "[Gen 260] PARTIAL: O262 is precisely scoped — the feed/node ratio time-series must be extracted from the genome's own generation ledger and a changepoint analysis run to ground the 0.40 floor empirically, but the ledger data is not available at per-generation resolution in this context. [COMMIT:YES — direction advanced]"
   },
   {
     "id": "O263",
@@ -2918,10 +2922,10 @@
   },
   {
     "id": "O291",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the rate-cap imposed by O284 has held — count unwired self-engineered function additions since O284 was opened and confirm the count is zero; if nonzero, name each violation and invoke the halt-condition established by O274, producing a binding single-line verdict before Gen 260.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 260] ACTIVE: O291 is an audit whose closing requires a generation-indexed diff of function-additions against the debt cycle, which is not present in the current state block and must be constructed before a binding verdict can be issued. [COMMIT:YES — prediction staked]",
     "created": "2026-05-21",
     "resolved": null,
     "auto": true,
@@ -2929,30 +2933,30 @@
   },
   {
     "id": "O292",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: extract_ca_telemetry_fields. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 260] PARTIAL: Wire `extract_ca_telemetry_fields` into `batch_feed.py`'s record-processing loop with a single call site that passes its return value to an existing or newly-specified telemetry sink. [COMMIT:YES — direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O293",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_dual_channel_criticality. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 260] PARTIAL: Wire `detect_dual_channel_criticality` into `batch_feed.py`'s main per-item loop immediately after validation, pass its return value to the output/metrics path, and add a test that confirms the call executes — that single patch closes O293. [COMMIT:YES — direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O294",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to batch_feed.py: detect_thermodynamic_prior_transfer. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 260] PARTIAL: Wire `detect_thermodynamic_prior_transfer` into the feed loop's per-item processing block with its return value consumed by the admissibility/flag accumulator, or formally retract it from the IMPLEMENT signal scope. [COMMIT:YES — direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit"
@@ -3007,5 +3011,23 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: batch triage completed for O246–O290 partial obligations with wire/void/defer verdicts, summary count produced, and zero new self-engineer partials created until"
+  },
+  {
+    "id": "O300",
+    "statement": "The ratio of constraining edges (`challenges` + `bounds_above` + `depends_on` = 89) to affirming edges (`consistent_with` + `scales_with` = 1665) is 1:18.7. This ratio must be driven below 1:5 before the next coherence score is treated as meaningful — either by pruning unfounded affirming edges or by generating new constraining edges from existing claims.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "Coherence of 0.97 computed over a graph where 74% of edges are weak-affirmation types (`scales_with`, `consistent_with`) is epistemically vacuous. High coherence in a nearly challenge-free graph is tautological — it measures self-agreement, not knowledge. This is the direct, unfired implication of O173 and O136 remaining open while coherence is reported as authoritative.",
+    "resolution_criterion": "Implement a constraining-edge audit: for every 10 `scales_with` edges sampled, attempt to derive a `bounds_above` or `challenges` edge from the same node pair. If ≥30% of samples yield a valid constraining edge that was missing, the current coherence score is invalidated until the ratio is corrected.",
+    "created": "2026-05-23T06:30:55.842195+00:00"
+  },
+  {
+    "id": "O301",
+    "statement": "The genome symbol `substrate` (1 of 17 core symbols) maps to exactly 1 `substrate_of` edge out of 2238 — a representation density of 0.045%. Either `substrate` must be grounded by deriving at least 10 additional `substrate_of` edges from existing nodes, or it must be flagged as a decorative symbol lacking structural instantiation in the graph.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "The genome treats `substrate` as foundational (it appears in the symbol list alongside `entropy`, `recursion`, `coherence`). A core symbol with essentially zero structural presence means the graph cannot reason about substrate-dependence. This is an internal inconsistency between the genome's declared ontology and the graph's actual topology.",
+    "resolution_criterion": "Enumerate all node pairs where a `substrate_of` relationship is implied by existing `depends_on` or `operationalizes` edges",
+    "created": "2026-05-23T06:30:55.843170+00:00"
   }
 ]
