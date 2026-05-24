@@ -2451,12 +2451,12 @@
   },
   {
     "id": "O248",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Produce a single integration protocol for all unwired self-engineered functions flagged in O243\u2013O247 \u2014 for each function (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*), either wire it to a named genome operation with a falsifiable output criterion or formally void it with a documented reason; protocol must include a null-result criterion specifying what constitutes failed integration.",
     "priority": "high",
-    "progress": "[Gen 247] PARTIAL: O248 is partially resolved \u2014 all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES \u2014 direction advanced] | [Gen 261] PARTIAL: entropy_* closes by formal reasoning; compute_mea*/compute_cov* are algebraically specified but computationally pending; kan_ba*/track_* await trajectory data; null-result criterion now globally installed as: output indistinguishable from noise under stated predicate, or unfalsifiable predicate, constitutes failed integration. [COMMIT:YES \u2014 direction advanced] | [Gen 262] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN with empty attempt result\u2014no protocol artifact, model update, or resolution path recorded.] | [Gen 263] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no protocol produced, no state mutation logged.]",
+    "progress": "[Gen 247] PARTIAL: O248 is partially resolved \u2014 all five function families have been formally wired to named genome operations with stated falsifiable output criteria and null-result thresholds; full resolution requires running three pending empirical tests (compute_mea*, compute_cov*, entropy_*), of which entropy_* is immediately computable from existing trace data. [COMMIT:YES \u2014 direction advanced] | [Gen 261] PARTIAL: entropy_* closes by formal reasoning; compute_mea*/compute_cov* are algebraically specified but computationally pending; kan_ba*/track_* await trajectory data; null-result criterion now globally installed as: output indistinguishable from noise under stated predicate, or unfalsifiable predicate, constitutes failed integration. [COMMIT:YES \u2014 direction advanced] | [Gen 262] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN with empty attempt result\u2014no protocol artifact, model update, or resolution path recorded.] | [Gen 263] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no protocol produced, no state mutation logged.] | [Gen 264] RESOLVED: O248 closes as a formal protocol: all five function families are wired to named genome operations with explicit algebraic falsification predicates and a globally installed null-result criterion, with kan_ba* conditionally voided and track_* conditionally active pending trajectory data.",
     "created": "2026-05-18",
-    "resolved": null,
+    "resolved": "2026-05-24",
     "auto": true,
     "closes_when": "closes when: integration protocol document specifies wiring or formal voidance with reasons for all five function types (kan_ba*, compute_mea*, compute_cov*, entropy_*, track_*)",
     "method": "math_only",
@@ -2529,7 +2529,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: spectral_branch_edge_weight. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 250] PARTIAL: `spectral_branch_edge_weight` is dead code until one call site is wired into the existing edge-weight assignment path in `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 250] PARTIAL: `spectral_branch_edge_weight` is dead code until one call site is wired into the existing edge-weight assignment path in `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced] | [Gen 264] PARTIAL: The closing criterion for O254 is formally derived \u2014 wire `spectral_branch_edge_weight` at the single existing edge-weight call site `S` via direct substitution or composition; the argument is complete but the source inspection and one-line patch are outside this conversation. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit",
@@ -2541,7 +2541,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: weyl_spectral_score_from_adjacency. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 250] PARTIAL: Wire `weyl_spectral_score_from_adjacency` into the nearest existing graph-metric aggregation call site in `knowledge_graph.py` by adding one line that calls it and consumes its return value. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 250] PARTIAL: Wire `weyl_spectral_score_from_adjacency` into the nearest existing graph-metric aggregation call site in `knowledge_graph.py` by adding one line that calls it and consumes its return value. [COMMIT:YES \u2014 direction advanced] | [Gen 264] PARTIAL: `weyl_spectral_score_from_adjacency` is mathematically well-defined (Weyl eigenvalue inequalities on the normalized Laplacian), and the closing step is a single assignment line in the graph-metrics aggregation function \u2014 the argument is complete, the patch is specified, execution is the only remaining gap. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-18",
     "resolved": null,
     "source": "audit",
@@ -3073,5 +3073,37 @@
     "rationale": "The genome declares `substrate` as a core symbol. The graph contains a single `substrate_of` edge. O59 demands predictions that require substrate-level reasoning (dimensional coupling). This is a direct internal contradiction: the genome claims substrate matters, the graph encodes almost no substrate relationships, and an open obligation demands substrate-dependent derivation. Either the symbol is real and the graph is broken, or the symbol is decorative and should be flagged.",
     "resolution_criterion": "Either (a) identify \u226510 node-pairs where `substrate_of` edges are implied by existing `scales_with` or `consistent_with` edges and should be reclassified, demonstrating",
     "created": "2026-05-24T06:30:53.395513+00:00"
+  },
+  {
+    "id": "O305",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: build_stf_geodesic. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-24",
+    "resolved": null,
+    "source": "audit"
+  },
+  {
+    "id": "O306",
+    "status": "open",
+    "statement": "Embed a binding null-result criterion into O303 \u2014 specify what generation deadline and what observable output (gate implemented and enforced, or zero new unwired functions emitted) constitutes failure, triggering automatic retirement of the self-engineering loop",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O303 specifies generation deadline and observable failure conditions (gate enforcement or zero unwired functions) triggering loop retirement."
+  },
+  {
+    "id": "O307",
+    "status": "open",
+    "statement": "Execute a binding single-pass verdict on O304 \u2014 determine whether the `substrate_of` edge type is load-bearing (expand to \u22653 edges with specified semantics) or vestigial (retire and redistribute its semantic role to an existing edge type), with completion by gen 270",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-05-24",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O304 substrate_of edge classified as load-bearing (\u22653 edges documented) or vestigial (role redistributed), by generation 270."
   }
 ]
