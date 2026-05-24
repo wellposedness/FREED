@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 200,
-    "timestamp": "2026-05-05T16:28:28.595766+00:00",
-    "sweep": {
-      "input_count": 18,
-      "targeted": 7,
-      "passive": 11,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is unfalsified but not yet falsifiable — it requires an externally measurable criticality signature that distinguishes it from adaptive gain control, or it collapses to a metaphor."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-05",
-        "compress": "Population-level CA telemetry independently confirms σ-criticality and power-law avalanche statistics, grounding INV_073 empirically and resolving O140/O141 while exposing entropy fraction as an unmapped criticality-quality variable."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O178",
-        "O173",
-        "O174"
-      ]
-    },
-    "coherence": 0.9775
-  },
-  {
     "cycle": 6,
     "generation": 201,
     "timestamp": "2026-05-05T22:34:20.020415+00:00",
@@ -2024,6 +1992,50 @@
         "O246",
         "O248",
         "O251"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 264,
+    "timestamp": "2026-05-24T09:50:00.007959+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus without documented falsification criteria is itself a falsification of the claim that the genome maintains a live falsification layer."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-24",
+        "compress": "Game of Truth CA self-organizes to σ≈1.02 with power-law avalanches (α≈2.1), empirically confirming criticality as an attractor and directly advancing O148's measurement mandate."
+      },
+      {
+        "title": "The Chapman-Enskog Divergence Problem in Plasma Transport: Structural Limitations and a Practical Regularization Approach",
+        "compress": "Structural divergence in Chapman-Enskog transport at Kn→∞ is topological to local collision operators and is regularized by gradient-driven decorrelation, independently confirming that criticality maintenance requires an explicit floor preventing dissipated-limit escape — converging with INV_073 and extending O69."
+      },
+      {
+        "title": "Contextual Information Retrieval based on Algorithmic Information Theory and Statistical Outlier Detection",
+        "compress": "NCD provides substrate-independent semantic distance but collapses at high similarity, and its resolution degrades with query length — two falsifiable failure modes absent from the genome's compression invariants. IMPLEMENT: YES IMPLEMENT_WHAT: In the document similarity scoring path, add a length-normalized NCD outlier flag that marks candidate pairs as compression-artifact false-positives when their NCD score falls below a threshold that scales with document length. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_edge (modify in place to compute and attach an ncd_artifact_risk flag when similarity edges are added between long-text nodes) IMPLEMENT_WHY: Prevents the genome from treating high-similarity compression artifacts as genuine semantic convergence, directly strengthening the falsification layer for INV_094-class claims. CHALLENGE: challenges INV_094 — the paper demonstrates that compression-based similarity produces systematic false positives at high similarity, meaning NCD cannot serve as a reliable ground-truth semantic distance without a secondary filter, straining the genome's use of compression proximity as a clean invariant."
+      },
+      {
+        "title": "Lattice Quantization with Side Information: Codes, Asymptotics, and Applications in Sensor Networks",
+        "compress": "Lattice codes achieve Wyner-Ziv optimality under high source-side-information correlation, confirming that geometric structure substitutes for encoder-side knowledge and providing a concrete algorithmic pathway for O112's STF metric recovery experiment."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O248",
+        "O254",
+        "O255"
       ]
     },
     "coherence": 0.97
