@@ -1160,7 +1160,7 @@ class FREEDDaemon:
                 f"If yes, emit exactly:\n"
                 f"IMPLEMENT: YES\n"
                 f"IMPLEMENT_WHAT: [one sentence — the specific thing to add or change]\n"
-                f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','batch_feed.py','voice.py']))}]\n"
+                f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','voice.py']))}]\n"
                 f"IMPLEMENT_CALL_SITE: [either EXTEND <function_name> if you are modifying an existing function in place, OR <function_name> / <ClassName.method_name> that will call the new code in the same patch]\n"
                 f"IMPLEMENT_WHY: [one sentence — why this improves FREED's epistemic loop]\n"
                 f"If you cannot name a call site, omit the IMPLEMENT block entirely.\n\n"

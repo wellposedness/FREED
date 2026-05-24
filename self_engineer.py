@@ -46,7 +46,12 @@ MODIFIABLE = {
     "l7_agent.py",
     "consolidate.py",
     "site_builder.py",
-    # "batch_feed.py",  # SURGICAL PAUSE 2026-05-21 — 5/6 reverts since fix-restart hit this file. Re-add after reading the reverted patches to diagnose root cause.
+    # batch_feed.py is intentionally absent. Diagnosed 2026-05-23: the file has no driver
+    # (no __main__, no process_feed, no queue loop) and exports exactly one live symbol
+    # (fetch_url, used by freed.py:37). IMPLEMENT signals targeting it were pattern-matching
+    # the file's appearance and producing orphans. Removed from IMPLEMENT_WHERE at freed.py:1163;
+    # keeping it out of MODIFIABLE for belt-and-suspenders symmetry. See O302 for the audit of
+    # nine pre-existing orphans inside the file.
     "voice.py",
     "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
     "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve

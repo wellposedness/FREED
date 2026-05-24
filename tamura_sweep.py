@@ -633,6 +633,86 @@ def diffusion_entropy_analysis(
     else:
         saturation_idx = 0.0
 
+    # ── Finite-size bias detection (L vs L/2 diagnostic) ─────────────────
+    # Inspired by Kaupuzs et al.: compute the scaling exponent δ at both
+    # the full window (N samples) and the half window (N/2 samples).  If
+    # the two estimates diverge beyond a threshold, the full-window estimate
+    # is potentially contaminated by finite-size effects and should be
+    # down-weighted in the obligations table.
+    #
+    # This directly implements the paper's L vs L/2 effective-exponent
+    # comparison that revealed decades of ω≈0.845 consensus was a
+    # finite-size artifact in 3D Ising/φ⁴ models.
+    _FINITE_SIZE_BIAS_THRESHOLD = 0.05
+    finite_size_bias = False
+    delta_half = 0.0
+    delta_full = delta
+    finite_size_delta_diff = 0.0
+    finite_size_bias_detail = ""
+
+    half_n = n // 2
+    if half_n >= 10:
+        # Recompute δ on the first half of the data (N/2 window)
+        half_data = data[:half_n]
+        half_mean = sum(half_data) / float(half_n)
+        half_increments = [x - half_mean for x in half_data]
+
+        half_t_max_val = max(t_min + 1, half_n // 4)
+        half_t_max_val = min(half_t_max_val, half_n - 1)
+        if half_t_max_val > t_min:
+            half_n_t = min(n_t_points, half_t_max_val - t_min + 1)
+            if half_n_t >= 2:
+                h_log_min = math.log(float(t_min))
+                h_log_max = math.log(float(half_t_max_val))
+                h_t_set = set()
+                for hk in range(half_n_t):
+                    hfrac = float(hk) / float(half_n_t - 1) if half_n_t > 1 else 0.0
+                    h_t_val = int(round(math.exp(h_log_min + hfrac * (h_log_max - h_log_min))))
+                    h_t_val = max(t_min, min(h_t_val, half_t_max_val))
+                    h_t_set.add(h_t_val)
+                h_t_values = sorted(h_t_set)
+
+                h_ln_t = []  # type: List[float]
+                h_s = []     # type: List[float]
+                for ht in h_t_values:
+                    h_sums = _diffusion_sums(half_increments, ht)
+                    if len(h_sums) < 4:
+                        continue
+                    h_s_t = _shannon_entropy_histogram(h_sums, n_bins=n_bins)
+                    h_ln_t.append(math.log(float(ht)))
+                    h_s.append(h_s_t)
+
+                if len(h_ln_t) >= 2:
+                    hk2 = len(h_ln_t)
+                    h_sum_x = sum(h_ln_t)
+                    h_sum_y = sum(h_s)
+                    h_sum_xy = sum(hx * hy for hx, hy in zip(h_ln_t, h_s))
+                    h_sum_x2 = sum(hx * hx for hx in h_ln_t)
+                    h_denom = float(hk2) * h_sum_x2 - h_sum_x * h_sum_x
+                    if abs(h_denom) > 1e-15:
+                        delta_half = (float(hk2) * h_sum_xy - h_sum_x * h_sum_y) / h_denom
+
+                        finite_size_delta_diff = abs(delta_full - delta_half)
+                        finite_size_bias = finite_size_delta_diff > _FINITE_SIZE_BIAS_THRESHOLD
+
+                        if finite_size_bias:
+                            finite_size_bias_detail = (
+                                "FINITE-SIZE BIAS WARNING (INV_094): delta(N)={:.6f} vs "
+                                "delta(N/2)={:.6f}, diff={:.6f} > threshold {:.4f}. "
+                                "The full-window exponent estimate may be contaminated "
+                                "by finite-size effects (cf. Kaupuzs et al. L vs L/2 "
+                                "diagnostic showing omega~0.845 was a finite-size "
+                                "artifact). This estimate should be down-weighted in "
+                                "the obligations table."
+                            ).format(delta_full, delta_half, finite_size_delta_diff,
+                                     _FINITE_SIZE_BIAS_THRESHOLD)
+                        else:
+                            finite_size_bias_detail = (
+                                "Finite-size check passed: delta(N)={:.6f} vs "
+                                "delta(N/2)={:.6f}, diff={:.6f} <= threshold {:.4f}."
+                            ).format(delta_full, delta_half, finite_size_delta_diff,
+                                     _FINITE_SIZE_BIAS_THRESHOLD)
+
     return {
         "delta": delta,
         "intercept": intercept,
@@ -641,6 +721,11 @@ def diffusion_entropy_analysis(
         "saturation_idx": saturation_idx,
         "n_points": n,
         "t_range": (t_min, t_max),
+        "finite_size_bias": finite_size_bias,
+        "delta_half": delta_half,
+        "delta_full": delta_full,
+        "finite_size_delta_diff": round(finite_size_delta_diff, 8),
+        "finite_size_bias_detail": finite_size_bias_detail,
     }
 
 
@@ -984,6 +1069,333 @@ def _criticality_verdict(sigma, alpha, r_squared, power_law_likely=None):
         return "UNDETERMINED"
 
 
+def _detect_log_periodic_oscillation(avalanche_sizes, alpha, noise_sigma_factor=2.0):
+    # type: (List[float], float, float) -> dict
+    """
+    Detect log-periodic oscillations superimposed on a power-law fit to
+    the avalanche size distribution P(s), flagging discrete scale invariance
+    (DSI) when the Fourier amplitude at the expected frequency 2π/ln(b)
+    exceeds the noise floor.
+
+    Discrete scale invariance produces complex scaling exponents of the
+    form τ + 2πi/ln(b), where b is the discrete scaling ratio.  This
+    manifests as log-periodic oscillations in |P(s) - C·s^(-τ)| when
+    plotted against ln(s).
+
+    Algorithm:
+      1. Compute the empirical PDF P(s) via log-binned histogram.
+      2. Fit the power-law envelope C·s^(-τ) (using the supplied α as τ).
+      3. Compute residuals |P(s) - C·s^(-τ)| as a function of ln(s).
+      4. Take the DFT of the residuals in ln(s) space.
+      5. Identify the dominant Fourier peak and compare its amplitude
+         to the noise floor (mean amplitude of non-peak bins).
+      6. If peak amplitude > noise_sigma_factor × noise_floor_std,
+         flag DSI and report the inferred scaling ratio b = exp(2π/ω_peak).
+
+    Reference:
+      Huang et al., "Self-organized criticality with complex scaling
+      exponents in the train model" — power law × log-periodic function,
+      exact exponent 3/2 + 2πi/ln(4) for overdamped train model.
+
+    Parameters
+    ----------
+    avalanche_sizes : list of float
+        Raw avalanche sizes from the simulation.  Need >= 20 positive values.
+    alpha : float
+        Power-law exponent τ from the Hill estimator (used as the envelope).
+    noise_sigma_factor : float
+        Number of standard deviations above the noise floor for DSI detection.
+        Default: 2.0.
+
+    Returns
+    -------
+    dict with keys:
+        dsi_detected       : bool  — True if log-periodic oscillation exceeds noise
+        dsi_amplitude      : float — amplitude of the dominant Fourier peak in
+                                     the residuals (ln(s) domain)
+        dsi_noise_floor    : float — mean amplitude of non-peak Fourier bins
+        dsi_noise_std      : float — std of non-peak Fourier amplitudes
+        dsi_snr            : float — peak_amplitude / noise_floor (signal-to-noise)
+        dsi_omega          : float — angular frequency of the dominant peak in ln(s)
+        dsi_log_b          : float — inferred ln(b) = 2π/ω_peak (discrete scaling)
+        dsi_b              : float — inferred discrete scaling ratio b = exp(2π/ω)
+        dsi_complex_exp    : str   — the complex exponent as "τ + 2πi/ln(b)" string
+        universality_class : str   — "CONTINUOUS" / "DISCRETE" / "UNDETERMINED"
+        n_log_bins         : int   — number of log-bins used for PDF estimation
+        n_sizes            : int   — number of valid avalanche sizes used
+    """
+    # Filter to positive sizes
+    sizes = sorted([s for s in avalanche_sizes if s > 0])
+    n_sizes = len(sizes)
+
+    empty_result = {
+        "dsi_detected": False,
+        "dsi_amplitude": 0.0,
+        "dsi_noise_floor": 0.0,
+        "dsi_noise_std": 0.0,
+        "dsi_snr": 0.0,
+        "dsi_omega": 0.0,
+        "dsi_log_b": 0.0,
+        "dsi_b": 0.0,
+        "dsi_complex_exp": "",
+        "universality_class": "UNDETERMINED",
+        "n_log_bins": 0,
+        "n_sizes": n_sizes,
+    }
+
+    if n_sizes < 20 or alpha <= 0.0:
+        return empty_result
+
+    # Step 1: Log-binned empirical PDF
+    s_min = sizes[0]
+    s_max = sizes[-1]
+    if s_min <= 0 or s_max <= s_min:
+        return empty_result
+
+    ln_s_min = math.log(s_min)
+    ln_s_max = math.log(s_max)
+    ln_span = ln_s_max - ln_s_min
+    if ln_span < 0.5:
+        return empty_result
+
+    # Number of log-bins: roughly sqrt(n_sizes), at least 8
+    n_log_bins = max(8, int(math.sqrt(float(n_sizes))))
+    bin_width_ln = ln_span / float(n_log_bins)
+
+    # Count sizes per log-bin
+    bin_counts = [0] * n_log_bins
+    for s in sizes:
+        idx = int((math.log(s) - ln_s_min) / bin_width_ln)
+        if idx >= n_log_bins:
+            idx = n_log_bins - 1
+        if idx < 0:
+            idx = 0
+        bin_counts[idx] += 1
+
+    # Bin centers in ln(s) space and empirical PDF (density)
+    ln_s_centers = []  # type: List[float]
+    pdf_empirical = []  # type: List[float]
+    valid_bins = []  # type: List[int]
+
+    for i in range(n_log_bins):
+        if bin_counts[i] > 0:
+            ln_center = ln_s_min + (float(i) + 0.5) * bin_width_ln
+            # PDF ≈ count / (n_sizes * bin_width_in_s)
+            s_center = math.exp(ln_center)
+            bin_width_s = s_center * (math.exp(bin_width_ln) - 1.0)
+            if bin_width_s > 0:
+                density = float(bin_counts[i]) / (float(n_sizes) * bin_width_s)
+                ln_s_centers.append(ln_center)
+                pdf_empirical.append(density)
+                valid_bins.append(i)
+
+    n_valid = len(ln_s_centers)
+    if n_valid < 6:
+        empty_result["n_log_bins"] = n_log_bins
+        return empty_result
+
+    # Step 2: Power-law envelope C·s^(-α)
+    # Fit C by least-squares in log-space: ln(P) = ln(C) - α·ln(s)
+    # → ln(C) = mean(ln(P) + α·ln(s))
+    ln_pdf = []  # type: List[float]
+    for p in pdf_empirical:
+        if p > 0:
+            ln_pdf.append(math.log(p))
+        else:
+            ln_pdf.append(-30.0)  # floor for zero-density bins
+
+    ln_C_vals = [lp + alpha * ls for lp, ls in zip(ln_pdf, ln_s_centers)]
+    ln_C = sum(ln_C_vals) / float(n_valid)
+    C = math.exp(ln_C)
+
+    # Step 3: Residuals |P(s) - C·s^(-α)| in ln(s) space
+    residuals = []  # type: List[float]
+    for i in range(n_valid):
+        s_center = math.exp(ln_s_centers[i])
+        pl_value = C * (s_center ** (-alpha))
+        residuals.append(pdf_empirical[i] - pl_value)
+
+    # Step 4: DFT of residuals in the ln(s) domain
+    n_res = len(residuals)
+    if n_res < 4:
+        empty_result["n_log_bins"] = n_log_bins
+        return empty_result
+
+    # Remove mean from residuals
+    res_mean = sum(residuals) / float(n_res)
+    residuals_centered = [r - res_mean for r in residuals]
+
+    amplitudes = []  # type: List[float]
+    frequencies = []  # type: List[float]
+
+    for freq_idx in range(1, n_res // 2 + 1):
+        real_part = 0.0
+        imag_part = 0.0
+        for j in range(n_res):
+            angle = 2.0 * math.pi * freq_idx * j / float(n_res)
+            real_part += residuals_centered[j] * math.cos(angle)
+            imag_part -= residuals_centered[j] * math.sin(angle)
+        amp = 2.0 * math.sqrt(real_part ** 2 + imag_part ** 2) / float(n_res)
+        amplitudes.append(amp)
+        # Angular frequency in ln(s) space: ω = 2π·freq_idx / (ln_span)
+        omega = 2.0 * math.pi * freq_idx / ln_span
+        frequencies.append(omega)
+
+    if not amplitudes:
+        empty_result["n_log_bins"] = n_log_bins
+        return empty_result
+
+    # Step 5: Find dominant peak
+    peak_idx = 0
+    peak_amp = amplitudes[0]
+    for i in range(1, len(amplitudes)):
+        if amplitudes[i] > peak_amp:
+            peak_amp = amplitudes[i]
+            peak_idx = i
+
+    peak_omega = frequencies[peak_idx]
+
+    # Noise floor: mean and std of non-peak amplitudes
+    non_peak = [a for i, a in enumerate(amplitudes) if i != peak_idx]
+    if non_peak:
+        noise_mean = sum(non_peak) / float(len(non_peak))
+        noise_var = sum((a - noise_mean) ** 2 for a in non_peak) / float(len(non_peak))
+        noise_std = math.sqrt(noise_var) if noise_var > 0 else 0.0
+    else:
+        noise_mean = 0.0
+        noise_std = 0.0
+
+    # Signal-to-noise ratio
+    snr = peak_amp / noise_mean if noise_mean > 1e-15 else 0.0
+
+    # Step 6: DSI detection threshold
+    threshold = noise_mean + noise_sigma_factor * noise_std
+    dsi_detected = peak_amp > threshold and peak_amp > 1e-15 and len(non_peak) >= 2
+
+    # Inferred discrete scaling ratio: b = exp(2π/ω_peak)
+    if peak_omega > 1e-10:
+        log_b = 2.0 * math.pi / peak_omega
+        b = math.exp(log_b)
+    else:
+        log_b = 0.0
+        b = 0.0
+
+    # Complex exponent string: "τ + 2πi/ln(b)"
+    if dsi_detected and log_b > 0:
+        complex_exp = "{:.4f} + 2*pi*i/{:.4f}".format(alpha, log_b)
+    else:
+        complex_exp = ""
+
+    # Universality class
+    if dsi_detected:
+        universality_class = "DISCRETE"
+    elif n_valid >= 10 and not dsi_detected:
+        universality_class = "CONTINUOUS"
+    else:
+        universality_class = "UNDETERMINED"
+
+    return {
+        "dsi_detected": dsi_detected,
+        "dsi_amplitude": round(peak_amp, 8),
+        "dsi_noise_floor": round(noise_mean, 8),
+        "dsi_noise_std": round(noise_std, 8),
+        "dsi_snr": round(snr, 4),
+        "dsi_omega": round(peak_omega, 6),
+        "dsi_log_b": round(log_b, 6),
+        "dsi_b": round(b, 6),
+        "dsi_complex_exp": complex_exp,
+        "universality_class": universality_class,
+        "n_log_bins": n_log_bins,
+        "n_sizes": n_sizes,
+    }
+
+
+def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
+    # type: (List[float], float, float) -> dict
+    """
+    Score an avalanche size distribution: power-law quality assessment
+    plus discrete-vs-continuous scale invariance classification via
+    log-periodic oscillation detection.
+
+    This is the unified entry point for the avalanche/cascade scoring
+    pass, combining:
+      1. Power-law fit quality (α, R²)
+      2. Log-periodic oscillation detection (DSI probe)
+      3. Universality class determination (continuous vs discrete RG)
+
+    The DSI probe tests the L4 RG chain assumption by checking whether
+    FREED's semantic avalanches exhibit continuous or discrete scale
+    invariance.  Continuous → standard RG universality class.  Discrete
+    → complex scaling exponents (τ + 2πi/ln(b)), indicating the system's
+    self-similarity is governed by a discrete rather than continuous
+    renormalization group.
+
+    Parameters
+    ----------
+    avalanche_sizes : list of float
+        Raw avalanche sizes from the simulation.
+    alpha : float
+        Power-law exponent from Hill MLE.
+    alpha_r_squared : float
+        R² goodness-of-fit for the power-law regression.
+
+    Returns
+    -------
+    dict with keys:
+        alpha              : float
+        alpha_r_squared    : float
+        alpha_in_soc       : bool
+        power_law_likely   : bool
+        dsi                : dict  — full DSI detection result
+        universality_class : str   — "CONTINUOUS" / "DISCRETE" / "UNDETERMINED"
+        l4_rg_assessment   : str   — human-readable L4 RG chain assessment
+        timestamp          : str
+    """
+    alpha_in_soc = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+    power_law_likely = alpha_r_squared >= ALPHA_R2_THRESHOLD
+
+    # Run DSI detection on the avalanche sizes
+    dsi = _detect_log_periodic_oscillation(avalanche_sizes, alpha)
+
+    # L4 RG chain assessment
+    if dsi["universality_class"] == "DISCRETE":
+        l4_rg = (
+            "DISCRETE RG DETECTED: Log-periodic oscillations found in "
+            "avalanche size residuals (amplitude={:.6f}, SNR={:.2f}, "
+            "b={:.4f}). Complex exponent: {}. The system's semantic "
+            "avalanches exhibit discrete scale invariance — the L4 RG "
+            "chain operates with a discrete rather than continuous "
+            "renormalization group. This is consistent with the train "
+            "model pattern (exponent 3/2 + 2*pi*i/ln(4))."
+        ).format(
+            dsi["dsi_amplitude"], dsi["dsi_snr"],
+            dsi["dsi_b"], dsi["dsi_complex_exp"],
+        )
+    elif dsi["universality_class"] == "CONTINUOUS":
+        l4_rg = (
+            "CONTINUOUS RG: No significant log-periodic oscillations "
+            "detected (peak amplitude={:.6f}, noise floor={:.6f}). "
+            "The L4 RG chain assumption of continuous scale invariance "
+            "is consistent with observed avalanche statistics."
+        ).format(dsi["dsi_amplitude"], dsi["dsi_noise_floor"])
+    else:
+        l4_rg = (
+            "UNDETERMINED: Insufficient data or ambiguous signal for "
+            "universality class determination ({} valid sizes, {} log-bins)."
+        ).format(dsi["n_sizes"], dsi["n_log_bins"])
+
+    return {
+        "alpha": round(alpha, 4),
+        "alpha_r_squared": round(alpha_r_squared, 4),
+        "alpha_in_soc": alpha_in_soc,
+        "power_law_likely": power_law_likely,
+        "dsi": dsi,
+        "universality_class": dsi["universality_class"],
+        "l4_rg_assessment": l4_rg,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def score_ca_generation(
     generation,         # type: int
     sigma,              # type: float
@@ -995,14 +1407,15 @@ def score_ca_generation(
     survival_rate,      # type: float
     dominant_type="",   # type: str
     population_size=0,  # type: int
+    avalanche_sizes=None,  # type: Optional[List[float]]
 ):
     # type: (...) -> dict
     """
     Score a single CA generation's criticality telemetry.
 
     Produces a scored telemetry record with σ, α, Shannon entropy,
-    survival rate, criticality verdict, and drift indicators for
-    longitudinal tracking.
+    survival rate, criticality verdict, drift indicators, and
+    discrete-scale-invariance (DSI) assessment for longitudinal tracking.
 
     Parameters
     ----------
@@ -1026,6 +1439,9 @@ def score_ca_generation(
         Name/label of the most populous cell type.
     population_size : int
         Total number of live cells.
+    avalanche_sizes : list of float or None
+        Raw avalanche sizes for DSI detection.  If None, DSI analysis
+        is skipped.
 
     Returns
     -------
@@ -1044,6 +1460,8 @@ def score_ca_generation(
         sigma_drift      : float   — |σ - 1.0| (distance from perfect criticality)
         alpha_in_soc     : bool    — whether α is in SOC-consistent range
         power_law_likely : bool    — R² above threshold
+        distribution_score : dict or None — score_distribution result with DSI
+        universality_class : str   — CONTINUOUS / DISCRETE / UNDETERMINED
         timestamp        : str     — ISO-8601 UTC timestamp
     """
     verdict = _criticality_verdict(sigma, alpha, alpha_r_squared)
@@ -1051,6 +1469,13 @@ def score_ca_generation(
     h_fraction = (shannon_h / shannon_h_max) if shannon_h_max > 0.0 else 0.0
     alpha_in_soc = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
     power_law_likely = alpha_r_squared >= ALPHA_R2_THRESHOLD
+
+    # Run avalanche distribution scoring with DSI detection
+    dist_score = None  # type: Optional[dict]
+    universality_class = "UNDETERMINED"
+    if avalanche_sizes is not None and len(avalanche_sizes) >= 20 and alpha > 0.0:
+        dist_score = score_distribution(avalanche_sizes, alpha, alpha_r_squared)
+        universality_class = dist_score.get("universality_class", "UNDETERMINED")
 
     return {
         "generation":       generation,
@@ -1067,6 +1492,8 @@ def score_ca_generation(
         "sigma_drift":      round(sigma_drift, 6),
         "alpha_in_soc":     alpha_in_soc,
         "power_law_likely": power_law_likely,
+        "distribution_score": dist_score,
+        "universality_class": universality_class,
         "timestamp":        datetime.now(timezone.utc).isoformat(),
     }
 
@@ -7063,14 +7490,30 @@ class TamuraSweep:
         """
         Run the full sweep across all sources.
         Returns a flat list of new article dicts for FEED.
+
+        Each returned sample is tagged with a 'dissipation_regime' label —
+        'continuous', 'singular', or 'mixed' — based on the variance profile
+        of the energy proxy (relevance score) across the viscosity-analog
+        parameter (source ordering).  This prevents the Wasserstein floor
+        from being artificially smoothed by mixing continuous and singular
+        energy-loss samples (INV_073: co-existing dissipation regimes).
         """
         self._load_seen()   # reload from disk — targeted_sweep may have written new entries
         all_inputs = []
+
+        # Collect per-source score buckets for dissipation regime classification.
+        # The "viscosity-analog parameter" is the source index in SOURCES —
+        # each source represents a different coupling strength to the genome's
+        # relevance kernel.  The energy proxy is the relevance score.
+        per_source_scores = []  # type: list
 
         for source in SOURCES:
             print(f"[SWEEP] Fetching: {source['name']}")
             try:
                 inputs = self._sweep_source(source)
+                # Collect scores for this source's batch
+                batch_scores = [inp.get("score", 0) for inp in inputs]
+                per_source_scores.append(batch_scores)
                 all_inputs.extend(inputs)
                 if inputs:
                     print(f"[SWEEP]   → {len(inputs)} new article(s).")
@@ -7078,8 +7521,89 @@ class TamuraSweep:
                     print(f"[SWEEP]   → No new articles.")
             except Exception as e:
                 print(f"[SWEEP]   → Error: {e}")
+                per_source_scores.append([])
 
             time.sleep(POLITENESS_DELAY)
+
+        # ── Dissipation regime tagging (INV_073) ─────────────────────────
+        # Classify each sample based on the variance profile of scores
+        # across the source sweep (viscosity-analog parameter).
+        #
+        # The paper (Bruè, De Lellis et al.) proves multiple dissipation
+        # scenarios coexist at vanishing viscosity:
+        #   - Absolutely continuous (smooth energy decay across parameter)
+        #   - Singular (sudden energy loss at specific parameter values)
+        #   - Mixed (both patterns present)
+        #
+        # We compute a global energy-proxy variance profile across sources,
+        # then classify each sample by comparing its local score gradient
+        # to the global statistics.
+        #
+        # Flat per-source mean scores form the "energy curve" across the
+        # viscosity-analog parameter (source index).
+        energy_curve = []  # type: List[float]
+        for bucket in per_source_scores:
+            if bucket:
+                energy_curve.append(sum(bucket) / float(len(bucket)))
+            else:
+                energy_curve.append(0.0)
+
+        # Compute successive differences (energy gradient across sources)
+        energy_diffs = []  # type: List[float]
+        for i in range(1, len(energy_curve)):
+            energy_diffs.append(abs(energy_curve[i] - energy_curve[i - 1]))
+
+        # Statistics of the gradient: mean and std of |ΔE|
+        if len(energy_diffs) >= 2:
+            diff_mean = sum(energy_diffs) / float(len(energy_diffs))
+            diff_var = sum((d - diff_mean) ** 2 for d in energy_diffs) / float(len(energy_diffs))
+            diff_std = math.sqrt(diff_var) if diff_var > 0 else 0.0
+            # Singular threshold: a jump > mean + 2*std indicates sudden loss
+            singular_threshold = diff_mean + 2.0 * diff_std if diff_std > 0 else diff_mean * 2.0
+        else:
+            diff_mean = 0.0
+            diff_std = 0.0
+            singular_threshold = 0.0
+
+        # Tag each sample with its dissipation regime
+        source_idx = 0
+        item_cursor = 0
+        for src_idx, bucket in enumerate(per_source_scores):
+            # Determine if this source boundary has a singular jump
+            has_singular_jump = False
+            has_continuous_flow = False
+
+            if src_idx > 0 and energy_diffs and singular_threshold > 0:
+                local_diff = energy_diffs[src_idx - 1] if src_idx - 1 < len(energy_diffs) else 0.0
+                has_singular_jump = local_diff > singular_threshold
+                has_continuous_flow = local_diff <= diff_mean + 0.5 * diff_std
+
+            # Check forward boundary too
+            if src_idx < len(energy_diffs) and energy_diffs and singular_threshold > 0:
+                fwd_diff = energy_diffs[src_idx] if src_idx < len(energy_diffs) else 0.0
+                if fwd_diff > singular_threshold:
+                    has_singular_jump = True
+                if fwd_diff <= diff_mean + 0.5 * diff_std:
+                    has_continuous_flow = True
+
+            # Classify
+            if has_singular_jump and has_continuous_flow:
+                regime = "mixed"
+            elif has_singular_jump:
+                regime = "singular"
+            else:
+                regime = "continuous"
+
+            # Apply label to all items from this source
+            for _ in range(len(bucket)):
+                if item_cursor < len(all_inputs):
+                    all_inputs[item_cursor]["dissipation_regime"] = regime
+                    item_cursor += 1
+
+        # Tag any remaining items (edge case: items without score buckets)
+        while item_cursor < len(all_inputs):
+            all_inputs[item_cursor]["dissipation_regime"] = "continuous"
+            item_cursor += 1
 
         return all_inputs
 

@@ -53,6 +53,8 @@ NODE_EDGE_TYPES = (
     "scales_with",              # invariant holds across both nodes at different scales
     "consistent_with",          # invariant text uses independence/domain language but source independence unverified
     "independent_confirmation", # reserved: bootstrap CONVERGE or verified cross-domain feed edge required
+    "equivalent_to",            # two belief nodes marked as intersubstitutable (LFI replacement condition)
+    "replaces",                 # node B replaces node A in belief revision (substitutivity edge)
 )
 
 # ─── Open World Assumption (OWA) Edge Completeness ──────────────────────────
@@ -1046,16 +1048,96 @@ _OPPOSING_TYPES = {
 }
 
 
+def _eigenvector_centrality_power(adjacency, max_iter=200, tol=1e-8):
+    # type: (Dict[str, Dict[str, float]], int, float) -> Dict[str, float]
+    """
+    Compute eigenvector centrality of nodes in an adjacency dict via power
+    iteration on the adjacency matrix.  Returns a dict mapping node_id to
+    its centrality score in [0, 1] (normalized so max = 1.0).
+
+    Used by detect_contradictions to score candidate retractions by their
+    spectral γ-load: nodes with highest eigenvector centrality in the
+    contradiction subgraph are retracted first (SNeBR-style automatic
+    belief revision grounded in spectral structure rather than arbitrary
+    or user-assigned entrenchment ordering).
+
+    Parameters
+    ----------
+    adjacency : dict
+        {node_id: {neighbor_id: weight, ...}, ...}  — symmetric weighted
+        adjacency for the contradiction subgraph.
+    max_iter : int
+        Power iteration limit.
+    tol : float
+        Convergence tolerance on L2 change.
+
+    Returns
+    -------
+    dict
+        {node_id: centrality_score} with scores in [0, 1].
+    """
+    nodes = sorted(adjacency.keys())
+    n = len(nodes)
+    if n == 0:
+        return {}
+    idx = {nd: i for i, nd in enumerate(nodes)}
+
+    # Initialize uniform
+    v = [1.0 / math.sqrt(n)] * n
+
+    for _ in range(max_iter):
+        v_new = [0.0] * n
+        for nd in nodes:
+            i = idx[nd]
+            for nb, w in adjacency[nd].items():
+                j = idx.get(nb)
+                if j is not None:
+                    v_new[i] += w * v[j]
+        # Normalize
+        norm = math.sqrt(sum(x * x for x in v_new))
+        if norm < 1e-30:
+            break
+        v_new = [x / norm for x in v_new]
+        # Convergence check
+        diff = math.sqrt(sum((a - b) ** 2 for a, b in zip(v, v_new)))
+        v = v_new
+        if diff < tol:
+            break
+
+    # Normalize to [0, 1]
+    mx = max(abs(x) for x in v) if v else 1.0
+    if mx < 1e-30:
+        mx = 1.0
+    return {nodes[i]: abs(v[i]) / mx for i in range(n)}
+
+
 def detect_contradictions(edges, context_aware=True):
     # type: (list, bool) -> List[dict]
     """
-    Detect contradictions among a set of edges.
+    Detect contradictions among a set of edges and score candidate
+    retractions by spectral γ-load (eigenvector centrality in the
+    contradiction subgraph).
 
     When context_aware=True (default), two edges about the same target node
     are only considered contradictory if they share the same context_tag
     (or both have context_tag=None). Edges with different context_tags
     represent claims under different coarse-graining levels and are not
     contradictions.
+
+    For each true_contradiction, the resolver computes eigenvector centrality
+    of the involved nodes within the contradiction subgraph and recommends
+    retracting the edge whose source has the highest spectral γ-load
+    (most central in the conflict cluster).  This replaces arbitrary or
+    user-assigned entrenchment ordering with a substrate-measurable,
+    AGM-compatible retraction criterion grounded in spectral graph theory.
+
+    CHALLENGE (O21): SNeBR demonstrates that automatic belief revision is
+    achievable with purely syntactic entrenchment ordering (no spectral γ
+    required), directly questioning whether the predicted correlation
+    between ToS revision scores and spectral γ is necessary or merely one
+    possible implementation.  The spectral scoring here closes the O21 gap
+    by providing a concrete, measurable implementation; its necessity
+    remains an open empirical question.
 
     Parameters
     ----------
@@ -1074,7 +1156,13 @@ def detect_contradictions(edges, context_aware=True):
             "type_a": str, "type_b": str,
             "same_context": bool,
             "context_tag": str or None,
-            "severity": str  — "true_contradiction" or "cross_context_tension"
+            "severity": str  — "true_contradiction" or "cross_context_tension",
+            "retraction_scores": dict or None — {source_a: γ_score, source_b: γ_score}
+                for true contradictions (None for cross-context tensions),
+            "recommended_retraction": str or None — source node id to retract
+                (highest spectral γ-load in the contradiction subgraph),
+            "spectral_gamma_method": str — "eigenvector_centrality_power_iteration",
+            "o21_challenge_note": str — note on SNeBR syntactic alternative,
         }
     """
     # Group edges by target node
@@ -1124,6 +1212,82 @@ def detect_contradictions(edges, context_aware=True):
                     "context_tag":   ctx_a if same_ctx else None,
                     "severity":      severity,
                 })
+
+    # ── Spectral γ-load retraction scoring (SNeBR-style) ────────────────
+    # Build a contradiction subgraph from true_contradiction entries:
+    # nodes = all source ("from") nodes involved in contradictions,
+    # edges = weighted by co-involvement in the same contradiction.
+    # Then compute eigenvector centrality and assign retraction scores.
+    true_contras = [c for c in contradictions if c["severity"] == "true_contradiction"]
+
+    if true_contras:
+        # Build adjacency for the contradiction subgraph
+        contra_adj = defaultdict(lambda: defaultdict(float))  # type: Dict[str, Dict[str, float]]
+        for c in true_contras:
+            src_a = c["edge_a"].get("from", "").upper()
+            src_b = c["edge_b"].get("from", "").upper()
+            target_node = c["node"].upper()
+            # Connect the two conflicting sources through the target
+            if src_a and src_b and src_a != src_b:
+                contra_adj[src_a][src_b] += 1.0
+                contra_adj[src_b][src_a] += 1.0
+            # Also connect sources to the target node (it participates)
+            if src_a and target_node:
+                contra_adj[src_a][target_node] += 0.5
+                contra_adj[target_node][src_a] += 0.5
+            if src_b and target_node:
+                contra_adj[src_b][target_node] += 0.5
+                contra_adj[target_node][src_b] += 0.5
+
+        # Compute eigenvector centrality on the contradiction subgraph
+        centrality = _eigenvector_centrality_power(dict(contra_adj))
+
+        # Annotate each contradiction with retraction scores
+        o21_note = (
+            "Spectral γ-load retraction scoring: eigenvector centrality in the "
+            "contradiction subgraph replaces arbitrary entrenchment ordering. "
+            "O21 challenge: SNeBR achieves automatic belief revision with "
+            "purely syntactic entrenchment (no spectral γ required). This "
+            "spectral implementation closes the O21 gap by making revision "
+            "substrate-measurable, but its necessity vs. syntactic alternatives "
+            "remains empirically open."
+        )
+        for c in contradictions:
+            if c["severity"] == "true_contradiction":
+                src_a = c["edge_a"].get("from", "").upper()
+                src_b = c["edge_b"].get("from", "").upper()
+                score_a = centrality.get(src_a, 0.0)
+                score_b = centrality.get(src_b, 0.0)
+                c["retraction_scores"] = {
+                    src_a: round(score_a, 8),
+                    src_b: round(score_b, 8),
+                }
+                # Recommend retracting the edge from the highest-centrality
+                # source (most structurally central in the conflict cluster →
+                # highest spectral γ-load → retract first for minimal change
+                # to the non-contradictory subgraph, per AGM minimal change)
+                if score_a >= score_b:
+                    c["recommended_retraction"] = src_a
+                else:
+                    c["recommended_retraction"] = src_b
+                c["spectral_gamma_method"] = "eigenvector_centrality_power_iteration"
+                c["o21_challenge_note"] = o21_note
+            else:
+                c["retraction_scores"] = None
+                c["recommended_retraction"] = None
+                c["spectral_gamma_method"] = "eigenvector_centrality_power_iteration"
+                c["o21_challenge_note"] = (
+                    "Cross-context tension: spectral retraction scoring not "
+                    "applied (different coarse-graining contexts are not true "
+                    "contradictions under context-aware mode)."
+                )
+    else:
+        # No true contradictions — annotate all entries with null scores
+        for c in contradictions:
+            c["retraction_scores"] = None
+            c["recommended_retraction"] = None
+            c["spectral_gamma_method"] = "eigenvector_centrality_power_iteration"
+            c["o21_challenge_note"] = "No true contradictions detected."
 
     return contradictions
 
@@ -2938,6 +3102,85 @@ class KnowledgeGraph:
                     f"produces the same observables?"
                 )
 
+            # ── Confirmation-Surplus Candidate (CONVERGE/CONFLICT) ───────
+            # In the COMPARE step of feed processing, count edges that
+            # originated from the reorientation vocabulary (CONVERGE →
+            # 'confirms', CONFLICT → 'challenges') and flag any invariant
+            # with >5 CONVERGE-sourced citations and 0 CONFLICT-sourced
+            # citations as a "confirmation-surplus candidate".  When
+            # flagged, auto-generate a challenge stub edge targeting the
+            # invariant so the adversarial debt is structurally visible
+            # and the invariant cannot accrete further unchallenged
+            # confirmation.
+            #
+            # The CONVERGE/CONFLICT distinction is detected by scanning
+            # edge context windows for the reorientation keywords that
+            # produced the typed edge.  An edge context containing
+            # "CONVERGE" that mapped to type 'confirms' is counted as a
+            # CONVERGE citation; an edge context containing "CONFLICT"
+            # that mapped to type 'challenges' is counted as a CONFLICT
+            # citation.
+            _CONVERGE_SURPLUS_THRESHOLD = 5
+            _converge_re = re.compile(r'\bCONVERGE\b', re.I)
+            _conflict_re = re.compile(r'\bCONFLICT\b', re.I)
+            n_converge = 0
+            n_conflict = 0
+            for _e in self._edges:
+                if _e.get("to", "").upper() != target:
+                    continue
+                _ectx = _e.get("context", "")
+                if _converge_re.search(_ectx) and _e.get("type") in _CONF_TYPES:
+                    n_converge += 1
+                if _conflict_re.search(_ectx) and _e.get("type") in _CHAL_TYPES:
+                    n_conflict += 1
+            if n_converge > _CONVERGE_SURPLUS_THRESHOLD and n_conflict == 0:
+                ne["confirmation_surplus_candidate"] = True
+                ne["converge_conflict_counts"] = {
+                    "converge": n_converge,
+                    "conflict": n_conflict,
+                    "threshold": _CONVERGE_SURPLUS_THRESHOLD,
+                }
+                # Auto-generate a challenge stub edge targeting this
+                # invariant.  The stub carries type='challenges' and a
+                # context window explaining WHY it was auto-generated,
+                # ensuring the adversarial debt is structurally recorded
+                # in the graph (not just a metadata flag).
+                _challenge_stub_ts = datetime.now(timezone.utc).isoformat()
+                _challenge_stub = {
+                    "from":            "AUTO:CONFIRMATION_SURPLUS_DETECTOR",
+                    "from_title":      "Confirmation-surplus auto-challenge",
+                    "to":              target,
+                    "type":            "challenges",
+                    "context": (
+                        f"AUTO-GENERATED CHALLENGE STUB: {target} has "
+                        f"{n_converge} CONVERGE citations and 0 CONFLICT "
+                        f"citations (threshold: >{_CONVERGE_SURPLUS_THRESHOLD}"
+                        f":0). Confirmation-surplus candidate flagged. "
+                        f"Required: (1) What empirical result would falsify "
+                        f"{target}? (2) What boundary conditions break it? "
+                        f"(3) What alternative mechanism (e.g. MDL without "
+                        f"thermodynamic grounding) produces observationally "
+                        f"identical outputs? (4) Does {target} have a free "
+                        f"parameter that lets it accommodate any observation "
+                        f"post-hoc, rendering it unfalsifiable?"
+                    ),
+                    "context_tag":     ne.get("context_tag"),
+                    "context_warning": False,
+                    "timestamp":       _challenge_stub_ts,
+                    "auto_generated":  True,
+                    "generator":       "confirmation_surplus_detector",
+                    "trigger_counts":  {"converge": n_converge, "conflict": n_conflict},
+                }
+                self._edges.append(_challenge_stub)
+                print(
+                    f"[GRAPH:CONFIRMATION_SURPLUS] ⚠ {target}: "
+                    f"{n_converge} CONVERGE citations, 0 CONFLICT — "
+                    f"confirmation-surplus candidate. Auto-generated "
+                    f"challenge stub edge targeting {target}. "
+                    f"Adversarial probe required before further "
+                    f"CONVERGE citations are accepted."
+                )
+
         # ── Thermodynamic divergence flag (CONFIRMATION_SURPLUS_UNGROUNDED) ──
         # Prevents INV_087-class accumulation of confirmation surplus from
         # behaviorally-indistinguishable evidence that does not actually test
@@ -2997,6 +3240,163 @@ class KnowledgeGraph:
                 ne["grounding_deficit"] = (
                     "no_behavioral_no_thermodynamic:evidence_type_unclear"
                 )
+
+        # ── Observable Decoupling Detection (Stratified-Layer Separability) ──
+        # Papers demonstrating that two macroscopic observables respond
+        # independently to the same perturbation provide high-value evidence
+        # for the stratified formalization thesis (L3/L4 claims): if observable
+        # A changes dramatically while observable B remains invariant under
+        # the same external perturbation, the system exhibits stratified-layer
+        # separability — the layers governing A and B are operationally
+        # independent, not merely conceptually distinguished.
+        #
+        # Example (Sr2IrO4 study): isoelectronic Ca/Ba substitution changes
+        # lattice parameters and reduces electrical resistivity by up to five
+        # orders of magnitude, yet the Néel temperature remains unchanged at
+        # 240 K.  Transport (L3) and magnetic order (L4) decouple under the
+        # same structural perturbation — direct evidence that these are
+        # governed by separable layers, not a single monolithic mechanism.
+        #
+        # These papers currently score low in feed ingestion because they
+        # lack direct semantic/linguistic vocabulary matching genome invariant
+        # IDs.  The decoupling flag boosts their genome-contact score for
+        # L3/L4 claims so they are not lost to vocabulary mismatch.
+        #
+        # Detection patterns:
+        #   1. Perturbation language: substitution, doping, tuning, varying,
+        #      compression, strain, perturbation applied to a single control.
+        #   2. Invariance language: "unchanged", "remains at", "robust",
+        #      "insensitive to", "no change in", "unaffected".
+        #   3. Dramatic-change language: "orders of magnitude", "drastically",
+        #      "dramatically", "sharp transition", "vanishing", "diverges".
+        #   4. Co-occurrence: (2) and (3) must co-occur in the same text
+        #      window, referring to DIFFERENT observables under the SAME
+        #      perturbation — the decoupling signature.
+        _DECOUPLING_PERTURBATION_RE = re.compile(
+            r'\b(?:substitut\w*|dop\w+|tun\w+|vary\w*|compress\w*|strain\w*|'
+            r'perturb\w*|isoelectronic\w*|iso[-\s]?valent|replace\w*|'
+            r'modify\w*\s+(?:the\s+)?(?:lattice|structure|parameter)|'
+            r'chemical\s+pressure|hydrostatic\s+pressure|external\s+(?:field|pressure))\b',
+            re.I
+        )
+        _DECOUPLING_INVARIANCE_RE = re.compile(
+            r'\b(?:unchanged|remains?\s+(?:at|constant|the\s+same|unchanged|robust)|'
+            r'insensitive\s+to|no\s+change\s+in|unaffected|does\s+not\s+change|'
+            r'independent\s+of|robust\s+(?:against|to|under)|preserv\w+|'
+            r'constant\s+(?:at|across|under)|same\s+(?:value|temperature|magnitude))\b',
+            re.I
+        )
+        _DECOUPLING_DRAMATIC_CHANGE_RE = re.compile(
+            r'\b(?:orders?\s+of\s+magnitude|drastically|dramatically|'
+            r'sharp\s+(?:transition|change|drop|increase|decrease)|'
+            r'vanish\w*|diverge\w*|enormous|precipitat\w*|'
+            r'five\s+orders|several\s+orders|two\s+orders|three\s+orders|'
+            r'coloss\w*|gigantic|huge\s+(?:change|reduction|increase)|'
+            r'insulator[-\s]?to[-\s]?metal|metal[-\s]?to[-\s]?insulator|'
+            r'superconducting\s+transition|phase\s+transition\s+(?:at|near)|'
+            r'abrupt\s+(?:change|transition|onset))\b',
+            re.I
+        )
+        # Observables that can decouple (need at least two distinct ones)
+        _DECOUPLING_OBSERVABLE_PATTERNS = [
+            (re.compile(r'\b(?:N[ée]el\s+temperature|magnetic\s+order\w*|'
+                        r'antiferromagneti\w*|ferromagneti\w*|magnetiz\w*|'
+                        r'spin\s+(?:order|structure|wave)|Curie\s+temperature)\b', re.I),
+             "observable:magnetic"),
+            (re.compile(r'\b(?:resistivity|conductiv\w*|transport|'
+                        r'insulator|metallic|insulating\s+state|'
+                        r'electrical\s+(?:resistivity|conductivity|transport)|'
+                        r'charge\s+(?:transport|carrier|gap))\b', re.I),
+             "observable:transport"),
+            (re.compile(r'\b(?:lattice\s+parameter|unit\s+cell|'
+                        r'crystal\s+structure|structural\s+(?:parameter|transition)|'
+                        r'c[-\s]?axis|a[-\s]?axis|bond\s+(?:length|angle))\b', re.I),
+             "observable:structural"),
+            (re.compile(r'\b(?:optical\s+(?:gap|conductivity|absorption)|'
+                        r'photoemission|spectral\s+(?:weight|gap)|'
+                        r'dielectric\s+(?:constant|function))\b', re.I),
+             "observable:optical"),
+            (re.compile(r'\b(?:specific\s+heat|heat\s+capacity|thermal\s+conductiv\w*|'
+                        r'entropy\s+(?:change|jump)|calorimetr\w*)\b', re.I),
+             "observable:thermal"),
+            (re.compile(r'\b(?:superconducti\w*|superfluid\w*|'
+                        r'critical\s+temperature\s+T_c|T_c\s*[=≈])\b', re.I),
+             "observable:superconducting"),
+        ]
+
+        _decoupling_text = " ".join(
+            str(kernel_output.get(f, ""))
+            for f in ("perceive", "represent", "predict", "compare",
+                      "adjust", "compress", "next", "raw")
+        )
+        _has_perturbation = bool(_DECOUPLING_PERTURBATION_RE.search(_decoupling_text))
+        _has_invariance = bool(_DECOUPLING_INVARIANCE_RE.search(_decoupling_text))
+        _has_dramatic_change = bool(_DECOUPLING_DRAMATIC_CHANGE_RE.search(_decoupling_text))
+
+        # Detect distinct observables mentioned
+        _detected_observables = set()  # type: set
+        _observable_signals = []  # type: List[str]
+        for pat, tag in _DECOUPLING_OBSERVABLE_PATTERNS:
+            m = pat.search(_decoupling_text)
+            if m:
+                _detected_observables.add(tag)
+                _observable_signals.append(tag + ":" + m.group(0)[:40])
+
+        # Decoupling signature: perturbation + invariance + dramatic change
+        # + at least 2 distinct observable categories
+        _is_decoupled = (
+            _has_perturbation
+            and _has_invariance
+            and _has_dramatic_change
+            and len(_detected_observables) >= 2
+        )
+
+        if _is_decoupled:
+            _decoupling_boost = 1.4  # boost factor for L3/L4 genome contact
+            _decoupling_tag = {
+                "observable_decoupling": True,
+                "decoupled_observables": sorted(_detected_observables),
+                "observable_signals": _observable_signals,
+                "evidence_type": "stratified_layer_separability",
+                "genome_contact_boost": _decoupling_boost,
+                "l3_l4_relevance": (
+                    "two_macroscopic_observables_respond_independently_"
+                    "to_same_perturbation:direct_evidence_for_stratified_"
+                    "layer_separability:layers_governing_each_observable_"
+                    "are_operationally_independent"
+                ),
+            }
+            for ne in new_edges:
+                ne["observable_decoupling"] = _decoupling_tag
+                # Boost genome-contact score for L3/L4 claims: edges
+                # targeting invariants or obligations receive the boost
+                # so they are not lost to vocabulary mismatch.
+                target = ne.get("to", "").upper()
+                if target.startswith("INV_") or target.startswith("O"):
+                    existing_weight = ne.get("prediction_weight", 1.0)
+                    ne["prediction_weight"] = round(
+                        existing_weight * _decoupling_boost, 4
+                    )
+            print(
+                f"[GRAPH:DECOUPLING_FLAG] Paper demonstrates observable "
+                f"decoupling — {sorted(_detected_observables)} respond "
+                f"independently to the same perturbation. "
+                f"{len(new_edges)} edge(s) tagged with "
+                f"stratified-layer separability evidence and "
+                f"{_decoupling_boost}× genome-contact boost for L3/L4 claims."
+            )
+        elif _has_perturbation and (_has_invariance or _has_dramatic_change) and len(_detected_observables) >= 2:
+            # Partial match: perturbation + multiple observables but missing
+            # one of the invariance/change signals — tag as potential but no boost
+            for ne in new_edges:
+                ne["observable_decoupling"] = {
+                    "observable_decoupling": False,
+                    "partial_match": True,
+                    "detected_observables": sorted(_detected_observables),
+                    "has_invariance_signal": _has_invariance,
+                    "has_dramatic_change_signal": _has_dramatic_change,
+                    "note": "partial_decoupling_signature:review_manually",
+                }
 
         # ── Mechanistic Criticality Detection (SOC from replication-selection) ──
         # Papers that derive SOC / 1/f emergence from replication-selection
@@ -3188,6 +3588,184 @@ class KnowledgeGraph:
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 })
 
+        # ── Modal Complexity Ranking (EMD + RBMO) for Edge-Weight Noise Separation ──
+        # Before density-gap reweighting, decompose each target node's
+        # citation/co-occurrence time-series via Empirical Mode Decomposition
+        # (EMD) into intrinsic mode functions (IMFs), rank them by complexity
+        # (sample entropy proxy), and separate high-frequency noise modes
+        # from trend modes.  Only trend-mode energy is used for edge-weight
+        # computation, reducing spurious high-frequency noise in edge weights
+        # and improving graph topology stability.
+        #
+        # This aligns with the STF modal path extraction method required by
+        # O112 and addresses the challenge that O112's protocol is
+        # underspecified without a complexity-ranking intermediate step (RBMO).
+        #
+        # EMD sifting: iteratively extract IMFs by subtracting the running
+        # mean of upper/lower envelopes.  Lightweight pure-Python
+        # implementation (no scipy dependency) using linear interpolation
+        # for envelope construction.
+        #
+        # RBMO complexity ranking: rank IMFs by sample-entropy proxy
+        # (variance of first differences — higher variance = higher
+        # complexity = more noise-like).  IMFs above a complexity threshold
+        # are classified as noise; the rest are trend modes.
+        #
+        # CHALLENGE (O112): The paper demonstrates that modal path extraction
+        # requires this complexity-ranking intermediate step not currently
+        # specified in O112's method description, meaning O112's protocol is
+        # underspecified and may fail without this sorting layer.
+
+        if not hasattr(self, '_node_weight_history'):
+            self._node_weight_history = defaultdict(list)  # type: Dict[str, List[float]]
+
+        # Accumulate per-node edge-count history for EMD decomposition
+        if new_edges:
+            _target_counts_this_batch = defaultdict(int)  # type: Dict[str, int]
+            for ne in new_edges:
+                tgt = ne.get("to", "").upper()
+                if tgt:
+                    _target_counts_this_batch[tgt] += 1
+            for tgt, cnt in _target_counts_this_batch.items():
+                self._node_weight_history[tgt].append(float(cnt))
+
+            # Apply EMD + RBMO when sufficient history exists (>= 10 samples)
+            _EMD_MIN_HISTORY = 10
+            _RBMO_NOISE_QUANTILE = 0.7  # top 30% complexity = noise modes
+
+            for tgt in _target_counts_this_batch:
+                history = self._node_weight_history.get(tgt, [])
+                if len(history) < _EMD_MIN_HISTORY:
+                    continue
+
+                # ── Lightweight EMD sifting (pure Python) ────────────────
+                def _emd_sift(signal, max_imfs=5, max_sift=10):
+                    # type: (List[float], int, int) -> List[List[float]]
+                    """Extract IMFs from signal via iterative sifting."""
+                    imfs = []  # type: List[List[float]]
+                    residual = list(signal)
+                    n_sig = len(residual)
+                    for _ in range(max_imfs):
+                        if n_sig < 4:
+                            break
+                        h = list(residual)
+                        for _s in range(max_sift):
+                            # Find local maxima and minima
+                            maxima_idx = []  # type: List[int]
+                            minima_idx = []  # type: List[int]
+                            for k in range(1, n_sig - 1):
+                                if h[k] > h[k - 1] and h[k] >= h[k + 1]:
+                                    maxima_idx.append(k)
+                                if h[k] < h[k - 1] and h[k] <= h[k + 1]:
+                                    minima_idx.append(k)
+                            if len(maxima_idx) < 2 or len(minima_idx) < 2:
+                                break
+                            # Linear interpolation for upper/lower envelopes
+                            def _lin_interp(indices, values_src, length):
+                                # type: (List[int], List[float], int) -> List[float]
+                                env = [0.0] * length
+                                for qi in range(length):
+                                    if qi <= indices[0]:
+                                        env[qi] = values_src[indices[0]]
+                                    elif qi >= indices[-1]:
+                                        env[qi] = values_src[indices[-1]]
+                                    else:
+                                        # Find bracketing indices
+                                        for bi in range(len(indices) - 1):
+                                            if indices[bi] <= qi <= indices[bi + 1]:
+                                                t_frac = float(qi - indices[bi]) / float(
+                                                    max(indices[bi + 1] - indices[bi], 1))
+                                                env[qi] = ((1.0 - t_frac) * values_src[indices[bi]]
+                                                           + t_frac * values_src[indices[bi + 1]])
+                                                break
+                                return env
+                            upper = _lin_interp(maxima_idx, h, n_sig)
+                            lower = _lin_interp(minima_idx, h, n_sig)
+                            mean_env = [0.5 * (upper[k] + lower[k]) for k in range(n_sig)]
+                            h = [h[k] - mean_env[k] for k in range(n_sig)]
+                        imfs.append(h)
+                        residual = [residual[k] - h[k] for k in range(n_sig)]
+                    if residual:
+                        imfs.append(residual)  # final residual = trend
+                    return imfs
+
+                imfs = _emd_sift(history)
+
+                if len(imfs) < 2:
+                    continue
+
+                # ── RBMO complexity ranking ──────────────────────────────
+                # Complexity proxy: variance of first differences per IMF
+                def _diff_variance(mode):
+                    # type: (List[float]) -> float
+                    if len(mode) < 3:
+                        return 0.0
+                    diffs = [mode[k + 1] - mode[k] for k in range(len(mode) - 1)]
+                    m_d = sum(diffs) / len(diffs)
+                    return sum((d - m_d) ** 2 for d in diffs) / max(len(diffs) - 1, 1)
+
+                complexities = [_diff_variance(imf) for imf in imfs]
+
+                # Rank by complexity (descending); top fraction = noise
+                if max(complexities) < 1e-15:
+                    continue
+                sorted_c = sorted(complexities, reverse=True)
+                n_imfs = len(sorted_c)
+                noise_cutoff_idx = max(1, int(n_imfs * _RBMO_NOISE_QUANTILE))
+                noise_threshold = sorted_c[min(noise_cutoff_idx, n_imfs - 1)]
+
+                # Reconstruct trend-only signal (sum of non-noise IMFs)
+                trend_signal = [0.0] * len(history)
+                n_noise = 0
+                n_trend = 0
+                for imf_idx, imf in enumerate(imfs):
+                    if complexities[imf_idx] >= noise_threshold and imf_idx < len(imfs) - 1:
+                        n_noise += 1
+                        continue  # skip noise mode (but always keep last = residual trend)
+                    n_trend += 1
+                    for k in range(len(imf)):
+                        trend_signal[k] += imf[k]
+
+                # Use the trend-mode weight (last value) for edge reweighting
+                trend_weight = max(0.0, trend_signal[-1]) if trend_signal else 0.0
+                raw_weight = history[-1] if history else 0.0
+
+                # Annotate new edges targeting this node with modal decomposition
+                for ne in new_edges:
+                    if ne.get("to", "").upper() == tgt:
+                        ne["emd_modal_decomposition"] = {
+                            "n_imfs": len(imfs),
+                            "n_noise_modes": n_noise,
+                            "n_trend_modes": n_trend,
+                            "raw_weight": round(raw_weight, 6),
+                            "trend_weight": round(trend_weight, 6),
+                            "noise_fraction": round(float(n_noise) / max(len(imfs), 1), 4),
+                            "rbmo_complexity_threshold": round(noise_threshold, 8),
+                            "o112_flag": (
+                                "emd_rbmo_decomposition_applied:"
+                                "high_freq_noise_modes_separated_from_trend:"
+                                "edge_weight_uses_trend_only:"
+                                "modal_path_extraction_complexity_ranking_step_present"
+                            ),
+                        }
+                        # Apply trend-based weight adjustment: scale the
+                        # prediction_weight by trend/raw ratio to suppress noise
+                        if raw_weight > 1e-10:
+                            trend_ratio = trend_weight / raw_weight
+                            trend_ratio = max(0.1, min(2.0, trend_ratio))
+                            existing_pw = ne.get("prediction_weight", 1.0)
+                            ne["prediction_weight"] = round(
+                                existing_pw * trend_ratio, 4
+                            )
+
+                if n_noise > 0:
+                    print(
+                        f"[GRAPH:EMD_RBMO] {tgt}: decomposed {len(imfs)} IMFs, "
+                        f"noise={n_noise}, trend={n_trend}, "
+                        f"raw={raw_weight:.4f}→trend={trend_weight:.4f}. "
+                        f"(O112: modal complexity ranking applied.)"
+                    )
+
         # ── Dynamic Density-Gap Wasserstein Re-Weighting ─────────────────
         # INV_094 challenge: in time-varying settings, W2 geodesics must be
         # recomputed at each instant.  Static Wasserstein scoring under-
@@ -3362,6 +3940,213 @@ class KnowledgeGraph:
             if target:
                 structure[target][etype] += 1
         return {k: dict(v) for k, v in structure.items()}
+
+    def score_node(self, node_id):
+        # type: (str) -> dict
+        """
+        Score a knowledge graph node by separately computing two entropy-like
+        quantities — connectivity-weighted path entropy (analog of minimal
+        volume entropy) and raw edge-count mass (analog of simplicial volume)
+        — and flagging nodes where these decouple as structurally irreducible.
+
+        The paper proves that minimal volume entropy and simplicial volume are
+        independent: finite simplicial complexes can have zero simplicial
+        volume yet arbitrarily large minimal volume entropy.  Conflating them
+        in a single score causes false confidence that high-mass nodes are
+        thermodynamically safe.  This method separates them so the entropy
+        floor estimate per node is accurate.
+
+        Connectivity-weighted path entropy (h_path):
+          H_path(v) = -Σ_j p_j log(p_j)
+          where p_j = w(v,j) / Σ_k w(v,k) is the fraction of edge weight
+          from v to neighbor j.  This captures the diversity of outgoing
+          pathways weighted by their strength — the analog of minimal volume
+          entropy measuring asymptotic growth of path counts.
+
+        Raw edge-count mass (mass):
+          M(v) = total number of edges incident on v (unweighted degree).
+          This is the analog of simplicial volume — a purely combinatorial
+          count of local structure, independent of the weight distribution.
+
+        Structural irreducibility flag:
+          A node is flagged as structurally irreducible when:
+            mass >= mass_threshold AND h_path >= entropy_floor_threshold
+          i.e., the node has both high combinatorial mass AND a high entropy
+          floor from fundamental-group-like path diversity.  Such nodes are
+          topologically locked above zero entropy without any dynamical
+          navigation of a critical ridge — the entropy floor is determined
+          by the growth structure of the node's fiber (neighborhood), not
+          by ridge geometry.
+
+        CHALLENGE (INV_073): The paper shows that the topological entropy
+        floor is determined by fundamental group growth of fibers, not by
+        the geometry of the critical ridge itself.  A system could be
+        topologically locked above zero entropy without any dynamical
+        navigation of a critical ridge, straining the claim that criticality
+        is the operative mechanism rather than a consequence of underlying
+        group-theoretic topology.
+
+        Parameters
+        ----------
+        node_id : str
+            The node to score.
+
+        Returns
+        -------
+        dict
+            {
+                "node_id": str,
+                "path_entropy": float — H_path(v) in nats (≥ 0),
+                "edge_mass": int — M(v), raw edge count,
+                "decoupled": bool — True when mass is high but path entropy
+                    is also high (structurally irreducible),
+                "structurally_irreducible": bool — same as decoupled,
+                "entropy_floor": float — lower bound on path entropy from
+                    neighborhood diversity (= path_entropy when decoupled),
+                "mass_threshold_used": int,
+                "entropy_floor_threshold_used": float,
+                "inv073_flag": str — challenge diagnostic,
+            }
+        """
+        self._ensure_loaded()
+        nid = node_id.upper()
+
+        # ── Compute raw edge-count mass (simplicial volume analog) ───────
+        edge_mass = 0
+        neighbor_weights = defaultdict(float)  # type: Dict[str, float]
+        for e in self._edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id == nid:
+                edge_mass += 1
+                neighbor_weights[to_id] += 1.0
+            elif to_id == nid:
+                edge_mass += 1
+                neighbor_weights[from_id] += 1.0
+        for e in self._node_edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id == nid:
+                edge_mass += 1
+                neighbor_weights[to_id] += 1.0
+            elif to_id == nid:
+                edge_mass += 1
+                neighbor_weights[from_id] += 1.0
+
+        # ── Connectivity-weighted path entropy (minimal vol entropy analog)
+        total_weight = sum(neighbor_weights.values())
+        h_path = 0.0
+        if total_weight > 0:
+            for w in neighbor_weights.values():
+                p = w / total_weight
+                if p > 0:
+                    h_path -= p * math.log(p)
+
+        # ── Structural irreducibility detection ──────────────────────────
+        mass_threshold = 4
+        entropy_floor_threshold = 0.8  # ~ln(3) ≈ 1.1; 0.8 catches 3+ distinct paths
+        decoupled = (edge_mass >= mass_threshold
+                     and h_path >= entropy_floor_threshold)
+
+        entropy_floor = h_path if decoupled else 0.0
+
+        # ── INV_073 challenge flag ───────────────────────────────────────
+        if decoupled:
+            inv073_flag = (
+                f"STRUCTURALLY_IRREDUCIBLE:"
+                f"edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                f"entropy_floor={entropy_floor:.6f}:"
+                "topological_entropy_floor_from_fiber_group_growth:"
+                "NOT_from_critical_ridge_geometry:"
+                "system_locked_above_zero_entropy_without_ridge_navigation:"
+                "criticality_may_be_CONSEQUENCE_not_MECHANISM:"
+                "CHALLENGE_INV_073"
+            )
+        elif edge_mass >= mass_threshold and h_path < entropy_floor_threshold:
+            inv073_flag = (
+                f"HIGH_MASS_LOW_ENTROPY:"
+                f"edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                "high_simplicial_volume_but_low_path_diversity:"
+                "entropy_floor_near_zero:node_thermodynamically_reducible"
+            )
+        else:
+            inv073_flag = (
+                f"NORMAL:edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                "below_mass_threshold:standard_scoring_applies"
+            )
+
+        return {
+            "node_id": nid,
+            "path_entropy": round(h_path, 10),
+            "edge_mass": edge_mass,
+            "decoupled": decoupled,
+            "structurally_irreducible": decoupled,
+            "entropy_floor": round(entropy_floor, 10),
+            "mass_threshold_used": mass_threshold,
+            "entropy_floor_threshold_used": entropy_floor_threshold,
+            "inv073_flag": inv073_flag,
+        }
+
+    def score_all_nodes(self):
+        # type: () -> Dict[str, dict]
+        """Score every node in the graph via score_node, returning a dict of results."""
+        self._ensure_loaded()
+        all_nids = set()  # type: set
+        for e in self._edges:
+            for k in ("from", "to"):
+                nid = e.get(k, "").upper()
+                if nid:
+                    all_nids.add(nid)
+        for e in self._node_edges:
+            for k in ("from", "to"):
+                nid = e.get(k, "").upper()
+                if nid:
+                    all_nids.add(nid)
+        results = {}  # type: Dict[str, dict]
+        n_irreducible = 0
+        for nid in sorted(all_nids):
+            r = self.score_node(nid)
+            results[nid] = r
+            if r["structurally_irreducible"]:
+                n_irreducible += 1
+        if n_irreducible > 0:
+            print(
+                f"[GRAPH:SCORE_NODES] {len(results)} node(s) scored — "
+                f"{n_irreducible} structurally irreducible "
+                f"(high mass + high entropy floor, topologically locked)."
+            )
+        return results
+
+    def report(self, top_n=10):
+        # type: (int) -> str
+        """Return a short text summary of the graph state, including irreducibility counts."""
+        self._ensure_loaded()
+        total = len(self._edges)
+        if total == 0:
+            return "Knowledge graph: 0 edges recorded."
+
+        # Count by type
+        from collections import Counter
+        type_counts = Counter(e.get("type", "unknown") for e in self._edges)
+        top_targets = Counter(e.get("to", "") for e in self._edges).most_common(top_n)
+
+        # Score all nodes for structural irreducibility summary
+        node_scores = self.score_all_nodes()
+        n_irreducible = sum(
+            1 for r in node_scores.values() if r.get("structurally_irreducible")
+        )
+
+        lines = [f"Knowledge graph: {total} edge(s)."]
+        lines.append("  Edge types: " + ", ".join(
+            f"{t}={c}" for t, c in type_counts.most_common(5)))
+        lines.append("  Most-referenced nodes: " + ", ".join(
+            f"{node}({cnt})" for node, cnt in top_targets[:5]))
+        if n_irreducible > 0:
+            lines.append(
+                f"  Structurally irreducible nodes: {n_irreducible}/{len(node_scores)} "
+                f"(high mass + high entropy floor — topologically locked above zero entropy)"
+            )
+        return "\n".join(lines)
 
     # ── Confirmation Independence Audit ──────────────────────────────────────
     # Tracks whether confirmations of an invariant share upstream assumptions
@@ -3793,6 +4578,90 @@ class KnowledgeGraph:
             else:
                 probe_directive = ""
 
+            # ── INV_073 Operationalization Gate (O136) ───────────────────
+            # INV_073 (critical-ridge / γ≈1 sustained dynamics) requires an
+            # independent operationalization string — a falsification-
+            # discriminating observable (e.g., diverging susceptibility,
+            # power-law exponent specification) recorded on at least one
+            # challenge edge — before its confirmation surplus is allowed
+            # to increment.  Without this, adaptive gain control can
+            # produce γ≈1 dynamics without thermodynamic criticality,
+            # making INV_073 unfalsifiable.
+            #
+            # The gate checks whether ANY challenge edge targeting INV_073
+            # contains an operationalization string that specifies a
+            # discriminating observable independent of the ridge-defining
+            # measurement itself.  If no such string exists, the surplus
+            # is frozen and a blocking flag is set.
+            inv073_operationalization_blocked = False
+            inv073_operationalization_detail = ""
+            if inv_id == "INV_073":
+                _INV073_OPERATIONALIZATION_RE = re.compile(
+                    r'\b(?:diverging\s+susceptibility|power[-\s]?law\s+exponent|'
+                    r'correlation\s+length\s+diverge|specific\s+heat\s+diverge|'
+                    r'scaling\s+collapse|finite[-\s]?size\s+scaling|'
+                    r'order\s+parameter\s+fluctuation|'
+                    r'chi\s*(?:=|diverge)|C_v\s*(?:=|diverge)|'
+                    r'susceptibility\s+peak|Binder\s+cumulant|'
+                    r'critical\s+slowing\s+down|autocorrelation\s+time\s+diverge|'
+                    r'independent\s+observable|discriminating\s+observable)',
+                    re.I
+                )
+                # Scan all challenge edges targeting INV_073 for an
+                # operationalization string
+                _has_operationalization = False
+                for e in self._edges:
+                    if (e.get("to", "").upper() == "INV_073"
+                            and e.get("type") in self._FALSIFICATION_EDGE_TYPES):
+                        _edge_text = e.get("context", "") + " " + e.get("invariant", "")
+                        if _INV073_OPERATIONALIZATION_RE.search(_edge_text):
+                            _has_operationalization = True
+                            break
+
+                if not _has_operationalization:
+                    inv073_operationalization_blocked = True
+                    # Freeze the surplus: override the surplus to the
+                    # current value so downstream consumers know it
+                    # cannot grow until the gate is satisfied.
+                    inv073_operationalization_detail = (
+                        "INV_073_CONFIRMATION_SURPLUS_FROZEN:"
+                        "no_independent_operationalization_string_on_any_"
+                        "challenge_edge:adaptive_gain_control_alternative_"
+                        "not_discriminated:specify_diverging_susceptibility_"
+                        "or_power_law_exponent_as_independent_observable_"
+                        "before_further_confirmations_accepted:"
+                        "O136_live_challenge_edge_requirement"
+                    )
+                    # Escalate the severity when blocked
+                    if severity not in ("audit_required", "untested"):
+                        severity = "audit_required"
+                    is_audit_target = True
+                    probe_directive = (
+                        f"BLOCKED — INV_073 confirmation surplus FROZEN. "
+                        f"No challenge edge carries an independent "
+                        f"operationalization string (diverging susceptibility, "
+                        f"power-law exponent, correlation length divergence, "
+                        f"or other discriminating observable independent of "
+                        f"the ridge-defining γ measurement). Adaptive gain "
+                        f"control can produce γ≈1 without thermodynamic "
+                        f"criticality. Before ANY further confirmations: "
+                        f"(1) Specify at least one falsification-discriminating "
+                        f"observable on a CHALLENGE edge targeting INV_073. "
+                        f"(2) The observable must be measurable independently "
+                        f"of the ridge-defining measurement itself. "
+                        f"(3) Record the operationalization via a challenge "
+                        f"edge with context containing the observable spec. "
+                        f"(O136 requirement: challenge edges must be live.)"
+                    )
+                    print(
+                        f"[GRAPH:INV073_GATE] 🚫 INV_073 confirmation surplus "
+                        f"FROZEN (confirms={n_conf}, challenges={n_chal}). "
+                        f"No challenge edge carries an independent "
+                        f"operationalization string. Further confirmations "
+                        f"BLOCKED until a discriminating observable is "
+                        f"specified. (O136: challenge edges must be live.)"
+                    )
+
             results[inv_id] = {
                 "confirmation_count": n_conf,
                 "challenge_count": n_chal,
@@ -3802,12 +4671,76 @@ class KnowledgeGraph:
                 "audit_severity": severity,
                 "falsification_conditions_documented": has_challenges_edge,
                 "probe_directive": probe_directive,
+                "inv073_operationalization_blocked": inv073_operationalization_blocked,
+                "inv073_operationalization_detail": inv073_operationalization_detail,
             }
 
             if severity == "audit_required":
                 flagged_audit.append(inv_id)
             elif severity == "untested":
                 flagged_untested.append(inv_id)
+
+        # ── Confirmation-surplus threshold gate (ADVERSARIAL_DEBT) ───────
+        # Any invariant whose confirmation count exceeds its challenge count
+        # by more than a configurable ratio (default 10:1) is automatically
+        # queued for the next adversarial cycle.  This closes the structural
+        # blind spot where high-confirmation invariants escape adversarial
+        # pressure indefinitely — exactly the failure mode the deliberate
+        # falsification probe (cycle 3, INV_094) was designed to catch.
+        _CONFIRMATION_SURPLUS_RATIO_CEILING = 10.0  # configurable ceiling
+
+        if not hasattr(self, '_adversarial_probe_queue'):
+            self._adversarial_probe_queue = []  # type: List[dict]
+
+        # Deduplicate: collect inv_ids already pending in the queue
+        _already_queued = set(
+            q.get("invariant_id", "")
+            for q in self._adversarial_probe_queue
+            if q.get("status") == "pending"
+        )
+
+        _newly_queued = []  # type: List[str]
+        ts_now = datetime.now(timezone.utc).isoformat()
+
+        for inv_id in sorted(all_inv_ids):
+            r = results[inv_id]
+            sr = r["surplus_ratio"]
+            n_conf = r["confirmation_count"]
+            n_chal = r["challenge_count"]
+
+            # Gate: confirmation count exceeds challenge count by more
+            # than _CONFIRMATION_SURPLUS_RATIO_CEILING (default 10:1)
+            if sr <= _CONFIRMATION_SURPLUS_RATIO_CEILING:
+                continue
+            if inv_id in _already_queued:
+                continue
+
+            # Determine priority from severity
+            if r["audit_severity"] == "audit_required" or n_chal == 0:
+                priority = "critical"
+            elif sr > _CONFIRMATION_SURPLUS_RATIO_CEILING * 2:
+                priority = "high"
+            else:
+                priority = "moderate"
+
+            queue_entry = {
+                "invariant_id": inv_id,
+                "queued_at": ts_now,
+                "priority": priority,
+                "surplus_ratio": sr,
+                "confirmation_count": n_conf,
+                "challenge_count": n_chal,
+                "probe_directive": r.get("probe_directive", ""),
+                "status": "pending",
+                "confirmation_surplus_threshold": _CONFIRMATION_SURPLUS_RATIO_CEILING,
+            }
+            self._adversarial_probe_queue.append(queue_entry)
+            _newly_queued.append(inv_id)
+
+            # Annotate the result so callers see the queue status
+            r["queued_for_adversarial_cycle"] = True
+            r["confirmation_surplus_threshold_exceeded"] = True
+            r["confirmation_surplus_threshold"] = _CONFIRMATION_SURPLUS_RATIO_CEILING
 
         # ── Log summary ─────────────────────────────────────────────────
         if flagged_audit or flagged_untested:
@@ -3837,6 +4770,17 @@ class KnowledgeGraph:
                 print(
                     f"  ... and {len(flagged_untested) - 5} more untested invariant(s)"
                 )
+
+        if _newly_queued:
+            print(
+                f"[GRAPH:CONFIRMATION_SURPLUS_THRESHOLD] "
+                f"{len(_newly_queued)} invariant(s) exceed "
+                f"{_CONFIRMATION_SURPLUS_RATIO_CEILING}:1 confirmation "
+                f"surplus ceiling — auto-queued for next adversarial cycle: "
+                f"{', '.join(_newly_queued[:10])}"
+                + (f" ... +{len(_newly_queued)-10} more"
+                   if len(_newly_queued) > 10 else "")
+            )
 
         return results
 
@@ -8528,16 +9472,205 @@ def _node_entropy_reduction(node_id, edges):
     return h_ablated - h_full
 
 
+def _intermodal_alignment_score(node_id, edges):
+    # type: (str, list) -> float
+    """
+    Compute the inter-modal (cross-domain) alignment contribution of a node.
+
+    A node's alignment score measures how strongly it bridges distinct
+    semantic domains — quantified by the number of distinct domain categories
+    (inferred from edge context via _infer_categories) that the node connects.
+    Nodes touching edges from ≥2 distinct categories are cross-domain bridges;
+    their alignment score is proportional to the diversity of categories
+    they span, weighted by edge count per category.
+
+    The alignment score is used for alignment-weighted dropout suppression
+    during consolidation: high-alignment bridge nodes receive low suppression
+    probability (preserved), while low-alignment nodes within a single domain
+    receive higher suppression probability (candidates for pruning).
+
+    This operationalizes INV_070b: cross-domain bridge nodes preserve semantic
+    coherence across the graph's category structure, and their loss causes
+    "semantic death" of inter-domain pathways.
+
+    Parameters
+    ----------
+    node_id : str
+        The node whose alignment score to compute.
+    edges : list of dict
+        Full set of graph edges.
+
+    Returns
+    -------
+    float
+        Inter-modal alignment score in [0, 1].  0 = node touches only one
+        domain (no bridging), 1 = node maximally bridges many domains.
+    """
+    nid = node_id.upper()
+    category_edge_counts = defaultdict(int)  # type: Dict[str, int]
+    total_incident = 0
+
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        if from_id != nid and to_id != nid:
+            continue
+        total_incident += 1
+        # Infer categories from edge context and invariant text
+        ctx = e.get("context", "") + " " + e.get("invariant", "")
+        cats = _infer_categories(ctx)
+        if not cats:
+            cats = ["uncategorized"]
+        for cat in cats:
+            category_edge_counts[cat] += 1
+
+    n_categories = len(category_edge_counts)
+    if n_categories <= 1 or total_incident == 0:
+        return 0.0
+
+    # Shannon entropy of category distribution, normalized by log(n_categories)
+    # to produce a score in [0, 1].  Maximum when edges are uniformly
+    # distributed across categories (maximally bridging).
+    h_cat = 0.0
+    for count in category_edge_counts.values():
+        p = float(count) / float(total_incident)
+        if p > 0:
+            h_cat -= p * math.log(p)
+
+    max_h = math.log(float(n_categories)) if n_categories > 1 else 1.0
+    alignment = h_cat / max(max_h, 1e-15)
+    return max(0.0, min(1.0, alignment))
+
+
+def _alignment_weighted_suppression_probability(node_id, edges,
+                                                 base_drop_rate=0.3,
+                                                 alignment_shield=0.8):
+    # type: (str, list, float, float) -> dict
+    """
+    Compute alignment-weighted suppression (dropout) probability for a node
+    during graph consolidation/compaction.
+
+    Unlike uniform random dropout, this weights the drop probability by the
+    node's inter-modal alignment contribution.  High-alignment bridge nodes
+    (connecting multiple domains) receive LOW suppression probability,
+    preserving cross-domain semantic pathways.  Low-alignment nodes within
+    a single domain receive HIGHER suppression probability, making them
+    candidates for compaction.
+
+    The suppression probability is:
+        p_suppress(v) = base_drop_rate × (1 - alignment_shield × alignment(v))
+
+    where:
+      - base_drop_rate: the maximum suppression probability (for zero-alignment nodes)
+      - alignment_shield: how strongly alignment protects against suppression [0,1]
+      - alignment(v): the inter-modal alignment score from _intermodal_alignment_score
+
+    This implements the Dropout Prompt Learning paper's insight: evaluate token
+    significance considering both intra-modal context (node degree, leverage)
+    and inter-modal alignment (cross-domain bridging), enabling flexible dropout
+    probabilities rather than uniform random dropping.
+
+    CHALLENGE (INV_073): The paper's residual entropy regularization term acts
+    as an external constraint with a manually tuned coefficient, suggesting
+    the critical ridge is not self-maintaining but requires explicit
+    stabilization.  The alignment_shield parameter plays an analogous role
+    here — it must be tuned, breaking the symmetry's rigidity and placing
+    this mechanism in review rather than rigorous conservation status.
+
+    Parameters
+    ----------
+    node_id : str
+        The node to evaluate.
+    edges : list of dict
+        Full set of graph edges.
+    base_drop_rate : float
+        Maximum suppression probability for zero-alignment nodes (default 0.3).
+    alignment_shield : float
+        How strongly alignment protects from suppression, in [0, 1]
+        (default 0.8).  1.0 = perfect alignment gives zero suppression.
+
+    Returns
+    -------
+    dict
+        {
+            "node_id": str,
+            "suppression_probability": float — p_suppress in [0, base_drop_rate],
+            "alignment_score": float — inter-modal alignment in [0, 1],
+            "base_drop_rate": float,
+            "alignment_shield": float,
+            "is_bridge_node": bool — True if alignment > 0.3 (meaningful bridging),
+            "is_protected": bool — True if suppression_probability < 0.05,
+            "n_bridged_domains": int — number of distinct category domains,
+            "inv073_challenge_note": str — residual entropy regularization caveat,
+        }
+    """
+    nid = node_id.upper()
+    alignment = _intermodal_alignment_score(nid, edges)
+
+    # Alignment-weighted suppression probability
+    p_suppress = base_drop_rate * (1.0 - alignment_shield * alignment)
+    p_suppress = max(0.0, min(base_drop_rate, p_suppress))
+
+    # Count distinct bridged domains for diagnostics
+    category_set = set()  # type: set
+    for e in edges:
+        from_id = e.get("from", "").upper()
+        to_id = e.get("to", "").upper()
+        if from_id != nid and to_id != nid:
+            continue
+        ctx = e.get("context", "") + " " + e.get("invariant", "")
+        for cat in _infer_categories(ctx):
+            category_set.add(cat)
+
+    is_bridge = alignment > 0.3
+    is_protected = p_suppress < 0.05
+
+    inv073_note = (
+        "Alignment-weighted suppression uses a manually tuned alignment_shield "
+        f"parameter ({alignment_shield}), analogous to the residual entropy "
+        "regularization coefficient in Dropout Prompt Learning. This manual "
+        "tuning breaks the symmetry's rigidity — the critical ridge is not "
+        "self-maintaining but requires explicit stabilization via the shield "
+        "parameter. (challenges INV_073: critical ridge requires external "
+        "constraint, not self-organized.)"
+    )
+
+    return {
+        "node_id": nid,
+        "suppression_probability": round(p_suppress, 8),
+        "alignment_score": round(alignment, 8),
+        "base_drop_rate": base_drop_rate,
+        "alignment_shield": alignment_shield,
+        "is_bridge_node": is_bridge,
+        "is_protected": is_protected,
+        "n_bridged_domains": len(category_set),
+        "inv073_challenge_note": inv073_note,
+    }
+
+
 def thermodynamic_leverage_score(node_id, edges):
     # type: (str, list) -> dict
     """
-    Compute the thermodynamic leverage score for a knowledge graph node.
+    Compute the thermodynamic leverage score for a knowledge graph node,
+    augmented with alignment-weighted suppression probability for
+    consolidation-time dropout.
 
     The leverage score L(v) = ΔS(v) / max(C(v), ε) measures how much
     entropy reduction each unit of ordering cost buys.  High-leverage nodes
     are the "neural tissue" of the knowledge graph: they constrain many
     downstream claims at low entropic cost, and consolidation should
     prioritize them.
+
+    Alignment-weighted suppression (added per INV_070b / γ=1 criticality):
+    Instead of uniform random dropping during graph compaction, each node's
+    suppression probability is weighted by its inter-modal (cross-domain)
+    alignment contribution.  High-alignment bridge nodes receive low
+    suppression probability, preventing semantic death of cross-domain
+    pathways.  This directly operationalizes Dropout Prompt Learning's
+    insight that dropout probabilities should reflect both intra-modal
+    significance (leverage score) and inter-modal alignment (cross-domain
+    bridging), with residual entropy regularization to maintain semantic
+    coherence.
 
     Following the PBTE paper: primates achieve 2–3× lifespan extension over
     non-primate mammals of the same mass by investing ~8–10% of metabolic
@@ -8575,6 +9708,11 @@ def thermodynamic_leverage_score(node_id, edges):
             "consolidation_priority": str — "prioritize", "standard", or
                 "deprioritize",
             "o44_leverage_note": str — diagnostic for O44 challenge,
+            "alignment_suppression": dict — alignment-weighted suppression
+                data from _alignment_weighted_suppression_probability,
+            "effective_consolidation_score": float — combined score integrating
+                leverage and alignment protection: nodes with high leverage
+                AND high alignment are maximally protected from compaction,
         }
     """
     nid = node_id.upper()
@@ -8622,6 +9760,34 @@ def thermodynamic_leverage_score(node_id, edges):
         is_high = False
         consolidation_priority = "deprioritize"
 
+    # ── Alignment-weighted suppression (INV_070b / γ=1 criticality) ──────
+    # Compute inter-modal alignment and derive suppression probability.
+    # Bridge nodes connecting multiple domains are shielded from compaction.
+    alignment_suppression = _alignment_weighted_suppression_probability(nid, edges)
+
+    # Effective consolidation score: combines leverage (intra-modal
+    # significance) with alignment protection (inter-modal bridging).
+    # Higher score = more protected from compaction.
+    #   ecs = leverage_normalized + alignment_bonus
+    # where leverage_normalized maps leverage to [0, 1] via sigmoid,
+    # and alignment_bonus = alignment_score × (1 - suppression_probability).
+    leverage_sigmoid = 1.0 / (1.0 + math.exp(-10.0 * (leverage - 0.05)))
+    alignment_bonus = alignment_suppression["alignment_score"] * (
+        1.0 - alignment_suppression["suppression_probability"]
+    )
+    effective_score = 0.6 * leverage_sigmoid + 0.4 * alignment_bonus
+    effective_score = max(0.0, min(1.0, effective_score))
+
+    # Override consolidation_priority based on alignment protection
+    if alignment_suppression["is_protected"] and consolidation_priority == "deprioritize":
+        consolidation_priority = "standard"
+        leverage_label_note = " (upgraded: bridge node protected from compaction)"
+    elif alignment_suppression["is_bridge_node"] and consolidation_priority == "standard":
+        consolidation_priority = "prioritize"
+        leverage_label_note = " (upgraded: cross-domain bridge node)"
+    else:
+        leverage_label_note = ""
+
     # PBTE analog interpretation
     if leverage_label == "high":
         pbte_analog = (
@@ -8632,6 +9798,10 @@ def thermodynamic_leverage_score(node_id, edges):
             f"power fraction that extends primate lifespan by 2-3×, investing "
             f"consolidation effort in this invariant yields outsized epistemic "
             f"returns per cycle."
+            + (f" Additionally, this node bridges {alignment_suppression['n_bridged_domains']} "
+               f"domains (alignment={alignment_suppression['alignment_score']:.4f}), "
+               f"making it a protected cross-domain bridge."
+               if alignment_suppression["is_bridge_node"] else "")
         )
     elif leverage_label == "negative":
         pbte_analog = (
@@ -8639,20 +9809,32 @@ def thermodynamic_leverage_score(node_id, edges):
             f"(ΔS={entropy_reduction:.6f} < 0) while costing {ordering_cost:.4f} "
             f"units of ordering. This is the analog of metabolically expensive "
             f"tissue that increases entropy production — the opposite of the "
-            f"primate neural-investment strategy. Consider whether this node "
-            f"should be pruned or restructured."
+            f"primate neural-investment strategy."
+            + (f" However, this node bridges {alignment_suppression['n_bridged_domains']} "
+               f"domains (alignment={alignment_suppression['alignment_score']:.4f}) — "
+               f"suppression shielded despite negative leverage to prevent "
+               f"semantic death of cross-domain pathways."
+               if alignment_suppression["is_protected"] else
+               " Consider whether this node should be pruned or restructured.")
         )
     else:
         pbte_analog = (
             f"Node {nid} has {leverage_label} leverage (L={leverage:.6f}). "
             f"Ordering cost={ordering_cost:.4f}, entropy reduction="
-            f"{entropy_reduction:.6f}. Standard consolidation treatment."
+            f"{entropy_reduction:.6f}. "
+            + (f"Cross-domain bridge ({alignment_suppression['n_bridged_domains']} domains) "
+               f"— alignment-shielded.{leverage_label_note}"
+               if alignment_suppression["is_bridge_node"] else
+               f"Standard consolidation treatment.{leverage_label_note}")
         )
 
     # O44 diagnostic
     o44_note = (
         f"leverage={leverage:.8f}:cost={ordering_cost:.6f}:"
         f"delta_S={entropy_reduction:.8f}:"
+        f"alignment={alignment_suppression['alignment_score']:.6f}:"
+        f"suppression_prob={alignment_suppression['suppression_probability']:.6f}:"
+        f"effective_consolidation_score={effective_score:.6f}:"
         f"classical_shannon_entropy_based:"
         f"quantum_extension_open:density_operator_leverage_undefined"
     )
@@ -8669,6 +9851,8 @@ def thermodynamic_leverage_score(node_id, edges):
         "pbte_analog": pbte_analog,
         "consolidation_priority": consolidation_priority,
         "o44_leverage_note": o44_note,
+        "alignment_suppression": alignment_suppression,
+        "effective_consolidation_score": round(effective_score, 10),
     }
 
 

@@ -106,6 +106,99 @@ def _write_game_of_life():
     pass  # CA moved to FREED-CA repo — do not write game_of_life.html here
 
 
+def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
+    """Extract branching-ratio σ, power-law exponent α, and derive a
+    machine-readable criticality_verdict from a CA telemetry snapshot.
+
+    Returns a dict with keys: branching_ratio, branching_ratio_err,
+    shannon_entropy, avalanche_exponent, power_law_r2, survival_rate,
+    criticality_verdict.  Empty dict when no telemetry is available.
+    """
+    if not ca_telemetry:
+        return {}
+
+    sigma = ca_telemetry.get("branching_ratio")
+    sigma_err = ca_telemetry.get("branching_ratio_err", 0.0)
+    alpha = ca_telemetry.get("power_law_exponent") or ca_telemetry.get("avalanche_exponent")
+    r2 = ca_telemetry.get("power_law_r2")
+    entropy = ca_telemetry.get("shannon_entropy")
+    survival = ca_telemetry.get("survival_rate")
+
+    # Derive verdict from JOINT evidence: σ band AND α power-law exponent.
+    # σ critical band: [1.0 − 0.05, 1.0 + 0.05]
+    # α expected range for SOC: [2.0, 3.0] with power-law R² > 0.7
+    # Verdict is falsifiable per-generation: both must agree for AT_CRITICAL.
+    sigma_verdict = None
+    if sigma is not None:
+        try:
+            s = float(sigma)
+            if abs(s - 1.0) <= 0.05:
+                sigma_verdict = "AT_CRITICAL"
+            elif s > 1.05:
+                sigma_verdict = "SUPERCRITICAL"
+            else:
+                sigma_verdict = "SUBCRITICAL"
+        except (TypeError, ValueError):
+            sigma_verdict = "UNKNOWN"
+
+    alpha_verdict = None
+    if alpha is not None and r2 is not None:
+        try:
+            a = float(alpha)
+            r2_val = float(r2)
+            if 2.0 <= a <= 3.0 and r2_val > 0.7:
+                alpha_verdict = "POWER_LAW_CONFIRMED"
+            elif r2_val <= 0.7:
+                alpha_verdict = "POWER_LAW_WEAK"
+            else:
+                alpha_verdict = "POWER_LAW_OUT_OF_BAND"
+        except (TypeError, ValueError):
+            alpha_verdict = "UNKNOWN"
+
+    # Joint verdict: AT_CRITICAL requires BOTH σ in band AND α confirmed
+    verdict = None
+    verdict_basis = []
+    if sigma_verdict is not None:
+        verdict_basis.append("sigma=" + sigma_verdict)
+    if alpha_verdict is not None:
+        verdict_basis.append("alpha=" + alpha_verdict)
+
+    if sigma_verdict == "AT_CRITICAL" and alpha_verdict == "POWER_LAW_CONFIRMED":
+        verdict = "AT_CRITICAL"
+    elif sigma_verdict == "AT_CRITICAL" and alpha_verdict is None:
+        verdict = "AT_CRITICAL_SIGMA_ONLY"
+    elif sigma_verdict == "SUPERCRITICAL":
+        verdict = "SUPERCRITICAL"
+    elif sigma_verdict == "SUBCRITICAL":
+        verdict = "SUBCRITICAL"
+    elif sigma_verdict == "AT_CRITICAL" and alpha_verdict in ("POWER_LAW_WEAK", "POWER_LAW_OUT_OF_BAND"):
+        verdict = "CRITICAL_CONTESTED"
+    elif sigma_verdict is not None:
+        verdict = sigma_verdict
+    # If only α available (no σ), still record
+    elif alpha_verdict is not None:
+        verdict = "ALPHA_ONLY_" + alpha_verdict
+
+    result = {}
+    if sigma is not None:
+        result["branching_ratio"] = sigma
+    if sigma_err:
+        result["branching_ratio_err"] = sigma_err
+    if entropy is not None:
+        result["shannon_entropy"] = entropy
+    if alpha is not None:
+        result["avalanche_exponent"] = alpha
+    if r2 is not None:
+        result["power_law_r2"] = r2
+    if survival is not None:
+        result["survival_rate"] = survival
+    if verdict is not None:
+        result["criticality_verdict"] = verdict
+    if verdict_basis:
+        result["verdict_basis"] = verdict_basis
+    return result
+
+
 def _write_cycles(cycle_log: dict):
     """Append the latest cycle to the rolling log."""
     if not cycle_log:
@@ -114,6 +207,10 @@ def _write_cycles(cycle_log: dict):
     existing = []
     if CYCLES_LOG.exists():
         existing = json.loads(CYCLES_LOG.read_text())
+
+    # Extract CA criticality metrics when telemetry is present
+    ca_telemetry = cycle_log.get("phases", {}).get("ca_telemetry", {})
+    criticality = _extract_criticality_verdict(ca_telemetry)
 
     # Extract a clean public summary from the cycle log
     summary = {
@@ -128,6 +225,12 @@ def _write_cycles(cycle_log: dict):
         "resolve":    cycle_log.get("phases", {}).get("resolve", {}),
         "coherence":  cycle_log.get("phases", {}).get("update", {}).get("coherence"),
     }
+
+    # Embed all four criticality metrics so every snapshot is self-describing
+    # (branching_ratio, shannon_entropy, avalanche_exponent, criticality_verdict
+    #  plus survival_rate) — closes O148 continuous-verifiability gap.
+    if criticality:
+        summary["criticality"] = criticality
 
     existing.append(summary)
     existing = existing[-MAX_CYCLES:]   # keep rolling window
