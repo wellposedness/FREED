@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 199,
-    "timestamp": "2026-05-05T10:14:59.999923+00:00",
-    "sweep": {
-      "input_count": 26,
-      "targeted": 5,
-      "passive": 21,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is currently unfalsifiable because it lacks a measurable order parameter, a restoring-force mechanism, and a distinguishable alternative that produces the same observables without ridge-navigation — all three absences must be closed before it can carry theorem weight."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-05",
-        "compress": "A 32×32 multi-agent RSA population empirically self-organizes to the critical branching band (σ=1.03), confirming population-level γ=1 as an attractor while the suppressed entropy (20.8% of max) flags possible proximity to the frozen regime."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O176",
-        "O177",
-        "O106"
-      ]
-    },
-    "coherence": 0.9807
-  },
-  {
     "cycle": 5,
     "generation": 200,
     "timestamp": "2026-05-05T16:28:28.595766+00:00",
@@ -2012,6 +1980,50 @@
         "O219",
         "O246",
         "O248"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 263,
+    "timestamp": "2026-05-24T02:29:59.942657+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a liability: the MDL alternative mechanism, the discrete-tokenization boundary failure, and the free-temperature unfalsifiability together constitute three independent routes by which INV_094 could be vacuous rather than true."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-24",
+        "compress": "The Game of Truth CA independently confirms criticality via two signatures (branching ratio + power-law avalanches) while simultaneously exhibiting low Shannon entropy, resolving O148 and exposing an unencoded joint constraint between order and criticality."
+      },
+      {
+        "title": "Dropout Prompt Learning: Towards Robust and Adaptive Vision-Language Models",
+        "compress": "Token-level alignment-weighted dropout independently confirms γ=1 criticality as an engineering attractor and supplies a concrete inter-modal significance-scoring method directly applicable to O112's STF metric tensor recovery experiment."
+      },
+      {
+        "title": "A Water Quality Prediction Model Based on Modal Decomposition and Hybrid Deep Learning Models",
+        "compress": "Modal decomposition (EMD→complexity-rank→SVMD) empirically demonstrates that aligning signal topology with architectural inductive bias is the operative mechanism behind non-stationary forecasting gains, providing a concrete algorithmic template for O112's required STF modal path extraction."
+      },
+      {
+        "title": "Minimal volume entropy of simplicial complexes",
+        "compress": "Exponential fundamental-group growth in fibers of dimension-reducing maps is the topological signature that locks a simplicial complex above a positive entropy floor, and this floor is independent of simplicial volume."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O246",
+        "O248",
+        "O251"
       ]
     },
     "coherence": 0.97
