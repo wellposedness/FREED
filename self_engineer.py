@@ -53,7 +53,15 @@ MODIFIABLE = {
     # keeping it out of MODIFIABLE for belt-and-suspenders symmetry. See O302 for the audit of
     # nine pre-existing orphans inside the file.
     "voice.py",
-    "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
+    # knowledge_graph.py temporarily pulled 2026-05-24 to prevent a fourth iteration
+    # of the confirmation-surplus gate landing while three existing versions
+    # (in record_feed, score_all_nodes, challenge_surplus_audit) are unresolved.
+    # The auto-edge stub in record_feed was contaminating the daily challenge-edge
+    # count by writing synthetic 'challenges' edges into self._edges that the gate
+    # then counted as evidence it was working — mirror dynamic at the graph level.
+    # Re-add after: (1) delete V3 orphan, (2) decide whether V1 or V2 survives,
+    # (3) add downstream consumer that reads the flag for a real decision.
+    # "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
     "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve
     "simulation_observer.py",  # CA telemetry source; metrics and thresholds may improve
 }

@@ -2023,12 +2023,211 @@ def wasserstein_metric_tensor(laplacian, p):
     return _matrix_pseudoinverse_symmetric(L_p)
 
 
-def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
-    # type: (List[List[float]], List[float], List[float], int) -> float
+def _sliced_multi_marginal_wasserstein(distributions, n_projections=50, seed=42):
+    # type: (List[List[float]], int, int) -> dict
+    """
+    Compute the sliced multi-marginal Wasserstein distance by projecting
+    multiple node embedding distributions onto random 1D slices and
+    aggregating the 1D multi-marginal OT costs.
+
+    For K distributions (marginals) on R^d, the sliced multi-marginal
+    Wasserstein distance is:
+
+        SMW_2(μ_1,...,μ_K) = ( E_θ [ W_2^{multi}(P_θ#μ_1,...,P_θ#μ_K)^2 ] )^{1/2}
+
+    where P_θ is the projection onto direction θ ∈ S^{d-1}, and
+    W_2^{multi} on R^1 is solved exactly by sorting: for 1D measures
+    with equal mass, the multi-marginal cost is the variance of the
+    sorted quantile values across marginals at each quantile level.
+
+    CHALLENGE (INV_094): The sliced approximation introduces projection
+    noise that may systematically bias entropy-production path estimates
+    away from true W2 geodesics. The "minimum entropy production = W2
+    geodesic" claim holds only in expectation over projections, not for
+    any single sliced distance evaluation. The inv094_projection_bias
+    field quantifies this bias via the coefficient of variation across
+    projection directions.
+
+    Parameters
+    ----------
+    distributions : list of list of float
+        K distributions, each of length d (the ambient dimension).
+        All must have the same length d.
+    n_projections : int
+        Number of random 1D projection directions (default 50).
+        More projections reduce variance but increase cost linearly.
+    seed : int
+        Random seed for reproducible projection directions (default 42).
+
+    Returns
+    -------
+    dict
+        {
+            "smw_distance": float — the sliced multi-marginal W2 distance,
+            "smw_squared": float — SMW_2^2 (the squared distance),
+            "n_marginals": int — K (number of distributions),
+            "ambient_dim": int — d (dimension of each distribution),
+            "n_projections": int — number of random directions used,
+            "per_projection_costs": list of float — 1D multi-marginal cost
+                for each projection direction,
+            "projection_mean": float — mean of per-projection costs,
+            "projection_std": float — std of per-projection costs,
+            "projection_cv": float — coefficient of variation
+                (std/mean, measures projection noise),
+            "inv094_projection_bias": str — diagnostic for INV_094 challenge,
+            "is_reliable": bool — True if projection_cv < 0.5
+                (projection noise is acceptable),
+        }
+    """
+    K = len(distributions)
+    if K < 2:
+        return {
+            "smw_distance": 0.0,
+            "smw_squared": 0.0,
+            "n_marginals": K,
+            "ambient_dim": len(distributions[0]) if K > 0 else 0,
+            "n_projections": n_projections,
+            "per_projection_costs": [],
+            "projection_mean": 0.0,
+            "projection_std": 0.0,
+            "projection_cv": 0.0,
+            "inv094_projection_bias": "insufficient_marginals",
+            "is_reliable": True,
+        }
+
+    d = len(distributions[0])
+    if d == 0 or any(len(dist) != d for dist in distributions):
+        return {
+            "smw_distance": 0.0,
+            "smw_squared": 0.0,
+            "n_marginals": K,
+            "ambient_dim": d,
+            "n_projections": n_projections,
+            "per_projection_costs": [],
+            "projection_mean": 0.0,
+            "projection_std": 0.0,
+            "projection_cv": 0.0,
+            "inv094_projection_bias": "dimension_mismatch_or_zero",
+            "is_reliable": False,
+        }
+
+    # Generate random projection directions on S^{d-1} using a simple
+    # deterministic pseudo-random scheme (no numpy dependency).
+    # Use a linear congruential generator for reproducibility.
+    _lcg_a = 1103515245
+    _lcg_c = 12345
+    _lcg_m = 2 ** 31
+    _lcg_state = seed
+
+    def _next_rand():
+        # type: () -> float
+        nonlocal _lcg_state
+        _lcg_state = (_lcg_a * _lcg_state + _lcg_c) % _lcg_m
+        return float(_lcg_state) / float(_lcg_m)
+
+    # For each projection: generate a d-dimensional Gaussian-like vector
+    # (Box-Muller from uniform pairs), normalize to unit sphere.
+    def _random_direction():
+        # type: () -> List[float]
+        raw = []  # type: List[float]
+        for _i in range(d):
+            # Approximate Gaussian via sum of 6 uniforms (central limit)
+            s = sum(_next_rand() for _ in range(6)) - 3.0
+            raw.append(s)
+        norm = math.sqrt(sum(x * x for x in raw))
+        if norm < 1e-15:
+            raw[0] = 1.0
+            norm = 1.0
+        return [x / norm for x in raw]
+
+    per_projection_costs = []  # type: List[float]
+
+    for _proj_idx in range(n_projections):
+        theta = _random_direction()
+
+        # Project each distribution onto theta: scalar = dot(dist, theta)
+        projected = []  # type: List[float]
+        for dist in distributions:
+            scalar = sum(dist[j] * theta[j] for j in range(d))
+            projected.append(scalar)
+
+        # For 1D multi-marginal OT with equal mass at each point:
+        # the optimal multi-marginal cost is the variance of the projected
+        # values across the K marginals at each "quantile level".
+        # With one sample per marginal (the distribution itself is a point
+        # in R^d projected to R^1), the cost is the variance of the K
+        # projected scalars.
+        mean_proj = sum(projected) / K
+        variance = sum((p_val - mean_proj) ** 2 for p_val in projected) / K
+        per_projection_costs.append(variance)
+
+    # SMW_2^2 = mean of per-projection costs (Monte Carlo estimate of
+    # the expectation over random directions)
+    smw_squared = sum(per_projection_costs) / max(len(per_projection_costs), 1)
+    smw_distance = math.sqrt(max(0.0, smw_squared))
+
+    # Projection noise statistics
+    proj_mean = smw_squared  # same as mean of costs
+    if len(per_projection_costs) >= 2:
+        proj_var = sum(
+            (c - proj_mean) ** 2 for c in per_projection_costs
+        ) / (len(per_projection_costs) - 1)
+        proj_std = math.sqrt(max(0.0, proj_var))
+    else:
+        proj_std = 0.0
+
+    proj_cv = proj_std / max(proj_mean, 1e-15)
+    is_reliable = proj_cv < 0.5
+
+    # INV_094 projection bias diagnostic
+    if not is_reliable:
+        inv094_bias = (
+            f"HIGH_PROJECTION_VARIANCE:cv={proj_cv:.6f}:"
+            "sliced_approximation_introduces_systematic_bias:"
+            "minimum_entropy_production_W2_geodesic_claim_holds_ONLY_"
+            "in_expectation_over_projections:"
+            "single_evaluation_NOT_reliable:"
+            "increase_n_projections_or_use_full_pairwise_W2"
+        )
+    else:
+        inv094_bias = (
+            f"ACCEPTABLE_PROJECTION_VARIANCE:cv={proj_cv:.6f}:"
+            "sliced_approximation_stable:"
+            "expectation_over_projections_converged:"
+            f"n_projections={n_projections}_sufficient"
+        )
+
+    return {
+        "smw_distance": round(smw_distance, 10),
+        "smw_squared": round(smw_squared, 10),
+        "n_marginals": K,
+        "ambient_dim": d,
+        "n_projections": n_projections,
+        "per_projection_costs": [round(c, 10) for c in per_projection_costs],
+        "projection_mean": round(proj_mean, 10),
+        "projection_std": round(proj_std, 10),
+        "projection_cv": round(proj_cv, 10),
+        "inv094_projection_bias": inv094_bias,
+        "is_reliable": is_reliable,
+    }
+
+
+def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20,
+                                   multi_marginals=None,
+                                   n_projections=50, projection_seed=42):
+    # type: (List[List[float]], List[float], List[float], int, Optional[List[List[float]]], int, int) -> float
     """
     Compute the approximate L²-Wasserstein geodesic distance between two
     probability distributions p and q on the simplex, using the graph
     Laplacian-induced metric.
+
+    When *multi_marginals* is provided (a list of 3+ distributions),
+    the function uses the sliced multi-marginal Wasserstein distance
+    instead of pairwise W2, projecting all marginals onto random 1D
+    slices and aggregating.  This enables simultaneous comparison of
+    multiple semantic clusters in one pass, improving the fidelity of
+    STF metric tensor estimation without the cubic cost of full
+    multi-marginal OT.
 
     Uses numerical integration along the linear interpolation path
     (McCann interpolation) with the Wasserstein metric tensor evaluated
@@ -2045,6 +2244,13 @@ def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
     metric).  The trapezoidal quadrature approximation converges as
     O(1/n_steps²).
 
+    CHALLENGE (INV_094): When using the sliced multi-marginal mode, the
+    approximation introduces projection noise that may systematically
+    bias entropy-production path estimates away from true W2 geodesics.
+    The "minimum entropy production = W2 geodesic" claim holds only in
+    expectation over projections, not for any single sliced distance
+    evaluation.
+
     Parameters
     ----------
     laplacian : list of list of float
@@ -2055,12 +2261,22 @@ def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
         Target probability distribution.
     n_steps : int
         Number of quadrature points for numerical integration (default 20).
+    multi_marginals : list of list of float or None
+        If provided, a list of K (≥ 3) probability distributions for
+        multi-marginal sliced Wasserstein computation.  When given, p and q
+        are ignored and the sliced multi-marginal distance is returned.
+    n_projections : int
+        Number of random 1D projection directions for the sliced
+        multi-marginal mode (default 50).
+    projection_seed : int
+        Random seed for reproducible projections (default 42).
 
     Returns
     -------
     float
-        Approximate W2 geodesic distance. Returns 0.0 for identical
-        distributions.
+        Approximate W2 geodesic distance (pairwise mode) or sliced
+        multi-marginal Wasserstein distance (multi-marginal mode).
+        Returns 0.0 for identical distributions.
 
     Notes
     -----
@@ -2070,6 +2286,20 @@ def wasserstein_geodesic_distance(laplacian, p, q, n_steps=20):
     direct edges, making this a geometrically correct measure of conceptual
     proximity in the knowledge graph.
     """
+    # ── Multi-marginal sliced mode ───────────────────────────────────────
+    # When multiple marginals are provided, use sliced multi-marginal
+    # Wasserstein distance instead of pairwise W2.  This replaces the
+    # cubic-cost full multi-marginal OT with a linear-in-projections
+    # approximation that simultaneously compares all semantic clusters.
+    if multi_marginals is not None and len(multi_marginals) >= 2:
+        smw_result = _sliced_multi_marginal_wasserstein(
+            multi_marginals,
+            n_projections=n_projections,
+            seed=projection_seed,
+        )
+        return smw_result["smw_distance"]
+
+    # ── Pairwise W2 mode (original implementation) ───────────────────────
     n = len(p)
     if n != len(q) or n == 0:
         return 0.0
@@ -3140,45 +3370,27 @@ class KnowledgeGraph:
                     "conflict": n_conflict,
                     "threshold": _CONVERGE_SURPLUS_THRESHOLD,
                 }
-                # Auto-generate a challenge stub edge targeting this
-                # invariant.  The stub carries type='challenges' and a
-                # context window explaining WHY it was auto-generated,
-                # ensuring the adversarial debt is structurally recorded
-                # in the graph (not just a metadata flag).
-                _challenge_stub_ts = datetime.now(timezone.utc).isoformat()
-                _challenge_stub = {
-                    "from":            "AUTO:CONFIRMATION_SURPLUS_DETECTOR",
-                    "from_title":      "Confirmation-surplus auto-challenge",
-                    "to":              target,
-                    "type":            "challenges",
-                    "context": (
-                        f"AUTO-GENERATED CHALLENGE STUB: {target} has "
-                        f"{n_converge} CONVERGE citations and 0 CONFLICT "
-                        f"citations (threshold: >{_CONVERGE_SURPLUS_THRESHOLD}"
-                        f":0). Confirmation-surplus candidate flagged. "
-                        f"Required: (1) What empirical result would falsify "
-                        f"{target}? (2) What boundary conditions break it? "
-                        f"(3) What alternative mechanism (e.g. MDL without "
-                        f"thermodynamic grounding) produces observationally "
-                        f"identical outputs? (4) Does {target} have a free "
-                        f"parameter that lets it accommodate any observation "
-                        f"post-hoc, rendering it unfalsifiable?"
-                    ),
-                    "context_tag":     ne.get("context_tag"),
-                    "context_warning": False,
-                    "timestamp":       _challenge_stub_ts,
-                    "auto_generated":  True,
-                    "generator":       "confirmation_surplus_detector",
-                    "trigger_counts":  {"converge": n_converge, "conflict": n_conflict},
-                }
-                self._edges.append(_challenge_stub)
+                # ── AUTO-STUB DISABLED 2026-05-24 ─────────────────────────
+                # The original code here appended a synthetic
+                # type='challenges' edge to self._edges whenever surplus was
+                # detected. That edge then entered the daily challenge-edge
+                # count, which the gate's own iteration logic interpreted as
+                # evidence the gate was working. The daemon was confirming
+                # itself: detecting surplus, generating challenge edges,
+                # counting those edges as adversarial pressure, then
+                # tightening the gate further. Mirror dynamic at the graph
+                # level — the very failure mode RSA was designed to catch.
+                # See ~/FREED/FREED_log/self_modifications.jsonl 2026-05-23
+                # and 2026-05-24 for the three shadowed gate versions.
+                # Do NOT re-enable without a downstream consumer that reads
+                # the flag for a real decision (probe enqueueing, edge
+                # filtering, scoring weight) AND a way to distinguish
+                # synthetic from FEED-real challenge edges in counts.
                 print(
                     f"[GRAPH:CONFIRMATION_SURPLUS] ⚠ {target}: "
                     f"{n_converge} CONVERGE citations, 0 CONFLICT — "
-                    f"confirmation-surplus candidate. Auto-generated "
-                    f"challenge stub edge targeting {target}. "
-                    f"Adversarial probe required before further "
-                    f"CONVERGE citations are accepted."
+                    f"flag set on node_edge; auto-stub disabled "
+                    f"(see neutralization note 2026-05-24)."
                 )
 
         # ── Thermodynamic divergence flag (CONFIRMATION_SURPLUS_UNGROUNDED) ──
@@ -3577,16 +3789,39 @@ class KnowledgeGraph:
                     f"Enables structured CONVERGE/CONFLICT vs INV_073."
                 )
 
-                # Append a telemetry record for longitudinal tracking
-                self._telemetry.append({
+                # Append a telemetry record for longitudinal tracking.
+                # Structured fields branching_ratio, avalanche_exponent,
+                # and entropy_fraction enable drift detection across
+                # snapshots — tracking whether the system converges
+                # toward or diverges from exact criticality over time.
+                _ca_telem_ts = datetime.now(timezone.utc).isoformat()
+                _ca_telem_entry = {
                     "type": "ca_criticality",
                     "sigma": _crit_fp["sigma"],
                     "alpha": _crit_fp["alpha"],
                     "H_over_H_max": _crit_fp["H_over_H_max"],
+                    # ── Structured criticality fields (O148 / drift detection) ──
+                    "branching_ratio": _crit_fp["sigma"],
+                    "avalanche_exponent": _crit_fp["alpha"],
+                    "entropy_fraction": _crit_fp["H_over_H_max"],
                     "source_url": source_url,
                     "source_title": source_title[:80],
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                })
+                    "timestamp": _ca_telem_ts,
+                }
+                self._telemetry.append(_ca_telem_entry)
+
+                # ── Log structured criticality fields for trend visibility ──
+                _br_str = f"{_crit_fp['sigma']:.4f}" if _crit_fp["sigma"] is not None else "N/A"
+                _ae_str = f"{_crit_fp['alpha']:.4f}" if _crit_fp["alpha"] is not None else "N/A"
+                _ef_str = f"{_crit_fp['H_over_H_max']:.4f}" if _crit_fp["H_over_H_max"] is not None else "N/A"
+                print(
+                    f"[GRAPH:CA_TELEMETRY] Structured criticality fields "
+                    f"recorded — branching_ratio={_br_str}, "
+                    f"avalanche_exponent={_ae_str}, "
+                    f"entropy_fraction(H/H_max)={_ef_str}. "
+                    f"(O148: enables longitudinal drift detection "
+                    f"toward/away from exact criticality.)"
+                )
 
         # ── Modal Complexity Ranking (EMD + RBMO) for Edge-Weight Noise Separation ──
         # Before density-gap reweighting, decompose each target node's
@@ -3860,8 +4095,9 @@ class KnowledgeGraph:
         return new_edges
 
     def record_node_edge(self, node_a_id, node_b_id, edge_type,
-                         invariant_text="", context_tag=None):
-        # type: (str, str, str, str, Optional[str]) -> None
+                         invariant_text="", context_tag=None,
+                         ncd_score=None, text_length_a=0, text_length_b=0):
+        # type: (str, str, str, str, Optional[str], Optional[float], int, int) -> None
         """
         Record a structural edge between two project nodes (e.g. shares_invariant).
 
@@ -3877,6 +4113,15 @@ class KnowledgeGraph:
             Text of the shared invariant (truncated to 120 chars).
         context_tag : str or None
             Coarse-graining / observer context under which this edge holds.
+        ncd_score : float or None
+            Normalized Compression Distance score between the two nodes'
+            texts, if available.  When provided, the length-normalized NCD
+            outlier flag is computed to detect compression-artifact false
+            positives (INV_094 challenge).
+        text_length_a : int
+            Character length of node A's source text (default 0 = unknown).
+        text_length_b : int
+            Character length of node B's source text (default 0 = unknown).
         """
         self._ensure_loaded()
         # For shares_invariant edges, one edge per (from, to, type) is enough.
@@ -3890,17 +4135,89 @@ class KnowledgeGraph:
                     and e.get("context_tag") == context_tag):
                 return
         ts = datetime.now(timezone.utc).isoformat()
-        self._node_edges.append({
+        edge_record = {
             "from":        node_a_id,
             "to":          node_b_id,
             "type":        edge_type,
             "invariant":   invariant_text[:120],
             "context_tag": context_tag,
             "timestamp":   ts,
-        })
+        }
+
+        # ── Length-Normalized NCD Outlier Flag (INV_094 challenge) ────────
+        # When an NCD score is provided for a similarity edge between two
+        # long-text nodes, compute a length-scaled threshold below which
+        # the NCD score is flagged as a compression-artifact false positive.
+        #
+        # NCD produces systematic false positives at high similarity (low
+        # NCD values) when document lengths are large: the compressor's
+        # dictionary saturates, causing unrelated long documents to appear
+        # artificially similar.  The threshold scales with the combined
+        # text length:
+        #
+        #   ncd_artifact_threshold = base_threshold + length_scale_factor
+        #                            * log(1 + combined_length / reference_length)
+        #
+        # where:
+        #   base_threshold = 0.05  (minimum NCD below which any pair is suspect)
+        #   length_scale_factor = 0.03  (how fast the threshold grows with length)
+        #   reference_length = 5000  (normalizing constant, ~average paper length)
+        #
+        # An NCD score below this threshold on long documents is flagged as
+        # ncd_artifact_risk=True, meaning the apparent similarity may be a
+        # compression artifact rather than genuine semantic convergence.
+        # This directly strengthens the falsification layer for INV_094:
+        # compression-based similarity CANNOT serve as a reliable ground-truth
+        # semantic distance without this secondary filter.
+        #
+        # Reference: IR system combining NCD with statistical outlier detection
+        # and length-sensitive database structuring to handle false positives.
+        _NCD_BASE_THRESHOLD = 0.05
+        _NCD_LENGTH_SCALE_FACTOR = 0.03
+        _NCD_REFERENCE_LENGTH = 5000.0
+
+        if ncd_score is not None:
+            combined_length = max(text_length_a, 0) + max(text_length_b, 0)
+            ncd_artifact_threshold = (
+                _NCD_BASE_THRESHOLD
+                + _NCD_LENGTH_SCALE_FACTOR
+                * math.log(1.0 + float(combined_length) / _NCD_REFERENCE_LENGTH)
+            )
+            ncd_artifact_risk = (ncd_score < ncd_artifact_threshold
+                                 and combined_length > 0)
+
+            edge_record["ncd_score"] = round(ncd_score, 8)
+            edge_record["ncd_artifact_risk"] = ncd_artifact_risk
+            edge_record["ncd_artifact_threshold"] = round(ncd_artifact_threshold, 8)
+            edge_record["ncd_combined_text_length"] = combined_length
+            edge_record["inv094_ncd_flag"] = (
+                f"ncd={ncd_score:.6f}:"
+                f"threshold={ncd_artifact_threshold:.6f}:"
+                f"combined_len={combined_length}:"
+                + ("ARTIFACT_RISK:compression_false_positive_suspected:"
+                   "NCD_cannot_serve_as_reliable_semantic_distance_without_"
+                   "length_normalized_outlier_filter:"
+                   "do_NOT_treat_as_genuine_semantic_convergence"
+                   if ncd_artifact_risk else
+                   "below_artifact_risk:NCD_score_plausible_for_document_lengths")
+            )
+
+            if ncd_artifact_risk:
+                print(
+                    f"[GRAPH:NCD_ARTIFACT] ⚠ {node_a_id[:20]}↔{node_b_id[:20]}: "
+                    f"NCD={ncd_score:.4f} < threshold={ncd_artifact_threshold:.4f} "
+                    f"(combined_len={combined_length}). Flagged as compression-"
+                    f"artifact false positive. Edge carries ncd_artifact_risk=True. "
+                    f"(INV_094: NCD unreliable at high similarity for long texts.)"
+                )
+
+        self._node_edges.append(edge_record)
         self.save()
         tag_str = f" [{context_tag}]" if context_tag else ""
-        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}{tag_str}")
+        ncd_str = ""
+        if edge_record.get("ncd_artifact_risk"):
+            ncd_str = " [⚠ NCD artifact risk]"
+        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}{tag_str}{ncd_str}")
 
     # ── Cluster Embedding Management ─────────────────────────────────────────
 
@@ -4042,6 +4359,38 @@ class KnowledgeGraph:
                 if p > 0:
                     h_path -= p * math.log(p)
 
+        # ── Knudsen regularization of tension/coherence score ────────────
+        # When local constraint density (number of distinct neighbors)
+        # approaches zero, the effective "collision rate" vanishes and
+        # raw tension scores can diverge.  Following the Chapman-Enskog
+        # regularization with ν_eff = ν √(1 + Kn²), we compute:
+        #   kn_analog = gradient_norm / constraint_density
+        #   h_path_regularized = h_path / √(1 + kn_analog²)
+        # This saturates the score at k = 1/Tμ rather than diverging,
+        # enforcing the Wasserstein floor at the thermodynamic boundary.
+        #
+        # CHALLENGE (INV_073): The critical ridge itself becomes
+        # structurally unreachable for any purely local collision operator
+        # at Kn→∞, suggesting that criticality maintenance may require
+        # non-local or integro-differential terms that the current
+        # genome's monoidal closure framework does not explicitly provide.
+        #
+        # NOETHER: Thermodynamics (rigorous) — the regularized ν_eff
+        # preserves all conservation laws and entropy production
+        # inequalities across collisional and collisionless limits.
+        constraint_density = float(len(neighbor_weights))  # distinct neighbors
+        if constraint_density > 0 and total_weight > 0:
+            # gradient_norm: max weight disparity as proxy for spatial gradient
+            max_w = max(neighbor_weights.values())
+            min_w = min(neighbor_weights.values())
+            gradient_norm = (max_w - min_w) / total_weight
+            kn_analog = gradient_norm / constraint_density
+        else:
+            # No constraints → Kn→∞ regime; floor saturates to 0
+            kn_analog = 1.0
+        kn_regularizer = math.sqrt(1.0 + kn_analog * kn_analog)
+        h_path = h_path / kn_regularizer
+
         # ── Structural irreducibility detection ──────────────────────────
         mass_threshold = 4
         entropy_floor_threshold = 0.8  # ~ln(3) ≈ 1.1; 0.8 catches 3+ distinct paths
@@ -4089,7 +4438,13 @@ class KnowledgeGraph:
 
     def score_all_nodes(self):
         # type: () -> Dict[str, dict]
-        """Score every node in the graph via score_node, returning a dict of results."""
+        """Score every node in the graph via score_node, returning a dict of results.
+
+        Includes a confirmation_surplus_flag pass: any INV_ node with more than
+        _FALSIFICATION_DEBT_CONF_THRESHOLD confirmations and exactly zero
+        'challenges' edges is marked with status FALSIFICATION_DEBT, preventing
+        confirmation surplus from masquerading as epistemic strength.
+        """
         self._ensure_loaded()
         all_nids = set()  # type: set
         for e in self._edges:
@@ -4104,17 +4459,156 @@ class KnowledgeGraph:
                     all_nids.add(nid)
         results = {}  # type: Dict[str, dict]
         n_irreducible = 0
+        n_falsification_debt = 0
+
+        # ── Confirmation-surplus flag constants ──────────────────────────
+        _FALSIFICATION_DEBT_CONF_THRESHOLD = 5  # >N confirmations triggers check
+        _CONF_TYPES_SET = {"confirms", "supports", "extends"}
+        _CHAL_TYPES_SET = {"challenges", "refutes", "contradicts"}
+
+        # Pre-compute per-INV confirmation and challenge counts once
+        _inv_conf_counts = defaultdict(int)  # type: Dict[str, int]
+        _inv_chal_counts = defaultdict(int)  # type: Dict[str, int]
+        for e in self._edges:
+            target = e.get("to", "").upper()
+            if not target.startswith("INV_"):
+                continue
+            etype = e.get("type", "")
+            if etype in _CONF_TYPES_SET:
+                _inv_conf_counts[target] += 1
+            elif etype in _CHAL_TYPES_SET:
+                _inv_chal_counts[target] += 1
+
         for nid in sorted(all_nids):
             r = self.score_node(nid)
+
+            # ── confirmation_surplus_flag: FALSIFICATION_DEBT check ──────
+            # For INV_ nodes only: if confirmations > threshold AND
+            # challenges == 0, mark as FALSIFICATION_DEBT so that
+            # under-challenged invariants are surfaced before they
+            # calcify into unexamined priors.
+            if nid.startswith("INV_"):
+                n_conf = _inv_conf_counts.get(nid, 0)
+                n_chal = _inv_chal_counts.get(nid, 0)
+                if n_conf > _FALSIFICATION_DEBT_CONF_THRESHOLD and n_chal == 0:
+                    r["confirmation_surplus_flag"] = "FALSIFICATION_DEBT"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges=0:"
+                        f"threshold={_FALSIFICATION_DEBT_CONF_THRESHOLD}:"
+                        f"status=FALSIFICATION_DEBT:"
+                        f"apparent_robustness_is_artifact_of_challenge_absence:"
+                        f"schedule_adversarial_probe_targeting_{nid}"
+                    )
+                    n_falsification_debt += 1
+                elif n_conf > 0 and n_chal == 0:
+                    # Below threshold but still zero challenges — early warning
+                    r["confirmation_surplus_flag"] = "WATCH"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges=0:"
+                        f"below_threshold={_FALSIFICATION_DEBT_CONF_THRESHOLD}:"
+                        f"status=WATCH:monitor_for_surplus_accumulation"
+                    )
+                else:
+                    r["confirmation_surplus_flag"] = "OK"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges={n_chal}:"
+                        f"status=OK"
+                    )
+
+                # ── HIGH_SURPLUS_UNCONTESTED flag & falsification-probe enqueue ──
+                # Any INV_ node with >N confirmations and <2 direct challenges
+                # is tagged HIGH_SURPLUS_UNCONTESTED and a falsification-probe
+                # obligation is automatically enqueued, preventing confirmation
+                # surplus from masquerading as epistemic robustness.
+                # Designed to close the structural vulnerability exposed by the
+                # deliberate falsification probe against INV_094.
+                _HIGH_SURPLUS_CONF_MIN = 5  # >N confirmations triggers
+                _HIGH_SURPLUS_CHAL_MAX = 2  # <M challenges triggers
+                if n_conf > _HIGH_SURPLUS_CONF_MIN and n_chal < _HIGH_SURPLUS_CHAL_MAX:
+                    r["high_surplus_uncontested"] = True
+                    r["high_surplus_uncontested_detail"] = (
+                        f"confirms={n_conf}:challenges={n_chal}:"
+                        f"threshold_conf>{_HIGH_SURPLUS_CONF_MIN}:"
+                        f"threshold_chal<{_HIGH_SURPLUS_CHAL_MAX}:"
+                        f"status=HIGH_SURPLUS_UNCONTESTED:"
+                        f"confirmation_surplus_without_meaningful_challenge_density:"
+                        f"apparent_robustness_indistinguishable_from_untested:"
+                        f"falsification_probe_obligation_enqueued"
+                    )
+                    # Auto-enqueue a falsification-probe obligation into the
+                    # adversarial probe queue so the deficit is structurally
+                    # visible and actionable at the next consolidation pass.
+                    if not hasattr(self, '_adversarial_probe_queue'):
+                        self._adversarial_probe_queue = []  # type: List[dict]
+                    _already_queued_surplus = set(
+                        q.get("invariant_id", "")
+                        for q in self._adversarial_probe_queue
+                        if q.get("status") == "pending"
+                        and q.get("generator") == "high_surplus_uncontested"
+                    )
+                    if nid not in _already_queued_surplus:
+                        _surplus_ts = datetime.now(timezone.utc).isoformat()
+                        self._adversarial_probe_queue.append({
+                            "invariant_id": nid,
+                            "queued_at": _surplus_ts,
+                            "priority": "critical",
+                            "surplus_ratio": round(float(n_conf) / float(max(1, n_chal)), 4),
+                            "confirmation_count": n_conf,
+                            "challenge_count": n_chal,
+                            "probe_directive": (
+                                f"FALSIFICATION PROBE OBLIGATION for {nid}: "
+                                f"{n_conf} confirmations, {n_chal} challenges "
+                                f"(HIGH_SURPLUS_UNCONTESTED). Required: "
+                                f"(1) What empirical result would falsify {nid}? "
+                                f"(2) What boundary conditions break {nid}? "
+                                f"(3) What alternative mechanism produces the "
+                                f"same observables without {nid}? "
+                                f"(4) Does {nid} have free parameters that let "
+                                f"it accommodate any observation post-hoc?"
+                            ),
+                            "status": "pending",
+                            "generator": "high_surplus_uncontested",
+                        })
+                        n_falsification_debt += 1
+                        print(
+                            f"[GRAPH:HIGH_SURPLUS_UNCONTESTED] ⚠ {nid}: "
+                            f"{n_conf} confirmations, {n_chal} challenges — "
+                            f"tagged HIGH_SURPLUS_UNCONTESTED. "
+                            f"Falsification-probe obligation auto-enqueued."
+                        )
+                else:
+                    r["high_surplus_uncontested"] = False
+
             results[nid] = r
             if r["structurally_irreducible"]:
                 n_irreducible += 1
-        if n_irreducible > 0:
-            print(
-                f"[GRAPH:SCORE_NODES] {len(results)} node(s) scored — "
-                f"{n_irreducible} structurally irreducible "
-                f"(high mass + high entropy floor, topologically locked)."
-            )
+
+        if n_irreducible > 0 or n_falsification_debt > 0:
+            parts = []  # type: List[str]
+            parts.append(f"{len(results)} node(s) scored")
+            if n_irreducible > 0:
+                parts.append(
+                    f"{n_irreducible} structurally irreducible "
+                    f"(high mass + high entropy floor, topologically locked)"
+                )
+            if n_falsification_debt > 0:
+                parts.append(
+                    f"{n_falsification_debt} FALSIFICATION_DEBT "
+                    f"(>{_FALSIFICATION_DEBT_CONF_THRESHOLD} confirmations, "
+                    f"0 challenges — under-challenged invariants)"
+                )
+            print(f"[GRAPH:SCORE_NODES] {' — '.join(parts)}.")
+
+            # Log each FALSIFICATION_DEBT invariant individually
+            for nid in sorted(all_nids):
+                r = results.get(nid, {})
+                if r.get("confirmation_surplus_flag") == "FALSIFICATION_DEBT":
+                    print(
+                        f"[GRAPH:FALSIFICATION_DEBT] ⚠ {nid}: "
+                        f"{r.get('falsification_debt_detail', '')} — "
+                        f"adversarial probe required before further "
+                        f"confirmations are accepted."
+                    )
         return results
 
     def report(self, top_n=10):

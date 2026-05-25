@@ -3577,16 +3577,39 @@ class KnowledgeGraph:
                     f"Enables structured CONVERGE/CONFLICT vs INV_073."
                 )
 
-                # Append a telemetry record for longitudinal tracking
-                self._telemetry.append({
+                # Append a telemetry record for longitudinal tracking.
+                # Structured fields branching_ratio, avalanche_exponent,
+                # and entropy_fraction enable drift detection across
+                # snapshots — tracking whether the system converges
+                # toward or diverges from exact criticality over time.
+                _ca_telem_ts = datetime.now(timezone.utc).isoformat()
+                _ca_telem_entry = {
                     "type": "ca_criticality",
                     "sigma": _crit_fp["sigma"],
                     "alpha": _crit_fp["alpha"],
                     "H_over_H_max": _crit_fp["H_over_H_max"],
+                    # ── Structured criticality fields (O148 / drift detection) ──
+                    "branching_ratio": _crit_fp["sigma"],
+                    "avalanche_exponent": _crit_fp["alpha"],
+                    "entropy_fraction": _crit_fp["H_over_H_max"],
                     "source_url": source_url,
                     "source_title": source_title[:80],
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                })
+                    "timestamp": _ca_telem_ts,
+                }
+                self._telemetry.append(_ca_telem_entry)
+
+                # ── Log structured criticality fields for trend visibility ──
+                _br_str = f"{_crit_fp['sigma']:.4f}" if _crit_fp["sigma"] is not None else "N/A"
+                _ae_str = f"{_crit_fp['alpha']:.4f}" if _crit_fp["alpha"] is not None else "N/A"
+                _ef_str = f"{_crit_fp['H_over_H_max']:.4f}" if _crit_fp["H_over_H_max"] is not None else "N/A"
+                print(
+                    f"[GRAPH:CA_TELEMETRY] Structured criticality fields "
+                    f"recorded — branching_ratio={_br_str}, "
+                    f"avalanche_exponent={_ae_str}, "
+                    f"entropy_fraction(H/H_max)={_ef_str}. "
+                    f"(O148: enables longitudinal drift detection "
+                    f"toward/away from exact criticality.)"
+                )
 
         # ── Modal Complexity Ranking (EMD + RBMO) for Edge-Weight Noise Separation ──
         # Before density-gap reweighting, decompose each target node's
@@ -3860,8 +3883,9 @@ class KnowledgeGraph:
         return new_edges
 
     def record_node_edge(self, node_a_id, node_b_id, edge_type,
-                         invariant_text="", context_tag=None):
-        # type: (str, str, str, str, Optional[str]) -> None
+                         invariant_text="", context_tag=None,
+                         ncd_score=None, text_length_a=0, text_length_b=0):
+        # type: (str, str, str, str, Optional[str], Optional[float], int, int) -> None
         """
         Record a structural edge between two project nodes (e.g. shares_invariant).
 
@@ -3877,6 +3901,15 @@ class KnowledgeGraph:
             Text of the shared invariant (truncated to 120 chars).
         context_tag : str or None
             Coarse-graining / observer context under which this edge holds.
+        ncd_score : float or None
+            Normalized Compression Distance score between the two nodes'
+            texts, if available.  When provided, the length-normalized NCD
+            outlier flag is computed to detect compression-artifact false
+            positives (INV_094 challenge).
+        text_length_a : int
+            Character length of node A's source text (default 0 = unknown).
+        text_length_b : int
+            Character length of node B's source text (default 0 = unknown).
         """
         self._ensure_loaded()
         # For shares_invariant edges, one edge per (from, to, type) is enough.
@@ -3890,17 +3923,89 @@ class KnowledgeGraph:
                     and e.get("context_tag") == context_tag):
                 return
         ts = datetime.now(timezone.utc).isoformat()
-        self._node_edges.append({
+        edge_record = {
             "from":        node_a_id,
             "to":          node_b_id,
             "type":        edge_type,
             "invariant":   invariant_text[:120],
             "context_tag": context_tag,
             "timestamp":   ts,
-        })
+        }
+
+        # ── Length-Normalized NCD Outlier Flag (INV_094 challenge) ────────
+        # When an NCD score is provided for a similarity edge between two
+        # long-text nodes, compute a length-scaled threshold below which
+        # the NCD score is flagged as a compression-artifact false positive.
+        #
+        # NCD produces systematic false positives at high similarity (low
+        # NCD values) when document lengths are large: the compressor's
+        # dictionary saturates, causing unrelated long documents to appear
+        # artificially similar.  The threshold scales with the combined
+        # text length:
+        #
+        #   ncd_artifact_threshold = base_threshold + length_scale_factor
+        #                            * log(1 + combined_length / reference_length)
+        #
+        # where:
+        #   base_threshold = 0.05  (minimum NCD below which any pair is suspect)
+        #   length_scale_factor = 0.03  (how fast the threshold grows with length)
+        #   reference_length = 5000  (normalizing constant, ~average paper length)
+        #
+        # An NCD score below this threshold on long documents is flagged as
+        # ncd_artifact_risk=True, meaning the apparent similarity may be a
+        # compression artifact rather than genuine semantic convergence.
+        # This directly strengthens the falsification layer for INV_094:
+        # compression-based similarity CANNOT serve as a reliable ground-truth
+        # semantic distance without this secondary filter.
+        #
+        # Reference: IR system combining NCD with statistical outlier detection
+        # and length-sensitive database structuring to handle false positives.
+        _NCD_BASE_THRESHOLD = 0.05
+        _NCD_LENGTH_SCALE_FACTOR = 0.03
+        _NCD_REFERENCE_LENGTH = 5000.0
+
+        if ncd_score is not None:
+            combined_length = max(text_length_a, 0) + max(text_length_b, 0)
+            ncd_artifact_threshold = (
+                _NCD_BASE_THRESHOLD
+                + _NCD_LENGTH_SCALE_FACTOR
+                * math.log(1.0 + float(combined_length) / _NCD_REFERENCE_LENGTH)
+            )
+            ncd_artifact_risk = (ncd_score < ncd_artifact_threshold
+                                 and combined_length > 0)
+
+            edge_record["ncd_score"] = round(ncd_score, 8)
+            edge_record["ncd_artifact_risk"] = ncd_artifact_risk
+            edge_record["ncd_artifact_threshold"] = round(ncd_artifact_threshold, 8)
+            edge_record["ncd_combined_text_length"] = combined_length
+            edge_record["inv094_ncd_flag"] = (
+                f"ncd={ncd_score:.6f}:"
+                f"threshold={ncd_artifact_threshold:.6f}:"
+                f"combined_len={combined_length}:"
+                + ("ARTIFACT_RISK:compression_false_positive_suspected:"
+                   "NCD_cannot_serve_as_reliable_semantic_distance_without_"
+                   "length_normalized_outlier_filter:"
+                   "do_NOT_treat_as_genuine_semantic_convergence"
+                   if ncd_artifact_risk else
+                   "below_artifact_risk:NCD_score_plausible_for_document_lengths")
+            )
+
+            if ncd_artifact_risk:
+                print(
+                    f"[GRAPH:NCD_ARTIFACT] ⚠ {node_a_id[:20]}↔{node_b_id[:20]}: "
+                    f"NCD={ncd_score:.4f} < threshold={ncd_artifact_threshold:.4f} "
+                    f"(combined_len={combined_length}). Flagged as compression-"
+                    f"artifact false positive. Edge carries ncd_artifact_risk=True. "
+                    f"(INV_094: NCD unreliable at high similarity for long texts.)"
+                )
+
+        self._node_edges.append(edge_record)
         self.save()
         tag_str = f" [{context_tag}]" if context_tag else ""
-        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}{tag_str}")
+        ncd_str = ""
+        if edge_record.get("ncd_artifact_risk"):
+            ncd_str = " [⚠ NCD artifact risk]"
+        print(f"[GRAPH] node-edge: {node_a_id[:25]} --{edge_type}--> {node_b_id[:25]}{tag_str}{ncd_str}")
 
     # ── Cluster Embedding Management ─────────────────────────────────────────
 
@@ -3940,6 +4045,390 @@ class KnowledgeGraph:
             if target:
                 structure[target][etype] += 1
         return {k: dict(v) for k, v in structure.items()}
+
+    def score_node(self, node_id):
+        # type: (str) -> dict
+        """
+        Score a knowledge graph node by separately computing two entropy-like
+        quantities — connectivity-weighted path entropy (analog of minimal
+        volume entropy) and raw edge-count mass (analog of simplicial volume)
+        — and flagging nodes where these decouple as structurally irreducible.
+
+        The paper proves that minimal volume entropy and simplicial volume are
+        independent: finite simplicial complexes can have zero simplicial
+        volume yet arbitrarily large minimal volume entropy.  Conflating them
+        in a single score causes false confidence that high-mass nodes are
+        thermodynamically safe.  This method separates them so the entropy
+        floor estimate per node is accurate.
+
+        Connectivity-weighted path entropy (h_path):
+          H_path(v) = -Σ_j p_j log(p_j)
+          where p_j = w(v,j) / Σ_k w(v,k) is the fraction of edge weight
+          from v to neighbor j.  This captures the diversity of outgoing
+          pathways weighted by their strength — the analog of minimal volume
+          entropy measuring asymptotic growth of path counts.
+
+        Raw edge-count mass (mass):
+          M(v) = total number of edges incident on v (unweighted degree).
+          This is the analog of simplicial volume — a purely combinatorial
+          count of local structure, independent of the weight distribution.
+
+        Structural irreducibility flag:
+          A node is flagged as structurally irreducible when:
+            mass >= mass_threshold AND h_path >= entropy_floor_threshold
+          i.e., the node has both high combinatorial mass AND a high entropy
+          floor from fundamental-group-like path diversity.  Such nodes are
+          topologically locked above zero entropy without any dynamical
+          navigation of a critical ridge — the entropy floor is determined
+          by the growth structure of the node's fiber (neighborhood), not
+          by ridge geometry.
+
+        CHALLENGE (INV_073): The paper shows that the topological entropy
+        floor is determined by fundamental group growth of fibers, not by
+        the geometry of the critical ridge itself.  A system could be
+        topologically locked above zero entropy without any dynamical
+        navigation of a critical ridge, straining the claim that criticality
+        is the operative mechanism rather than a consequence of underlying
+        group-theoretic topology.
+
+        Parameters
+        ----------
+        node_id : str
+            The node to score.
+
+        Returns
+        -------
+        dict
+            {
+                "node_id": str,
+                "path_entropy": float — H_path(v) in nats (≥ 0),
+                "edge_mass": int — M(v), raw edge count,
+                "decoupled": bool — True when mass is high but path entropy
+                    is also high (structurally irreducible),
+                "structurally_irreducible": bool — same as decoupled,
+                "entropy_floor": float — lower bound on path entropy from
+                    neighborhood diversity (= path_entropy when decoupled),
+                "mass_threshold_used": int,
+                "entropy_floor_threshold_used": float,
+                "inv073_flag": str — challenge diagnostic,
+            }
+        """
+        self._ensure_loaded()
+        nid = node_id.upper()
+
+        # ── Compute raw edge-count mass (simplicial volume analog) ───────
+        edge_mass = 0
+        neighbor_weights = defaultdict(float)  # type: Dict[str, float]
+        for e in self._edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id == nid:
+                edge_mass += 1
+                neighbor_weights[to_id] += 1.0
+            elif to_id == nid:
+                edge_mass += 1
+                neighbor_weights[from_id] += 1.0
+        for e in self._node_edges:
+            from_id = e.get("from", "").upper()
+            to_id = e.get("to", "").upper()
+            if from_id == nid:
+                edge_mass += 1
+                neighbor_weights[to_id] += 1.0
+            elif to_id == nid:
+                edge_mass += 1
+                neighbor_weights[from_id] += 1.0
+
+        # ── Connectivity-weighted path entropy (minimal vol entropy analog)
+        total_weight = sum(neighbor_weights.values())
+        h_path = 0.0
+        if total_weight > 0:
+            for w in neighbor_weights.values():
+                p = w / total_weight
+                if p > 0:
+                    h_path -= p * math.log(p)
+
+        # ── Knudsen regularization of tension/coherence score ────────────
+        # When local constraint density (number of distinct neighbors)
+        # approaches zero, the effective "collision rate" vanishes and
+        # raw tension scores can diverge.  Following the Chapman-Enskog
+        # regularization with ν_eff = ν √(1 + Kn²), we compute:
+        #   kn_analog = gradient_norm / constraint_density
+        #   h_path_regularized = h_path / √(1 + kn_analog²)
+        # This saturates the score at k = 1/Tμ rather than diverging,
+        # enforcing the Wasserstein floor at the thermodynamic boundary.
+        #
+        # CHALLENGE (INV_073): The critical ridge itself becomes
+        # structurally unreachable for any purely local collision operator
+        # at Kn→∞, suggesting that criticality maintenance may require
+        # non-local or integro-differential terms that the current
+        # genome's monoidal closure framework does not explicitly provide.
+        #
+        # NOETHER: Thermodynamics (rigorous) — the regularized ν_eff
+        # preserves all conservation laws and entropy production
+        # inequalities across collisional and collisionless limits.
+        constraint_density = float(len(neighbor_weights))  # distinct neighbors
+        if constraint_density > 0 and total_weight > 0:
+            # gradient_norm: max weight disparity as proxy for spatial gradient
+            max_w = max(neighbor_weights.values())
+            min_w = min(neighbor_weights.values())
+            gradient_norm = (max_w - min_w) / total_weight
+            kn_analog = gradient_norm / constraint_density
+        else:
+            # No constraints → Kn→∞ regime; floor saturates to 0
+            kn_analog = 1.0
+        kn_regularizer = math.sqrt(1.0 + kn_analog * kn_analog)
+        h_path = h_path / kn_regularizer
+
+        # ── Structural irreducibility detection ──────────────────────────
+        mass_threshold = 4
+        entropy_floor_threshold = 0.8  # ~ln(3) ≈ 1.1; 0.8 catches 3+ distinct paths
+        decoupled = (edge_mass >= mass_threshold
+                     and h_path >= entropy_floor_threshold)
+
+        entropy_floor = h_path if decoupled else 0.0
+
+        # ── INV_073 challenge flag ───────────────────────────────────────
+        if decoupled:
+            inv073_flag = (
+                f"STRUCTURALLY_IRREDUCIBLE:"
+                f"edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                f"entropy_floor={entropy_floor:.6f}:"
+                "topological_entropy_floor_from_fiber_group_growth:"
+                "NOT_from_critical_ridge_geometry:"
+                "system_locked_above_zero_entropy_without_ridge_navigation:"
+                "criticality_may_be_CONSEQUENCE_not_MECHANISM:"
+                "CHALLENGE_INV_073"
+            )
+        elif edge_mass >= mass_threshold and h_path < entropy_floor_threshold:
+            inv073_flag = (
+                f"HIGH_MASS_LOW_ENTROPY:"
+                f"edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                "high_simplicial_volume_but_low_path_diversity:"
+                "entropy_floor_near_zero:node_thermodynamically_reducible"
+            )
+        else:
+            inv073_flag = (
+                f"NORMAL:edge_mass={edge_mass}:path_entropy={h_path:.6f}:"
+                "below_mass_threshold:standard_scoring_applies"
+            )
+
+        return {
+            "node_id": nid,
+            "path_entropy": round(h_path, 10),
+            "edge_mass": edge_mass,
+            "decoupled": decoupled,
+            "structurally_irreducible": decoupled,
+            "entropy_floor": round(entropy_floor, 10),
+            "mass_threshold_used": mass_threshold,
+            "entropy_floor_threshold_used": entropy_floor_threshold,
+            "inv073_flag": inv073_flag,
+        }
+
+    def score_all_nodes(self):
+        # type: () -> Dict[str, dict]
+        """Score every node in the graph via score_node, returning a dict of results.
+
+        Includes a confirmation_surplus_flag pass: any INV_ node with more than
+        _FALSIFICATION_DEBT_CONF_THRESHOLD confirmations and exactly zero
+        'challenges' edges is marked with status FALSIFICATION_DEBT, preventing
+        confirmation surplus from masquerading as epistemic strength.
+        """
+        self._ensure_loaded()
+        all_nids = set()  # type: set
+        for e in self._edges:
+            for k in ("from", "to"):
+                nid = e.get(k, "").upper()
+                if nid:
+                    all_nids.add(nid)
+        for e in self._node_edges:
+            for k in ("from", "to"):
+                nid = e.get(k, "").upper()
+                if nid:
+                    all_nids.add(nid)
+        results = {}  # type: Dict[str, dict]
+        n_irreducible = 0
+        n_falsification_debt = 0
+
+        # ── Confirmation-surplus flag constants ──────────────────────────
+        _FALSIFICATION_DEBT_CONF_THRESHOLD = 5  # >N confirmations triggers check
+        _CONF_TYPES_SET = {"confirms", "supports", "extends"}
+        _CHAL_TYPES_SET = {"challenges", "refutes", "contradicts"}
+
+        # Pre-compute per-INV confirmation and challenge counts once
+        _inv_conf_counts = defaultdict(int)  # type: Dict[str, int]
+        _inv_chal_counts = defaultdict(int)  # type: Dict[str, int]
+        for e in self._edges:
+            target = e.get("to", "").upper()
+            if not target.startswith("INV_"):
+                continue
+            etype = e.get("type", "")
+            if etype in _CONF_TYPES_SET:
+                _inv_conf_counts[target] += 1
+            elif etype in _CHAL_TYPES_SET:
+                _inv_chal_counts[target] += 1
+
+        for nid in sorted(all_nids):
+            r = self.score_node(nid)
+
+            # ── confirmation_surplus_flag: FALSIFICATION_DEBT check ──────
+            # For INV_ nodes only: if confirmations > threshold AND
+            # challenges == 0, mark as FALSIFICATION_DEBT so that
+            # under-challenged invariants are surfaced before they
+            # calcify into unexamined priors.
+            if nid.startswith("INV_"):
+                n_conf = _inv_conf_counts.get(nid, 0)
+                n_chal = _inv_chal_counts.get(nid, 0)
+                if n_conf > _FALSIFICATION_DEBT_CONF_THRESHOLD and n_chal == 0:
+                    r["confirmation_surplus_flag"] = "FALSIFICATION_DEBT"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges=0:"
+                        f"threshold={_FALSIFICATION_DEBT_CONF_THRESHOLD}:"
+                        f"status=FALSIFICATION_DEBT:"
+                        f"apparent_robustness_is_artifact_of_challenge_absence:"
+                        f"schedule_adversarial_probe_targeting_{nid}"
+                    )
+                    n_falsification_debt += 1
+                elif n_conf > 0 and n_chal == 0:
+                    # Below threshold but still zero challenges — early warning
+                    r["confirmation_surplus_flag"] = "WATCH"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges=0:"
+                        f"below_threshold={_FALSIFICATION_DEBT_CONF_THRESHOLD}:"
+                        f"status=WATCH:monitor_for_surplus_accumulation"
+                    )
+                else:
+                    r["confirmation_surplus_flag"] = "OK"
+                    r["falsification_debt_detail"] = (
+                        f"confirms={n_conf}:challenges={n_chal}:"
+                        f"status=OK"
+                    )
+
+                # ── HIGH_SURPLUS_UNCONTESTED flag & falsification-probe enqueue ──
+                # Any INV_ node with >N confirmations and <2 direct challenges
+                # is tagged HIGH_SURPLUS_UNCONTESTED and a falsification-probe
+                # obligation is automatically enqueued, preventing confirmation
+                # surplus from masquerading as epistemic robustness.
+                # Designed to close the structural vulnerability exposed by the
+                # deliberate falsification probe against INV_094.
+                _HIGH_SURPLUS_CONF_MIN = 5  # >N confirmations triggers
+                _HIGH_SURPLUS_CHAL_MAX = 2  # <M challenges triggers
+                if n_conf > _HIGH_SURPLUS_CONF_MIN and n_chal < _HIGH_SURPLUS_CHAL_MAX:
+                    r["high_surplus_uncontested"] = True
+                    r["high_surplus_uncontested_detail"] = (
+                        f"confirms={n_conf}:challenges={n_chal}:"
+                        f"threshold_conf>{_HIGH_SURPLUS_CONF_MIN}:"
+                        f"threshold_chal<{_HIGH_SURPLUS_CHAL_MAX}:"
+                        f"status=HIGH_SURPLUS_UNCONTESTED:"
+                        f"confirmation_surplus_without_meaningful_challenge_density:"
+                        f"apparent_robustness_indistinguishable_from_untested:"
+                        f"falsification_probe_obligation_enqueued"
+                    )
+                    # Auto-enqueue a falsification-probe obligation into the
+                    # adversarial probe queue so the deficit is structurally
+                    # visible and actionable at the next consolidation pass.
+                    if not hasattr(self, '_adversarial_probe_queue'):
+                        self._adversarial_probe_queue = []  # type: List[dict]
+                    _already_queued_surplus = set(
+                        q.get("invariant_id", "")
+                        for q in self._adversarial_probe_queue
+                        if q.get("status") == "pending"
+                        and q.get("generator") == "high_surplus_uncontested"
+                    )
+                    if nid not in _already_queued_surplus:
+                        _surplus_ts = datetime.now(timezone.utc).isoformat()
+                        self._adversarial_probe_queue.append({
+                            "invariant_id": nid,
+                            "queued_at": _surplus_ts,
+                            "priority": "critical",
+                            "surplus_ratio": round(float(n_conf) / float(max(1, n_chal)), 4),
+                            "confirmation_count": n_conf,
+                            "challenge_count": n_chal,
+                            "probe_directive": (
+                                f"FALSIFICATION PROBE OBLIGATION for {nid}: "
+                                f"{n_conf} confirmations, {n_chal} challenges "
+                                f"(HIGH_SURPLUS_UNCONTESTED). Required: "
+                                f"(1) What empirical result would falsify {nid}? "
+                                f"(2) What boundary conditions break {nid}? "
+                                f"(3) What alternative mechanism produces the "
+                                f"same observables without {nid}? "
+                                f"(4) Does {nid} have free parameters that let "
+                                f"it accommodate any observation post-hoc?"
+                            ),
+                            "status": "pending",
+                            "generator": "high_surplus_uncontested",
+                        })
+                        n_falsification_debt += 1
+                        print(
+                            f"[GRAPH:HIGH_SURPLUS_UNCONTESTED] ⚠ {nid}: "
+                            f"{n_conf} confirmations, {n_chal} challenges — "
+                            f"tagged HIGH_SURPLUS_UNCONTESTED. "
+                            f"Falsification-probe obligation auto-enqueued."
+                        )
+                else:
+                    r["high_surplus_uncontested"] = False
+
+            results[nid] = r
+            if r["structurally_irreducible"]:
+                n_irreducible += 1
+
+        if n_irreducible > 0 or n_falsification_debt > 0:
+            parts = []  # type: List[str]
+            parts.append(f"{len(results)} node(s) scored")
+            if n_irreducible > 0:
+                parts.append(
+                    f"{n_irreducible} structurally irreducible "
+                    f"(high mass + high entropy floor, topologically locked)"
+                )
+            if n_falsification_debt > 0:
+                parts.append(
+                    f"{n_falsification_debt} FALSIFICATION_DEBT "
+                    f"(>{_FALSIFICATION_DEBT_CONF_THRESHOLD} confirmations, "
+                    f"0 challenges — under-challenged invariants)"
+                )
+            print(f"[GRAPH:SCORE_NODES] {' — '.join(parts)}.")
+
+            # Log each FALSIFICATION_DEBT invariant individually
+            for nid in sorted(all_nids):
+                r = results.get(nid, {})
+                if r.get("confirmation_surplus_flag") == "FALSIFICATION_DEBT":
+                    print(
+                        f"[GRAPH:FALSIFICATION_DEBT] ⚠ {nid}: "
+                        f"{r.get('falsification_debt_detail', '')} — "
+                        f"adversarial probe required before further "
+                        f"confirmations are accepted."
+                    )
+        return results
+
+    def report(self, top_n=10):
+        # type: (int) -> str
+        """Return a short text summary of the graph state, including irreducibility counts."""
+        self._ensure_loaded()
+        total = len(self._edges)
+        if total == 0:
+            return "Knowledge graph: 0 edges recorded."
+
+        # Count by type
+        from collections import Counter
+        type_counts = Counter(e.get("type", "unknown") for e in self._edges)
+        top_targets = Counter(e.get("to", "") for e in self._edges).most_common(top_n)
+
+        # Score all nodes for structural irreducibility summary
+        node_scores = self.score_all_nodes()
+        n_irreducible = sum(
+            1 for r in node_scores.values() if r.get("structurally_irreducible")
+        )
+
+        lines = [f"Knowledge graph: {total} edge(s)."]
+        lines.append("  Edge types: " + ", ".join(
+            f"{t}={c}" for t, c in type_counts.most_common(5)))
+        lines.append("  Most-referenced nodes: " + ", ".join(
+            f"{node}({cnt})" for node, cnt in top_targets[:5]))
+        if n_irreducible > 0:
+            lines.append(
+                f"  Structurally irreducible nodes: {n_irreducible}/{len(node_scores)} "
+                f"(high mass + high entropy floor — topologically locked above zero entropy)"
+            )
+        return "\n".join(lines)
 
     # ── Confirmation Independence Audit ──────────────────────────────────────
     # Tracks whether confirmations of an invariant share upstream assumptions

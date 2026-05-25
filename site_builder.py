@@ -232,9 +232,78 @@ def _write_cycles(cycle_log: dict):
     if criticality:
         summary["criticality"] = criticality
 
+    # Record σ and α time-series from CA telemetry so temporal drift
+    # toward/away from criticality is trackable across cycles (resolves O148).
+    # When the CA runner provides per-step arrays, embed them directly;
+    # otherwise, accumulate point values into a rolling time-series file.
+    _append_criticality_timeseries(criticality, summary.get("timestamp"))
+
     existing.append(summary)
     existing = existing[-MAX_CYCLES:]   # keep rolling window
     CYCLES_LOG.write_text(json.dumps(existing, indent=2, ensure_ascii=False))
+
+
+def _append_criticality_timeseries(criticality: dict, timestamp: str = None):
+    """Append σ and α point values to a rolling time-series JSON file.
+
+    If the CA telemetry includes per-step arrays (sigma_timeseries,
+    alpha_timeseries), those are stored verbatim for that cycle.
+    Otherwise the snapshot σ and α are appended as single-point entries.
+    This enables detection of drift outside the critical band over time,
+    falsifying or confirming the attractor claim (INV_073).
+    """
+    if not criticality:
+        return
+
+    ts_file = DOCS_DIR / "criticality_timeseries.json"
+    existing = []
+    if ts_file.exists():
+        try:
+            existing = json.loads(ts_file.read_text())
+        except (json.JSONDecodeError, OSError):
+            existing = []
+
+    entry = {"timestamp": timestamp or datetime.now(timezone.utc).isoformat()}
+
+    # Snapshot values — always present when criticality dict is non-empty
+    sigma = criticality.get("branching_ratio")
+    sigma_err = criticality.get("branching_ratio_err")
+    alpha = criticality.get("avalanche_exponent")
+    r2 = criticality.get("power_law_r2")
+    verdict = criticality.get("criticality_verdict")
+
+    if sigma is not None:
+        entry["sigma"] = sigma
+    if sigma_err is not None:
+        entry["sigma_err"] = sigma_err
+    if alpha is not None:
+        entry["alpha"] = alpha
+    if r2 is not None:
+        entry["power_law_r2"] = r2
+    if verdict is not None:
+        entry["verdict"] = verdict
+
+    # Per-step arrays from extended CA telemetry (when available)
+    for ts_key in ("sigma_timeseries", "alpha_timeseries", "entropy_timeseries"):
+        ts_val = criticality.get(ts_key)
+        if isinstance(ts_val, list) and ts_val:
+            entry[ts_key] = ts_val
+
+    # Compute running drift diagnostic: is σ trending away from 1.0?
+    recent_sigmas = [e.get("sigma") for e in existing[-19:] if e.get("sigma") is not None]
+    if sigma is not None:
+        recent_sigmas.append(sigma)
+    if len(recent_sigmas) >= 3:
+        mean_sigma = sum(recent_sigmas) / len(recent_sigmas)
+        sigma_std = (sum((s - mean_sigma) ** 2 for s in recent_sigmas) / len(recent_sigmas)) ** 0.5
+        entry["sigma_rolling_mean"] = round(mean_sigma, 6)
+        entry["sigma_rolling_std"] = round(sigma_std, 6)
+        entry["sigma_in_critical_band"] = abs(mean_sigma - 1.0) <= 0.05
+
+    existing.append(entry)
+    # Keep last 200 entries (matches CA measurement window)
+    existing = existing[-200:]
+    ts_file.write_text(json.dumps(existing, indent=2, ensure_ascii=False))
 
 
 # ── HTML ──────────────────────────────────────────────────────────────────────

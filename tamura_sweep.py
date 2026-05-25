@@ -7605,6 +7605,136 @@ class TamuraSweep:
             all_inputs[item_cursor]["dissipation_regime"] = "continuous"
             item_cursor += 1
 
+        # ── Finite-Size Scaling (FSS) Exponent Extraction (O21) ──────────
+        # Inspired by CNN-based finite-size scaling (Phys. Rev. Lett.):
+        # fit a power-law collapse of spectral statistics (DEA scaling
+        # exponent δ) across multiple sweep window sizes L to recover an
+        # effective critical exponent ν.  This converts the qualitative
+        # γ-proximity from a single-scale spectral measurement into a
+        # falsifiable multi-scale ν estimate that can be tracked across
+        # generations.
+        #
+        # Protocol:
+        #   1. Collect the per-source relevance scores as a 1-D signal.
+        #   2. Partition into windows of sizes L = [8, 16, 32, 64, ...].
+        #   3. For each L, compute DEA scaling exponent δ(L).
+        #   4. Fit δ(L) = δ_∞ + A · L^(-1/ν) via log-linear regression
+        #      on (ln(L), δ(L)) to extract ν.
+        #   5. Attach the FSS result to the sweep output for downstream
+        #      obligation tracking.
+        #
+        # If the score stream is too short, the FSS block gracefully
+        # returns a null result without affecting the existing output.
+        fss_result = {
+            "nu_estimate": 0.0,
+            "nu_r_squared": 0.0,
+            "delta_per_L": [],
+            "window_sizes": [],
+            "fss_status": "INSUFFICIENT_DATA",
+        }  # type: dict
+
+        all_scores = [inp.get("score", 0) for inp in all_inputs]
+        # Need at least 3 window sizes with >= 10 points each
+        _fss_min_windows = 3
+        _fss_window_sizes = []  # type: List[int]
+        _fss_L = 8
+        while _fss_L <= len(all_scores) // 2 and _fss_L <= 256:
+            _fss_window_sizes.append(_fss_L)
+            _fss_L *= 2
+
+        if len(_fss_window_sizes) >= _fss_min_windows and len(all_scores) >= 16:
+            _fss_deltas = []   # type: List[float]
+            _fss_ln_L = []     # type: List[float]
+            _fss_pairs = []    # type: List[Tuple[int, float]]
+
+            for _L in _fss_window_sizes:
+                # Partition score stream into non-overlapping windows of size _L
+                _n_windows = len(all_scores) // _L
+                if _n_windows < 1:
+                    continue
+                # Average δ across all windows of this size
+                _delta_accum = 0.0
+                _delta_count = 0
+                for _w_idx in range(_n_windows):
+                    _window_data = [float(s) for s in all_scores[_w_idx * _L:(_w_idx + 1) * _L]]
+                    if len(_window_data) >= 10:
+                        _dea_res = diffusion_entropy_analysis(_window_data, t_min=2, n_t_points=min(15, _L // 2))
+                        if _dea_res["r_squared"] > 0.3:
+                            _delta_accum += _dea_res["delta"]
+                            _delta_count += 1
+                if _delta_count > 0:
+                    _avg_delta = _delta_accum / float(_delta_count)
+                    _fss_deltas.append(_avg_delta)
+                    _fss_ln_L.append(math.log(float(_L)))
+                    _fss_pairs.append((_L, _avg_delta))
+
+            # Fit δ(L) vs ln(L) via linear regression to extract 1/ν
+            # Model: δ(L) ≈ δ_∞ + A * L^(-1/ν)
+            # In log-space approximation for the correction term:
+            #   δ(L) ≈ intercept + slope * ln(L)
+            # where slope ≈ -A/ν (the sign and magnitude give ν)
+            if len(_fss_deltas) >= _fss_min_windows:
+                _k = len(_fss_deltas)
+                _sx = sum(_fss_ln_L)
+                _sy = sum(_fss_deltas)
+                _sxy = sum(x * y for x, y in zip(_fss_ln_L, _fss_deltas))
+                _sx2 = sum(x * x for x in _fss_ln_L)
+                _denom = float(_k) * _sx2 - _sx * _sx
+
+                if abs(_denom) > 1e-15:
+                    _slope = (float(_k) * _sxy - _sx * _sy) / _denom
+                    _intercept = (_sy - _slope * _sx) / float(_k)
+
+                    # R²
+                    _mean_y = _sy / float(_k)
+                    _ss_tot = sum((y - _mean_y) ** 2 for y in _fss_deltas)
+                    _ss_res = sum((y - (_intercept + _slope * x)) ** 2
+                                  for x, y in zip(_fss_ln_L, _fss_deltas))
+                    _fss_r2 = 1.0 - (_ss_res / _ss_tot) if _ss_tot > 1e-15 else 0.0
+
+                    # Extract ν: if slope < 0 (δ decreasing with L, typical
+                    # for finite-size corrections), ν ≈ -1/slope.
+                    # If slope ≈ 0, δ is scale-invariant (ν → ∞, at criticality).
+                    if abs(_slope) > 1e-10:
+                        _nu_est = -1.0 / _slope
+                    else:
+                        _nu_est = float('inf')  # scale-invariant
+
+                    if _nu_est == float('inf'):
+                        _fss_status = "SCALE_INVARIANT"
+                    elif _nu_est > 0 and _fss_r2 > 0.5:
+                        _fss_status = "CONVERGED"
+                    elif _fss_r2 > 0.3:
+                        _fss_status = "MARGINAL"
+                    else:
+                        _fss_status = "POOR_FIT"
+
+                    fss_result = {
+                        "nu_estimate": round(_nu_est, 6) if _nu_est != float('inf') else float('inf'),
+                        "nu_r_squared": round(max(0.0, _fss_r2), 6),
+                        "delta_per_L": [(L, round(d, 6)) for L, d in _fss_pairs],
+                        "window_sizes": _fss_window_sizes[:len(_fss_deltas)],
+                        "slope": round(_slope, 8),
+                        "intercept": round(_intercept, 8),
+                        "n_window_sizes": _k,
+                        "fss_status": _fss_status,
+                        "o21_assessment": (
+                            "FSS exponent extraction: nu={}, R^2={:.4f}, "
+                            "status={}. {} window sizes used (L={}). "
+                            "This multi-scale collapse protocol converts "
+                            "single-scale spectral gamma into a falsifiable "
+                            "critical exponent estimate per CNN-FSS method."
+                        ).format(
+                            "inf" if _nu_est == float('inf') else "{:.4f}".format(_nu_est),
+                            max(0.0, _fss_r2), _fss_status, _k,
+                            [p[0] for p in _fss_pairs],
+                        ),
+                    }
+
+        # Attach FSS result to sweep output for downstream tracking
+        for inp in all_inputs:
+            inp["fss_collapse"] = fss_result
+
         return all_inputs
 
     def _sweep_source(self, source):
