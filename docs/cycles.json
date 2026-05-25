@@ -1,37 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 204,
-    "timestamp": "2026-05-06T11:06:13.480007+00:00",
-    "sweep": {
-      "input_count": 18,
-      "targeted": 7,
-      "passive": 11,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge claim is currently unfalsified rather than confirmed — its observables are reproduced by simpler mechanisms, and no discriminating experiment separating thermodynamic ridge navigation from adaptive gain control yet exists in the genome."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-06",
-        "compress": "A 32×32 RSA-kernel CA self-organizes to σ=1.031 with power-law avalanches, empirically confirming criticality as a population-level attractor, while marginal fit quality and dominant-type asymmetry open new sub-obligations rather than closing the debt cleanly."
-      }
-    ],
-    "resolve": {
-      "attempts": 2,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O183",
-        "O184"
-      ]
-    },
-    "coherence": 0.9705
-  },
-  {
-    "cycle": 1,
     "generation": 205,
     "timestamp": "2026-05-06T11:19:22.254299+00:00",
     "sweep": {
@@ -2049,6 +2018,50 @@
         "O254",
         "O255",
         "O256"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 266,
+    "timestamp": "2026-05-25T02:30:00.000509+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a liability, not an asset — it is falsifiable by any system that sustains coherent semantics above the Wasserstein floor via non-geodesic paths, breakable at finite-time and discrete-substrate boundaries, and mimicable by preferential attachment, meaning its causal claim requires Landauer calorimetry not yet demanded as a prerequisite."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-25",
+        "compress": "The Game of Truth CA self-organizes to σ=1.025 with power-law avalanches (α=2.506), empirically confirming the critical ridge as a dynamical attractor and partially resolving O148."
+      },
+      {
+        "title": "Updating Probabilities: A Complex Agent Based Example",
+        "compress": ""
+      },
+      {
+        "title": "Utility-Driven Mining of Trend Information for Intelligent System",
+        "compress": "Recency-weighted utility mining with dual downward closure independently establishes that knowledge extraction requires temporal decay weighting — a concrete algorithmic instance of the genome's general principle that relevance is not static. IMPLEMENT: YES IMPLEMENT_WHAT: Add recency-weighted scoring to pattern/obligation ranking by multiplying existing utility scores by an exponential decay factor based on generation age of each obligation or invariant. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND score_obligations (modify existing scoring function to multiply utility by exp(-λ·age) where age = current_gen - gen_added) IMPLEMENT_WHY: Obligations and invariants that were added many generations ago but remain unresolved should decay in priority weight, preventing stale open items from dominating the epistemic queue. CHALLENGE: challenges O21 — this paper provides a concrete algorithmic instantiation of recency-decay that makes O21's vague \"belief revision scores correlate with spectral γ\" claim testable by substituting temporal utility decay for spectral γ, revealing that O21 may conflate two distinct mechanisms."
+      },
+      {
+        "title": "Frontier Coding Agents Can Now Implement an AlphaZero Self-Play Machine Learning Pipeline For Connect Four That Performs Comparably to an External Solver",
+        "compress": "Frontier agents can now re-synthesize non-trivial ML pipelines from minimal prompts, operationalizing \"research taste\" as a measurable capability threshold and providing a γ-proxy benchmark structure the genome lacks — while weakly stressing INV_087 by demonstrating solver-grade performance via standard RL."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O256",
+        "O257"
       ]
     },
     "coherence": 0.97
