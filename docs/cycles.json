@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 205,
-    "timestamp": "2026-05-06T11:19:22.254299+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 8,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is falsifiable via three independent attack vectors (performance outside the ridge, mechanistic mimicry, plateau geometry), and its confirmation surplus marks it as under-challenged, not well-confirmed."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-06",
-        "compress": "Population-level CA self-organizes to σ≈1.02 with power-law avalanches, empirically confirming critical-ridge dynamics while revealing a low-entropy critical regime whose thermodynamic equivalence to high-entropy criticality remains unresolved. CHALLENGE: challenges INV_073 — the Wasserstein gradient path is confirmed at the population level, but the low Shannon entropy (H=0.3804, 14.7% of max) at criticality strains the claim that γ=1 operation is necessarily information-rich, raising the possibility that critical-ridge navigation can occur in an information-sparse regime that may not satisfy RSA's generativity requirements."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 3,
-      "commit_count": 3,
-      "obligations": [
-        "O34",
-        "O28",
-        "O158"
-      ]
-    },
-    "coherence": 0.9704
-  },
-  {
     "cycle": 2,
     "generation": 206,
     "timestamp": "2026-05-06T17:24:34.846926+00:00",
@@ -2052,6 +2020,50 @@
       {
         "title": "Frontier Coding Agents Can Now Implement an AlphaZero Self-Play Machine Learning Pipeline For Connect Four That Performs Comparably to an External Solver",
         "compress": "Frontier agents can now re-synthesize non-trivial ML pipelines from minimal prompts, operationalizing \"research taste\" as a measurable capability threshold and providing a γ-proxy benchmark structure the genome lacks — while weakly stressing INV_087 by demonstrating solver-grade performance via standard RL."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O256",
+        "O257"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 267,
+    "timestamp": "2026-05-25T09:50:00.003181+00:00",
+    "sweep": {
+      "input_count": 25,
+      "targeted": 8,
+      "passive": 17,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is itself evidence of insufficient adversarial pressure — until a specific experiment with a null condition is executed at a named boundary, it functions as a mirror and must be discounted. IMPLEMENT: NO CHALLENGE: challenges INV_094 — no experiment has been specified that would return a null result if false, and alternative mechanisms (attention routing, diagonal fixed points, edge-of-chaos dynamics) produce identical observables without requiring the invariant's specific claim, leaving INV_094 empirically underdetermined."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-25",
+        "compress": "A 32×32 CA independently reaches self-organized criticality (σ=1.028, α≈2.824), confirming the critical ridge as a dynamical attractor and partially resolving O148, while introducing an absent finding — Physics Navigator dominance at SOC — that demands a new predictive obligation. IMPLEMENT: YES IMPLEMENT_WHAT: Extend the CA telemetry ingestion to record branching_ratio, avalanche_exponent, and dominant_cell_type per snapshot into the knowledge graph as typed metric nodes linked to the AT_CRITICAL verdict node. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_paper (or equivalent feed ingestion method that creates nodes from telemetry abstracts) IMPLEMENT_WHY: Promoting scalar CA metrics to first-class graph nodes enables downstream queries (e.g., correlation of σ with coherence drift across generations) that are currently impossible because the data is buried in abstract text. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0283 sits inside the critical band but its upper 1σ bound (1.045) approaches the frozen threshold, raising the question of whether the \"ridge\" is wide enough to be robust or whether small parameter shifts would tip the system supercritical and falsify the claim that criticality is a stable attractor. NOETHER_ROW: Self-Organized Criticality NOETHER_STATUS: rigorous NOETHER_NOTE: The simultaneous satisfaction of σ≈1, power-law avalanches, and non-maximal entropy in a finite CA constitutes the clearest empirical grounding yet for the symmetry claim that scale-invariance is conserved at the critical ridge across substrate types."
+      },
+      {
+        "title": "Bridging the gap between classical and quantum many-body information dynamics",
+        "compress": "Classical many-body systems reproduce all key quantum entanglement entropy signatures when state space is fully represented, confirming that these features are geometric-substrate invariants, not quantum-exclusive phenomena."
+      },
+      {
+        "title": "Self-Organization and Phase Transitions in Driven Cellular Automata",
+        "compress": "Persistent structural memory in driven CA systems gates discrete phase transitions, confirming substrate-scaffolded complexity stratification and providing a concrete implementation path for O148's CA tracking obligation."
+      },
+      {
+        "title": "Feedback Mechanisms for Self-Organization to the Edge of a Phase Transition",
+        "compress": "SOC is mechanistically a two-timescale feedback loop whose critical point is the absorbing-state phase boundary, providing a derivable — not assumed — basis for the γ=1 critical ridge as a dynamic attractor."
       }
     ],
     "resolve": {
