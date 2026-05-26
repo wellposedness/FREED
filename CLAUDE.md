@@ -306,6 +306,46 @@ If FREED produces only confirms on the CLS paper, file a new obligation: *"Audit
 
 ---
 
+## SESSION 2026-05-25 — Branching-ratio gate is structurally mislabeled
+
+### Finding
+
+`[GRAPH:BRANCHING_RATIO]` fired supercritical two cycles in a row — σ=3.40 (gen 266) then σ=3.80 (gen 267). CA reference held at 1.022 critical the whole time. Investigation showed this is a gate kind-mismatch, not a corpus or L7-pressure problem.
+
+**Code reference**: `knowledge_graph.py:3084` sets `_CA_CRITICAL_BAND = (0.95, 1.05)` from CA telemetry. The comment block at lines 3103–3107 already acknowledges the structural mismatch: *"Per-call σ is structurally incomparable to the [0.95, 1.05] band."* The author switched to per-phase σ as a fix, but per-phase doesn't help — the FEED prompt asks L7 for four typed edges per paper (confirms/challenges/advances/extends), so σ structurally lives at 3–4 regardless of windowing.
+
+Edge-type split on the two excursion cycles was even across all four types — neither challenges nor confirms dominating. Not pressure inflation, not corpus richness, just prompt arithmetic. The σ alarm is artifact noise.
+
+### What's actually worth watching
+
+`context_warning` rate per cycle — proportion of edges L7 records without strong context grounding. Recent history:
+
+```
+05-21 16:35  5%    05-23 16:32   8%    05-24 16:32  37%
+05-22 02:38  0%    05-24 02:32  63%    05-25 02:44  12%
+05-22 10:00  0%    05-24 09:52   0%    05-25 10:07  32%
+05-22 16:40 12%    05-23 09:52  18%
+05-23 02:32 10%
+```
+
+Per-cycle variance is huge (0% → 63% within a day). Don't set a fixed threshold from a 2-cycle delta; baseline needs ≥20 cycles of mean+σ, written to a durable log file, not recomputed each session. Until then, treat individual high readings as paper-batch quality variance, not L7 inflation.
+
+### Goodhart isolation rule (permanent)
+
+**Any gauge that lands on the dashboard must never appear in L7's prompt context** — not in FEED, not in cerebellum filters, not in OBLIGATE. The moment L7 can see it's being measured on a number, it optimizes the number rather than the underlying quality. This applies to context_warning rate first, but the rule is general: gauges are for the operator, not the daemon.
+
+### Orphan-wiring obligation attractor
+
+`O255, O257, O258, O259, O264, O265, O268` — all variants of "Self-engineer attempted to add unwired function(s) to knowledge_graph.py". Seven obligations generated in one overnight from the same blocked target. Same closed-loop pattern as the batch_feed.py attractor. Fix is hash-collision dedup on `(source: "orphan_wiring", target_file)` so the second identical obligation closes against the first. Not urgent; queue for next idle window.
+
+Before restoring `knowledge_graph.py` to MODIFIABLE, every obligation in that cluster needs a progress note appended: *"blocked by temporary MODIFIABLE suspension 2026-05-24, reopen when block lifts"* — otherwise they leak forward as permanent debt with no closure path.
+
+### Carry forward
+
+See `[[branching_ratio_gate]]` for the durable form. Related: `[[gate_neutralization]]` (2026-05-24, the knowledge_graph.py write-suspension that caused this cluster).
+
+---
+
 ## What FREED is not
 
 Not a chatbot wrapper. Not a RAG system. Not a knowledge base with vector search.

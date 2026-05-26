@@ -196,6 +196,84 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         result["criticality_verdict"] = verdict
     if verdict_basis:
         result["verdict_basis"] = verdict_basis
+
+    # O148: Track frozen-seed count — permanently-active cells that act as
+    # catalytic substrates for phase-stratified emergence (per frozen-GoL paper).
+    # Without this variable the measurement protocol cannot detect the causally
+    # decisive phase transitions that survival_rate alone misses.
+    frozen_seeds = ca_telemetry.get("frozen_seed_count")
+    if frozen_seeds is not None:
+        result["frozen_seed_count"] = frozen_seeds
+
+    # Per-cell-type branching decomposition: determine whether Navigator cells
+    # are causally responsible for maintaining σ≈1.02 or merely coincidentally
+    # dominant.  When the CA runner supplies per_type_branching or cell_type_counts,
+    # we compute each type's contribution to aggregate σ.  Otherwise we derive
+    # what we can from dominant_type + total σ.
+    per_type_raw = ca_telemetry.get("per_type_branching")
+    cell_type_counts = ca_telemetry.get("cell_type_counts")
+    dominant_type = ca_telemetry.get("dominant_type")
+
+    per_type_branching = {}
+    if isinstance(per_type_raw, dict) and per_type_raw:
+        # Full per-type data from CA runner: {type_name: {sigma, count, ...}}
+        total_cells = sum(
+            (v.get("count", 0) if isinstance(v, dict) else 0)
+            for v in per_type_raw.values()
+        )
+        for ctype, cdata in per_type_raw.items():
+            if not isinstance(cdata, dict):
+                continue
+            ct_sigma = cdata.get("sigma")
+            ct_count = cdata.get("count", 0)
+            entry = {}
+            if ct_sigma is not None:
+                entry["sigma"] = ct_sigma
+            if ct_count:
+                entry["count"] = ct_count
+            if total_cells and ct_count and sigma is not None:
+                # Weighted contribution to aggregate σ
+                weight = ct_count / total_cells
+                entry["weight"] = round(weight, 6)
+                try:
+                    entry["sigma_contribution"] = round(float(ct_sigma) * weight, 6)
+                except (TypeError, ValueError):
+                    pass
+            if entry:
+                per_type_branching[ctype] = entry
+    elif isinstance(cell_type_counts, dict) and cell_type_counts and sigma is not None:
+        # Only counts available — attribute aggregate σ proportionally (null
+        # hypothesis: all types branch at the same rate).  This is the baseline
+        # against which per-type σ data, when available, can be compared.
+        total_cells = sum(cell_type_counts.values())
+        for ctype, ct_count in cell_type_counts.items():
+            if total_cells:
+                weight = ct_count / total_cells
+                per_type_branching[ctype] = {
+                    "count": ct_count,
+                    "weight": round(weight, 6),
+                    "sigma_contribution_null_hypothesis": round(float(sigma) * weight, 6),
+                }
+    elif dominant_type and sigma is not None:
+        # Minimal info: record that dominant type exists alongside aggregate σ
+        per_type_branching[dominant_type] = {
+            "dominant": True,
+            "aggregate_sigma": sigma,
+            "note": "per-type sigma unavailable; only aggregate recorded",
+        }
+
+    if per_type_branching:
+        result["per_type_branching"] = per_type_branching
+        # Flag whether Navigator cells drive criticality
+        nav_entries = {k: v for k, v in per_type_branching.items()
+                       if "navigator" in k.lower()}
+        if nav_entries:
+            nav_total_contrib = sum(
+                v.get("sigma_contribution", v.get("sigma_contribution_null_hypothesis", 0.0))
+                for v in nav_entries.values()
+            )
+            result["navigator_branching_contribution"] = round(nav_total_contrib, 6)
+
     return result
 
 

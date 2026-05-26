@@ -13,6 +13,7 @@ import os
 import re
 import json
 import time
+import random
 import signal
 import traceback
 import base64
@@ -36,6 +37,7 @@ from cerebellum      import Cerebellum
 from dmn             import DMNAgent
 from batch_feed      import fetch_url
 from promote         import PromotePhase
+from ascii_orientation import build_sketch as build_ascii_sketch
 import voice
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
@@ -1103,6 +1105,11 @@ class FREEDDaemon:
         # is structurally incomparable).
         get_graph().begin_feed_window()
 
+        # L7 ASCII orientation A/B (2026-05-25) — per-paper coin flip,
+        # deterministic on cycle_num for reproducibility. Probes excluded.
+        ab_rng = random.Random(self.cycle_num)
+        ab_log = []
+
         feed_results = []
         total_feeds = len(capped_inputs)
         for feed_idx, inp in enumerate(capped_inputs):
@@ -1126,11 +1133,36 @@ class FREEDDaemon:
                 for o in open_obs
             ) or "  (none open)"
 
+            # ── L7 ASCII orientation A/B (experimental) ──────────────────
+            is_probe = inp.get('source') == 'falsification_probe'
+            if is_probe:
+                had_sketch = False
+                sketch_text = ""
+            else:
+                had_sketch = ab_rng.random() < 0.5
+                if had_sketch:
+                    pred = inp.get("prediction", {}) or {}
+                    anchors = (list(pred.get("confirms", []))
+                               + list(pred.get("challenges", [])))
+                    try:
+                        sketch_text = build_ascii_sketch(anchors, get_graph())
+                    except Exception as _e:
+                        print(f"[FEED] sketch error (skipping): {_e}")
+                        sketch_text = ""
+                else:
+                    sketch_text = ""
+            sketch_block = (
+                f"LOCAL ORIENTATION SKETCH "
+                f"(co-occurrence neighborhood of predicted anchors):\n"
+                f"{sketch_text}\n\n"
+            ) if sketch_text else ""
+
             prompt = (
                 f"FEED INPUT:\n"
                 f"Title: {inp.get('title', 'unknown')}\n"
                 f"Abstract: {safe_content}\n\n"
                 f"OPEN OBLIGATIONS:\n{ob_ref}\n\n"
+                f"{sketch_block}"
                 f"PART 1 — DERIVE (no genome reference):\n"
                 f"What does this paper independently establish? State the invariants or "
                 f"findings as if encountering them for the first time, without reference "
@@ -1220,6 +1252,18 @@ class FREEDDaemon:
                 if hits or surprises:
                     print(f"  [PREDICT→ACTUAL] hits:{sorted(hits)} surprises:{sorted(surprises)}")
 
+            # L7 ASCII orientation A/B — tally outcomes per real paper.
+            if not is_probe:
+                _ne = new_edges or []
+                ab_log.append({
+                    "title":             inp.get("title", "?")[:60],
+                    "had_sketch":        had_sketch,
+                    "sketch_chars":      len(sketch_text),
+                    "n_edges":           len(_ne),
+                    "n_context_warning": sum(1 for e in _ne if e.get("context_warning")),
+                    "output_tokens":     _u.get("output_tokens", 0),
+                })
+
             # O76 — update Noether's Table row if L7 emitted a NOETHER_ROW signal
             self._maybe_update_noether_row(result)
 
@@ -1269,6 +1313,7 @@ class FREEDDaemon:
         branching = get_graph().close_feed_window()
         cycle_log["phases"]["feed"] = feed_results
         cycle_log["phases"]["feed_branching_ratio"] = branching
+        cycle_log["phases"]["feed_sketch_ab"] = ab_log
         return feed_results
 
     # ── CONSOLIDATE ──────────────────────────────────────────────────────────

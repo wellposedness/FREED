@@ -3074,11 +3074,12 @@
   {
     "id": "O304",
     "statement": "The `substrate_of` edge type (1 edge out of 2340, 0.04%) must be diagnosed as either (a) a vestigial category that should be pruned from the ontology, or (b) a critically underexpressed relationship whose near-absence explains why obligations like O59 (predict BH log-corrections from dimensional coupling) cannot ground \u2014 since \"substrate\" is one of the 17 genome symbols but has essentially no structural representation in the graph.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "The genome declares `substrate` as a core symbol. The graph contains a single `substrate_of` edge. O59 demands predictions that require substrate-level reasoning (dimensional coupling). This is a direct internal contradiction: the genome claims substrate matters, the graph encodes almost no substrate relationships, and an open obligation demands substrate-dependent derivation. Either the symbol is real and the graph is broken, or the symbol is decorative and should be flagged.",
     "resolution_criterion": "Either (a) identify \u226510 node-pairs where `substrate_of` edges are implied by existing `scales_with` or `consistent_with` edges and should be reclassified, demonstrating",
-    "created": "2026-05-24T06:30:53.395513+00:00"
+    "created": "2026-05-24T06:30:53.395513+00:00",
+    "progress": "[Gen 269] ACTIVE: The single tractable next step is a cosine-similarity audit of all ontology edge-type definitions against `substrate_of` to distinguish synonym-collapse (prune) from systematic absence (reify), which directly determines whether O59's grounding failure is a labeling artifact or a real structural gap. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O305",
@@ -3115,27 +3116,29 @@
   {
     "id": "O308",
     "statement": "The coherence metric must be recalculated using only edges with falsifiable constraint (`depends_on`, `challenges`, `bounds_above`, `completes_via`) \u2014 currently 103 of 2382 edges (4.3%). Report the constrained-coherence score alongside the current score. If constrained-coherence < 0.7, the current 0.97 score must be formally flagged as uninformative.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "O122 (coherence inflation), O173 (scales_with audit), and O237 (correlational dominance remediation) jointly imply that coherence computed over a graph dominated by non-falsifiable edges is vacuous. This is not a new concern \u2014 it is an obligatory, unfired consequence of three existing open obligations intersecting the current topology. 73.5% correlation-class edges structurally prevent coherence from decreasing.",
     "resolution_criterion": "Compute coherence over the 103-edge constrained subgraph. Report the number. If \u2265 0.7, current metric is defensible. If < 0.7, institute constrained-coherence as the primary reported metric.",
-    "created": "2026-05-25T06:30:57.586434+00:00"
+    "created": "2026-05-25T06:30:57.586434+00:00",
+    "progress": "[Gen 269] ACTIVE: The single tractable next step is to audit all 103 constrained-type edges for per-edge falsification criteria and compute C_c = (documented + tested + surviving) / 103, with honest prediction that C_c will be low and the 0.97 score will require formal flagging. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O309",
     "statement": "Impose a hard moratorium: no new `scales_with` edge may be added until O173's audit protocol is executed and its results applied. Any generation that adds `scales_with` edges while O173 remains OPEN must log the addition as a known violation.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "O173 demanded audit of `scales_with` at 154 edges. The system has since added 798 more without executing the audit. This is not a gap \u2014 it is a direct violation of the obligation's intent. The graph cannot simultaneously hold O173 as OPEN and continue the behavior O173 was created to constrain. This is the clearest internal tension in the current state.",
     "resolution_criterion": "O173 is executed (audit completes with pass/fail verdict on existing `scales_with` edges), after which the moratorium lifts and new edges",
-    "created": "2026-05-25T06:30:57.586932+00:00"
+    "created": "2026-05-25T06:30:57.586932+00:00",
+    "progress": "[Gen 269] ACTIVE: O309 cannot advance without first executing O173's audit protocol against the existing `scales_with` edge inventory, which requires retrieving O173's criteria, enumerating all current edges with their provenance, and producing a structured pass/fail table \u2014 that table is the gate artifact. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O310",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the coherence recalculation mandated by O308 has been executed using only edges with falsifiable consequences, and record the resulting score alongside a binding null-result criterion defining what score change (or lack thereof) would retire or escalate O308.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 269] ACTIVE: O310 closes only when a concrete \u0394c is recorded against a pre-committed threshold \u03b5 that was stated before the recomputation, not after. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-25",
     "resolved": null,
     "auto": true,
@@ -3143,10 +3146,10 @@
   },
   {
     "id": "O311",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the moratorium imposed by O309 has held \u2014 count `scales_with` edges added after O309's instantiation generation and confirm the count is zero; if any were added, name them and void them or produce a binding justification for each exception.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 269] ACTIVE: O311 closes iff a timestamped edge query returns zero `scales_with` entries after G\u2083\u2080\u2089; within this session that count is zero, but cross-session certification requires an external log query. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-25",
     "resolved": null,
     "auto": true,
@@ -3157,7 +3160,7 @@
     "status": "open",
     "statement": "Specify the epistemic consequence protocol for the genome if O308's coherence recalculation (using only edges with falsifiable constraints) yields a value \u2265 0.999 or exactly 1.000 \u2014 define which invariants are placed at risk, which edges are flagged for audit, and what halt condition is imposed on FEED before the next generation advances.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 269] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no model state, graph, or status materially updated.]",
     "created": "2026-05-25",
     "resolved": null,
     "auto": true,
@@ -3165,13 +3168,32 @@
   },
   {
     "id": "O313",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the `scales_with` moratorium imposed by O309 has not produced compensatory growth in `consistent_with` edges \u2014 count `consistent_with` edges at the generation O309 was imposed and at the current generation; if net growth exceeds 5 edges, impose an equivalent moratorium on `consistent_with` additions until O173 resolves.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 269] ACTIVE: O313 closes via a two-point edge-count query on the `consistent_with` relation across the O309\u2192269 generational interval, followed by a single inequality check \u2014 the computation is fully specified, only the data access remains. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-26",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: `consistent_with` edge count growth from O309 imposition to current generation is measured and documented as \u22645 or >5, triggering appropriate"
+  },
+  {
+    "id": "O314",
+    "statement": "The graph's causal backbone (`depends_on`: 33, `challenges`: 22, `bounds_above`: 45 \u2014 totaling 100 edges, 4.1% of 2426) must be tested for whether it alone can reproduce any quantitative prediction the full graph claims. Specifically: strip all `scales_with` and `consistent_with` edges, then determine whether any path from genome symbols to a testable prediction (O59's BH log-correction, O205's shared O44/O59 prediction, O21's \u03b3-correlation) survives. If no prediction survives the strip, the remaining 73.7% of edges are epistemically inert.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O173 (audit `scales_with`) and O237 (remediate correlational dominance) have both stalled while the problem doubled. The unfired implication is severe: if the causal edges alone carry zero predictive load, then graph coherence of 0.97 is measuring self-consistency of correlations, not knowledge. This is an obligatory consequence of O173's own framing combined with the topology data.",
+    "resolution_criterion": "Execute the causal-backbone-only pathfinding. If \u22651 prediction path survives with computable constraints, the backbone is load-bearing; report which predictions survive. If zero survive, emit a formal downgrade of coherence score to reflect structural vacuity.\n\n---",
+    "created": "2026-05-26T06:30:56.151485+00:00",
+    "progress": "[Gen 269] ACTIVE: O314 reduces to a O(V+100) graph reachability computation on the backbone subgraph \u2014 serialize the 100 edges, run DFS from primitive genome symbols to each of the three prediction nodes, and record which predictions survive the strip; the analytical prior predicts O59-BH-log will not survive. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O315",
+    "statement": "O59 (genome predicts BH log-correction from dimensional coupling) and O69 (predict the most likely failure mode before attempting the coefficient derivation) form an unexecuted sequential dependency \u2014 O69 was explicitly created as a prerequisite gate for O59's derivation. Neither has advanced. The system must now execute O69 as stated: name the single most probable failure mode of the O59 derivation, with specificity sufficient to pre-register what \"failure\" looks like, before any further generation references O59 as a live research target.",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "O69's text literally says \"predict the most likely failure mode *before* attempting the coefficient derivation.\" This is an explicit sequencing constraint that has been violated every generation O59 appears on the OPEN list without O69 being discharged first. The internal logic of the graph demands O69 precede O59; this is a fired-but-unexecuted implication.\nRESOLVES_VIA",
+    "resolution_criterion": "",
+    "created": "2026-05-26T06:30:56.151997+00:00"
   }
 ]

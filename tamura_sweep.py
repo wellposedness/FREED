@@ -7731,9 +7731,102 @@ class TamuraSweep:
                         ),
                     }
 
-        # Attach FSS result to sweep output for downstream tracking
+        # ── Absorbing-State Signature Detection (O21 / INV_073) ────────
+        # When computing spectral γ (DEA δ) for O21, detect whether the
+        # activity time-series shows absorbing-state signatures: contiguous
+        # runs of zero activity.  This distinguishes sub-critical collapse
+        # (long zero-runs → system fell into absorbing state) from critical
+        # fluctuations (brief zero-runs interspersed with power-law bursts).
+        #
+        # SOC theory (Muñoz et al.): the critical ridge is the boundary
+        # between an active phase (activity reverberates indefinitely) and
+        # an absorbing/quiescent phase (activity eventually ceases).  Long
+        # contiguous zero-runs are the hallmark of the absorbing state.
+        #
+        # The detection runs in the same pass that already computes γ,
+        # scanning the per-source score stream for contiguous zero-score
+        # runs.  Output: a binary covariate `absorbing_state_flag` (True
+        # if the longest zero-run exceeds a threshold fraction of the
+        # series length) plus diagnostic metadata.
+        #
+        # INV_073 relevance: the paper shows the critical ridge is only a
+        # stable attractor under strict two-timescale separation (drive ≪
+        # relax).  If the score stream shows absorbing-state signatures,
+        # the system has crossed into the sub-critical phase, meaning the
+        # two-timescale separation assumption may be violated for RSA's
+        # actual cognitive timescales.
+
+        # Threshold: a zero-run longer than this fraction of N is absorbing
+        _ABSORBING_RUN_FRACTION = 0.15  # 15% of series length
+        _ABSORBING_MIN_RUN = 3          # minimum absolute run length to count
+
+        # Scan the score stream for contiguous zero-activity runs
+        _zero_runs = []       # type: List[int]
+        _current_run = 0      # type: int
+        _total_zeros = 0      # type: int
+
+        for _sc in all_scores:
+            if _sc == 0 or _sc == 0.0:
+                _current_run += 1
+                _total_zeros += 1
+            else:
+                if _current_run >= _ABSORBING_MIN_RUN:
+                    _zero_runs.append(_current_run)
+                _current_run = 0
+        # Flush trailing run
+        if _current_run >= _ABSORBING_MIN_RUN:
+            _zero_runs.append(_current_run)
+
+        _n_scores = len(all_scores)
+        _max_zero_run = max(_zero_runs) if _zero_runs else 0
+        _absorbing_threshold = max(
+            _ABSORBING_MIN_RUN,
+            int(_ABSORBING_RUN_FRACTION * _n_scores)
+        ) if _n_scores > 0 else _ABSORBING_MIN_RUN
+
+        _absorbing_flag = _max_zero_run >= _absorbing_threshold
+        _zero_fraction = float(_total_zeros) / float(_n_scores) if _n_scores > 0 else 0.0
+
+        if _absorbing_flag:
+            _absorbing_detail = (
+                "ABSORBING-STATE DETECTED (O21/INV_073): longest contiguous "
+                "zero-activity run = {} steps (threshold = {}, {:.1%} of N={}). "
+                "Total zero-activity fraction = {:.1%}. {} zero-runs of length "
+                ">= {}. This indicates sub-critical collapse — the system has "
+                "entered the absorbing phase. The spectral gamma estimate "
+                "(delta={}) may reflect sub-critical dynamics rather than "
+                "critical fluctuations. INV_073: the two-timescale separation "
+                "(drive << relax) may not hold at RSA's cognitive timescales."
+            ).format(
+                _max_zero_run, _absorbing_threshold,
+                float(_max_zero_run) / float(_n_scores) if _n_scores > 0 else 0.0,
+                _n_scores, _zero_fraction, len(_zero_runs), _ABSORBING_MIN_RUN,
+                fss_result.get("slope", "N/A"),
+            )
+        else:
+            _absorbing_detail = (
+                "No absorbing-state signature: longest zero-run = {} steps "
+                "(threshold = {}). Zero-activity fraction = {:.1%}. "
+                "Consistent with active/critical phase — spectral gamma "
+                "estimate reflects genuine critical fluctuations."
+            ).format(_max_zero_run, _absorbing_threshold, _zero_fraction)
+
+        _absorbing_state_result = {
+            "absorbing_state_flag": _absorbing_flag,
+            "max_zero_run": _max_zero_run,
+            "absorbing_threshold": _absorbing_threshold,
+            "n_zero_runs": len(_zero_runs),
+            "zero_run_lengths": _zero_runs[:20],  # cap for serialization
+            "zero_fraction": round(_zero_fraction, 6),
+            "total_zeros": _total_zeros,
+            "n_scores": _n_scores,
+            "absorbing_detail": _absorbing_detail,
+        }
+
+        # Attach FSS result and absorbing-state covariate to sweep output
         for inp in all_inputs:
             inp["fss_collapse"] = fss_result
+            inp["absorbing_state"] = _absorbing_state_result
 
         return all_inputs
 
