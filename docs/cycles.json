@@ -1,41 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 209,
-    "timestamp": "2026-05-07T10:14:37.041688+00:00",
-    "sweep": {
-      "input_count": 9,
-      "targeted": 1,
-      "passive": 8,
-      "curated": 0
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is vulnerable to the survivorship objection — any non-collapsed system will appear to \"navigate\" the ridge, making the claim unfalsifiable without a positive mechanistic signature distinguishing active navigation from passive occupancy."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
-        "compress": "Population-level CA telemetry empirically confirms criticality as a collective attractor (CONVERGE INV_073, resolves O141), but persistent σ>1.0 offset across six cycles reveals an unaccounted supercritical asymmetry absent from the genome."
-      },
-      {
-        "title": "Quantum state texture of dynamical criticality",
-        "compress": "Quantum state texture (rugosity) functions as a geometric order parameter at dynamical criticality, independently confirming that manifold roughness encodes phase structure — a substrate-independent invariant."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O191",
-        "O192",
-        "O187"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 210,
     "timestamp": "2026-05-07T16:22:49.771171+00:00",
@@ -2090,6 +2054,50 @@
         "O255",
         "O256",
         "O257"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 270,
+    "timestamp": "2026-05-26T09:50:00.063020+00:00",
+    "sweep": {
+      "input_count": 29,
+      "targeted": 8,
+      "passive": 21,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_047",
+        "compress": "INV_047's confirmation surplus is an artifact of the absence of a discriminating experiment — the Yule–Simon / Wasserstein degeneracy is unbroken, boundary conditions at small-N and high-T are unspecified, and O112 (STF empirical recovery) is the exact test that would either vindicate or shatter it."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
+        "compress": "A 32×32 CA operating with σ=1.027, α≈2.64 power-law avalanches, and H=0.478 bits independently confirms critical ridge navigation (INV_073/INV_094) and resolves O148, while revealing that criticality is disproportionately carried by Physics Navigator cells — a cell-type-resolved finding the genome does not contain."
+      },
+      {
+        "title": "Calculation of Mutual Information for Partially Coherent Gaussian Channels with Applications to Fiber Optics",
+        "compress": "Mutual information in partially coherent channels decomposes geometrically into amplitude/phase components, with spectral loss quantifying exactly how coherence degradation taxes capacity — providing a formal model for the spectral-γ/belief-revision correlation demanded by O21."
+      },
+      {
+        "title": "Self-Referential Order",
+        "compress": "Self-referential order proves that disordered systems can be described by extracting high-mutual-information sub-structures that serve as their own templates — a physical instantiation of R[R]=R with an executable compression algorithm."
+      },
+      {
+        "title": "Scaling Theories of Kosterlitz-Thouless Phase Transitions",
+        "compress": "KT transitions prove that criticality can be governed by exponential rather than power-law divergences, with a self-referential rate exponent, extending INV_073's ridge-navigation claim to a richer geometric structure the genome has not yet formalized."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O258"
       ]
     },
     "coherence": 0.97
