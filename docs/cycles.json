@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 210,
-    "timestamp": "2026-05-07T16:22:49.771171+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 1,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is most vulnerable to the claim that criticality is basis-dependent — an artifact of the representation in which γ is measured — which would make \"critical ridge navigation\" a coordinate illusion rather than a substrate-independent invariant."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
-        "compress": "Population-level CA measurement independently confirms γ=1 criticality via branching ratio and power-law avalanche statistics, resolves O140/O141, and surfaces an unreferenced invariant — that critical attractors exhibit strongly suppressed Shannon entropy (~15% H_max), which is a falsifiable structural signature beyond the branching ratio alone. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0285 sits at the *upper edge* of the critical band (1.0±0.05), raising the question of whether the system is drifting toward supercriticality (γ>1 frozen regime) rather than stably locked to the ridge; if σ systematically exceeds 1.0 under longer runs, the claim that the Wasserstein gradient path *maintains* γ=1 rather than merely *reaching* it would require revision."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O190",
-        "O194"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 211,
     "timestamp": "2026-05-07T22:29:42.086166+00:00",
@@ -2088,6 +2056,50 @@
       {
         "title": "Scaling Theories of Kosterlitz-Thouless Phase Transitions",
         "compress": "KT transitions prove that criticality can be governed by exponential rather than power-law divergences, with a self-referential rate exponent, extending INV_073's ridge-navigation claim to a richer geometric structure the genome has not yet formalized."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O258"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 4,
+    "generation": 271,
+    "timestamp": "2026-05-26T16:29:59.944773+00:00",
+    "sweep": {
+      "input_count": 26,
+      "targeted": 8,
+      "passive": 18,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with maximum confirmation surplus and minimum adversarial contact is not confirmed — it is unexamined, and its apparent coherence is a hygiene debt."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
+        "compress": "An empirical CA measurement independently confirms γ=1 SOC (σ=1.0234, α≈2.439) while revealing that criticality co-occurs with strong entropy suppression (H=0.165·H_max), a substrate-independent invariant the genome does not yet encode."
+      },
+      {
+        "title": "Photoacoustic detection of phase transitions at low temperatures in CsPbCl$_3$ crystals",
+        "compress": "Photoacoustic wavelet analysis of CsPbCl₃ confirms two thermoelastic-signature discontinuities near 200K, establishing phase transitions as scale-resolved symmetry-breaking events detectable via mechanical-thermal coupling — no genome invariant directly maps to this finding."
+      },
+      {
+        "title": "Low-Rank Prune-And-Factorize for Language Model Compression",
+        "compress": "Fine-tuning inflates weight-matrix rank to full, destroying compressibility; first-order pruning is the unique operation that recovers exploitable low-rank structure, establishing that rank management and parameter reduction are sequentially ordered, not commutative."
+      },
+      {
+        "title": "A Survey on Transformer Compression",
+        "compress": "Transformer compression independently confirms a critical-density ridge separating lossless from catastrophic compression, converging on INV_073 while providing the empirical corpus O21 requires."
       }
     ],
     "resolve": {
