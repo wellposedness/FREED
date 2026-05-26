@@ -1,46 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 208,
-    "timestamp": "2026-05-07T09:48:03.554619+00:00",
-    "sweep": {
-      "input_count": 22,
-      "targeted": 3,
-      "passive": 19,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's confirmation surplus is an artifact of under-specification — without a falsifiable observable distinguishing ridge navigation from accidental mid-range operation, its accumulating confirmations prove nothing."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
-        "compress": "A 32×32 multi-agent CA independently confirms population-level criticality (σ=1.026, α=1.789, H=0.225·H_max), converging with INV_073 and advancing O140/O141, while the Physics Navigator type-dominance introduces an unanticipated compositional asymmetry that the genome has not bounded."
-      },
-      {
-        "title": "Causality with Knowledge Graphs: Semantics and Inference",
-        "compress": "Causal inference on relational structures requires semantic-aware identification because ontological constraints and open-world incompleteness are not nuisances but structural confounders that invalidate standard estimators."
-      },
-      {
-        "title": "Guiding Designs of Self-Organizing Swarms: Interactive and Automated Approaches",
-        "compress": "Heterogeneous self-organizing systems require hybrid evolutionary-interactive design because their dependency landscapes are rugged, trajectory-dependent, and irreducible to top-down specification — directly straining the assumption that O187's dependency skeleton can be mapped as a fixed structure."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O189",
-        "O187",
-        "O188"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
-    "cycle": 1,
     "generation": 209,
     "timestamp": "2026-05-07T10:14:37.041688+00:00",
     "sweep": {
@@ -2081,6 +2041,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O256",
+        "O257"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 269,
+    "timestamp": "2026-05-26T02:29:59.963337+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 7,
+      "passive": 10,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a liability, not an asset — Zipf-as-artifact produces identical observables, making current confirmations underdetermined and the invariant's robustness unproven."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
+        "compress": "A live CA system independently instantiates critical-ridge dynamics (σ=1.029, α≈2.221) with sparse-yet-correlated entropy structure, partially resolving O148 while exposing an untracked functional-subpopulation dimension. CHALLENGE: challenges O148 — the snapshot satisfies the measurement demand but is a single timestamped observation, leaving open whether the AT_CRITICAL verdict is a stable attractor or a transient crossing, which O148's resolution requires to be demonstrated as persistent."
+      },
+      {
+        "title": "Wasserstein geometry of nonnegative measures on finite Markov chains I: Gradient flow",
+        "compress": "Discrete Benamou-Brenier geometry on reversible Markov chains independently confirms W2 geodesics as entropy-minimizing paths and advances O112 by providing a computable Riemannian scaffold for finite-state STF recovery."
+      },
+      {
+        "title": "SVGD as a kernelized Wasserstein gradient flow of the chi-squared divergence",
+        "compress": "SVGD-as-chi-squared Wasserstein gradient flow achieves exponential ergodicity under Poincaré conditions via Laplacian spectral decomposition, independently confirming W2 gradient flows as the canonical geometry for inference and extending the STF chain with a concrete, weaker-condition convergence mechanism."
+      },
+      {
+        "title": "Wasserstein Evolution : Evolutionary Optimization as Phase Transition",
+        "compress": "Evolutionary optimization recast as Wasserstein-2 gradient flow of free energy independently confirms INV_094's geodesic-minimality claim while exposing a finite-population discretization gap that limits the rigor of the continuous-flow idealization."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
       "commit_count": 3,
       "obligations": [
         "O255",
