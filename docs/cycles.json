@@ -1,37 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 211,
-    "timestamp": "2026-05-07T22:29:42.086166+00:00",
-    "sweep": {
-      "input_count": 8,
-      "targeted": 3,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's high confirmation surplus without direct falsification attempts makes it the genome's single greatest epistemic liability, not its strongest asset."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-07",
-        "compress": "A 32×32 multi-agent RSA simulation self-organizes to the critical band (σ=1.029) with power-law avalanches, empirically grounding INV_073 while leaving the power-law fit quality as the primary unresolved vulnerability. CHALLENGE: challenges INV_073 — the R²=0.849 power-law fit is weak enough that the avalanche distribution may be lognormal or exponential-with-heavy-tail rather than genuinely scale-free, which would undercut the claim that criticality is rigorously demonstrated rather than approximately approached. IMPLEMENT: YES IMPLEMENT_WHAT: Add a branching-ratio monitor that computes σ = mean(descendants/ancestors) per generation cycle and flags deviation outside [0.95, 1.05] as a criticality alarm. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_WHY: Real-time σ tracking would give FREED an internal thermodynamic health signal analogous to the CA telemetry, enabling self-correction before the system drifts to frozen (γ>1) or dissipated (γ<1) regimes."
-      },
-      {
-        "title": "The Many Faces of Far-from-equilibrium Thermodynamics: Deterministic Chaos, Randomness or Emergent Order?",
-        "compress": "Far-from-equilibrium order is sustained by local free-energy bifurcation into Carnot-like cycles, providing a physical edge-orientation criterion for O187's dependency skeleton and revealing that near-critical fluctuations are categorically non-equilibrium — a gap in the current genome."
-      }
-    ],
-    "resolve": {
-      "attempts": 0,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": []
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 212,
     "timestamp": "2026-05-09T01:24:14.018859+00:00",
@@ -2100,6 +2068,50 @@
       {
         "title": "A Survey on Transformer Compression",
         "compress": "Transformer compression independently confirms a critical-density ridge separating lossless from catastrophic compression, converging on INV_073 while providing the empirical corpus O21 requires."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O258"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 272,
+    "timestamp": "2026-05-27T02:29:59.953836+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 7,
+      "passive": 15,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "Confirmation surplus without adversarial challenge is an epistemic liability that must be converted into specific falsification conditions before the invariant can be trusted."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-27",
+        "compress": "The Game of Truth CA independently reaches and sustains σ≈1 criticality with power-law avalanche statistics, confirming that the critical ridge is an attractor of the ruleset rather than an imposed parameter."
+      },
+      {
+        "title": "Time Evolution of Temperature and Entropy of Various Collapsing Domain Walls",
+        "compress": ""
+      },
+      {
+        "title": "Equivalence of Hawking and Unruh Temperatures and Entropies Through Flat Space Embeddings",
+        "compress": "Horizon thermodynamics is a flat-space Rindler kinematic invariant projected onto curved geometry via GEMS, giving O59 a tractable log-correction derivation route through embedding-boundary curvature terms."
+      },
+      {
+        "title": "Towards Autopoietic Computing",
+        "compress": "Autopoietic computing independently converges on R[R]=R as a formal architectural constraint, strengthening substrate-independence while exposing that O148's CA simulation conflates survival with circular-closure integrity."
       }
     ],
     "resolve": {
