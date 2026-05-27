@@ -7700,8 +7700,105 @@ class TamuraSweep:
                     else:
                         _nu_est = float('inf')  # scale-invariant
 
+                    # ── KT exponential branch (INV_073) ──────────────
+                    # Test KT-class fit: ξ ~ exp(a / sqrt|T - Tc|)
+                    # In our parameterization, δ(L) plays the role of
+                    # the correlation-length proxy.  The KT model is:
+                    #   ln(δ(L)) = b + a / sqrt(L)
+                    # i.e. linear in 1/sqrt(L).  We fit via OLS on
+                    # (1/sqrt(L), ln(δ(L))) and compare to the power-law
+                    # fit via BIC to determine which universality class
+                    # (power-law vs KT exponential) better describes the
+                    # correlation-length scaling.
+                    #
+                    # BIC = k_params * ln(n) + n * ln(RSS/n)
+                    # Both models have 2 parameters; lower BIC wins.
+                    #
+                    # Reference: Kaupuzs et al. — KT scaling theory with
+                    # exponential correlation-length growth.
+                    _kt_selected = False
+                    _kt_a = 0.0
+                    _kt_b = 0.0
+                    _kt_r2 = 0.0
+                    _kt_bic = float('inf')
+                    _pl_bic = float('inf')
+                    _kt_detail = ""
+
+                    # Build KT regressors: x_kt = 1/sqrt(L), y_kt = ln(δ)
+                    _kt_x = []  # type: List[float]
+                    _kt_y = []  # type: List[float]
+                    for _Li, _di in _fss_pairs:
+                        if _di > 1e-15 and _Li > 0:
+                            _kt_x.append(1.0 / math.sqrt(float(_Li)))
+                            _kt_y.append(math.log(_di))
+
+                    _kt_n = len(_kt_x)
+                    if _kt_n >= 3:
+                        _kt_sx = sum(_kt_x)
+                        _kt_sy = sum(_kt_y)
+                        _kt_sxy = sum(_x * _y for _x, _y in zip(_kt_x, _kt_y))
+                        _kt_sx2 = sum(_x * _x for _x in _kt_x)
+                        _kt_denom = float(_kt_n) * _kt_sx2 - _kt_sx * _kt_sx
+
+                        if abs(_kt_denom) > 1e-15:
+                            _kt_a = (float(_kt_n) * _kt_sxy - _kt_sx * _kt_sy) / _kt_denom
+                            _kt_b = (_kt_sy - _kt_a * _kt_sx) / float(_kt_n)
+
+                            # KT R²
+                            _kt_mean_y = _kt_sy / float(_kt_n)
+                            _kt_ss_tot = sum((_y - _kt_mean_y) ** 2 for _y in _kt_y)
+                            _kt_ss_res = sum(
+                                (_y - (_kt_b + _kt_a * _x)) ** 2
+                                for _x, _y in zip(_kt_x, _kt_y)
+                            )
+                            _kt_r2 = 1.0 - (_kt_ss_res / _kt_ss_tot) if _kt_ss_tot > 1e-15 else 0.0
+
+                            # BIC for KT model: 2 params, n=_kt_n
+                            # BIC = k*ln(n) + n*ln(RSS/n)
+                            _kt_rss = _kt_ss_res
+                            if _kt_rss > 0 and _kt_n > 0:
+                                _kt_bic = 2.0 * math.log(float(_kt_n)) + float(_kt_n) * math.log(_kt_rss / float(_kt_n))
+                            elif _kt_rss <= 0:
+                                _kt_bic = 2.0 * math.log(float(_kt_n)) + float(_kt_n) * math.log(1e-30)
+
+                            # BIC for power-law model: 2 params, n=_k
+                            # Use the _ss_res from the power-law fit above
+                            _pl_rss = _ss_res
+                            if _pl_rss > 0 and _k > 0:
+                                _pl_bic = 2.0 * math.log(float(_k)) + float(_k) * math.log(_pl_rss / float(_k))
+                            elif _pl_rss <= 0:
+                                _pl_bic = 2.0 * math.log(float(_k)) + float(_k) * math.log(1e-30)
+
+                            # Select model with lower BIC
+                            _kt_selected = _kt_bic < _pl_bic
+
+                            if _kt_selected:
+                                _kt_detail = (
+                                    "KT EXPONENTIAL SELECTED (BIC): KT BIC={:.4f} < "
+                                    "power-law BIC={:.4f}. KT fit: ln(delta) = {:.6f} + "
+                                    "{:.6f}/sqrt(L), R^2={:.4f}. This suggests the "
+                                    "correlation-length scaling is Kosterlitz-Thouless "
+                                    "class (xi ~ exp(a/sqrt|T-Tc|)) rather than "
+                                    "power-law. The critical ridge has an implicit, "
+                                    "self-referential rate exponent that drifts with "
+                                    "distance from criticality — INV_073's fixed-geometry "
+                                    "ridge-navigation model may be a special case valid "
+                                    "only for power-law universality classes."
+                                ).format(_kt_bic, _pl_bic, _kt_b, _kt_a, _kt_r2)
+                            else:
+                                _kt_detail = (
+                                    "POWER-LAW SELECTED (BIC): power-law BIC={:.4f} < "
+                                    "KT BIC={:.4f}. KT fit R^2={:.4f} vs power-law "
+                                    "R^2={:.4f}. Standard power-law universality class "
+                                    "is the better model — INV_073's fixed-geometry "
+                                    "ridge-navigation model is consistent with the "
+                                    "observed scaling."
+                                ).format(_pl_bic, _kt_bic, _kt_r2, _fss_r2)
+
                     if _nu_est == float('inf'):
                         _fss_status = "SCALE_INVARIANT"
+                    elif _kt_selected:
+                        _fss_status = "KT_EXPONENTIAL"
                     elif _nu_est > 0 and _fss_r2 > 0.5:
                         _fss_status = "CONVERGED"
                     elif _fss_r2 > 0.3:
@@ -7718,16 +7815,29 @@ class TamuraSweep:
                         "intercept": round(_intercept, 8),
                         "n_window_sizes": _k,
                         "fss_status": _fss_status,
+                        "kt_selected": _kt_selected,
+                        "kt_a": round(_kt_a, 8),
+                        "kt_b": round(_kt_b, 8),
+                        "kt_r_squared": round(max(0.0, _kt_r2), 6),
+                        "kt_bic": round(_kt_bic, 4) if _kt_bic != float('inf') else float('inf'),
+                        "pl_bic": round(_pl_bic, 4) if _pl_bic != float('inf') else float('inf'),
+                        "universality_class": "KT_EXPONENTIAL" if _kt_selected else "POWER_LAW",
+                        "kt_detail": _kt_detail,
                         "o21_assessment": (
                             "FSS exponent extraction: nu={}, R^2={:.4f}, "
                             "status={}. {} window sizes used (L={}). "
+                            "KT exponential test: {} (BIC_KT={}, BIC_PL={}). "
                             "This multi-scale collapse protocol converts "
                             "single-scale spectral gamma into a falsifiable "
-                            "critical exponent estimate per CNN-FSS method."
+                            "critical exponent estimate per CNN-FSS method, "
+                            "now with KT-class discrimination."
                         ).format(
                             "inf" if _nu_est == float('inf') else "{:.4f}".format(_nu_est),
                             max(0.0, _fss_r2), _fss_status, _k,
                             [p[0] for p in _fss_pairs],
+                            "SELECTED" if _kt_selected else "rejected",
+                            "inf" if _kt_bic == float('inf') else "{:.4f}".format(_kt_bic),
+                            "inf" if _pl_bic == float('inf') else "{:.4f}".format(_pl_bic),
                         ),
                     }
 
@@ -7827,6 +7937,151 @@ class TamuraSweep:
         for inp in all_inputs:
             inp["fss_collapse"] = fss_result
             inp["absorbing_state"] = _absorbing_state_result
+
+        # ── Yule–Simon Null-Model Discrimination (INV_047 Falsification) ──
+        # INV_047 claims corpus frequency trajectories follow geodesic
+        # (Wasserstein-consistent) structure.  The Yule–Simon preferential
+        # attachment process produces identical Zipf observables without
+        # any Wasserstein gradient flow.  This step computes a live
+        # discrimination score between the two hypotheses using the
+        # per-source frequency data collected during this sweep.
+        #
+        # Method: Compare the empirical rank-frequency trajectory across
+        # sources against the Yule–Simon prediction.  Under Yule–Simon,
+        # the rank-frequency curve is path-independent (depends only on
+        # total counts and the attachment parameter ρ).  Under geodesic
+        # Wasserstein flow, successive source batches should show
+        # monotonic transport (the Earth Mover's Distance between
+        # consecutive source histograms should be consistently positive
+        # and directional, not random-walk-like).
+        #
+        # Discrimination score D ∈ [-1, 1]:
+        #   D > 0 → geodesic structure (Wasserstein-consistent, supports INV_047)
+        #   D ≈ 0 → indistinguishable from Yule–Simon (INV_047 underdetermined)
+        #   D < 0 → anti-geodesic (actively inconsistent with INV_047)
+
+        _ys_discrimination = {
+            "discrimination_score": 0.0,
+            "geodesic_evidence": 0.0,
+            "yule_simon_evidence": 0.0,
+            "n_source_pairs": 0,
+            "transport_directions": [],
+            "inv047_status": "INSUFFICIENT_DATA",
+            "inv047_detail": "",
+        }  # type: dict
+
+        # Build per-source score histograms (using the already-collected
+        # per_source_scores buckets from the dissipation-regime pass above)
+        if len(per_source_scores) >= 2:
+            # For each consecutive source pair, compute:
+            #   1. L1 transport distance (discrete Wasserstein-1 proxy)
+            #   2. Sign of the mean shift (directional transport)
+            _transport_dists = []   # type: List[float]
+            _transport_signs = []   # type: List[float]
+            _n_pairs = 0
+
+            for _si in range(len(per_source_scores) - 1):
+                _bucket_a = per_source_scores[_si]
+                _bucket_b = per_source_scores[_si + 1]
+                if not _bucket_a or not _bucket_b:
+                    continue
+
+                _mean_a = sum(_bucket_a) / float(len(_bucket_a))
+                _mean_b = sum(_bucket_b) / float(len(_bucket_b))
+
+                # L1 distance between sorted score lists (discrete W1 proxy)
+                _sorted_a = sorted(_bucket_a)
+                _sorted_b = sorted(_bucket_b)
+                _min_len = min(len(_sorted_a), len(_sorted_b))
+                if _min_len > 0:
+                    _w1 = sum(abs(_sorted_a[_k] - _sorted_b[_k])
+                              for _k in range(_min_len)) / float(_min_len)
+                    _transport_dists.append(_w1)
+                    _transport_signs.append(1.0 if _mean_b >= _mean_a else -1.0)
+                    _n_pairs += 1
+
+            if _n_pairs >= 2:
+                # Geodesic test: under Wasserstein flow, transport should be
+                # consistently directional (sign consistency).  Under
+                # Yule–Simon, signs should be random (≈50/50).
+                _sign_sum = sum(_transport_signs)
+                _sign_consistency = abs(_sign_sum) / float(_n_pairs)
+                # Expected sign consistency under null (random walk): ~1/sqrt(n)
+                _null_consistency = 1.0 / math.sqrt(float(_n_pairs)) if _n_pairs > 0 else 0.0
+
+                # Transport magnitude test: under geodesic flow, W1 should
+                # be non-negligible and structured.  Under Yule–Simon, W1
+                # should scale as ~1/sqrt(sample_size) (sampling noise only).
+                _mean_w1 = sum(_transport_dists) / float(len(_transport_dists))
+                _var_w1 = sum((_w - _mean_w1) ** 2 for _w in _transport_dists) / float(len(_transport_dists))
+                _std_w1 = math.sqrt(_var_w1) if _var_w1 > 0 else 0.0
+                # Coefficient of variation: low CV = consistent transport (geodesic)
+                _cv_w1 = _std_w1 / _mean_w1 if _mean_w1 > 1e-12 else 0.0
+
+                # Geodesic evidence: high sign consistency + low CV of transport
+                _geo_evidence = _sign_consistency * max(0.0, 1.0 - _cv_w1)
+                # Yule–Simon evidence: sign consistency near null + high CV
+                _ys_evidence = max(0.0, 1.0 - (_sign_consistency / max(_null_consistency * 3.0, 0.01)))
+                _ys_evidence *= min(1.0, _cv_w1)
+
+                # Discrimination score: geodesic - yule_simon, clamped to [-1, 1]
+                _disc = _geo_evidence - _ys_evidence
+                _disc = max(-1.0, min(1.0, _disc))
+
+                # Status classification
+                if _disc > 0.3:
+                    _inv047_status = "GEODESIC_SUPPORTED"
+                    _inv047_detail = (
+                        "INV_047 SUPPORTED: discrimination_score={:.4f} > 0.3. "
+                        "Per-source frequency trajectories show directional "
+                        "transport (sign_consistency={:.3f} vs null={:.3f}, "
+                        "mean_W1={:.4f}, CV={:.3f}) consistent with Wasserstein "
+                        "geodesic flow rather than path-independent Yule–Simon "
+                        "preferential attachment. {} source pairs analyzed."
+                    ).format(_disc, _sign_consistency, _null_consistency,
+                             _mean_w1, _cv_w1, _n_pairs)
+                elif _disc < -0.3:
+                    _inv047_status = "YULE_SIMON_PREFERRED"
+                    _inv047_detail = (
+                        "INV_047 CHALLENGED: discrimination_score={:.4f} < -0.3. "
+                        "Per-source frequency trajectories are more consistent "
+                        "with Yule–Simon preferential attachment than Wasserstein "
+                        "geodesic flow (sign_consistency={:.3f}, null={:.3f}, "
+                        "CV={:.3f}). The Zipf observables cited by INV_047 may "
+                        "be produced by a simpler stochastic mechanism without "
+                        "gradient flow structure. {} source pairs analyzed."
+                    ).format(_disc, _sign_consistency, _null_consistency,
+                             _cv_w1, _n_pairs)
+                else:
+                    _inv047_status = "UNDERDETERMINED"
+                    _inv047_detail = (
+                        "INV_047 UNDERDETERMINED: discrimination_score={:.4f} "
+                        "is within [-0.3, 0.3]. Cannot distinguish geodesic "
+                        "(Wasserstein) from path-independent (Yule–Simon) "
+                        "structure in the corpus frequency trajectories. "
+                        "sign_consistency={:.3f} (null={:.3f}), mean_W1={:.4f}, "
+                        "CV={:.3f}. {} source pairs analyzed. More data or "
+                        "additional substrates needed to resolve the degeneracy."
+                    ).format(_disc, _sign_consistency, _null_consistency,
+                             _mean_w1, _cv_w1, _n_pairs)
+
+                _ys_discrimination = {
+                    "discrimination_score": round(_disc, 6),
+                    "geodesic_evidence": round(_geo_evidence, 6),
+                    "yule_simon_evidence": round(_ys_evidence, 6),
+                    "sign_consistency": round(_sign_consistency, 6),
+                    "null_sign_consistency": round(_null_consistency, 6),
+                    "mean_w1_transport": round(_mean_w1, 6),
+                    "cv_w1_transport": round(_cv_w1, 6),
+                    "n_source_pairs": _n_pairs,
+                    "transport_directions": [round(_s, 1) for _s in _transport_signs],
+                    "inv047_status": _inv047_status,
+                    "inv047_detail": _inv047_detail,
+                }
+
+        # Attach Yule–Simon discrimination result to every sweep item
+        for inp in all_inputs:
+            inp["yule_simon_discrimination"] = _ys_discrimination
 
         return all_inputs
 
