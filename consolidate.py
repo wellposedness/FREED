@@ -1207,6 +1207,74 @@ class EnergyCorrection:
             "effective_gap_threshold": round(effective_threshold, 4),
         }
 
+    @staticmethod
+    def _entropy_curvature(scores):
+        # type: (list) -> dict
+        """
+        Compute discrete second derivative (curvature) of the running entropy
+        estimate over a sliding window of coherence/energy scores.
+
+        Microcanonical analysis: curvature singularities in the entropy surface
+        announce phase transitions before they occur — even in finite systems.
+        Negative curvature (concave entropy) signals a phase-transition precursor
+        where the thermodynamic state is about to undergo regime change.
+
+        The microcanonical entropy estimate at index i:
+            S_i = -p_i * ln(p_i) - (1-p_i) * ln(1-p_i)
+        where p_i is the coherence score (treated as occupation probability).
+
+        Discrete second derivative (curvature):
+            d2S_i = S_{i+1} - 2*S_i + S_{i-1}
+
+        Negative d2S flags convex-to-concave transition in the entropy surface —
+        the finite-system precursor of a continuous phase transition.
+        """
+        if len(scores) < 3:
+            return {
+                "entropy_curvatures": [],
+                "negative_curvature_detected": False,
+                "min_curvature": 0.0,
+                "mean_curvature": 0.0,
+                "phase_transition_precursor": False,
+                "n_negative": 0,
+                "n_points": len(scores),
+            }
+
+        # Compute binary entropy for each score, clamped to (0,1) open interval
+        def _binary_entropy(p):
+            # type: (float) -> float
+            eps = 1e-12
+            p = max(eps, min(1.0 - eps, p))
+            return -(p * math.log(p) + (1.0 - p) * math.log(1.0 - p))
+
+        entropies = [_binary_entropy(s) for s in scores]
+
+        # Discrete second derivative (central difference)
+        curvatures = []
+        for i in range(1, len(entropies) - 1):
+            d2s = entropies[i + 1] - 2.0 * entropies[i] + entropies[i - 1]
+            curvatures.append(round(d2s, 6))
+
+        n_negative = sum(1 for c in curvatures if c < -1e-8)
+        min_curv = min(curvatures) if curvatures else 0.0
+        mean_curv = sum(curvatures) / len(curvatures) if curvatures else 0.0
+
+        # Phase-transition precursor: majority of curvature samples are negative
+        # (concave entropy regime) OR minimum curvature is strongly negative
+        # Threshold calibrated: |d2S| > 0.05 is significant for binary entropy
+        # on [0,1] scores (max |d2S| ~ 0.69 at the inflection point)
+        precursor = (n_negative > len(curvatures) / 2) or (min_curv < -0.05)
+
+        return {
+            "entropy_curvatures": curvatures,
+            "negative_curvature_detected": n_negative > 0,
+            "min_curvature": round(min_curv, 6),
+            "mean_curvature": round(mean_curv, 6),
+            "phase_transition_precursor": precursor,
+            "n_negative": n_negative,
+            "n_points": len(scores),
+        }
+
     def audit_cycle(self, nodes, cycle_number=0):
         # type: (list, int) -> dict
         """
@@ -1214,6 +1282,11 @@ class EnergyCorrection:
 
         Returns a cycle-level report with per-node audits and aggregate stats.
         Flags the cycle if any node's gap exceeds threshold.
+
+        Also computes the discrete second derivative (curvature) of the
+        microcanonical entropy over the sliding window of node scores,
+        detecting phase-transition precursors in the knowledge graph's
+        thermodynamic state.
         """
         audits = []
         flagged_nodes = []
@@ -1239,6 +1312,14 @@ class EnergyCorrection:
         max_gap = max(gaps) if gaps else 0.0
         n_flagged = len(flagged_nodes)
 
+        # ── Entropy curvature analysis (phase-transition precursor) ───────
+        # Use the true energy scores as the sliding window: these represent
+        # the microcanonical entropy surface over the node population.
+        # Ordering by node generation/index preserves the "energy axis" —
+        # curvature along this axis detects regime-change geometry.
+        e_true_scores = [a["e_true"] for a in audits]
+        curvature_analysis = self._entropy_curvature(e_true_scores)
+
         report = {
             "cycle": cycle_number,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1250,6 +1331,7 @@ class EnergyCorrection:
             "flagged_nodes": flagged_nodes,
             "gap_threshold": self.gap_threshold,
             "relaxation_xi": self.relaxation_xi,
+            "entropy_curvature": curvature_analysis,
         }
 
         # Log the audit
@@ -1266,6 +1348,17 @@ class EnergyCorrection:
         else:
             print(f"  [ENERGY-AUDIT] Cycle {cycle_number} CLEAN: "
                   f"mean_gap={mean_gap:.4f}, max_gap={max_gap:.4f}")
+
+        # ── Phase-transition precursor warning ────────────────────────────
+        if curvature_analysis["phase_transition_precursor"]:
+            print(f"  [ENTROPY-CURVATURE] ⚠ PHASE TRANSITION PRECURSOR detected: "
+                  f"min_curvature={curvature_analysis['min_curvature']:.4f}, "
+                  f"{curvature_analysis['n_negative']}/{curvature_analysis['n_points']-2} "
+                  f"negative curvature points — regime change imminent")
+        elif curvature_analysis["negative_curvature_detected"]:
+            print(f"  [ENTROPY-CURVATURE] Mild negative curvature: "
+                  f"min={curvature_analysis['min_curvature']:.4f}, "
+                  f"{curvature_analysis['n_negative']} negative point(s)")
 
         return report
 

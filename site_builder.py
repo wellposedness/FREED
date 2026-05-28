@@ -146,8 +146,10 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         try:
             a = float(alpha)
             r2_val = float(r2)
-            if 2.0 <= a <= 3.0 and r2_val > 0.7:
+            if 2.0 <= a <= 2.5 and r2_val > 0.7:
                 alpha_verdict = "POWER_LAW_CONFIRMED"
+            elif 2.5 < a <= 3.0 and r2_val > 0.7:
+                alpha_verdict = "POWER_LAW_EXTENDED_BAND"
             elif r2_val <= 0.7:
                 alpha_verdict = "POWER_LAW_WEAK"
             else:
@@ -186,6 +188,47 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         result["branching_ratio_err"] = sigma_err
     if entropy is not None:
         result["shannon_entropy"] = entropy
+        # Compute H/H_max (normalized entropy ratio) — scale-invariant criticality
+        # index.  H_max = log2(N_states) for the CA grid.  The CA telemetry may
+        # supply h_max directly; otherwise we derive it from grid_size (number of
+        # distinct cell states defaults to the standard Game of Truth 5-type alphabet,
+        # giving H_max = log2(5) ≈ 2.322; or from an explicit n_states field).
+        h_max = ca_telemetry.get("h_max") or ca_telemetry.get("H_max")
+        if h_max is None:
+            import math
+            n_states = ca_telemetry.get("n_states") or ca_telemetry.get("num_cell_types")
+            if n_states is not None:
+                try:
+                    ns = int(n_states)
+                    if ns > 1:
+                        h_max = math.log2(ns)
+                except (TypeError, ValueError):
+                    pass
+            # Fallback: infer from grid_size if available (log2 of unique states)
+            if h_max is None:
+                # Default to log2(6) ≈ 2.585 for standard 6-type Game of Truth grid
+                # (matches paper excerpt: H_max = 2.585 bits for 32x32 grid with 6 types)
+                h_max = ca_telemetry.get("h_max_default", math.log2(6))
+        if h_max is not None:
+            try:
+                h_max_val = float(h_max)
+                h_val = float(entropy)
+                if h_max_val > 0:
+                    h_ratio = round(h_val / h_max_val, 6)
+                    result["h_max"] = round(h_max_val, 6)
+                    result["h_over_h_max"] = h_ratio
+                    # Criticality signature: H/H_max near 0.2 indicates
+                    # structured-information fraction at the critical ridge
+                    if 0.15 <= h_ratio <= 0.25:
+                        result["entropy_criticality"] = "AT_RIDGE"
+                    elif h_ratio < 0.15:
+                        result["entropy_criticality"] = "FROZEN"
+                    elif h_ratio > 0.25 and h_ratio < 0.5:
+                        result["entropy_criticality"] = "NEAR_RIDGE"
+                    else:
+                        result["entropy_criticality"] = "DISORDERED"
+            except (TypeError, ValueError):
+                pass
     if alpha is not None:
         result["avalanche_exponent"] = alpha
     if r2 is not None:
@@ -433,6 +476,90 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                     result["navigator_verdict"] = "SUPERCRITICAL"
                 else:
                     result["navigator_verdict"] = "SUBCRITICAL"
+
+    # ── O148: Spatial correlation extent — extensive vs localized phase ──
+    # Detect the absorbing-state transition by computing the fraction of
+    # cells in the active state across rows.  When the CA runner supplies
+    # per-row active fractions (row_active_fractions: list[float]) or a
+    # full grid snapshot (grid_rows: list[list[int]]), we compute:
+    #   active_fraction  — mean fraction of active cells across all rows
+    #   active_row_ratio — fraction of rows with any active cell
+    #   spatial_extent_verdict — EXTENSIVE / LOCALIZED / CRITICAL_BOUNDARY
+    # The threshold p_c ≈ 0.5 marks the absorbing-state transition: above
+    # it the active state is extensive (percolating), below it the active
+    # state is localized (absorbed).  Near p_c the system sits at the
+    # critical boundary — the load-bearing diagnostic for universality.
+    row_fractions = ca_telemetry.get("row_active_fractions")
+    grid_rows = ca_telemetry.get("grid_rows")
+    active_state = ca_telemetry.get("active_state", 1)
+
+    if row_fractions is None and grid_rows is not None:
+        # Derive per-row active fractions from raw grid snapshot
+        try:
+            row_fractions = []
+            for row in grid_rows:
+                if not row:
+                    row_fractions.append(0.0)
+                else:
+                    n_active = sum(1 for cell in row if cell == active_state)
+                    row_fractions.append(n_active / len(row))
+        except (TypeError, ValueError):
+            row_fractions = None
+
+    if isinstance(row_fractions, list) and row_fractions:
+        try:
+            valid_fracs = [float(f) for f in row_fractions]
+            n_rows = len(valid_fracs)
+            active_fraction = sum(valid_fracs) / n_rows if n_rows else 0.0
+            active_rows = sum(1 for f in valid_fracs if f > 0.0)
+            active_row_ratio = active_rows / n_rows if n_rows else 0.0
+
+            result["spatial_active_fraction"] = round(active_fraction, 6)
+            result["spatial_active_row_ratio"] = round(active_row_ratio, 6)
+            result["spatial_n_rows"] = n_rows
+
+            # Absorbing-state transition thresholds (tunable; defaults
+            # calibrated to 2D plaquette model p_c ≈ 0.5 mapping)
+            p_c_low = float(ca_telemetry.get("absorbing_threshold_low", 0.40))
+            p_c_high = float(ca_telemetry.get("absorbing_threshold_high", 0.60))
+
+            if active_fraction >= p_c_high:
+                spatial_verdict = "EXTENSIVE"
+            elif active_fraction <= p_c_low:
+                spatial_verdict = "LOCALIZED"
+            else:
+                spatial_verdict = "CRITICAL_BOUNDARY"
+
+            result["spatial_extent_verdict"] = spatial_verdict
+
+            # Row-level heterogeneity: std of per-row fractions indicates
+            # whether the active state is uniformly distributed (extensive)
+            # or clustered (localized with spatial structure)
+            if n_rows >= 2:
+                mean_f = active_fraction
+                std_f = (sum((f - mean_f) ** 2 for f in valid_fracs) / n_rows) ** 0.5
+                result["spatial_row_std"] = round(std_f, 6)
+                # High std with moderate mean → spatially structured (near transition)
+                if std_f > 0.15 and p_c_low < active_fraction < p_c_high:
+                    result["spatial_structure"] = "HETEROGENEOUS_CRITICAL"
+                elif std_f > 0.15:
+                    result["spatial_structure"] = "HETEROGENEOUS"
+                else:
+                    result["spatial_structure"] = "HOMOGENEOUS"
+
+            # Integrate spatial extent with existing criticality verdict:
+            # true criticality requires BOTH σ in band AND spatial extent
+            # at the extensive/localized boundary
+            if verdict is not None and spatial_verdict == "CRITICAL_BOUNDARY":
+                if "CRITICAL" in verdict:
+                    result["absorbing_state_confirmed"] = True
+                else:
+                    result["absorbing_state_confirmed"] = False
+            elif spatial_verdict == "CRITICAL_BOUNDARY":
+                result["absorbing_state_confirmed"] = None  # no σ to cross-check
+
+        except (TypeError, ValueError):
+            pass
 
     return result
 
