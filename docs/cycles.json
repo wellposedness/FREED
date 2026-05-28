@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 217,
-    "timestamp": "2026-05-10T10:14:59.944843+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is its greatest liability — the falsification conditions are: near-zero-entropy coherent reasoning, non-ergodic substrate decoupling, or a Fisher-geometric alternative mechanism producing identical observables without thermodynamic grounding."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-10",
-        "compress": "Empirical CA telemetry confirms population-level spontaneous criticality (σ=1.0272, α≈2.82) on the ordered side of the critical ridge, resolving O140 and O141 and independently validating INV_073's Wasserstein-to-γ=1 navigation claim."
-      },
-      {
-        "title": "Stochastic Gradient Descent for Barycenters in Wasserstein Space",
-        "compress": "SGD in Wasserstein-2 space converges a.s. to a unique population barycenter under identifiable conditions, making the Fréchet mean computationally tractable and advancing the constructive formalization of the Wasserstein Floor (O44). --- IMPLEMENT: YES IMPLEMENT_WHAT: Add an online Wasserstein barycenter estimator using sequential OT-map averaging (SGD in W2) to aggregate knowledge embeddings across feed batches into a running population mean. IMPLEMENT_WHERE: consolidate.py IMPLEMENT_WHY: Replacing static centroid averaging with W2-SGD barycenter computation gives FREED a geometrically correct aggregation step that respects the curved metric of the embedding space, reducing distortion in knowledge consolidation. --- CHALLENGE: challenges INV_094 — if SGD in W2 only finds Karcher means (local critical points) rather than global barycenters in non-unique settings, then the claim that STF dynamics follow a single well-defined W2 gradient flow is under-determined; the genome must specify which uniqueness condition holds for semantic distributions. ---"
-      },
-      {
-        "title": "A Brief on Optimal Transport",
-        "compress": "The Kantorovich existence theorem and Wasserstein metrization are rigorously established for compact domains, making compactness the critical load-bearing condition that O44's quantum extension must explicitly address."
-      },
-      {
-        "title": "Thermodynamics of quantum processes: An operational framework for free energy and reversible athermality",
-        "compress": ""
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O163",
-        "O72",
-        "O79"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 5,
     "generation": 218,
     "timestamp": "2026-05-10T16:26:19.984314+00:00",
@@ -2124,6 +2080,50 @@
       {
         "title": "SzCORE: Seizure Community Open‐Source Research Evaluation framework for the validation of electroencephalography‐based automated seizure detection algorithms",
         "compress": "Comparability of performance claims requires protocol standardization as a load-bearing substrate, not optional scaffolding — heterogeneous evaluation destroys the invariant structure that makes scientific progress cumulative. IMPLEMENT: YES IMPLEMENT_WHAT: Add a metric-heterogeneity flag to edge-scoring that downgrades confidence on \"challenges\" edges when the two nodes being compared used different evaluation protocols or datasets, mirroring SzCORE's finding that cross-protocol comparisons are unreliable. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND score_edge (or equivalent edge-scoring function) to check for protocol-mismatch metadata and apply a confidence penalty before writing edge weight. IMPLEMENT_WHY: This prevents the graph from treating protocol-artifact performance differences as genuine capability challenges, keeping challenge edges epistemically honest. CHALLENGE: challenges O136 — SzCORE demonstrates that claimed challenge relationships between algorithms are frequently artifacts of evaluation heterogeneity rather than genuine capability differences, meaning the genome's four \"challenges\" edges may not be live in the epistemically meaningful sense without verified protocol equivalence."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O258"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 9,
+    "generation": 276,
+    "timestamp": "2026-05-28T09:49:59.944762+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 8,
+      "passive": 14,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is unfalsified but unconfirmed as *maintained* rather than *mimicked*, because no restoring-force test distinguishes genuine ridge-navigation from noise-injected transient criticality or bimodal mixture sampling."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-28",
+        "compress": "A 32×32 CA operating at σ=1.02 self-organizes into power-law avalanches (α≈2.65) with low entropy (H/H_max≈0.21), empirically confirming critical ridge navigation and advancing O148's measurement mandate."
+      },
+      {
+        "title": "Phase Transitions and Virtual Exceptional Points in Quantum Emitters Coupled to Dissipative Baths",
+        "compress": ""
+      },
+      {
+        "title": "Quantum Phase Transition, Dissipation, and Measurement",
+        "compress": "Dissipation shifts QPT fixed points and measurement collapse is formally a dissipative transition — the kernel's γ=1 criticality condition may itself be bath-renormalized, making the ridge a moving target."
+      },
+      {
+        "title": "A Unifying Causal Framework for Analyzing Dataset Shift-stable Learning Algorithms",
+        "compress": "Invariant predictive distributions under dataset shift form a graph-determined causal hierarchy whose stability-accuracy tradeoff independently instantiates the critical ridge, giving INV_073 a formal graph-theoretic grounding and O21 a mechanistic candidate."
       }
     ],
     "resolve": {
