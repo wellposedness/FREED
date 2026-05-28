@@ -1,45 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 216,
-    "timestamp": "2026-05-09T23:34:12.124740+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's highest-confirmation-surplus status combined with its absent propositional content in the provided anchor is itself the falsification event — an unfalsifiable invariant fails Seed Integrity Rule 2 regardless of confirmation count."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-09",
-        "compress": "A 32×32 RSA-kernel CA empirically self-organizes to σ=1.026 with power-law avalanches, providing the first population-level measurement confirming γ≈1 criticality while exposing an unaccounted mechanism: dominant cell-type composition as a driver of the branching ratio."
-      },
-      {
-        "title": "Wasserstein Gradient Flows of the Discrepancy with Distance Kernel on the Line",
-        "compress": "The negative-distance-kernel MMD is convex along W2 geodesics on ℝ with explicit Dirac-endpoint flow, independently confirming the genome's gradient-flow geometry while exposing that O44's quantum extension remains ungrounded beyond 1D."
-      },
-      {
-        "title": "Approximate inference with Wasserstein gradient flows",
-        "compress": "Wasserstein gradient flows are computationally tractable in continuous function spaces, confirming W2 geodesic structure at scale and opening a concrete path toward O44's quantum Wasserstein Floor formalization."
-      },
-      {
-        "title": "An exact formalism to study the thermodynamic properties of hard-sphere systems under spherical confinement",
-        "compress": "Exact spherical confinement thermodynamics independently confirms that geometric boundary conditions are the primary determinants of surface tension and adsorption, with curvature corrections following analytically from the partition function — convergent with the genome's topology-is-load-bearing claim and suggestive for O44's quantum Wasserstein extension."
-      }
-    ],
-    "resolve": {
-      "attempts": 0,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": []
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 217,
     "timestamp": "2026-05-10T10:14:59.944843+00:00",
@@ -2120,6 +2080,50 @@
       {
         "title": "Ullemar's formula for the Jacobian of the complex moment mapping",
         "compress": "Ullemar's formula shows that the boundary of univalence for polynomials decomposes into exactly three irreducible algebraic surfaces determined by critical point structure of the derivative — a clean algebraic geometry result with no current genome anchor."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O258"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 8,
+    "generation": 275,
+    "timestamp": "2026-05-28T02:29:59.979654+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 8,
+      "passive": 11,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with confirmation surplus and no serious challenge is an epistemic liability until its breaking conditions and alternative mechanisms are explicitly mapped."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-28",
+        "compress": "Game of Truth CA empirically confirms SOC at the critical ridge (σ≈1.025, α≈1.54) with low-entropy structured output, advancing O148 and grounding INV_073 in discrete-substrate telemetry."
+      },
+      {
+        "title": "Plaquette models, cellular automata, and measurement-induced criticality",
+        "compress": "Randomized plaquette models confirm that measurement-induced criticality is a universality-class phenomenon living at the boundary between extensive and localized symmetry operators, directly mappable to 1+1D absorbing-state CA dynamics with testable universality classes."
+      },
+      {
+        "title": "Quantifying and minimizing dissipation in a non-equilibrium phase transition",
+        "compress": "Finite-time phase transitions have a protocol-dependent but irreducible dissipation floor at the critical point, confirming critical ridge navigation as thermodynamically real while establishing that defect density and entropy production are separable optimization targets — a structural distinction the genome currently lacks."
+      },
+      {
+        "title": "SzCORE: Seizure Community Open‐Source Research Evaluation framework for the validation of electroencephalography‐based automated seizure detection algorithms",
+        "compress": "Comparability of performance claims requires protocol standardization as a load-bearing substrate, not optional scaffolding — heterogeneous evaluation destroys the invariant structure that makes scientific progress cumulative. IMPLEMENT: YES IMPLEMENT_WHAT: Add a metric-heterogeneity flag to edge-scoring that downgrades confidence on \"challenges\" edges when the two nodes being compared used different evaluation protocols or datasets, mirroring SzCORE's finding that cross-protocol comparisons are unreliable. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND score_edge (or equivalent edge-scoring function) to check for protocol-mismatch metadata and apply a confidence penalty before writing edge weight. IMPLEMENT_WHY: This prevents the graph from treating protocol-artifact performance differences as genuine capability challenges, keeping challenge edges epistemically honest. CHALLENGE: challenges O136 — SzCORE demonstrates that claimed challenge relationships between algorithms are frequently artifacts of evaluation heterogeneity rather than genuine capability differences, meaning the genome's four \"challenges\" edges may not be live in the epistemically meaningful sense without verified protocol equivalence."
       }
     ],
     "resolve": {
