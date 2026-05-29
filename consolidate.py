@@ -336,11 +336,147 @@ class MWDEScorer:
         n_keys = len(all_keys)
         return w1 / n_keys if n_keys > 0 else 1.0
 
+    @staticmethod
+    def _mac_check(dist_node, dist_evidence, mac_threshold=0.15):
+        # type: (dict, dict, float) -> dict
+        """
+        Minimal Assent Connection (MAC) verification.
+
+        Before computing credence correlation (MWDE weight / γ-correlation),
+        verify that assent behavior tracks next-token probabilities. The MAC
+        requires that the model's binary assent (non-zero probability assigned
+        to a token) is consistent with its graded credence (the probability
+        mass assigned).
+
+        Operationally: for each term in the shared vocabulary, check whether
+        the node "assents" to the term (assigns it non-negligible probability)
+        AND whether the magnitude of that assent tracks the evidence distribution.
+        If the assent-credence coupling is broken (many terms where the node
+        assents but assigns wildly different credence than evidence suggests,
+        or vice versa), the MAC fails and any subsequent correlation score
+        is flagged as spurious.
+
+        MAC metric:
+            For each shared term, compute:
+                assent_node = 1 if dist_node[term] > floor else 0
+                assent_evidence = 1 if dist_evidence[term] > floor else 0
+            Assent agreement = fraction of terms where assent_node == assent_evidence
+
+            For terms where both assent, compute credence tracking:
+                rank correlation (Spearman-like) between node and evidence masses
+
+            MAC passes when:
+                1. Assent agreement >= mac_threshold (binary behavior tracks)
+                2. Credence tracking > 0 among shared-assent terms (graded
+                   probabilities are not anti-correlated)
+
+        Args:
+            dist_node: node's word frequency distribution
+            dist_evidence: evidence's word frequency distribution
+            mac_threshold: minimum assent agreement ratio to pass MAC
+
+        Returns:
+            dict with mac_pass, assent_agreement, credence_tracking,
+            mac_failure_reason (if failed)
+        """
+        if not dist_node or not dist_evidence:
+            return {
+                "mac_pass": False,
+                "assent_agreement": 0.0,
+                "credence_tracking": 0.0,
+                "mac_failure_reason": "empty_distribution",
+            }
+
+        # Floor for assent: terms below this are treated as "not assented to"
+        assent_floor = 1e-4
+
+        all_terms = sorted(set(list(dist_node.keys()) + list(dist_evidence.keys())))
+        if not all_terms:
+            return {
+                "mac_pass": False,
+                "assent_agreement": 0.0,
+                "credence_tracking": 0.0,
+                "mac_failure_reason": "no_vocabulary",
+            }
+
+        # Step 1: Assent agreement — binary assent alignment
+        agree_count = 0
+        both_assent_terms = []
+        for term in all_terms:
+            a_node = dist_node.get(term, 0.0) > assent_floor
+            a_evid = dist_evidence.get(term, 0.0) > assent_floor
+            if a_node == a_evid:
+                agree_count += 1
+            if a_node and a_evid:
+                both_assent_terms.append(term)
+
+        assent_agreement = agree_count / len(all_terms) if all_terms else 0.0
+
+        # Step 2: Credence tracking — rank correlation among shared-assent terms
+        # Use Spearman-style: rank both distributions over the shared terms,
+        # compute 1 - 6*sum(d_i^2) / (n*(n^2-1))
+        credence_tracking = 0.0
+        if len(both_assent_terms) >= 2:
+            node_vals = [dist_node.get(t, 0.0) for t in both_assent_terms]
+            evid_vals = [dist_evidence.get(t, 0.0) for t in both_assent_terms]
+
+            def _rank(vals):
+                # type: (list) -> list
+                indexed = sorted(enumerate(vals), key=lambda x: x[1])
+                ranks = [0.0] * len(vals)
+                for rank_pos, (orig_idx, _) in enumerate(indexed):
+                    ranks[orig_idx] = float(rank_pos + 1)
+                return ranks
+
+            ranks_n = _rank(node_vals)
+            ranks_e = _rank(evid_vals)
+            n_shared = len(both_assent_terms)
+            d_sq_sum = sum((ranks_n[i] - ranks_e[i]) ** 2 for i in range(n_shared))
+            denom = n_shared * (n_shared ** 2 - 1)
+            if denom > 0:
+                credence_tracking = 1.0 - (6.0 * d_sq_sum) / denom
+            else:
+                credence_tracking = 0.0
+        elif len(both_assent_terms) == 1:
+            # Single shared term: trivially correlated
+            credence_tracking = 1.0
+
+        # MAC verdict
+        mac_failure_reason = None
+        if assent_agreement < mac_threshold:
+            mac_failure_reason = (
+                f"assent_agreement={assent_agreement:.3f} < threshold={mac_threshold}: "
+                f"binary assent behavior does not track next-token probabilities"
+            )
+        elif credence_tracking <= 0.0 and len(both_assent_terms) >= 2:
+            mac_failure_reason = (
+                f"credence_tracking={credence_tracking:.3f} <= 0: "
+                f"graded credence is anti-correlated with evidence — "
+                f"assent-credence coupling is broken"
+            )
+
+        mac_pass = mac_failure_reason is None
+
+        return {
+            "mac_pass": mac_pass,
+            "assent_agreement": round(assent_agreement, 4),
+            "credence_tracking": round(credence_tracking, 4),
+            "n_shared_assent_terms": len(both_assent_terms),
+            "mac_failure_reason": mac_failure_reason,
+        }
+
     def score_node_evidence(self, node_text, evidence_text):
         # type: (str, str) -> dict
         """
         Score how well a node's semantic model accommodates new evidence,
         using MWDE theory for misspecification-robust assessment.
+
+        MAC precondition gate: before computing credence correlation, verify
+        that the model's assent behavior tracks its next-token probabilities
+        above a threshold. If MAC fails, the correlation score is flagged as
+        spurious rather than returned as a valid measurement. This prevents
+        O21's AlphaPruning protocol from producing spurious γ-correlation
+        measurements on models where assent-credence coupling is broken.
 
         Returns:
             dict with:
@@ -349,6 +485,8 @@ class MWDEScorer:
                 - misspecification_flag: True if distance suggests model inadequacy
                 - asymptotic_variance_proxy: proxy for the MWDE asymptotic variance
                   (larger support overlap = tighter inference)
+                - mac_check: MAC verification result dict
+                - mac_failure: True if MAC failed (correlation score is spurious)
         """
         dist_node = self._text_to_distribution(node_text)
         dist_evidence = self._text_to_distribution(evidence_text)
@@ -360,6 +498,28 @@ class MWDEScorer:
                 "misspecification_flag": True,
                 "asymptotic_variance_proxy": float('inf'),
                 "support_overlap": 0.0,
+                "mac_check": {"mac_pass": False, "assent_agreement": 0.0,
+                              "credence_tracking": 0.0,
+                              "mac_failure_reason": "empty_distribution"},
+                "mac_failure": True,
+            }
+
+        # ── MAC precondition gate ─────────────────────────────────────────
+        # Verify assent-credence coupling before computing correlation.
+        # If MAC fails, flag explicitly rather than returning spurious score.
+        mac_result = self._mac_check(dist_node, dist_evidence)
+
+        if not mac_result["mac_pass"]:
+            # MAC failure: return flagged result with zero weight.
+            # The correlation score would be spurious — do not compute it.
+            return {
+                "wasserstein_distance": float('nan'),
+                "mwde_weight": 0.0,
+                "misspecification_flag": True,
+                "asymptotic_variance_proxy": float('inf'),
+                "support_overlap": 0.0,
+                "mac_check": mac_result,
+                "mac_failure": True,
             }
 
         w_dist = self._discrete_wasserstein_1d(dist_node, dist_evidence)
@@ -396,6 +556,8 @@ class MWDEScorer:
             "misspecification_flag": misspec,
             "asymptotic_variance_proxy": round(avar_proxy, 6) if avar_proxy != float('inf') else float('inf'),
             "support_overlap": round(support_ratio, 4),
+            "mac_check": mac_result,
+            "mac_failure": False,
         }
 
     def rank_nodes_by_evidence(self, nodes, evidence_text):
@@ -1151,6 +1313,155 @@ class EnergyCorrection:
         gamma = abs(n_invariants - n_open) / total
         return gamma
 
+    @staticmethod
+    def _detect_gamma_restoring_force(gamma_current, node):
+        # type: (float, dict) -> dict
+        """
+        γ-perturbation restoring-force detector for INV_073 falsification.
+
+        INV_073 claims the system navigates a critical ridge at γ≈1.
+        Three confound mechanisms produce γ≈1 observables WITHOUT a
+        maintained ridge:
+          1. Noise-injected transient criticality (random walks through γ≈1)
+          2. Bimodal mixture sampling (averaging distant modes yields ~1)
+          3. Selection-bias retention (only γ≈1 snapshots survive pruning)
+
+        The distinguishing test: a genuine restoring force means that after
+        γ is displaced from its equilibrium, it returns toward that
+        equilibrium in subsequent observations. Confounds 1-3 do NOT
+        produce this return — they produce random γ trajectories that
+        happen to sample near 1.0.
+
+        Tracking protocol:
+          - Read the node's γ history (gamma_history field)
+          - Append current γ
+          - Detect displacement events (|γ - γ_equilibrium| > displacement_threshold)
+          - After a displacement, check if subsequent γ values trend back
+            toward γ_equilibrium (restoring) or wander (no restoring force)
+          - A restoring force is confirmed when ≥ 2 of 3 post-displacement
+            samples move closer to equilibrium than the displaced value
+
+        Returns dict with:
+          - gamma_current: current γ value
+          - gamma_equilibrium: running mean of γ history (the "ridge" target)
+          - gamma_history_len: how many γ samples we have
+          - displacement_detected: whether current γ is significantly displaced
+          - displacement_magnitude: |γ - γ_eq|
+          - restoring_force_detected: True if post-displacement return observed
+          - restoring_force_evidence: description of the evidence (or lack)
+          - inv073_confound_status: UNFALSIFIED / RESTORING_CONFIRMED / INSUFFICIENT_DATA
+        """
+        DISPLACEMENT_THRESHOLD = 0.15  # |γ - γ_eq| must exceed this
+        MIN_HISTORY_FOR_TEST = 4       # need at least 4 samples to test
+        RETURN_WINDOW = 3              # check 3 samples after displacement
+
+        # Read existing γ history from node, append current
+        gamma_history = list(node.get("gamma_history", []))
+        gamma_history.append(round(gamma_current, 4))
+
+        n = len(gamma_history)
+
+        # Compute equilibrium estimate: running mean of all γ samples
+        gamma_eq = sum(gamma_history) / n if n > 0 else gamma_current
+
+        # Current displacement from equilibrium
+        disp_mag = abs(gamma_current - gamma_eq)
+        displaced_now = disp_mag > DISPLACEMENT_THRESHOLD
+
+        # Default result for insufficient data
+        result = {
+            "gamma_current": round(gamma_current, 4),
+            "gamma_equilibrium": round(gamma_eq, 4),
+            "gamma_history_len": n,
+            "displacement_detected": displaced_now,
+            "displacement_magnitude": round(disp_mag, 4),
+            "restoring_force_detected": False,
+            "restoring_force_evidence": "insufficient_data",
+            "inv073_confound_status": "INSUFFICIENT_DATA",
+        }
+
+        if n < MIN_HISTORY_FOR_TEST:
+            return result
+
+        # Scan history for displacement events and check for return
+        # A displacement event: sample where |γ_i - γ_eq| > threshold
+        # After each displacement, check if the next RETURN_WINDOW samples
+        # trend back toward γ_eq
+        restoring_events = 0
+        displacement_events = 0
+        non_restoring_events = 0
+
+        for i in range(n - 1):
+            disp_i = abs(gamma_history[i] - gamma_eq)
+            if disp_i <= DISPLACEMENT_THRESHOLD:
+                continue  # not a displacement event
+            displacement_events += 1
+
+            # Check subsequent samples within the return window
+            window_end = min(i + 1 + RETURN_WINDOW, n)
+            if window_end <= i + 1:
+                continue  # no post-displacement data
+
+            # Count how many post-displacement samples are closer to
+            # equilibrium than the displaced value
+            returning = 0
+            wandering = 0
+            for j in range(i + 1, window_end):
+                post_disp = abs(gamma_history[j] - gamma_eq)
+                if post_disp < disp_i:
+                    returning += 1
+                else:
+                    wandering += 1
+
+            # Restoring force criterion: majority of window returns
+            if returning > wandering:
+                restoring_events += 1
+            else:
+                non_restoring_events += 1
+
+        # Verdict
+        if displacement_events == 0:
+            evidence = ("no_displacement_observed: gamma has remained near "
+                        "equilibrium — restoring force untestable (could be "
+                        "selection-bias confound)")
+            status = "INSUFFICIENT_DATA"
+            restoring = False
+        elif restoring_events > non_restoring_events and displacement_events >= 2:
+            evidence = (
+                f"restoring_confirmed: {restoring_events}/{displacement_events} "
+                f"displacement events show return toward gamma_eq={gamma_eq:.3f} "
+                f"— consistent with maintained ridge, inconsistent with "
+                f"random-walk/mixture confounds"
+            )
+            status = "RESTORING_CONFIRMED"
+            restoring = True
+        elif non_restoring_events > restoring_events and displacement_events >= 2:
+            evidence = (
+                f"restoring_ABSENT: {non_restoring_events}/{displacement_events} "
+                f"displacement events show NO return toward gamma_eq={gamma_eq:.3f} "
+                f"— INV_073 ridge claim NOT supported, confound mechanisms "
+                f"(noise/mixture/selection) remain viable explanations"
+            )
+            status = "UNFALSIFIED"
+            restoring = False
+        else:
+            evidence = (
+                f"inconclusive: {displacement_events} displacement event(s), "
+                f"{restoring_events} restoring, {non_restoring_events} wandering "
+                f"— need more observations to distinguish ridge from confound"
+            )
+            status = "INSUFFICIENT_DATA"
+            restoring = False
+
+        result["restoring_force_detected"] = restoring
+        result["restoring_force_evidence"] = evidence
+        result["inv073_confound_status"] = status
+        result["displacement_events"] = displacement_events
+        result["restoring_events"] = restoring_events
+        result["non_restoring_events"] = non_restoring_events
+
+        return result
+
     def audit_node(self, node):
         # type: (dict) -> dict
         """
@@ -1167,6 +1478,8 @@ class EnergyCorrection:
             - correction_applied: whether the gap exceeded threshold
             - spectral_asymmetry: estimated γ for this node
             - effective_gap_threshold: W_c ∝ √γ disorder-tolerance threshold
+            - gamma_restoring_force: γ-perturbation tracking for INV_073
+              falsification (restoring-force detection over time)
         """
         e_surrogate = float(node.get("coherence_score", 0.5))
         grounding = self._compute_grounding(node)
@@ -1193,6 +1506,12 @@ class EnergyCorrection:
         corrected = xi * e_surrogate + (1.0 - xi) * e_true
         corrected = round(min(0.99, max(0.0, corrected)), 4)
 
+        # ── γ-perturbation restoring-force tracking (INV_073 falsification) ──
+        # Detect whether γ returns toward equilibrium after displacement,
+        # distinguishing genuine critical-ridge navigation from confound
+        # mechanisms (noise transients, bimodal mixtures, selection bias).
+        gamma_rf = self._detect_gamma_restoring_force(gamma, node)
+
         return {
             "e_true": round(e_true, 4),
             "e_surrogate": round(e_surrogate, 4),
@@ -1205,6 +1524,7 @@ class EnergyCorrection:
             "relaxation_xi": xi,
             "spectral_asymmetry": round(gamma, 4),
             "effective_gap_threshold": round(effective_threshold, 4),
+            "gamma_restoring_force": gamma_rf,
         }
 
     @staticmethod
@@ -1718,6 +2038,37 @@ class Consolidator:
             "nodes_updated":  0,
             "invariants_mined": [],
         }
+
+        # ── Dissipative-criticality signal detection (INV_073) ────────────────
+        # Flag papers whose abstract contains both "dissipat" and "phase transition"
+        # as carrying a dissipative-renormalization signal. These papers directly
+        # probe whether the kernel's critical ridge is bath-renormalized — tagging
+        # them ensures they are weighted in coherence updates rather than treated
+        # as generic physics literature.
+        _nk_lower = new_knowledge.lower()
+        if "dissipat" in _nk_lower and "phase transition" in _nk_lower:
+            report["dissipative_criticality_signal"] = True
+            # Increment dissipative_criticality_count on genome state dict
+            if state is not None:
+                state["dissipative_criticality_count"] = state.get(
+                    "dissipative_criticality_count", 0) + 1
+                # Persist the updated count back to FREED_state.json
+                _state_path = FREED_DIR / "FREED_state.json"
+                if _state_path.exists():
+                    try:
+                        _sdata = json.loads(_state_path.read_text())
+                        _sdata["dissipative_criticality_count"] = state[
+                            "dissipative_criticality_count"]
+                        _state_path.write_text(
+                            json.dumps(_sdata, indent=2, ensure_ascii=False))
+                    except (json.JSONDecodeError, OSError):
+                        pass
+                print(f"[CONSOLIDATE] ⚡ Dissipative-criticality signal detected "
+                      f"(count={state['dissipative_criticality_count']}): "
+                      f"INV_073 — bath-renormalized QPT fixed point may shift "
+                      f"ridge criterion away from naive γ=1")
+        else:
+            report["dissipative_criticality_signal"] = False
 
         # ── Phase 1: Select ──────────────────────────────────────────────────
         affected = self.select_affected(new_knowledge, all_nodes)

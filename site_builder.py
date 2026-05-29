@@ -597,6 +597,48 @@ def _write_cycles(cycle_log: dict):
     if criticality:
         summary["criticality"] = criticality
 
+    # O148 structured telemetry: promote key metrics to top-level summary
+    # fields so subsequent FEED steps can cross-correlate without parsing
+    # the nested criticality dict.  These flat fields enable the epistemic
+    # loop to detect convergence of criticality metrics across replicates.
+    if criticality:
+        _br = criticality.get("branching_ratio")
+        if _br is not None:
+            summary["branching_ratio"] = _br
+        # O148: σ uncertainty band — required for falsifiability of σ≈1.0 claim
+        _br_err = criticality.get("branching_ratio_err")
+        if _br_err is not None:
+            summary["branching_ratio_err"] = _br_err
+        _ae = criticality.get("avalanche_exponent")
+        if _ae is not None:
+            summary["avalanche_exponent"] = _ae
+        # O148: power-law R² — quantifies fit quality; R²<0.9 flags weak universality
+        _r2 = criticality.get("power_law_r2")
+        if _r2 is not None:
+            summary["power_law_r2"] = _r2
+        _sr = criticality.get("survival_rate")
+        if _sr is not None:
+            summary["survival_rate"] = _sr
+        # entropy_ratio: H/H_max is the scale-invariant criticality index
+        _er = criticality.get("h_over_h_max")
+        if _er is not None:
+            summary["entropy_ratio"] = _er
+        elif criticality.get("shannon_entropy") is not None:
+            # Fall back to raw entropy when ratio unavailable
+            summary["entropy_ratio"] = criticality.get("shannon_entropy")
+        _dct = criticality.get("dominant_cell_type")
+        if _dct is not None:
+            summary["dominant_cell_type"] = _dct
+        # O148: joint criticality verdict and its basis — makes RESOLVE
+        # firing automatable by surfacing the machine-readable verdict
+        # (e.g. AT_CRITICAL, CRITICAL_CONTESTED) at the top level
+        _cv = criticality.get("criticality_verdict")
+        if _cv is not None:
+            summary["criticality_verdict"] = _cv
+        _vb = criticality.get("verdict_basis")
+        if _vb is not None:
+            summary["verdict_basis"] = _vb
+
     # Record σ and α time-series from CA telemetry so temporal drift
     # toward/away from criticality is trackable across cycles (resolves O148).
     # When the CA runner provides per-step arrays, embed them directly;

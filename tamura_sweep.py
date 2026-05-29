@@ -1384,6 +1384,66 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
             "universality class determination ({} valid sizes, {} log-bins)."
         ).format(dsi["n_sizes"], dsi["n_log_bins"])
 
+    # ── SOC reference exponent comparison (INV_094) ──────────────────────
+    # The fractal-diffusive SOC model predicts specific power-law slopes:
+    #   αF = 9/5 = 1.80 (flux/size)
+    #   αE = 5/3 ≈ 1.67 (fluence/energy)
+    #   αT = 2.00 (avalanche duration)
+    # A meta-analysis across 25 interdisciplinary phenomena found ~80%
+    # consistency with αs = 1.99 ± 0.30.  Distributions whose fitted α
+    # deviates by more than 0.30 from ALL three reference values are
+    # flagged as "non-SOC outliers" — signaling either methodological
+    # artifact or genuine non-critical dynamics, both epistemically
+    # actionable.
+    _SOC_REF_ALPHA_F = 1.80   # flux / size exponent (9/5)
+    _SOC_REF_ALPHA_E = 1.67   # fluence / energy exponent (5/3)
+    _SOC_REF_ALPHA_T = 2.00   # avalanche duration exponent
+    _SOC_DEVIATION_THRESHOLD = 0.30
+
+    _soc_refs = {
+        "alpha_F": _SOC_REF_ALPHA_F,
+        "alpha_E": _SOC_REF_ALPHA_E,
+        "alpha_T": _SOC_REF_ALPHA_T,
+    }
+    _soc_deviations = {}  # type: dict
+    _soc_closest_ref = ""
+    _soc_closest_dev = float('inf')
+    for _ref_name, _ref_val in _soc_refs.items():
+        _dev = abs(alpha - _ref_val)
+        _soc_deviations[_ref_name] = round(_dev, 4)
+        if _dev < _soc_closest_dev:
+            _soc_closest_dev = _dev
+            _soc_closest_ref = _ref_name
+
+    _soc_outlier = _soc_closest_dev > _SOC_DEVIATION_THRESHOLD
+
+    if _soc_outlier:
+        _soc_flag_detail = (
+            "NON-SOC OUTLIER (INV_094): fitted alpha={:.4f} deviates by "
+            "{:.4f} from nearest SOC reference {} ({:.2f}), exceeding "
+            "threshold {:.2f}. Deviations from all references: {}. "
+            "This distribution is inconsistent with fractal-diffusive SOC "
+            "model predictions (alpha_F=1.80, alpha_E=1.67, alpha_T=2.00). "
+            "Power-law appearance alone does NOT confirm criticality — "
+            "this may indicate methodological artifact or genuine "
+            "non-critical dynamics. Flagged for downstream inspection."
+        ).format(
+            alpha, _soc_closest_dev, _soc_closest_ref,
+            _soc_refs[_soc_closest_ref], _SOC_DEVIATION_THRESHOLD,
+            _soc_deviations,
+        )
+    else:
+        _soc_flag_detail = (
+            "SOC CONSISTENT: fitted alpha={:.4f} is within {:.2f} of "
+            "SOC reference {} ({:.2f}). Deviation={:.4f}. Consistent "
+            "with fractal-diffusive SOC model predictions across 25 "
+            "interdisciplinary substrates (Aschwanden meta-analysis: "
+            "alpha_s=1.99+/-0.30, ~80% consistency rate)."
+        ).format(
+            alpha, _SOC_DEVIATION_THRESHOLD, _soc_closest_ref,
+            _soc_refs[_soc_closest_ref], _soc_closest_dev,
+        )
+
     return {
         "alpha": round(alpha, 4),
         "alpha_r_squared": round(alpha_r_squared, 4),
@@ -1392,6 +1452,12 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
         "dsi": dsi,
         "universality_class": dsi["universality_class"],
         "l4_rg_assessment": l4_rg,
+        "soc_ref_deviations": _soc_deviations,
+        "soc_closest_ref": _soc_closest_ref,
+        "soc_closest_deviation": round(_soc_closest_dev, 4),
+        "soc_outlier": _soc_outlier,
+        "soc_deviation_threshold": _SOC_DEVIATION_THRESHOLD,
+        "soc_flag_detail": _soc_flag_detail,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -7933,10 +7999,166 @@ class TamuraSweep:
             "absorbing_detail": _absorbing_detail,
         }
 
-        # Attach FSS result and absorbing-state covariate to sweep output
+        # ── Branching-Ratio Estimator (INV_073 Falsification) ────────────
+        # Computes σ = descendant_events / ancestor_events per avalanche
+        # epoch across the per-source score stream, classifying the sweep's
+        # aggregate activity as sub-critical (σ < 0.95), critical
+        # (0.95 ≤ σ ≤ 1.05), or super-critical (σ > 1.05).
+        #
+        # An "avalanche" here is a contiguous run of above-mean activity
+        # across consecutive source batches.  Within each avalanche the
+        # ancestor score (source i) and descendant score (source i+1) are
+        # compared to yield a per-epoch σ.  The global σ is the mean of
+        # per-epoch ratios.
+        #
+        # INV_073 challenge: if σ systematically drifts above 1 under high
+        # cognitive load (many high-scoring sources), the claim that
+        # biological / epistemic systems *maintain* the critical ridge
+        # during active cognition is falsified rather than merely
+        # approached transiently.
+        #
+        # This is the canonical SOC order parameter; embedding it here
+        # directly tests O21's spectral-γ correlation claim with a
+        # falsifiable, continuous metric.
+
+        _br_result = {
+            "sigma_mean": 0.0,
+            "sigma_std": 0.0,
+            "sigma_per_epoch": [],
+            "n_epochs": 0,
+            "regime": "UNDETERMINED",
+            "regime_detail": "",
+            "inv073_falsified": False,
+            "inv073_detail": "",
+        }  # type: dict
+
+        # Compute global mean score as the quiescent threshold
+        _all_src_means = [
+            sum(b) / float(len(b)) if b else 0.0
+            for b in per_source_scores
+        ]
+        _global_mean_score = (
+            sum(_all_src_means) / float(len(_all_src_means))
+            if _all_src_means else 0.0
+        )
+
+        # Identify avalanche epochs: contiguous runs of above-mean sources
+        _br_epochs = []       # type: List[float]
+        _in_epoch = False
+        _epoch_ancestors = [] # type: List[float]
+        _epoch_descendants = [] # type: List[float]
+
+        for _si in range(len(_all_src_means)):
+            _above = _all_src_means[_si] > _global_mean_score
+            if _above:
+                if not _in_epoch:
+                    _in_epoch = True
+                    _epoch_ancestors = []
+                    _epoch_descendants = []
+                # Within an epoch, treat source i as ancestor, i+1 as descendant
+                if _epoch_ancestors:
+                    # Previous source was ancestor, current is descendant
+                    _epoch_descendants.append(_all_src_means[_si])
+                _epoch_ancestors.append(_all_src_means[_si])
+            else:
+                # Quiescent — close any open epoch
+                if _in_epoch and len(_epoch_ancestors) >= 1 and len(_epoch_descendants) >= 1:
+                    _anc_mean = sum(_epoch_ancestors[:-1]) / float(len(_epoch_ancestors) - 1) if len(_epoch_ancestors) > 1 else _epoch_ancestors[0]
+                    _desc_mean = sum(_epoch_descendants) / float(len(_epoch_descendants))
+                    if _anc_mean > 1e-12:
+                        _br_epochs.append(_desc_mean / _anc_mean)
+                _in_epoch = False
+                _epoch_ancestors = []
+                _epoch_descendants = []
+
+        # Flush trailing epoch
+        if _in_epoch and len(_epoch_ancestors) >= 1 and len(_epoch_descendants) >= 1:
+            _anc_mean = sum(_epoch_ancestors[:-1]) / float(len(_epoch_ancestors) - 1) if len(_epoch_ancestors) > 1 else _epoch_ancestors[0]
+            _desc_mean = sum(_epoch_descendants) / float(len(_epoch_descendants))
+            if _anc_mean > 1e-12:
+                _br_epochs.append(_desc_mean / _anc_mean)
+
+        # If no multi-step epochs found, fall back to consecutive-pair ratios
+        if not _br_epochs and len(_all_src_means) >= 2:
+            for _si in range(len(_all_src_means) - 1):
+                if _all_src_means[_si] > 1e-12:
+                    _br_epochs.append(
+                        _all_src_means[_si + 1] / _all_src_means[_si]
+                    )
+
+        if _br_epochs:
+            _br_n = len(_br_epochs)
+            _br_mean = sum(_br_epochs) / float(_br_n)
+            _br_var = sum((_s - _br_mean) ** 2 for _s in _br_epochs) / float(_br_n)
+            _br_std = math.sqrt(_br_var) if _br_var > 0 else 0.0
+
+            # Classify regime
+            _BR_LOW = 0.95
+            _BR_HIGH = 1.05
+            if _BR_LOW <= _br_mean <= _BR_HIGH:
+                _br_regime = "CRITICAL"
+                _br_regime_detail = (
+                    "sigma={:.4f}+/-{:.4f} within critical band [{:.2f}, {:.2f}]. "
+                    "The sweep's score propagation is at criticality — descendant "
+                    "activity neither amplifies nor decays relative to ancestors. "
+                    "{} avalanche epoch(s) analyzed."
+                ).format(_br_mean, _br_std, _BR_LOW, _BR_HIGH, _br_n)
+            elif _br_mean > _BR_HIGH:
+                _br_regime = "SUPERCRITICAL"
+                _br_regime_detail = (
+                    "sigma={:.4f}+/-{:.4f} above critical band (>{:.2f}). "
+                    "Descendant scores systematically exceed ancestor scores — "
+                    "the sweep exhibits supercritical amplification. {} epoch(s)."
+                ).format(_br_mean, _br_std, _BR_HIGH, _br_n)
+            else:
+                _br_regime = "SUBCRITICAL"
+                _br_regime_detail = (
+                    "sigma={:.4f}+/-{:.4f} below critical band (<{:.2f}). "
+                    "Descendant scores systematically decay relative to ancestors — "
+                    "the sweep exhibits subcritical dissipation. {} epoch(s)."
+                ).format(_br_mean, _br_std, _BR_LOW, _br_n)
+
+            # INV_073 falsification: sustained supercritical
+            _br_inv073_falsified = _br_mean > _BR_HIGH and _br_std < 0.1
+            if _br_inv073_falsified:
+                _br_inv073_detail = (
+                    "INV_073 CHALLENGED: sigma={:.4f}+/-{:.4f} is sustained "
+                    "supercritical (>{:.2f} with low variance). If neural "
+                    "avalanches during active tasks show sigma systematically "
+                    "above 1, the claim that biological systems *maintain* the "
+                    "critical ridge during active cognition is falsified rather "
+                    "than merely approached transiently. The branching ratio "
+                    "indicates runaway amplification, not ridge navigation."
+                ).format(_br_mean, _br_std, _BR_HIGH)
+            elif _br_regime == "CRITICAL":
+                _br_inv073_detail = (
+                    "INV_073 CONSISTENT: sigma={:.4f} within critical band. "
+                    "The sweep's score propagation maintains the critical ridge, "
+                    "consistent with O21's spectral-gamma correlation claim."
+                ).format(_br_mean)
+            else:
+                _br_inv073_detail = (
+                    "INV_073 MONITORING: sigma={:.4f} in {} regime. "
+                    "Not yet falsified but not confirming ridge maintenance."
+                ).format(_br_mean, _br_regime.lower())
+
+            _br_result = {
+                "sigma_mean": round(_br_mean, 6),
+                "sigma_std": round(_br_std, 6),
+                "sigma_per_epoch": [round(_s, 6) for _s in _br_epochs],
+                "n_epochs": _br_n,
+                "regime": _br_regime,
+                "regime_detail": _br_regime_detail,
+                "inv073_falsified": _br_inv073_falsified,
+                "inv073_detail": _br_inv073_detail,
+            }
+
+        # Attach FSS result, absorbing-state covariate, and branching-ratio
+        # estimator to sweep output
         for inp in all_inputs:
             inp["fss_collapse"] = fss_result
             inp["absorbing_state"] = _absorbing_state_result
+            inp["branching_ratio_estimate"] = _br_result
 
         # ── Yule–Simon Null-Model Discrimination (INV_047 Falsification) ──
         # INV_047 claims corpus frequency trajectories follow geodesic
