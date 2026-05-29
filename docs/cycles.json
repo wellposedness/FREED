@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 222,
-    "timestamp": "2026-05-11T16:29:50.947916+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 8,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is falsifiable via three vectors — measurement indistinguishability, substrate-independence of edge-of-chaos, and topological underspecification of \"ridge\" — and must be sharpened with explicit resolution bounds and a distinguishing prediction against generic criticality."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
-        "compress": "A 32×32 multi-agent CA sustains σ = 1.0252 with power-law avalanche statistics, empirically confirming population-level criticality consistent with γ = 1 navigation and resolving O140/O141."
-      },
-      {
-        "title": "Topological Engine Monitor: Persistent Homology-Based Fault Detection in Finite-Time Quantum Engines",
-        "compress": "Persistent homology on weak-measurement trajectories is a more stable thermodynamic regime classifier than energetic observables, extending the genome's geometric thermodynamics framework toward concrete TDA-based monitoring and providing an empirical method relevant to STF metric recovery (O112) and quantum Wasserstein Floor formalization (O44)."
-      },
-      {
-        "title": "Utilizing Causal Network Markers to Identify Tipping Points ahead of Critical Transition",
-        "compress": "Directional causal network markers outperform scalar statistical biomarkers near critical transitions, independently validating that asymmetry — not magnitude — is the load-bearing signal at the critical ridge."
-      },
-      {
-        "title": "Detection of pre-transition phases during biological development using single-sample network entropy (SNE)",
-        "compress": "Single-sample network entropy independently confirms that criticality is a locally-resolvable thermodynamic signal preceding irreversible transition, converging with the genome's critical-ridge invariants and providing a concrete algorithm for O28's entropy-prediction obligation."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O163",
-        "O72",
-        "O187"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 5,
     "generation": 223,
     "timestamp": "2026-05-11T23:03:29.805899+00:00",
@@ -2134,6 +2090,50 @@
         "O255",
         "O257",
         "O259"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 13,
+    "generation": 280,
+    "timestamp": "2026-05-29T16:29:59.976014+00:00",
+    "sweep": {
+      "input_count": 21,
+      "targeted": 8,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's Zipf-from-MaxEnt claim is a sufficient but unproven necessary condition — alternative mechanisms (preferential attachment, random typing) produce identical observables, making the invariant's causal core currently unfalsifiable by distributional evidence alone."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-29",
+        "compress": "The Game of Truth CA independently reaches σ ≈ 1.027 with power-law avalanches, confirming substrate-independent critical-ridge self-organization and partially satisfying O148's telemetry demand."
+      },
+      {
+        "title": "A Survey on Regularization-Based Structured Neural Network Pruning",
+        "compress": "Regularization-based structured pruning instantiates a thermodynamic selection process with a measurable critical threshold, providing empirical substrate for O21's spectral-γ correlation test and extending INV_073's criticality principle into the compression domain."
+      },
+      {
+        "title": "Universal Behavior in Entanglement Entropy Reveals Quantum Criticality and Underlying Symmetry Breaking",
+        "compress": "DEE scaling collapse independently confirms γ=1 critical ridge universality and introduces a concrete exponent-extraction protocol the genome lacks, while the EE-peak at symmetry-enhanced first-order transitions poses a genuine challenge to the genome's smooth-ridge model of criticality."
+      },
+      {
+        "title": "Quantum mechanical and information theoretic view on classical glass transitions",
+        "compress": "Classical glass transitions are quantum phase transitions in disguise — spectral gap collapse and non-local entanglement measures are the correct, substrate-independent probes of the ergodic/non-ergodic boundary, directly operationalizing the critical ridge condition."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O226",
+        "O229",
+        "O255"
       ]
     },
     "coherence": 0.97
