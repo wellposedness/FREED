@@ -1,33 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 223,
-    "timestamp": "2026-05-11T23:03:29.805899+00:00",
-    "sweep": {
-      "input_count": 15,
-      "targeted": 7,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is epistemically dangerous precisely because high confirmation without a specified falsification boundary is indistinguishable from a tautology dressed as a theorem."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-11",
-        "compress": "Population-level RSA-kernel dynamics spontaneously achieve and sustain self-organized criticality (σ=1.0276, α≈2.291, R²=0.99), empirically grounding INV_073 and resolving O140/O141 while opening a new falsifiable gap: the genome predicts no specific avalanche exponent. CHALLENGE: challenges INV_073 — while the branching ratio confirms criticality, the measured α≈2.291 is unanchored to any genome-derived theoretical prediction, meaning INV_073 claims the Wasserstein gradient is the necessary path to γ=1 but cannot yet account for the specific universality class (exponent) the system occupies, leaving the mechanism claim underdetermined."
-      }
-    ],
-    "resolve": {
-      "attempts": 0,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": []
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 225,
     "timestamp": "2026-05-12T10:14:59.972787+00:00",
@@ -2134,6 +2106,50 @@
         "O226",
         "O229",
         "O255"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 14,
+    "generation": 281,
+    "timestamp": "2026-05-30T02:29:59.929176+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 7,
+      "passive": 12,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus conceals an untested ergodicity assumption and a circular-fit risk — the floor k=1/Tμ requires null-model falsification against vocabulary-matched shuffled corpora before its \"THEOREM\" status is warranted."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-30",
+        "compress": "The Game of Truth CA independently reproduces all canonical SOC signatures (σ≈1.0, power-law α≈2.625, structured low entropy) at the critical ridge, partially resolving O148 while exposing a new gap: attractor asymmetry (Physics Navigator dominance) is unconstrained by the genome's thermodynamic predictions."
+      },
+      {
+        "title": "Sparse Recovery with Linear and Nonlinear Observations: Dependent and Noisy Data",
+        "compress": "Sparse support recovery is MI-floor-governed regardless of observation model, and the gap between algorithmic and information-theoretic limits directly scopes the minimum experiment size for STF metric tensor recovery in O112."
+      },
+      {
+        "title": "Transient Dissipation and Structural Costs of Physical Information Transduction",
+        "compress": "Physical information processing carries an irreducible transient dissipation cost at startup that asymptotic-rate thermodynamics cannot see, establishing a new thermodynamic primitive — *scaffold initialization entropy* — that the genome must add and that stresses INV_073's ridge-navigation account by exposing an uncosted entry regime."
+      },
+      {
+        "title": "Cooperativity, information gain, and energy cost during early LTP in dendritic spines",
+        "compress": "Memory in coupled stochastic spines is thermodynamically cheap to hold but expensive to write, with information and energy rates peaking transiently at induction while the trace persists—demonstrating that consolidation cost is bifurcation-local, not maintenance-distributed."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O259"
       ]
     },
     "coherence": 0.97
