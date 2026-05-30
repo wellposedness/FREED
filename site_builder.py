@@ -119,6 +119,45 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
 
     sigma = ca_telemetry.get("branching_ratio")
     sigma_err = ca_telemetry.get("branching_ratio_err", 0.0)
+
+    # O148: Compute σ = mean(offspring)/mean(active) from per-timestep arrays
+    # when branching_ratio is not pre-computed by the CA runner.  This closes
+    # the open demand for richer CA telemetry by deriving the criticality
+    # signal directly from raw simulation data.
+    if sigma is None:
+        offspring_per_step = ca_telemetry.get("offspring_per_step")
+        active_per_step = ca_telemetry.get("active_per_step")
+        if (isinstance(offspring_per_step, list) and isinstance(active_per_step, list)
+                and len(offspring_per_step) > 0 and len(active_per_step) > 0):
+            try:
+                valid_offspring = [float(x) for x in offspring_per_step if x is not None]
+                valid_active = [float(x) for x in active_per_step if x is not None]
+                if valid_active and valid_offspring:
+                    mean_offspring = sum(valid_offspring) / len(valid_offspring)
+                    mean_active = sum(valid_active) / len(valid_active)
+                    if mean_active > 0:
+                        sigma = round(mean_offspring / mean_active, 6)
+                        # Compute uncertainty via per-step σ_i = offspring_i / active_i
+                        n_steps = min(len(valid_offspring), len(valid_active))
+                        per_step_sigmas = []
+                        for i in range(n_steps):
+                            if valid_active[i] > 0:
+                                per_step_sigmas.append(valid_offspring[i] / valid_active[i])
+                        if len(per_step_sigmas) >= 2:
+                            mu = sum(per_step_sigmas) / len(per_step_sigmas)
+                            variance = sum((s - mu) ** 2 for s in per_step_sigmas) / len(per_step_sigmas)
+                            sigma_err = round(variance ** 0.5, 6)
+                        else:
+                            sigma_err = 0.0
+                        # Store computed values back so downstream logic picks them up
+                        ca_telemetry["branching_ratio"] = sigma
+                        ca_telemetry["branching_ratio_err"] = sigma_err
+                        ca_telemetry["branching_ratio_computed"] = True
+                        ca_telemetry["branching_ratio_n_steps"] = n_steps
+                        ca_telemetry["branching_ratio_mean_offspring"] = round(mean_offspring, 6)
+                        ca_telemetry["branching_ratio_mean_active"] = round(mean_active, 6)
+            except (TypeError, ValueError):
+                pass
     alpha = ca_telemetry.get("power_law_exponent") or ca_telemetry.get("avalanche_exponent")
     r2 = ca_telemetry.get("power_law_r2")
     entropy = ca_telemetry.get("shannon_entropy")

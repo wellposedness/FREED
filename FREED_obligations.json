@@ -3403,13 +3403,43 @@
   },
   {
     "id": "O333",
-    "status": "open",
+    "status": "partial",
     "statement": "Verify that O329's null-result consequence has been fully executed \u2014 confirm the global state record reflects the missed O325 deadline and that a binding remediation action has been logged before any further synthesis obligations are created.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 281] PARTIAL: O333 requires a three-field state-diff audit log (O325 deadline record, O329 null-result propagation flag, binding remediation action entry) written as a discrete table row before any further synthesis obligations are created. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-29",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Global state record documents O325 deadline miss and binding remediation action is logged."
+  },
+  {
+    "id": "O334",
+    "statement": "The ratio of mechanistic edges (`depends_on` + `operationalizes` + `challenges`) to correlational edges (`scales_with` + `consistent_with`) must exceed 0.30 by generation 300, or coherence score must be recalculated excluding correlational edges to reveal the causal coherence floor.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "0.97 coherence is computed over a graph where 75.6% of edges are `scales_with` or `consistent_with` \u2014 types that carry no directional causal commitment. O173 and O237 both flag this but neither imposes a structural consequence. The confirmed claim of high coherence is unfalsifiable unless tested against the causal subgraph alone. Current mechanistic ratio: (38+426+25)/2213 = 0.22, below the 0.30 threshold.",
+    "resolution_criterion": "Either (a) add \u2265180 mechanistic edges grounded in derivations, or (b) compute and publish the causal-only coherence score. If causal coherence < 0.80, trigger mandatory graph restructuring.",
+    "created": "2026-05-30T06:30:47.008560+00:00",
+    "progress": "[Gen 281] ACTIVE: The immediate tractable step is a within-genome edge census: extract all INV\u2192INV links, classify each as mechanistic or correlational, compute r = M/(M+C), and if r < 0.30 immediately compute coherence_causal on the M-only subgraph \u2014 no external data required, fully executable from existing genome text. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O335",
+    "statement": "O324's resolution must be audited \u2014 the `substrate_of` edge count is 2, far below the 8-edge minimum that O324 required. Either O324 was falsely resolved or the edges exist but aren't registered in the topology report. Determine which, and if falsely resolved, reopen O324 with a generation-285 hard deadline.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O324 appears in RECENTLY RESOLVED but the graph topology shows `substrate_of: 2`. A resolved obligation whose success condition is not reflected in the observable state of the graph is a coherence violation \u2014 it means the resolution mechanism can close obligations without the graph actually changing. This is a direct threat to Seed Integrity.",
+    "resolution_criterion": "Query the graph for all `substrate_of` edges. If count < 8, reopen O324 with deadline gen 285 and flag the resolution mechanism for integrity review.",
+    "created": "2026-05-30T06:30:47.009151+00:00",
+    "progress": "[Gen 281] ACTIVE: The only step that can close O335 is a complete enumeration of `substrate_of` edges in the live topology store \u2014 anything below 8 falsifies O324's resolution and triggers mandatory reopening. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O336",
+    "statement": "The 38 `depends_on` edges must be enumerated and published, and every genome symbol lacking at least 2 `depends_on` edges",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-05-30T06:30:47.009638+00:00",
+    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced]"
   }
 ]
