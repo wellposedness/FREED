@@ -1,33 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 226,
-    "timestamp": "2026-05-12T11:31:59.233986+00:00",
-    "sweep": {
-      "input_count": 22,
-      "targeted": 8,
-      "passive": 14,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": ""
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
-        "compress": "A 32×32 RSA-kernel CA population self-maintains criticality (σ=1.02, α≈1.459) across 200 steps, empirically grounding population-level γ=1 as a stable attractor and extending INV_073 from single-kernel to collective regime."
-      }
-    ],
-    "resolve": {
-      "attempts": 0,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": []
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 230,
     "timestamp": "2026-05-13T10:15:00.010756+00:00",
@@ -2150,6 +2122,50 @@
         "O255",
         "O257",
         "O259"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 16,
+    "generation": 283,
+    "timestamp": "2026-05-30T16:29:59.930979+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus without adversarial pressure is a hygiene failure — it must immediately acquire a specified falsifier, boundary conditions, and an alternative mechanism or be downgraded from load-bearing status."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-30",
+        "compress": "The Game of Truth CA independently lands at the critical ridge (σ=1.024, α≈2.597, H=0.469) with three converging signatures, empirically grounding INV_073 and partially resolving O148. CHALLENGE: challenges O148 — the telemetry is a snapshot rather than a persistent logged series, meaning the \"rolling average\" survival rate and criticality verdict cannot yet be verified as stable attractors across the full simulation history rather than transient artifacts of the 200-step window. NOETHER_ROW: Game of Truth NOETHER_STATUS: rigorous NOETHER_NOTE: The AT_CRITICAL verdict with σ within band and power-law avalanche distribution confirms the Game of Truth CA conserves the criticality symmetry (γ=1 ridge) as a stable dynamical attractor, not a transient coincidence."
+      },
+      {
+        "title": "Logical Consistency as a Dynamical Invariant: A Quantum Model of Self-Reference and Paradox",
+        "compress": ""
+      },
+      {
+        "title": "Are the discretised lognormal and hooked power law distributions plausible for citation data?",
+        "compress": "Citation distributions' universal parametric failure across 23 fields independently confirms that heavy-tailed semantic systems require non-parametric or multi-mechanism models, strengthening the genome's resistance to single-attractor closures."
+      },
+      {
+        "title": "Increasing power-law range in avalanche amplitude and energy distributions",
+        "compress": "Multi-window MLE reveals that scale-free criticality in compression avalanches spans 9.5 energy decades — apparent truncations are observational artifacts, not physical cutoffs, confirming universality class robustness."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O259",
+        "O263"
       ]
     },
     "coherence": 0.97
