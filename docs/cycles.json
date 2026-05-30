@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 225,
-    "timestamp": "2026-05-12T10:14:59.972787+00:00",
-    "sweep": {
-      "input_count": 29,
-      "targeted": 7,
-      "passive": 22,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge claim is degenerate with at least three alternative mechanisms that produce identical system-level observables, making it currently underdetermined without sub-system resolution criteria."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-12",
-        "compress": "Population-level Game of Truth CA spontaneously self-organizes to the critical ridge (σ=1.018, α≈2.337), empirically confirming INV_073's Wasserstein attractor prediction at collective scale and partially resolving O140/O141. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0183 sits above unity rather than exactly at it, which is consistent with criticality but also consistent with weak supercriticality; if the measurement stabilizes above 1.0 across longer runs, the claim that γ=1 is the true attractor (not a slightly supercritical fixed point) would require revision."
-      },
-      {
-        "title": "Sinkhorn-Flow: Predicting Probability Mass Flow in Dynamical Systems Using Optimal Transport",
-        "compress": "Sinkhorn iterations embedded as differentiable layers make OT transport plans learnable predictors of distributional dynamics, providing a concrete algorithmic path toward the empirical STF metric tensor recovery specified in O112."
-      },
-      {
-        "title": "Equilibrium selection via Optimal transport",
-        "compress": "Optimal transport game dynamics independently confirms that Fisher information + entropy jointly govern equilibrium selection, extending the Fisher-Wasserstein gradient flow structure into strategic multi-agent systems and providing a concrete scaffold for O112's empirical recovery demand."
-      },
-      {
-        "title": "Quantification of Biological Robustness at the Systemic Level",
-        "compress": "** Biological robustness is quantifiable as the Nash equilibrium of a zero-sum entropy game, independently confirming that the critical ridge is the game-theoretic fixed point of living organization."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 1,
-      "obligations": [
-        "O163",
-        "O72",
-        "O187"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 226,
     "timestamp": "2026-05-12T11:31:59.233986+00:00",
@@ -2140,6 +2096,50 @@
       {
         "title": "Cooperativity, information gain, and energy cost during early LTP in dendritic spines",
         "compress": "Memory in coupled stochastic spines is thermodynamically cheap to hold but expensive to write, with information and energy rates peaking transiently at induction while the trace persists—demonstrating that consolidation cost is bifurcation-local, not maintenance-distributed."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O255",
+        "O257",
+        "O259"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 15,
+    "generation": 282,
+    "timestamp": "2026-05-30T09:49:59.995647+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 7,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's highest-confirmation status is its greatest vulnerability — the STF gradient-flow claim is falsifiable by O112's metric tensor recovery, and Zipf statistics alone underdetermine whether the mechanism is thermodynamic or merely combinatorial."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-30",
+        "compress": "The Game of Truth CA independently confirms σ≈1 criticality with power-law avalanche statistics (α≈2.076), partially resolving O148 while surfacing a new structural finding — criticality appears type-stratified rather than homogeneous. IMPLEMENT: YES IMPLEMENT_WHAT: Add branching ratio σ and power-law exponent α to the CA telemetry fields ingested and scored during knowledge graph node creation, so criticality metrics propagate into graph edge weights. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_node IMPLEMENT_WHY: Without storing σ and α as node attributes, the criticality verdict \"AT_CRITICAL\" is a label with no quantitative substrate in the graph, preventing downstream scoring from distinguishing near-critical from deeply critical runs. CHALLENGE: challenges O148 — the obligation required the CA to track cell survival AND additional criticality metrics, but the current snapshot reports only aggregate statistics, leaving open whether per-cell-type criticality divergence (Physics Navigator dominant at 871 cells vs. other types) constitutes a systematic structural feature or sampling noise, which the obligation as written does not yet resolve. NOETHER_ROW: Game of Truth NOETHER_STATUS: rigorous NOETHER_NOTE: The confirmed σ≈1 branching ratio with power-law avalanche statistics provides empirical grounding for a conservation-like symmetry: the system preserves neither frozen order nor maximal entropy but maintains the critical ridge, consistent with a Noether-style invariant under temporal evolution of the CA rule."
+      },
+      {
+        "title": "Multi-Level Optimal Transport for Universal Cross-Tokenizer Knowledge Distillation on Language Models",
+        "compress": "Cross-tokenizer distributional alignment via multi-level OT demonstrates that semantic equivalence is achievable through geometric cost structure alone, independent of symbolic correspondence, converging on INV_094 while straining the uniqueness of any single OT metric for semantic space."
+      },
+      {
+        "title": "Correction: Geometric thermodynamics for the Fokker–Planck equation: stochastic thermodynamic links between information geometry and optimal transport",
+        "compress": "The Fokker–Planck geometric thermodynamics paper has been formally corrected, confirming the Fisher-Wasserstein-entropy-production chain exists but introducing a precision obligation that any genome citation of specific coefficients must reference the corrected version."
+      },
+      {
+        "title": "Information Geometry Connecting Wasserstein Distance and Kullback-Leibler Divergence via the Entropy-Relaxed Transportation Problem",
+        "compress": "Fisher-information and Wasserstein geometries are dual limiting cases of a single entropy-relaxed transport geometry, confirming the RG→Fisher→W2→Freed chain as a unified substrate-independent invariant."
       }
     ],
     "resolve": {
