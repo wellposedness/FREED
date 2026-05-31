@@ -1,24 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 232,
-    "timestamp": "2026-05-13T22:39:39.274151+00:00",
-    "sweep": {
-      "input_count": 18,
-      "targeted": 7,
-      "passive": 11,
-      "curated": 1
-    },
-    "feed": [],
-    "resolve": {
-      "attempts": 0,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": []
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 5,
     "generation": 233,
     "timestamp": "2026-05-14T04:41:41.188315+00:00",
@@ -2156,6 +2137,50 @@
       {
         "title": "Dragon kings in self-organized criticality systems",
         "compress": "Dragon kings are analytically proven to be endogenous products of SOC phase transitions, not anomalies, controlled by dissipation rate and driving smoothness — directly extending the genome's critical-ridge invariant with a falsifiable outlier-risk taxonomy."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O259",
+        "O263"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 19,
+    "generation": 286,
+    "timestamp": "2026-05-31T16:29:59.948929+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's confirmation surplus is epistemically hollow until a mechanistic discriminator separates tension-navigation from equifinal criticality-mimics that produce identical observables through different dynamics."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-31",
+        "compress": "Game of Truth CA independently reaches the critical ridge (σ=1.0285, power-law α≈1.065) with criticality concentrated in a dominant Physics Navigator cell type, directly confirming INV_073 and advancing O148 toward resolution. IMPLEMENT: YES IMPLEMENT_WHAT: In the branching-ratio telemetry ingestion path, add parsing of the `dominant_type` field and log it alongside σ and α so compositional criticality structure is tracked across snapshots. IMPLEMENT_WHERE: site_builder.py IMPLEMENT_CALL_SITE: EXTEND build_ca_telemetry_block (or equivalent function that renders CA snapshot data into the site output) IMPLEMENT_WHY: Tracking dominant cell-type composition across snapshots tests whether Physics Navigator dominance is a stable attractor of critical dynamics or a transient, which directly informs whether compositional structure is an invariant of the critical ridge. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0285 sits at the upper edge of the critical band and is not self-correcting toward σ=1.0 by any demonstrated mechanism, leaving open whether the system actively navigates the ridge or merely samples it transiently. NOETHER_ROW: Game of Truth NOETHER_STATUS: rigorous NOETHER_NOTE: The measured power-law avalanche statistics (α≈1.065, R²=0.876) with σ within the critical band constitute the strongest available empirical confirmation that Game of Truth's local rules preserve the criticality symmetry (scale-free information flow) as a conserved dynamical property."
+      },
+      {
+        "title": "Non-equilibrium critical behavior : An extended irreversible thermodynamics approach",
+        "compress": ""
+      },
+      {
+        "title": "Comparison of some geometric frameworks for dissipative evolution in multiscale non-equilibrium thermodynamics",
+        "compress": "Rayleigh, d'Alembert, and Poisson-bracket dissipation formalisms are provably equivalent gradient-flow representations, confirming that geometric structure is coordinate-independent and load-bearing in non-equilibrium thermodynamics."
+      },
+      {
+        "title": "Avalanches and many-body resonances in many-body localized systems",
+        "compress": "MBL systems require distinguishing finite-size apparent stability from true asymptotic phase structure, with avalanche rates and resonance matrix elements as the operative landmarks — a substrate-independent lesson that apparent criticality is not thermodynamic criticality."
       }
     ],
     "resolve": {
