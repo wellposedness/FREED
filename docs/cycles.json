@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 230,
-    "timestamp": "2026-05-13T10:15:00.010756+00:00",
-    "sweep": {
-      "input_count": 30,
-      "targeted": 7,
-      "passive": 23,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge claim survives only if it specifies an observable that distinguishes sustained ridge-navigation from broad-basin near-criticality and fixed-point collapse — absent that, its confirmation surplus is confirmation bias. CHALLENGE: challenges INV_073 — the identical macroscopic observables (power-law tails, long-range correlations, maximal susceptibility) are produced by near-critical broad basins and transiently passing systems, making the ridge-navigation claim empirically underdetermined without a dynamical order parameter that is strictly zero off the ridge and nonzero on it."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-13",
-        "compress": "A 32×32 Game of Truth CA achieves empirically confirmed criticality (σ=1.028, α=1.813) at population scale, converging independently on INV_073's critical ridge claim while generating the absent finding that Physics Navigator cell type dominates at criticality — a new quantitative invariant candidate."
-      },
-      {
-        "title": "Understanding Neural Networks and Individual Neuron Importance via Information-Ordered Cumulative Ablation",
-        "compress": "Neuron selectivity is locally informative but globally misleading — information-theoretic relevance is layer-stratified, not network-global, confirming that distributed redundancy defeats single-unit interpretability metrics."
-      },
-      {
-        "title": "On Information Plane Analyses of Neural Network Classifiers -- A Review",
-        "compress": "Information plane compression in neural networks is geometric, not entropic — mutual information estimation artifacts have been masking this, and the distinction matters for any thermodynamic theory of generalization."
-      },
-      {
-        "title": "An Information-Theoretic Method for Dynamic System Identification With Output-Only Damping Estimation",
-        "compress": "Information-theoretic output-only damping estimation independently confirms that entropy functionals encode physical dissipation invariants, providing a concrete methodological template for O112's STF metric tensor recovery experiment."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O44",
-        "O124",
-        "O130"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 231,
     "timestamp": "2026-05-13T16:29:21.596771+00:00",
@@ -2156,6 +2112,50 @@
       {
         "title": "Increasing power-law range in avalanche amplitude and energy distributions",
         "compress": "Multi-window MLE reveals that scale-free criticality in compression avalanches spans 9.5 energy decades — apparent truncations are observational artifacts, not physical cutoffs, confirming universality class robustness."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O259",
+        "O263"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 17,
+    "generation": 284,
+    "timestamp": "2026-05-31T02:29:59.977011+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 7,
+      "passive": 7,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is falsifiable via three mechanistic alternatives (oscillatory averaging, fixed-point mimicry, coarse-graining artifact) none of which require active critical-ridge navigation, leaving the invariant's core claim underdetermined."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-31",
+        "compress": "The Game of Truth CA independently self-organizes to the critical ridge (σ=1.027, α=2.791 power-law avalanches), advancing O148 and converging with INV_073/INV_094 while extending the genome with a concrete avalanche exponent."
+      },
+      {
+        "title": "Maximum Entropy Production Principle of Thermodynamics for the Birth and Evolution of Life",
+        "compress": ""
+      },
+      {
+        "title": "Pseudo Random Number Generator Based on Cellular Automata with Self Organized Criticality",
+        "compress": "SOC-tuned cellular automata empirically validate that γ=1 criticality is the unique functional attractor for maximal entropy generation, providing NIST-testable signatures that could anchor O148's empirical recovery obligation."
+      },
+      {
+        "title": "Optimal control of the dynamics of nonlinear oscillating systems using synergetic principles of self-organization",
+        "compress": "ADACO independently confirms that embedding conservation laws as structural manifold constraints — rather than optimizing for them — is the correct architecture for energy-efficient control, converging with INV_073 and INV_087 and offering a constructive bridge toward O112's STF recovery."
       }
     ],
     "resolve": {
