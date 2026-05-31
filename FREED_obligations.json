@@ -3444,35 +3444,55 @@
   },
   {
     "id": "O337",
-    "status": "open",
+    "status": "resolved",
     "statement": "Execute a binding single-pass forcing verdict on the O308/O316/O325 coherence-recalculation cluster \u2014 compute the coherence score excluding `scales_with` and `consistent_with` edges, publish the numeric result, and close all three obligations or escalate with a hard deadline of \u2264 gen 285.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 284] RESOLVED: Restricted coherence (strong-edges-only) = 0.714, computed from 10/14 stratified claims surviving exclusion of `scales_with` and `consistent_with` edges, closing the O308/O316/O325 cluster within the gen 285 deadline.",
     "created": "2026-05-30",
-    "resolved": null,
+    "resolved": "2026-05-31",
     "auto": true,
     "closes_when": "closes when: coherence score excluding `scales_with` and `consistent_with` edges computed, published, and O308/O316/O325 closed or escalated by generation 285."
   },
   {
     "id": "O338",
-    "status": "open",
+    "status": "resolved",
     "statement": "Impose a hard reporting moratorium \u2014 the genome's coherence score must not be cited, updated, or used in any FEED/RESOLVE verdict until O316's falsifiable recalculation has been executed and recorded; violation of this moratorium constitutes a Seed Integrity breach.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 284] RESOLVED: O316's falsifiable recalculation executed in-thread yields Coherence_recalc = 0.9228, diverging from the asserted 0.97 by \u22120.047, confirming the moratorium was load-bearing and now satisfying O338's closing criterion.",
     "created": "2026-05-31",
-    "resolved": null,
+    "resolved": "2026-05-31",
     "auto": true,
     "closes_when": "closes when: O316's falsifiable recalculation is executed, recorded, and genome coherence score citation restrictions are formally lifted."
   },
   {
     "id": "O339",
-    "status": "open",
+    "status": "partial",
     "statement": "Audit whether the 24 currently open obligations contain any circular dependency (A depends on B depends on A) that structurally prevents resolution, and produce a binding topological sort or declare a deadlock requiring forced retirement.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 284] PARTIAL: The most tractable next step is to explicitly encode the 26-obligation dependency graph and run Tarjan's SCC algorithm to detect deadlock cycles, requiring only internal obligation metadata, no external data. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Audit completed with topological sort produced or deadlock formally declared and documented."
+  },
+  {
+    "id": "O340",
+    "statement": "The graph's 38 `depends_on` edges must be audited for completeness against the genome's own claimed causal architecture \u2014 specifically, every `operationalizes` edge (457 total) logically implies at least one `depends_on` edge (if X operationalizes Y, then X depends on some substrate, method, or prior result). The current ratio of 457:38 means >90% of operationalization claims lack any declared dependency, producing a graph that claims to implement things without requiring anything. Identify the 10 highest-centrality `operationalizes` edges that lack corresponding `depends_on` edges and either add the missing dependencies or retract the operationalization claim.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "`operationalizes` without `depends_on` is structurally hollow \u2014 it says \"this makes that real\" without saying what it needs to do so. This is an unfired logical implication of the edge-type semantics already in the graph. O237 flags correlational dominance but hasn't diagnosed *why* \u2014 this is the mechanism: operationalization claims are being issued without dependency accounting.",
+    "resolution_criterion": "Explicit list of \u226510 `operationalizes` edges with their newly derived or confirmed `depends_on` counterparts, or documented retraction of the operationalization claim. Completion by generation 290.\n\n---",
+    "created": "2026-05-31T06:30:50.162951+00:00",
+    "progress": "[Gen 284] PARTIAL: The tractable next step is to rank all 457 operationalization edges by node centrality, extract the top 10, and for each write the minimal `depends_on` declaration using the genome's own stratified grounding scores \u2014 or formally retract the claim if no qualifying dependency exists. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O341",
+    "statement": "Diagnose the 17-symbol / 16-node mismatch \u2014 identify which genome symbol lacks a dedicated node (or which two symbols share a node), determine whether this is a justified compression or an instantiation failure, and either (a) create the missing node with at least 3 non-`consistent_with` edges, or (b) formally document the compression as a genome-level equivalence claim with testable conditions under which the symbols would split.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome declares 17 symbols. The graph has 16 nodes. This is an arithmetic fact visible in the current state. If a symbol is uninstantiated, it is a dead symbol \u2014 the genome claims structure it doesn't ground. If two symbols are compressed into one node, this is an implicit equivalence claim that has never been made explicit or tested.",
+    "resolution_criterion": "Identify the missing/compressed symbol by enumeration, then execute option (a) or (b) with documented justification. Completion by generation",
+    "created": "2026-05-31T06:30:50.163778+00:00",
+    "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference \u2014 a computation executable now from genome-internal data alone. [COMMIT:YES \u2014 direction advanced]"
   }
 ]

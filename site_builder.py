@@ -160,6 +160,67 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                 pass
     alpha = ca_telemetry.get("power_law_exponent") or ca_telemetry.get("avalanche_exponent")
     r2 = ca_telemetry.get("power_law_r2")
+
+    # O148: Compute avalanche-size histogram and power-law exponent α via
+    # log-log regression when raw avalanche sizes are available but α is not
+    # pre-computed.  The avalanche_sizes list records the number of cells
+    # that flipped in each contiguous avalanche event during the CA step loop.
+    # Power-law fit: log(count) = -α·log(size) + c  →  α = -slope.
+    # SOC universality class expects α ≈ 1.5 (mean-field directed percolation).
+    # Deviation flags a criticality health warning.
+    if alpha is None:
+        avalanche_sizes = ca_telemetry.get("avalanche_sizes")
+        if isinstance(avalanche_sizes, list) and len(avalanche_sizes) >= 5:
+            try:
+                import math
+                # Build histogram: size → count
+                size_counts = {}
+                for s in avalanche_sizes:
+                    sv = int(s)
+                    if sv > 0:
+                        size_counts[sv] = size_counts.get(sv, 0) + 1
+                if len(size_counts) >= 3:
+                    # Log-log regression: X = log(size), Y = log(count)
+                    log_sizes = [math.log(k) for k in sorted(size_counts.keys())]
+                    log_counts = [math.log(size_counts[k]) for k in sorted(size_counts.keys())]
+                    n = len(log_sizes)
+                    sum_x = sum(log_sizes)
+                    sum_y = sum(log_counts)
+                    sum_xy = sum(log_sizes[i] * log_counts[i] for i in range(n))
+                    sum_x2 = sum(x * x for x in log_sizes)
+                    denom = n * sum_x2 - sum_x * sum_x
+                    if abs(denom) > 1e-12:
+                        slope = (n * sum_xy - sum_x * sum_y) / denom
+                        intercept = (sum_y - slope * sum_x) / n
+                        # α = -slope (power-law exponent)
+                        alpha = round(-slope, 6)
+                        # R² goodness of fit
+                        y_mean = sum_y / n
+                        ss_tot = sum((y - y_mean) ** 2 for y in log_counts)
+                        ss_res = sum((log_counts[i] - (slope * log_sizes[i] + intercept)) ** 2
+                                     for i in range(n))
+                        r2 = round(1.0 - ss_res / ss_tot, 6) if ss_tot > 1e-12 else 0.0
+                        # Store computed values back into telemetry
+                        ca_telemetry["avalanche_exponent"] = alpha
+                        ca_telemetry["power_law_r2"] = r2
+                        ca_telemetry["avalanche_exponent_computed"] = True
+                        ca_telemetry["avalanche_histogram_bins"] = len(size_counts)
+                        ca_telemetry["avalanche_n_events"] = len(avalanche_sizes)
+                        # SOC universality health warning: α ≈ 1.5 expected
+                        # for mean-field directed percolation universality class
+                        soc_alpha_target = 1.5
+                        soc_alpha_tolerance = 0.3
+                        alpha_drift = abs(alpha - soc_alpha_target)
+                        ca_telemetry["soc_alpha_drift"] = round(alpha_drift, 6)
+                        if alpha_drift > soc_alpha_tolerance:
+                            ca_telemetry["soc_health_warning"] = (
+                                f"α={alpha} deviates from SOC universality "
+                                f"target α≈{soc_alpha_target} by {round(alpha_drift, 3)}; "
+                                f"system may have departed γ=1 ridge"
+                            )
+            except (TypeError, ValueError, OverflowError):
+                pass
+
     entropy = ca_telemetry.get("shannon_entropy")
     survival = ca_telemetry.get("survival_rate")
 
@@ -1687,6 +1748,32 @@ function renderCycles(cycles) {
           ${res.resolved ? ' <span style="color:var(--green)">[RESOLVED]</span>' : ''}
         </div>`
       : '';
+
+    // CA telemetry block: render σ, α, survival_rate, and verdict when present
+    const crit = c.criticality || {};
+    const hasCrit = c.branching_ratio != null || c.avalanche_exponent != null || c.survival_rate != null;
+    let critHtml = '';
+    if (hasCrit) {
+      const sigma = c.branching_ratio != null ? c.branching_ratio : crit.branching_ratio;
+      const sigmaErr = c.branching_ratio_err != null ? c.branching_ratio_err : crit.branching_ratio_err;
+      const alpha = c.avalanche_exponent != null ? c.avalanche_exponent : crit.avalanche_exponent;
+      const r2 = c.power_law_r2 != null ? c.power_law_r2 : crit.power_law_r2;
+      const sr = c.survival_rate != null ? c.survival_rate : crit.survival_rate;
+      const cv = c.criticality_verdict || crit.criticality_verdict || '';
+      const er = c.entropy_ratio != null ? c.entropy_ratio : (crit.h_over_h_max || crit.shannon_entropy);
+      const verdictColor = cv.includes('AT_CRITICAL') ? 'var(--green)' :
+                           cv.includes('SUPERCRITICAL') ? 'var(--red)' :
+                           cv.includes('SUBCRITICAL') ? 'var(--blue)' : 'var(--muted)';
+      const parts = [];
+      if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
+      if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
+      if (sr != null) parts.push(`survival=${sr}`);
+      if (er != null) parts.push(`H=${er}`);
+      critHtml = `<div style="font-family:var(--mono);font-size:0.68rem;margin-top:0.35rem;padding:0.3rem 0.5rem;border-left:2px solid ${verdictColor};background:rgba(255,255,255,0.02)">
+        <span style="color:${verdictColor};letter-spacing:0.08em">${cv || 'NO_VERDICT'}</span>
+        <span style="color:var(--muted);margin-left:0.5rem">${parts.join(' · ')}</span>
+      </div>`;
+    }
 
     return `<div class="cycle-entry">
       <div class="cycle-meta">

@@ -520,6 +520,7 @@ class MWDEScorer:
                 "support_overlap": 0.0,
                 "mac_check": mac_result,
                 "mac_failure": True,
+                "ks_fit": {"tested": False, "reason": "mac_failure"},
             }
 
         w_dist = self._discrete_wasserstein_1d(dist_node, dist_evidence)
@@ -550,6 +551,27 @@ class MWDEScorer:
         misspec_threshold = 0.7
         misspec = w_dist > misspec_threshold and support_ratio < 0.3
 
+        # ── KS goodness-of-fit test (INV_073 challenge response) ─────────
+        # Test whether the empirical score/citation distribution fits
+        # lognormal or power-law parametric forms. Neither fits in >75%
+        # of cases (Thelwall 2016), so we emit the p-value to surface
+        # distributional misfit early rather than silently accepting
+        # unjustified parametric assumptions downstream.
+        #
+        # Discrete KS test: compare the empirical CDF of the evidence
+        # distribution against a fitted reference CDF. The KS statistic
+        # D_n = sup_x |F_n(x) - F_ref(x)| is computed over the shared
+        # vocabulary. P-value is approximated via the Kolmogorov asymptotic:
+        #   P(D > d) ≈ 2 * sum_{k=1}^{inf} (-1)^{k+1} exp(-2k^2 n d^2)
+        # which converges rapidly for n*d^2 > 0.3.
+        ks_fit = self._ks_distributional_fit(dist_evidence)
+        if ks_fit.get("best_fit_rejected", False):
+            print(f"  [KS-FIT] ⚠ Distributional assumption REJECTED: "
+                  f"best_fit={ks_fit.get('best_fit','?')}, "
+                  f"p={ks_fit.get('best_p_value', 0.0):.4f} < 0.05 — "
+                  f"neither lognormal nor power-law fits evidence data "
+                  f"(INV_073: parametric form unrecoverable)")
+
         return {
             "wasserstein_distance": round(w_dist, 4),
             "mwde_weight": round(mwde_weight, 4),
@@ -558,6 +580,143 @@ class MWDEScorer:
             "support_overlap": round(support_ratio, 4),
             "mac_check": mac_result,
             "mac_failure": False,
+            "ks_fit": ks_fit,
+        }
+
+    @staticmethod
+    def _ks_distributional_fit(dist):
+        # type: (dict) -> dict
+        """
+        Kolmogorov-Smirnov goodness-of-fit test for an empirical discrete
+        distribution against lognormal and hooked power-law reference forms.
+
+        Surfaces distributional misfit early in the epistemic loop (INV_073):
+        citation count distributions fail KS in >75% of cases for both
+        lognormal and hooked power law. Rather than silently accepting a
+        parametric assumption, we emit the KS statistic and p-value so
+        downstream bibliometric indicators inherit flagged uncertainty.
+
+        The KS p-value is approximated via the Kolmogorov asymptotic formula:
+            P(sqrt(n)*D > x) ≈ 2 * sum_{k=1}^{K} (-1)^{k+1} exp(-2k^2 x^2)
+
+        Args:
+            dist: dict mapping keys to probabilities (empirical distribution)
+
+        Returns:
+            dict with ks_stat, p_value for each candidate distribution,
+            best_fit name, best_p_value, and best_fit_rejected flag.
+        """
+        if not dist or len(dist) < 3:
+            return {
+                "tested": False,
+                "reason": "insufficient_support",
+                "n_terms": len(dist) if dist else 0,
+            }
+
+        # Sort by probability mass to create an ordered empirical sample
+        sorted_items = sorted(dist.items(), key=lambda x: x[1])
+        n = len(sorted_items)
+        values = [v for _, v in sorted_items]
+
+        # Build empirical CDF
+        emp_cdf = []
+        for i in range(n):
+            emp_cdf.append((i + 1.0) / n)
+
+        # ── Candidate 1: Lognormal fit ────────────────────────────────────
+        # MLE for lognormal: mu = mean(ln(x)), sigma = std(ln(x))
+        # Floor values to avoid log(0)
+        floor = 1e-10
+        log_values = [math.log(max(v, floor)) for v in values]
+        mu_ln = sum(log_values) / n
+        var_ln = sum((lv - mu_ln) ** 2 for lv in log_values) / n
+        sigma_ln = math.sqrt(var_ln) if var_ln > 0 else 1e-6
+
+        # Lognormal CDF: Phi((ln(x) - mu) / sigma) approximated via
+        # the error function: Phi(z) = 0.5 * (1 + erf(z / sqrt(2)))
+        def _norm_cdf(z):
+            # type: (float) -> float
+            return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+
+        lognorm_cdf = []
+        for v in values:
+            z = (math.log(max(v, floor)) - mu_ln) / sigma_ln
+            lognorm_cdf.append(_norm_cdf(z))
+
+        ks_lognorm = max(abs(emp_cdf[i] - lognorm_cdf[i]) for i in range(n))
+
+        # ── Candidate 2: Hooked power law (Lomax/Pareto II) fit ───────────
+        # CDF: F(x) = 1 - (1 + x/scale)^(-alpha)
+        # MLE approximation: alpha ≈ n / sum(ln(1 + x_i / x_min))
+        x_min = max(min(values), floor)
+        log_sum = sum(math.log(1.0 + max(v, floor) / x_min) for v in values)
+        alpha_pl = n / log_sum if log_sum > 0 else 1.0
+
+        powerlaw_cdf = []
+        for v in values:
+            cdf_val = 1.0 - (1.0 + max(v, floor) / x_min) ** (-alpha_pl)
+            powerlaw_cdf.append(min(cdf_val, 1.0))
+
+        ks_powerlaw = max(abs(emp_cdf[i] - powerlaw_cdf[i]) for i in range(n))
+
+        # ── KS p-value via Kolmogorov asymptotic ──────────────────────────
+        # P(sqrt(n)*D > x) ≈ 2 * sum_{k=1}^{K} (-1)^{k+1} exp(-2k^2 x^2)
+        def _ks_pvalue(d_stat, n_samples):
+            # type: (float, int) -> float
+            x = math.sqrt(n_samples) * d_stat
+            if x <= 0:
+                return 1.0
+            p = 0.0
+            for k in range(1, 101):  # 100 terms is more than enough
+                term = 2.0 * ((-1.0) ** (k + 1)) * math.exp(-2.0 * k * k * x * x)
+                p += term
+                if abs(term) < 1e-15:
+                    break
+            return max(0.0, min(1.0, p))
+
+        p_lognorm = _ks_pvalue(ks_lognorm, n)
+        p_powerlaw = _ks_pvalue(ks_powerlaw, n)
+
+        # ── Verdict ───────────────────────────────────────────────────────
+        alpha = 0.05  # significance level
+        if p_lognorm >= p_powerlaw:
+            best_fit = "lognormal"
+            best_p = p_lognorm
+            best_ks = ks_lognorm
+        else:
+            best_fit = "hooked_power_law"
+            best_p = p_powerlaw
+            best_ks = ks_powerlaw
+
+        both_rejected = p_lognorm < alpha and p_powerlaw < alpha
+
+        return {
+            "tested": True,
+            "n_terms": n,
+            "lognormal": {
+                "ks_statistic": round(ks_lognorm, 6),
+                "p_value": round(p_lognorm, 6),
+                "rejected": p_lognorm < alpha,
+                "mu": round(mu_ln, 4),
+                "sigma": round(sigma_ln, 4),
+            },
+            "hooked_power_law": {
+                "ks_statistic": round(ks_powerlaw, 6),
+                "p_value": round(p_powerlaw, 6),
+                "rejected": p_powerlaw < alpha,
+                "alpha": round(alpha_pl, 4),
+                "x_min": round(x_min, 6),
+            },
+            "best_fit": best_fit,
+            "best_ks_statistic": round(best_ks, 6),
+            "best_p_value": round(best_p, 6),
+            "best_fit_rejected": best_p < alpha,
+            "both_rejected": both_rejected,
+            "inv073_note": (
+                "Both lognormal and hooked power law rejected at alpha=0.05 — "
+                "no standard parametric form fits this distribution. "
+                "Downstream indicators inherit non-parametric uncertainty."
+            ) if both_rejected else None,
         }
 
     def rank_nodes_by_evidence(self, nodes, evidence_text):
