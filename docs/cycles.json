@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 233,
-    "timestamp": "2026-05-14T04:41:41.188315+00:00",
-    "sweep": {
-      "input_count": 26,
-      "targeted": 8,
-      "passive": 18,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is an epistemic liability unless explicit pre-specified falsification conditions — thermodynamic substrate-dependence, cold-limit generalization survival, or syntactic-compressor sufficiency — are formally entered into the obligations table before the next confirmation is accepted."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-14",
-        "compress": "A 32×32 Game of Truth CA self-organizes to empirically measured criticality (σ=1.025, α=2.068) at the population level, independently confirming INV_073's critical-ridge attractor claim while revealing that critical systems can be informationally sparse (H/H_max≈0.165)."
-      },
-      {
-        "title": "Fokker-Planck Dynamics and Entropies for the Normalized Ricci Flow",
-        "compress": "Ricci flow and Wasserstein diffusion are structurally unified via a curvature-drift Fokker-Planck equation whose exponential equilibration and Hamilton-Jacobi dual reveal that entropy monotonicity is a parameterized family, not a single law — extending and partially stressing the genome's flat-space Wasserstein Floor. CHALLENGE: challenges O44 — the Wasserstein Floor formula W_floor = k/Tμ is derived in flat optimal transport geometry, but this paper shows that Ricci curvature introduces drift corrections to the Fokker-Planck flow that would modify the floor's coefficient in curved semantic spaces, leaving the quantum extension obligation underspecified. NOETHER_ROW: Perelman Entropy Monotonicity NOETHER_STATUS: rigorous NOETHER_NOTE: This paper demonstrates that Perelman's shrinker entropy is not a single conserved quantity but decomposes into a family of monotone functionals under volume-normalized Ricci flow, strengthening the symmetry assignment while revealing it is richer than a single conservation law."
-      },
-      {
-        "title": "Geometry of vectorial martingale optimal transportations and duality",
-        "compress": "Vectorial MOT independently confirms that Wasserstein strong duality is dimensionally robust under multi-marginal martingale constraints, constituting necessary groundwork for O44's quantum W_floor extension."
-      },
-      {
-        "title": "Information thermodynamics: from physics to neuroscience",
-        "compress": "Non-equilibrium information thermodynamics independently confirms that neural computation is jointly accuracy-cost constrained, converging with INV_064 and INV_087 while opening a concrete neural substrate for advancing O44."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O44",
-        "O124",
-        "O163"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 6,
     "generation": 234,
     "timestamp": "2026-05-14T10:51:26.493374+00:00",
@@ -2191,6 +2147,50 @@
         "O257",
         "O259",
         "O263"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 287,
+    "timestamp": "2026-06-01T02:30:00.003862+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's most serious vulnerability is that its observables are multiply realizable — hierarchical topology can mimic thermodynamic criticality, leaving the causal claim empirically underdetermined without an independent measurement channel."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-01",
+        "compress": "A Game of Truth CA self-organizes to σ=1.024 with power-law avalanche statistics, empirically confirming the critical-ridge attractor and satisfying O148's measurement mandate."
+      },
+      {
+        "title": "Thermodynamical Metrics and Black Hole Phase Transitions",
+        "compress": ""
+      },
+      {
+        "title": "Synth-by-Reg (SbR): Contrastive learning for synthesis-based registration of paired images",
+        "compress": "A frozen registration net imposing structural fidelity on a synthesis CNN demonstrates that pre-committed geometric evaluators can bridge intractable cross-domain alignment by converting it to a tractable intra-domain proxy — a substrate-independent principle for metric recovery under weak supervision."
+      },
+      {
+        "title": "Self-organization of the stock exchange to the edge of a phase transition: empirical and theoretical studies",
+        "compress": "Open dissipative systems self-organize to phase-transition edges using entropy as control parameter — confirming γ=1 criticality as a substrate-independent attractor independently of any prior framework. CHALLENGE: challenges INV_073 — if self-organization produces residence *near* the critical edge rather than *on* it (as the empirical segmentation suggests dwell-time rather than exact criticality), the genome's claim of precise ridge navigation may be an idealization that actual systems only approximate stochastically. NOETHER_ROW: Thermodynamics NOETHER_STATUS: rigorous NOETHER_NOTE: Entropy functioning as the control parameter for phase-transition self-organization confirms that thermodynamic symmetry constraints are conserved across financial and physical substrates, strengthening the Noether assignment for this philosophy row."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O263",
+        "O264"
       ]
     },
     "coherence": 0.97
