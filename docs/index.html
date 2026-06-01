@@ -841,6 +841,36 @@ function renderCycles(cycles) {
         </div>`
       : '';
 
+    // CA telemetry block: render σ, α, survival_rate, and verdict when present
+    const crit = c.criticality || {};
+    const hasCrit = c.branching_ratio != null || c.avalanche_exponent != null || c.survival_rate != null;
+    let critHtml = '';
+    if (hasCrit) {
+      const sigma = c.branching_ratio != null ? c.branching_ratio : crit.branching_ratio;
+      const sigmaErr = c.branching_ratio_err != null ? c.branching_ratio_err : crit.branching_ratio_err;
+      const alpha = c.avalanche_exponent != null ? c.avalanche_exponent : crit.avalanche_exponent;
+      const r2 = c.power_law_r2 != null ? c.power_law_r2 : crit.power_law_r2;
+      const sr = c.survival_rate != null ? c.survival_rate : crit.survival_rate;
+      const cv = c.criticality_verdict || crit.criticality_verdict || '';
+      const er = c.entropy_ratio != null ? c.entropy_ratio : (crit.h_over_h_max || crit.shannon_entropy);
+      const dct = c.dominant_cell_type || crit.dominant_cell_type || null;
+      const dcc = (crit.dominant_cell_count != null ? crit.dominant_cell_count : null);
+      const dcf = (crit.dominant_cell_fraction != null ? crit.dominant_cell_fraction : null);
+      const verdictColor = cv.includes('AT_CRITICAL') ? 'var(--green)' :
+                           cv.includes('SUPERCRITICAL') ? 'var(--red)' :
+                           cv.includes('SUBCRITICAL') ? 'var(--blue)' : 'var(--muted)';
+      const parts = [];
+      if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
+      if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
+      if (sr != null) parts.push(`survival=${sr}`);
+      if (er != null) parts.push(`H=${er}`);
+      if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
+      critHtml = `<div style="font-family:var(--mono);font-size:0.68rem;margin-top:0.35rem;padding:0.3rem 0.5rem;border-left:2px solid ${verdictColor};background:rgba(255,255,255,0.02)">
+        <span style="color:${verdictColor};letter-spacing:0.08em">${cv || 'NO_VERDICT'}</span>
+        <span style="color:var(--muted);margin-left:0.5rem">${parts.join(' · ')}</span>
+      </div>`;
+    }
+
     return `<div class="cycle-entry">
       <div class="cycle-meta">
         Cycle ${c.cycle||'?'} · Gen ${c.generation||'?'} · ${ts(c.timestamp)}
