@@ -258,15 +258,40 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
             alpha_verdict = "UNKNOWN"
 
     # Joint verdict: AT_CRITICAL requires BOTH σ in band AND α confirmed
+    # O148 confidence gate: R² ≥ 0.80 required for full AT_CRITICAL verdict.
+    # When the power-law fit is weak (R² < 0.80), the criticality claim is
+    # downgraded to CRITICAL_LOW_CONFIDENCE regardless of σ band membership.
+    # This prevents premature AT_CRITICAL verdicts when the power-law fit
+    # is statistically weak, tightening the epistemic standard.
+    R2_CONFIDENCE_THRESHOLD = 0.80
+    r2_confident = False
+    if r2 is not None:
+        try:
+            r2_confident = float(r2) >= R2_CONFIDENCE_THRESHOLD
+        except (TypeError, ValueError):
+            r2_confident = False
+
     verdict = None
     verdict_basis = []
     if sigma_verdict is not None:
         verdict_basis.append("sigma=" + sigma_verdict)
     if alpha_verdict is not None:
         verdict_basis.append("alpha=" + alpha_verdict)
+    if r2 is not None:
+        verdict_basis.append("r2=" + str(r2) + (">=0.80" if r2_confident else "<0.80"))
 
     if sigma_verdict == "AT_CRITICAL" and alpha_verdict == "POWER_LAW_CONFIRMED":
-        verdict = "AT_CRITICAL"
+        # Gate on R² confidence: full AT_CRITICAL only when R² ≥ 0.80
+        if r2_confident:
+            verdict = "AT_CRITICAL"
+        else:
+            verdict = "CRITICAL_LOW_CONFIDENCE"
+    elif sigma_verdict == "AT_CRITICAL" and alpha_verdict == "POWER_LAW_EXTENDED_BAND":
+        # Extended α band (2.5–3.0) also gated on R² confidence
+        if r2_confident:
+            verdict = "AT_CRITICAL"
+        else:
+            verdict = "CRITICAL_LOW_CONFIDENCE"
     elif sigma_verdict == "AT_CRITICAL" and alpha_verdict is None:
         verdict = "AT_CRITICAL_SIGMA_ONLY"
     elif sigma_verdict == "SUPERCRITICAL":
@@ -282,6 +307,12 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         verdict = "ALPHA_ONLY_" + alpha_verdict
 
     result = {}
+    # O148: confidence_flag — True only when R² ≥ 0.80, surfaced alongside
+    # every verdict so downstream consumers can distinguish rigorous from
+    # provisional criticality claims without re-parsing the basis string.
+    if r2 is not None:
+        result["r2_confidence_flag"] = r2_confident
+        result["r2_confidence_threshold"] = R2_CONFIDENCE_THRESHOLD
     if sigma is not None:
         result["branching_ratio"] = sigma
     if sigma_err:
@@ -358,6 +389,33 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         result["dominant_cell_type"] = dominant_type_val
     if dominant_count is not None:
         result["dominant_cell_count"] = dominant_count
+
+    # O148: Compute dominant cell-type population fraction so the genome can
+    # track whether Physics Navigator dominance is a stable attractor across
+    # runs or a run-specific fluctuation.  Fraction = dominant_count / total_cells.
+    # total_cells derived from grid_size, cell_type_counts sum, or explicit field.
+    if dominant_count is not None:
+        total_cells_for_frac = ca_telemetry.get("total_cells")
+        if total_cells_for_frac is None:
+            _ctc = ca_telemetry.get("cell_type_counts")
+            if isinstance(_ctc, dict) and _ctc:
+                total_cells_for_frac = sum(_ctc.values())
+        if total_cells_for_frac is None:
+            grid_size = ca_telemetry.get("grid_size")
+            if isinstance(grid_size, (int, float)) and grid_size > 0:
+                total_cells_for_frac = int(grid_size) * int(grid_size)
+            elif isinstance(grid_size, (list, tuple)) and len(grid_size) >= 2:
+                try:
+                    total_cells_for_frac = int(grid_size[0]) * int(grid_size[1])
+                except (TypeError, ValueError):
+                    pass
+        if total_cells_for_frac is not None:
+            try:
+                frac = float(dominant_count) / float(total_cells_for_frac)
+                result["dominant_cell_fraction"] = round(frac, 6)
+                result["total_cells"] = int(total_cells_for_frac)
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
 
     # INV_023 / O148: Closure-integrity check — distinguish autopoietic
     # circular-closure collapse from simple cell death.  Autopoietic closure
@@ -1761,6 +1819,9 @@ function renderCycles(cycles) {
       const sr = c.survival_rate != null ? c.survival_rate : crit.survival_rate;
       const cv = c.criticality_verdict || crit.criticality_verdict || '';
       const er = c.entropy_ratio != null ? c.entropy_ratio : (crit.h_over_h_max || crit.shannon_entropy);
+      const dct = c.dominant_cell_type || crit.dominant_cell_type || null;
+      const dcc = (crit.dominant_cell_count != null ? crit.dominant_cell_count : null);
+      const dcf = (crit.dominant_cell_fraction != null ? crit.dominant_cell_fraction : null);
       const verdictColor = cv.includes('AT_CRITICAL') ? 'var(--green)' :
                            cv.includes('SUPERCRITICAL') ? 'var(--red)' :
                            cv.includes('SUBCRITICAL') ? 'var(--blue)' : 'var(--muted)';
@@ -1769,6 +1830,7 @@ function renderCycles(cycles) {
       if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
       if (sr != null) parts.push(`survival=${sr}`);
       if (er != null) parts.push(`H=${er}`);
+      if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
       critHtml = `<div style="font-family:var(--mono);font-size:0.68rem;margin-top:0.35rem;padding:0.3rem 0.5rem;border-left:2px solid ${verdictColor};background:rgba(255,255,255,0.02)">
         <span style="color:${verdictColor};letter-spacing:0.08em">${cv || 'NO_VERDICT'}</span>
         <span style="color:var(--muted);margin-left:0.5rem">${parts.join(' · ')}</span>

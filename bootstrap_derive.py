@@ -17,6 +17,7 @@ Usage:
 
 import os
 import json
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 import anthropic

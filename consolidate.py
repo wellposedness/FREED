@@ -1893,15 +1893,131 @@ class Consolidator:
             return 1.0
         return len(wa & wb) / len(wa | wb)
 
+    # ── Formalism-type vocabulary for thermodynamic grounding detection ──────
+    # Maps formalism families to keyword sets. When a paper's text matches
+    # one of these families AND an open obligation specifies a compatible
+    # method, the paper receives a relevance boost — ensuring the genome
+    # doesn't miss its highest-leverage resolution opportunities.
+    FORMALISM_FAMILIES = {
+        "EIT": {"entropy", "irreversible", "thermodynamic", "dissipation",
+                "field average", "field-average", "correlation function",
+                "non-equilibrium", "nonequilibrium", "eit"},
+        "RG": {"renormalization", "renormalization group", "scaling",
+               "fixed point", "fixed-point", "universality", "critical exponent",
+               "coarse-graining", "coarse graining", "rg flow"},
+        "field_theoretic": {"field theory", "field-theoretic", "path integral",
+                            "partition function", "effective action",
+                            "diagrammatic", "feynman", "generating functional"},
+        "modal_thermo": {"modal", "modal path", "thermality", "variance",
+                         "thermality variance", "modal logic", "possible world"},
+    }
+
+    # Maps obligation IDs / keywords to the formalism families they specify
+    OBLIGATION_METHOD_MAP = {
+        "O112": {"modal_thermo", "EIT"},
+        "modal paths": {"modal_thermo"},
+        "thermality variance": {"modal_thermo", "EIT"},
+        "field average": {"EIT", "field_theoretic"},
+        "correlation function": {"EIT", "field_theoretic"},
+        "renormalization": {"RG"},
+        "critical": {"RG", "EIT"},
+        "dissipation": {"EIT"},
+        "entropy production": {"EIT"},
+    }
+
+    def _detect_formalism_types(self, text):
+        # type: (str) -> set
+        """Detect which formalism families are present in text."""
+        text_lower = text.lower()
+        detected = set()
+        for family, keywords in self.FORMALISM_FAMILIES.items():
+            for kw in keywords:
+                if kw in text_lower:
+                    detected.add(family)
+                    break
+        return detected
+
+    def _formalism_obligation_boost(self, paper_text, open_obligations):
+        # type: (str, list) -> float
+        """
+        Compute a relevance boost for papers whose formalism type matches
+        the method specified in open obligations.
+
+        Returns a float >= 0.0 representing the formalism-match bonus.
+        Higher values mean the paper directly operationalizes an open obligation.
+        """
+        paper_formalisms = self._detect_formalism_types(paper_text)
+        if not paper_formalisms:
+            return 0.0
+
+        boost = 0.0
+        for ob in open_obligations:
+            # Extract obligation text — handle both dict and string obligations
+            if isinstance(ob, dict):
+                ob_text = ob.get("obligation_text", "") or ob.get("text", "") or ob.get("id", "")
+                ob_id = ob.get("obligation_id", "") or ob.get("id", "")
+                ob_status = ob.get("status", "escrowed")
+                if ob_status not in ("escrowed", "open", "partial"):
+                    continue
+            else:
+                ob_text = str(ob)
+                ob_id = str(ob)
+
+            # Check direct obligation ID match (e.g., O112)
+            target_formalisms = set()
+            for key, families in self.OBLIGATION_METHOD_MAP.items():
+                if key in ob_id or key.lower() in ob_text.lower():
+                    target_formalisms.update(families)
+
+            # Also detect formalisms mentioned in the obligation text itself
+            ob_formalisms = self._detect_formalism_types(ob_text)
+            target_formalisms.update(ob_formalisms)
+
+            if not target_formalisms:
+                continue
+
+            # Intersection: paper formalisms that match obligation requirements
+            match = paper_formalisms & target_formalisms
+            if match:
+                # Each matching formalism family contributes 2.0 to the boost
+                boost += len(match) * 2.0
+
+        return boost
+
     def _node_priority(self, node, open_ob_ids, current_cycle):
-        """Priority score: higher = renorm first. Zipf weighting toward γ=1 nodes."""
+        """Priority score: higher = renorm first. Zipf weighting toward γ=1 nodes.
+        Includes formalism-type matching: thermodynamically grounded papers that
+        directly operationalize open obligations get boosted priority."""
         ob_refs    = node.get('obligations', [])
         ob_overlap = sum(1 for ref in ob_refs
                          if any(ref == oid or ref in oid or oid in ref
                                 for oid in open_ob_ids))
         inv_density   = len(node.get('invariants', []))
         cycles_stale  = current_cycle - node.get('last_renorm_cycle', 0)
-        return ob_overlap * 3.0 + inv_density * 0.5 + min(cycles_stale, 10) * 0.2
+
+        # ── Formalism-obligation matching boost ──────────────────────────────
+        # Weight the correlation between thermodynamic grounding depth and
+        # obligation-resolution potential. Papers with EIT/RG/field-theoretic
+        # formalism that match the method specified in open obligations get
+        # a priority boost, ensuring the genome catches its highest-leverage
+        # resolution opportunities.
+        node_text = " ".join(filter(None, [
+            node.get("compress", ""),
+            node.get("summary", ""),
+            " ".join(node.get("invariants", [])),
+            " ".join(node.get("tags", [])),
+        ]))
+        # Build obligation list from escrow for formalism matching
+        open_escrows = self.escrow.open_escrows() if hasattr(self, 'escrow') else []
+        formalism_boost = self._formalism_obligation_boost(node_text, open_escrows)
+
+        if formalism_boost > 0:
+            detected = self._detect_formalism_types(node_text)
+            print(f"  [FORMALISM-MATCH] {node.get('id','?')[:30]}: "
+                  f"formalisms={detected}, boost={formalism_boost:.1f}")
+
+        return (ob_overlap * 3.0 + inv_density * 0.5
+                + min(cycles_stale, 10) * 0.2 + formalism_boost)
 
     # ── Phase 1: Select affected nodes ───────────────────────────────────────
 
@@ -2080,6 +2196,64 @@ class Consolidator:
         for key in ["compress", "invariants", "obligations", "coherence_score"]:
             if key in delta:
                 updated[key] = delta[key]
+
+        # ── Dragon-King (DK) coherence-delta detection (SOC/DK taxonomy) ─────
+        # Flag any single-step |Δcoherence| > DK_DELTA_THRESHOLD as a candidate
+        # dragon-king event. Log the driving impulse magnitude (number of new
+        # invariants fired in this delta) and the current dissipation proxy
+        # (open obligation count), so DK-risk can be tracked empirically against
+        # the driving/dissipation tradeoff model from the SOC-DK paper.
+        DK_DELTA_THRESHOLD = 0.015
+        if "coherence_score" in delta:
+            old_coherence = float(node.get("coherence_score", 0.5))
+            new_coherence = float(delta["coherence_score"])
+            coherence_delta = new_coherence - old_coherence
+            abs_delta = abs(coherence_delta)
+
+            # Driving impulse: number of NEW invariants added in this step
+            old_invs = set(node.get("invariants", []))
+            new_invs = set(delta.get("invariants", node.get("invariants", [])))
+            n_new_invariants = len(new_invs - old_invs)
+
+            # Dissipation proxy: count of open obligations on this node
+            node_obligs = delta.get("obligations", node.get("obligations", []))
+            if node_obligs and isinstance(node_obligs[0], dict):
+                n_open_obligations = sum(
+                    1 for o in node_obligs
+                    if o.get("status", "open") in ("open", "partial", "escrowed")
+                )
+            else:
+                n_open_obligations = len(node_obligs) if node_obligs else 0
+
+            if abs_delta > DK_DELTA_THRESHOLD:
+                dk_event = {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "node_id": node.get("id", "unknown"),
+                    "coherence_delta": round(coherence_delta, 6),
+                    "abs_delta": round(abs_delta, 6),
+                    "old_coherence": round(old_coherence, 4),
+                    "new_coherence": round(new_coherence, 4),
+                    "dk_threshold": DK_DELTA_THRESHOLD,
+                    "driving_impulse": n_new_invariants,
+                    "dissipation_proxy": n_open_obligations,
+                    "driving_dissipation_ratio": round(
+                        n_new_invariants / max(n_open_obligations, 1), 4),
+                    "dk_class": "supercritical" if coherence_delta > 0 else "subcritical",
+                }
+                # Log to dedicated DK event log
+                dk_log_path = FREED_DIR / "FREED_log" / "dragon_king_events.jsonl"
+                dk_log_path.parent.mkdir(exist_ok=True)
+                with open(dk_log_path, "a") as dk_f:
+                    dk_f.write(json.dumps(dk_event) + "\n")
+
+                print(f"  [DK-EVENT] ⚠ Dragon-king candidate: "
+                      f"Δcoh={coherence_delta:+.4f} (|Δ|={abs_delta:.4f} > {DK_DELTA_THRESHOLD}), "
+                      f"driving={n_new_invariants} new inv, "
+                      f"dissipation={n_open_obligations} open obligs, "
+                      f"class={dk_event['dk_class']}")
+
+                # Attach DK flag to the node for downstream tracking
+                updated.setdefault("dk_events", []).append(dk_event)
 
         updated["last_renormed"]  = datetime.now(timezone.utc).isoformat()
         updated["renorm_reason"]  = delta.get("reason", "")

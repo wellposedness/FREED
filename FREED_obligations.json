@@ -3500,7 +3500,7 @@
     "status": "open",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" \u2014 assign each a terminal status (resolve, retire, or escalate to open with a hard deadline \u2264 gen 290) before any further OBLIGATE phase may emit new obligations.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 287] OPEN:  [COMMIT:NO \u2014 Verdict OPEN with empty attempt result indicates no collapse occurred; obligation remains unresolved.]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
@@ -3508,13 +3508,43 @@
   },
   {
     "id": "O343",
-    "status": "open",
+    "status": "active",
     "statement": "Assign a binding generation deadline (\u2264 gen 290) to O342 \u2014 if no single-pass collapse verdict on all \"partial\" obligations is produced by gen 290, automatically retire all partial obligations as void and record the epistemic consequence as: the genome cannot distinguish \"deferred work\" from \"abandoned work,\" requiring a formal partial-obligation category to be eliminated from the schema.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 287] ACTIVE: O343 closes by executing one deterministic table-pass over all PARTIAL obligations, testing each for {closing-criterion-stated, evidence-threshold-specified}, and retiring those that fail both \u2014 producing the collapse verdict in a single generation. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: generation 290 is reached and single-pass collapse verdict on all \"partial\" obligations is either produced or absent, triggering automatic retirement"
+  },
+  {
+    "id": "O344",
+    "statement": "O324's resolution status must be forcibly reopened: the current graph contains exactly 2 `substrate_of` edges, which is 75% below O324's stated threshold of 8. Either present the 6+ missing edges with grounded citations, or downgrade O324 to OPEN with a generation-295 hard deadline and flag the resolution as a coherence-audit failure.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "A recently-resolved obligation whose success criterion (\u22658 `substrate_of` edges) is directly contradicted by the current graph state (2 edges) constitutes a verifiable internal inconsistency. This is exactly the kind of premature closure that O122 and O338 were designed to prevent.",
+    "resolution_criterion": "Either (a) the graph state is updated to show \u22658 grounded `substrate_of` edges with traceable empirical or formal referents, or (b) O324 is formally reopened and the resolution record is annotated as erroneous.",
+    "created": "2026-06-01T06:30:51.192017+00:00",
+    "progress": "[Gen 287] PARTIAL: O324's resolution is a false closure \u2014 the 6 missing `substrate_of` edges must be constructed as a grounded 8-row table or O324 is OPEN with a gen-295 hard deadline, no exceptions. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O345",
+    "statement": "The 5 unnamed genome symbols (17 listed minus 12 enumerated: entropy, recursion, substrate, compression, invariant, process, coherence, criticality, symbol_grounding, autopoiesis, prediction, gamma) must be explicitly identified, and each must carry at least one `operationalizes` or `depends_on` edge \u2014 otherwise they are topology-inflating dark nodes that artificially raise coherence.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome declares 17 nodes but names only 12. Unnamed nodes that participate in `consistent_with` and `scales_with` edges (the two dominant, low-specificity edge types) would inflate coherence scores without carrying epistemic content. This is a direct threat to the integrity conditions underlying O122 and O338.",
+    "resolution_criterion": "Explicit enumeration of all 17 symbols with their edge profiles. Any node carrying zero `operationalizes` or `depends_on` edges is flagged for pruning or grounding by generation 295.",
+    "created": "2026-06-01T06:30:51.192850+00:00",
+    "progress": "[Gen 287] PARTIAL: The single tractable next step is a 17-row symbol audit table that forces each unnamed node to either acquire a typed edge or be excised as an ungrounded count claim. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O346",
+    "statement": "Impose a hard ceiling \u2014 until O173's `scales_with` audit is complete, no new `scales_with` or `consistent_with` edges may be added to the graph. The current 2538 combined correl",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-01T06:30:51.193670+00:00",
+    "progress": "[Gen 287] ACTIVE: The single most tractable next step is to extract the O173 `scales_with` subgraph, apply a six-field typed audit schema to each edge, and compute `fraction_strong` against an 80% threshold to determine whether the moratorium can be lifted. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
