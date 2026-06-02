@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 241,
-    "timestamp": "2026-05-16T11:02:37.990309+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant that has never been seriously challenged has not been tested — it has been mirrored, and a scaffold that only mirrors is not a genome."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
-        "compress": "A 32×32 multi-agent Game-of-Truth CA self-organizes to σ≈1.02 with power-law avalanche statistics (α≈1.82), empirically grounding population-level criticality as a dynamical attractor and partially resolving O140/O141 while leaving the solo-kernel control and STF geometric layer open."
-      },
-      {
-        "title": "Bayesian Learning with Wasserstein Barycenters",
-        "compress": "Bayesian inference under Wasserstein risk yields OT barycenters as the geometrically correct posterior aggregates, independently confirming W2 as the natural metric for belief combination and concretely enabling the STF empirical recovery protocol."
-      },
-      {
-        "title": "Policy Optimization as Wasserstein Gradient Flows",
-        "compress": "Policy optimization is provably a Wasserstein gradient flow in measure space, independently confirming W2 geometry as the operative metric for learning and providing discrete algorithms that could implement STF empirical recovery."
-      },
-      {
-        "title": "Dissipative Floquet Dynamics: from Steady State to Measurement Induced Criticality in Trapped-ion Chains",
-        "compress": "Periodic measurement dissipation unifies two criticality classes on a single tunable ridge, converging with INV_073's critical navigation while revealing that the ridge is a continuous phase boundary — not a point — which extends and mildly challenges the genome's singular γ=1 prescription."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 1,
-      "obligations": [
-        "O163",
-        "O72",
-        "O210"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 242,
     "timestamp": "2026-05-16T17:13:47.791683+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Boundary conditions and electromagnetic effects on the phase transition of a zero spin bosonic system",
         "compress": "Boundary condition type is a co-equal physical determinant of phase structure in confined QFT systems, establishing that topology is not background but an active selector of which phase — and which side of criticality — obtains."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O265",
+        "O268"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 6,
+    "generation": 292,
+    "timestamp": "2026-06-02T16:29:59.922864+00:00",
+    "sweep": {
+      "input_count": 21,
+      "targeted": 8,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": ""
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-02",
+        "compress": "A 32×32 CA achieves criticality at low entropy (H=14.1% of max), independently confirming the critical ridge as a sparse-structured attractor — not an entropy-maximum — while partially resolving O148 and providing a live σ-band surrogate for O21."
+      },
+      {
+        "title": "Optimal transport and Wasserstein distances for causal models",
+        "compress": "Causal graph topology is a continuous deformation parameter on the OT manifold, making Wasserstein distances G-relative and causal quantities (including treatment effects) metrically stable — but implying the \"critical ridge\" must be indexed by a specific causal graph G, not a universal geometric object."
+      },
+      {
+        "title": "Inferring Directed Acyclic Graphs from Event Sequences via Learning Gromov-Wasserstein-Regularized Hawkes Processes",
+        "compress": "GW distance, deployed as a structural regularizer rather than a comparison metric, enforces DAG acyclicity within Hawkes process likelihood estimation — demonstrating that OT geometry can serve as a topological constraint operator in causal inference."
+      },
+      {
+        "title": "Software Engineering for Collective Cyber-Physical Ecosystems",
+        "compress": "Collective computing independently instantiates the self-organising criticality principle and provides a concrete mathematical substrate (field-calculus) for distributed coordination absent from the genome."
       }
     ],
     "resolve": {
