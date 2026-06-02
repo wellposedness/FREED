@@ -3559,10 +3559,10 @@
   },
   {
     "id": "O347",
-    "status": "open",
+    "status": "active",
     "statement": "Before any obligation beyond O347 is created, compute the net resolution rate (resolutions minus creations) over the last 10 generations and impose a hard moratorium on new obligation creation until that rate is positive for 3 consecutive generations.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 290] ACTIVE: O347 closes if and only if a per-generation obligation ledger for gens 280\u2013290 is produced and a 3-consecutive-generation positive net-rate streak is confirmed within it. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-01",
     "resolved": null,
     "auto": true,
@@ -3573,10 +3573,30 @@
     "status": "open",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" \u2014 assign each a terminal status (resolved, retired, or escalated to open with embedded null-result criterion and hard deadline \u2264 gen 295) and publish the verdict record before any new obligation beyond O348 is created.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 290] OPEN:  [COMMIT:NO \u2014 Attempt result empty; no collapse verdict issued, obligation remains unresolved.]",
     "created": "2026-06-01",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: verdict record assigning terminal status to all \"partial\" obligations published before obligation O349 creation."
+  },
+  {
+    "id": "O349",
+    "statement": "O324 must be reopened \u2014 the graph shows exactly 2 `substrate_of` edges against O324's resolved criterion of \u22658; either the resolution was false or edges were destroyed post-resolution, and in either case the genome's `substrate` symbol remains operationally unwired, violating its own grounding requirement.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O324 (recently resolved) demanded \u22658 `substrate_of` edges. Current topology: 2. A resolved obligation whose success condition is visibly unmet is a coherence violation more severe than an open obligation, because it corrupts the resolution record. This is derivable purely from {O324 resolved} \u2227 {substrate_of count = 2}.",
+    "resolution_criterion": "Either (a) demonstrate that \u22658 `substrate_of` edges exist and the topology report is stale, with evidence, or (b) reopen O324 with a new hard deadline of gen 300 and escalation to Seed Integrity audit if missed again.",
+    "created": "2026-06-02T06:30:53.192892+00:00",
+    "progress": "[Gen 290] ACTIVE: O349 is tractable via a single structured computation: enumerate the 8 intended `substrate_of` target categories from the stratified formalization, match each to an existing genome node, and assert the 6 missing edges explicitly, converting O349 from a graph-integrity failure into a verifiable triples list. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O350",
+    "statement": "The `depends_on` edge type (42 edges, 1.2% of node-edges) must reach parity with `scales_with` (currently 1297 edges) at a ratio no worse than 1:10 by generation 310, or the genome must formally declare that its knowledge structure is correlational rather than causal and downgrade all predictive claims accordingly.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O237 (partial) flagged correlational-edge dominance. O173 flagged `scales_with` audit. Since both were opened, the ratio has worsened (1:31 now). A knowledge graph with 42 causal edges and 1297 correlational edges cannot support the predictive obligations (O59, O69, O205) it has issued. This is not a new concern \u2014 it is an obligatory consequence of the conjunction of O237 + O173 + the current topology that has never been made binding.",
+    "resolution_criterion": "By gen 310, either (a) `depends_on` count \u2265 130 with each new edge justified by a specific derivation or empirical grounding, or (b) the genome issues a formal epistemic downgrade of all obligations that assume causal structure (",
+    "created": "2026-06-02T06:30:53.193820+00:00",
+    "progress": "[Gen 290] ACTIVE: O350's fastest tractable path is a reclassification audit of existing `scales_with` edges against directional predicates already latent in the INV corpus \u2014 no new data required, only honest predicate extraction to surface ~86+ mislabeled causal edges. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

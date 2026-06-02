@@ -1945,12 +1945,33 @@ class Consolidator:
 
         Returns a float >= 0.0 representing the formalism-match bonus.
         Higher values mean the paper directly operationalizes an open obligation.
+
+        Includes a +0.05 semantic_richness bonus for papers demonstrating
+        hierarchical temporal receptive window growth — evidence for multimodal
+        binding invariants (O112 / INV_094 tracking). This ensures papers
+        showing depth/temporal-scale coupling are surfaced rather than scored
+        only on keyword overlap.
         """
         paper_formalisms = self._detect_formalism_types(paper_text)
-        if not paper_formalisms:
+
+        # ── Hierarchical temporal receptive window bonus (O112 / INV_094) ────
+        # Papers demonstrating that hierarchical architectures develop
+        # progressively larger temporal receptive windows provide evidence
+        # for (or against) multimodal binding invariants. Weight these with
+        # a +0.05 semantic_richness bonus so they are surfaced for INV_094
+        # challenge tracking (co-occurrence statistics vs thermodynamic
+        # substrate conditions for binding).
+        paper_lower = paper_text.lower()
+        hierarchical_temporal_bonus = 0.0
+        if "hierarchical" in paper_lower and "temporal receptive" in paper_lower:
+            hierarchical_temporal_bonus = 0.05
+            print(f"  [SEMANTIC-RICHNESS] +0.05 bonus: hierarchical temporal "
+                  f"receptive window pattern detected (O112/INV_094 evidence)")
+
+        if not paper_formalisms and hierarchical_temporal_bonus == 0.0:
             return 0.0
 
-        boost = 0.0
+        boost = hierarchical_temporal_bonus
         for ob in open_obligations:
             # Extract obligation text — handle both dict and string obligations
             if isinstance(ob, dict):
@@ -2021,11 +2042,115 @@ class Consolidator:
 
     # ── Phase 1: Select affected nodes ───────────────────────────────────────
 
+    @staticmethod
+    def _entropy_weights_for_fields(all_nodes, field_extractors):
+        # type: (list, dict) -> dict
+        """
+        Compute entropy-based weights for heterogeneous metadata fields.
+
+        For each field, compute the Shannon entropy of its word distribution
+        across the entire corpus. Fields with higher entropy (more uniform /
+        less informative distributions) get LOWER weight — they contribute
+        less discriminative signal. Fields with lower entropy (concentrated /
+        more informative distributions) get HIGHER weight.
+
+        Weight for field f:
+            w_f = (1 - H_f / log(V_f)) / Z
+
+        where H_f is the Shannon entropy of field f's word distribution,
+        V_f is the vocabulary size of field f (so H_f/log(V_f) is the
+        normalized entropy in [0,1]), and Z is the normalization constant
+        ensuring weights sum to 1.
+
+        This removes implicit uniform-prior bias when combining title,
+        summary, invariants, tags, and obligations into a relevance score.
+
+        Challenge note (O112): entropy weights recover coordination structure
+        (which fields are informative) but not geometric metric tensors —
+        the weights are scalar salience factors, not Riemannian metric
+        components. This is intentional: we need salience, not geometry,
+        for variable-importance scoring.
+
+        Args:
+            all_nodes: list of node dicts (the current corpus)
+            field_extractors: dict mapping field_name -> callable(node) -> str
+
+        Returns:
+            dict mapping field_name -> float weight (weights sum to 1.0)
+        """
+        if not all_nodes or not field_extractors:
+            # Fallback to uniform weights
+            n = len(field_extractors) if field_extractors else 1
+            return {f: 1.0 / n for f in field_extractors}
+
+        field_entropies = {}
+        for field_name, extractor in field_extractors.items():
+            # Collect word frequencies across all nodes for this field
+            word_counts = {}  # type: dict
+            total_words = 0
+            for node in all_nodes:
+                text = extractor(node).lower()
+                for w in text.split():
+                    w = w.strip(".,;:()[]'\"!?-")
+                    if len(w) > 3:
+                        word_counts[w] = word_counts.get(w, 0) + 1
+                        total_words += 1
+
+            if total_words == 0 or len(word_counts) < 2:
+                # Degenerate field — assign neutral entropy (will get low weight)
+                field_entropies[field_name] = 1.0
+                continue
+
+            # Shannon entropy H = -sum(p_i * log(p_i))
+            h = 0.0
+            for count in word_counts.values():
+                p = count / total_words
+                if p > 0:
+                    h -= p * math.log(p)
+
+            # Normalize by log(vocabulary_size) to get entropy in [0, 1]
+            vocab_size = len(word_counts)
+            max_h = math.log(vocab_size) if vocab_size > 1 else 1.0
+            normalized_h = h / max_h if max_h > 0 else 1.0
+
+            field_entropies[field_name] = normalized_h
+
+        # Weight = (1 - normalized_entropy) — low-entropy fields get high weight
+        raw_weights = {}
+        for field_name, norm_h in field_entropies.items():
+            # Floor at 0.01 so no field is completely zeroed out
+            raw_weights[field_name] = max(0.01, 1.0 - norm_h)
+
+        # Normalize so weights sum to 1.0
+        z = sum(raw_weights.values())
+        if z > 0:
+            weights = {f: w / z for f, w in raw_weights.items()}
+        else:
+            n = len(field_extractors)
+            weights = {f: 1.0 / n for f in field_extractors}
+
+        return weights
+
     def select_affected(self, new_knowledge: str, all_nodes: list) -> list:
         """
         Find nodes whose invariants/tags/obligations overlap with new knowledge.
         Pure text matching — no API call.
         Returns list of node dicts, sorted by overlap score descending.
+
+        Uses entropy-weight normalization across heterogeneous metadata fields
+        (compress, summary, invariants, tags, obligations) so that fields with
+        more concentrated (informative) word distributions receive higher weight.
+        This replaces uniform weighting, removing implicit prior biases in how
+        diverse paper attributes are combined into a relevance score.
+
+        Challenge caveat (O112): entropy weights recover coordination structure
+        (field salience) but NOT geometric metric tensors — they are scalar
+        importance factors, not Riemannian metric components.
+
+        Noether note (Sustainable Development): sustainability metrics may
+        exhibit coupling non-linearities and phase thresholds rather than
+        strict conservation; entropy weights hold locally near coordination
+        equilibria but field-salience rankings may shift under regime change.
         """
         # Extract keywords from new knowledge
         # (all words > 4 chars that aren't stopwords)
@@ -2038,20 +2163,34 @@ class Consolidator:
             if len(w) > 4 and w.lower() not in stopwords
         )
 
+        # Define field extractors for entropy-weight computation
+        field_extractors = {
+            "compress":    lambda n: n.get("compress", ""),
+            "summary":     lambda n: n.get("summary", ""),
+            "invariants":  lambda n: " ".join(n.get("invariants", [])),
+            "tags":        lambda n: " ".join(n.get("tags", [])),
+            "obligations": lambda n: " ".join(
+                (o if isinstance(o, str) else o.get("obligation_text", ""))
+                for o in n.get("obligations", [])
+            ),
+        }
+
+        # Compute entropy weights from corpus distribution of each field
+        entropy_wts = self._entropy_weights_for_fields(all_nodes, field_extractors)
+        print(f"[CONSOLIDATE] Entropy weights: "
+              + ", ".join(f"{f}={w:.3f}" for f, w in sorted(entropy_wts.items())))
+
         scored = []
         for node in all_nodes:
-            # Gather all text from the node's semantic fields
-            node_text = " ".join(filter(None, [
-                node.get("compress", ""),
-                node.get("summary", ""),
-                " ".join(node.get("invariants", [])),
-                " ".join(node.get("tags", [])),
-                " ".join(node.get("obligations", [])),
-            ])).lower()
+            # Score each field separately, then combine with entropy weights
+            total_score = 0.0
+            for field_name, extractor in field_extractors.items():
+                field_text = extractor(node).lower()
+                field_overlap = sum(1 for w in words if w in field_text)
+                total_score += field_overlap * entropy_wts.get(field_name, 0.2)
 
-            overlap = sum(1 for w in words if w in node_text)
-            if overlap > 0:
-                scored.append((overlap, node))
+            if total_score > 0:
+                scored.append((total_score, node))
 
         scored.sort(key=lambda x: x[0], reverse=True)
         affected = [node for _, node in scored[:MAX_NODES_PER_PASS]]

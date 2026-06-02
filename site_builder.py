@@ -371,6 +371,123 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
     if verdict_basis:
         result["verdict_basis"] = verdict_basis
 
+    # O148 / QCA temporal coherence proxy: compute the squared overlap
+    # |⟨ρ(t)|ρ(t-1)⟩|² between consecutive cell-state distributions.
+    # The QCA paper shows that near criticality (γ=1 ridge), temporal
+    # coherence follows a universal power law on approach to stationarity.
+    # Tracking only spatial survival misses this definitive temporal signal.
+    #
+    # Input: step_distributions — list of per-step cell-state distributions,
+    # where each entry is a dict {cell_type: fraction} or a list of floats
+    # representing the probability vector over cell types at that timestep.
+    # Output: temporal_coherence_series — list of |⟨ρ(t)|ρ(t-1)⟩|² values,
+    # one per consecutive pair, plus power-law fit diagnostics.
+    step_distributions = ca_telemetry.get("step_distributions")
+    if isinstance(step_distributions, list) and len(step_distributions) >= 2:
+        try:
+            import math
+            # Normalize each step's distribution into a probability vector
+            def _to_prob_vec(dist):
+                if isinstance(dist, dict):
+                    total = sum(float(v) for v in dist.values()) or 1.0
+                    return {k: float(v) / total for k, v in dist.items()}
+                elif isinstance(dist, (list, tuple)):
+                    total = sum(float(v) for v in dist) or 1.0
+                    return {str(i): float(v) / total for i, v in enumerate(dist)}
+                return None
+
+            temporal_coherence_series = []
+            prev_vec = _to_prob_vec(step_distributions[0])
+            for step_idx in range(1, len(step_distributions)):
+                curr_vec = _to_prob_vec(step_distributions[step_idx])
+                if prev_vec is None or curr_vec is None:
+                    prev_vec = curr_vec
+                    continue
+                # Inner product: ⟨ρ(t-1)|ρ(t)⟩ = Σ_i √(p_i(t-1)) · √(p_i(t))
+                # This is the Bhattacharyya coefficient; squared gives fidelity
+                all_keys = set(prev_vec.keys()) | set(curr_vec.keys())
+                inner = 0.0
+                for k in all_keys:
+                    p_prev = prev_vec.get(k, 0.0)
+                    p_curr = curr_vec.get(k, 0.0)
+                    if p_prev > 0 and p_curr > 0:
+                        inner += math.sqrt(p_prev) * math.sqrt(p_curr)
+                # Squared overlap — the temporal coherence proxy
+                overlap_sq = inner * inner
+                temporal_coherence_series.append(round(overlap_sq, 8))
+                prev_vec = curr_vec
+
+            if temporal_coherence_series:
+                result["temporal_coherence_series"] = temporal_coherence_series
+                result["temporal_coherence_n_steps"] = len(temporal_coherence_series)
+                # Summary statistics
+                tc_mean = sum(temporal_coherence_series) / len(temporal_coherence_series)
+                result["temporal_coherence_mean"] = round(tc_mean, 6)
+                if len(temporal_coherence_series) >= 2:
+                    tc_std = (sum((v - tc_mean) ** 2 for v in temporal_coherence_series)
+                              / len(temporal_coherence_series)) ** 0.5
+                    result["temporal_coherence_std"] = round(tc_std, 6)
+
+                # Power-law fit: C(t) ~ t^(-δ) on approach to stationarity.
+                # Compute deviation from unity: 1 - overlap² gives the
+                # coherence decay signal; fit log(1-C) vs log(t).
+                decay_vals = []
+                for i, c in enumerate(temporal_coherence_series):
+                    deficit = 1.0 - c
+                    if deficit > 1e-12:
+                        decay_vals.append((i + 1, deficit))
+
+                if len(decay_vals) >= 3:
+                    log_t = [math.log(d[0]) for d in decay_vals]
+                    log_d = [math.log(d[1]) for d in decay_vals]
+                    n_fit = len(log_t)
+                    sum_x = sum(log_t)
+                    sum_y = sum(log_d)
+                    sum_xy = sum(log_t[j] * log_d[j] for j in range(n_fit))
+                    sum_x2 = sum(x * x for x in log_t)
+                    denom_fit = n_fit * sum_x2 - sum_x * sum_x
+                    if abs(denom_fit) > 1e-12:
+                        slope_tc = (n_fit * sum_xy - sum_x * sum_y) / denom_fit
+                        intercept_tc = (sum_y - slope_tc * sum_x) / n_fit
+                        # δ = -slope (power-law decay exponent)
+                        delta = round(-slope_tc, 6)
+                        # R² for the fit
+                        y_mean_tc = sum_y / n_fit
+                        ss_tot_tc = sum((y - y_mean_tc) ** 2 for y in log_d)
+                        ss_res_tc = sum(
+                            (log_d[j] - (slope_tc * log_t[j] + intercept_tc)) ** 2
+                            for j in range(n_fit)
+                        )
+                        r2_tc = round(1.0 - ss_res_tc / ss_tot_tc, 6) if ss_tot_tc > 1e-12 else 0.0
+
+                        result["temporal_coherence_exponent"] = delta
+                        result["temporal_coherence_r2"] = r2_tc
+                        result["temporal_coherence_n_fit_points"] = n_fit
+
+                        # Verdict: universal power-law behavior near criticality
+                        # expects δ > 0 (coherence deficit decays) with good R²
+                        if r2_tc >= 0.7 and delta > 0:
+                            result["temporal_coherence_verdict"] = "POWER_LAW_DECAY"
+                        elif r2_tc >= 0.7 and delta <= 0:
+                            result["temporal_coherence_verdict"] = "COHERENCE_GROWING"
+                        else:
+                            result["temporal_coherence_verdict"] = "NO_CLEAR_SCALING"
+
+                        # Cross-check with spatial criticality verdict
+                        if verdict is not None and r2_tc >= 0.7:
+                            if "CRITICAL" in (verdict or "") and delta > 0:
+                                result["temporal_spatial_agreement"] = True
+                            else:
+                                result["temporal_spatial_agreement"] = False
+
+                # Store back into telemetry for downstream consumers
+                ca_telemetry["temporal_coherence_series"] = temporal_coherence_series
+                if "temporal_coherence_exponent" in result:
+                    ca_telemetry["temporal_coherence_exponent"] = result["temporal_coherence_exponent"]
+                    ca_telemetry["temporal_coherence_r2"] = result["temporal_coherence_r2"]
+        except (TypeError, ValueError, OverflowError):
+            pass
+
     # O148: Track frozen-seed count — permanently-active cells that act as
     # catalytic substrates for phase-stratified emergence (per frozen-GoL paper).
     # Without this variable the measurement protocol cannot detect the causally
@@ -416,6 +533,61 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                 result["total_cells"] = int(total_cells_for_frac)
             except (TypeError, ValueError, ZeroDivisionError):
                 pass
+
+    # O148: Per-cell-type entropy decomposition — compute each type's count,
+    # probability p_i, and Shannon contribution h_i = -p_i·log2(p_i).
+    # This directly tests whether Physics Navigator dominance causally
+    # explains the 84% entropy suppression by showing which types carry
+    # the entropy and which suppress it.  The sum of h_i equals H_total,
+    # providing a closed-form decomposition of the snapshot entropy.
+    _ctc_for_entropy = ca_telemetry.get("cell_type_counts")
+    if isinstance(_ctc_for_entropy, dict) and _ctc_for_entropy:
+        import math
+        _total_for_entropy = sum(_ctc_for_entropy.values())
+        if _total_for_entropy > 0:
+            per_type_entropy = {}
+            h_reconstructed = 0.0
+            for ctype, ct_count in _ctc_for_entropy.items():
+                p_i = ct_count / _total_for_entropy
+                if p_i > 0:
+                    h_i = -p_i * math.log2(p_i)
+                else:
+                    h_i = 0.0
+                h_reconstructed += h_i
+                per_type_entropy[ctype] = {
+                    "count": ct_count,
+                    "probability": round(p_i, 6),
+                    "shannon_contribution": round(h_i, 6),
+                }
+            # H_max for this alphabet size
+            n_types = len(_ctc_for_entropy)
+            h_max_types = math.log2(n_types) if n_types > 1 else 0.0
+            result["per_type_entropy"] = per_type_entropy
+            result["entropy_reconstructed"] = round(h_reconstructed, 6)
+            result["entropy_n_types"] = n_types
+            if h_max_types > 0:
+                result["entropy_suppression_ratio"] = round(
+                    1.0 - h_reconstructed / h_max_types, 6
+                )
+            # Identify the type contributing most to entropy suppression:
+            # the type with highest p_i (lowest h_i relative to uniform)
+            # In a uniform distribution each type would contribute
+            # h_uniform = log2(n_types)/n_types.  The suppression from
+            # type i is (h_uniform - h_i) — positive when that type is
+            # over-represented and thus suppresses entropy.
+            if n_types > 1:
+                h_uniform_per = math.log2(n_types) / n_types
+                max_suppressor = None
+                max_suppression = -float("inf")
+                for ctype, edata in per_type_entropy.items():
+                    suppression_i = h_uniform_per - edata["shannon_contribution"]
+                    edata["entropy_suppression"] = round(suppression_i, 6)
+                    if suppression_i > max_suppression:
+                        max_suppression = suppression_i
+                        max_suppressor = ctype
+                if max_suppressor is not None:
+                    result["entropy_dominant_suppressor"] = max_suppressor
+                    result["entropy_dominant_suppression"] = round(max_suppression, 6)
 
     # INV_023 / O148: Closure-integrity check — distinguish autopoietic
     # circular-closure collapse from simple cell death.  Autopoietic closure
