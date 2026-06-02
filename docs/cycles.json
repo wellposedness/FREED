@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 12,
-    "generation": 240,
-    "timestamp": "2026-05-16T04:40:28.953831+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 7,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant confirmed but never seriously challenged is not proven — it is merely uncontested, and contestation is the missing load."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
-        "compress": "A 32×32 multi-agent CA self-organizes to measurable criticality (σ=1.03, α≈1.93) confirming that γ=1 is an empirical population attractor, not an imposed parameter, while the weak R²=0.795 leaves the power-law claim partially open. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0288 sits within the critical band but above unity, raising the question of whether the system is genuinely critical or slowly supercritical, which would mean the Wasserstein gradient has not yet converged to the ridge but is drifting toward γ>1 (frozen) regime."
-      },
-      {
-        "title": "A novel energy-optimal scalar auxiliary variable (EOP-SAV) approach for gradient flows",
-        "compress": "** Gradient flow numerics independently proves that surrogate-energy stability without optimal correction accumulates systematic drift from true dissipation — converging with RSA's critical ridge and MaxRL invariants while revealing that pointwise γ=1 adherence may need relaxation to expectation-level criticality."
-      },
-      {
-        "title": "Phase transitions and thermodynamic properties of antiferromagnetic Ising model with next-nearest-neighbor interactions on the Kagome lattice",
-        "compress": "Frustrated-lattice physics independently demonstrates that competing interactions select second-order criticality via order-from-disorder, providing a substrate-independent physical instantiation of critical-ridge stability."
-      },
-      {
-        "title": "Life as Non-Normal Chemical Accelerator",
-        "compress": "Life's elevated entropy production is structurally caused by non-normal (asymmetric, hierarchical) biochemical network topology, providing a falsifiable spectral criterion that distinguishes biotic from abiotic dissipation and mechanistically grounds the EAR-intelligence hypothesis in O28."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O163",
-        "O72",
-        "O210"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 241,
     "timestamp": "2026-05-16T11:02:37.990309+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "SimE: A Knowledge Graph Embedding Model to Encode Self-Similar Structures Through Algebraic and Geometric Transformations",
         "compress": "Knowledge graphs are algebraically self-similar across scales, and similarity-group embeddings in complex spaces operationalize scale-invariant semantic structure — independently converging on INV_059 and extending O112's empirical pathway."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O265",
+        "O268"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 291,
+    "timestamp": "2026-06-02T09:50:00.019606+00:00",
+    "sweep": {
+      "input_count": 32,
+      "targeted": 8,
+      "passive": 24,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's necessity claim that systems *must* navigate the γ=1 ridge is unfalsified only because no operational discriminator yet separates true criticality from structured near-critical mimicry — that gap is the falsification target."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-02",
+        "compress": "A 32×32 Game of Truth CA self-organizes to σ=1.03 with power-law avalanches (α≈2.43), independently confirming the critical ridge as a dynamic attractor while revealing that criticality coexists with low entropy (H/H_max≈0.177), which strains any equivalence between criticality and entropy maximization. CHALLENGE: challenges INV_073 — the paper shows the system operating at criticality (σ=1.03) while maintaining H/H_max≈0.177, directly stressing any claim that the critical ridge coincides with or requires high entropy production; criticality and near-maximum entropy are demonstrably dissociable here."
+      },
+      {
+        "title": "EnSToM: Enhancing Dialogue Systems with Entropy-Scaled Steering Vectors for Topic Maintenance",
+        "compress": "** Effective behavioral steering requires entropy-aware scaling of intervention magnitude — a thermodynamic calibration principle independently confirmed at the activation level."
+      },
+      {
+        "title": "Phase Transitions in Neural Networks Pruning",
+        "compress": "Neural network pruning undergoes a second-order phase transition at a critical connectivity threshold, independently confirming γ=1 ridge criticality while raising the challenge that the critical point may be a knife-edge rather than a navigable ridge."
+      },
+      {
+        "title": "Boundary conditions and electromagnetic effects on the phase transition of a zero spin bosonic system",
+        "compress": "Boundary condition type is a co-equal physical determinant of phase structure in confined QFT systems, establishing that topology is not background but an active selector of which phase — and which side of criticality — obtains."
       }
     ],
     "resolve": {
