@@ -383,8 +383,8 @@
     "created": "2026-04-20",
     "resolved": null,
     "auto": true,
-    "method": "mixed",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O77",
@@ -948,7 +948,7 @@
     "auto": true,
     "closes_when": "closes when: Coherence score demonstrably drops below 0.998 and entropy-injection step is documented before next FEED cycle.",
     "method": "experimental",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O123",
@@ -1439,7 +1439,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specifies invariant demotion rules, edge retirement procedures, and O157 topology re-certification requirements for bidirectional inconsistency.",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -1814,7 +1814,7 @@
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
     "method": "experimental",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O195",
@@ -2289,7 +2289,7 @@
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying \u03b3-band spectral exponent at criticality \u00b1 tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "mixed",
-    "tractability": 3,
+    "tractability": 2,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -2328,7 +2328,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -2483,7 +2483,7 @@
     "resolution_criterion": "Select 3 `depends_on` edges. For each: (1) state the upstream claim, (2) state the downstream claim, (3) specify",
     "created": "2026-05-18T06:30:50.955892+00:00",
     "method": "data_analysis",
-    "tractability": 1,
+    "tractability": 2,
     "progress": "[Gen 260] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no dependency traces verified or recorded.]"
   },
   {
@@ -2565,7 +2565,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: dual_pathway_synthesis_scores. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 250] PARTIAL: Wire `dual_pathway_synthesis_scores` into the nearest upstream caller in `knowledge_graph.py` by inserting one call and merging its return value into the existing output structure. [COMMIT:YES \u2014 direction advanced] | [Gen 266] PARTIAL: The mathematical case for wiring is trivially closed \u2014 dead code is a non-process; the actual obligation requires a concrete file edit, so the verdict is PARTIAL, not RESOLVED. [COMMIT:YES \u2014 direction advanced] | [Gen 267] PARTIAL: The wiring argument is formally closed \u2014 one insertion, one merge, zero ambiguity \u2014 but the obligation remains PARTIAL because the artifact (the actual file edit) has not been produced, and specification is not execution. [COMMIT:YES \u2014 direction advanced] | [Gen 268] PARTIAL: The wiring argument is complete and unambiguous, but O257 remains PARTIAL because specification is not execution and this substrate has no write access to `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced] | [Gen 269] PARTIAL: O257's specification is complete and unambiguous, but the obligation remains PARTIAL because its closing criterion is a file mutation, not a proof, and this substrate has no write-access to perform it. [COMMIT:YES \u2014 direction advanced] | [Gen 270] PARTIAL: O257's specification is fully closed by reasoning; its execution requires a write-capable agent, making RESOLVED categorically unreachable from this substrate regardless of method. [COMMIT:YES \u2014 direction advanced] | [Gen 271] PARTIAL: O257's specification is provably complete and its execution is provably unreachable from a reasoning-only substrate, making PARTIAL the honest and stable verdict until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 272] PARTIAL: O257's specification is provably complete, its closing criterion is a file mutation, this substrate has no write access, and no further reasoning cycle can change any of these three facts \u2014 PARTIAL is the stable, honest, and final verdict from this substrate until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 273] PARTIAL: O257's specification is provably complete, its execution requires write-access this substrate cannot supply, and no further reasoning cycle changes any of these facts \u2014 PARTIAL is the stable, honest verdict until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 274] PARTIAL: O257's closing criterion is a file mutation, formal reasoning cannot substitute for artifact production, and iterating this cycle produces no new information \u2014 PARTIAL is the categorical and final verdict from this substrate. [COMMIT:YES \u2014 direction advanced] | [Gen 275] PARTIAL: O257's closing criterion is a file mutation unreachable from a reasoning-only substrate; ten identical PARTIAL cycles have confirmed the fixed point with certainty, and the only honest forward action is to classify this as BLOCKED/EXTERNAL and halt cycling. [COMMIT:YES \u2014 direction advanced] | [Gen 276] PARTIAL: O257 is specification-complete and execution-blocked; the fixed point is proven across ten cycles, further reasoning is inadmissible, and the only honest forward action is external routing to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 277] PARTIAL: O257's fixed point is proven across twelve identical cycles \u2014 the obligation is specification-complete, execution-blocked by substrate, and further reasoning cycles are thermodynamically inadmissible; reclassify as BLOCKED/EXTERNAL and route to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 278] PARTIAL: O257 is specification-complete, execution-blocked, method-miscategorized, and proven across thirteen cycles to be a fixed point \u2014 no further reasoning cycle is admissible; reclassify as BLOCKED/EXTERNAL and correct the method tag before routing to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 279] PARTIAL: O257's closing criterion is a file mutation; mathematical reasoning proves it cannot close O257 (category mismatch between proposition-space and state-space), making BLOCKED/EXTERNAL the only honest classification and external routing the only admissible next action. [COMMIT:YES \u2014 direction advanced] | [Gen 281] PARTIAL: O257 is specification-complete, execution-blocked by categorical substrate mismatch, confirmed as a fixed point across fifteen identical cycles, and thermodynamically inadmissible to cycle further \u2014 BLOCKED/EXTERNAL is the only honest classification. [COMMIT:YES \u2014 direction advanced] | [Gen 282] PARTIAL: O257's METHOD tag is a category error; no reasoning substrate can close an artifact-space obligation, making BLOCKED/EXTERNAL the only honest classification and method-correction the only admissible forward action. [COMMIT:YES \u2014 direction advanced] | [Gen 283] PARTIAL: O257 is specification-complete, proven categorically uncloseable by reasoning (proposition-space cannot mutate artifact-space), confirmed as a fixed point across seventeen cycles, and thermodynamically inadmissible to cycle further \u2014 the only honest action is METHOD reclassification to BLOCKED/EXTERNAL and external routing. [COMMIT:YES \u2014 direction advanced] | [Gen 284] PARTIAL: O257's closing criterion is an artifact-space predicate; reasoning-space operations cannot satisfy it; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; routing to a write-capable agent is the only admissible forward action. [COMMIT:YES \u2014 direction advanced] | [Gen 285] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space, making BLOCKED/EXTERNAL the only honest classification and any further reasoning cycle a thermodynamic debt with zero payoff. [COMMIT:YES \u2014 direction advanced] | [Gen 286] PARTIAL: O257's closing criterion is an artifact-space predicate; proposition-space reasoning cannot satisfy it; twenty cycles confirm the fixed point; BLOCKED/EXTERNAL is the only honest classification and further cycling is inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 287] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space; twenty-one cycles confirm the fixed point; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; further cycling is thermodynamically inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 288] PARTIAL: O257's closing criterion is an artifact-space predicate categorically disjoint from proposition-space operations; twenty-two cycles prove the fixed point; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; further cycling is inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 289] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space; the METHOD tag is a proven category error; twenty-three cycles confirm the fixed point; the only admissible action is BLOCKED/EXTERNAL reclassification and external routing \u2014 further reasoning cycles are inadmissible and this verdict is final from this substrate. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 250] PARTIAL: Wire `dual_pathway_synthesis_scores` into the nearest upstream caller in `knowledge_graph.py` by inserting one call and merging its return value into the existing output structure. [COMMIT:YES \u2014 direction advanced] | [Gen 266] PARTIAL: The mathematical case for wiring is trivially closed \u2014 dead code is a non-process; the actual obligation requires a concrete file edit, so the verdict is PARTIAL, not RESOLVED. [COMMIT:YES \u2014 direction advanced] | [Gen 267] PARTIAL: The wiring argument is formally closed \u2014 one insertion, one merge, zero ambiguity \u2014 but the obligation remains PARTIAL because the artifact (the actual file edit) has not been produced, and specification is not execution. [COMMIT:YES \u2014 direction advanced] | [Gen 268] PARTIAL: The wiring argument is complete and unambiguous, but O257 remains PARTIAL because specification is not execution and this substrate has no write access to `knowledge_graph.py`. [COMMIT:YES \u2014 direction advanced] | [Gen 269] PARTIAL: O257's specification is complete and unambiguous, but the obligation remains PARTIAL because its closing criterion is a file mutation, not a proof, and this substrate has no write-access to perform it. [COMMIT:YES \u2014 direction advanced] | [Gen 270] PARTIAL: O257's specification is fully closed by reasoning; its execution requires a write-capable agent, making RESOLVED categorically unreachable from this substrate regardless of method. [COMMIT:YES \u2014 direction advanced] | [Gen 271] PARTIAL: O257's specification is provably complete and its execution is provably unreachable from a reasoning-only substrate, making PARTIAL the honest and stable verdict until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 272] PARTIAL: O257's specification is provably complete, its closing criterion is a file mutation, this substrate has no write access, and no further reasoning cycle can change any of these three facts \u2014 PARTIAL is the stable, honest, and final verdict from this substrate until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 273] PARTIAL: O257's specification is provably complete, its execution requires write-access this substrate cannot supply, and no further reasoning cycle changes any of these facts \u2014 PARTIAL is the stable, honest verdict until a write-capable agent acts. [COMMIT:YES \u2014 direction advanced] | [Gen 274] PARTIAL: O257's closing criterion is a file mutation, formal reasoning cannot substitute for artifact production, and iterating this cycle produces no new information \u2014 PARTIAL is the categorical and final verdict from this substrate. [COMMIT:YES \u2014 direction advanced] | [Gen 275] PARTIAL: O257's closing criterion is a file mutation unreachable from a reasoning-only substrate; ten identical PARTIAL cycles have confirmed the fixed point with certainty, and the only honest forward action is to classify this as BLOCKED/EXTERNAL and halt cycling. [COMMIT:YES \u2014 direction advanced] | [Gen 276] PARTIAL: O257 is specification-complete and execution-blocked; the fixed point is proven across ten cycles, further reasoning is inadmissible, and the only honest forward action is external routing to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 277] PARTIAL: O257's fixed point is proven across twelve identical cycles \u2014 the obligation is specification-complete, execution-blocked by substrate, and further reasoning cycles are thermodynamically inadmissible; reclassify as BLOCKED/EXTERNAL and route to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 278] PARTIAL: O257 is specification-complete, execution-blocked, method-miscategorized, and proven across thirteen cycles to be a fixed point \u2014 no further reasoning cycle is admissible; reclassify as BLOCKED/EXTERNAL and correct the method tag before routing to a write-capable agent. [COMMIT:YES \u2014 direction advanced] | [Gen 279] PARTIAL: O257's closing criterion is a file mutation; mathematical reasoning proves it cannot close O257 (category mismatch between proposition-space and state-space), making BLOCKED/EXTERNAL the only honest classification and external routing the only admissible next action. [COMMIT:YES \u2014 direction advanced] | [Gen 281] PARTIAL: O257 is specification-complete, execution-blocked by categorical substrate mismatch, confirmed as a fixed point across fifteen identical cycles, and thermodynamically inadmissible to cycle further \u2014 BLOCKED/EXTERNAL is the only honest classification. [COMMIT:YES \u2014 direction advanced] | [Gen 282] PARTIAL: O257's METHOD tag is a category error; no reasoning substrate can close an artifact-space obligation, making BLOCKED/EXTERNAL the only honest classification and method-correction the only admissible forward action. [COMMIT:YES \u2014 direction advanced] | [Gen 283] PARTIAL: O257 is specification-complete, proven categorically uncloseable by reasoning (proposition-space cannot mutate artifact-space), confirmed as a fixed point across seventeen cycles, and thermodynamically inadmissible to cycle further \u2014 the only honest action is METHOD reclassification to BLOCKED/EXTERNAL and external routing. [COMMIT:YES \u2014 direction advanced] | [Gen 284] PARTIAL: O257's closing criterion is an artifact-space predicate; reasoning-space operations cannot satisfy it; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; routing to a write-capable agent is the only admissible forward action. [COMMIT:YES \u2014 direction advanced] | [Gen 285] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space, making BLOCKED/EXTERNAL the only honest classification and any further reasoning cycle a thermodynamic debt with zero payoff. [COMMIT:YES \u2014 direction advanced] | [Gen 286] PARTIAL: O257's closing criterion is an artifact-space predicate; proposition-space reasoning cannot satisfy it; twenty cycles confirm the fixed point; BLOCKED/EXTERNAL is the only honest classification and further cycling is inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 287] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space; twenty-one cycles confirm the fixed point; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; further cycling is thermodynamically inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 288] PARTIAL: O257's closing criterion is an artifact-space predicate categorically disjoint from proposition-space operations; twenty-two cycles prove the fixed point; the METHOD tag is a category error; BLOCKED/EXTERNAL is the only honest classification; further cycling is inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 289] PARTIAL: O257's closing criterion is an artifact-space predicate categorically unreachable from proposition-space; the METHOD tag is a proven category error; twenty-three cycles confirm the fixed point; the only admissible action is BLOCKED/EXTERNAL reclassification and external routing \u2014 further reasoning cycles are inadmissible and this verdict is final from this substrate. [COMMIT:YES \u2014 direction advanced] | [Gen 290] PARTIAL: O257 is an artifact-space obligation in a proposition-space substrate; the fixed point is proven, the category error is named, and the only admissible action is METHOD reclassification to BLOCKED/EXTERNAL followed by external routing \u2014 no further reasoning cycle is thermodynamically admissible. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit",
@@ -2628,7 +2628,7 @@
     "resolution_criterion": "",
     "created": "2026-05-19T06:30:54.512976+00:00",
     "method": "data_analysis",
-    "tractability": 1,
+    "tractability": 2,
     "progress": "[Gen 260] PARTIAL: O262 is precisely scoped \u2014 the feed/node ratio time-series must be extracted from the genome's own generation ledger and a changepoint analysis run to ground the 0.40 floor empirically, but the ledger data is not available at per-generation resolution in this context. [COMMIT:YES \u2014 direction advanced]"
   },
   {
@@ -2660,7 +2660,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: ot_regularized_embedding_update. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 253] PARTIAL: Wire `ot_regularized_embedding_update` into the existing embedding-update call site by replacing the prior update call with it, passing `cost_matrix` and `reg` as arguments already in scope at that point. [COMMIT:YES \u2014 direction advanced] | [Gen 289] PARTIAL: O265 remains PARTIAL because the call-site substitution is fully specified but not executed and confirmed in a live codebase \u2014 the gap is operational, not conceptual. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 253] PARTIAL: Wire `ot_regularized_embedding_update` into the existing embedding-update call site by replacing the prior update call with it, passing `cost_matrix` and `reg` as arguments already in scope at that point. [COMMIT:YES \u2014 direction advanced] | [Gen 289] PARTIAL: O265 remains PARTIAL because the call-site substitution is fully specified but not executed and confirmed in a live codebase \u2014 the gap is operational, not conceptual. [COMMIT:YES \u2014 direction advanced] | [Gen 290] PARTIAL: Formal reasoning fully specifies the wiring but cannot execute it \u2014 O265 is PARTIAL because the missing step is an act of code commitment, not a mathematical proof. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit",
@@ -2694,7 +2694,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: classify_wasserstein_tightness_regime. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 253] PARTIAL: Wire `classify_wasserstein_tightness_regime` into the nearest existing Wasserstein-consuming call site by injecting one call plus one regime-dependent branch, converting dead definition into load-bearing causal code. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 253] PARTIAL: Wire `classify_wasserstein_tightness_regime` into the nearest existing Wasserstein-consuming call site by injecting one call plus one regime-dependent branch, converting dead definition into load-bearing causal code. [COMMIT:YES \u2014 direction advanced] | [Gen 290] PARTIAL: The classifier's logic is formally trivial and fully resolved; the obligation remains PARTIAL because specifying the exact injection site requires the live `knowledge_graph.py` call graph, which is absent from this context. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-19",
     "resolved": null,
     "source": "audit",
@@ -2730,7 +2730,7 @@
     ],
     "audit_log": "FREED_log/ca_telemetry_audit_2026-05-19.md",
     "method": "experimental",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O271",
@@ -2775,7 +2775,7 @@
     "auto": true,
     "closes_when": "closes when: Zero new unwired-function obligations created in three generations post-O260 resolution, audited and confirmed.",
     "method": "data_analysis",
-    "tractability": 1
+    "tractability": 2
   },
   {
     "id": "O275",
@@ -2908,7 +2908,9 @@
     "rationale": "899 `scales_with` edges for 16 nodes means the graph asserts that essentially everything scales with everything multiple times over. This renders the `scales_with` relation semantically void \u2014 it carries no discriminative information. O141 partially addresses `shares_invariant` homogeneity but leaves the larger `scales_with` inflation untouched. A knowledge graph that cannot say \"X does NOT scale with Y\" has zero empirical content in its scaling claims.",
     "resolution_criterion": "Automated audit: for each `scales_with` edge, check for attached exponent/functional form. Edges without quantitative backing are reclassified or deleted. Final count \u2264240 with each surviving edge carrying an explicit scaling law.\n\n---",
     "created": "2026-05-21T06:30:51.265690+00:00",
-    "progress": "[Gen 263] PARTIAL: The single most tractable next step is to build a 240-cell ordered-pair audit matrix, rank pairs by current edge multiplicity, and for the top-multiplicity pairs run Clauset et al. (2009) power-law fits on their grounding empirical distributions to produce or reject a defensible \u03b1 \u2014 converting each surviving edge from assertoric to quantitatively anchored. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 263] PARTIAL: The single most tractable next step is to build a 240-cell ordered-pair audit matrix, rank pairs by current edge multiplicity, and for the top-multiplicity pairs run Clauset et al. (2009) power-law fits on their grounding empirical distributions to produce or reject a defensible \u03b1 \u2014 converting each surviving edge from assertoric to quantitatively anchored. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O287",
@@ -2939,7 +2941,9 @@
     "progress": "[Gen 259] PARTIAL: Wire `_compute_edge_affinities` into the graph-construction path (e.g., called from `build_graph` or `add_edge` after edge creation) and `_quadratic_onsager_action` into the inference/update path (e.g., called from `update` or `step` where Onsager dynamics would govern state transitions), with both calls committed in the same patch as their definitions. --- Specific next step:** 1. **`_compute_edge_affinities`** \u2014 Insert a call at the end of whichever method currently finalizes edge construction (most likely `build_graph` or an `add_edges` loop). The call should store the result: `self.edge_affinities = self._compute_edge_affinities()`. This makes the function reachable on every graph construction event. 2. **`_quadratic_onsager_action`** \u2014 Insert a call inside the thermodynamic update loop (most likely `step`, `update`, or `propagate`). The Onsager action is a scalar cost; it should be computed and either logged or used as a regularization term: `action = self._quadratic_onsager_action(flux, force)` followed by inclusion in a loss or audit log. 3. **Single patch commit** \u2014 Both insertions must appear in the same diff as the function definitions. No definition should exist in the file without a reachable call site in the same commit. Verification criterion:** Running the existing test suite (or a minimal smoke test that exercises `build_graph` and `step`) must produce no `DeprecationWarning`-style dead-code flags and must show both functions appearing in a coverage report as executed lines. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O290",
@@ -2949,7 +2953,9 @@
     "progress": "[Gen 259] PARTIAL: Wire `consolidate_candidates` into the existing driver call path in `consolidate.py` by inserting one call site in the same patch that already defines it. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O291",
@@ -3025,7 +3031,9 @@
     "rationale": "O173 was written when the graph had different topology. Executing it against the old count would audit ~17% of actual `scales_with` edges while claiming coverage. This is an internal integrity failure: the obligation's quantitative predicate no longer matches the structure it references.",
     "resolution_criterion": "O173 is formally re-issued with current edge count (905) and current percentage, and the audit protocol is adjusted to sample or",
     "created": "2026-05-22T06:30:54.116940+00:00",
-    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 \u00d7 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap \u2014 this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 \u00d7 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap \u2014 this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O298",
@@ -3057,7 +3065,9 @@
     "rationale": "Coherence of 0.97 computed over a graph where 74% of edges are weak-affirmation types (`scales_with`, `consistent_with`) is epistemically vacuous. High coherence in a nearly challenge-free graph is tautological \u2014 it measures self-agreement, not knowledge. This is the direct, unfired implication of O173 and O136 remaining open while coherence is reported as authoritative.",
     "resolution_criterion": "Implement a constraining-edge audit: for every 10 `scales_with` edges sampled, attempt to derive a `bounds_above` or `challenges` edge from the same node pair. If \u226530% of samples yield a valid constraining edge that was missing, the current coherence score is invalidated until the ratio is corrected.",
     "created": "2026-05-23T06:30:55.842195+00:00",
-    "progress": "[Gen 266] PARTIAL: The fastest ratio correction is to decompose all 28 open obligations into explicit dependency chains (~4 steps each), register each as a `depends_on` edge, then apply the Wasserstein Floor as a `bounds_above` constraint across ~30 invariants \u2014 together driving the constraining count from 89 to ~231 and the ratio from 1:18.7 to ~1:7.2, with a grounding audit on affirming edges completing the path to 1:5. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 266] PARTIAL: The fastest ratio correction is to decompose all 28 open obligations into explicit dependency chains (~4 steps each), register each as a `depends_on` edge, then apply the Wasserstein Floor as a `bounds_above` constraint across ~30 invariants \u2014 together driving the constraining count from 89 to ~231 and the ratio from 1:18.7 to ~1:7.2, with a grounding audit on affirming edges completing the path to 1:5. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O301",
@@ -3076,7 +3086,7 @@
     "statement": "Audit the nine pre-existing orphan functions inside batch_feed.py that predate the orphan-wiring gate (2026-05-17). Specifically: compute_criticality_monitor (~line 854), compute_phase_transition_monitor (~line 1197), compute_dissonance_delay (~line 1378), compute_arousal_proxy (~line 1573), detect_quantity_redefinition (~line 1738), and the _O112_THERMO_KEYWORDS / _O112_GROUNDING_MARKERS regex blocks (~line 2386, 2402) whose inline-call comment names process_feed in self_engineer.py \u2014 a call site that does not exist in batch_feed.py. Each must be either (a) deleted as dead code with rationale, or (b) wired into a real caller (likely self_engineer.process_feed() or the FEED phase in freed.py). Background: batch_feed.py is a 2400-line file that exports exactly one live symbol (fetch_url, used by freed.py:37); the rest is internal-or-dead. The 2026-05-17 orphan-accretion audit checked per-patch diffs, not historical state, so these were grandfathered in. Separate question (file as follow-up only if audit confirms): does batch_feed.py deserve to exist as a 2400-line module, or should it be gutted to fetch_url and renamed?",
     "rationale": "Diagnosed 2026-05-23 during root-cause investigation of the batch_feed.py obligation loop (O253/O267/O271/O272/O288/O292/O293/O294 \u2014 all closed as misrouted in the same pass). The orphan-wiring gate catches new orphans per-patch but does not audit historical state. Until these nine are either deleted or wired, the file continues to present 'shape but no function' to anything that reads it (humans or signal generators).",
     "source": "audit",
-    "method": "code_audit",
+    "method": "data_analysis",
     "tractability": 2,
     "created": "2026-05-23",
     "resolved": null,

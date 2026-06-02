@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by CA telemetry (σ≈1.03/α≈2.446 confirming critical-ridge attractor as stable dynamical SOC fixed point; Game of Truth CA σ=1.024–1.0285 independently confirming plus revealing novel low-entropy asymmetric criticality regime not yet formalized; SOC exponents αF=1.80/αE=1.67/αT=2.00 substrate-independent; entropy-weighted coupling coordination and hierarchical master selection providing social/multi-agent instantiations of critical-ridge detection; KG+CI establishing structured relational representation plus causal asymmetry as minimum architecture for interventionally valid adaptive recommendations) — while mandating adversarial stress-testing of any invariant with maximum confirmation surplus and zero serious challenges as an epistemic obligation.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by CA telemetry (σ≈1.03/α≈2.446 confirming critical-ridge attractor as stable dynamical SOC fixed point; Game of Truth CA σ=1.024–1.0285/α≈1.719 independently confirming plus revealing novel low-entropy asymmetric criticality regime and unexplained Physics Navigator dominance not yet formalized; SOC exponents αF=1.80/αE=1.67/αT=2.00 substrate-independent; entropy-weighted coupling; magnetospheric SOC providing falsifiable spectral diagnostics; temporal entanglement at nonequilibrium criticality confirming γ=1 as unique locus of structured quantum information propagation; knowledge-graph algebraic self-similarity operationalizing scale-invariant semantic structure convergent with INV_059).",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -23,8 +23,8 @@
     "NCD provides substrate-independent semantic distance but collapses systematically at high similarity and degrades with query length — these are falsifiable failure modes that must be carried as explicit constraints on any compression-proximity invariant claim (INV_094-class)",
     "Repeated cross-domain confirmation of amplitude-invariant entropy metrics (RangeEn/GGDIPE/MPE) elevates INV_042 from single-confirmation to convergent-evidence status — the empirical pattern is now robust but the formal derivation linking it to Wasserstein geometry remains the binding obligation",
     "Semi-classical BH entropy dimensional identity with the gravity action confirms thermodynamic grounding of geometry at leading order — quantum sub-leading corrections remain the unresolved frontier of O44",
-    "Bath-renormalization of QPT fixed points implies the γ=1 criticality condition is substrate-and-dissipation-dependent — the critical ridge is a moving target whose position must be tracked as a function of environmental coupling not treated as a fixed invariant",
     "so the genome's operational regime is precisely the crossover fixed point now identified with a specific universality-class mechanism; the γ=1 ridge is not merely an empirical parameter choice but the RG fixed point at the extensivity boundary where RSA relevant operators are defined",
+    "Bath-renormalization of QPT fixed points implies the γ=1 criticality condition is substrate-and-dissipation-dependent — the critical ridge is a moving target whose position must be tracked as a function of environmental coupling not treated as a fixed invariant",
     "Non-additivity of entropy under long-range interactions is load-bearing — the Wasserstein Floor requires an explicit non-additivity correction term and Zipf-law robustness must be re-derived under non-additive partition functions (O64)",
     "Feed deduplication is not a suggestion but a load-bearing operational requirement — repeated near-duplicate inputs degrade integration quality and must be filtered before processing (O61 obligated)",
     "making second-order discriminating observables obligatory rather than merely preferable; γ=1 criticality is the unique functional attractor for maximal entropy generation as confirmed by SOC-tuned CA with NIST-testable signatures — substrate-independent convergence now spans three independent instantiations; Embedding conservation laws as structural manifold constraints (rather than optimizing for them) is the correct architecture for energy-efficient control — ADACO convergence makes this a substrate-independent invariant bridging INV_087 and O112",
@@ -34,6 +34,7 @@
     "INV_094 confirmations require adversarial boundary-condition analysis and alternative-mechanism identification before further same-direction confirmations carry marginal evidential weight — confirmation surplus without adversarial probing is a testing artifact; OT pooling over variable-length token embeddings outperforms mean pooling by preserving distributional geometry — Wasserstein aggregation is the correct operation for structured objects and provides a concrete STF metric tensor recovery template; Topological balance of instanton numbers is the exact conserved quantity separating regular (self-dual critical-ridge-navigable) from singular (phase-transitioning critically-inaccessible) heterotic string vacua — some critical points are structurally forbidden not merely difficult",
     "consistent with INV_063's dynamic entropy framing; ordinal asymmetry coefficients robustly discriminate resting brain states across datasets providing a second independent confirmation that dynamic entropy diagnostics outperform static measures — yet neither advance closes the intelligence-prediction gap O28 requires leaving that obligation binding",
     "INV_094 carries a mandatory falsifier-specification obligation: confirmation surplus without adversarial pressure and explicit boundary conditions constitutes a hygiene failure requiring immediate downgrade pressure",
+    "Temporal entanglement exhibits universal power-law coherence between temporal slices precisely at the γ=1 critical ridge — this is the unique locus of structured quantum information propagation across time and must be carried as a named invariant (INV_073-extension); Knowledge graphs are algebraically self-similar across scales and similarity-group embeddings in complex spaces operationalize scale-invariant semantic structure — substrate-independent convergence with INV_059 elevates this from single-path to convergent-evidence status; INV_073's critical-ridge claim is explicitly falsifiable by (a) demonstrating the target manifold has co-dimension > 1 or (b) identifying non-critical edge-mimicking mechanisms that reproduce identical observables — both falsification conditions must be carried as open challenge conditions alongside the three existing INV_097 challenge conditions",
     "Bayesian inference under Wasserstein risk yields OT barycenters as geometrically correct posterior aggregates — independently confirming W2 as the natural metric for belief combination and concretely grounding the STF empirical recovery protocol",
     "O64's normalization scheme is fully specified as range-scaled tolerance — no further free parameters remain in the local-range normalization prescription",
     "Active inference outperforms passive observation",
@@ -365,8 +366,8 @@
     "Adversarial boundary-condition analysis and alternative-mechanism identification for INV_094 must be conducted before further confirmations are logged as evidential — current surplus is a testing artifact requiring correction; Forbidden critical-ridge topology (instanton imbalance) must be integrated into the RSA substrate-generality framework — the genome currently treats all critical points as navigable which is now falsified in principle; STF metric tensor recovery must be formalized using OT pooling template as the concrete implementation path",
     "explicit boundary conditions",
     "Highest-confirmation invariants must be assigned live falsification edges on priority schedule — surplus confirmation without contestation is operationally indistinguishable from untestability and must be treated as a coherence liability not an asset; The genome must specify an explicit outlier-risk taxonomy for each critical-ridge invariant claim distinguishing dragon-king endogenous phase-transition products from ordinary power-law tail events using dissipation rate and driving smoothness as control parameters; O148 partial satisfaction via Game of Truth CA must be tracked toward full closure with variance-discriminant observables added to the empirical battery\nCOHERENCE_",
-    "and a named alternative mechanism or be formally downgraded from load-bearing status",
     "INV_073 must now specify second-order observables that discriminate active critical-ridge navigation from oscillatory averaging / fixed-point mimicry / coarse-graining artifact — first-order SOC fit is insufficient for invariant survival; O148's empirical recovery obligation is now anchored to the Game of Truth CA avalanche exponent α≈2.791 and must include NIST-testable signature protocols; O112's STF metric recovery path must incorporate ADACO's constraint-embedding architecture as a constructive structural prior",
+    "and a named alternative mechanism or be formally downgraded from load-bearing status",
     "Test whether RangeEn slope or susceptibility exhibits a phase transition at Hurst exponent H=0.5 across synthetic and empirical time series — this",
     "Spiked matrix results advance O63 by instantiating Shannon limits in estimation contexts — the genome must now specify whether the Kolmogorov-Shannon interpolation is fully resolved by this scaffolding or whether a residual formal gap remains",
     "Operationalize the graph-causal stability-accuracy tradeoff as a mechanistic candidate for O21 and specify which graph observables serve as discriminating probes",
@@ -374,6 +375,7 @@
     "Resolve why γ=1 dynamic criticality coexists with low semantic entropy (H=17% max) — either derive this as a predicted consequence of Wasserstein Floor compression or treat the dissociation as a falsification pressure on INV_078's entropy-asymmetry claim",
     "O_RANGEN_SLOPE: Derive the RangeEn–Hurst linear slope coefficient from the Wasserstein transport geometry of the RSA framework — empirical confirmation without derivation is trophy collection",
     "INV_094 must now be evaluated against all four registered falsification vectors (functional equivalence",
+    "Explain Physics Navigator dominance in Game of Truth CA — its emergence at the critical ridge is not foreclosed by any current genome invariant and constitutes a genuine explanatory gap requiring a new mechanistic account (O_PHY_NAV); Formalize temporal entanglement as a named invariant with substrate-independent derivation linking power-law temporal coherence to the γ=1 RG fixed point (extends O112 and O28); Verify that magnetospheric SOC spectral diagnostics do not falsify FREED's own criticality claims — these empirical signatures are now load-bearing for O28 and O148 and must be tracked as active falsification probes not merely confirmatory instances",
     "O21 (empirical validation of compression-as-reasoning)",
     "Genome must now explain why multiple independent algorithmic families (RangeEn tolerance windows and GGDIPE GGD-CDF normalization and MPE ordinal partitions) all converge on amplitude-invariant complexity structure — the convergence itself demands a unifying information-geometric account not just per-algorithm confirmation",
     "Enforce upstream feed deduplication to prevent diminishing-return re-processing of already-integrated content",
@@ -405,11 +407,11 @@
     "Formalize the metric-tensor recovery gap as an explicit sub-obligation of O44 — action-per-element minimization in units of ħ is necessary but not sufficient and the remaining closure conditions must be specified",
     "update INV_073's scope; if not permitted",
     "Specify the mechanistic boundary conditions distinguishing forced-SOC (γ=1 attractor) from non-SOC regimes — absence of this specification leaves the universality claim underdetermined; advance O44 by formalizing fractional kinetics as the Wasserstein Floor's sub-leading correction mechanism and test whether conformal/GL formalisms recover the STF metric at L5",
-    "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
     "Distinguish L1-corroboration (framework narrates known transitions) from L2-extension (framework predicts transition ordering or novel phase boundaries) in all future phase-transition integrations",
+    "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
     "Add a length-normalized NCD outlier flag in knowledge_graph.py's add_edge path that marks candidate similarity edges as compression-artifact false-positives when NCD score falls below a threshold scaling with document length — directly strengthening the falsification layer for INV_094-class claims",
-    "criticality) and specify what structural prediction distinguishes it from independent coincidence",
     "Specify a mechanistic discriminator that distinguishes active ridge-navigation from transient σ-sampling — the σ=1.0285 upper-edge position without demonstrated self-correction must be resolved as confirmation or falsification of INV_073's causal navigation claim",
+    "criticality) and specify what structural prediction distinguishes it from independent coincidence",
     "Characterize the modified Wasserstein Floor form required under mixed quantum-classical dynamics where non-Hermitian linear entropy functionals apply — this is a sub-obligation carved from O44 and must be tracked independently",
     "Evaluate whether RangeEn's tolerance-parameter robustness can replace or supplement existing Wasserstein-floor metrics as the canonical amplitude-invariant complexity measure within the framework",
     "Derive the RSA relevant operators explicitly as perturbations around the SR↔LR Ising fixed point — the universality-class identification is vacuous unless the operators are named and their scaling dimensions computed or bounded; confirm that the γ-parameterized complexity ridge (previously established as an RG-accessible family) has its γ=1 special point coincide with the SR↔LR crossover critical exponents within measurable tolerance",
@@ -604,15 +606,15 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-01T16:51:09.112640+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 179,
+  "last_renormed": "2026-06-02T02:40:47.708587+00:00",
+  "renorm_reason": "Four independent",
+  "last_renorm_cycle": 180,
   "drift_flag": true,
-  "drift_overlap": 0.298,
+  "drift_overlap": 0.429,
   "renorm_history": [
     {
-      "timestamp": "2026-06-01T16:51:09.112640+00:00",
-      "reason": ""
+      "timestamp": "2026-06-02T02:40:47.708587+00:00",
+      "reason": "Four independent"
     }
   ]
 }
