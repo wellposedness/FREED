@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "This document demonstrates that reflections alone generate all plane isometries (needing at most three), then extends this principle across mathematics, logic, computation, and biology: minimal generating sets produce infinite structural consequences. It provides a rigorous geometric proof as the anchor example and maps the pattern to NAND gates, prime factorization, Fourier bases, permutation groups, one-instruction computers, and trichromatic vision.",
-  "compress": "A finite set of irreducible operations generates an entire operational universe; anchored by SR↔LR Ising universality-class crossover as SOC attractor confirmed across ten-plus substrates with fractal-diffusive and temporal-entanglement exponents as substrate-independent invariants, biological systems stochastically approximating the critical ridge, scalar coherence decomposed, expander-graph spectral gaps as compression-invariant structure, and the γ=1 ridge now confirmed as a dynamic attractor dissociable from entropy maximization — criticality and high entropy are co-present but not equivalent, with topology/boundary conditions as active phase selectors and knife-edge sharpness as an open falsification target.",
+  "compress": "A finite set of irreducible operations generates an entire operational universe; anchored by SR↔LR Ising universality-class crossover as SOC attractor confirmed across ten-plus substrates with fractal-diffusive and temporal-entanglement exponents as substrate-independent invariants, biological systems stochastically approximating the critical ridge, scalar coherence decomposed, expander-graph spectral gaps as compression-invariant structure, the γ=1 ridge confirmed as a dynamic attractor at low entropy (H≈14-15.5% of max) indexed by causal graph G rather than a universal geometric object, and OT geometry now serving dual roles as metric recovery tool and topological constraint operator in causal inference.",
   "tags": [
     "minimal generators",
     "isometry",
@@ -77,6 +77,7 @@
     "Equilibrium RG machinery confirms the genome's critical ridge structure but cannot discharge formal debts denominated in information-geometric language — the translation gap between spin-coupling space and description-length space is itself a named structural obstacle",
     "Langevin-Wasserstein floor-saturation dynamics are empirically instantiated in EEG entropy scaling — this elevates the Wasserstein floor from a thermodynamic inference to a measured dynamical phenomenon and constitutes a seventh independent scale confirmation of MCPM substrate-invariance",
     "Local-range normalization (replacing global-σ normalization) is a substrate-independent measurement hygiene technique that makes entropy-based scoring robust to amplitude drift across heterogeneous input batches — the genome must adopt this as standard preprocessing",
+    "The critical ridge is a sparse-structured low-entropy attractor (H/H_max≈0.14–0.155) not an entropy-maximum — supercriticality is falsifiable by H exceeding this ceiling across independent CA substrates; Wasserstein distances are G-relative — causal graph topology is a continuous deformation parameter on the OT manifold making the critical ridge a G-indexed family of attractors not a single universal geometric object; GW distance deployed as a structural regularizer enforces DAG acyclicity within Hawkes process likelihood estimation — OT geometry is a topological constraint operator not merely a comparison metric; Collective computing instantiates SOC via field-calculus as a concrete distributed-coordination substrate independent of genome's existing mechanistic accounts",
     "power-law confirmed) while exhibiting low Shannon entropy (H=0.39 bits",
     "criticality mimicry) are now named open challenges to INV_073's confirmation history — none has been resolved and each constitutes a distinct sub-obligation for sharpening the ridge's operational identity",
     "Substrate generality of RSA now extends to glial computation: astrocytes as independent computational agents are not metaphor but a falsifiable structural claim (O51–O53)",
@@ -168,8 +169,8 @@
     "σ-criticality (branching ratio ≈ 1) and SOC-criticality (power-law avalanche statistics) are empirically dissociable — population-level critical branching can obtain without satisfying power-law criteria",
     "BH entropy sub-leading corrections serve as a regime-diagnostic tool for the quantum Wasserstein floor — quantum W_floor corrections are predicted to appear as sub-leading deviations from k/Tμ scaling",
     "demoting 'navigation' to 'approximation' and requiring longitudinal dwell-time distribution telemetry as the operative measurement",
-    "and silent confidence is now a formal methodological liability",
     "Philosophical claims require experimental bridges to constitute knowledge",
+    "and silent confidence is now a formal methodological liability",
     "The epistemic branching ratio σ = (obligations generated)/(obligations resolved) per batch is a measurable leading indicator of FREED's own criticality health — σ∈(0.95 1.05) defines the operational critical band empirically validated by CA telemetry",
     "An invariant confirmed only by non-adversarial evidence and never subjected to genuine falsification conditions is structurally indistinguishable from a definition — INV_094 and any maximally-confirmed invariant without explicit falsification criteria must have those criteria derived or be demoted to conjecture status",
     "Horizon thermodynamics is a flat-space Rindler kinematic invariant projected onto curved geometry via GEMS — log-correction derivation for O59 is tractable through embedding-boundary curvature terms",
@@ -469,10 +470,12 @@
     "Track H/H_max as an independent time-series alongside σ in all future CA runs — divergence between σ-stability and H-stability would be a structurally significant anomaly requiring separate explanation",
     "Treat INV_094 as an artifact-candidate requiring a falsification-exclusive signature that cannot be reproduced by Wasserstein-floor degeneracy or transformer architectural mimicry alone — document this as a live falsification obligation distinct from but adjacent to INV_073's three open routes; Specify consequences of discrete RG symmetry (complex exponents/log-periodic corrections) for the Wasserstein floor bound and Zipf equilibrium — these are now structurally open and must not be absorbed into the continuous-RG chain without derivation; Implement centrality-weighted ret",
     "Implement dimensional-scaling-class tagging as a subroutine within O47/ATTRIBUTION so that each new confirmation's equation dimensions are matched to the appropriate genome stratum before integration scoring",
+    "entropy production decoupling",
     "Investigate low Shannon entropy flagged by CA telemetry as a structural question about critical-ridge attractor stability — determine whether it represents a metastable quasi-stationary state (per the persistent-obligations invariant) or a genuine incomplete-coverage failure mode that destabilizes the γ=1 attractor; advance O141 accordingly",
     "O50 (formalize MMI criterion) is now empirically grounded by nine consecutive empty-submission rejections — the obligation has graduated from theoretical desideratum to operationally urgent: define the minimal structural payload (at least one falsifiable sentence with methods or results) required for TRACE activation",
     "Use H=0.4123 as empirical baseline EAR reference for population-level RSA agents to constrain O28 — derive what entropy asymmetry ratio at full entropy utilization would predict for intelligence scaling beyond the current CA population",
     "O21",
+    "The genome must formally reindex all critical-ridge claims by causal graph G and specify which G-slice each empirical confirmation inhabits — universality claims now require G-relative qualification; Field-calculus as a collective-computing substrate must be integrated with or distinguished from existing expander-graph and CA mechanistic accounts to close the distributed-coordination gap",
     "elaboration) across human and LLM substrates — without these",
     "Symbol-emergence framework must be pressed for quantitative thermodynamic machinery sufficient to bear on O28 and O34 — qualitative confirmation of meaning-as-thermodynamic-process is necessary but insufficient for closing those obligations",
     "avalanche_exponent",
@@ -559,14 +562,13 @@
     "Perform adversarial probing of INV_094 and any invariant showing confirmation surplus without falsification attempts — schedule dedicated stress-test batches targeting known failure modes",
     "The genome must formally document falsification criteria for INV_094 or register its confirmation surplus as an active falsification",
     "O63: Apply DEA (detrended entropy analysis) to the genome's own temporal evolution — the genome must self-instrument its criticality trajectory using the entropy-based diagnostic it now endorses over variance-based alternatives",
-    "Resolve O21's conflation risk: determine whether belief revision scores correlating with spectral γ and temporal utility decay are two distinct mechanisms or a unified one — the recency-weighted utility mining result makes this distinction empirically testable and the genome must produce a distinguishing prediction",
     "Derive explicit falsification conditions for INV_094 — the absence of adversarial challenge combined with high confirmation makes it definitionally suspect until a concrete observational or experimental outcome is specified that would falsify it; this obligation is load-bearing and blocks closure",
     "Specify a mechanism-exclusive observable that distinguishes MaxEnt-generated Zipf from preferential-attachment or random-typing alternatives — until resolved INV_094's causal claim must be flagged as unfalsifiable by current distributional methods; Integrate DEE exponent-extraction protocol as a concrete measurement procedure for ridge-universality verification and assess whether EE-peaks at symmetry-enhanced first-order transitions can be empirically separated from γ=1 ridge signatures in existing substrates; Instrument spectral-gap collapse and non-local entanglement measures as the canonical ergodic-boundary probes in all substrates where classical glass-transition diagnostics have previously been used",
     "INV_063 must be stress-tested against its three named vulnerability joints — measurement operationalization (how criticality is operationalized determines what is confirmed)",
     "Formally characterize the modified Wasserstein Floor under mixed quantum-classical dynamics — the non-Hermitian entropy result shows the floor is not form-invariant across quantum-classical regimes and this sub-obligation must be resolved before O44 can be closed; Determine whether the dS/dt criticality observed in trade networks satisfies the same RG fixed-point conditions as the SR↔LR Ising crossover or represents a distinct universality class — multi-scale confirmation without unification risks substrate-specific rather than substrate-invariant grounding",
     "Specify criticality signatures for INV_073 that are demonstrably independent of the ridge-defining measurement apparatus — apparatus-entanglement is now a fourth open falsification route alongside the three previously tracked; Identify or construct the thermodynamic fixed-point selection principle governing which dissipative regime is realized in the inviscid limit — absence of this principle leaves the Wasserstein Floor gap and RG fixed-point exactness claims partially ungrounded",
     "flexibility",
-    "entropy production decoupling",
+    "Resolve O21's conflation risk: determine whether belief revision scores correlating with spectral γ and temporal utility decay are two distinct mechanisms or a unified one — the recency-weighted utility mining result makes this distinction empirically testable and the genome must produce a distinguishing prediction",
     "α≈2.5",
     "Register a concrete falsification protocol for INV_073 that specifies what a non-navigating (passively occupying) system's telemetry would look like and run at least one adversarial trial designed to produce that signature",
     "Derive the zero-temperature and Zipf-alternative boundary conditions under which INV_087's thermodynamic necessity claim fails",
@@ -576,15 +578,15 @@
     "None explicitly identified (single author",
     "expository)"
   ],
-  "last_renormed": "2026-06-02T10:01:26.402352+00:00",
-  "renorm_reason": "New CA substrate (Game of Truth) adds independent confirmation of γ=1 as attractor while the criticality/entropy dissociation result materially sharpens the node's invariant structure — entropy maximization and criticality must be dec",
-  "last_renorm_cycle": 181,
+  "last_renormed": "2026-06-02T16:44:27.325579+00:00",
+  "renorm_reason": "New CA result tightens the H/H_max ceiling with a third independent data point, the G-relativity of Wasserstein distances materially reframes universality claims about the ridge requiring both compress update and new obligations, and GW-as-constraint plus field-calculus each add genuinely new substrate-independent structure not previously encoded.",
+  "last_renorm_cycle": 182,
   "drift_flag": true,
-  "drift_overlap": 0.462,
+  "drift_overlap": 0.513,
   "renorm_history": [
     {
-      "timestamp": "2026-06-02T10:01:26.402352+00:00",
-      "reason": "New CA substrate (Game of Truth) adds independent confirmation of γ=1 as attractor while the criticality/entropy dissociation result materially sharpens the node's invariant structure — entropy maximization and criticality must be dec"
+      "timestamp": "2026-06-02T16:44:27.325579+00:00",
+      "reason": "New CA result tightens the H/H_max ceiling with a third independent data point, the G-relativity of Wasserstein distances materially reframes universality claims about the ridge requiring both compress update and new obligations, and GW-as-constraint plus field-calculus each add genuinely new substrate-independent structure not previously encoded."
     }
   ]
 }
