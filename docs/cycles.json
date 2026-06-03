@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 243,
-    "timestamp": "2026-05-16T23:26:32.840756+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 8,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's highest risk is not empirical refutation but definitional collapse — if MaxRL is not operationally distinguishable from KL-regularized Bayesian RL, the invariant is a rename, not a discovery, and its entire confirmation surplus evaporates. CHALLENGE: challenges INV_094 — the absence of a specified observable that discriminates MaxRL from KL-regularized Bayesian RL means INV_094's confirmation surplus may reflect conceptual overlap with known methods rather than independent empirical support."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
-        "compress": "A 32×32 multi-agent CA simulation empirically achieves self-organized criticality (σ=1.022, α≈2.696, H≈20% max) without tuning, converging with INV_073's gradient-flow-to-γ=1 claim while exposing a genome gap: no universality-class prediction exists for the observed avalanche exponent."
-      },
-      {
-        "title": "Neural Investment as an Entropy-Budget Strategy: A Thermodynamic Derivation of Primate Longevity from the Principle of Biological Time Equivalence",
-        "compress": ""
-      },
-      {
-        "title": "Controlling Wasserstein Distances by Kernel Norms with Application to Compressive Statistical Learning",
-        "compress": "Wasserstein distances are controlled by kernel norms under H-LRIP, making sketch-based distributional compression geometrically faithful — this operationalizes O112 but also conditions it on a regularity check not currently in the genome."
-      },
-      {
-        "title": "Measurement of Volatile Compounds for Real-Time Analysis of Soil Microbial Metabolic Response to Simulated Snowmelt",
-        "compress": "Soil microbial systems demonstrate that internal thermodynamic state is non-destructively recoverable from structured volatile emissions, independently validating metabolic distinguishability while supplying a concrete spectral recovery protocol that extends O112's empirical demands."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O163",
-        "O72",
-        "O211"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 244,
     "timestamp": "2026-05-17T10:15:00.000671+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O257",
+        "O265",
+        "O268"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 8,
+    "generation": 294,
+    "timestamp": "2026-06-03T09:49:59.982803+00:00",
+    "sweep": {
+      "input_count": 31,
+      "targeted": 8,
+      "passive": 23,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073 is falsifiable via three independent vectors — mimicry, perturbation tolerance, and output equivalence — and remains undefended unless it specifies observables that non-critical dynamics cannot reproduce."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-03",
+        "compress": "A 32×32 Game of Truth CA sustains AT_CRITICAL attractor state with σ=1.03 and α≈1.83 power-law avalanches, empirically confirming that the critical ridge is a dynamically stable regime rather than an unstable boundary, and partially advancing O148."
+      },
+      {
+        "title": "Category learning in deep neural networks: Information content and geometry of internal representations",
+        "compress": "Categorical perception's boundary-expansion / within-compression geometry is a substrate-independent, noise-driven necessity that directly instantiates the STF metric dilation prediction O112 needs to empirically recover."
+      },
+      {
+        "title": "Brain‐Inspired Efficient Pruning: Exploiting Criticality in Spiking Neural Networks",
+        "compress": "Criticality in SNNs is a structural selector — the γ=1 ridge identifies thermodynamically necessary connections, making pruning a falsifiable test of the critical ridge invariant rather than a heuristic compression. CHALLENGE: challenges INV_073 — if criticality-based pruning can be applied post-hoc to a trained network (rather than requiring continuous ridge navigation during training), this suggests γ=1 is a recoverable property, not a strict dynamical requirement, which would weaken the claim that real-time ridge navigation is necessary for admissibility."
+      },
+      {
+        "title": "Self-Organized Criticality and Quantum Coherence in Tubulin Networks Under the Orch-OR Theory",
+        "compress": "Scale-free topology with stochastic noise is sufficient for SOC avalanches, making the Orch-OR quantum collapse interpretation a non-load-bearing label that conflicts with thermodynamic distinguishability requirements."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
       "obligations": [
         "O257",
         "O265",
