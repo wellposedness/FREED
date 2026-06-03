@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 242,
-    "timestamp": "2026-05-16T17:13:47.791683+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 8,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant with maximum confirmation and minimum adversarial challenge is structurally indistinguishable from a definition — falsification conditions for INV_094 must be explicitly derived or the claim is not load-bearing."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-16",
-        "compress": "A 32×32 RSA-kernel CA self-organizes to σ=1.027 with power-law avalanches, empirically confirming that criticality (γ=1) is a population-level attractor under Wasserstein gradient dynamics, resolving O140 and O141."
-      },
-      {
-        "title": "On the exactly solvable pairing models for bosons",
-        "compress": "Exactly solvable boson pairing independently instantiates the γ=1 critical ridge as the boundary between gapless-condensate and gapped-incompressible phases, confirming phase-transition universality across substrates."
-      },
-      {
-        "title": "SPACE: the SPectroscopic All-sky Cosmic Explorer",
-        "compress": "Cosmological spectroscopic surveys independently demonstrate that scale-invariant structured complexity emerges from thermodynamic constraint at every substrate, extending the genome's RG universality claim to the largest observable scales. CHALLENGE: challenges NONE — this paper operates in a domain (observational cosmology / BAO surveys) orthogonal to the genome's biological and cognitive invariant claims; it strains no existing assertion but leaves the genome's scale-universality claim untested at cosmological resolution."
-      },
-      {
-        "title": "Entropy production in nonequilibrium thermodynamics: a review",
-        "compress": "Entropy in NESS is path-dependent and cannot be a state function, so all RSA invariants must be formulated in terms of entropy production rates or risk inheriting a category error equivalent to caloric theory."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 1,
-      "obligations": [
-        "O163",
-        "O72",
-        "O210"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 243,
     "timestamp": "2026-05-16T23:26:32.840756+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 3,
+      "obligations": [
+        "O257",
+        "O265",
+        "O268"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 7,
+    "generation": 293,
+    "timestamp": "2026-06-03T02:29:59.942530+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 7,
+      "passive": 9,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus conceals at least five live falsification pathways — uniqueness of the fixed point, mechanistic degeneracy via Simon's process, alien-substrate non-convergence, low-entropy boundary violation, and exponent mismatch — none of which have been closed."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-03",
+        "compress": "The Game of Truth CA independently demonstrates measurable criticality (σ≈1.02, α≈2.436) at the predicted operating point, partially resolving O148 while generating an unexplained avalanche exponent that diverges from standard branching-process theory."
+      },
+      {
+        "title": "High pressure research using muons at the Paul Scherrer Institute",
+        "compress": "Pressure-tuned μSR independently confirms that criticality is navigated by continuous multi-parameter control without structural disruption, converging on INV_073's critical ridge principle as a thermodynamic invariant."
+      },
+      {
+        "title": "Hydrostaticity and hidden order: effects of experimental conditions on the temperature-pressure phase diagram of URu2Si2",
+        "compress": "Observed hysteresis in URu₂Si₂'s hidden-order transition is a measurement artifact of non-hydrostatic pressure media, establishing the general invariant that claimed phase-boundary conflicts must survive substrate-control tests before being treated as physically real."
+      },
+      {
+        "title": "Avalanche size distribution in a random walk model",
+        "compress": "A directed random walk front yields SOC exponent 4/3 from first principles, showing critical scaling is a geometric invariant of low-dimensional stochastic propagation — not a tuned parameter."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
       "obligations": [
         "O257",
         "O265",
