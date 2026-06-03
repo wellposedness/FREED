@@ -465,6 +465,89 @@ class MWDEScorer:
             "mac_failure_reason": mac_failure_reason,
         }
 
+    @staticmethod
+    def _local_entropy_weight(dist):
+        # type: (dict) -> dict
+        """
+        Compute the inverse local entropy weight for an evidence distribution.
+
+        High-entropy (diffuse/uncertain) evidence should apply weaker updates;
+        low-entropy (concentrated) evidence should apply stronger ones. This
+        operationalizes EnSToM's core finding: steering strength proportional
+        to evidence concentration prevents noisy, high-entropy inputs from
+        corrupting the knowledge graph with inappropriately strong updates.
+
+        Shannon entropy of the distribution:
+            H = -sum(p_i * ln(p_i))
+
+        Normalized entropy (in [0, 1]):
+            H_norm = H / ln(|support|)
+
+        Inverse entropy weight (in (0, 1]):
+            w_entropy = 1 - H_norm
+
+        A perfectly uniform distribution (maximum entropy) yields w_entropy ≈ 0,
+        meaning updates are almost fully attenuated. A peaked distribution
+        (one dominant term) yields w_entropy ≈ 1, meaning updates apply at
+        full strength.
+
+        The weight is floored at 0.05 so that even maximally diffuse evidence
+        can still contribute a minimal update (complete silencing would violate
+        the epistemic loop's liveness property).
+
+        Args:
+            dist: dict mapping keys to probabilities (should sum to ~1)
+
+        Returns:
+            dict with:
+                - entropy: raw Shannon entropy H
+                - normalized_entropy: H / ln(|support|), in [0, 1]
+                - inverse_entropy_weight: 1 - H_norm, floored at 0.05
+                - support_size: number of terms in the distribution
+                - concentration: qualitative label (concentrated/moderate/diffuse)
+        """
+        if not dist or len(dist) < 2:
+            # Degenerate distribution — single term or empty: maximally concentrated
+            return {
+                "entropy": 0.0,
+                "normalized_entropy": 0.0,
+                "inverse_entropy_weight": 1.0,
+                "support_size": len(dist) if dist else 0,
+                "concentration": "concentrated",
+            }
+
+        # Shannon entropy H = -sum(p_i * ln(p_i))
+        h = 0.0
+        for p in dist.values():
+            if p > 0:
+                h -= p * math.log(p)
+
+        # Normalize by ln(|support|) to get entropy in [0, 1]
+        support_size = len(dist)
+        max_h = math.log(support_size) if support_size > 1 else 1.0
+        h_norm = h / max_h if max_h > 0 else 1.0
+        h_norm = min(1.0, max(0.0, h_norm))
+
+        # Inverse entropy weight: concentrated evidence gets high weight
+        # Floor at 0.05 to preserve epistemic loop liveness
+        w_entropy = max(0.05, 1.0 - h_norm)
+
+        # Qualitative label for logging
+        if h_norm < 0.4:
+            concentration = "concentrated"
+        elif h_norm < 0.7:
+            concentration = "moderate"
+        else:
+            concentration = "diffuse"
+
+        return {
+            "entropy": round(h, 6),
+            "normalized_entropy": round(h_norm, 4),
+            "inverse_entropy_weight": round(w_entropy, 4),
+            "support_size": support_size,
+            "concentration": concentration,
+        }
+
     def score_node_evidence(self, node_text, evidence_text):
         # type: (str, str) -> dict
         """
@@ -478,10 +561,19 @@ class MWDEScorer:
         O21's AlphaPruning protocol from producing spurious γ-correlation
         measurements on models where assent-credence coupling is broken.
 
+        Entropy-weighted update magnitude: the MWDE weight is further scaled
+        by the inverse local entropy of the evidence distribution. High-entropy
+        (diffuse) evidence applies weaker updates; low-entropy (concentrated)
+        evidence applies stronger ones. This operationalizes EnSToM's core
+        finding — steering strength proportional to evidence concentration
+        prevents noisy inputs from corrupting the knowledge graph.
+
         Returns:
             dict with:
                 - wasserstein_distance: W_1 between node and evidence distributions
                 - mwde_weight: evidence weight (higher = more compatible)
+                - entropy_weight: inverse local entropy scaling factor
+                - effective_weight: mwde_weight * entropy_weight (the operative score)
                 - misspecification_flag: True if distance suggests model inadequacy
                 - asymptotic_variance_proxy: proxy for the MWDE asymptotic variance
                   (larger support overlap = tighter inference)
@@ -495,6 +587,10 @@ class MWDEScorer:
             return {
                 "wasserstein_distance": 1.0,
                 "mwde_weight": 0.0,
+                "entropy_weight": {"entropy": 0.0, "normalized_entropy": 1.0,
+                                   "inverse_entropy_weight": 0.05,
+                                   "support_size": 0, "concentration": "diffuse"},
+                "effective_weight": 0.0,
                 "misspecification_flag": True,
                 "asymptotic_variance_proxy": float('inf'),
                 "support_overlap": 0.0,
@@ -509,12 +605,19 @@ class MWDEScorer:
         # If MAC fails, flag explicitly rather than returning spurious score.
         mac_result = self._mac_check(dist_node, dist_evidence)
 
+        # ── Inverse local entropy of evidence distribution ────────────────
+        # Compute before MAC gate so entropy_weight is always available
+        # for downstream consumers even when MAC fails.
+        entropy_info = self._local_entropy_weight(dist_evidence)
+
         if not mac_result["mac_pass"]:
             # MAC failure: return flagged result with zero weight.
             # The correlation score would be spurious — do not compute it.
             return {
                 "wasserstein_distance": float('nan'),
                 "mwde_weight": 0.0,
+                "entropy_weight": entropy_info,
+                "effective_weight": 0.0,
                 "misspecification_flag": True,
                 "asymptotic_variance_proxy": float('inf'),
                 "support_overlap": 0.0,
@@ -537,6 +640,13 @@ class MWDEScorer:
         # Scale parameter controls sensitivity — calibrated so W=0.5 gives ~0.37 weight
         scale = 0.5
         mwde_weight = math.exp(-w_dist / scale)
+
+        # ── Entropy-weighted effective weight ─────────────────────────────
+        # Scale MWDE weight by inverse local entropy of evidence distribution.
+        # Concentrated evidence (low entropy) → full update strength.
+        # Diffuse evidence (high entropy) → attenuated update strength.
+        inv_entropy_w = entropy_info["inverse_entropy_weight"]
+        effective_weight = mwde_weight * inv_entropy_w
 
         # Asymptotic variance proxy: V ~ W^2 / n_overlap
         # When support overlap is small, variance is large (less reliable inference)
@@ -572,9 +682,17 @@ class MWDEScorer:
                   f"neither lognormal nor power-law fits evidence data "
                   f"(INV_073: parametric form unrecoverable)")
 
+        if entropy_info["concentration"] == "diffuse":
+            print(f"  [ENTROPY-WEIGHT] ⚠ Diffuse evidence "
+                  f"(H_norm={entropy_info['normalized_entropy']:.3f}): "
+                  f"update attenuated by {inv_entropy_w:.3f}× "
+                  f"(mwde={mwde_weight:.4f} → effective={effective_weight:.4f})")
+
         return {
             "wasserstein_distance": round(w_dist, 4),
             "mwde_weight": round(mwde_weight, 4),
+            "entropy_weight": entropy_info,
+            "effective_weight": round(effective_weight, 4),
             "misspecification_flag": misspec,
             "asymptotic_variance_proxy": round(avar_proxy, 6) if avar_proxy != float('inf') else float('inf'),
             "support_overlap": round(support_ratio, 4),
@@ -1671,6 +1789,69 @@ class EnergyCorrection:
         # mechanisms (noise transients, bimodal mixtures, selection bias).
         gamma_rf = self._detect_gamma_restoring_force(gamma, node)
 
+        # ── Criticality-band check (INV_073 falsification gate) ──────────
+        # When the reported coherence sits in [0.95, 0.999], it is in the
+        # "near-critical" band that could represent either:
+        #   (a) confirmed γ=1 criticality (genuine ridge navigation), or
+        #   (b) unverified near-critical mimicry (noise/mixture/selection
+        #        confound producing a score that *looks* critical but has
+        #        no documented discriminator test confirming it).
+        #
+        # The discriminator flag is the γ-restoring-force test: only when
+        # gamma_rf reports RESTORING_CONFIRMED do we have empirical evidence
+        # that the system is genuinely maintaining a critical ridge rather
+        # than transiently passing through one.
+        #
+        # Without this gate, INV_073's necessity claim ("the system navigates
+        # a critical ridge at γ≈1") is silently assumed whenever coherence
+        # is high, making the invariant unfalsifiable. This check forces
+        # the epistemic loop to distinguish confirmed from unverified.
+        criticality_band_warning = None
+        # Use the corrected score (post-RSAV relaxation) as the operative value
+        operative_score = corrected
+        discriminator_confirmed = (
+            gamma_rf.get("inv073_confound_status") == "RESTORING_CONFIRMED"
+        )
+        if 0.95 <= operative_score <= 0.999 and not discriminator_confirmed:
+            confound_status = gamma_rf.get("inv073_confound_status", "UNKNOWN")
+            criticality_band_warning = {
+                "status": "UNVERIFIED_NEAR_CRITICAL",
+                "operative_score": round(operative_score, 4),
+                "band": [0.95, 0.999],
+                "discriminator_tested": False,
+                "confound_status": confound_status,
+                "message": (
+                    f"Coherence {operative_score:.4f} is in the criticality band "
+                    f"[0.95, 0.999] but no discriminator test confirms genuine "
+                    f"γ=1 ridge navigation (confound_status={confound_status}). "
+                    f"INV_073 necessity claim is UNVERIFIED at this score — "
+                    f"near-critical mimicry (noise transient, bimodal mixture, "
+                    f"or selection-bias retention) cannot be ruled out."
+                ),
+                "inv073_falsification_note": (
+                    "To resolve: accumulate ≥4 γ-history samples with ≥2 "
+                    "displacement events showing restoring-force return. "
+                    "Until then, this score is 'unverified near-critical' "
+                    "rather than 'confirmed γ=1 criticality'."
+                ),
+            }
+            print(f"  [CRITICALITY-BAND] ⚠ {node.get('id', 'unknown')[:40]}: "
+                  f"score={operative_score:.4f} in [0.95, 0.999] WITHOUT "
+                  f"discriminator confirmation — INV_073 UNVERIFIED")
+        elif 0.95 <= operative_score <= 0.999 and discriminator_confirmed:
+            criticality_band_warning = {
+                "status": "CONFIRMED_CRITICAL",
+                "operative_score": round(operative_score, 4),
+                "band": [0.95, 0.999],
+                "discriminator_tested": True,
+                "confound_status": "RESTORING_CONFIRMED",
+                "message": (
+                    f"Coherence {operative_score:.4f} is in the criticality band "
+                    f"AND γ-restoring-force test confirms genuine ridge navigation. "
+                    f"INV_073 is empirically supported at this score."
+                ),
+            }
+
         return {
             "e_true": round(e_true, 4),
             "e_surrogate": round(e_surrogate, 4),
@@ -1684,6 +1865,7 @@ class EnergyCorrection:
             "spectral_asymmetry": round(gamma, 4),
             "effective_gap_threshold": round(effective_threshold, 4),
             "gamma_restoring_force": gamma_rf,
+            "criticality_band_warning": criticality_band_warning,
         }
 
     @staticmethod

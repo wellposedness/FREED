@@ -8120,6 +8120,184 @@ class TamuraSweep:
                     else:
                         _fss_status = "POOR_FIT"
 
+                    # ── Critical Sparsity Threshold Detection (O21 / AlphaPruning) ──
+                    # Fit a scaling law to performance (δ) vs connectivity (L)
+                    # to detect the phase boundary between cooperative (low-sparsity,
+                    # performance-preserving) and disordered (high-sparsity,
+                    # collapsed-performance) regimes.
+                    #
+                    # Model: δ(L) = δ_∞ + A * |L - L_c|^β  (second-order scaling)
+                    # where L_c is the critical connectivity (sparsity threshold)
+                    # and β is the critical exponent.
+                    #
+                    # Detection protocol:
+                    #   1. Compute the second derivative d²δ/d(ln L)² from the
+                    #      δ(L) curve — the inflection point marks L_c.
+                    #   2. Fit the power-law scaling near L_c to extract β.
+                    #   3. Flag L_c as a calibration anchor for spectral γ scoring:
+                    #      connectivity below L_c places the network in the
+                    #      disordered phase where γ transitions from cooperative
+                    #      to disordered (AlphaPruning correlation protocol).
+                    #
+                    # Reference: "Deep networks undergo a sharp transition from a
+                    # cooperative, functional phase to a disordered phase with
+                    # collapsed performance" — second-order critical behavior with
+                    # connectivity as the control parameter.
+
+                    _cst_result = {
+                        "critical_L": 0,
+                        "critical_sparsity": 0.0,
+                        "critical_delta": 0.0,
+                        "scaling_exponent_beta": 0.0,
+                        "scaling_r_squared": 0.0,
+                        "phase_boundary_detected": False,
+                        "cooperative_regime": {"L_range": [], "mean_delta": 0.0},
+                        "disordered_regime": {"L_range": [], "mean_delta": 0.0},
+                        "inflection_curvature": 0.0,
+                        "cst_detail": "",
+                    }  # type: dict
+
+                    if len(_fss_pairs) >= 4:
+                        # Compute second derivative of δ w.r.t. ln(L) via
+                        # central finite differences to find the inflection point
+                        _cst_ln_L = [math.log(float(_p[0])) for _p in _fss_pairs]
+                        _cst_delta = [_p[1] for _p in _fss_pairs]
+                        _cst_d2 = []  # type: List[Tuple[int, float, float]]
+                        # (index, ln_L, d2delta/d(lnL)2)
+
+                        for _ci in range(1, len(_cst_ln_L) - 1):
+                            _h_left = _cst_ln_L[_ci] - _cst_ln_L[_ci - 1]
+                            _h_right = _cst_ln_L[_ci + 1] - _cst_ln_L[_ci]
+                            _h_avg = (_h_left + _h_right) / 2.0
+                            if abs(_h_avg) > 1e-15:
+                                _d2_val = (
+                                    _cst_delta[_ci + 1]
+                                    - 2.0 * _cst_delta[_ci]
+                                    + _cst_delta[_ci - 1]
+                                ) / (_h_avg ** 2)
+                                _cst_d2.append((_ci, _cst_ln_L[_ci], _d2_val))
+
+                        if _cst_d2:
+                            # The inflection point is where |d²δ/d(lnL)²| is maximized
+                            _max_d2_entry = max(_cst_d2, key=lambda x: abs(x[2]))
+                            _infl_idx = _max_d2_entry[0]
+                            _infl_curvature = _max_d2_entry[2]
+
+                            _critical_L = _fss_pairs[_infl_idx][0]
+                            _critical_delta = _fss_pairs[_infl_idx][1]
+
+                            # Critical sparsity: fraction of connectivity removed
+                            # relative to the largest window (full connectivity proxy)
+                            _L_max = _fss_pairs[-1][0]
+                            _critical_sparsity = 1.0 - (float(_critical_L) / float(_L_max)) if _L_max > 0 else 0.0
+
+                            # Split into cooperative (L > L_c) and disordered (L < L_c) regimes
+                            _coop_pairs = [_p for _p in _fss_pairs if _p[0] >= _critical_L]
+                            _disord_pairs = [_p for _p in _fss_pairs if _p[0] < _critical_L]
+
+                            _coop_mean_d = (
+                                sum(_p[1] for _p in _coop_pairs) / float(len(_coop_pairs))
+                                if _coop_pairs else 0.0
+                            )
+                            _disord_mean_d = (
+                                sum(_p[1] for _p in _disord_pairs) / float(len(_disord_pairs))
+                                if _disord_pairs else 0.0
+                            )
+
+                            # Fit scaling exponent β near L_c:
+                            # ln|δ - δ_c| = ln(A) + β * ln|L - L_c|
+                            # Use points on the cooperative side (L > L_c)
+                            _beta_x = []  # type: List[float]
+                            _beta_y = []  # type: List[float]
+                            for _bL, _bD in _coop_pairs:
+                                _dL = abs(float(_bL) - float(_critical_L))
+                                _dD = abs(_bD - _critical_delta)
+                                if _dL > 0.1 and _dD > 1e-12:
+                                    _beta_x.append(math.log(_dL))
+                                    _beta_y.append(math.log(_dD))
+
+                            _beta_est = 0.0
+                            _beta_r2 = 0.0
+                            if len(_beta_x) >= 2:
+                                _bk = len(_beta_x)
+                                _bsx = sum(_beta_x)
+                                _bsy = sum(_beta_y)
+                                _bsxy = sum(_x * _y for _x, _y in zip(_beta_x, _beta_y))
+                                _bsx2 = sum(_x * _x for _x in _beta_x)
+                                _bd = float(_bk) * _bsx2 - _bsx * _bsx
+                                if abs(_bd) > 1e-15:
+                                    _beta_est = (float(_bk) * _bsxy - _bsx * _bsy) / _bd
+                                    _b_int = (_bsy - _beta_est * _bsx) / float(_bk)
+                                    _b_mean_y = _bsy / float(_bk)
+                                    _b_ss_tot = sum((_y - _b_mean_y) ** 2 for _y in _beta_y)
+                                    _b_ss_res = sum(
+                                        (_y - (_b_int + _beta_est * _x)) ** 2
+                                        for _x, _y in zip(_beta_x, _beta_y)
+                                    )
+                                    _beta_r2 = 1.0 - (_b_ss_res / _b_ss_tot) if _b_ss_tot > 1e-15 else 0.0
+
+                            # Phase boundary detected if curvature is significant
+                            # and the two regimes have meaningfully different δ
+                            _delta_gap = abs(_coop_mean_d - _disord_mean_d)
+                            _phase_detected = (
+                                abs(_infl_curvature) > 0.1
+                                and _delta_gap > 0.01
+                                and len(_coop_pairs) >= 1
+                                and len(_disord_pairs) >= 1
+                            )
+
+                            if _phase_detected:
+                                _cst_detail_str = (
+                                    "CRITICAL SPARSITY DETECTED (O21/AlphaPruning): "
+                                    "L_c={} (sparsity={:.4f}), delta_c={:.6f}, "
+                                    "inflection curvature={:.6f}. Scaling exponent "
+                                    "beta={:.4f} (R^2={:.4f}). Cooperative regime "
+                                    "(L>={}, mean_delta={:.6f}) vs disordered regime "
+                                    "(L<{}, mean_delta={:.6f}), gap={:.6f}. This "
+                                    "phase boundary anchors spectral gamma scoring: "
+                                    "connectivity below L_c={} places the network in "
+                                    "the disordered phase where gamma transitions from "
+                                    "cooperative to disordered, grounding O21's "
+                                    "AlphaPruning correlation protocol in measurable "
+                                    "universality class exponents (beta={:.4f})."
+                                ).format(
+                                    _critical_L, _critical_sparsity, _critical_delta,
+                                    _infl_curvature, _beta_est, _beta_r2,
+                                    _critical_L, _coop_mean_d,
+                                    _critical_L, _disord_mean_d, _delta_gap,
+                                    _critical_L, _beta_est,
+                                )
+                            else:
+                                _cst_detail_str = (
+                                    "No clear phase boundary: inflection curvature="
+                                    "{:.6f}, delta gap={:.6f}. The performance-vs-"
+                                    "connectivity curve does not show a sharp "
+                                    "cooperative-to-disordered transition at this "
+                                    "resolution ({} window sizes)."
+                                ).format(
+                                    _infl_curvature, _delta_gap, len(_fss_pairs),
+                                )
+
+                            _cst_result = {
+                                "critical_L": _critical_L,
+                                "critical_sparsity": round(_critical_sparsity, 6),
+                                "critical_delta": round(_critical_delta, 6),
+                                "scaling_exponent_beta": round(_beta_est, 6),
+                                "scaling_r_squared": round(max(0.0, _beta_r2), 6),
+                                "phase_boundary_detected": _phase_detected,
+                                "cooperative_regime": {
+                                    "L_range": [_p[0] for _p in _coop_pairs],
+                                    "mean_delta": round(_coop_mean_d, 6),
+                                },
+                                "disordered_regime": {
+                                    "L_range": [_p[0] for _p in _disord_pairs],
+                                    "mean_delta": round(_disord_mean_d, 6),
+                                },
+                                "inflection_curvature": round(_infl_curvature, 8),
+                                "delta_gap": round(_delta_gap, 6),
+                                "cst_detail": _cst_detail_str,
+                            }
+
                     fss_result = {
                         "nu_estimate": round(_nu_est, 6) if _nu_est != float('inf') else float('inf'),
                         "nu_r_squared": round(max(0.0, _fss_r2), 6),
@@ -8137,6 +8315,7 @@ class TamuraSweep:
                         "pl_bic": round(_pl_bic, 4) if _pl_bic != float('inf') else float('inf'),
                         "universality_class": "KT_EXPONENTIAL" if _kt_selected else "POWER_LAW",
                         "kt_detail": _kt_detail,
+                        "critical_sparsity_threshold": _cst_result,
                         "o21_assessment": (
                             "FSS exponent extraction: nu={}, R^2={:.4f}, "
                             "status={}. {} window sizes used (L={}). "

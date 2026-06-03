@@ -149,6 +149,33 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                             sigma_err = round(variance ** 0.5, 6)
                         else:
                             sigma_err = 0.0
+                        # Per-timestep σ-band monitoring: flag steps where
+                        # σ_i exits the critical band (1.0 ± 0.05) as
+                        # hygiene events.  This makes AT_CRITICAL a live
+                        # upstream signal in the telemetry pipeline rather
+                        # than a post-hoc annotation derived only from the
+                        # aggregate mean.
+                        SIGMA_BAND_CENTER = 1.0
+                        SIGMA_BAND_HALF = 0.05
+                        sigma_hygiene_events = []
+                        per_step_sigma_log = []
+                        for step_i, s_i in enumerate(per_step_sigmas):
+                            s_rounded = round(s_i, 6)
+                            in_band = abs(s_i - SIGMA_BAND_CENTER) <= SIGMA_BAND_HALF
+                            per_step_sigma_log.append(s_rounded)
+                            if not in_band:
+                                sigma_hygiene_events.append({
+                                    "step": step_i,
+                                    "sigma": s_rounded,
+                                    "deviation": round(s_i - SIGMA_BAND_CENTER, 6),
+                                    "direction": "SUPERCRITICAL" if s_i > SIGMA_BAND_CENTER + SIGMA_BAND_HALF else "SUBCRITICAL",
+                                })
+                        ca_telemetry["per_step_sigma"] = per_step_sigma_log
+                        ca_telemetry["sigma_hygiene_events"] = sigma_hygiene_events
+                        ca_telemetry["sigma_hygiene_event_count"] = len(sigma_hygiene_events)
+                        ca_telemetry["sigma_in_band_fraction"] = round(
+                            1.0 - len(sigma_hygiene_events) / len(per_step_sigmas), 6
+                        ) if per_step_sigmas else 0.0
                         # Store computed values back so downstream logic picks them up
                         ca_telemetry["branching_ratio"] = sigma
                         ca_telemetry["branching_ratio_err"] = sigma_err
@@ -949,6 +976,13 @@ def _write_cycles(cycle_log: dict):
         _sr = criticality.get("survival_rate")
         if _sr is not None:
             summary["survival_rate"] = _sr
+        # O148: persist shannon_entropy as its own top-level field so it is
+        # recorded alongside branching_ratio and avalanche_exponent in every
+        # per-step metrics dict — enables longitudinal H tracking and
+        # finite-size scaling analysis without a separate pipeline.
+        _se = criticality.get("shannon_entropy")
+        if _se is not None:
+            summary["shannon_entropy"] = _se
         # entropy_ratio: H/H_max is the scale-invariant criticality index
         _er = criticality.get("h_over_h_max")
         if _er is not None:
