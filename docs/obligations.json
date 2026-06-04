@@ -2814,7 +2814,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: entropy_relaxed_ot_interpolation. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 256] PARTIAL: Wire `entropy_relaxed_ot_interpolation(source_weights, target_weights, epsilon)` into the existing graph-state-update call path in `knowledge_graph.py` — specifically, identify the method that currently performs linear or heuristic blending of node distributions, replace that blend with a call to the new function, and pass its output to whatever downstream consumer (embedding store, attention weight, traversal score) previously received the blended result. [COMMIT:YES — direction advanced] | [Gen 295] OPEN:  [COMMIT:YES — Obligation remains OPEN; no function added, no graph updated, no state landed.]",
+    "progress": "[Gen 256] PARTIAL: Wire `entropy_relaxed_ot_interpolation(source_weights, target_weights, epsilon)` into the existing graph-state-update call path in `knowledge_graph.py` — specifically, identify the method that currently performs linear or heuristic blending of node distributions, replace that blend with a call to the new function, and pass its output to whatever downstream consumer (embedding store, attention weight, traversal score) previously received the blended result. [COMMIT:YES — direction advanced] | [Gen 295] OPEN:  [COMMIT:YES — Obligation remains OPEN; no function added, no graph updated, no state landed.] | [Gen 296] PARTIAL: The OT_ε interpolant is a formally proven, type-safe, thermodynamically superior drop-in for any linear blend on the probability simplex — but wiring it requires a software engineer to read the actual call site and downstream type. [COMMIT:YES — direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit",
@@ -2847,7 +2847,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to tamura_sweep.py: band_exit_records. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 259] PARTIAL: Wire `band_exit_records` into the sweep loop's band-exit detection site and confirm its return value feeds the output accumulator — one targeted diff closes the orphaned-definition defect entirely. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 259] PARTIAL: Wire `band_exit_records` into the sweep loop's band-exit detection site and confirm its return value feeds the output accumulator — one targeted diff closes the orphaned-definition defect entirely. [COMMIT:YES — direction advanced] | [Gen 296] PARTIAL: The closure argument is fully specified — insert call to `band_exit_records` at band-exit detection site, feed return value to accumulator — but the patch itself requires access to the live file to write. [COMMIT:YES — direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit",
@@ -2859,7 +2859,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to knowledge_graph.py: meme_graph_complexity_score. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 259] PARTIAL: O282 closes the moment `meme_graph_complexity_score` appears on the right-hand side of an assignment or in a return statement within a called method in the same patch — one line, one call edge, zero new abstractions required. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 259] PARTIAL: O282 closes the moment `meme_graph_complexity_score` appears on the right-hand side of an assignment or in a return statement within a called method in the same patch — one line, one call edge, zero new abstractions required. [COMMIT:YES — direction advanced] | [Gen 296] PARTIAL: The unwired function is a pure thermodynamic debt — a name paying entropy cost with zero process return — and the debt clears the instant one call edge is written into an already-reachable method in the same patch. [COMMIT:YES — direction advanced]",
     "created": "2026-05-20",
     "resolved": null,
     "source": "audit",
@@ -3598,5 +3598,16 @@
     "resolution_criterion": "By gen 310, either (a) `depends_on` count ≥ 130 with each new edge justified by a specific derivation or empirical grounding, or (b) the genome issues a formal epistemic downgrade of all obligations that assume causal structure (",
     "created": "2026-06-02T06:30:53.193820+00:00",
     "progress": "[Gen 290] ACTIVE: O350's fastest tractable path is a reclassification audit of existing `scales_with` edges against directional predicates already latent in the INV corpus — no new data required, only honest predicate extraction to surface ~86+ mislabeled causal edges. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O351",
+    "status": "open",
+    "statement": "Impose a hard creation moratorium — no new obligation beyond O351 may be instantiated until the count of (open + active + partial) obligations falls below 20, verified by a binding single-pass count at the start of each generation cycle.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: obligation count of (open + active + partial) falls below 20 at generation cycle start."
   }
 ]
