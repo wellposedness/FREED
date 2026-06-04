@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-06-04T09:50:00.385678+00:00",
+  "timestamp": "2026-06-04T16:30:00.385834+00:00",
   "grid": "32x32",
   "measure_steps": 200,
   "elapsed_s": 0.39,
   "branching_ratio": {
-    "sigma": 1.0286,
-    "se": 0.0176
+    "sigma": 1.0248,
+    "se": 0.0161
   },
-  "shannon_entropy": 0.4511,
+  "shannon_entropy": 0.4555,
   "shannon_entropy_max": 2.585,
-  "survival_rate": 0.9203,
+  "survival_rate": 0.9351,
   "type_distribution": {
-    "Physics Builder": 10,
-    "Symbol Builder": 2,
-    "Physics Navigator": 881,
-    "Symbol Navigator": 35,
-    "Physics Drifter": 13,
+    "Physics Builder": 9,
+    "Symbol Builder": 0,
+    "Physics Navigator": 887,
+    "Symbol Navigator": 40,
+    "Physics Drifter": 15,
     "Symbol Drifter": 1
   },
   "avalanche": {
     "sizes": [
       1,
       1,
-      1,
-      1,
-      4,
       2,
-      1,
-      1,
       2,
       1,
       1,
       2,
       1,
-      1,
-      1,
-      2,
       2,
       1,
       1,
-      2
+      2,
+      3,
+      1,
+      1,
+      1,
+      2,
+      1,
+      1,
+      1
     ],
-    "exponent": 3.101,
-    "r2": 0.863,
-    "power_law_likely": false
+    "exponent": 1.978,
+    "r2": 0.959,
+    "power_law_likely": true
   },
   "criticality": "AT_CRITICAL",
   "sigma_tolerance": 0.05
