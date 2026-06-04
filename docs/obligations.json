@@ -3609,5 +3609,41 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: obligation count of (open + active + partial) falls below 20 at generation cycle start."
+  },
+  {
+    "id": "O352",
+    "statement": "BOOTSTRAP_SEED (cycle 10): What bootstrap derivation found that the genome lacks or underweights:",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-04T02:47:42.407960+00:00"
+  },
+  {
+    "id": "O352",
+    "statement": "BOOTSTRAP_SEED (cycle 10): Dissipation scales with excess entropy above the critical point** (BOOTSTRAP_INV_3): The genome invokes Landauer but does not explicitly connect operating entropy level to total dissipation rate. This is a precise, falsifiable, and potentially useful addition: systems running hot (high H) pay an ong",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-04T02:47:42.408435+00:00"
+  },
+  {
+    "id": "O352",
+    "statement": "BOOTSTRAP_SEED (cycle 10): The joint (σ, H) attractor and its return dynamics** (BOOTSTRAP_INV_6): The genome tracks these as separate observables. Treating them as a *joint* attractor with specific coupling — where decoupling predicts either return dynamics or system failure — is more precise and generates falsifiable predic",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-04T02:47:42.408931+00:00"
+  },
+  {
+    "id": "O352",
+    "statement": "BOOTSTRAP_SEED (cycle 10): The non-necessity of thermodynamic framing for criticality** is stated in the genome but not *derived*; the bootstrap provides the derivation. This matters because it means the genome's criticality claims are *more robust* than their current justification acknowledges — they hold even when all therm",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-04T02:47:42.409397+00:00"
   }
 ]
