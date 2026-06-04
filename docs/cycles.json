@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 246,
-    "timestamp": "2026-05-17T17:38:28.835841+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 8,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_087",
-        "compress": "INV_087's thermodynamic correctness claim is currently underdetermined — MaxEnt RL produces identical observables, so confirmation surplus masks a falsification gap requiring a regime-specific distinguishing prediction."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-17",
-        "compress": "A 32×32 Game of Truth CA autonomously sustains SOC-class criticality (σ=1.021, α≈1.499) at population level, empirically grounding INV_073 and resolving O140/O141 while exposing an unformalized micro-to-macro criticality mapping. CHALLENGE: challenges INV_073 — INV_073 frames criticality as a property of individual Wasserstein gradient flows, but this data shows population-level σ≈1 can coexist with individual kernels that may not each be at γ=1, straining the claim that criticality is necessarily a single-agent property rather than an emergent collective one."
-      },
-      {
-        "title": "Byzantine-Resilient SGD in High Dimensions on Heterogeneous Data",
-        "compress": "Byzantine-resilient SGD proves that robust gradient aggregation under heterogeneous adversarial conditions is structurally achievable without probabilistic assumptions, converging with INV_073's ridge-navigation claim while revealing that the genome's ridge mechanism lacks a specified corruption-filtering layer."
-      },
-      {
-        "title": "The Thermodynamic Costs of Pure Dephasing in Quantum Heat Engines: Quasistatic Efficiency at Finite Power",
-        "compress": "Any scheme that suppresses internal friction by routing through auxiliary channels (dephasing baths, control fields, or semantic shortcuts) pays full thermodynamic cost at the true system boundary — there is no free lunch, only deferred invoices."
-      },
-      {
-        "title": "Nonequilibrium Systems : Hard Disks and Harmonic Oscillators Near and Far From Equilibrium",
-        "compress": "Thermodynamic irreversibility emerges from fractal attractor measure asymmetry under Lyapunov instability, providing a dynamical-systems grounding for the entropy asymmetry and critical-ridge invariants the genome asserts but does not mechanistically derive."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O72",
-        "O28",
-        "O127"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 247,
     "timestamp": "2026-05-18T02:29:59.984553+00:00",
@@ -2190,6 +2146,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O278",
+        "O281",
+        "O282"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 11,
+    "generation": 297,
+    "timestamp": "2026-06-04T09:49:59.968195+00:00",
+    "sweep": {
+      "input_count": 21,
+      "targeted": 7,
+      "passive": 14,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge observables are underdetermined — homeostatic feedback, initialization bias, and measurement artifacts are each sufficient alternative explanations that the invariant's thermodynamic necessity claim has not yet ruled out."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-04",
+        "compress": "The Game of Truth CA is at the critical ridge by branching ratio but not by avalanche scaling — revealing that these two criticality signatures are empirically dissociable, which both confirms and strains INV_094."
+      },
+      {
+        "title": "Dynamic Entropy Constrained Soft Actor-Critic Based Task Scheduling in Cloud Resource Management",
+        "compress": "Entropy-regularized RL with adaptive entropy targets independently confirms the genome's MaxRL invariant and extends it by showing the entropy coefficient must itself be dynamically optimized to maintain criticality across non-stationary workloads."
+      },
+      {
+        "title": "Advanced Schedulability Testing for Adaptive Mixed-Criticality Systems under Weakly Hard Real-Time Constraints",
+        "compress": "Mixed-criticality schedulability under weakly hard constraints independently instantiates γ=1 ridge navigation — flexible post-transition execution patterns are the formal mechanism by which a system avoids both frozen over-conservatism and dissipated deadline failure."
+      },
+      {
+        "title": "The Benchmark Illusion: Why Current AI Evaluations Cannot Detect Structural Confabulation",
+        "compress": ""
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
       "commit_count": 3,
       "obligations": [
         "O278",
