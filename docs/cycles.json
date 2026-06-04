@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 247,
-    "timestamp": "2026-05-18T02:29:59.984553+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 7,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_087",
-        "compress": "INV_087's thermodynamic correctness claim is under genuine stress because entropy-regularized RL produces observationally equivalent policies without the free energy framing, making the \"replacement\" of standard RL a reframing unless a distinguishing quantitative prediction is specified."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-18",
-        "compress": "Population-level CA telemetry empirically confirms σ≈1.025 criticality with power-law avalanches, resolving O140/O141, while revealing that critical systems occupy ~20% entropy (ordered-critical, not entropic midpoint) — a constraint absent from the genome."
-      },
-      {
-        "title": "Phase Transitions as Emergent Geometric Phenomena: A Deterministic Entropy Evolution Law",
-        "compress": "Phase-space curvature deterministically generates entropy and characterizes criticality without ensemble primitives — geometry is prior to thermodynamics, not parallel to it."
-      },
-      {
-        "title": "Diagnosing Quantum Phase Transition Order and Deconfined Criticality via Entanglement Entropy.",
-        "compress": "Subleading logarithmic Rényi entropy terms are a falsifiable, geometry-sensitive diagnostic that can distinguish emergent symmetry groups and expose weakly first-order transitions masquerading as continuous criticality — directly operationalizing the log-correction method O59 demands."
-      },
-      {
-        "title": "Wehrl entropy production rate across a dynamical quantum phase transition",
-        "compress": "Wehrl entropy production *rate* non-analyticity at dynamical quantum phase transitions independently confirms that temporal derivatives of coarse-grained entropy, not entropy levels, are the load-bearing criticality detectors — converging with INV_063/INV_094 and offering a concrete method for O112."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 0,
-      "obligations": [
-        "O72",
-        "O127",
-        "O128"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 248,
     "timestamp": "2026-05-18T09:50:00.004391+00:00",
@@ -2195,6 +2151,50 @@
         "O278",
         "O281",
         "O282"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 12,
+    "generation": 298,
+    "timestamp": "2026-06-04T16:29:59.967579+00:00",
+    "sweep": {
+      "input_count": 15,
+      "targeted": 7,
+      "passive": 8,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus without adversarial challenge is a structural hygiene failure — the probe forces explicit falsification conditions or demotion, and convergence between independent derivations only carries evidential weight when the falsification surface has been genuinely pressured."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-04",
+        "compress": "Game of Truth CA empirically demonstrates σ≈1.02 power-law criticality with Physics Navigator cell-type dominance, independently confirming that the γ=1 critical ridge is a measurable, stable, cell-type-structured attractor in discrete substrate dynamics."
+      },
+      {
+        "title": "The Time Course of Perceptual Closure of Incomplete Visual Objects: An Event-Related Potential Study",
+        "compress": "Perceptual closure is a temporally staged, constraint-driven inference process whose ERP signature independently instantiates the critical-ridge completion dynamic that the genome assigns to semantic gap-bridging."
+      },
+      {
+        "title": "Bridging Histology and Tractography: First In Vivo Visualization of Short‐Range Prefrontal Connections Informed by Primate Tract‐Tracing",
+        "compress": "Short-range prefrontal wiring is a structured, conserved graph recoverable in vivo only via fine-scale prior injection — a methodological invariant directly applicable to STF metric tensor recovery (O112)."
+      },
+      {
+        "title": "Nonequilibrium universality of the nonreciprocally coupled $\\mathbf{O(n_1) \\times O(n_2)}$ model",
+        "compress": "Nonreciprocal coupling between distinct symmetry groups generically produces scale-invariant FDR violation and underdamped critical oscillations, establishing nonequilibrium universality as a structural attractor rather than a fine-tuned condition."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O278",
+        "O281",
+        "O283"
       ]
     },
     "coherence": 0.97
