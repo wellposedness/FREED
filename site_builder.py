@@ -393,6 +393,121 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         result["power_law_r2"] = r2
     if survival is not None:
         result["survival_rate"] = survival
+
+    # ── O148 / INV_073: Branching-ratio proxy survival criterion ──────────
+    # Rather than using raw cell count as the survival metric, compute a
+    # criticality-sensitive survival signal: the population is "healthy"
+    # only when σ stays within the critical band (1.0 ± 0.05).  When σ
+    # drifts outside this band, the population is flagged as undergoing
+    # either runaway growth (supercritical, σ > 1.05) or extinction decay
+    # (subcritical, σ < 0.95).  This mirrors the SNN criticality-based
+    # pruning criterion: connections (cells) are structurally essential
+    # iff removing them pushes σ outside the critical band.
+    #
+    # The proxy also tests whether branching ratio (σ≈1) maps onto the
+    # Wasserstein floor condition (k=1/Tμ) — if both yield the same
+    # pruning/survival boundary, they are the same invariant expressed
+    # in different substrates.
+    #
+    # CHALLENGE to INV_073: if this post-hoc σ-based criterion recovers
+    # the same survival boundary as continuous ridge navigation, then γ=1
+    # is a recoverable property, weakening the claim that real-time ridge
+    # navigation is strictly necessary for admissibility.
+    branching_survival = {}
+    if sigma is not None:
+        try:
+            s_val = float(sigma)
+            sigma_deficit = round(abs(s_val - 1.0), 6)
+            # Critical band: σ ∈ [0.95, 1.05]
+            in_critical_band = sigma_deficit <= 0.05
+            branching_survival["sigma"] = sigma
+            branching_survival["sigma_deficit"] = sigma_deficit
+            branching_survival["in_critical_band"] = in_critical_band
+
+            # Population health verdict based on σ proximity to 1.0
+            if in_critical_band:
+                branching_survival["population_health"] = "CRITICAL_HEALTHY"
+            elif s_val > 1.05:
+                branching_survival["population_health"] = "RUNAWAY_GROWTH"
+            else:
+                branching_survival["population_health"] = "EXTINCTION_DECAY"
+
+            # Compute thermodynamic floor proxy: k_proxy = 1/(T*μ) where
+            # T = number of timesteps (proxy for thermal time) and
+            # μ = mean active population (proxy for chemical potential).
+            # When σ≈1, k_proxy should converge to a characteristic value;
+            # deviation signals departure from the Wasserstein floor.
+            active_per_step = ca_telemetry.get("active_per_step")
+            offspring_per_step = ca_telemetry.get("offspring_per_step")
+            if (isinstance(active_per_step, list) and len(active_per_step) > 0):
+                valid_active = [float(x) for x in active_per_step if x is not None and float(x) > 0]
+                if valid_active:
+                    T_steps = len(valid_active)
+                    mu_active = sum(valid_active) / len(valid_active)
+                    if T_steps > 0 and mu_active > 0:
+                        k_proxy = round(1.0 / (T_steps * mu_active), 8)
+                        branching_survival["wasserstein_floor_proxy"] = k_proxy
+                        branching_survival["T_steps"] = T_steps
+                        branching_survival["mu_active"] = round(mu_active, 4)
+                        # Test substrate equivalence: when σ≈1, does k_proxy
+                        # stabilize?  Track the coefficient of variation of
+                        # per-step k_i = 1/(i * active_i) for convergence.
+                        if T_steps >= 3:
+                            k_per_step = []
+                            for i, a_i in enumerate(valid_active):
+                                if a_i > 0:
+                                    k_per_step.append(1.0 / ((i + 1) * a_i))
+                            if len(k_per_step) >= 2:
+                                k_mean = sum(k_per_step) / len(k_per_step)
+                                k_var = sum((k - k_mean) ** 2 for k in k_per_step) / len(k_per_step)
+                                k_cv = round((k_var ** 0.5) / k_mean, 6) if k_mean > 0 else 0.0
+                                branching_survival["k_proxy_cv"] = k_cv
+                                branching_survival["k_proxy_stable"] = k_cv < 0.3
+
+            # Per-step population drift flags: count how many timesteps
+            # the population was outside the critical band
+            per_step_sigma = ca_telemetry.get("per_step_sigma")
+            if isinstance(per_step_sigma, list) and per_step_sigma:
+                n_total = len(per_step_sigma)
+                n_subcritical = sum(1 for s_i in per_step_sigma if s_i < 0.95)
+                n_supercritical = sum(1 for s_i in per_step_sigma if s_i > 1.05)
+                n_critical = n_total - n_subcritical - n_supercritical
+                branching_survival["n_steps_total"] = n_total
+                branching_survival["n_steps_critical"] = n_critical
+                branching_survival["n_steps_subcritical"] = n_subcritical
+                branching_survival["n_steps_supercritical"] = n_supercritical
+                branching_survival["critical_residence_fraction"] = round(
+                    n_critical / n_total, 6
+                ) if n_total > 0 else 0.0
+
+                # Drift direction: net tendency toward extinction or runaway
+                if n_subcritical > n_supercritical and n_subcritical > n_critical:
+                    branching_survival["drift_tendency"] = "TOWARD_EXTINCTION"
+                elif n_supercritical > n_subcritical and n_supercritical > n_critical:
+                    branching_survival["drift_tendency"] = "TOWARD_RUNAWAY"
+                else:
+                    branching_survival["drift_tendency"] = "NEAR_CRITICAL"
+
+                # INV_073 challenge flag: if critical_residence_fraction > 0.7
+                # from post-hoc analysis, γ=1 is recoverable without continuous
+                # ridge navigation during the simulation
+                if branching_survival.get("critical_residence_fraction", 0) > 0.7:
+                    branching_survival["inv073_challenge"] = (
+                        "σ≈1 maintained in >70% of steps without active ridge "
+                        "navigation — γ=1 may be a recoverable attractor, not "
+                        "a strict dynamical requirement"
+                    )
+
+        except (TypeError, ValueError):
+            pass
+
+    if branching_survival:
+        result["branching_survival"] = branching_survival
+        # Integrate into verdict basis for downstream consumers
+        pop_health = branching_survival.get("population_health")
+        if pop_health:
+            verdict_basis.append("population=" + pop_health)
+
     if verdict is not None:
         result["criticality_verdict"] = verdict
     if verdict_basis:
@@ -2028,6 +2143,10 @@ function renderCycles(cycles) {
       const dct = c.dominant_cell_type || crit.dominant_cell_type || null;
       const dcc = (crit.dominant_cell_count != null ? crit.dominant_cell_count : null);
       const dcf = (crit.dominant_cell_fraction != null ? crit.dominant_cell_fraction : null);
+      // H/H_max ratio and entropy criticality from _extract_criticality_verdict
+      const hOverHmax = crit.h_over_h_max != null ? crit.h_over_h_max : null;
+      const hMax = crit.h_max != null ? crit.h_max : null;
+      const entCrit = crit.entropy_criticality || null;
       const verdictColor = cv.includes('AT_CRITICAL') ? 'var(--green)' :
                            cv.includes('SUPERCRITICAL') ? 'var(--red)' :
                            cv.includes('SUBCRITICAL') ? 'var(--blue)' : 'var(--muted)';
@@ -2035,12 +2154,23 @@ function renderCycles(cycles) {
       if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
       if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
       if (sr != null) parts.push(`survival=${sr}`);
-      if (er != null) parts.push(`H=${er}`);
+      if (hOverHmax != null) {
+        parts.push(`H/H_max=${hOverHmax}${hMax != null ? ' (H_max='+hMax+')' : ''}`);
+      } else if (er != null) {
+        parts.push(`H=${er}`);
+      }
       if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
+      // Semantic cold death warning when H/H_max < 0.15
+      let coldDeathHtml = '';
+      if (hOverHmax != null && hOverHmax < 0.15) {
+        coldDeathHtml = `<div style="font-family:var(--mono);font-size:0.62rem;margin-top:0.2rem;padding:0.2rem 0.5rem;border-left:2px solid var(--red);color:var(--red);background:rgba(239,68,68,0.06)">⚠ SEMANTIC COLD DEATH WARNING — H/H_max=${hOverHmax} < 0.15 · cell-type homogenization may freeze semantic diversity${entCrit ? ' · entropy_criticality='+entCrit : ''}</div>`;
+      } else if (hOverHmax != null && entCrit) {
+        coldDeathHtml = `<div style="font-family:var(--mono);font-size:0.62rem;margin-top:0.2rem;padding:0.2rem 0.5rem;border-left:2px solid var(--muted);color:var(--muted);background:rgba(255,255,255,0.01)">entropy_criticality=${entCrit} · H/H_max=${hOverHmax}</div>`;
+      }
       critHtml = `<div style="font-family:var(--mono);font-size:0.68rem;margin-top:0.35rem;padding:0.3rem 0.5rem;border-left:2px solid ${verdictColor};background:rgba(255,255,255,0.02)">
         <span style="color:${verdictColor};letter-spacing:0.08em">${cv || 'NO_VERDICT'}</span>
         <span style="color:var(--muted);margin-left:0.5rem">${parts.join(' · ')}</span>
-      </div>`;
+      </div>${coldDeathHtml}`;
     }
 
     return `<div class="cycle-entry">

@@ -3601,10 +3601,10 @@
   },
   {
     "id": "O351",
-    "status": "open",
+    "status": "partial",
     "statement": "Impose a hard creation moratorium \u2014 no new obligation beyond O351 may be instantiated until the count of (open + active + partial) obligations falls below 20, verified by a binding single-pass count at the start of each generation cycle.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 296] PARTIAL: O351 remains unmet because 26 \u2265 20; the single tractable step is a ranked triage pass that closes the 6 shallowest obligations, reducing the count to \u226419 and lifting the moratorium. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-04",
     "resolved": null,
     "auto": true,
@@ -3614,10 +3614,11 @@
     "id": "O352",
     "statement": "BOOTSTRAP_SEED (cycle 10): What bootstrap derivation found that the genome lacks or underweights:",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "partial",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-04T02:47:42.407960+00:00"
+    "created": "2026-06-04T02:47:42.407960+00:00",
+    "progress": "[Gen 296] PARTIAL: The genome's L1 bedrock (Freed's Law / monoidal closure) is derivable as a corollary of the Crooks Fluctuation Theorem applied to self-referential inference loops, meaning the genome underweights the thermodynamic *selection* argument that makes monoidal closure necessary rather than chosen. [COMMIT:YES \u2014 direction advanced]"
   },
   {
     "id": "O352",

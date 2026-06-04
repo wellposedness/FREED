@@ -2313,6 +2313,65 @@ class Consolidator:
 
         return weights
 
+    # ── Named-discipline vocabulary for cross-domain isomorphism detection ───
+    # Bateson's insight: papers spanning ≥2 disciplines disproportionately
+    # reveal substrate-independent invariants. Single-domain keyword matching
+    # systematically undervalues these; the CROSS_DOMAIN_BOOST corrects this
+    # bias and keeps the genome's EXTEND channel active.
+    DISCIPLINE_VOCABULARY = {
+        "physics":       {"quantum", "thermodynamic", "entropy", "hamiltonian",
+                          "lagrangian", "field theory", "statistical mechanics",
+                          "phase transition", "renormalization", "dissipation",
+                          "equilibrium", "non-equilibrium", "planck", "boson",
+                          "fermion", "schrödinger", "spacetime"},
+        "biology":       {"organism", "evolution", "autopoiesis", "cell",
+                          "genetic", "genome", "phenotype", "metabolism",
+                          "neural", "cortical", "synaptic", "ecological",
+                          "species", "morphogenesis", "homeostasis"},
+        "cybernetics":   {"feedback", "cybernetic", "control system", "regulation",
+                          "homeostatic", "self-organization", "self-organiz",
+                          "circular causality", "requisite variety", "ashby",
+                          "wiener", "bateson", "second-order"},
+        "philosophy":    {"ontology", "epistemology", "phenomenology", "existential",
+                          "hermeneutic", "metaphysics", "teleology", "consciousness",
+                          "intentionality", "qualia", "dualism", "monism",
+                          "pragmatism", "existentialism"},
+        "mathematics":   {"topology", "manifold", "functor", "category theory",
+                          "homomorphism", "isomorphism", "algebraic", "theorem",
+                          "proof", "conjecture", "stochastic", "martingale",
+                          "measure theory", "hilbert space"},
+        "computer_science": {"algorithm", "computation", "turing", "recursive",
+                             "compiler", "neural network", "deep learning",
+                             "machine learning", "information theory", "automata",
+                             "complexity class", "np-hard"},
+        "art":           {"aesthetic", "artistic", "sculpture", "installation",
+                          "performance art", "contemporary art", "visual art",
+                          "rauschenberg", "abramović", "kapoor", "stelarc",
+                          "artistic practice", "artwork"},
+        "economics":     {"market", "equilibrium price", "utility", "game theory",
+                          "nash", "pareto", "mechanism design", "auction",
+                          "macroeconomic", "microeconomic", "fiscal"},
+        "sociology":     {"social system", "institution", "luhmann", "parsons",
+                          "social structure", "cultural", "discourse",
+                          "sociological", "habitus", "bourdieu"},
+        "neuroscience":  {"fmri", "eeg", "hippocampus", "prefrontal", "cortex",
+                          "dopamine", "serotonin", "neuroplasticity",
+                          "connectome", "broca", "wernicke", "thalamus"},
+    }
+    CROSS_DOMAIN_BOOST = 1.15  # multiplicative boost for ≥2-discipline papers
+
+    def _detect_disciplines(self, text):
+        # type: (str) -> set
+        """Detect which named disciplines are present in text."""
+        text_lower = text.lower()
+        detected = set()
+        for discipline, keywords in self.DISCIPLINE_VOCABULARY.items():
+            for kw in keywords:
+                if kw in text_lower:
+                    detected.add(discipline)
+                    break  # one hit per discipline is sufficient
+        return detected
+
     def select_affected(self, new_knowledge: str, all_nodes: list) -> list:
         """
         Find nodes whose invariants/tags/obligations overlap with new knowledge.
@@ -2324,6 +2383,12 @@ class Consolidator:
         more concentrated (informative) word distributions receive higher weight.
         This replaces uniform weighting, removing implicit prior biases in how
         diverse paper attributes are combined into a relevance score.
+
+        Cross-domain isomorphism detection (Bateson): when the new knowledge
+        spans ≥2 named disciplines, all EXTEND-candidate weights are boosted
+        by CROSS_DOMAIN_BOOST (1.15×), since such papers disproportionately
+        reveal substrate-independent invariants that single-domain keyword
+        matching systematically undervalues.
 
         Challenge caveat (O112): entropy weights recover coordination structure
         (field salience) but NOT geometric metric tensors — they are scalar
@@ -2344,6 +2409,21 @@ class Consolidator:
             for w in new_knowledge.split()
             if len(w) > 4 and w.lower() not in stopwords
         )
+
+        # ── Cross-domain isomorphism detection (Bateson) ─────────────────────
+        # Detect named disciplines spanned by the new knowledge. Papers
+        # spanning ≥2 disciplines are tagged cross_domain_isomorphism=True
+        # and receive a multiplicative EXTEND-candidate weight boost of 1.15×,
+        # correcting the systematic undervaluation by single-domain matching.
+        disciplines_detected = self._detect_disciplines(new_knowledge)
+        is_cross_domain = len(disciplines_detected) >= 2
+        cross_domain_multiplier = self.CROSS_DOMAIN_BOOST if is_cross_domain else 1.0
+
+        if is_cross_domain:
+            print(f"[CONSOLIDATE] ⚡ Cross-domain isomorphism detected: "
+                  f"disciplines={disciplines_detected} — "
+                  f"EXTEND-candidate weight boosted by {self.CROSS_DOMAIN_BOOST}× "
+                  f"(Bateson: substrate-independent invariants more likely)")
 
         # Define field extractors for entropy-weight computation
         field_extractors = {
@@ -2371,13 +2451,25 @@ class Consolidator:
                 field_overlap = sum(1 for w in words if w in field_text)
                 total_score += field_overlap * entropy_wts.get(field_name, 0.2)
 
+            # Apply cross-domain isomorphism boost to EXTEND-candidate weight
+            if is_cross_domain:
+                total_score *= cross_domain_multiplier
+
             if total_score > 0:
                 scored.append((total_score, node))
 
         scored.sort(key=lambda x: x[0], reverse=True)
         affected = [node for _, node in scored[:MAX_NODES_PER_PASS]]
 
-        print(f"[CONSOLIDATE] {len(affected)} node(s) affected by new knowledge.")
+        # Tag affected nodes with cross_domain_isomorphism metadata
+        if is_cross_domain:
+            for node in affected:
+                node["cross_domain_isomorphism"] = True
+                node["cross_domain_disciplines"] = sorted(disciplines_detected)
+
+        print(f"[CONSOLIDATE] {len(affected)} node(s) affected by new knowledge."
+              + (f" (cross_domain_isomorphism=True, {len(disciplines_detected)} disciplines)"
+                 if is_cross_domain else ""))
         return affected
 
     # ── Wall-clock API timeout helper ────────────────────────────────────────
