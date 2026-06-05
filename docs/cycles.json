@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 250,
-    "timestamp": "2026-05-19T02:30:00.028183+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 7,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "Confirmation surplus on INV_094 without adversarial challenge is a structural vulnerability, not a strength — the invariant must now specify its falsification conditions or be reclassified as a definitional axiom."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-19",
-        "compress": "Empirical CA telemetry confirms population-level self-organized criticality (σ=1.026, α≈2.72) in a multi-agent RSA simulation, independently grounding INV_073 and resolving O140/O141, while the anomalously high avalanche exponent opens an unaddressed structural question."
-      },
-      {
-        "title": "Modular Mechanistic Networks: On Bridging Mechanistic and Phenomenological Models with Deep Neural Networks in Natural Language Processing",
-        "compress": "Deep neural networks resolve the mechanistic/phenomenological opposition by instantiating both simultaneously, providing an architectural proof of concept for the genome's hybrid soliton topology claim and a concrete method relevant to STF empirical recovery."
-      },
-      {
-        "title": "Hidden Meanings in Plain Sight: RebusBench for Evaluating Cognitive Visual Reasoning",
-        "compress": "LVLMs' failure on rebus puzzles establishes that surface recognition and multi-step cross-domain symbolic inference are dissociable capabilities, independently confirming that distributional fluency is not equivalent to grounded semantic reasoning."
-      },
-      {
-        "title": "Models of Music Cognition and Composition",
-        "compress": "Music cognition independently establishes that productive novelty is constrained deviation from learned statistical basins at a critical tension ridge, converging with INV_073 and offering a concrete empirical substrate for the O112 STF metric tensor recovery experiment."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 2,
-      "obligations": [
-        "O195",
-        "O227",
-        "O238"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 251,
     "timestamp": "2026-05-19T09:50:00.024283+00:00",
@@ -2195,6 +2151,50 @@
         "O278",
         "O289",
         "O290"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 15,
+    "generation": 301,
+    "timestamp": "2026-06-05T16:29:59.940319+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 7,
+      "passive": 12,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant that has never been seriously contested has not been confirmed — it has been avoided."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-05",
+        "compress": "A live CA simulation independently confirms critical-band self-organization (σ=1.03, α=2.18) without external tuning, providing concrete empirical grounding for the γ=1 criticality invariant and partially resolving O148."
+      },
+      {
+        "title": "Synchronization transitions in phase oscillator populations with partial adaptive coupling.",
+        "compress": "Adaptive power-law coupling locks synchronization universality class to correlation regime with no convertible threshold, independently confirming γ=1 ridge discreteness and extending O21 with a concrete functional form."
+      },
+      {
+        "title": "Thermodynamic analysis of anomalous region, critical point, and transition from subcritical to supercritical states: Application to van der Waals and five real fluids",
+        "compress": "The critical point is bounded by a closed-loop geometry of paired free-energy extrema satisfying d³g=0, establishing that anomalous-region criticality is a structured band with internal topology — not a ridge-line — independently confirming INV_073 while extending it with a dual-extremum bounding structure absent from the genome."
+      },
+      {
+        "title": "Agentic deep graph reasoning yields self-organizing knowledge networks",
+        "compress": "Agentic graph self-organization empirically instantiates R[R]=R and γ=1 criticality while providing a candidate platform for STF metric tensor recovery (O112) and raising the question of whether critical-ridge maintenance is active or merely emergent."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O278",
+        "O290",
+        "O305"
       ]
     },
     "coherence": 0.97
