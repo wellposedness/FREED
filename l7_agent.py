@@ -1761,9 +1761,26 @@ class L7Agent:
         self._load_genome()
         self.entropy_scorer = NonHermitianEntropyScorer(dim=4)
         self.branching_monitor = BranchingRatioMonitor(tolerance=0.05)
+
+        # ── DESAC dynamic entropy coefficient (INV_087) ──────────────────
+        # Instead of a fixed entropy regularization coefficient, we learn
+        # alpha per-batch to maintain a target entropy H_target.
+        # Update rule: log_alpha ← log_alpha - lr * (H_current - H_target)
+        # This keeps exploration on the critical ridge across changing
+        # knowledge domains / non-stationary epistemic environments.
+        self._desac_log_alpha = 0.0          # log(alpha), learned variable
+        self._desac_alpha = 1.0              # exp(log_alpha), the coefficient
+        self._desac_lr = 0.05                # learning rate for alpha updates
+        self._desac_h_target = 0.5           # target linear entropy (γ≈1 ridge)
+        self._desac_alpha_min = 0.01         # floor to prevent collapse
+        self._desac_alpha_max = 10.0         # ceiling to prevent explosion
+        self._desac_history = []             # type: List[Dict[str, float]]
+        self._desac_max_history = 64
+
         print(f"[L7] Online. Genome: {len(self.genome_text):,} chars. Context capped at {GENOME_CAP} chars/query.")
         print(f"[L7] Non-Hermitian entropy scorer initialized (dim={self.entropy_scorer.dim}).")
         print(f"[L7] Branching-ratio monitor initialized (tolerance={self.branching_monitor.TOLERANCE}).")
+        print(f"[L7] DESAC dynamic entropy coefficient initialized (α={self._desac_alpha:.4f}, H_target={self._desac_h_target}).")
 
     # ── Genome ──────────────────────────────────────────────────────────────
 

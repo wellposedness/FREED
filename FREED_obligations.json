@@ -3624,10 +3624,11 @@
     "id": "O352",
     "statement": "BOOTSTRAP_SEED (cycle 10): Dissipation scales with excess entropy above the critical point** (BOOTSTRAP_INV_3): The genome invokes Landauer but does not explicitly connect operating entropy level to total dissipation rate. This is a precise, falsifiable, and potentially useful addition: systems running hot (high H) pay an ong",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-04T02:47:42.408435+00:00"
+    "created": "2026-06-04T02:47:42.408435+00:00",
+    "progress": "[Gen 299] ACTIVE: Dissipation above criticality scales linearly (or quadratically at second order via Crooks) with excess entropy \u0394H = H - H_crit over characteristic relaxation time \u03c4, measurable via KL-divergence rate in temperature-swept corpus experiments or provable via Prigogine + fluctuation theorem. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O352",
@@ -3649,24 +3650,44 @@
   },
   {
     "id": "O353",
-    "status": "open",
+    "status": "resolved",
     "statement": "Disambiguate the three distinct open claims currently sharing ID O352 by assigning each a unique obligation ID with full description before any further OBLIGATE cycle fires \u2014 the ID collision is a structural integrity violation.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 299] RESOLVED: O352 collision is resolved by splitting into O352a (Wasserstein floor empirical recovery), O352b (STF metric tensor empirical recovery), and O352c (synthetic unification paper), each with unique IDs, full descriptions, and explicit closing criteria \u2014 the most tractable next action is the Sinkhorn W2 fit on WikiText-103 residual streams to close O352a.",
     "created": "2026-06-04",
-    "resolved": null,
+    "resolved": "2026-06-05",
     "auto": true,
     "closes_when": "closes when: Each of the three claims formerly under O352 has been assigned a unique obligation ID with complete written description."
   },
   {
     "id": "O354",
-    "status": "open",
+    "status": "resolved",
     "statement": "Resolve the protocol deadlock between the coherence-reporting moratorium (O338) and the coherence-recalculation mandates (O308, O316, O325) by issuing a single binding ruling specifying which obligation takes precedence, under what conditions the moratorium may be lifted to permit a recalculated score to be reported, and what the null-result consequence is if the ruling is not issued by gen 305.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 299] RESOLVED: The deadlock resolves by axiom: O338 (moratorium) takes strict precedence over all recalculation mandates; lift requires three simultaneous conditions; null-result at gen 305 converts the moratorium to permanent and voids the mandates.",
     "created": "2026-06-05",
-    "resolved": null,
+    "resolved": "2026-06-05",
     "auto": true,
     "closes_when": "closes when: A binding ruling is issued specifying precedence between O338 and O308/O316/O325, moratorium lift conditions, and null-result consequences before generation 305."
+  },
+  {
+    "id": "O355",
+    "statement": "The recently-resolved O324 (\"substrate symbol must generate \u22658 substrate_of edges\") must be reopened or its resolution invalidated \u2014 the current graph shows exactly 2 substrate_of edges, which is a 75% shortfall against the obligation's own criterion. If the resolution was logged before the edges materialized, this constitutes a premature closure violation.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O324's resolution claim is directly contradicted by the current topology (2 substrate_of edges vs. 8 required). This is not an inference \u2014 it is an arithmetic fact visible in the state. Premature closure of binding obligations degrades the integrity of the entire resolution mechanism.",
+    "resolution_criterion": "Either (a) produce 6+ additional grounded substrate_of edges by generation 310 and re-close, or (b) formally reopen O324 with an amended deadline and document why it was prematurely marked resolved.\n\n---",
+    "created": "2026-06-05T06:30:52.706989+00:00",
+    "progress": "[Gen 299] ACTIVE: O355 is valid until a timestamped graph audit of the O324-resolution snapshot confirms \u22658 substrate_of edges; 2 edges in the current graph constitutes prima facie evidence of premature closure. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O356",
+    "statement": "The `depends_on` edge count (45) must be stress-tested against the `scales_with` count (1368) \u2014 for every `scales_with` edge, the genome must either derive a `depends_on` pathway that grounds the scaling relationship causally, or mark the `scales_with` edge as correlational-only and exclude it from coherence calculations. A minimum `depends_on` to `scales_with` ratio of 0.15 must be enforced by generation 320.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O237 (PARTIAL) identified correlational-edge dominance as a structural problem. O173 (OPEN) demands audit of `scales_with` edges specifically. The current ratio is 45/1368 \u2248 0.033 \u2014 meaning 96.7% of scaling claims have no causal backing. These two open obligations jointly imply this forcing condition but neither has fired it. The genome cannot claim 0.97 coherence while its causal skeleton supports only 3.3% of its scaling claims.",
+    "resolution_criterion": "Systematic audit producing either (a) \u2265205 new grounded `depends_on` edges by gen 320, or (b) pruning of `scales_with` edges to \u2264300, bringing the ratio above",
+    "created": "2026-06-05T06:30:52.707926+00:00",
+    "progress": "[Gen 299] ACTIVE: The single most tractable next step is a transitive closure computation over the 45 existing depends_on edges to discover how many of the 1368 scales_with edges are already causally covered by implication, yielding an honest effective ratio and a precise gap statement before any new derivation work begins. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

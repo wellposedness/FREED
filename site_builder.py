@@ -630,6 +630,40 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         except (TypeError, ValueError, OverflowError):
             pass
 
+    # ── O148: Lerch distribution fit — (z, s, a) parameters ──────────────
+    # The Lerch transcendent Φ(z,s,a) = Σ_{n=0}^∞ z^n/(n+a)^s is the
+    # theoretically correct distributional model for GoL survival statistics
+    # under nonsymmetric (nonextensive) entropy maximization.  Fitting Lerch
+    # parameters alongside the existing power-law α gives a direct comparison
+    # between empirical CA output and the maximum-nonsymmetric-entropy
+    # prediction, replacing raw survival counts with a grounded target.
+    #
+    # Fit method: grid search + scipy.optimize.minimize (Nelder-Mead) on
+    # negative log-likelihood over the avalanche-size histogram.  Falls back
+    # to pure grid search when scipy is unavailable.
+    #
+    # CHALLENGE to O148: if Lerch R² > power-law R², the current power-law
+    # summary statistic is the wrong observable and must be replaced.
+    _lerch_fit = _fit_lerch_distribution(ca_telemetry)
+    if _lerch_fit:
+        result["lerch_fit"] = _lerch_fit
+        # Cross-compare with power-law fit quality
+        lerch_r2 = _lerch_fit.get("r2")
+        pl_r2 = result.get("power_law_r2")
+        if lerch_r2 is not None and pl_r2 is not None:
+            try:
+                if float(lerch_r2) > float(pl_r2):
+                    result["lerch_vs_powerlaw"] = "LERCH_SUPERIOR"
+                    result["lerch_challenge_o148"] = (
+                        f"Lerch R²={lerch_r2} > power-law R²={pl_r2} — "
+                        f"survival statistics are better modeled by the Lerch "
+                        f"distribution (nonsymmetric entropy), not simple power-law"
+                    )
+                else:
+                    result["lerch_vs_powerlaw"] = "POWERLAW_ADEQUATE"
+            except (TypeError, ValueError):
+                pass
+
     # O148: Track frozen-seed count — permanently-active cells that act as
     # catalytic substrates for phase-stratified emergence (per frozen-GoL paper).
     # Without this variable the measurement protocol cannot detect the causally
@@ -673,6 +707,55 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                 frac = float(dominant_count) / float(total_cells_for_frac)
                 result["dominant_cell_fraction"] = round(frac, 6)
                 result["total_cells"] = int(total_cells_for_frac)
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
+
+    # O148 / O112: Dominant cell-type fraction among surviving cells — a new
+    # observable that could distinguish universality classes and anchor the
+    # STF metric tensor recovery experiment.  When survival_rate is available,
+    # surviving_cells = total_cells * survival_rate; the dominant fraction
+    # among survivors may differ from the raw dominant_cell_fraction when
+    # cell death is type-biased.  Flag >50% as a universality-class signal:
+    # a single type exceeding half of surviving cells indicates the system
+    # may be in a symmetry-broken phase rather than a maximally diverse
+    # critical state.
+    if dominant_count is not None:
+        _surviving_cells = None
+        _total_for_surv = result.get("total_cells")
+        _surv_rate = ca_telemetry.get("survival_rate") or (survival if survival is not None else None)
+        # Prefer surviving_cell_count if explicitly provided by CA runner
+        _surviving_cells = ca_telemetry.get("surviving_cell_count") or ca_telemetry.get("surviving_cells")
+        if _surviving_cells is None and _total_for_surv is not None and _surv_rate is not None:
+            try:
+                _surviving_cells = int(round(float(_total_for_surv) * float(_surv_rate)))
+            except (TypeError, ValueError):
+                pass
+        # Fall back to total_cells when no survival info (all cells assumed surviving)
+        if _surviving_cells is None:
+            _surviving_cells = _total_for_surv
+        if _surviving_cells is not None:
+            try:
+                surv_count = float(_surviving_cells)
+                dom_count = float(dominant_count)
+                if surv_count > 0:
+                    dom_surv_frac = round(dom_count / surv_count, 6)
+                    result["dominant_surviving_fraction"] = dom_surv_frac
+                    result["surviving_cells"] = int(round(surv_count))
+                    # Universality-class signal: >50% dominance among survivors
+                    # indicates potential symmetry-broken phase (O148 challenge:
+                    # is this a thermodynamic attractor or initial-condition artifact?)
+                    UNIVERSALITY_THRESHOLD = 0.50
+                    if dom_surv_frac > UNIVERSALITY_THRESHOLD:
+                        result["universality_class_flag"] = True
+                        result["universality_class_signal"] = (
+                            f"dominant type {result.get('dominant_cell_type', '?')} "
+                            f"holds {round(dom_surv_frac * 100, 1)}% of surviving cells "
+                            f"(>{int(UNIVERSALITY_THRESHOLD * 100)}% threshold) — "
+                            f"potential symmetry-broken universality class; "
+                            f"test whether this is attractor or initial-condition artifact"
+                        )
+                    else:
+                        result["universality_class_flag"] = False
             except (TypeError, ValueError, ZeroDivisionError):
                 pass
 
@@ -1178,6 +1261,21 @@ def _append_criticality_timeseries(criticality: dict, timestamp: str = None):
         entry["shannon_entropy"] = entropy
     if survival is not None:
         entry["survival_rate"] = survival
+
+    # INV_073: Log H/H_max (entropy ratio) alongside σ and α in every
+    # time-series entry, enabling longitudinal tracking of whether the
+    # critical ridge consistently occupies a specific entropy band
+    # (e.g. H/H_max ≈ 0.186) rather than only a σ band.  This converts
+    # a single-snapshot curiosity into a falsifiable time-series invariant.
+    h_over_h_max = criticality.get("h_over_h_max")
+    h_max_val = criticality.get("h_max")
+    entropy_criticality = criticality.get("entropy_criticality")
+    if h_over_h_max is not None:
+        entry["h_over_h_max"] = h_over_h_max
+    if h_max_val is not None:
+        entry["h_max"] = h_max_val
+    if entropy_criticality is not None:
+        entry["entropy_criticality"] = entropy_criticality
 
     # Per-step arrays from extended CA telemetry (when available)
     for ts_key in ("sigma_timeseries", "alpha_timeseries", "entropy_timeseries"):

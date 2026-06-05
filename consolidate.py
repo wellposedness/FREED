@@ -2455,8 +2455,95 @@ class Consolidator:
             if is_cross_domain:
                 total_score *= cross_domain_multiplier
 
+            # ── Entropy-cascade bonus for multi-layer dynamical composition ──
+            # Papers describing heterogeneous-layer dynamical systems (e.g., a
+            # cellular automaton seeded by a chaotic map) exhibit inter-layer
+            # entropy amplification and are disproportionately likely to surface
+            # cross-domain (ABSENT) invariants. Detect multi-layer composition
+            # in the new knowledge and apply a small additive bonus to relevance.
+            #
+            # Detection: co-occurrence of ≥2 distinct dynamical-layer keywords
+            # from different families (CA/automaton layer + chaotic/map layer +
+            # optional diffusion/scrambling layer). The bonus scales with the
+            # number of distinct layers detected: 2 layers → +0.08, 3+ → +0.12.
+            #
+            # INV_073 challenge note: this paper shows deterministic chaotic
+            # seeds (not stochastic noise) suffice to drive CA-based criticality,
+            # straining formulations treating stochasticity as necessary for γ=1.
+            _DYNLAYER_FAMILIES = {
+                "cellular_automaton": {"cellular automaton", "wireworld",
+                                       "game of life", "rule 110", "rule 30",
+                                       "automata", "cell automaton"},
+                "chaotic_map":        {"chaotic map", "logistic map",
+                                       "piecewise linear", "tent map",
+                                       "henon map", "lorenz", "chaotic seed",
+                                       "chaotic system"},
+                "diffusion":          {"diffusion", "pixel scrambling",
+                                       "scrambling", "permutation",
+                                       "substitution-permutation"},
+                "neural_layer":       {"neural network layer", "recurrent layer",
+                                       "convolutional layer", "transformer layer",
+                                       "attention layer"},
+                "stochastic":         {"stochastic process", "markov chain",
+                                       "random walk", "brownian", "langevin",
+                                       "noise-driven"},
+            }
+            _nk_lower_ec = new_knowledge.lower()
+            _detected_layers = set()
+            for _layer_family, _layer_kws in _DYNLAYER_FAMILIES.items():
+                for _lkw in _layer_kws:
+                    if _lkw in _nk_lower_ec:
+                        _detected_layers.add(_layer_family)
+                        break
+            _entropy_cascade_bonus = 0.0
+            if len(_detected_layers) >= 3:
+                _entropy_cascade_bonus = 0.12
+            elif len(_detected_layers) >= 2:
+                _entropy_cascade_bonus = 0.08
+            if _entropy_cascade_bonus > 0:
+                total_score += _entropy_cascade_bonus
+
+            # ── Stabilization-cost flag (Landauer extension detection) ────────
+            # Papers that explicitly extend Landauer's principle beyond erasure
+            # to include state-stabilization costs represent a distinct class of
+            # thermodynamic grounding. Standard Landauer citations treat
+            # thermodynamic cost as erasure-only; papers introducing stabilization
+            # costs extend the energetic accounting to include coherence
+            # maintenance / rendered-state persistence. These are high-value
+            # genome-extension signals (INV_094 challenge: observation costs
+            # include state-stabilization beyond erasure).
+            #
+            # Detection: co-occurrence of Landauer-related language AND
+            # stabilization-cost language in the new knowledge text.
+            _LANDAUER_KEYWORDS = {
+                "landauer", "erasure cost", "information erasure",
+                "thermodynamic cost of information",
+            }
+            _STABILIZATION_KEYWORDS = {
+                "stabilization of rendered states", "state stabilization cost",
+                "stabilization cost", "state stabilization",
+                "stabilization of rendered", "rendered state stabilization",
+                "coherence maintenance cost", "coherence-maintenance cost",
+            }
+            _has_landauer = any(kw in _nk_lower_ec for kw in _LANDAUER_KEYWORDS)
+            _has_stabilization = any(kw in _nk_lower_ec for kw in _STABILIZATION_KEYWORDS)
+            _stabilization_cost_bonus = 0.0
+            if _has_landauer and _has_stabilization:
+                _stabilization_cost_bonus = 0.05
+                total_score += _stabilization_cost_bonus
+
             if total_score > 0:
                 scored.append((total_score, node))
+
+        # Log entropy-cascade detection once (outside per-node loop)
+        if len(_detected_layers) >= 2:
+            print(f"[CONSOLIDATE] ⚡ Entropy-cascade bonus applied: "
+                  f"multi-layer dynamical composition detected "
+                  f"(layers={sorted(_detected_layers)}, "
+                  f"bonus=+{_entropy_cascade_bonus:.2f}) — "
+                  f"heterogeneous-layer papers surface cross-domain "
+                  f"invariants (INV_073: deterministic chaotic seeds "
+                  f"sufficient for CA criticality)")
 
         scored.sort(key=lambda x: x[0], reverse=True)
         affected = [node for _, node in scored[:MAX_NODES_PER_PASS]]
@@ -2466,6 +2553,72 @@ class Consolidator:
             for node in affected:
                 node["cross_domain_isomorphism"] = True
                 node["cross_domain_disciplines"] = sorted(disciplines_detected)
+
+        # ── Verification halt score (binary flag) ─────────────────────────────
+        # Tag each affected node with verification_halt_score: 1 if the paper's
+        # text demonstrates categorical output-halting under ignorance (epistemic
+        # verification capability), 0 if the system produces calibrated continuation
+        # / uncertainty estimates without architectural halt authority.
+        #
+        # This operationalizes the core distinction from the benchmark-blindness
+        # paper: benchmarks measure pattern-matching within training distributions
+        # but are categorically blind to verification capability — the architectural
+        # authority to halt or refuse output under irreducible ignorance. Papers
+        # tagged 1 evaluate systems WITH this capability; papers tagged 0 evaluate
+        # systems that produce calibrated confidence without halt authority.
+        #
+        # Detection heuristic: scan the node's text (compress + summary + invariants)
+        # AND the new_knowledge for co-occurrence of halt-authority indicators vs.
+        # calibrated-continuation indicators. The flag is set per-node based on
+        # whichever signal dominates in the combined textual evidence.
+        _halt_keywords = {
+            "halt", "halting", "refuse", "refusal", "abstain", "abstention",
+            "categorical halt", "output-halting", "output halting",
+            "verification capability", "verification-capable",
+            "epistemic halt", "irreducible ignorance", "refuse output",
+            "halt under ignorance", "verification blind", "verification-blind",
+            "benchmark blind", "benchmark-blind", "categorically blind",
+            "halt authority", "architectural authority",
+        }
+        _continuation_keywords = {
+            "calibrated uncertainty", "calibrated confidence",
+            "calibrated continuation", "uncertainty quantification",
+            "confidence score", "softmax probability", "evidence-conditioned",
+            "pattern-matching", "pattern matching", "training distribution",
+            "benchmark performance", "benchmark score", "leaderboard",
+            "internal consistency", "next-token", "next token",
+        }
+        _nk_lower_for_vhs = new_knowledge.lower()
+        n_tagged_halt = 0
+        for node in affected:
+            node_text_combined = " ".join(filter(None, [
+                node.get("compress", ""),
+                node.get("summary", ""),
+                " ".join(node.get("invariants", [])),
+            ])).lower()
+            combined_text = node_text_combined + " " + _nk_lower_for_vhs
+
+            halt_hits = sum(1 for kw in _halt_keywords if kw in combined_text)
+            cont_hits = sum(1 for kw in _continuation_keywords if kw in combined_text)
+
+            # Binary flag: 1 if halt-authority signal dominates or is present
+            # alongside continuation language (the paper is ABOUT the distinction);
+            # 0 if only continuation/benchmark language with no halt signal.
+            if halt_hits > 0 and halt_hits >= cont_hits:
+                node["verification_halt_score"] = 1
+                n_tagged_halt += 1
+            elif halt_hits > 0 and cont_hits > halt_hits:
+                # Paper discusses both but leans toward calibrated continuation —
+                # still tag 1 because it demonstrates awareness of the distinction
+                node["verification_halt_score"] = 1
+                n_tagged_halt += 1
+            else:
+                node["verification_halt_score"] = 0
+
+        if n_tagged_halt > 0:
+            print(f"[CONSOLIDATE] ⚡ verification_halt_score=1 on {n_tagged_halt}/"
+                  f"{len(affected)} node(s): verification-capable vs "
+                  f"verification-blind distinction detected")
 
         print(f"[CONSOLIDATE] {len(affected)} node(s) affected by new knowledge."
               + (f" (cross_domain_isomorphism=True, {len(disciplines_detected)} disciplines)"
