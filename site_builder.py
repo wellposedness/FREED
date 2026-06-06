@@ -508,6 +508,124 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
         if pop_health:
             verdict_basis.append("population=" + pop_health)
 
+    # ── O148: Finite-size survival scaling correction ─────────────────────
+    # The paper's analytical form: P_survive ~ f((p - p_c) * N^(1/ν))
+    # where p is the colonization/survival parameter (mapped to σ here),
+    # p_c is the critical point (σ_c = 1.0), N is habitat capacity
+    # (total cell count), and ν is the correlation-length exponent.
+    # For directed percolation universality class in 2D: ν ≈ 0.734.
+    # The scaling function f(x) = 1/(1 + exp(-x)) gives the sigmoidal
+    # crossover that replaces binary alive/dead counting near criticality.
+    #
+    # This correction makes the survival signal quantitatively predictive:
+    # raw survival_rate is biased toward the deterministic (N→∞) step
+    # function; the scaled version captures the finite-N broadening that
+    # the paper demonstrates is analytically necessary.
+    finite_size_scaling = {}
+    if sigma is not None and survival is not None:
+        # Determine N (total cell count / habitat capacity)
+        N_cells = ca_telemetry.get("total_cells")
+        if N_cells is None:
+            _ctc_fs = ca_telemetry.get("cell_type_counts")
+            if isinstance(_ctc_fs, dict) and _ctc_fs:
+                N_cells = sum(_ctc_fs.values())
+        if N_cells is None:
+            grid_size_fs = ca_telemetry.get("grid_size")
+            if isinstance(grid_size_fs, (int, float)) and grid_size_fs > 0:
+                N_cells = int(grid_size_fs) * int(grid_size_fs)
+            elif isinstance(grid_size_fs, (list, tuple)) and len(grid_size_fs) >= 2:
+                try:
+                    N_cells = int(grid_size_fs[0]) * int(grid_size_fs[1])
+                except (TypeError, ValueError):
+                    pass
+        if N_cells is not None and N_cells > 0:
+            try:
+                import math
+                s_val = float(sigma)
+                surv_val = float(survival)
+                # Critical point and universality exponent
+                p_c = 1.0  # σ_c = 1.0 (critical branching ratio)
+                nu = ca_telemetry.get("correlation_length_exponent", 0.734)  # 2D DP default
+                nu = float(nu)
+
+                # Scaling variable: x = (σ - σ_c) * N^(1/ν)
+                scaling_variable = (s_val - p_c) * (N_cells ** (1.0 / nu))
+                finite_size_scaling["scaling_variable"] = round(scaling_variable, 6)
+                finite_size_scaling["N"] = N_cells
+                finite_size_scaling["nu"] = round(nu, 4)
+                finite_size_scaling["sigma_minus_pc"] = round(s_val - p_c, 6)
+
+                # Analytical survival probability from scaling function
+                # f(x) = 1/(1 + exp(-x)) — sigmoidal crossover
+                # Clamp to avoid overflow in exp
+                x_clamped = max(-500.0, min(500.0, scaling_variable))
+                p_survive_scaled = 1.0 / (1.0 + math.exp(-x_clamped))
+                finite_size_scaling["p_survive_scaled"] = round(p_survive_scaled, 6)
+                finite_size_scaling["p_survive_raw"] = round(surv_val, 6)
+
+                # Bias diagnostic: difference between raw survival and
+                # finite-size-corrected survival.  Large positive bias means
+                # the raw count overestimates persistence (deterministic limit
+                # artifact); large negative means it underestimates.
+                survival_bias = round(surv_val - p_survive_scaled, 6)
+                finite_size_scaling["survival_bias"] = survival_bias
+                finite_size_scaling["bias_direction"] = (
+                    "RAW_OVERESTIMATES" if survival_bias > 0.05
+                    else "RAW_UNDERESTIMATES" if survival_bias < -0.05
+                    else "NEGLIGIBLE_BIAS"
+                )
+
+                # Transition width: the finite-size scaling predicts that
+                # the critical transition is broadened by ΔΣ ~ N^(-1/ν).
+                # This is the window around σ_c where P_survive transitions
+                # from ~0 to ~1; outside this window raw counting is adequate.
+                transition_width = N_cells ** (-1.0 / nu)
+                finite_size_scaling["transition_width"] = round(transition_width, 8)
+                in_transition_zone = abs(s_val - p_c) <= 2.0 * transition_width
+                finite_size_scaling["in_transition_zone"] = in_transition_zone
+
+                # When in the transition zone, the scaling correction is
+                # load-bearing: raw survival counts are systematically biased.
+                # Outside the zone, they converge to the deterministic limit.
+                if in_transition_zone:
+                    finite_size_scaling["correction_status"] = "SCALING_CORRECTION_ACTIVE"
+                    finite_size_scaling["note"] = (
+                        f"|σ-σ_c|={round(abs(s_val - p_c), 6)} <= "
+                        f"2·N^(-1/ν)={round(2.0 * transition_width, 8)} — "
+                        f"finite-size broadening dominates; raw survival "
+                        f"biased by {survival_bias}"
+                    )
+                    # Replace raw survival with scaled survival in the result
+                    # when in the transition zone — this is the key correction
+                    result["survival_rate_raw"] = surv_val
+                    result["survival_rate"] = round(p_survive_scaled, 6)
+                else:
+                    finite_size_scaling["correction_status"] = "DETERMINISTIC_LIMIT_ADEQUATE"
+
+                # Effective critical point estimator: for finite N, the
+                # apparent p_c shifts by ~N^(-1/ν).  Report the corrected
+                # critical point so downstream consumers don't mislocate it.
+                pc_shift = N_cells ** (-1.0 / nu)
+                finite_size_scaling["pc_apparent"] = round(p_c + pc_shift, 8)
+                finite_size_scaling["pc_true"] = p_c
+                finite_size_scaling["pc_shift"] = round(pc_shift, 8)
+
+            except (TypeError, ValueError, OverflowError, ZeroDivisionError):
+                pass
+
+    if finite_size_scaling:
+        result["finite_size_scaling"] = finite_size_scaling
+        # Surface in verdict basis so the scaling correction is visible
+        correction = finite_size_scaling.get("correction_status", "")
+        if correction:
+            verdict_basis.append("fss=" + correction)
+        # When in the transition zone and bias is significant, append
+        # a challenge note to the criticality verdict
+        if finite_size_scaling.get("in_transition_zone") and abs(finite_size_scaling.get("survival_bias", 0)) > 0.05:
+            verdict_basis.append(
+                "fss_bias=" + str(finite_size_scaling.get("survival_bias", 0))
+            )
+
     if verdict is not None:
         result["criticality_verdict"] = verdict
     if verdict_basis:
@@ -707,6 +825,31 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
                 frac = float(dominant_count) / float(total_cells_for_frac)
                 result["dominant_cell_fraction"] = round(frac, 6)
                 result["total_cells"] = int(total_cells_for_frac)
+                # Near-frozen-attractor warning: when any single cell type
+                # exceeds 80% of the grid, the system is approaching a
+                # frozen attractor where criticality (σ≈1) cannot be
+                # maintained — loss of type diversity suppresses the
+                # branching heterogeneity that sustains the critical band.
+                FROZEN_ATTRACTOR_THRESHOLD = 0.80
+                if frac > FROZEN_ATTRACTOR_THRESHOLD:
+                    result["near_frozen_attractor"] = True
+                    result["near_frozen_attractor_threshold"] = FROZEN_ATTRACTOR_THRESHOLD
+                    result["near_frozen_attractor_warning"] = (
+                        f"dominant type {result.get('dominant_cell_type', '?')} "
+                        f"holds {round(frac * 100, 1)}% of grid "
+                        f"(>{int(FROZEN_ATTRACTOR_THRESHOLD * 100)}% threshold) — "
+                        f"near-frozen-attractor: criticality loss imminent; "
+                        f"type diversity insufficient to sustain σ≈1 branching"
+                    )
+                    # Append to verdict_basis so the frozen-attractor signal
+                    # is visible in the joint criticality verdict
+                    if isinstance(verdict_basis, list):
+                        verdict_basis.append(
+                            "frozen_attractor=WARNING("
+                            + str(round(frac * 100, 1)) + "%)"
+                        )
+                else:
+                    result["near_frozen_attractor"] = False
             except (TypeError, ValueError, ZeroDivisionError):
                 pass
 

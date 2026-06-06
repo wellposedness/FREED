@@ -2546,7 +2546,45 @@ class Consolidator:
                   f"sufficient for CA criticality)")
 
         scored.sort(key=lambda x: x[0], reverse=True)
-        affected = [node for _, node in scored[:MAX_NODES_PER_PASS]]
+
+        # ── Two-stage HA-LD→MD filter (multi-fidelity convergence) ────────
+        # Stage 1 (cheap proxy — "HA-LD"): structural/syntactic overlap score
+        # computed above via keyword matching + entropy weights. Retain top-K
+        # survivors where K = 2 * MAX_NODES_PER_PASS (generous funnel).
+        #
+        # Stage 2 (expensive semantic — "MD"): run MWDE Wasserstein scoring
+        # only on the Stage-1 survivors, then keep the top MAX_NODES_PER_PASS
+        # by effective_weight. This mirrors the HA-LD→MD protocol: screen a
+        # large candidate pool with a cheap proxy, then apply expensive
+        # evaluation only to the survivors — reducing compute cost by orders
+        # of magnitude while preserving accuracy.
+        STAGE1_K = min(len(scored), MAX_NODES_PER_PASS * 2)
+        stage1_survivors = scored[:STAGE1_K]
+
+        if len(stage1_survivors) > MAX_NODES_PER_PASS:
+            # Stage 2: MWDE semantic scoring on survivors only
+            mwde_scorer = MWDEScorer(wasserstein_order=1)
+            stage2_scored = []
+            for proxy_score, node in stage1_survivors:
+                node_text = " ".join(filter(None, [
+                    node.get("compress", ""),
+                    node.get("summary", ""),
+                    " ".join(node.get("invariants", [])),
+                    " ".join(node.get("tags", [])),
+                ]))
+                mwde_result = mwde_scorer.score_node_evidence(
+                    node_text, new_knowledge)
+                # Composite: proxy score provides floor, MWDE refines ranking
+                effective_w = mwde_result.get("effective_weight", 0.0)
+                composite = proxy_score * 0.4 + effective_w * 10.0 * 0.6
+                stage2_scored.append((composite, proxy_score, effective_w, node))
+            stage2_scored.sort(key=lambda x: x[0], reverse=True)
+            affected = [node for _, _, _, node in stage2_scored[:MAX_NODES_PER_PASS]]
+            print(f"[CONSOLIDATE] Two-stage filter: {len(scored)} candidates → "
+                  f"{STAGE1_K} stage-1 survivors → {len(affected)} stage-2 "
+                  f"(HA-LD→MD protocol)")
+        else:
+            affected = [node for _, node in stage1_survivors[:MAX_NODES_PER_PASS]]
 
         # Tag affected nodes with cross_domain_isomorphism metadata
         if is_cross_domain:

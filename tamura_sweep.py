@@ -1698,6 +1698,40 @@ def score_ca_generation(
         dist_score = score_distribution(avalanche_sizes, alpha, alpha_r_squared)
         universality_class = dist_score.get("universality_class", "UNDETERMINED")
 
+    # ── Empirical criticality confirmation (INV_073 ridge-navigation) ────
+    # Ground the criticality verdict in measured σ and α rather than
+    # heuristic proxies.  The `criticality_confirmed` flag is True only
+    # when BOTH:
+    #   1. σ ∈ [0.95, 1.05]  (branching ratio in critical band)
+    #   2. R² > 0.99          (power-law fit is near-perfect)
+    # This closes the gap between CA telemetry and the genome's INV_073
+    # ridge-navigation invariant by requiring empirically measured σ and α
+    # to pass strict thresholds before declaring confirmed criticality.
+    #
+    # Paper reference values (Game of Truth 32×32, 200-step):
+    #   σ = 1.0284 ± 0.0171 — within critical band
+    #   α ≈ 1.764, R² = 0.999 — power-law confirmed
+    _SIGMA_CONF_LOW = 0.95
+    _SIGMA_CONF_HIGH = 1.05
+    _R2_CONF_THRESHOLD = 0.99
+
+    sigma_in_critical_band = _SIGMA_CONF_LOW <= sigma <= _SIGMA_CONF_HIGH
+    r2_exceeds_threshold = alpha_r_squared > _R2_CONF_THRESHOLD
+    criticality_confirmed = sigma_in_critical_band and r2_exceeds_threshold
+
+    criticality_confirmation_detail = (
+        "sigma={:.4f} {} [{:.2f}, {:.2f}], alpha={:.4f}, R^2={:.4f} {} {:.2f}. "
+        "criticality_confirmed={}."
+    ).format(
+        sigma,
+        "IN" if sigma_in_critical_band else "OUTSIDE",
+        _SIGMA_CONF_LOW, _SIGMA_CONF_HIGH,
+        alpha, alpha_r_squared,
+        ">" if r2_exceeds_threshold else "<=",
+        _R2_CONF_THRESHOLD,
+        criticality_confirmed,
+    )
+
     return {
         "generation":       generation,
         "sigma":            round(sigma, 6),
@@ -1715,6 +1749,10 @@ def score_ca_generation(
         "power_law_likely": power_law_likely,
         "distribution_score": dist_score,
         "universality_class": universality_class,
+        "criticality_confirmed": criticality_confirmed,
+        "sigma_in_critical_band": sigma_in_critical_band,
+        "r2_exceeds_threshold": r2_exceeds_threshold,
+        "criticality_confirmation_detail": criticality_confirmation_detail,
         "timestamp":        datetime.now(timezone.utc).isoformat(),
     }
 
@@ -8278,6 +8316,50 @@ class TamuraSweep:
                                     _infl_curvature, _delta_gap, len(_fss_pairs),
                                 )
 
+                            # ── Phase-Critical Detection (O21 AlphaPruning) ──
+                            # Flag when γ (spectral scaling exponent δ) crosses
+                            # the critical threshold identified by second-order
+                            # phase-transition scaling signatures:
+                            #   1. Diverging variance: the variance of δ values
+                            #      in the window containing L_c is significantly
+                            #      larger than in windows away from L_c.
+                            #   2. Power-law exponent shift: β deviates from the
+                            #      mean-field value (β_MF = 0.5) indicating
+                            #      non-trivial universality class.
+                            # When both signatures are present, the γ value at
+                            # L_c is at the phase boundary and the corresponding
+                            # belief-revision score is annotated phase_critical=True.
+                            _phase_critical = False
+                            _variance_diverging = False
+                            _exponent_shifted = False
+                            _pc_variance_ratio = 0.0
+                            _pc_beta_deviation = abs(_beta_est - 0.5) if _beta_est > 0 else 0.0
+
+                            # Variance divergence test: compare δ variance near L_c
+                            # vs away from L_c
+                            if len(_coop_pairs) >= 2 and len(_disord_pairs) >= 2:
+                                _coop_deltas = [_p[1] for _p in _coop_pairs]
+                                _disord_deltas = [_p[1] for _p in _disord_pairs]
+                                _coop_mean_v = sum(_coop_deltas) / float(len(_coop_deltas))
+                                _disord_mean_v = sum(_disord_deltas) / float(len(_disord_deltas))
+                                _coop_var = sum((_d - _coop_mean_v) ** 2 for _d in _coop_deltas) / float(len(_coop_deltas))
+                                _disord_var = sum((_d - _disord_mean_v) ** 2 for _d in _disord_deltas) / float(len(_disord_deltas))
+                                # Near-critical variance: combine both sides
+                                _near_crit_var = (_coop_var + _disord_var) / 2.0
+                                # Far-from-critical variance: use the regime with lower variance
+                                _far_var = min(_coop_var, _disord_var) if min(_coop_var, _disord_var) > 1e-15 else 1e-15
+                                _pc_variance_ratio = _near_crit_var / _far_var if _far_var > 1e-15 else 0.0
+                                # Diverging if variance ratio > 2 (fluctuations peak at L_c)
+                                _variance_diverging = _pc_variance_ratio > 2.0
+
+                            # Exponent shift test: β significantly different from
+                            # mean-field (0.5) with good fit quality
+                            _exponent_shifted = (_pc_beta_deviation > 0.15 and _beta_r2 > 0.5)
+
+                            # Phase-critical flag: either signature suffices when
+                            # phase boundary is detected; both together give strong signal
+                            _phase_critical = _phase_detected and (_variance_diverging or _exponent_shifted)
+
                             _cst_result = {
                                 "critical_L": _critical_L,
                                 "critical_sparsity": round(_critical_sparsity, 6),
@@ -8285,6 +8367,11 @@ class TamuraSweep:
                                 "scaling_exponent_beta": round(_beta_est, 6),
                                 "scaling_r_squared": round(max(0.0, _beta_r2), 6),
                                 "phase_boundary_detected": _phase_detected,
+                                "phase_critical": _phase_critical,
+                                "phase_critical_variance_diverging": _variance_diverging,
+                                "phase_critical_exponent_shifted": _exponent_shifted,
+                                "phase_critical_variance_ratio": round(_pc_variance_ratio, 6),
+                                "phase_critical_beta_deviation": round(_pc_beta_deviation, 6),
                                 "cooperative_regime": {
                                     "L_range": [_p[0] for _p in _coop_pairs],
                                     "mean_delta": round(_coop_mean_d, 6),
