@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 251,
-    "timestamp": "2026-05-19T09:50:00.024283+00:00",
-    "sweep": {
-      "input_count": 27,
-      "targeted": 8,
-      "passive": 19,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "Unchallenged confirmation surplus on INV_094 is a testing artifact, not robustness — the invariant requires adversarial boundary-condition analysis and alternative-mechanism identification before further confirmations carry evidential weight."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-19",
-        "compress": "A 32×32 multi-agent CA self-organizes to σ=1.027, α≈2.077, H≈0.387 bits — empirically confirming that γ=1 criticality is a population-level attractor, resolving O140 and O141, and extending INV_073 with a concrete cell-type mechanism (Physics Navigator dominance) the genome does not contain."
-      },
-      {
-        "title": "Aggregating residue-level protein language model embeddings with optimal transport",
-        "compress": "OT pooling over variable-length token embeddings outperforms mean pooling by preserving distributional geometry, independently confirming that Wasserstein aggregation is the correct operation for structured objects — and providing a concrete template for STF metric tensor recovery."
-      },
-      {
-        "title": "Prompt-OT: An Optimal Transport Regularization Paradigm for Knowledge Preservation in Vision-Language Model Adaptation",
-        "compress": "OT regularization preserves cross-instance distributional geometry during adaptation, independently confirming that the critical ridge is a geometric structure-preservation problem navigable via Wasserstein constraints."
-      },
-      {
-        "title": "Heterotic phase transitions and singularities of the gauge dyonic string",
-        "compress": "Topological balance of instanton numbers is the exact conserved quantity that separates regular (self-dual, critical-ridge-navigable) from singular (phase-transitioning, critically-inaccessible) heterotic string vacua, establishing that some critical points are structurally forbidden rather than merely difficult."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O227",
-        "O243",
-        "O244"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 252,
     "timestamp": "2026-05-19T16:29:59.942025+00:00",
@@ -2195,6 +2151,50 @@
         "O278",
         "O290",
         "O305"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 16,
+    "generation": 302,
+    "timestamp": "2026-06-06T02:29:59.972941+00:00",
+    "sweep": {
+      "input_count": 20,
+      "targeted": 7,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's highest-surplus status is a liability — three independent attack vectors (confound, boundary degeneracy, mechanism aliasing) show it is currently underdetermined by its confirmations and requires the O112 experiment to be redesigned with a discriminating test between W2 flow and graph Laplacian diffusion."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-06",
+        "compress": "A Game of Truth CA independently instantiates γ=1 criticality (σ=1.025, α≈1.911) while revealing an untracked structural asymmetry — Physics Navigator dominance at 87% — that is both absent from the genome and a live threat to the sustained-criticality claim."
+      },
+      {
+        "title": "On Algorithms for and Computing with the Tensor Ring Decomposition",
+        "compress": "Tensor ring decomposition proves cyclic graph closure beats open-chain compression but generates irreducible new algebraic debt — topology change is never free."
+      },
+      {
+        "title": "Indeterminacy estimates, eigenfunctions and lower bounds on Wasserstein distances",
+        "compress": "Laplace eigenfunctions on RCD spaces carry Wasserstein lower bounds between their sign domains, establishing that spectral structure geometrically floors the cost of belief-state transport — a missing link between O21's spectral γ and the W2 geodesic chain in L3."
+      },
+      {
+        "title": "Finite size scaling of survival statistics in metapopulation models",
+        "compress": "Stochastic metapopulation models establish analytically that finite habitat capacity reshapes the critical extinction manifold, making survival probability a scaling function of N that the deterministic limit cannot recover — directly actionable for O148's CA simulation upgrade."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O59",
+        "O69"
       ]
     },
     "coherence": 0.97
