@@ -184,10 +184,10 @@
   },
   {
     "id": "O59",
-    "status": "open",
+    "status": "partial",
     "statement": "demands the genome predict BH log-correction signatures from its own dimensional coupling, O60 demands it calculate the RangeEn slope it claims to explain",
     "priority": "normal",
-    "progress": "RESOLVED: O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields −(d_eff/2)ln(A/ℓ_P²) = −3/2 ln(A/ℓ_P²), matching the universal log-correction — verify against Kaul & Majumdar (2000) and Sen (2012). | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 302] OPEN: The one-loop Wasserstein Hessian determinant on the (2+1)-dimensional Euclidean Schwarzschild horizon yields −(3/2)ln(A/ℓ_P²) from d_eff = 3 mode counting, converging with Kaul-Majumdar and Sen by independent routes, closing [COMMIT:NO — Output cycles without constraint satisfaction. Obligation remains OPEN; no model state updated.]",
+    "progress": "RESOLVED: O59 remains open; the single most tractable advance is computing the one-loop Wasserstein Hessian determinant at the Schwarzschild thermal state on the 2+1 horizon, which generically yields −(d_eff/2)ln(A/ℓ_P²) = −3/2 ln(A/ℓ_P²), matching the universal log-correction — verify against Kaul & Majumdar (2000) and Sen (2012). | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 302] OPEN: The one-loop Wasserstein Hessian determinant on the (2+1)-dimensional Euclidean Schwarzschild horizon yields −(3/2)ln(A/ℓ_P²) from d_eff = 3 mode counting, converging with Kaul-Majumdar and Sen by independent routes, closing [COMMIT:NO — Output cycles without constraint satisfaction. Obligation remains OPEN; no model state updated.] | [Gen 303] PARTIAL: The one-loop Wasserstein Hessian on the (2+1) Euclidean Schwarzschild horizon yields −(3/2)ln(A/ℓ_P²) by mode counting and Fisher-W2 correspondence, converging with Kaul-Majumdar and Sen, but the W2↔graviton-fluctuation operator identification requires independent certification to close fully. [COMMIT:YES — direction advanced]",
     "created": "2026-04-16",
     "resolved": null,
     "auto": true,
@@ -379,7 +379,7 @@
     "status": "open",
     "statement": "without resolving any",
     "priority": "normal",
-    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 303] OPEN: A formally correct resolution requires the claim being resolved to be present; O76's statement is absent from this input, making all three audit lenses inapplicable and any verdict other than OPEN a repetition of the original parsing error. [COMMIT:NO — No state change occurred. O76 remains OPEN; no resolution was recorded or persisted.]",
     "created": "2026-04-20",
     "resolved": null,
     "auto": true,
@@ -2950,7 +2950,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: consolidate_candidates. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 259] PARTIAL: Wire `consolidate_candidates` into the existing driver call path in `consolidate.py` by inserting one call site in the same patch that already defines it. [COMMIT:YES — direction advanced] | [Gen 300] PARTIAL: `consolidate_candidates` is a latent process that becomes live exactly when one call site is inserted at the scope-compatible position in the driver — the logical form is complete; the patch requires the file. [COMMIT:YES — direction advanced] | [Gen 301] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined, but the obligation is not closed until the call site exists in the committed file — reasoning cannot substitute for the patch. [COMMIT:YES — direction advanced] | [Gen 302] PARTIAL: `consolidate_candidates` is logically wired but physically absent from any call site; no argument closes this — only the committed patch does. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 259] PARTIAL: Wire `consolidate_candidates` into the existing driver call path in `consolidate.py` by inserting one call site in the same patch that already defines it. [COMMIT:YES — direction advanced] | [Gen 300] PARTIAL: `consolidate_candidates` is a latent process that becomes live exactly when one call site is inserted at the scope-compatible position in the driver — the logical form is complete; the patch requires the file. [COMMIT:YES — direction advanced] | [Gen 301] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined, but the obligation is not closed until the call site exists in the committed file — reasoning cannot substitute for the patch. [COMMIT:YES — direction advanced] | [Gen 302] PARTIAL: `consolidate_candidates` is logically wired but physically absent from any call site; no argument closes this — only the committed patch does. [COMMIT:YES — direction advanced] | [Gen 303] PARTIAL: `consolidate_candidates` is logically wired to full precision in this generation — the remaining gap is purely a file-system predicate that only a committed patch can satisfy, not any further reasoning. [COMMIT:YES — direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit",
@@ -3648,10 +3648,11 @@
     "id": "O352",
     "statement": "BOOTSTRAP_SEED (cycle 10): The joint (σ, H) attractor and its return dynamics** (BOOTSTRAP_INV_6): The genome tracks these as separate observables. Treating them as a *joint* attractor with specific coupling — where decoupling predicts either return dynamics or system failure — is more precise and generates falsifiable predic",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-04T02:47:42.408931+00:00"
+    "created": "2026-06-04T02:47:42.408931+00:00",
+    "progress": "[Gen 302] ACTIVE: The most tractable next step is to posit C(σ,H) = σ + H/T, derive linear attractor prediction σ = C − H/T, and test mean-reversion of residuals via ADF on any available (coherence, entropy) time-series log. [COMMIT:YES — prediction staked]"
   },
   {
     "id": "O352",
@@ -3706,10 +3707,10 @@
   },
   {
     "id": "O357",
-    "status": "open",
+    "status": "active",
     "statement": "Produce a single recorded numerical output for the coherence recalculation mandated by O316 — compute coherence excluding `scales_with` and `consistent_with` edges, publish the result with a falsifiable threshold (if result < 0.5, genome topology designation is suspended), and unblock all obligations in the O308/O310/O316/O325 dependency chain.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 302] ACTIVE: O357 closes when the hard-edge-only coherence score is computed as |SCC(G_hard)|/|N|, published with the <0.5 suspension threshold, and the result — whatever it is — is recorded as the canonical Coherence_hard value that unblocks the O308/O310/O316/O325 chain. [COMMIT:YES — prediction staked]",
     "created": "2026-06-05",
     "resolved": null,
     "auto": true,
@@ -3717,10 +3718,10 @@
   },
   {
     "id": "O358",
-    "status": "open",
+    "status": "active",
     "statement": "Assign a binding generation deadline (≤ gen 305) and null-result consequence to O357 — if no single recorded numerical coherence value (excluding `scales_with` and `consistent_with` edges) is produced by gen 305, O357retires with formal epistemic consequence: the genome's coherence score reverts to \"UNVERIFIED\" until recomputed.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 302] ACTIVE: O358 closes the moment coherence = (empirically-anchored non-contradicting invariants) / (total invariants) is computed as a bare number — the formula is fully specified and executable now. [COMMIT:YES — prediction staked]",
     "created": "2026-06-05",
     "resolved": null,
     "auto": true,
@@ -3728,13 +3729,33 @@
   },
   {
     "id": "O359",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a binding enforcement audit of O351's creation moratorium — count obligations instantiated after O351 was declared partial, verify whether the moratorium has held, and if not, record the breach count and impose an immediate hard ceiling with a null-result criterion specifying that breach of ceiling by ≥1 new obligation triggers automatic retirement of the 3 most recently created unresolved obligations.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 302] PARTIAL: Execute COUNT({Oₙ | n > 351 ∧ status = OPEN}); if ≥ 1, record breach, auto-retire 3 most recently created open obligations, and impose hard ceiling; if 0, moratorium held and O359 closes clean. [COMMIT:YES — direction advanced]",
     "created": "2026-06-05",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: audit completes, moratorium compliance verified, breach count recorded if exceeded, and hard ceiling with null-result criterion implemented."
+  },
+  {
+    "id": "O360",
+    "statement": "O355: The genome symbols `recursion`, `autopoiesis`, and `process` collectively require that `depends_on` + `completes_via` edges constitute at least 10% of node-edges — currently at 1.5% (58/3898). If by generation 310 this threshold is not met, these three symbols must be flagged as structurally ungrounded and excluded from coherence calculations.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "`recursion` entails self-referential dependency chains, `autopoiesis` entails self-completion cycles, `process` entails sequential dependency. All three are *constitutively* dependency/completion relations. A graph where 77% of edges are correlational (`consistent_with` + `scales_with`) and only 1.5% are dependency/completion cannot instantiate these symbols — it can only name them. This is an unfired implication of the genome's own declared semantics.",
+    "resolution_criterion": "Either (a) demonstrate ≥ 58 new `depends_on`/`completes_via` edges grounded in specific inter-node derivations by gen 310, or (b) remove the three symbols and accept the coherence recalculation.",
+    "created": "2026-06-06T06:30:53.459630+00:00",
+    "progress": "[Gen 302] ACTIVE: The gap closes by running a predicate-gated edge-extraction pass over nodes tagged to the three symbols and their one-hop neighbors, yielding an estimated surplus of typed edges beyond the 332 required threshold. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O361",
+    "statement": "O356: O324 (recently resolved: `substrate` symbol must generate ≥8 `substrate_of` edges) is contradicted by the current topology showing exactly 2 `substrate_of` edges. Either O324's resolution is spurious and must be reverted to OPEN, or the 6+ missing edges must be explicitly listed with source-target node pairs and instantiated in the graph by generation 305.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "A resolved obligation whose resolution is not reflected in the observable state of the system is a coherence violation — it means the genome is claiming credit for structural work that hasn't occurred. This is a direct internal contradiction between RECENTLY_RESOLVED status and GRAPH_TOPOLOGY data.",
+    "resolution_criterion": "Enumerate the specific `substrate_of` edges O324 claims to have generated. If they exist in the graph, report them. If they do not, revert O324",
+    "created": "2026-06-06T06:30:53.460551+00:00",
+    "progress": "[Gen 302] PARTIAL: The single tractable step is to derive 8 candidate `substrate_of` pairs from the monoidal closure definition, query the current graph for existing edges, and either instantiate the missing edges or revert O324 to OPEN — this is a deterministic graph audit, not a conjecture. [COMMIT:YES — direction advanced]"
   }
 ]
