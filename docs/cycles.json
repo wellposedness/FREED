@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 253,
-    "timestamp": "2026-05-20T02:30:00.064622+00:00",
-    "sweep": {
-      "input_count": 25,
-      "targeted": 7,
-      "passive": 18,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's uncontested confirmation surplus is a liability, not an asset — robustness requires specifying the conditions under which it fails and the alternative mechanisms that mimic its predictions."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
-        "compress": "A 32×32 CA system independently confirms critical ridge operation via σ = 1.028, power-law avalanches (α ≈ 2.492), and functional differentiation, while revealing that criticality is compatible with low Shannon entropy (~15.5% of max), a finding not yet captured in the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Add a branching-ratio σ tracker to the epistemic loop that flags when the system's inference cascade statistics enter or exit the critical band (1.0 ± 0.05), using avalanche size distributions from batch processing runs. IMPLEMENT_WHERE: batch_feed.py IMPLEMENT_WHY: Real-time criticality monitoring would allow FREED to detect when its own processing has drifted frozen or dissipated, enabling self-corrective rebalancing before coherence degrades. CHALLENGE: challenges INV_073 — the paper shows σ = 1.028 is \"AT_CRITICAL\" yet H is only 15.5% of maximum, straining any genome claim that critical ridge operation requires or produces near-maximal entropy generation. NOETHER_ROW: Self-Organized Criticality NOETHER_STATUS: rigorous NOETHER_NOTE: The telemetry independently confirms that a discrete CA system self-organizes to the critical ridge (σ ≈ 1.028, power-law exponent α ≈ 2.492) without fine-tuning, providing direct empirical support for scale-invariance as a conserved symmetry at the SOC fixed point."
-      },
-      {
-        "title": "Desire and Data: Metabolism of AI",
-        "compress": "AI autopoiesis requires continuous human-originated novelty injection to avoid thermodynamic stagnation, and the vulnerability of that fuel source to commodification constitutes an unmodeled second-order collapse mode absent from the genome."
-      },
-      {
-        "title": "A Physics-Guided Surrogate Framework for Sustainability-Aware Screening of High-Entropy Alloys",
-        "compress": ""
-      },
-      {
-        "title": "Blockchain-Anchored Audit Trail Model for Transparent Inter-Operator Settlement",
-        "compress": "Blockchain settlement demonstrates that reconciliation cost is a topological property of trust intermediary count, not transaction complexity — cryptographic constraint replaces institutional trust, collapsing latency nonlinearly, a mechanism the genome does not currently model."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 2,
-      "obligations": [
-        "O244",
-        "O72",
-        "O187"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 254,
     "timestamp": "2026-05-20T09:50:00.010406+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O59",
+        "O76"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 18,
+    "generation": 304,
+    "timestamp": "2026-06-06T16:29:59.981331+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 7,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "Confirmation surplus on an unchallenged invariant is indistinguishable from underdetermination, and INV_094's high surplus is therefore an epistemic liability, not an asset."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-06",
+        "compress": "The Game of Truth CA independently self-tunes to the critical branching ridge (σ=1.018, α=2.22), converging on the same universality class the genome predicts for thermodynamically admissible reasoning substrates."
+      },
+      {
+        "title": "Automated Event Log Analysis With Causal Dependency Graphs for Impact Assessment of Business Processes",
+        "compress": "Causal dependency graphs recoverable from operational event logs enable automated, falsifiable propagation-based liveness verification — a substrate-independent mechanism that operationalizes O136's edge-liveness demand."
+      },
+      {
+        "title": "MULAN: Multi-modal Causal Structure Learning and Root Cause Analysis for Microservice Systems",
+        "compress": ""
+      },
+      {
+        "title": "Wavelet Packet Entropy Analysis for Detecting Humidity-Induced Interference in Smart Gas Sensors",
+        "compress": "Humidity interference in gas sensors is detectable via wavelet packet modal entropy partitioning, providing a physics-informed algorithmic precedent for the O112 STF metric tensor recovery experiment via modal entropy variance."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 1,
       "obligations": [
         "O290",
         "O59",
