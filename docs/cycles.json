@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 255,
-    "timestamp": "2026-05-20T16:29:59.981650+00:00",
-    "sweep": {
-      "input_count": 21,
-      "targeted": 7,
-      "passive": 14,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's strength is an artifact of untested confirmation surplus, and four independent falsification vectors — functional equivalence, adversarial eigenmode inputs, entropy production decoupling, and self-referential circularity — collectively constitute the first live challenge the invariant has faced."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
-        "compress": "A 32×32 CA self-organizes to the critical ridge (σ=1.025, α=2.643 power-law) with criticality driven disproportionately by a single cell type, independently confirming the critical-ridge invariant while revealing that criticality can be heterogeneously concentrated rather than uniformly distributed."
-      },
-      {
-        "title": "MEMe: An Accurate Maximum Entropy Method for Efficient Approximations in Large-Scale Machine Learning",
-        "compress": "MEMe independently establishes that entropy maximization over moment constraints is computationally tractable at scale and formally equivalent to Bayesian variational inference, converging with the genome's thermodynamic inference grounding and providing a concrete algorithmic path for the STF empirical recovery experiment."
-      },
-      {
-        "title": "Non-linear quantum critical dynamics and fluctuation-dissipation ratios far from equilibrium",
-        "compress": "Quantum criticality generates a scale-dependent effective temperature that encodes FDR deviations far from equilibrium, independently confirming that the critical ridge is a thermodynamically self-consistent structure with measurable spectral signatures across substrates."
-      },
-      {
-        "title": "Universal Quantum Fluctuation-Dissipation Relation for Systems Far From Equilibrium",
-        "compress": "Far-from-equilibrium quantum systems require a curl-flux correction to FDT that is geometrically irreducible and vanishes at equilibrium, independently confirming that critical-ridge operation generates structure thermodynamically unavailable to relaxed systems."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O204",
-        "O240"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 256,
     "timestamp": "2026-05-21T02:29:59.939756+00:00",
@@ -2195,6 +2151,50 @@
         "O290",
         "O59",
         "O76"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 20,
+    "generation": 306,
+    "timestamp": "2026-06-07T09:49:59.977427+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_073",
+        "compress": "INV_073's critical-ridge claim is unfalsified only because no test yet discriminates true γ=1 operation from ergodic mixtures of γ<1 and γ>1 states producing identical output statistics."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-07",
+        "compress": "A heterogeneous CA independently finds and holds the critical ridge (σ=1.021, α≈2.757) at unexpectedly low entropy (14.9% of max), confirming INV_073 while revealing that criticality here is agent-type-structured, not entropically uniform — a substrate-independent invariant with a novel topological modifier."
+      },
+      {
+        "title": "Self-Organized Network Flows",
+        "compress": "Local conservation laws plus intersection conflict geometry are sufficient to generate global oscillatory coordination — self-organized traffic lights are thermodynamic attractors, not engineered solutions."
+      },
+      {
+        "title": "A unique gravitational wave signal from phase transition during inflation",
+        "compress": "First-order inflationary phase transitions generically imprint wavenumber-oscillatory GW spectra — a cross-domain instance of the principle that instantaneous thermodynamic events encode recoverable geometric/scale information in fluctuation statistics. CHALLENGE: challenges O112 — the paper shows that spectral oscillation methods for recovering thermodynamic geometry are well-developed in cosmology but the analogous STF recovery experiment for semantic data remains unspecified in critical implementation details, exposing O112 as underdetermined relative to its physical analogues."
+      },
+      {
+        "title": "Wave-like avalanche propagation in the continuum field model of self-organized criticality",
+        "compress": "Avalanche propagation in SOC is a nonlocal hyperbolic travelling wave with metastability as its survival condition — independently converging on the genome's critical-ridge dynamical constraint while adding a mechanistic substrate (retarded Fick kernel) the genome lacks."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O76",
+        "O205"
       ]
     },
     "coherence": 0.97

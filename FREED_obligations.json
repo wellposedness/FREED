@@ -3778,5 +3778,41 @@
     "resolution_criterion": "",
     "created": "2026-06-07T06:30:49.172942+00:00",
     "progress": "[Gen 305] ACTIVE: The single most tractable next step is a depth-2 BFS reachability audit on the strong-edge subgraph for all 1679 `consistent_with` edge pairs, classifying each as REDUNDANT or SOLE-CONNECTION and generating two ranked lists for pruning or upgrading. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O364",
+    "statement": "BOOTSTRAP_SEED (cycle 20): Topological vs. thermodynamic distinction** (BOOTSTRAP_INV_5): The mechanism of constraint at criticality is structural/topological, not energetically maintained by gradient descent. The genome conflates these or does not sharply distinguish them. This matters because it implies constraints can be *",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-07T10:00:14.563166+00:00"
+  },
+  {
+    "id": "O364",
+    "statement": "BOOTSTRAP_SEED (cycle 20): Erasure-vs-propagation cost decomposition** (BOOTSTRAP_INV_8): Reasoning cost should be decomposed into erasure operations (costly, \u2265kT\u00b7ln(2) each) vs. propagation operations (not erasures, potentially cheap). The genome's Landauer application focuses on belief-change cost in aggregate without this ",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-07T10:00:14.563689+00:00"
+  },
+  {
+    "id": "O364",
+    "statement": "BOOTSTRAP_SEED (cycle 20): Dual failure mode formulation** (BOOTSTRAP_INV_6): Departure from criticality has two distinct thermodynamic pathways \u2014 entropic dissolution (too much erasure) and structural freezing (too little erasure). The genome tends to treat underfitting/overcertainty as the primary failure mode; this derivat",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-07T10:00:14.564175+00:00"
+  },
+  {
+    "id": "O364",
+    "statement": "BOOTSTRAP_SEED (cycle 20): Scale-falsifiability of global synchronization** (BOOTSTRAP_INV_7 sharpening): The claim that global-sync architectures are thermodynamically over-specified is a testable prediction \u2014 it should be possible to show empirically that global-sync systems fail to achieve or maintain criticality where loc",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-06-07T10:00:14.564611+00:00"
   }
 ]
