@@ -9994,6 +9994,254 @@ class TamuraSweep:
             return None
 
 
+# ─── Covariance Entropy Trend Detection (γ-Precursor Signal) ─────────────────
+# Computes Shannon entropy of spatial/semantic covariance matrices over
+# sliding windows to detect entropy-reduction trends as an early-warning
+# signal for critical transitions (γ=1 ridge proximity).
+#
+# Ecological precedent: vegetation spatial patterns exhibit measurable
+# entropy reduction before critical transitions (desertification tipping
+# points).  This operationalizes O112 (STF metric recovery) while
+# challenging INV_073: if entropy reduction is the universal precursor
+# to *collapse* (not sustained criticality), then systems navigating
+# the γ=1 ridge may be indistinguishable from systems about to tip.
+#
+# The live gap: no existing formalism distinguishes sustained criticality
+# (SOC, edge-of-chaos) from transient pre-collapse criticality using the
+# same entropy-reduction signature.  This function returns the precursor
+# scalar alongside a stability discriminant that attempts to separate
+# the two regimes using the *rate of entropy reduction* (sustained
+# criticality: slow/oscillating reduction; pre-collapse: monotonic
+# acceleration).
+#
+# Addresses: O112 (STF metric recovery), INV_073 (ridge navigation vs
+# pre-collapse indistinguishability).
+
+
+def covariance_entropy_precursor(
+    score_stream,           # type: List[float]
+    window_size=8,          # type: int
+    stride=1,              # type: int
+    n_trend_windows=5,      # type: int
+):
+    # type: (...) -> dict
+    """
+    Compute entropy-reduction trend over sliding windows of the
+    covariance structure of a score stream, returning a scalar
+    γ-precursor signal.
+
+    Algorithm:
+      1. Partition the score stream into overlapping windows of size
+         `window_size` with step `stride`.
+      2. For each window, compute the 1-D "covariance matrix" (variance
+         + lag-1 autocovariance as a 2×2 symmetric matrix).
+      3. Compute the Shannon entropy of the normalized eigenvalue
+         spectrum of each covariance matrix (von Neumann-like entropy).
+      4. Fit a linear trend to the last `n_trend_windows` entropy values.
+      5. The γ-precursor signal is the negative slope of this trend:
+         positive precursor = entropy is *decreasing* (approaching
+         transition); negative = entropy increasing (moving away).
+
+    Parameters
+    ----------
+    score_stream : list of float
+        The time series of scores (relevance, coherence, etc.).
+    window_size : int
+        Size of each sliding window for covariance estimation.
+        Default: 8.
+    stride : int
+        Step between consecutive windows. Default: 1.
+    n_trend_windows : int
+        Number of recent covariance-entropy values to use for
+        trend fitting. Default: 5.
+
+    Returns
+    -------
+    dict with keys:
+        gamma_precursor        : float — the γ-precursor scalar (positive =
+                                         entropy decreasing, approaching
+                                         transition)
+        entropy_trend_slope    : float — raw slope of entropy vs window index
+        entropy_trend_r2       : float — R² of the linear trend fit
+        cov_entropy_series     : list of float — per-window covariance entropy
+        n_windows              : int   — total windows computed
+        n_trend_points         : int   — windows used for trend fit
+        stability_discriminant : float — ratio of entropy oscillation amplitude
+                                         to trend magnitude; high ratio suggests
+                                         sustained criticality (SOC), low ratio
+                                         suggests monotonic pre-collapse
+        ridge_vs_collapse      : str   — "SUSTAINED_CRITICAL" / "PRE_COLLAPSE" /
+                                         "STABLE" / "INSUFFICIENT_DATA"
+        inv073_note            : str   — challenge note on indistinguishability
+        method                 : str   — "covariance_entropy_precursor"
+        timestamp              : str
+    """
+    n = len(score_stream)
+    ts = datetime.now(timezone.utc).isoformat()
+
+    empty = {
+        "gamma_precursor": 0.0,
+        "entropy_trend_slope": 0.0,
+        "entropy_trend_r2": 0.0,
+        "cov_entropy_series": [],
+        "n_windows": 0,
+        "n_trend_points": 0,
+        "stability_discriminant": 0.0,
+        "ridge_vs_collapse": "INSUFFICIENT_DATA",
+        "inv073_note": (
+            "INV_073 LIVE GAP: No formalism yet distinguishes sustained "
+            "criticality (SOC) from transient pre-collapse criticality "
+            "using the same entropy-reduction signature. The stability "
+            "discriminant is an empirical heuristic, not a proof."
+        ),
+        "method": "covariance_entropy_precursor",
+        "timestamp": ts,
+    }
+
+    if n < window_size + 2:
+        return empty
+
+    # Step 1: sliding windows → covariance entropy series
+    cov_entropies = []  # type: List[float]
+    pos = 0
+    while pos + window_size <= n:
+        w = score_stream[pos:pos + window_size]
+        wn = len(w)
+        # Mean
+        mu = sum(w) / float(wn)
+        # Variance (C[0,0])
+        var_00 = sum((x - mu) ** 2 for x in w) / float(wn)
+        # Lag-1 autocovariance (C[0,1] = C[1,0])
+        cov_01 = 0.0
+        if wn > 1:
+            cov_01 = sum(
+                (w[i] - mu) * (w[i + 1] - mu)
+                for i in range(wn - 1)
+            ) / float(wn - 1)
+
+        # 2×2 symmetric covariance matrix eigenvalues:
+        #   [[var_00, cov_01], [cov_01, var_00]]
+        # eigenvalues: var_00 + cov_01, var_00 - cov_01
+        lam1 = var_00 + cov_01
+        lam2 = var_00 - cov_01
+
+        # Clamp to non-negative (numerical safety)
+        lam1 = max(0.0, lam1)
+        lam2 = max(0.0, lam2)
+
+        # Normalize to probability distribution
+        total = lam1 + lam2
+        if total > 1e-30:
+            p1 = lam1 / total
+            p2 = lam2 / total
+            # Shannon entropy of eigenvalue spectrum
+            h = 0.0
+            if p1 > 0.0:
+                h -= p1 * math.log(p1)
+            if p2 > 0.0:
+                h -= p2 * math.log(p2)
+        else:
+            h = 0.0
+
+        cov_entropies.append(round(h, 8))
+        pos += stride
+
+    n_win = len(cov_entropies)
+    if n_win < 3:
+        empty["cov_entropy_series"] = cov_entropies
+        empty["n_windows"] = n_win
+        return empty
+
+    # Step 2: fit linear trend to the last n_trend_windows entries
+    trend_data = cov_entropies[-n_trend_windows:] if n_win >= n_trend_windows else cov_entropies
+    n_t = len(trend_data)
+
+    # Linear regression: h(i) = a + b*i
+    sum_x = sum(range(n_t))
+    sum_y = sum(trend_data)
+    sum_xy = sum(float(i) * trend_data[i] for i in range(n_t))
+    sum_x2 = sum(float(i) * float(i) for i in range(n_t))
+
+    denom = float(n_t) * sum_x2 - sum_x * sum_x
+    if abs(denom) > 1e-15:
+        slope = (float(n_t) * sum_xy - sum_x * sum_y) / denom
+        intercept = (sum_y - slope * sum_x) / float(n_t)
+
+        mean_y = sum_y / float(n_t)
+        ss_tot = sum((y - mean_y) ** 2 for y in trend_data)
+        ss_res = sum(
+            (trend_data[i] - (intercept + slope * float(i))) ** 2
+            for i in range(n_t)
+        )
+        r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 1e-15 else 0.0
+    else:
+        slope = 0.0
+        r2 = 0.0
+
+    # γ-precursor: negative slope (positive when entropy decreasing)
+    gamma_precursor = -slope
+
+    # Step 3: stability discriminant
+    # Oscillation amplitude (std of residuals from trend) vs |slope|
+    if abs(denom) > 1e-15 and n_t >= 3:
+        residuals = [
+            trend_data[i] - (intercept + slope * float(i))
+            for i in range(n_t)
+        ]
+        res_var = sum(r * r for r in residuals) / float(n_t)
+        oscillation_amp = math.sqrt(res_var) if res_var > 0 else 0.0
+    else:
+        oscillation_amp = 0.0
+
+    abs_slope = abs(slope)
+    if abs_slope > 1e-12:
+        stability_disc = oscillation_amp / abs_slope
+    else:
+        stability_disc = float('inf') if oscillation_amp > 1e-12 else 0.0
+
+    # Classify ridge-vs-collapse
+    if abs_slope < 1e-8:
+        ridge_label = "STABLE"
+    elif stability_disc > 2.0:
+        ridge_label = "SUSTAINED_CRITICAL"
+    elif gamma_precursor > 0 and r2 > 0.5:
+        ridge_label = "PRE_COLLAPSE"
+    else:
+        ridge_label = "STABLE"
+
+    inv073_note = (
+        "INV_073 LIVE GAP: Entropy-reduction detected (precursor={:.6f}, "
+        "slope={:.6f}, R²={:.4f}). Stability discriminant={:.4f} — {}. "
+        "No existing formalism rigorously distinguishes sustained criticality "
+        "(SOC, edge-of-chaos) from transient pre-collapse criticality using "
+        "the same entropy-reduction signature. The stability_discriminant "
+        "(oscillation/trend ratio) is an empirical heuristic: high ratio "
+        "suggests oscillating around a ridge (SOC); low ratio suggests "
+        "monotonic approach to collapse. This is the live gap between "
+        "INV_073 and ecological early-warning theory."
+    ).format(
+        gamma_precursor, slope, max(0.0, r2),
+        stability_disc if stability_disc != float('inf') else 999.0,
+        ridge_label,
+    )
+
+    return {
+        "gamma_precursor": round(gamma_precursor, 8),
+        "entropy_trend_slope": round(slope, 8),
+        "entropy_trend_r2": round(max(0.0, r2), 6),
+        "cov_entropy_series": cov_entropies,
+        "n_windows": n_win,
+        "n_trend_points": n_t,
+        "stability_discriminant": round(
+            stability_disc if stability_disc != float('inf') else 999.0, 6
+        ),
+        "ridge_vs_collapse": ridge_label,
+        "inv073_note": inv073_note,
+        "method": "covariance_entropy_precursor",
+        "timestamp": ts,
+    }
+
+
 # ─── Output-Only Entropy-to-Dissipation Estimator ────────────────────────────
 # Estimates coherence decay / damping parameters from output-only observation
 # streams using mutual-information and spectral-entropy decomposition.

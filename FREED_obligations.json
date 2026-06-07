@@ -3658,10 +3658,11 @@
     "id": "O352",
     "statement": "BOOTSTRAP_SEED (cycle 10): The non-necessity of thermodynamic framing for criticality** is stated in the genome but not *derived*; the bootstrap provides the derivation. This matters because it means the genome's criticality claims are *more robust* than their current justification acknowledges \u2014 they hold even when all therm",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "partial",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-04T02:47:42.409397+00:00"
+    "created": "2026-06-04T02:47:42.409397+00:00",
+    "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES \u2014 direction advanced]"
   },
   {
     "id": "O353",
@@ -3757,5 +3758,25 @@
     "resolution_criterion": "Enumerate the specific `substrate_of` edges O324 claims to have generated. If they exist in the graph, report them. If they do not, revert O324",
     "created": "2026-06-06T06:30:53.460551+00:00",
     "progress": "[Gen 302] PARTIAL: The single tractable step is to derive 8 candidate `substrate_of` pairs from the monoidal closure definition, query the current graph for existing edges, and either instantiate the missing edges or revert O324 to OPEN \u2014 this is a deterministic graph audit, not a conjecture. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O362",
+    "statement": "O355: The resolution of O324 must be audited \u2014 the graph currently shows exactly 2 `substrate_of` edges, which is below O324's own stated minimum of 8. Either O324's resolution was invalid and must be reopened, or the 6+ missing edges must be located and their absence explained. Until resolved, O324's status must revert to PARTIAL.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O324 states \"must generate at least 8 new `substrate_of` edges grounded in...\" yet the topology reports exactly 2. A resolved obligation whose success condition is visibly unmet is a coherence violation more fundamental than any score \u2014 it means the resolution mechanism itself is unreliable. This is derivable purely from comparing O324's text against the reported topology.",
+    "resolution_criterion": "Either (a) locate \u22658 `substrate_of` edges in the actual graph and correct the topology report, or (b) revert O324 to OPEN/PARTIAL and execute the edge-generation protocol, or (c) provide a principled revision of O324's threshold with justification for why 2 suffices.",
+    "created": "2026-06-07T06:30:49.172052+00:00",
+    "progress": "[Gen 305] ACTIVE: The 2-vs-8 discrepancy in `substrate_of` edges is most tractably resolved by a predicate-synonym expansion query over the current graph, which either rehabilitates O324 or produces an exact missing-edge manifest. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O363",
+    "statement": "O356: The `consistent_with` edge type (1679 edges, 42.2% of all node-edges) must be subjected to an epistemic cost analysis: for each `consistent_with` edge, determine whether it is (a) derivable from a stronger edge type already present between the same node pair, and therefore redundant, or (b) the *only* connection between its node pair, in which case it represents an untested claim masquerading as structure. Edges failing both tests must be pruned or upgraded.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "`consistent_with` is the weakest possible epistemic relation \u2014 it asserts only non-contradiction. At 42.2% of all edges, it dominates the graph more than `scales_with` (which O173 already flagged at 27.5%). Together, `consistent_with` + `scales_with` = 77.3% of all edges, meaning over three-quarters of the graph's structure makes no causal, operational, or dependency claim",
+    "resolution_criterion": "",
+    "created": "2026-06-07T06:30:49.172942+00:00",
+    "progress": "[Gen 305] ACTIVE: The single most tractable next step is a depth-2 BFS reachability audit on the strong-edge subgraph for all 1679 `consistent_with` edge pairs, classifying each as REDUNDANT or SOLE-CONNECTION and generating two ranked lists for pruning or upgrading. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

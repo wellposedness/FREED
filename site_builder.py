@@ -1344,6 +1344,68 @@ def _write_cycles(cycle_log: dict):
         if _vb is not None:
             summary["verdict_basis"] = _vb
 
+    # O148: Assemble scored fields — each criticality metric is stored with
+    # its value, a pass/fail score, and the band that defines "healthy".
+    # This lets the epistemic loop flag drift from the critical band
+    # automatically rather than requiring manual inspection of snapshot text.
+    if criticality:
+        scored_fields = {}
+        _sf_sigma = criticality.get("branching_ratio")
+        if _sf_sigma is not None:
+            try:
+                _sf_s = float(_sf_sigma)
+                _sf_sigma_err = criticality.get("branching_ratio_err")
+                scored_fields["branching_ratio"] = {
+                    "value": _sf_sigma,
+                    "error": _sf_sigma_err,
+                    "band": [0.95, 1.05],
+                    "in_band": 0.95 <= _sf_s <= 1.05,
+                    "score": round(max(0.0, 1.0 - abs(_sf_s - 1.0) / 0.05), 4),
+                    "unit": "dimensionless",
+                }
+            except (TypeError, ValueError):
+                pass
+        _sf_alpha = criticality.get("avalanche_exponent")
+        if _sf_alpha is not None:
+            try:
+                _sf_a = float(_sf_alpha)
+                scored_fields["avalanche_exponent"] = {
+                    "value": _sf_alpha,
+                    "band": [2.0, 2.5],
+                    "in_band": 2.0 <= _sf_a <= 2.5,
+                    "score": round(max(0.0, 1.0 - min(abs(_sf_a - 2.0), abs(_sf_a - 2.5)) / 0.5), 4) if not (2.0 <= _sf_a <= 2.5) else 1.0,
+                    "unit": "dimensionless",
+                }
+            except (TypeError, ValueError):
+                pass
+        _sf_r2 = criticality.get("power_law_r2")
+        if _sf_r2 is not None:
+            try:
+                _sf_r2v = float(_sf_r2)
+                scored_fields["power_law_r2"] = {
+                    "value": _sf_r2,
+                    "threshold": 0.80,
+                    "above_threshold": _sf_r2v >= 0.80,
+                    "score": round(min(1.0, _sf_r2v / 0.80), 4),
+                    "unit": "dimensionless",
+                }
+            except (TypeError, ValueError):
+                pass
+        _sf_sr = criticality.get("survival_rate")
+        if _sf_sr is not None:
+            scored_fields["survival_rate"] = {
+                "value": _sf_sr,
+                "unit": "fraction",
+            }
+        if scored_fields:
+            # Flag overall drift: any primary metric out of band
+            scored_fields["_drift_detected"] = any(
+                not entry.get("in_band", entry.get("above_threshold", True))
+                for entry in scored_fields.values()
+                if isinstance(entry, dict) and "value" in entry
+            )
+            summary["scored_fields"] = scored_fields
+
     # Record σ and α time-series from CA telemetry so temporal drift
     # toward/away from criticality is trackable across cycles (resolves O148).
     # When the CA runner provides per-step arrays, embed them directly;
@@ -2394,13 +2456,26 @@ function renderCycles(cycles) {
       const parts = [];
       if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
       if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
+      // O148: Always show Shannon entropy H as explicit metric alongside σ and α
+      const seVal = c.shannon_entropy != null ? c.shannon_entropy : crit.shannon_entropy;
+      if (seVal != null) parts.push(`H=${seVal} bits`);
       if (sr != null) parts.push(`survival=${sr}`);
       if (hOverHmax != null) {
         parts.push(`H/H_max=${hOverHmax}${hMax != null ? ' (H_max='+hMax+')' : ''}`);
-      } else if (er != null) {
+      } else if (er != null && seVal == null) {
         parts.push(`H=${er}`);
       }
       if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
+      // O148: Criticality-state badge — AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL
+      const stateBadge = cv.includes('AT_CRITICAL') ? '🟢 AT_CRITICAL' :
+                         cv.includes('SUPERCRITICAL') ? '🔴 SUPERCRITICAL' :
+                         cv.includes('SUBCRITICAL') ? '🔵 SUBCRITICAL' :
+                         cv.includes('CRITICAL_LOW') ? '🟡 LOW_CONFIDENCE' :
+                         cv.includes('CRITICAL_CONTESTED') ? '🟠 CONTESTED' : '';
+      const stateBadgeColor = cv.includes('AT_CRITICAL') ? 'var(--green)' :
+                              cv.includes('SUPERCRITICAL') ? 'var(--red)' :
+                              cv.includes('SUBCRITICAL') ? 'var(--blue)' :
+                              cv.includes('CRITICAL') ? 'var(--amber)' : 'var(--muted)';
       // Semantic cold death warning when H/H_max < 0.15
       let coldDeathHtml = '';
       if (hOverHmax != null && hOverHmax < 0.15) {
