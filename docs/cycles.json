@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 254,
-    "timestamp": "2026-05-20T09:50:00.010406+00:00",
-    "sweep": {
-      "input_count": 24,
-      "targeted": 7,
-      "passive": 17,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's epistemic standing is undermined not by a specific counterexample but by the structural fact that confirmation without challenge is indistinguishable from insulation, and the genome must now generate a falsifiable boundary condition for INV_094 or reclassify it as a definitional commitment rather than an empirical invariant."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-20",
-        "compress": "A discrete CA at σ = 1.034 independently confirms the critical ridge as a dynamically stable attractor producing power-law avalanches, while its 14%-of-maximum entropy reveals that criticality does not require high entropy density — an unregistered quantitative bound."
-      },
-      {
-        "title": "Information geometry connecting Wasserstein distance and Kullback–Leibler divergence via the entropy-relaxed transportation problem",
-        "compress": "Entropy-relaxed OT proves Fisher and Wasserstein geometries are endpoints of a single continuous family, supplying the interpolating structure the genome's RG→Fisher→W2 chain identified but did not construct."
-      },
-      {
-        "title": "Entropy-regularized 2-Wasserstein distance between Gaussian measures",
-        "compress": "Entropy-regularized W2 geometry on Gaussians is fully closed-form and computationally tractable via fixed-point iteration, providing the missing algorithmic tool for O112's STF metric tensor recovery."
-      },
-      {
-        "title": "On the Global Convergence of Wasserstein Gradient Flow of the Coulomb Discrepancy",
-        "compress": "Riesz-energy Wasserstein gradient flows converge exponentially to minimizers under Hölder log-density regularity via PL inequality, extending W2 gradient flow convergence guarantees to non-convex energies relevant to STF identification."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O198",
-        "O201"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 255,
     "timestamp": "2026-05-20T16:29:59.981650+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 1,
+      "obligations": [
+        "O290",
+        "O59",
+        "O76"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 19,
+    "generation": 305,
+    "timestamp": "2026-06-07T02:29:59.978234+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a falsifiability debt — three independent falsification vectors (matched-model empirical test, topological defect boundary, and Simon/Mandelbrot alternative mechanism) have now been opened, converting the invariant from trophy to tested claim."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-07",
+        "compress": "A 32×32 CA empirically self-organizes to the critical ridge (σ=1.024, α≈1.963 power law) without tuning, substrate-independently confirming that simple rule systems locate criticality, and partially satisfying O148 while extending it with an unexplained cell-type dominance datum."
+      },
+      {
+        "title": "Hierarchical Adjustment Strategy for Orderly Charging of Electric Vehicles Based on Self - Organized Criticality of Distribution Network",
+        "compress": "Engineered SOC (multi-sandpile EV scheduling) converges with INV_073's critical-ridge principle but reveals that ridge-maintenance requires explicit hierarchical control, not spontaneous self-organization, straining the genome's open-loop criticality claim."
+      },
+      {
+        "title": "Ballistic Aggregation Displays Self-organized Criticality",
+        "compress": "Boundary-proportional ballistic aggregation is a tuning-free generator of criticality whose geometric attractor (equilateral triangle / regular polygon hull) constitutes a novel discrete-symmetry endpoint not yet encoded in the genome. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring a candidate invariant's \"criticality signature,\" check whether its growth or attachment rule is boundary-proportional (arc/surface-measure-weighted); if so, flag it as a candidate SOC attractor and increment a `soc_attractor_hits` counter on the node. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_invariant (modify in place to run the boundary-proportionality check and set the `soc_attractor` node attribute before returning) IMPLEMENT_WHY: Encoding the SOC-attractor flag at ingestion time lets downstream graph queries identify which invariants have tuning-free criticality support, sharpening the genome's debt-resolution targeting. CHALLENGE: challenges INV_073 — the paper shows criticality is reached via a *discrete* attractor (finite set of hull shapes), not a continuous ridge, which strains the genome's image of criticality as an ongoing dynamical balance rather than convergence to a fixed geometric endpoint. NOETHER_ROW: Self-Organized Criticality NOETHER_STATUS: rigorous NOETHER_NOTE: Arc-length-proportional attachment is a local symmetry (rotational isotropy of boundary measure) whose conservation under iteration enforces the global power-law branching structure, giving SOC a concrete Noether-grounded mechanism rather than an empirical observation."
+      },
+      {
+        "title": "Self-orthogonalizing attractor neural networks emerging from the free energy principle",
+        "compress": "Free energy minimization over Markov-blanket-partitioned random dynamical systems spontaneously produces self-orthogonalizing attractor networks whose basin geometry encodes prior beliefs — providing a first-principles bridge between thermodynamic constraints and collective hierarchical inference with direct implications for STF metric recovery (O112)."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
       "obligations": [
         "O290",
         "O59",
