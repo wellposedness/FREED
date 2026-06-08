@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 258,
-    "timestamp": "2026-05-21T16:29:59.957445+00:00",
-    "sweep": {
-      "input_count": 17,
-      "targeted": 7,
-      "passive": 10,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_087",
-        "compress": "INV_087's rejection of standard RL as thermodynamically incorrect is unstressed until a regime is specified where MaxRL and standard RL diverge on a *thermodynamic* (not merely behavioral) observable — without that, the invariant is a relabeling, not a claim."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-21",
-        "compress": "The Game of Truth CA independently reproduces γ = 1 criticality via power-law avalanches and branching ratio σ ≈ 1.027, partially resolving O148 and converging with INV_073."
-      },
-      {
-        "title": "Quantum coherence–driven self-organized criticality and nonequilibrium light localization",
-        "compress": "Quantum coherence functions as a dynamical tuning parameter that self-organizes photon localization onto the critical ridge without fine-tuning, extending SOC from classical dissipation to coherence-controlled quantum nonequilibrium and providing a concrete physical substrate for spectral γ measurement."
-      },
-      {
-        "title": "Power-law correlations and coupling of active and quiet states underlie a class of complex systems with self-organization at criticality",
-        "compress": ""
-      },
-      {
-        "title": "A thermodynamics-informed active learning approach to perception and reasoning about fluids",
-        "compress": "Embedding thermodynamic invariants as architectural priors unifies perception and simulation while enabling cross-material generalization — providing a concrete methodological template for O112's STF metric recovery experiment."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O202",
-        "O215"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 259,
     "timestamp": "2026-05-22T16:30:00.024681+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Origin of the power-law exponent in the landslide frequency-size distribution",
         "compress": "Landslide SOC cellular automaton derives α ≈ 2.2 as a trigger-independent fixed point of local failure-threshold dynamics, independently confirming that universal scaling exponents are mechanistic outputs of criticality rather than fitted constants."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O76",
+        "O205"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 23,
+    "generation": 309,
+    "timestamp": "2026-06-08T09:49:59.974381+00:00",
+    "sweep": {
+      "input_count": 30,
+      "targeted": 8,
+      "passive": 22,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's highest-risk failure mode is that its observables are multiply realizable by architectural mimicry, making accumulated confirmations consistent with but not entailing the thermodynamic necessity claim, and the genome's own update loop may be the primary source of its confirmation surplus. CHALLENGE: challenges INV_094 — a sparse-attention transformer with fixed temperature schedule can produce output distributions indistinguishable from γ=1 criticality on all current genome observables, meaning the thermodynamic enforcement claim is not independently confirmed by any existing evidence in the obligation record. IMPLEMENT: YES IMPLEMENT_WHAT: Add a confirmation-surplus tracker that flags invariants whose confirmation-to-challenge ratio exceeds 10:1 and injects them into the next adversarial probe cycle automatically. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND build_graph (add surplus flagging during edge traversal when tabulating `confirms` vs `challenges` edge counts per invariant node) IMPLEMENT_WHY: Prevents confirmation inflation by ensuring high-surplus invariants are automatically queued for adversarial probing before coherence scores drift toward 1.000, enforcing Seed Integrity Rule 1 structurally rather than manually."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-08",
+        "compress": "A live CA substrate independently confirms critical-band operation (σ=1.0222) with power-law avalanches (α≈2.632), converging on the genome's γ=1 criticality invariant from a discrete dynamical substrate."
+      },
+      {
+        "title": "Radon-Wasserstein Gradient Flows for Interacting-Particle Sampling in High Dimensions",
+        "compress": "Radon-Wasserstein geometry proves that linear-scaling KL gradient flows exist on measure space, falsifying W2 uniqueness and opening a computationally cheaper alternative path for STF metric recovery (O112)."
+      },
+      {
+        "title": "Iterated Belief Base Revision: A Dynamic Epistemic Logic Approach",
+        "compress": "Priority graphs are the sufficient statistic for iterated belief revision dynamics — topology of preference, not belief content, determines all revision trajectories — partially advancing O21 and introducing a candidate invariant absent from the genome."
+      },
+      {
+        "title": "Modified Levenberg-Marquardt Algorithm For Tensor CP Decomposition in Image Compression",
+        "compress": "Modified LM tensor decomposition confirms that second-order optimization with Kronecker-structured Jacobians efficiently navigates high-dimensional non-convex loss landscapes, providing a tractable computational pathway for STF metric tensor recovery (O112). CHALLENGE: challenges O112 — the paper shows CP decomposition recovers geometric structure from tensor data, but only for array-structured inputs with explicit rank assumptions; semantic embedding tensors in FREED may lack the rank-regularity required for LM-CP convergence, leaving the empirical recovery method specified in O112 potentially ill-conditioned."
       }
     ],
     "resolve": {
