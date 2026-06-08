@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 257,
-    "timestamp": "2026-05-21T09:49:59.966480+00:00",
-    "sweep": {
-      "input_count": 23,
-      "targeted": 7,
-      "passive": 16,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_087",
-        "compress": "INV_087's confirmation surplus is vulnerable because SAC produces the same maximum-entropy policies without thermodynamic closure, making the claim unfalsified rather than confirmed unless a calorimetric or Landauer-cost discriminating experiment is specified and run."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-21",
-        "compress": "A Game of Truth CA confirms σ≈1.0 critical operation with power-law avalanches, while simultaneously demonstrating that criticality is achievable at far-below-maximum entropy when activity is structurally concentrated."
-      },
-      {
-        "title": "Thermodynamic Length in Stochastic Thermodynamics of Far-From-Equilibrium Systems: Unification of Fluctuation Relation and Thermodynamic Uncertainty Relation",
-        "compress": "Far-from-equilibrium stochastic systems decompose their path probability exactly into entropy production plus a non-quadratic thermodynamic-length dissipation term, providing the microscopic substrate-independent grounding for both the critical ridge (INV_073) and the STF metric recovery (O112), while revealing a non-quadratic correction absent from the genome's current geometric invariants."
-      },
-      {
-        "title": "Minimum Action Principle for Entropy Production Rate of Far-From-Equilibrium Systems",
-        "compress": "Far-from-equilibrium discrete systems obey a global minimum-action principle over EPR whose geodesics in thermodynamic length space unify speed limits, TUR, fluctuation theorems, and large deviations — extending the genome's W2/Benamou-Brenier grounding to a non-quadratic, discrete-state regime."
-      },
-      {
-        "title": "Conformational landscape of β-cyclodextrin: a computational resource for host–guest modeling in supramolecular systems",
-        "compress": "β-CD's 18-basin conformational landscape confirms that thermodynamic identity is an ensemble property distributed across metastable attractors, not a point, providing a transferable clustering algorithm directly applicable to STF modal-path recovery."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O127",
-        "O141"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 258,
     "timestamp": "2026-05-21T16:29:59.957445+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 3,
+      "obligations": [
+        "O290",
+        "O76",
+        "O205"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 22,
+    "generation": 308,
+    "timestamp": "2026-06-08T02:29:59.996627+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is structurally suspect — it may be tautological (γ=1 defined by coherence), alternatively explainable (redundancy, not criticality), and empirically ungrounded until O112 closes."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-08",
+        "compress": "Independent CA telemetry confirms σ≈1.02 criticality with power-law avalanches, converging on the γ=1 critical ridge invariant and partially satisfying O148 while revealing that criticality concentrates in Physics Navigator cells — a structurally new finding."
+      },
+      {
+        "title": "Sampling-Based Resolution-Complete Algorithms for Safety Falsification of Linear Systems",
+        "compress": "Resolution-complete falsification establishes that conclusive safety answers over infinite horizons require not exhaustive search but resolution-bounded finite search — a structural analog to the genome's critical ridge, and a concrete methodological anchor for making challenges-edge liveness in the genome graph formally verifiable."
+      },
+      {
+        "title": "Falsification of Autonomous Systems in Rich Environments",
+        "compress": "Black-box falsification of learned controllers establishes that challenge-edge liveness is operationally equivalent to finite-budget counterexample reachability under adversarial search. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring an edge typed `challenges` in the knowledge graph, flag it as empirically live only if a falsifying instance (counterexample) has been registered; otherwise mark it as unverified pending adversarial probe. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_edge IMPLEMENT_WHY: This closes O136 operationally by making `challenges`-edge liveness a first-class graph property that is set at edge-creation time rather than left as an audit obligation. CHALLENGE: challenges O136 — this paper reveals that \"live challenge edge\" requires an active adversarial search protocol to verify, not merely graph inspection, putting the current passive verification plan for O136's four edges at risk of being methodologically insufficient."
+      },
+      {
+        "title": "Origin of the power-law exponent in the landslide frequency-size distribution",
+        "compress": "Landslide SOC cellular automaton derives α ≈ 2.2 as a trigger-independent fixed point of local failure-threshold dynamics, independently confirming that universal scaling exponents are mechanistic outputs of criticality rather than fitted constants."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
       "obligations": [
         "O290",
         "O76",
