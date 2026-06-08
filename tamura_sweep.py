@@ -2634,6 +2634,110 @@ class BranchingRatioTracker:
         # power-law distribution.
         alpha_loglog, alpha_loglog_slope, alpha_loglog_r2 = self._fit_power_law_loglog()
 
+        # ── Avalanche-exponent cross-validation (σ, α co-reporting) ──────
+        # Co-report σ and α in the same telemetry pass so the epistemic
+        # loop can cross-validate criticality claims.  σ alone can be
+        # spuriously near-unity; α deviating from the SOC universality
+        # class (α≈2.3) signals pseudo-criticality.
+        #
+        # The Hill MLE α and the log-log CCDF α_loglog are independent
+        # estimators.  When both agree AND fall within the SOC universality
+        # band [1.5, 3.0], criticality is cross-validated.  When they
+        # diverge, or when σ is in-band but α is outside SOC range,
+        # pseudo-criticality is flagged.
+        #
+        # SOC universality class reference: α ≈ 2.3 (±0.5) for canonical
+        # SOC systems (BTW sandpile, forest fire, neural avalanches).
+        # Tighter reference: α_SOC ≈ 2.3 from the Game of Truth telemetry
+        # snapshot (α≈2.351, R²=0.961).
+        _ALPHA_SOC_TARGET = 2.3
+        _ALPHA_SOC_TOLERANCE = 0.5
+        _alpha_hill_in_soc = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
+        _alpha_loglog_in_soc = ALPHA_SOC_LOW <= alpha_loglog <= ALPHA_SOC_HIGH
+        _alpha_agreement = (
+            abs(alpha - alpha_loglog) < 0.3
+            if alpha > 0.0 and alpha_loglog > 0.0 else False
+        )
+        _alpha_near_soc_target = (
+            abs(alpha - _ALPHA_SOC_TARGET) < _ALPHA_SOC_TOLERANCE
+            if alpha > 0.0 else False
+        )
+        _sigma_alpha_cross_validated = (
+            in_band and _alpha_hill_in_soc and r_squared >= ALPHA_R2_THRESHOLD
+        )
+        _pseudo_criticality = (
+            in_band and not _alpha_hill_in_soc and alpha > 0.0
+        )
+
+        if _sigma_alpha_cross_validated and _alpha_agreement:
+            _cross_validation_status = "CONFIRMED_SOC"
+            _cross_validation_detail = (
+                "sigma={:.4f} in critical band AND alpha_hill={:.4f} "
+                "(R^2={:.4f}) in SOC range [{:.1f}, {:.1f}], alpha_loglog="
+                "{:.4f} (R^2={:.4f}) agrees. Cross-validated criticality."
+            ).format(
+                s_mean, alpha, r_squared, ALPHA_SOC_LOW, ALPHA_SOC_HIGH,
+                alpha_loglog, alpha_loglog_r2,
+            )
+        elif _sigma_alpha_cross_validated:
+            _cross_validation_status = "LIKELY_SOC"
+            _cross_validation_detail = (
+                "sigma={:.4f} in band, alpha_hill={:.4f} in SOC range, "
+                "but alpha_loglog={:.4f} diverges (|diff|={:.4f}>0.3). "
+                "Hill MLE confirms but log-log fit disagrees — possible "
+                "distribution curvature or finite-size effect."
+            ).format(
+                s_mean, alpha, alpha_loglog,
+                abs(alpha - alpha_loglog),
+            )
+        elif _pseudo_criticality:
+            _cross_validation_status = "PSEUDO_CRITICAL"
+            _cross_validation_detail = (
+                "sigma={:.4f} in critical band BUT alpha={:.4f} outside "
+                "SOC range [{:.1f}, {:.1f}] (R^2={:.4f}). Branching ratio "
+                "alone cannot confirm criticality — avalanche statistics "
+                "inconsistent with SOC universality class (alpha~2.3). "
+                "This is the INV_073 dissociation pattern."
+            ).format(
+                s_mean, alpha, ALPHA_SOC_LOW, ALPHA_SOC_HIGH, r_squared,
+            )
+        elif alpha == 0.0 and in_band:
+            _cross_validation_status = "SIGMA_ONLY"
+            _cross_validation_detail = (
+                "sigma={:.4f} in band but insufficient avalanche data "
+                "for alpha estimation. Cannot cross-validate."
+            ).format(s_mean)
+        else:
+            _cross_validation_status = "NOT_CRITICAL"
+            _cross_validation_detail = (
+                "sigma={:.4f} {}, alpha={:.4f}. Neither criterion "
+                "confirms SOC."
+            ).format(
+                s_mean,
+                "in band" if in_band else "outside band",
+                alpha,
+            )
+
+        _criticality_cross_validation = {
+            "status": _cross_validation_status,
+            "detail": _cross_validation_detail,
+            "sigma_mean": round(s_mean, 6),
+            "sigma_in_band": in_band,
+            "alpha_hill": round(alpha, 4),
+            "alpha_hill_r_squared": round(r_squared, 4),
+            "alpha_hill_in_soc": _alpha_hill_in_soc,
+            "alpha_loglog": round(alpha_loglog, 4),
+            "alpha_loglog_r_squared": round(alpha_loglog_r2, 4),
+            "alpha_loglog_in_soc": _alpha_loglog_in_soc,
+            "alpha_estimators_agree": _alpha_agreement,
+            "alpha_near_soc_target": _alpha_near_soc_target,
+            "alpha_soc_target": _ALPHA_SOC_TARGET,
+            "alpha_deviation_from_target": round(
+                abs(alpha - _ALPHA_SOC_TARGET), 4
+            ) if alpha > 0.0 else 0.0,
+            "pseudo_criticality_flag": _pseudo_criticality,
+        }
+
         return {
             "sigma_mean": round(s_mean, 6),
             "sigma_std": round(s_std, 6),
@@ -2650,6 +2754,7 @@ class BranchingRatioTracker:
             "verdict": verdict,
             "structured_criticality": structured_criticality,
             "h_fraction_latest": round(h_fraction_latest, 4),
+            "criticality_cross_validation": _criticality_cross_validation,
         }
 
     def _fit_power_law_loglog(self):
@@ -4010,6 +4115,76 @@ class CASweepTelemetry:
         # Surfaces whether population composition predicts criticality (INV_073).
         composition_vector = dict(type_counts) if type_counts else {}
 
+        # ── Per-cell-type branching ratio (INV_073 falsifiable invariant) ──
+        # Compare consecutive snapshots' type_counts to compute σ_type for
+        # each cell type: σ_type = count_now / count_prev.  This tests
+        # whether criticality (σ≈1) localizes in navigator-class cells or
+        # is uniformly distributed across types, converting the ABSENT
+        # finding into a falsifiable per-type invariant.
+        #
+        # Physics Navigator vs other types: if σ_navigator ≈ 1 while
+        # σ_other deviates, criticality is load-bearing on navigators.
+        # If all types share σ≈1 uniformly, criticality is a population-
+        # level emergent property, not type-localized.
+        per_type_sigma = {}  # type: dict
+        per_type_sigma_detail = ""
+        if type_counts and hasattr(self, '_prev_type_counts') and self._prev_type_counts:
+            _all_types = set(list(type_counts.keys()) + list(self._prev_type_counts.keys()))
+            _nav_sigmas = []  # type: List[float]
+            _other_sigmas = []  # type: List[float]
+            for _ct in _all_types:
+                _prev_c = self._prev_type_counts.get(_ct, 0)
+                _curr_c = type_counts.get(_ct, 0)
+                if _prev_c > 0:
+                    _type_sigma = float(_curr_c) / float(_prev_c)
+                    per_type_sigma[_ct] = round(_type_sigma, 6)
+                    # Classify: navigator-class cells vs others
+                    _ct_lower = _ct.lower()
+                    if "navigator" in _ct_lower or "physics" in _ct_lower:
+                        _nav_sigmas.append(_type_sigma)
+                    else:
+                        _other_sigmas.append(_type_sigma)
+                elif _curr_c > 0:
+                    # New type appeared (infinite σ — mark as emergence)
+                    per_type_sigma[_ct] = float('inf')
+
+            # Compare navigator σ vs other σ
+            if _nav_sigmas and _other_sigmas:
+                _nav_mean = sum(_nav_sigmas) / float(len(_nav_sigmas))
+                _other_mean = sum(_other_sigmas) / float(len(_other_sigmas))
+                _nav_in_band = self.sigma_band_low <= _nav_mean <= self.sigma_band_high
+                _other_in_band = self.sigma_band_low <= _other_mean <= self.sigma_band_high
+                if _nav_in_band and not _other_in_band:
+                    per_type_sigma_detail = (
+                        "CRITICALITY LOCALIZED: Navigator σ={:.4f} (in band) vs "
+                        "other types σ={:.4f} (outside band [{:.2f},{:.2f}]). "
+                        "Criticality localizes in navigator-class cells."
+                    ).format(_nav_mean, _other_mean,
+                             self.sigma_band_low, self.sigma_band_high)
+                elif _nav_in_band and _other_in_band:
+                    per_type_sigma_detail = (
+                        "CRITICALITY UNIFORM: Navigator σ={:.4f} and other "
+                        "types σ={:.4f} both in critical band. Criticality "
+                        "is a population-level emergent property."
+                    ).format(_nav_mean, _other_mean)
+                else:
+                    per_type_sigma_detail = (
+                        "Navigator σ={:.4f} ({}) vs other σ={:.4f} ({}). "
+                        "Neither type exclusively maintains criticality."
+                    ).format(
+                        _nav_mean, "in band" if _nav_in_band else "out of band",
+                        _other_mean, "in band" if _other_in_band else "out of band",
+                    )
+            elif _nav_sigmas:
+                _nav_mean = sum(_nav_sigmas) / float(len(_nav_sigmas))
+                per_type_sigma_detail = (
+                    "Only navigator-class types tracked: σ_nav={:.4f}. "
+                    "No other types for comparison."
+                ).format(_nav_mean)
+
+        # Store current type_counts for next snapshot's per-type σ computation
+        self._prev_type_counts = dict(type_counts) if type_counts else {}
+
         snapshot = {
             "generation":        generation,
             "sigma_instant":     round(sigma_instant, 6),
@@ -4025,6 +4200,8 @@ class CASweepTelemetry:
             "dominant_share":    dominant_share,
             "total_population":  total_pop,
             "composition_vector": composition_vector,
+            "per_type_sigma":    per_type_sigma,
+            "per_type_sigma_detail": per_type_sigma_detail,
             "in_sigma_band":     in_sigma_band,
             "in_alpha_band":     in_alpha_band,
             "verdict":           verdict,

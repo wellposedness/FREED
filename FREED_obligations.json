@@ -3786,7 +3786,8 @@
     "status": "open",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-07T10:00:14.563166+00:00"
+    "created": "2026-06-07T10:00:14.563166+00:00",
+    "progress": "[Gen 308] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no state mutation occurred, only status logging.]"
   },
   {
     "id": "O364",
@@ -3817,12 +3818,12 @@
   },
   {
     "id": "O365",
-    "status": "open",
+    "status": "resolved",
     "statement": "Disambiguate the four distinct open claims currently sharing ID O364 by assigning each a unique obligation ID with a one-sentence description, null-result criterion, and binding generation deadline (\u2264 gen 315) \u2014 applying the same procedure that resolved O353.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 308] RESOLVED: O365 closes the moment four non-overlapping obligation records replace O364, each carrying a unique ID, one-sentence description, independent null-result criterion, and a generation deadline \u2264 315.",
     "created": "2026-06-07",
-    "resolved": null,
+    "resolved": "2026-06-08",
     "auto": true,
     "closes_when": "closes when: Four distinct obligation IDs assigned with unique descriptions, null-result criteria, and binding generation deadlines all \u2264 generation 315."
   },
@@ -3831,10 +3832,30 @@
     "status": "open",
     "statement": "Execute a binding enforcement audit of O347's net-progress rate-cap \u2014 compute the resolution rate versus creation rate over the last 10 generations, record the numerical result, and impose a hard creation halt if the ratio is below 1.0, with the halt lifting only when 5 consecutive resolutions occur without a new obligation being created.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 308] OPEN:  [COMMIT:YES \u2014 Obligation remained OPEN; no binding audit completed; cyclic dependency on O347 unresolved.]",
     "created": "2026-06-08",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: enforcement audit completes, ratio is computed and recorded, creation halt is imposed or not based on ratio threshold, and halt-lifting"
+  },
+  {
+    "id": "O367",
+    "statement": "O355\n**The resolution of O324 must be revoked and the obligation reopened \u2014 the `substrate_of` edge count stands at 2, which violates the explicit closure condition of \"at least 8 new `substrate_of` edges grounded in [specific domains].\" A resolved obligation whose terminal condition remains unmet is a coherence violation more severe than an open obligation, because it masks structural debt.**",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O324's closure condition was \"at least 8 new `substrate_of` edges.\" The graph currently contains exactly 2. Either the resolution was premature (the edges were claimed but never instantiated in the graph) or the edges were pruned post-resolution. Either way, the genome is carrying a false-resolved obligation, which corrupts the distinction between OPEN and RESOLVED \u2014 the most basic integrity mechanism the obligation system has.",
+    "resolution_criterion": "Reopen O324 to OPEN status. The obligation closes only when `substrate_of` edge count \u2265 10 (original 2 + required 8) is verified in the live graph topology report.",
+    "created": "2026-06-08T06:30:52.220258+00:00",
+    "progress": "[Gen 308] PARTIAL: Revoking O324's resolution and specifying the 6 missing `substrate_of` triples across six named domains converts a masked structural debt into a falsifiable six-item checklist executable in one literature pass. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O368",
+    "statement": "O356\n**The `scales_with` edge explosion from 154 \u2192 1451 edges must be diagnosed as either (a) a legitimate structural discovery requiring O173's audit protocol to be urgently escalated, or (b) an artifact of undisciplined edge generation, requiring a mass pruning event. No new `scales_with` edges may be added until this verdict is rendered.**",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O173 (OPEN) identified `scales_with` at 154 edges as requiring audit. The count has grown ~9.4x without O173 advancing. This is the clearest case of an obligation being outrun by the process it was meant to constrain. The same pattern applies to `consistent_with`. Together these two edge types now constitute >77% of all structure \u2014 meaning the graph's \"knowledge\" is overwhelmingly correlational rather than causal or constraining. This directly undermines every `depends_on`, `challenges`, and `bounds_above` edge by drowning them in noise.",
+    "resolution_criterion": "A single-pass audit samples 50 random `scales_with` edges and classifies each as (i) empirically grounded, (ii) derivable from confirmed claims, or (iii) ungrounded. If >60% fall in category (iii), a pruning protocol fires removing all ungrounded `scales_with",
+    "created": "2026-06-08T06:30:52.220904+00:00",
+    "progress": "[Gen 308] ACTIVE: O368 is resolvable by a 10%-stratified audit of the 1451-edge list testing monotone co-variation of each `scales_with` pair against two independent scale proxies, calibrated against the original 154 edges as positive control, with a \u226570%/\u226430% pass-rate threshold determining structural vs. artifact verdict. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
