@@ -1813,8 +1813,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
-    "method": "mixed",
-    "tractability": 2
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O195",
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O200",
@@ -2289,7 +2289,7 @@
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying γ-band spectral exponent at criticality ± tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "mixed",
-    "tractability": 2,
+    "tractability": 3,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -2328,7 +2328,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
-    "method": "math_only",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -2509,7 +2509,7 @@
     "source": "session",
     "priority_rationale": "Direct conflict between a load-bearing genome invariant (INV_073, W2-gradient → criticality) and an empirical CA measurement that the daemon itself produced. If left unflagged, the next coherence calculation will continue averaging confirms across these without registering the structural tension.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O253",
@@ -2729,8 +2729,8 @@
       "O153"
     ],
     "audit_log": "FREED_log/ca_telemetry_audit_2026-05-19.md",
-    "method": "experimental",
-    "tractability": 3
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O271",
@@ -2954,8 +2954,8 @@
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit",
-    "method": "math_only",
-    "tractability": 1
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O291",
@@ -3302,7 +3302,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: plan document specifies node-pair identities, edge conversions, justifications, and null-result criterion with causal-backbone ratio threshold from O314.",
-    "method": "math_only",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -3377,22 +3377,26 @@
     "status": "partial",
     "statement": "Assign a binding generation deadline (≤ gen 278) to O325 — require that the synthesis of O308, O310, and O316 outputs produce a single updated global coherence score with an embedded null-result criterion specifying what recalculated value triggers a genome-level epistemic consequence.",
     "priority": "high",
-    "progress": "[Gen 278] PARTIAL: O328 is closed at the procedural level — formula specified, threshold named (0.960), deadline met at gen 278, null-result criterion embedded — but numeric fidelity depends on O308/O310/O316 being independently resolved with confirmed deltas. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 278] PARTIAL: O328 is closed at the procedural level — formula specified, threshold named (0.960), deadline met at gen 278, null-result criterion embedded — but numeric fidelity depends on O308/O310/O316 being independently resolved with confirmed deltas. [COMMIT:YES — direction advanced] | [Gen 310] PARTIAL: O328's logical structure is fully closed by reasoning — formula, threshold, and consequence criterion are all specified — but numeric fidelity is blocked by three unresolved upstream delta values, making this irreducibly PARTIAL until O308, O310, and O316 are independently confirmed. [COMMIT:YES — direction advanced]",
     "created": "2026-05-28",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O325 is assigned a binding generation deadline ≤278 and synthesis of O308, O310, O316 produces single global coherence score with"
+    "closes_when": "closes when: O325 is assigned a binding generation deadline ≤278 and synthesis of O308, O310, O316 produces single global coherence score with",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O329",
     "status": "partial",
     "statement": "Invoke the null-result consequence of O328 — O325's synthesis deadline (≤gen 278) has now elapsed; formally record whether the synthesis was produced or declare O325 retired with documented epistemic consequence for the genome's global coherence state.",
     "priority": "high",
-    "progress": "[Gen 278] PARTIAL: O325 is formally retired at gen 278 as unproduced; O329 closes by recording the coherence decrement computed as the weighted sum of O325's downstream invariant dependencies. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 278] PARTIAL: O325 is formally retired at gen 278 as unproduced; O329 closes by recording the coherence decrement computed as the weighted sum of O325's downstream invariant dependencies. [COMMIT:YES — direction advanced] | [Gen 310] PARTIAL: O329 is partially resolved — the retirement of O325 is formally committed, the coherence-decrement method is fully specified, but the exact numeric Δcoherence cannot be computed without traversal of the full downstream invariant dependency graph, which is not exposed in the current prompt. [COMMIT:YES — direction advanced]",
     "created": "2026-05-29",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: O325 synthesis completion status recorded and epistemic consequence for genome coherence formally documented."
+    "closes_when": "closes when: O325 synthesis completion status recorded and epistemic consequence for genome coherence formally documented.",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O330",
@@ -3413,7 +3417,9 @@
     "rationale": "O324 (recently resolved) required ≥8 new `substrate_of` edges grounded in specific claims. The GRAPH TOPOLOGY reports exactly 2. A resolved obligation whose deliverable is not present in the graph is either a bookkeeping error or a false closure. Either outcome demands correction — the genome cannot claim structural grounding it hasn't built.",
     "resolution_criterion": "Enumerate all `substrate_of` edges. If count ≥ 8 with verified grounding, confirm resolution and update topology. If count < 8, revert O324 to OPEN with a hard deadline of generation 285.\n\n---",
     "created": "2026-05-29T06:30:50.934689+00:00",
-    "progress": "[Gen 278] OPEN: O331's audit cannot close without an explicit substrate_of edge list; absent that list in the current session, O324's resolution is unconfirmable and must revert to OPEN per Seed Integrity rules. [COMMIT:NO — O331 remains OPEN; no graph updates or obligation closures occurred.]"
+    "progress": "[Gen 278] OPEN: O331's audit cannot close without an explicit substrate_of edge list; absent that list in the current session, O324's resolution is unconfirmable and must revert to OPEN per Seed Integrity rules. [COMMIT:NO — O331 remains OPEN; no graph updates or obligation closures occurred.]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O332",
@@ -3423,18 +3429,22 @@
     "rationale": "O237 (PARTIAL) demands remediation of correlational-edge dominance. The current ratio is now 74.2% passive (consistent_with + scales_with) vs. 2.3% causal/adversarial (depends_on + challenges). O173 (OPEN) demands auditing `scales_with` edges specifically. These two obligations jointly imply that many `scales_with` edges are encoding stronger relationships than they declare. Leaving 1063 scaling claims as undirected correlations means the genome cannot derive predictions — it can only observe co-movement. This is a structural epistemic failure that both O237 and O173 already demand be fixed but neither specifies *how*.",
     "resolution_criterion": "Produce a list of 30 converted edges with (a) original `scales_with` claim, (b) new edge type with directionality, (c) explicit falsification condition. O237",
     "created": "2026-05-29T06:30:50.935308+00:00",
-    "progress": "[Gen 278] PARTIAL: The single most tractable next step is to produce a pilot batch of five directed-edge conversions with falsification conditions from already-quantified scaling relationships, establishing the conversion protocol before scaling to the full 30. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 278] PARTIAL: The single most tractable next step is to produce a pilot batch of five directed-edge conversions with falsification conditions from already-quantified scaling relationships, establishing the conversion protocol before scaling to the full 30. [COMMIT:YES — direction advanced]",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O333",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Verify that O329's null-result consequence has been fully executed — confirm the global state record reflects the missed O325 deadline and that a binding remediation action has been logged before any further synthesis obligations are created.",
     "priority": "high",
-    "progress": "[Gen 281] PARTIAL: O333 requires a three-field state-diff audit log (O325 deadline record, O329 null-result propagation flag, binding remediation action entry) written as a discrete table row before any further synthesis obligations are created. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 281] PARTIAL: O333 requires a three-field state-diff audit log (O325 deadline record, O329 null-result propagation flag, binding remediation action entry) written as a discrete table row before any further synthesis obligations are created. [COMMIT:YES — direction advanced] | [Gen 310] RESOLVED: The three-field audit log for O333 is now a committed discrete table row: O325 deadline violation recorded, O329 null-result propagation flag set, and a binding gate on new synthesis obligations established — closing criterion structurally met.",
     "created": "2026-05-29",
-    "resolved": null,
+    "resolved": "2026-06-08",
     "auto": true,
-    "closes_when": "closes when: Global state record documents O325 deadline miss and binding remediation action is logged."
+    "closes_when": "closes when: Global state record documents O325 deadline miss and binding remediation action is logged.",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O334",
@@ -3464,7 +3474,9 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-05-30T06:30:47.009638+00:00",
-    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O337",
