@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 259,
-    "timestamp": "2026-05-22T16:30:00.024681+00:00",
-    "sweep": {
-      "input_count": 17,
-      "targeted": 8,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_087",
-        "compress": "INV_087's thermodynamic necessity claim is falsifiable at the zero-temperature limit and by Zipf-mimicking alternatives, and the genome must carry this boundary explicitly or the confirmation surplus is unearned."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-22",
-        "compress": "Three mutually independent CA metrics (σ≈1.02, α≈2.604, H=0.481) converge on AT_CRITICAL, empirically confirming the critical-ridge attractor and substantially discharging O148."
-      },
-      {
-        "title": "Recursive Reasoning With Reduced Complexity and Intermittency for Nonequilibrium Learning in Stochastic Games",
-        "compress": "Intermittent recursive reasoning in nonequilibrium stochastic games converges with criticality-gated operation (INV_073) and provides a spectral mechanism linking recursive depth to γ-thresholds relevant to O21, while challenging the interpretation of sustained criticality as continuous rather than punctuated."
-      },
-      {
-        "title": "Connectivity Matters: Neural Network Pruning Through the Lens of Effective Sparsity",
-        "compress": "Direct sparsity is a lower bound on functional sparsity with a compression-depth-dependent gap, meaning any genome invariant or obligation that uses nominal parameter counts to proxy functional state is operating on a systematically biased substrate."
-      },
-      {
-        "title": "Optimal Transport for Time-Varying Multi-Agent Coverage Control",
-        "compress": "Time-varying OT coverage confirms W2 gradient flow as a control surface, extending the genome's static STF=Wasserstein-gradient-flow claim to dynamic targets and flagging a stability gap in O112's empirical recovery method."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 2,
-      "obligations": [
-        "O187",
-        "O202",
-        "O217"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 260,
     "timestamp": "2026-05-23T02:29:59.911289+00:00",
@@ -2195,6 +2151,50 @@
         "O290",
         "O76",
         "O205"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 24,
+    "generation": 310,
+    "timestamp": "2026-06-08T16:29:59.982764+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 7,
+      "passive": 9,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's highest-confirmation-surplus status is itself the falsification risk — the genome cannot currently distinguish a genuine thermodynamic floor from a numerical artifact, a temperature-dependent limit, or a category error in applying path-entropy to state-entropy."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-08",
+        "compress": "A live 32×32 CA empirically sits at σ≈1.03 with power-law avalanches (α≈2.49), directly confirming critical ridge operation and partially resolving O148 while revealing an ungenomed finding that Physics Navigator cells are the dominant critical attractor."
+      },
+      {
+        "title": "Ultrafast entropy production in nonequilibrium magnets",
+        "compress": "Ultrafast magnetic entropy production is governed by dM/dt not M, inertial spin corrections are thermodynamically non-negligible, and the full pipeline from order-parameter dynamics to dissipation rate provides a validated experimental template directly applicable to O112's STF metric tensor recovery."
+      },
+      {
+        "title": "Large Interconnected Thermodynamic Systems Nearly Minimize Entropy Production",
+        "compress": "Large interconnected CTMCs statistically self-organize toward minimum entropy production as size increases, independently confirming critical-ridge operation (INV_073) and thermodynamic efficiency at scale (INV_087) as emergent scaling laws rather than universal constraints."
+      },
+      {
+        "title": "A scaling law chaotic system",
+        "compress": "Scaling-law ODEs embed Mandelbrot exponents as structural parameters that produce a novel universality class of chaotic attractor, independently confirming that power-law geometry is dynamically stable while opening the unresolved question of whether RSA's thermodynamic fixed point is unique or one among several competing fractal basins."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O328",
+        "O329",
+        "O333"
       ]
     },
     "coherence": 0.97
