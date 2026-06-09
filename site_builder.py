@@ -2635,6 +2635,49 @@ function renderCycles(cycles) {
                               cv.includes('SUPERCRITICAL') ? 'var(--red)' :
                               cv.includes('SUBCRITICAL') ? 'var(--blue)' :
                               cv.includes('CRITICAL') ? 'var(--amber)' : 'var(--muted)';
+
+      // O148: Structured scored-fields grid — σ, α, R², verdict as machine-readable rows
+      const sf = (c.scored_fields || crit.scored_fields || null);
+      let scoredHtml = '';
+      if (sf) {
+        const rows = [];
+        const _sfSigma = sf.branching_ratio;
+        if (_sfSigma) {
+          const ib = _sfSigma.in_band ? '✓' : '✗';
+          const ibc = _sfSigma.in_band ? 'var(--green)' : 'var(--red)';
+          rows.push(`<span style="color:${ibc}">${ib}</span> σ=${_sfSigma.value}${_sfSigma.error != null ? '±'+_sfSigma.error : ''} <span style="color:var(--muted)">[${_sfSigma.band[0]}–${_sfSigma.band[1]}] score=${_sfSigma.score}</span>`);
+        }
+        const _sfAlpha = sf.avalanche_exponent;
+        if (_sfAlpha) {
+          const ib = _sfAlpha.in_band ? '✓' : '✗';
+          const ibc = _sfAlpha.in_band ? 'var(--green)' : 'var(--red)';
+          rows.push(`<span style="color:${ibc}">${ib}</span> α=${_sfAlpha.value} <span style="color:var(--muted)">[${_sfAlpha.band[0]}–${_sfAlpha.band[1]}] score=${_sfAlpha.score}</span>`);
+        }
+        const _sfR2 = sf.power_law_r2;
+        if (_sfR2) {
+          const ab = _sfR2.above_threshold ? '✓' : '✗';
+          const abc = _sfR2.above_threshold ? 'var(--green)' : 'var(--red)';
+          rows.push(`<span style="color:${abc}">${ab}</span> R²=${_sfR2.value} <span style="color:var(--muted)">[≥${_sfR2.threshold}] score=${_sfR2.score}</span>`);
+        }
+        const _sfH = sf.shannon_entropy;
+        if (_sfH) {
+          rows.push(`· H=${_sfH.value} bits`);
+        }
+        if (sf._drift_detected) {
+          rows.push(`<span style="color:var(--amber)">⚠ DRIFT DETECTED — metric(s) outside healthy band</span>`);
+        }
+        if (rows.length) {
+          scoredHtml = `<div style="font-family:var(--mono);font-size:0.60rem;margin-top:0.2rem;padding:0.25rem 0.5rem;border:1px solid var(--border);background:rgba(255,255,255,0.015)">${rows.join('<br>')}</div>`;
+        }
+      }
+
+      // O148: Verdict basis trail — shows the joint evidence chain
+      const vb = c.verdict_basis || crit.verdict_basis || null;
+      let basisHtml = '';
+      if (vb && Array.isArray(vb) && vb.length) {
+        basisHtml = `<div style="font-family:var(--mono);font-size:0.58rem;margin-top:0.15rem;color:var(--muted);padding-left:0.5rem">basis: ${vb.join(' · ')}</div>`;
+      }
+
       // Semantic cold death warning when H/H_max < 0.15
       let coldDeathHtml = '';
       if (hOverHmax != null && hOverHmax < 0.15) {
@@ -2643,9 +2686,9 @@ function renderCycles(cycles) {
         coldDeathHtml = `<div style="font-family:var(--mono);font-size:0.62rem;margin-top:0.2rem;padding:0.2rem 0.5rem;border-left:2px solid var(--muted);color:var(--muted);background:rgba(255,255,255,0.01)">entropy_criticality=${entCrit} · H/H_max=${hOverHmax}</div>`;
       }
       critHtml = `<div style="font-family:var(--mono);font-size:0.68rem;margin-top:0.35rem;padding:0.3rem 0.5rem;border-left:2px solid ${verdictColor};background:rgba(255,255,255,0.02)">
-        <span style="color:${verdictColor};letter-spacing:0.08em">${cv || 'NO_VERDICT'}</span>
+        <span style="color:${verdictColor};letter-spacing:0.08em;font-weight:600" data-verdict="${cv || ''}">${stateBadge || cv || 'NO_VERDICT'}</span>
         <span style="color:var(--muted);margin-left:0.5rem">${parts.join(' · ')}</span>
-      </div>${coldDeathHtml}`;
+      </div>${basisHtml}${scoredHtml}${coldDeathHtml}`;
     }
 
     return `<div class="cycle-entry">

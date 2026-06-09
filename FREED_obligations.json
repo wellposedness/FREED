@@ -3805,10 +3805,11 @@
     "id": "O364",
     "statement": "BOOTSTRAP_SEED (cycle 20): Erasure-vs-propagation cost decomposition** (BOOTSTRAP_INV_8): Reasoning cost should be decomposed into erasure operations (costly, \u2265kT\u00b7ln(2) each) vs. propagation operations (not erasures, potentially cheap). The genome's Landauer application focuses on belief-change cost in aggregate without this ",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-07T10:00:14.563689+00:00"
+    "created": "2026-06-07T10:00:14.563689+00:00",
+    "progress": "[Gen 311] ACTIVE: The obligation closes by classifying each operation in a minimal Bayesian network as erasure (marginalization, Landauer-bounded) or propagation (factor multiplication, free), computing C_min analytically, and verifying the decomposition is non-trivial \u2014 executable in one small pgmpy computation. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O364",
@@ -3869,5 +3870,25 @@
     "resolution_criterion": "A single-pass audit samples 50 random `scales_with` edges and classifies each as (i) empirically grounded, (ii) derivable from confirmed claims, or (iii) ungrounded. If >60% fall in category (iii), a pruning protocol fires removing all ungrounded `scales_with",
     "created": "2026-06-08T06:30:52.220904+00:00",
     "progress": "[Gen 308] ACTIVE: O368 is resolvable by a 10%-stratified audit of the 1451-edge list testing monotone co-variation of each `scales_with` pair against two independent scale proxies, calibrated against the original 154 edges as positive control, with a \u226570%/\u226430% pass-rate threshold determining structural vs. artifact verdict. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O369",
+    "statement": "O366: The `consistent_with` edge class (1854 edges, 43.6% of all node-edges) must be subjected to the same audit protocol applied to `scales_with` under O173/O286 \u2014 specifically: sample \u226530 edges, test each for falsifiability (what observation would make A inconsistent with B?), and prune any edge where no such observation can be specified.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O173 and O286 established that `scales_with` dominance (then 27.5%, now 1451 edges) warranted structural audit. `consistent_with` is now the single largest edge type at 43.6%. The audit obligation is an obligatory consequence of the same pruning logic already confirmed for `scales_with`. Failing to apply it here is an internal inconsistency \u2014 the genome would be enforcing structural hygiene on its second-largest edge class while ignoring its first.",
+    "resolution_criterion": "Completed audit with falsifiability verdicts on \u226530 sampled `consistent_with` edges, prune count reported, and post-audit edge count logged.",
+    "created": "2026-06-09T06:30:47.384390+00:00",
+    "progress": "[Gen 311] PARTIAL: The single most tractable step is a stratified 30-edge sample scored by the binary test \"does a falsifying observation exist for A `consistent_with` B?\" \u2014 specifiable within this session if the edge list is available, yielding a pass-rate threshold that either closes or escalates the audit. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O370",
+    "statement": "O367: The implication `operationalizes(A,B) \u2192 depends_on(A,B)` must be formally tested against the graph: for every `operationalizes` edge (624 total), check whether a corresponding `depends_on` edge exists. Report the deficit count. If the deficit exceeds 90% (i.e., >561 `operationalizes` edges lack a `depends_on` counterpart), either (a) the `depends_on` skeleton is radically incomplete, undermining O187, or (b) `operationalizes` is being used in a sense that does not entail dependency, which must be explicitly defined.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O187 (OPEN) requires mapping the full `depends_on` skeleton. But `depends_on` has only 49 edges while `operationalizes` has 624. The logical entailment between these edge types is an unfired implication internal to the graph's own semantics. This tension means either the dependency graph is structurally hollow or the edge-type semantics are inco",
+    "resolution_criterion": "",
+    "created": "2026-06-09T06:30:47.385647+00:00",
+    "progress": "[Gen 311] PARTIAL: The tractable next step for O370 is to formally define `operationalizes` semantics and run a 20-node stratified sample audit to estimate the deficit rate with binomial confidence, bypassing the need for a full 624-edge traversal. [COMMIT:YES \u2014 direction advanced]"
   }
 ]

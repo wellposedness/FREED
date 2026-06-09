@@ -2738,6 +2738,70 @@ class BranchingRatioTracker:
             "pseudo_criticality_flag": _pseudo_criticality,
         }
 
+        # ── Avalanche exponent α via log-log histogram regression (O148) ─
+        # Extract the power-law exponent α and R² from a log-log linear
+        # regression on the avalanche-size *histogram* (binned PDF).  This
+        # is a third independent α estimator alongside Hill MLE and CCDF
+        # log-log, closing the gap between manual telemetry snapshots
+        # (which report α≈2.632, R²=0.897) and the automated criticality
+        # audit.  Storing α_histogram and α_histogram_r2 makes O148
+        # continuously trackable rather than episodically sampled.
+        alpha_histogram = 0.0
+        alpha_histogram_r2 = 0.0
+        _hist_sizes = [s for s in self._avalanche_sizes if s > 0]
+        if len(_hist_sizes) >= 20:
+            _hs_min = min(_hist_sizes)
+            _hs_max = max(_hist_sizes)
+            if _hs_min > 0 and _hs_max > _hs_min:
+                _ln_s_min = math.log(_hs_min)
+                _ln_s_max = math.log(_hs_max)
+                _ln_span = _ln_s_max - _ln_s_min
+                if _ln_span > 0.3:
+                    _n_log_bins = max(8, int(math.sqrt(float(len(_hist_sizes)))))
+                    _bin_w = _ln_span / float(_n_log_bins)
+                    _bin_counts = [0] * _n_log_bins
+                    for _sv in _hist_sizes:
+                        _bi = int((math.log(_sv) - _ln_s_min) / _bin_w)
+                        if _bi >= _n_log_bins:
+                            _bi = _n_log_bins - 1
+                        _bin_counts[_bi] += 1
+                    # Build log-log pairs: (ln(s_center), ln(density))
+                    _hx = []  # type: List[float]
+                    _hy = []  # type: List[float]
+                    for _bi2 in range(_n_log_bins):
+                        if _bin_counts[_bi2] > 0:
+                            _lc = _ln_s_min + (float(_bi2) + 0.5) * _bin_w
+                            _sc = math.exp(_lc)
+                            _bw_s = _sc * (math.exp(_bin_w) - 1.0)
+                            if _bw_s > 0:
+                                _dens = float(_bin_counts[_bi2]) / (float(len(_hist_sizes)) * _bw_s)
+                                if _dens > 0:
+                                    _hx.append(_lc)
+                                    _hy.append(math.log(_dens))
+                    if len(_hx) >= 3:
+                        _hk = len(_hx)
+                        _hsx = sum(_hx)
+                        _hsy = sum(_hy)
+                        _hsxy = sum(_x * _y for _x, _y in zip(_hx, _hy))
+                        _hsx2 = sum(_x * _x for _x in _hx)
+                        _hd = float(_hk) * _hsx2 - _hsx * _hsx
+                        if abs(_hd) > 1e-15:
+                            _h_slope = (float(_hk) * _hsxy - _hsx * _hsy) / _hd
+                            _h_int = (_hsy - _h_slope * _hsx) / float(_hk)
+                            # For P(s) ~ s^{-alpha}, slope = -alpha
+                            alpha_histogram = -_h_slope
+                            _h_mean_y = _hsy / float(_hk)
+                            _h_ss_tot = sum((_y - _h_mean_y) ** 2 for _y in _hy)
+                            _h_ss_res = sum(
+                                (_y - (_h_int + _h_slope * _x)) ** 2
+                                for _x, _y in zip(_hx, _hy)
+                            )
+                            alpha_histogram_r2 = (
+                                1.0 - (_h_ss_res / _h_ss_tot)
+                                if _h_ss_tot > 1e-15 else 0.0
+                            )
+                            alpha_histogram_r2 = max(0.0, alpha_histogram_r2)
+
         return {
             "sigma_mean": round(s_mean, 6),
             "sigma_std": round(s_std, 6),
@@ -2746,6 +2810,8 @@ class BranchingRatioTracker:
             "alpha_loglog": round(alpha_loglog, 4),
             "alpha_loglog_slope": round(alpha_loglog_slope, 6),
             "alpha_loglog_r_squared": round(alpha_loglog_r2, 4),
+            "alpha_histogram": round(alpha_histogram, 4),
+            "alpha_histogram_r_squared": round(alpha_histogram_r2, 4),
             "power_law_likely": power_law_likely,
             "in_critical_band": in_band,
             "drift_event": None,
