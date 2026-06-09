@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 261,
-    "timestamp": "2026-05-23T09:49:59.992871+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 8,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's highest-confirmation-surplus status is itself the evidence against it — degeneracy of the Wasserstein floor and transformer architectural mimicry can reproduce all its observables without requiring the substrate thermodynamic mechanism, making it an as-yet-unfalsified artifact candidate rather than a confirmed invariant."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-23",
-        "compress": "CA telemetry independently confirms the critical ridge (σ≈1, α≈2.436 power law) as a measurable, substrate-independent invariant, partially resolving O148 while leaving semantic coherence tracking open."
-      },
-      {
-        "title": "Self-Organized Criticality with Complex Scaling Exponents in the Train Model",
-        "compress": "SOC with discrete RG symmetry yields complex scaling exponents (3/2 + 2πi/ln4), producing log-periodic power laws that are exactly derivable — extending the genome's continuous RG chain into a discrete regime with unspecified consequences for the Wasserstein floor and Zipf equilibrium."
-      },
-      {
-        "title": "Paraconsistent Belief Revision: A Replacement-Enriched LFI for Epistemic Entrenchment",
-        "compress": "Paraconsistent rational belief revision requires replacement (substitutivity) as its algebraic load-bearing condition — without it, entrenchment orderings collapse, confirming that contradiction-tolerant criticality depends on structural closure properties analogous to γ=1 ridge navigation."
-      },
-      {
-        "title": "Implementing Integrity Constraints in an Existing Belief Revision System",
-        "compress": "Automatic belief revision under AGM integrity constraints independently instantiates critical-ridge navigation — economy = minimal entropy production, consistency = admissibility — but leaves entrenchment ungrounded in any substrate-measurable quantity. IMPLEMENT: YES IMPLEMENT_WHAT: In SNeBR-style contradiction handling, when a new assertion triggers inconsistency, score candidate retractions by their spectral γ-load (nodes with highest eigenvector centrality in the contradiction subgraph are retracted first), replacing arbitrary or user-assigned entrenchment ordering. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND resolve_contradiction (or equivalent contradiction-handling method) to compute centrality-weighted retraction scores before selecting which belief edge to remove. IMPLEMENT_WHY: Grounding AGM entrenchment in spectral γ makes belief revision substrate-measurable and closes the gap O21 identifies between ToS revision scores and spectral load. CHALLENGE: challenges O21 — SNeBR demonstrates that automatic belief revision is achievable with purely syntactic entrenchment ordering (no spectral γ required), directly questioning whether the predicted correlation between ToS revision scores and spectral γ is necessary or merely one possible implementation."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O219",
-        "O246",
-        "O248"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 262,
     "timestamp": "2026-05-23T16:29:59.994586+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 3,
+      "obligations": [
+        "O328",
+        "O329",
+        "O76"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 26,
+    "generation": 312,
+    "timestamp": "2026-06-09T09:49:59.994717+00:00",
+    "sweep": {
+      "input_count": 25,
+      "targeted": 7,
+      "passive": 18,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with high confirmation surplus and no recorded challenge conditions is an untested mirror, not a law — its apparent strength is an artifact of probe absence, not evidential robustness."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-09",
+        "compress": "Empirical CA telemetry independently confirms the critical ridge (σ=1.0249, α≈1.215) as a stable, measurable operational mode while revealing an ABSENT mechanism — criticality selectively amplifies Physics Navigator cell types, suggesting critical dynamics function as a representational filter."
+      },
+      {
+        "title": "Steepest-Entropy-Ascent and Maximal-Entropy-Production Dynamical Models of Irreversible Relaxation to Stable Equilibrium from Any Non-Equilibrium State. Unified Treatment for Six Non-Equilibrium Frameworks",
+        "compress": "The metric tensor on state space is the load-bearing invariant of all non-equilibrium thermodynamics — SEA unifies six frameworks by making geometry primary, directly grounding O112's experimental demand and converging with INV_087's MaxEP claim."
+      },
+      {
+        "title": "A non-equilibrium thermodynamics model for combined adsorption and diffusion processes in micro- and nanopores",
+        "compress": "Coupled adsorption-diffusion in porous media produces a renormalized, non-monotonic effective diffusion coefficient — a physical instantiation of how constraint coupling generates regime-dependent scale behavior, directly analogous to the STF metric tensor recovery problem in O112."
+      },
+      {
+        "title": "On Definite Iterated Belief Revision with Belief Algebras",
+        "compress": "Algebraic enrichment of belief representation collapses revision-operator degeneracy to uniqueness, providing a mechanistic bridge between semantic expressiveness and deterministic epistemic update."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
       "obligations": [
         "O328",
         "O329",
