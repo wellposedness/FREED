@@ -1012,6 +1012,30 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
             except (TypeError, ValueError, ZeroDivisionError):
                 pass
 
+    # O148: Full cell-type distribution — record every type's count and fraction
+    # so criticality-as-selector can be tracked across generations. This closes
+    # the ABSENT gap by capturing whether Physics Navigator dominance is an
+    # invariant of critical dynamics or a transient fluctuation.
+    _ctc_dist = ca_telemetry.get("cell_type_counts")
+    if isinstance(_ctc_dist, dict) and _ctc_dist:
+        _total_dist = sum(_ctc_dist.values())
+        if _total_dist > 0:
+            distribution = {}
+            for ctype, ct_count in sorted(_ctc_dist.items(), key=lambda x: -x[1]):
+                distribution[ctype] = {
+                    "count": ct_count,
+                    "fraction": round(ct_count / _total_dist, 6),
+                }
+            result["cell_type_distribution"] = distribution
+            result["cell_type_distribution_total"] = _total_dist
+            result["cell_type_distribution_n_types"] = len(_ctc_dist)
+            # Track whether a single type exceeds 50% — dominance signal
+            top_type = max(_ctc_dist, key=_ctc_dist.get)
+            top_frac = _ctc_dist[top_type] / _total_dist
+            result["distribution_dominant_type"] = top_type
+            result["distribution_dominant_fraction"] = round(top_frac, 6)
+            result["distribution_is_dominated"] = top_frac > 0.50
+
     # O148 / O112: Dominant cell-type fraction among surviving cells — a new
     # observable that could distinguish universality classes and anchor the
     # STF metric tensor recovery experiment.  When survival_rate is available,

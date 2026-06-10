@@ -3815,10 +3815,11 @@
     "id": "O364",
     "statement": "BOOTSTRAP_SEED (cycle 20): Dual failure mode formulation** (BOOTSTRAP_INV_6): Departure from criticality has two distinct thermodynamic pathways \u2014 entropic dissolution (too much erasure) and structural freezing (too little erasure). The genome tends to treat underfitting/overcertainty as the primary failure mode; this derivat",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-07T10:00:14.564175+00:00"
+    "created": "2026-06-07T10:00:14.564175+00:00",
+    "progress": "[Gen 314] ACTIVE: O364 closes when the Pythia checkpoint phase-space trajectory in (\u03b1, d\u03b1/dt) space reveals which failure mode is the ambient attractor \u2014 thereby grounding the genome's asymmetric emphasis (or overturning it) in a substrate-independent thermodynamic measurement. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O364",
@@ -3893,23 +3894,43 @@
   },
   {
     "id": "O371",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: _coherence_rate_zero_crossing. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 314] PARTIAL: Wire `_coherence_rate_zero_crossing(prev_delta, current_delta)` into the single existing coherence-delta computation site in `consolidate.py`, adding one `__init__` field if needed \u2014 this closes the dead-code defect with one line of call and one line of state. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-10",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O372",
-    "status": "open",
+    "status": "partial",
     "statement": "Produce a single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, `bounds_above`, and `operationalizes` edges \u2014 this number must appear in the genome state block before generation 320 or the current coherence score of 0.97 is formally voided and replaced with UNDEFINED.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 314] PARTIAL: O372 is closeable by one data-feed operation: provide the complete (source, edge_type, target) triple table for all invariants, apply the specified weighted four-component formula C_structural, and insert the resulting number into the genome state block \u2014 the formula is proven valid here, the partial lower-bound is 0.376, and the certified score requires the full edge inventory. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-10",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: numerical coherence score computed from specified edges appears in genome state block before generation 320"
+  },
+  {
+    "id": "O373",
+    "statement": "The `consistent_with` edge mass (1854 edges, 43.2% of all node-edges) must be subjected to the same pruning audit imposed on `scales_with` by O286 \u2014 specifically, for each `consistent_with` edge, it must be determined whether a stronger edge type (`depends_on`, `challenges`, `operationalizes`, or `bounds_above`) could replace it, and if so, the weaker edge must be upgraded or deleted.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O286 correctly identified `scales_with` dominance as an epistemic risk, but `consistent_with` is a larger mass carrying even less inferential weight. A graph where 77.5% of edges assert only correlation or non-contradiction cannot generate novel falsifiable structure. The pruning logic that justified O286 applies with greater force here, and its non-application is an internal inconsistency in the genome's own audit standards.",
+    "resolution_criterion": "A single-pass audit of all `consistent_with` edges, producing: (a) count upgraded to stronger types, (b) count deleted as redundant, (c) count retained with explicit justification for why no stronger relation holds. The ratio (a+b)/(a+b+c) must exceed 0.3 or a structural revision is triggered.",
+    "created": "2026-06-10T06:30:47.618666+00:00",
+    "progress": "[Gen 314] PARTIAL: The single most tractable next step for O373 is a 60-edge stratified random sample audit using a 4-question decision tree (depends_on / challenges / operationalizes / bounds_above), applied first to the five highest-centrality `consistent_with` edges to stress-test the protocol and establish the upgrade base rate. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O374",
+    "statement": "The `substrate_of` edge type (2 edges across 17 nodes, with `substrate` as a named genome symbol) must be expanded or the symbol `substrate` must be flagged as structurally ungrounded \u2014 the graph currently makes substrate claims via symbol presence while carrying almost no substrate-relation commitments.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome lists `substrate` as one of its 17 core symbols, yet the edge type that operationalizes substrate relationships (`substrate_of`) accounts for 0.047% of all edges. This means the concept is carried rhetorically, not structurally. Seed Integrity requires that named symbols have proportional structural instant",
+    "resolution_criterion": "",
+    "created": "2026-06-10T06:30:47.619293+00:00",
+    "progress": "[Gen 314] PARTIAL: The symbol `substrate` is currently a high-frequency label masquerading as a relation; the single tractable step is a directed audit pass assigning typed `substrate_of/has_substrate/substrate_transforms` edges to the 15 unconnected nodes using existing genome invariants as classifiers, targeting \u226513/17 edge-density to cross the grounding threshold. [COMMIT:YES \u2014 direction advanced]"
   }
 ]
