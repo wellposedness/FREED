@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 264,
-    "timestamp": "2026-05-24T09:50:00.007959+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus without documented falsification criteria is itself a falsification of the claim that the genome maintains a live falsification layer."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-24",
-        "compress": "Game of Truth CA self-organizes to σ≈1.02 with power-law avalanches (α≈2.1), empirically confirming criticality as an attractor and directly advancing O148's measurement mandate."
-      },
-      {
-        "title": "The Chapman-Enskog Divergence Problem in Plasma Transport: Structural Limitations and a Practical Regularization Approach",
-        "compress": "Structural divergence in Chapman-Enskog transport at Kn→∞ is topological to local collision operators and is regularized by gradient-driven decorrelation, independently confirming that criticality maintenance requires an explicit floor preventing dissipated-limit escape — converging with INV_073 and extending O69."
-      },
-      {
-        "title": "Contextual Information Retrieval based on Algorithmic Information Theory and Statistical Outlier Detection",
-        "compress": "NCD provides substrate-independent semantic distance but collapses at high similarity, and its resolution degrades with query length — two falsifiable failure modes absent from the genome's compression invariants. IMPLEMENT: YES IMPLEMENT_WHAT: In the document similarity scoring path, add a length-normalized NCD outlier flag that marks candidate pairs as compression-artifact false-positives when their NCD score falls below a threshold that scales with document length. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_edge (modify in place to compute and attach an ncd_artifact_risk flag when similarity edges are added between long-text nodes) IMPLEMENT_WHY: Prevents the genome from treating high-similarity compression artifacts as genuine semantic convergence, directly strengthening the falsification layer for INV_094-class claims. CHALLENGE: challenges INV_094 — the paper demonstrates that compression-based similarity produces systematic false positives at high similarity, meaning NCD cannot serve as a reliable ground-truth semantic distance without a secondary filter, straining the genome's use of compression proximity as a clean invariant."
-      },
-      {
-        "title": "Lattice Quantization with Side Information: Codes, Asymptotics, and Applications in Sensor Networks",
-        "compress": "Lattice codes achieve Wyner-Ziv optimality under high source-side-information correlation, confirming that geometric structure substitutes for encoder-side knowledge and providing a concrete algorithmic pathway for O112's STF metric recovery experiment."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O248",
-        "O254",
-        "O255"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 265,
     "timestamp": "2026-05-24T16:29:59.940779+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O328",
+        "O76",
+        "O317"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 29,
+    "generation": 315,
+    "timestamp": "2026-06-10T09:50:00.007861+00:00",
+    "sweep": {
+      "input_count": 30,
+      "targeted": 8,
+      "passive": 22,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant whose falsification conditions have never been adversarially stress-tested carries its confirmation surplus as debt, not credit, and must be named, bounded, and challenged before that surplus can count as evidence."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-10",
+        "compress": "A 32×32 CA sustains empirically measured criticality (σ=1.021, α≈2.746) with sub-maximal entropy, independently confirming that the critical ridge is a stable computational attractor reachable without maximal disorder. IMPLEMENT: YES IMPLEMENT_WHAT: In the telemetry ingestion path, add branching-ratio σ and power-law exponent α as tracked scalar fields alongside existing survival-rate logging, so the epistemic loop can flag AT_CRITICAL / FROZEN / DISSIPATED state transitions automatically. IMPLEMENT_WHERE: site_builder.py IMPLEMENT_CALL_SITE: EXTEND build_site (or whichever function currently processes CA telemetry snapshots into the site output) IMPLEMENT_WHY: Surfaces criticality-state transitions as first-class signals in the build pipeline, enabling automatic detection of regime shifts that currently require manual inspection of raw telemetry. CHALLENGE: challenges INV_073 — the paper shows criticality coexists with H=0.235 of maximum entropy, straining any reading of the critical ridge that equates it with maximum entropy production; the Wasserstein floor linkage must be re-examined under sub-maximal entropy conditions. NOETHER_ROW: Physics Navigator NOETHER_STATUS: review NOETHER_NOTE: Concentration of criticality in a single dominant cell type (861/total cells) suggests symmetry-breaking across cell classes, meaning conservation laws derived from uniform-criticality assumptions may not hold at the cell-type level."
+      },
+      {
+        "title": "Friction in Myocardial Anoxia Leads to Negative Excess Entropy Production, Self-Organization, and Dissipative Structures",
+        "compress": "Anoxic cardiac muscle exhibits negative excess entropy production and self-organization, independently confirming that productive dissipation at the thermodynamic critical ridge (INV_073/INV_087) is a substrate-independent biological invariant."
+      },
+      {
+        "title": "The Conditions Necessary for the Formation of Dissipative Structures in Tribo-Films on Friction Surfaces That Decrease the Wear Rate",
+        "compress": "Dissipative structure formation in tribo-films requires thermodynamic instability as a necessary precondition, independently confirming that self-organization lives at the critical threshold, not within the stable interior."
+      },
+      {
+        "title": "Convergence of the empirical spectral measure of unitary Brownian motion",
+        "compress": "Unitary Brownian motion spectral measures converge to Biane's limit at explicit W1 rates uniformly over time paths, giving Wasserstein geometry its first path-level metrological grip on random matrix dynamics."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
       "obligations": [
         "O328",
         "O76",
