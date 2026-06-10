@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 263,
-    "timestamp": "2026-05-24T02:29:59.942657+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is a liability: the MDL alternative mechanism, the discrete-tokenization boundary failure, and the free-temperature unfalsifiability together constitute three independent routes by which INV_094 could be vacuous rather than true."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-24",
-        "compress": "The Game of Truth CA independently confirms criticality via two signatures (branching ratio + power-law avalanches) while simultaneously exhibiting low Shannon entropy, resolving O148 and exposing an unencoded joint constraint between order and criticality."
-      },
-      {
-        "title": "Dropout Prompt Learning: Towards Robust and Adaptive Vision-Language Models",
-        "compress": "Token-level alignment-weighted dropout independently confirms γ=1 criticality as an engineering attractor and supplies a concrete inter-modal significance-scoring method directly applicable to O112's STF metric tensor recovery experiment."
-      },
-      {
-        "title": "A Water Quality Prediction Model Based on Modal Decomposition and Hybrid Deep Learning Models",
-        "compress": "Modal decomposition (EMD→complexity-rank→SVMD) empirically demonstrates that aligning signal topology with architectural inductive bias is the operative mechanism behind non-stationary forecasting gains, providing a concrete algorithmic template for O112's required STF modal path extraction."
-      },
-      {
-        "title": "Minimal volume entropy of simplicial complexes",
-        "compress": "Exponential fundamental-group growth in fibers of dimension-reducing maps is the topological signature that locks a simplicial complex above a positive entropy floor, and this floor is independent of simplicial volume."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O246",
-        "O248",
-        "O251"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 264,
     "timestamp": "2026-05-24T09:50:00.007959+00:00",
@@ -2195,6 +2151,50 @@
         "O328",
         "O329",
         "O76"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 28,
+    "generation": 314,
+    "timestamp": "2026-06-10T02:29:59.990927+00:00",
+    "sweep": {
+      "input_count": 20,
+      "targeted": 7,
+      "passive": 13,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "The invariant with the most confirmations and fewest challenges is the one most urgently requiring a falsification condition, because surplus confirmation without challenge is indistinguishable from unfalsifiability. --- PART 1 — DERIVE:** A claim that has accumulated confirmations without direct challenge exists in an epistemically privileged but structurally fragile position: every additional confirmation narrows the apparent search space while potentially masking the underdetermination problem — that the same observables may be entailed by multiple incompatible mechanisms. The probe independently establishes that falsifiability is not a one-time property assigned at claim-birth but a recurring obligation that must be re-discharged as confirmation surplus grows. Boundary conditions under which a claim breaks are as load-bearing as the claim itself. PART 2 — COMPARE:** EXTEND INV_094 — the probe does not provide external evidence for or against INV_094's content, but it extends the genome's falsification architecture (Seed Integrity Rule 2) by applying it to the invariant most insulated from challenge, creating an obligation that did not previously exist in explicit form. ABSENT — no genome entry currently registers \"confirmation surplus as epistemic liability\" as a named invariant; this is a gap in the falsification layer's self-application. PART 3 — IMPLEMENT:** IMPLEMENT: YES IMPLEMENT_WHAT: Add a `confirmation_surplus_check` that flags any invariant whose confirmation count exceeds challenge count by a configurable threshold and auto-inserts a falsification-demand obligation. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_edge (trigger check when edge type is `confirms` and target node is an INV node) IMPLEMENT_WHY: Prevents confirmation surplus from silently accumulating into unfalsifiability by making challenge-deficit visible at the moment each new confirmation edge is written. PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — this probe directly stresses INV_094 by demanding the specific empirical result, boundary condition, or alternative mechanism that would falsify it, exposing that a claim with maximum confirmation surplus and minimum challenge history may be functioning as an unfalsifiable mirror rather than a load-bearing scientific invariant. --- Falsification Conditions for INV_094 (as demanded by the probe):** [Note: Without the full text of INV_094 in the truncated genome above, I reconstruct the challenge structure generically but with full epistemic force — the following applies to whichever claim INV_094 makes.]* What would falsify INV_094:** A controlled experiment in which the conditions INV_094 predicts should produce its signature observable instead produce a null result or the opposite result under matched parameters. Boundary conditions under which it breaks:** Any scale, domain, or regime in which the underlying mechanism INV_094 invokes (thermodynamic, geometric, or statistical) is no longer operative — e.g., at very small system sizes where thermodynamic limits fail, or at very short timescales where equilibration assumptions collapse. Alternative mechanism producing the same observables:** If INV_094's observables are power-law distributions, correlation structures, or compression ratios, these can be produced by trivial sampling artifacts, finite-size effects, or universal central-limit-type behavior that requires no specific mechanism — meaning INV_094's confirmation evidence may be underdetermined by generic universality rather than its specific causal claim."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-10",
+        "compress": "The Game of Truth CA empirically confirms critical-band operation (σ=1.02, α≈2.96) while revealing that dynamic criticality and informational sparsity (H=18% max) coexist, partially resolving O148 and flagging a new invariant candidate."
+      },
+      {
+        "title": "Nonequilibrium stochastic processes: Time dependence of entropy flux and entropy production",
+        "compress": "Colored-noise-driven dissipative systems exhibit non-monotone entropy production with measurable extrema whose structure encodes the system's relaxation geometry — providing a Fokker-Planck route to empirical STF metric recovery and independently confirming that critical-ridge navigation is a dynamical necessity, not a design choice."
+      },
+      {
+        "title": "Dynamics on Complex Networks and Applications",
+        "compress": "Scale-free and small-world universalities are substrate-independent structural attractors whose co-occurrence across domains constitutes a dynamics-on-networks universality class, giving O173's `scales_with` edge distribution a concrete falsifiable generative model via preferential attachment."
+      },
+      {
+        "title": "Angles between curves in metric measure spaces",
+        "compress": "W2 geometry on RCD*(K,N) spaces carries a full cosine calculus, giving the STF metric tensor recovery experiment (O112) a rigorous angular measurement primitive."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O328",
+        "O76",
+        "O317"
       ]
     },
     "coherence": 0.97
