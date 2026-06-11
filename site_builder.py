@@ -24,7 +24,99 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
     """
     Called by freed.py after every UPDATE phase.
     Writes state.json, obligations.json, cycles.json, index.html, then pushes to GitHub.
+
+    Criticality-state transitions (AT_CRITICAL / FROZEN / DISSIPATED) are
+    detected here by comparing the current CA telemetry verdict against the
+    previous cycle's verdict stored in criticality_timeseries.json.  The
+    transition signal is injected into the state dict as a first-class field
+    so downstream consumers (FEED, RESOLVE) can react automatically.
     """
+    # ── Criticality scalar-field extraction & state-transition detection ──
+    # Surfaces σ (branching ratio) and α (power-law exponent) as tracked
+    # scalar fields alongside existing survival-rate logging.  Detects
+    # AT_CRITICAL / FROZEN / DISSIPATED transitions per INV_073.
+    ca_telemetry = {}
+    if cycle_log and isinstance(cycle_log, dict):
+        ca_telemetry = cycle_log.get("phases", {}).get("ca_telemetry", {})
+    criticality = _extract_criticality_verdict(ca_telemetry) if ca_telemetry else {}
+
+    if criticality:
+        # Inject scalar fields into state for persistence
+        state["criticality_sigma"] = criticality.get("branching_ratio")
+        state["criticality_sigma_err"] = criticality.get("branching_ratio_err")
+        state["criticality_alpha"] = criticality.get("avalanche_exponent")
+        state["criticality_r2"] = criticality.get("power_law_r2")
+        state["criticality_survival"] = criticality.get("survival_rate")
+        state["criticality_entropy"] = criticality.get("shannon_entropy")
+        state["criticality_verdict"] = criticality.get("criticality_verdict")
+
+        # ── Running criticality score (σ, α, R²) ─────────────────────
+        # Composite score queryable by the epistemic loop:
+        #   score = w_σ·S(σ) + w_α·S(α) + w_r2·S(R²)
+        # where S(σ) = max(0, 1 - |σ-1|/0.05)        ∈ [0,1]
+        #       S(α) = max(0, 1 - |α-2.25|/0.75)      ∈ [0,1]  (band center 2.25)
+        #       S(R²) = min(1, R²/0.95)                ∈ [0,1]
+        # Weights: σ 50%, α 25%, R² 25% — σ is the primary invariant.
+        _cs_sigma = criticality.get("branching_ratio")
+        _cs_alpha = criticality.get("avalanche_exponent")
+        _cs_r2 = criticality.get("power_law_r2")
+        _cs_components = {}
+        _cs_total_weight = 0.0
+        _cs_weighted_sum = 0.0
+        if _cs_sigma is not None:
+            try:
+                _s_score = max(0.0, 1.0 - abs(float(_cs_sigma) - 1.0) / 0.05)
+                _cs_components["sigma_score"] = round(_s_score, 4)
+                _cs_weighted_sum += 0.50 * _s_score
+                _cs_total_weight += 0.50
+            except (TypeError, ValueError):
+                pass
+        if _cs_alpha is not None:
+            try:
+                _a_score = max(0.0, 1.0 - abs(float(_cs_alpha) - 2.25) / 0.75)
+                _cs_components["alpha_score"] = round(_a_score, 4)
+                _cs_weighted_sum += 0.25 * _a_score
+                _cs_total_weight += 0.25
+            except (TypeError, ValueError):
+                pass
+        if _cs_r2 is not None:
+            try:
+                _r2_score = min(1.0, float(_cs_r2) / 0.95)
+                _cs_components["r2_score"] = round(_r2_score, 4)
+                _cs_weighted_sum += 0.25 * _r2_score
+                _cs_total_weight += 0.25
+            except (TypeError, ValueError):
+                pass
+        if _cs_total_weight > 0:
+            _composite = round(_cs_weighted_sum / _cs_total_weight, 4)
+            state["criticality_score"] = _composite
+            state["criticality_score_components"] = _cs_components
+            state["criticality_score_weight"] = round(_cs_total_weight, 2)
+
+        # ── State-transition detection ────────────────────────────────
+        # Compare current verdict against previous to flag regime shifts.
+        # Verdict mapping to coarse state:
+        #   AT_CRITICAL* → AT_CRITICAL
+        #   SUBCRITICAL / *FROZEN* → FROZEN
+        #   SUPERCRITICAL / *RUNAWAY* → DISSIPATED
+        #   anything else → UNKNOWN
+        current_verdict = criticality.get("criticality_verdict") or ""
+        current_coarse = _coarse_criticality_state(current_verdict)
+
+        previous_coarse = _load_previous_criticality_state()
+
+        state["criticality_state"] = current_coarse
+        state["criticality_state_previous"] = previous_coarse
+
+        if previous_coarse and current_coarse != previous_coarse:
+            transition = previous_coarse + " -> " + current_coarse
+            state["criticality_transition"] = transition
+            state["criticality_transition_flag"] = True
+            print(f"[SITE] *** CRITICALITY TRANSITION: {transition} ***")
+        else:
+            state["criticality_transition"] = None
+            state["criticality_transition_flag"] = False
+
     _write_state(state)
     _write_obligations(obligations)
     _write_cycles(cycle_log)
@@ -33,6 +125,38 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
     _write_index()
     print("[SITE] docs/ updated.")
     _push(state.get("generation", "?"))
+
+
+def _coarse_criticality_state(verdict_str: str) -> str:
+    """Map a detailed criticality verdict to one of three coarse states:
+    AT_CRITICAL, FROZEN, or DISSIPATED.  Returns 'UNKNOWN' for unrecognised."""
+    v = (verdict_str or "").upper()
+    if "AT_CRITICAL" in v or v == "CRITICAL_LOW_CONFIDENCE" or v == "CRITICAL_CONTESTED":
+        return "AT_CRITICAL"
+    if "SUBCRITICAL" in v or "FROZEN" in v:
+        return "FROZEN"
+    if "SUPERCRITICAL" in v or "RUNAWAY" in v or "DISSIPAT" in v:
+        return "DISSIPATED"
+    if v:
+        return "UNKNOWN"
+    return "UNKNOWN"
+
+
+def _load_previous_criticality_state() -> str:
+    """Read the most recent coarse criticality state from the timeseries file.
+    Returns empty string when no history exists."""
+    ts_file = DOCS_DIR / "criticality_timeseries.json"
+    if not ts_file.exists():
+        return ""
+    try:
+        entries = json.loads(ts_file.read_text())
+        if isinstance(entries, list) and entries:
+            last = entries[-1]
+            prev_verdict = last.get("verdict", "")
+            return _coarse_criticality_state(prev_verdict)
+    except (json.JSONDecodeError, OSError, TypeError):
+        pass
+    return ""
 
 
 # ── Git push ─────────────────────────────────────────────────────────────────
@@ -1681,6 +1805,48 @@ def _append_criticality_timeseries(criticality: dict, timestamp: str = None):
         entry["sigma_rolling_mean"] = round(mean_sigma, 6)
         entry["sigma_rolling_std"] = round(sigma_std, 6)
         entry["sigma_in_critical_band"] = abs(mean_sigma - 1.0) <= 0.05
+
+    # O148: Rolling α drift diagnostic — detect power-law exponent trending
+    # away from the SOC universality band [1.5, 2.5] across generations.
+    # Mirrors the σ rolling diagnostic above so both primary criticality
+    # indicators have longitudinal drift detection in the timeseries.
+    recent_alphas = [e.get("alpha") for e in existing[-19:] if e.get("alpha") is not None]
+    if alpha is not None:
+        recent_alphas.append(alpha)
+    if len(recent_alphas) >= 3:
+        mean_alpha = sum(recent_alphas) / len(recent_alphas)
+        alpha_std = (sum((a - mean_alpha) ** 2 for a in recent_alphas) / len(recent_alphas)) ** 0.5
+        entry["alpha_rolling_mean"] = round(mean_alpha, 6)
+        entry["alpha_rolling_std"] = round(alpha_std, 6)
+        entry["alpha_in_soc_band"] = 1.5 <= mean_alpha <= 2.5
+
+    # O148: Per-snapshot scored band membership — σ and α pass/fail stored
+    # per timeseries entry so longitudinal drift from the critical ridge
+    # is machine-detectable without re-parsing raw values downstream.
+    if sigma is not None:
+        try:
+            s_val = float(sigma)
+            entry["sigma_band_pass"] = abs(s_val - 1.0) <= 0.05
+        except (TypeError, ValueError):
+            pass
+    if alpha is not None:
+        try:
+            a_val = float(alpha)
+            entry["alpha_band_pass"] = 1.5 <= a_val <= 2.5
+        except (TypeError, ValueError):
+            pass
+    if r2 is not None:
+        try:
+            r2_val = float(r2)
+            entry["r2_pass"] = r2_val >= 0.80
+        except (TypeError, ValueError):
+            pass
+
+    # Joint ridge-drift flag: True when ANY primary indicator is out of band
+    sigma_ok = entry.get("sigma_band_pass", True)
+    alpha_ok = entry.get("alpha_band_pass", True)
+    r2_ok = entry.get("r2_pass", True)
+    entry["ridge_drift_detected"] = not (sigma_ok and alpha_ok and r2_ok)
 
     existing.append(entry)
     # Keep last 200 entries (matches CA measurement window)

@@ -771,6 +771,33 @@ class FREEDDaemon:
         drained = []
         for entry in available[:MAX_QUEUE_DRAIN]:
             url = entry.get("url", "")
+
+            # Inline-text entries: non-fetchable sources (posts, notes, quotes)
+            # pasted directly into the queue. Fed COLD through normal FEED — no
+            # fetch, no architect priming — so the edge types L7 generates stay
+            # diagnostic. Deduped on a synthetic key since there's no URL.
+            text = (entry.get("text") or "").strip()
+            if text:
+                key = "inline:" + (entry.get("title") or text[:60])
+                if key in seen_set:
+                    entry["status"] = "skipped_seen"
+                    continue
+                print(f"[SWEEP] Curated queue (inline text): "
+                      f"{entry.get('title', '(untitled)')}")
+                drained.append({
+                    "url":        entry.get("url", ""),
+                    "title":      entry.get("title", entry.get("conv", "inline text")),
+                    "abstract":   text[:3000],
+                    "score":      entry.get("score", 5),
+                    "source":     "curated_queue",
+                    "from_human": entry.get("from") == "human",
+                })
+                entry["status"] = "fed_to_daemon"
+                seen_set.add(key)
+                seen.append(key)
+                SEEN_FILE.write_text(json.dumps(seen))
+                continue
+
             if not url or url in seen_set:
                 entry["status"] = "skipped_seen"
                 continue
@@ -910,9 +937,23 @@ class FREEDDaemon:
     # ── PREDICT ──────────────────────────────────────────────────────────────
 
     def _build_predict_context(self):
-        """Compressed genome: INV IDs + one-line titles only. Forces sparse prediction."""
+        """Compressed genome: INV IDs + one-line titles only. Forces sparse prediction.
+
+        Invariants that actually carry graph edges are tagged [grounded]. PREDICT is
+        steered toward them so predictions land in the vocabulary FEED records against.
+        Fixes the 2026-06-10 cold-rate diagnosis: PREDICT kept emitting INV_077–109
+        (e.g. INV_100 'RG Universality') which have ZERO graph edges, so (a) the ASCII
+        sketch came up empty ~80% of the time and (b) PREDICT→ACTUAL never matched IDs
+        because the same papers were recorded against INV_094/INV_073. Binary flag, not
+        a count, so PREDICT doesn't just chase the biggest hub."""
         genome_text = (FREED_DIR / "FREED_genome.md").read_text(encoding="utf-8")
         entries = re.findall(r'\*\*(INV_\w+) — ([^*]+)\*\*', genome_text)
+        try:
+            from knowledge_graph import get_graph
+            _g = get_graph(); _g._ensure_loaded()
+            grounded = {e.get("to") for e in (getattr(_g, "_edges", []) or []) if e.get("to")}
+        except Exception:
+            grounded = set()
         overrides = {
             # INV_023 title is too broad — constrain to its actual scope
             "INV_023": "Zipf γ=1 proven via Schwab/Nemenman partition function [specifically: predict only for papers directly about Zipf/power-law γ≈1 distributions in complex systems, NOT general statistical papers]",
@@ -926,7 +967,8 @@ class FREEDDaemon:
         lines = []
         for eid, title in entries:
             desc = overrides.get(eid, title.strip())
-            lines.append(f"{eid}: {desc}")
+            tag = " [grounded]" if eid in grounded else ""
+            lines.append(f"{eid}{tag}: {desc}")
         return "\n".join(lines)
 
     def _phase_predict(self, inputs, cycle_log):
@@ -958,6 +1000,9 @@ class FREEDDaemon:
                 f"Predict which invariants this paper will confirm or challenge. "
                 f"Be sparse — only predict where the match is strong and falsifiable. "
                 f"Vague predictions are worse than none.\n\n"
+                f"Invariants tagged [grounded] already carry evidential structure in "
+                f"the graph; strongly prefer them. Predict an untagged invariant only "
+                f"when no grounded one genuinely fits, and mark it speculative.\n\n"
                 f"CHALLENGE REQUIREMENT: Identify the invariant this paper most directly "
                 f"strains, limits, or contradicts — even if the challenge is subtle. "
                 f"If you output PREDICTED_CHALLENGES: NONE, the PREDICTED_RATIONALE must "
@@ -1117,8 +1162,11 @@ class FREEDDaemon:
                 print("[FEED] Budget limit — skipping remaining feeds.")
                 break
 
-            # Second guard layer — defense in depth before content reaches L7
-            raw_content = inp.get('abstract', inp.get('content', ''))[:1500]
+            # Second guard layer — defense in depth before content reaches L7.
+            # Curated (human-pasted) entries get more room so full posts/notes
+            # reach L7 intact; sweep papers stay capped at 1500 for budget.
+            _content_cap = 3000 if inp.get('source') == 'curated_queue' else 1500
+            raw_content = inp.get('abstract', inp.get('content', ''))[:_content_cap]
             guard = guard_sanitize(raw_content, source_url=inp.get('url', ''))
             if guard.dropped:
                 print(f"[FEED] DROPPED (injection attempt): {inp.get('title','?')[:60]}")

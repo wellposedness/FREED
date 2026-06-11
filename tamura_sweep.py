@@ -1310,6 +1310,245 @@ def _detect_log_periodic_oscillation(avalanche_sizes, alpha, noise_sigma_factor=
     }
 
 
+def _two_hypothesis_exponent_test(avalanche_sizes, alpha_pure):
+    # type: (List[float], float) -> dict
+    """
+    Two-hypothesis test for avalanche exponent: (1) pure power law
+    P(s) ~ s^{-tau} vs (2) tau=1 logarithmic correction P(s) ~ 1/(s ln(s)^2).
+
+    Selects via data-collapse residual to prevent systematic exponent
+    inflation from finite-size bias.  When the true distribution is
+    logarithmic (tau=1), bare power-law fitting overestimates tau
+    because the log-correction curvature is absorbed into the slope.
+
+    Method:
+      1. Build the empirical log-binned PDF of avalanche sizes.
+      2. Fit hypothesis H1: ln P(s) = ln C1 - tau * ln(s)
+         (pure power law, tau = alpha_pure from Hill MLE).
+      3. Fit hypothesis H2: ln P(s) = ln C2 - ln(s) - 2*ln(ln(s))
+         (tau=1 with logarithmic correction).
+      4. Compute data-collapse residuals (sum of squared deviations
+         from each model in log-space).
+      5. Select the model with lower residual.  If H2 wins and
+         alpha_pure > 1.15, the pure power-law exponent was inflated.
+
+    Parameters
+    ----------
+    avalanche_sizes : list of float
+        Raw positive avalanche sizes.  Need >= 20 values.
+    alpha_pure : float
+        Power-law exponent from Hill MLE (the H1 hypothesis).
+
+    Returns
+    -------
+    dict with keys:
+        selected_hypothesis   : str   — "PURE_POWER_LAW" or "LOG_CORRECTED_TAU1"
+        alpha_corrected       : float — alpha_pure if H1 wins, 1.0 if H2 wins
+        alpha_pure            : float — echo of input (Hill MLE estimate)
+        residual_power_law    : float — sum-of-squares residual for H1
+        residual_log_corrected: float — sum-of-squares residual for H2
+        residual_ratio        : float — H1_residual / H2_residual (>1 means H2 better)
+        inflation_detected    : bool  — True if H2 wins and alpha_pure > 1.15
+        inflation_magnitude   : float — alpha_pure - 1.0 (the bias magnitude)
+        n_log_bins            : int   — number of valid log-bins used
+        n_sizes               : int   — number of positive avalanche sizes
+        detail                : str   — human-readable explanation
+    """
+    sizes = sorted([s for s in avalanche_sizes if s > 0])
+    n_sizes = len(sizes)
+
+    empty = {
+        "selected_hypothesis": "UNDETERMINED",
+        "alpha_corrected": alpha_pure,
+        "alpha_pure": alpha_pure,
+        "residual_power_law": 0.0,
+        "residual_log_corrected": 0.0,
+        "residual_ratio": 1.0,
+        "inflation_detected": False,
+        "inflation_magnitude": 0.0,
+        "n_log_bins": 0,
+        "n_sizes": n_sizes,
+        "detail": "",
+    }
+
+    if n_sizes < 20 or alpha_pure <= 0.0:
+        empty["detail"] = (
+            "Insufficient data ({} sizes) or invalid alpha ({:.4f}) for "
+            "two-hypothesis test."
+        ).format(n_sizes, alpha_pure)
+        return empty
+
+    s_min = sizes[0]
+    s_max = sizes[-1]
+    if s_min <= 0 or s_max <= s_min:
+        empty["detail"] = "Degenerate size range."
+        return empty
+
+    ln_s_min = math.log(s_min)
+    ln_s_max = math.log(s_max)
+    ln_span = ln_s_max - ln_s_min
+    if ln_span < 0.5:
+        empty["detail"] = "Log-span too narrow ({:.4f}) for reliable fit.".format(ln_span)
+        return empty
+
+    # Build log-binned empirical PDF
+    n_log_bins = max(8, int(math.sqrt(float(n_sizes))))
+    bin_width_ln = ln_span / float(n_log_bins)
+    bin_counts = [0] * n_log_bins
+    for s in sizes:
+        idx = int((math.log(s) - ln_s_min) / bin_width_ln)
+        if idx >= n_log_bins:
+            idx = n_log_bins - 1
+        if idx < 0:
+            idx = 0
+        bin_counts[idx] += 1
+
+    # Build valid (ln_s_center, ln_density) pairs
+    ln_s_centers = []  # type: List[float]
+    ln_densities = []  # type: List[float]
+    s_centers = []     # type: List[float]
+
+    for i in range(n_log_bins):
+        if bin_counts[i] > 0:
+            ln_center = ln_s_min + (float(i) + 0.5) * bin_width_ln
+            s_center = math.exp(ln_center)
+            bin_width_s = s_center * (math.exp(bin_width_ln) - 1.0)
+            if bin_width_s > 0:
+                density = float(bin_counts[i]) / (float(n_sizes) * bin_width_s)
+                if density > 0:
+                    ln_s_centers.append(ln_center)
+                    ln_densities.append(math.log(density))
+                    s_centers.append(s_center)
+
+    n_valid = len(ln_s_centers)
+    if n_valid < 4:
+        empty["n_log_bins"] = n_log_bins
+        empty["detail"] = "Too few valid log-bins ({}) for two-hypothesis test.".format(n_valid)
+        return empty
+
+    # ── H1: Pure power law ln P = ln C1 - tau * ln(s) ──
+    # Use alpha_pure as tau; fit C1 via least-squares in log-space
+    h1_ln_C_vals = [ld + alpha_pure * ls for ld, ls in zip(ln_densities, ln_s_centers)]
+    h1_ln_C = sum(h1_ln_C_vals) / float(n_valid)
+    # Residual: sum of (ln_P_observed - ln_P_predicted)^2
+    h1_residual = 0.0
+    for i in range(n_valid):
+        predicted = h1_ln_C - alpha_pure * ln_s_centers[i]
+        h1_residual += (ln_densities[i] - predicted) ** 2
+
+    # ── H2: tau=1 with log correction: ln P = ln C2 - ln(s) - 2*ln(ln(s)) ──
+    # For s > 1, ln(ln(s)) is defined when s > e^0 = 1, i.e. ln(s) > 0.
+    # Filter to bins where ln(s) > 0.1 (s > ~1.1) to avoid log(log(s)) issues
+    h2_valid_indices = []  # type: List[int]
+    for i in range(n_valid):
+        if ln_s_centers[i] > 0.1:
+            h2_valid_indices.append(i)
+
+    if len(h2_valid_indices) < 3:
+        # Can't fit H2 reliably; default to H1
+        return {
+            "selected_hypothesis": "PURE_POWER_LAW",
+            "alpha_corrected": alpha_pure,
+            "alpha_pure": alpha_pure,
+            "residual_power_law": round(h1_residual, 8),
+            "residual_log_corrected": 0.0,
+            "residual_ratio": 1.0,
+            "inflation_detected": False,
+            "inflation_magnitude": 0.0,
+            "n_log_bins": n_valid,
+            "n_sizes": n_sizes,
+            "detail": (
+                "H2 (log-corrected tau=1) not testable: too few bins with "
+                "ln(s)>0.1 ({}). Defaulting to pure power-law H1."
+            ).format(len(h2_valid_indices)),
+        }
+
+    # Fit C2: ln_P = ln_C2 - ln(s) - 2*ln(ln(s))
+    # → ln_C2 = ln_P + ln(s) + 2*ln(ln(s))
+    h2_ln_C_vals = []  # type: List[float]
+    for i in h2_valid_indices:
+        ln_ln_s = math.log(ln_s_centers[i])
+        h2_ln_C_vals.append(ln_densities[i] + ln_s_centers[i] + 2.0 * ln_ln_s)
+    h2_ln_C = sum(h2_ln_C_vals) / float(len(h2_ln_C_vals))
+
+    # Compute H2 residual over the same valid bins
+    h2_residual = 0.0
+    for i in h2_valid_indices:
+        ln_ln_s = math.log(ln_s_centers[i])
+        predicted = h2_ln_C - ln_s_centers[i] - 2.0 * ln_ln_s
+        h2_residual += (ln_densities[i] - predicted) ** 2
+
+    # Also compute H1 residual over only the H2-valid bins for fair comparison
+    h1_residual_matched = 0.0
+    for i in h2_valid_indices:
+        predicted = h1_ln_C - alpha_pure * ln_s_centers[i]
+        h1_residual_matched += (ln_densities[i] - predicted) ** 2
+
+    # ── Model selection via residual comparison ──
+    # Use the matched residuals (same bins) for fair comparison
+    if h2_residual > 1e-30:
+        residual_ratio = h1_residual_matched / h2_residual
+    else:
+        residual_ratio = 1.0
+
+    # H2 wins if its residual is lower (ratio > 1) by a meaningful margin
+    # Use a threshold of 1.05 to avoid noise-driven selection
+    _SELECTION_THRESHOLD = 1.05
+    h2_wins = residual_ratio > _SELECTION_THRESHOLD
+
+    if h2_wins:
+        selected = "LOG_CORRECTED_TAU1"
+        alpha_corrected = 1.0
+        inflation_detected = alpha_pure > 1.15
+        inflation_magnitude = alpha_pure - 1.0
+        detail = (
+            "INV_094 TWO-HYPOTHESIS TEST: Log-corrected tau=1 model SELECTED "
+            "(residual_ratio={:.4f} > {:.2f}). Pure power-law exponent "
+            "tau={:.4f} is likely INFLATED by finite-size bias. The true "
+            "distribution is better described by P(s) ~ 1/(s * ln(s)^2) "
+            "(tau=1 with logarithmic correction) rather than a clean power "
+            "law P(s) ~ s^(-{:.4f}). H1 residual={:.6f}, H2 residual={:.6f} "
+            "(matched over {} bins). Any genome claim that RSA criticality "
+            "is characterized by tau={:.4f} may be an artifact of fitting "
+            "a pure power law to a logarithmic distribution."
+        ).format(
+            residual_ratio, _SELECTION_THRESHOLD,
+            alpha_pure, alpha_pure,
+            h1_residual_matched, h2_residual, len(h2_valid_indices),
+            alpha_pure,
+        )
+    else:
+        selected = "PURE_POWER_LAW"
+        alpha_corrected = alpha_pure
+        inflation_detected = False
+        inflation_magnitude = 0.0
+        detail = (
+            "INV_094 TWO-HYPOTHESIS TEST: Pure power-law model SELECTED "
+            "(residual_ratio={:.4f} <= {:.2f}). Exponent tau={:.4f} is "
+            "NOT significantly inflated by logarithmic corrections. "
+            "H1 residual={:.6f}, H2 residual={:.6f} (matched over {} bins). "
+            "The bare power-law fit is adequate for this distribution."
+        ).format(
+            residual_ratio, _SELECTION_THRESHOLD,
+            alpha_pure, h1_residual_matched, h2_residual,
+            len(h2_valid_indices),
+        )
+
+    return {
+        "selected_hypothesis": selected,
+        "alpha_corrected": round(alpha_corrected, 4),
+        "alpha_pure": round(alpha_pure, 4),
+        "residual_power_law": round(h1_residual_matched, 8),
+        "residual_log_corrected": round(h2_residual, 8),
+        "residual_ratio": round(residual_ratio, 6),
+        "inflation_detected": inflation_detected,
+        "inflation_magnitude": round(inflation_magnitude, 4),
+        "n_log_bins": n_valid,
+        "n_sizes": n_sizes,
+        "detail": detail,
+    }
+
+
 def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
     # type: (List[float], float, float) -> dict
     """
@@ -1320,8 +1559,18 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
     This is the unified entry point for the avalanche/cascade scoring
     pass, combining:
       1. Power-law fit quality (α, R²)
-      2. Log-periodic oscillation detection (DSI probe)
-      3. Universality class determination (continuous vs discrete RG)
+      2. Two-hypothesis exponent test: pure power law vs τ=1 logarithmic
+         correction, selected via data-collapse residual to prevent
+         systematic exponent inflation from finite-size bias (INV_094)
+      3. Log-periodic oscillation detection (DSI probe)
+      4. Universality class determination (continuous vs discrete RG)
+
+    The two-hypothesis test (step 2) replaces bare power-law exponent
+    fitting with a model-selection step that compares:
+      H1: P(s) ~ s^{-τ}              (pure power law)
+      H2: P(s) ~ 1/(s · ln(s)²)     (τ=1 with logarithmic correction)
+    If H2 has lower data-collapse residual, the fitted τ from H1 was
+    inflated by finite-size bias, and the corrected exponent τ=1 is used.
 
     The DSI probe tests the L4 RG chain assumption by checking whether
     FREED's semantic avalanches exhibit continuous or discrete scale
@@ -1342,15 +1591,24 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
     Returns
     -------
     dict with keys:
-        alpha              : float
+        alpha              : float  — corrected exponent (after two-hypothesis test)
+        alpha_uncorrected  : float  — original Hill MLE exponent (before correction)
         alpha_r_squared    : float
         alpha_in_soc       : bool
         power_law_likely   : bool
-        dsi                : dict  — full DSI detection result
-        universality_class : str   — "CONTINUOUS" / "DISCRETE" / "UNDETERMINED"
-        l4_rg_assessment   : str   — human-readable L4 RG chain assessment
+        two_hypothesis_test: dict   — full result of _two_hypothesis_exponent_test
+        exponent_inflation_detected : bool — True if τ=1 log-correction won
+        dsi                : dict   — full DSI detection result
+        universality_class : str    — "CONTINUOUS" / "DISCRETE" / "UNDETERMINED"
+        l4_rg_assessment   : str    — human-readable L4 RG chain assessment
         timestamp          : str
     """
+    # ── Two-hypothesis exponent test (INV_094) ──
+    # Test pure power law vs τ=1 logarithmic correction before proceeding
+    two_hyp = _two_hypothesis_exponent_test(avalanche_sizes, alpha)
+    alpha_uncorrected = alpha
+    alpha = two_hyp["alpha_corrected"]
+
     alpha_in_soc = ALPHA_SOC_LOW <= alpha <= ALPHA_SOC_HIGH
     power_law_likely = alpha_r_squared >= ALPHA_R2_THRESHOLD
 
