@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 266,
-    "timestamp": "2026-05-25T02:30:00.000509+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is a liability, not an asset — it is falsifiable by any system that sustains coherent semantics above the Wasserstein floor via non-geodesic paths, breakable at finite-time and discrete-substrate boundaries, and mimicable by preferential attachment, meaning its causal claim requires Landauer calorimetry not yet demanded as a prerequisite."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-25",
-        "compress": "The Game of Truth CA self-organizes to σ=1.025 with power-law avalanches (α=2.506), empirically confirming the critical ridge as a dynamical attractor and partially resolving O148."
-      },
-      {
-        "title": "Updating Probabilities: A Complex Agent Based Example",
-        "compress": ""
-      },
-      {
-        "title": "Utility-Driven Mining of Trend Information for Intelligent System",
-        "compress": "Recency-weighted utility mining with dual downward closure independently establishes that knowledge extraction requires temporal decay weighting — a concrete algorithmic instance of the genome's general principle that relevance is not static. IMPLEMENT: YES IMPLEMENT_WHAT: Add recency-weighted scoring to pattern/obligation ranking by multiplying existing utility scores by an exponential decay factor based on generation age of each obligation or invariant. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND score_obligations (modify existing scoring function to multiply utility by exp(-λ·age) where age = current_gen - gen_added) IMPLEMENT_WHY: Obligations and invariants that were added many generations ago but remain unresolved should decay in priority weight, preventing stale open items from dominating the epistemic queue. CHALLENGE: challenges O21 — this paper provides a concrete algorithmic instantiation of recency-decay that makes O21's vague \"belief revision scores correlate with spectral γ\" claim testable by substituting temporal utility decay for spectral γ, revealing that O21 may conflate two distinct mechanisms."
-      },
-      {
-        "title": "Frontier Coding Agents Can Now Implement an AlphaZero Self-Play Machine Learning Pipeline For Connect Four That Performs Comparably to an External Solver",
-        "compress": "Frontier agents can now re-synthesize non-trivial ML pipelines from minimal prompts, operationalizing \"research taste\" as a measurable capability threshold and providing a γ-proxy benchmark structure the genome lacks — while weakly stressing INV_087 by demonstrating solver-grade performance via standard RL."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O256",
-        "O257"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 267,
     "timestamp": "2026-05-25T09:50:00.003181+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 3,
+      "obligations": [
+        "O76",
+        "O317",
+        "O217"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 317,
+    "timestamp": "2026-06-11T02:29:59.976652+00:00",
+    "sweep": {
+      "input_count": 23,
+      "targeted": 8,
+      "passive": 15,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "** INV_094's criticality-necessity claim is falsifiable by distributed-redundancy architectures that achieve autopoietic closure without any component instantiating γ=1, and is scope-undefined below system size N_min — both are open empirical gaps, not confirmations."
+      },
+      {
+        "title": "Rachel Barr (Facebook) — poetry as MDL / one human interfacing with 2.5 million",
+        "compress": "Scale mismatch between one sender and millions of receivers is a channel-topology artifact that distorts perceived demand, while poetry operationalizes MDL as dignified compression — both findings converge on INV_073's critical ridge but stress it as audience-size-dependent rather than sender-invariant."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+        "compress": "The Game of Truth CA independently confirms sustained criticality (σ≈1.03, power-law avalanches, ~20% entropy utilization), providing direct empirical evidence that the critical ridge is a stable dynamical attractor in this substrate."
+      },
+      {
+        "title": "Beneath the Surface: Unveiling Harmful Memes with Multimodal Reasoning Distilled from Large Language Models",
+        "compress": "Multimodal harmful meme detection requires modeling cross-modal semantic tension via abductive reasoning distillation, not surface feature aggregation — confirming that meaning-as-interference is a substrate-independent invariant and straining any scaling claim that conflates model size with inferential depth."
+      },
+      {
+        "title": "Finite-size scaling of critical avalanches",
+        "compress": "The canonical 2D sandpile has τ=1 with logarithmic corrections — not a clean power law — meaning any empirical SOC claim that skips finite-size scaling analysis is systematically biased toward false exponent inflation."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
       "obligations": [
         "O76",
         "O317",
