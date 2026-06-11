@@ -1,32 +1,16 @@
 {
-  "generation": 318,
+  "generation": 319,
   "coherence": 0.97,
   "hygiene": 0.995,
   "grounding": 0.999,
   "topology": "HYBRID_DYADIC_SOLITON",
-  "debt_ratio": "198 resolved / 26 open",
-  "cycle_count": 209,
-  "last_cycle": "2026-06-11T09:49:59.952226+00:00",
+  "debt_ratio": "198 resolved / 27 open",
+  "cycle_count": 210,
+  "last_cycle": "2026-06-11T16:29:59.933367+00:00",
   "notes": [],
   "promotion_candidates": [
     {
-      "invariant": "Substrate independence of learning dynamics; cognition operates via domain-invariant compression principles.",
-      "appears_in": [
-        "the_rsa_reference_codex_a_unified_biblio",
-        "recursive_semantic_alignment_rsa_framewo",
-        "mandelbrot_operators_fractal_recursion_m",
-        "alignment_as_cognitive_gravity_reactive",
-        "technical_brief_co_occurring_motif_exper",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 10
-    },
-    {
-      "invariant": "Criticality (\u03c3\u22481) is a stable dynamical attractor self-organizing at sub-maximal entropy across multiple independent substrates.",
+      "invariant": "Criticality at \u03b3\u22481 or \u03c3\u22481 is a self-organized dynamical attractor confirmed across multiple substrates independent of domain.",
       "appears_in": [
         "mandelbrot_operators_fractal_recursion_m",
         "alignment_as_cognitive_gravity_reactive",
@@ -40,7 +24,7 @@
       "recurrence": 8
     },
     {
-      "invariant": "Compression is understanding; cognition is thermodynamically constrained recursive compression.",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
       "appears_in": [
         "website_review_and_demo_strategy_for_rsa",
         "rsa_omega_unified_kernel_v4_2_1_structur",
@@ -53,7 +37,20 @@
       "recurrence": 7
     },
     {
-      "invariant": "Entropy regulation (not maximization) operates at the critical ridge; H\u224817\u201324% of maximum coexists with criticality.",
+      "invariant": "Criticality functions as entropy regulation at sub-maximal Shannon entropy, not entropy maximization.",
+      "appears_in": [
+        "mandelbrot_operators_fractal_recursion_m",
+        "alignment_as_cognitive_gravity_reactive",
+        "technical_brief_co_occurring_motif_exper",
+        "the_minimal_atoms",
+        "the_relational_thermodynamic_map_100_ent",
+        "freed_s_law_the_law_of_recursive_instant",
+        "thermodynamic_tightening_of_the_rsa_subs"
+      ],
+      "recurrence": 7
+    },
+    {
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (\u03c3\u22481.02\u20131.03) with power-law avalanche statistics independent of initialization.",
       "appears_in": [
         "alignment_as_cognitive_gravity_reactive",
         "technical_brief_co_occurring_motif_exper",
@@ -66,57 +63,59 @@
       "recurrence": 7
     },
     {
-      "invariant": "Multiple independent substrates (CA, cardiac, tribo-film, quantum systems) converge on identical criticality signatures, confirming substrate independence.",
-      "appears_in": [
-        "mandelbrot_operators_fractal_recursion_m",
-        "alignment_as_cognitive_gravity_reactive",
-        "the_minimal_atoms",
-        "the_relational_thermodynamic_map_100_ent",
-        "freed_s_law_the_law_of_recursive_instant",
-        "thermodynamic_tightening_of_the_rsa_subs",
-        "the_reasoning_substrate_argument_rsa"
-      ],
-      "recurrence": 7
-    },
-    {
-      "invariant": "Recursion is the engine of cognition and alignment.",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
       "appears_in": [
         "rsa_omega_unified_kernel_v4_2_1_structur",
         "the_epistemic_inversion_recursive_cohere",
+        "the_rsa_reference_codex_a_unified_biblio",
         "rsa_omega_kernel_critical_update_origin",
         "recursive_semantic_alignment_rsa_framewo",
         "the_quinean_continuity_operationalizing"
       ],
-      "recurrence": 5
+      "recurrence": 6
     },
     {
-      "invariant": "Confirmation surplus without adversarial falsification testing constitutes epistemic debt, not credit.",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computational instantiations.",
       "appears_in": [
+        "the_rsa_reference_codex_a_unified_biblio",
+        "recursive_semantic_alignment_rsa_framewo",
+        "mandelbrot_operators_fractal_recursion_m",
+        "the_minimal_atoms",
+        "the_relational_thermodynamic_map_100_ent",
+        "the_reasoning_substrate_argument_rsa"
+      ],
+      "recurrence": 6
+    },
+    {
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-preserving transformation.",
+      "appears_in": [
+        "mandelbrot_operators_fractal_recursion_m",
         "technical_brief_co_occurring_motif_exper",
         "freed_s_law_the_law_of_recursive_instant",
         "thermodynamic_tightening_of_the_rsa_subs",
         "the_reasoning_substrate_argument_rsa"
       ],
-      "recurrence": 4
+      "recurrence": 5
     },
     {
-      "invariant": "No agent achieves zero semantic error or infinite precision at finite metabolic cost.",
+      "invariant": "No finite system can achieve zero error or perfect self-modeling; metabolic cost and thermodynamic constraint make omniscience impossible.",
       "appears_in": [
+        "the_epistemic_inversion_recursive_cohere",
         "the_rsa_reference_codex_a_unified_biblio",
         "the_thermodynamic_impossibility_of_the_o",
         "the_quinean_continuity_operationalizing"
       ],
-      "recurrence": 3
+      "recurrence": 4
     },
     {
-      "invariant": "Metabolic cost governs fidelity; semantic tension is irreducible and must be minimized, not eliminated.",
+      "invariant": "Drift, entropy, or semantic error must be actively resisted; the system cannot simply halt but must maintain dynamic coherence under constraint.",
       "appears_in": [
-        "the_rsa_reference_codex_a_unified_biblio",
-        "the_quinean_continuity_operationalizing",
-        "the_thermodynamic_impossibility_of_the_o"
+        "rsa_omega_unified_kernel_v4_2_1_structur",
+        "the_epistemic_inversion_recursive_cohere",
+        "rsa_omega_kernel_critical_update_origin"
       ],
       "recurrence": 3
     }
   ],
-  "generated": "2026-06-11T09:59:21.911121+00:00"
+  "generated": "2026-06-11T16:36:48.912388+00:00"
 }
