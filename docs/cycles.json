@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 269,
-    "timestamp": "2026-05-26T02:29:59.963337+00:00",
-    "sweep": {
-      "input_count": 17,
-      "targeted": 7,
-      "passive": 10,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is a liability, not an asset — Zipf-as-artifact produces identical observables, making current confirmations underdetermined and the invariant's robustness unproven."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
-        "compress": "A live CA system independently instantiates critical-ridge dynamics (σ=1.029, α≈2.221) with sparse-yet-correlated entropy structure, partially resolving O148 while exposing an untracked functional-subpopulation dimension. CHALLENGE: challenges O148 — the snapshot satisfies the measurement demand but is a single timestamped observation, leaving open whether the AT_CRITICAL verdict is a stable attractor or a transient crossing, which O148's resolution requires to be demonstrated as persistent."
-      },
-      {
-        "title": "Wasserstein geometry of nonnegative measures on finite Markov chains I: Gradient flow",
-        "compress": "Discrete Benamou-Brenier geometry on reversible Markov chains independently confirms W2 geodesics as entropy-minimizing paths and advances O112 by providing a computable Riemannian scaffold for finite-state STF recovery."
-      },
-      {
-        "title": "SVGD as a kernelized Wasserstein gradient flow of the chi-squared divergence",
-        "compress": "SVGD-as-chi-squared Wasserstein gradient flow achieves exponential ergodicity under Poincaré conditions via Laplacian spectral decomposition, independently confirming W2 gradient flows as the canonical geometry for inference and extending the STF chain with a concrete, weaker-condition convergence mechanism."
-      },
-      {
-        "title": "Wasserstein Evolution : Evolutionary Optimization as Phase Transition",
-        "compress": "Evolutionary optimization recast as Wasserstein-2 gradient flow of free energy independently confirms INV_094's geodesic-minimality claim while exposing a finite-population discretization gap that limits the rigor of the continuous-flow idealization."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O256",
-        "O257"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 270,
     "timestamp": "2026-05-26T09:50:00.063020+00:00",
@@ -2195,6 +2151,50 @@
         "O76",
         "O270",
         "O274"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 320,
+    "timestamp": "2026-06-12T16:30:00.001037+00:00",
+    "sweep": {
+      "input_count": 22,
+      "targeted": 8,
+      "passive": 14,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus masks a structural fragility — it lacks a specified empirical benchmark where MaxRL and standard RL make divergent predictions, making it currently unfalsifiable rather than robustly confirmed."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+        "compress": "A 32×32 CA spontaneously self-organizes to σ≈1.03 with power-law avalanches, independently confirming the critical ridge as a dynamical attractor and identifying constraint-navigating behavior as its dominant stable state."
+      },
+      {
+        "title": "Wasserstein Gradient Flows for Optimizing Gaussian Mixture Policies",
+        "compress": "Wasserstein gradient flows over GMM policy spaces empirically instantiate the W2 geodesic = minimum entropy production principle in a concrete engineering domain, independently converging with the genome's L3 geometric structure claim."
+      },
+      {
+        "title": "$L^2$ over Wasserstein: Statistical Analysis for Optimal Transport",
+        "compress": "L² over Wasserstein proves stochastic gradient flow structure survives statistical uncertainty, directly enabling rigorous empirical recovery of the STF metric tensor under realistic (noisy, estimated) data conditions."
+      },
+      {
+        "title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+        "compress": "Observer-coupled identity drift formalizes as curvature-deformed categorical fixed-points, converging with critical-ridge navigation and autopoietic closure while extending the STF empirical recovery target with a concrete geometric candidate."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O290",
+        "O76",
+        "O122"
       ]
     },
     "coherence": 0.97
