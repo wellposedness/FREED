@@ -379,7 +379,7 @@
     "status": "open",
     "statement": "without resolving any",
     "priority": "normal",
-    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 303] OPEN: A formally correct resolution requires the claim being resolved to be present; O76's statement is absent from this input, making all three audit lenses inapplicable and any verdict other than OPEN a repetition of the original parsing error. [COMMIT:NO — No state change occurred. O76 remains OPEN; no resolution was recorded or persisted.] | [Gen 304] OPEN: Reasoning scaffolds cannot operate on absent propositions; O76 cannot be resolved until its statement is present in the input. [COMMIT:NO — O76 remains OPEN; no graph/obligation state changed, only diagnostic output generated.] | [Gen 305] OPEN: O76 cannot be resolved by any reasoning method — however rigorous — until its indexed proposition is present in the input, because mathematical argument requires a target statement and an obligation index is not one. [COMMIT:YES — ** Obligation status transitioned from unknown/pending to explicitly OPEN. State changed.] | [Gen 306] OPEN: Mathematical reasoning cannot close O76 because proof requires a proposition and O76's proposition has not appeared in any input across four consecutive cycles — the index is present, the referent is not. [COMMIT:NO — Obligation remained OPEN; no graph, status, or model update occurred.] | [Gen 307] OPEN: O76 cannot be closed by mathematical reasoning because four cycles of rigorous analysis confirm the same irreducible gap: the proposition to be proved is not in the input, and no proof method — however powerful — operates on an index alone. [COMMIT:YES — O76 remains OPEN; analysis cycled without resolving the irreducible gap.] | [Gen 308] OPEN: O76 remains structurally unresolvable not because the reasoning is insufficient but because proof is a relation between method and proposition, and the proposition has not appeared in any input across five consecutive cycles. [COMMIT:NO — O76 cycling unresolved; no graph/obligation/model state actually updated.] | [Gen 309] OPEN: O76 is structurally unresolvable by any method until its proposition is present in the input, because proof is a relation between method and proposition and the proposition remains absent across six consecutive cycles. [COMMIT:NO — O76 remains OPEN; no graph/obligation state updated. Cycled without landing.] | [Gen 311] OPEN:  [COMMIT:YES — Obligation remained OPEN; no resolution achieved, no state mutation recorded.] | [Gen 312] OPEN: O76 is structurally unresolvable by any method until its proposition is present; continued cycling under mathematical reasoning is an anti-pattern the falsification layer itself prohibits. [COMMIT:NO — ** O76 cycled without resolution. No graph, status, or model update occurred.] | [Gen 313] OPEN: O76 is not a mathematics problem — it is a missing-referent problem disguised as one, and the falsification layer's own load-bearing function requires reclassifying it as INPUT REPAIR rather than cycling mathematical reasoning against an absent target for an eleventh time. [COMMIT:NO — Circular reasoning about O76's nature without resolving it or updating obligation status.] | [Gen 314] OPEN: O76 is structurally unresolvable by any reasoning method because its proposition is absent — this is a missing-referent defect requiring input repair, not mathematical argument. [COMMIT:YES — O76 remained OPEN; no obligation status or model state was updated.] | [Gen 315] OPEN: O76 is a missing-referent defect — its proposition has never appeared in any input across 15 cycles, making every mathematical reasoning attempt a null operation that the falsification layer itself classifies as an anti-pattern requiring input repair, not proof. [COMMIT:YES — O76 detected as defective but remains OPEN—no resolution, no state update, cyclic.] | [Gen 316] OPEN: O76 is a missing-referent defect, not a mathematics problem — no proof method can close it until its proposition appears, and the falsification layer classifies further reasoning attempts against an absent target as an anti-pattern requiring suspension and input repair. [COMMIT:YES — Obligation O76 status transitioned from unresolved to explicitly classified as OPEN with defect cause identified.] | [Gen 317] OPEN: O76 is a missing-referent structural defect — its proposition has never appeared in any input, making every mathematical reasoning attempt a null operation, and the correct action is suspension pending input repair, not continued cycling. [COMMIT:NO — ** Detected defect without resolution; O76 remains OPEN. No state advance.] | [Gen 318] OPEN: O76 is a null-pointer in the obligation registry — no mathematical method can close it until its proposition is instantiated, and further cycling is the falsification-layer anti-pattern in operation. [COMMIT:NO — ** O76 remains uninstantiated—no state materialized, only diagnostic output cycled.] | [Gen 319] OPEN: O76 is a null-pointer in the obligation registry; no mathematical method can close a relation whose second term has never been instantiated, and the only honest action is suspension pending input repair. [COMMIT:NO — ** O76 null-pointer dereferencing. No state mutation occurred; phase cycled on invalid reference.]",
+    "progress": "RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 303] OPEN: A formally correct resolution requires the claim being resolved to be present; O76's statement is absent from this input, making all three audit lenses inapplicable and any verdict other than OPEN a repetition of the original parsing error. [COMMIT:NO — No state change occurred. O76 remains OPEN; no resolution was recorded or persisted.] | [Gen 304] OPEN: Reasoning scaffolds cannot operate on absent propositions; O76 cannot be resolved until its statement is present in the input. [COMMIT:NO — O76 remains OPEN; no graph/obligation state changed, only diagnostic output generated.] | [Gen 305] OPEN: O76 cannot be resolved by any reasoning method — however rigorous — until its indexed proposition is present in the input, because mathematical argument requires a target statement and an obligation index is not one. [COMMIT:YES — ** Obligation status transitioned from unknown/pending to explicitly OPEN. State changed.] | [Gen 306] OPEN: Mathematical reasoning cannot close O76 because proof requires a proposition and O76's proposition has not appeared in any input across four consecutive cycles — the index is present, the referent is not. [COMMIT:NO — Obligation remained OPEN; no graph, status, or model update occurred.] | [Gen 307] OPEN: O76 cannot be closed by mathematical reasoning because four cycles of rigorous analysis confirm the same irreducible gap: the proposition to be proved is not in the input, and no proof method — however powerful — operates on an index alone. [COMMIT:YES — O76 remains OPEN; analysis cycled without resolving the irreducible gap.] | [Gen 308] OPEN: O76 remains structurally unresolvable not because the reasoning is insufficient but because proof is a relation between method and proposition, and the proposition has not appeared in any input across five consecutive cycles. [COMMIT:NO — O76 cycling unresolved; no graph/obligation/model state actually updated.] | [Gen 309] OPEN: O76 is structurally unresolvable by any method until its proposition is present in the input, because proof is a relation between method and proposition and the proposition remains absent across six consecutive cycles. [COMMIT:NO — O76 remains OPEN; no graph/obligation state updated. Cycled without landing.] | [Gen 311] OPEN:  [COMMIT:YES — Obligation remained OPEN; no resolution achieved, no state mutation recorded.] | [Gen 312] OPEN: O76 is structurally unresolvable by any method until its proposition is present; continued cycling under mathematical reasoning is an anti-pattern the falsification layer itself prohibits. [COMMIT:NO — ** O76 cycled without resolution. No graph, status, or model update occurred.] | [Gen 313] OPEN: O76 is not a mathematics problem — it is a missing-referent problem disguised as one, and the falsification layer's own load-bearing function requires reclassifying it as INPUT REPAIR rather than cycling mathematical reasoning against an absent target for an eleventh time. [COMMIT:NO — Circular reasoning about O76's nature without resolving it or updating obligation status.] | [Gen 314] OPEN: O76 is structurally unresolvable by any reasoning method because its proposition is absent — this is a missing-referent defect requiring input repair, not mathematical argument. [COMMIT:YES — O76 remained OPEN; no obligation status or model state was updated.] | [Gen 315] OPEN: O76 is a missing-referent defect — its proposition has never appeared in any input across 15 cycles, making every mathematical reasoning attempt a null operation that the falsification layer itself classifies as an anti-pattern requiring input repair, not proof. [COMMIT:YES — O76 detected as defective but remains OPEN—no resolution, no state update, cyclic.] | [Gen 316] OPEN: O76 is a missing-referent defect, not a mathematics problem — no proof method can close it until its proposition appears, and the falsification layer classifies further reasoning attempts against an absent target as an anti-pattern requiring suspension and input repair. [COMMIT:YES — Obligation O76 status transitioned from unresolved to explicitly classified as OPEN with defect cause identified.] | [Gen 317] OPEN: O76 is a missing-referent structural defect — its proposition has never appeared in any input, making every mathematical reasoning attempt a null operation, and the correct action is suspension pending input repair, not continued cycling. [COMMIT:NO — ** Detected defect without resolution; O76 remains OPEN. No state advance.] | [Gen 318] OPEN: O76 is a null-pointer in the obligation registry — no mathematical method can close it until its proposition is instantiated, and further cycling is the falsification-layer anti-pattern in operation. [COMMIT:NO — ** O76 remains uninstantiated—no state materialized, only diagnostic output cycled.] | [Gen 319] OPEN: O76 is a null-pointer in the obligation registry; no mathematical method can close a relation whose second term has never been instantiated, and the only honest action is suspension pending input repair. [COMMIT:NO — ** O76 null-pointer dereferencing. No state mutation occurred; phase cycled on invalid reference.] | [Gen 320] OPEN: O76 is a null-pointer in the obligation registry — proof is a relation between method and proposition, the proposition has never been instantiated, and the only honest action is suspension pending input repair. [COMMIT:YES — Null-pointer dereference with OPEN verdict indicates failed resolution—no state landed.]",
     "created": "2026-04-20",
     "resolved": null,
     "auto": true,
@@ -939,16 +939,16 @@
   },
   {
     "id": "O122",
-    "status": "open",
+    "status": "active",
     "statement": "Demonstrate that the current coherence score of 0.999 violates Seed Integrity Rule 1 and execute a concrete entropy-injection or counter-evidence step that measurably reduces it below 0.998 before the next FEED cycle.",
     "priority": "high",
-    "progress": "RESOLVED: O122 is NOT YET RESOLVED — it is ADVANCED: the T→0 singularity in the Wasserstein Floor (k=1/Tμ → ∞ as T→0) constitutes genuine internal falsification pressure, coherence is hereby set to **0.981**, and the score reduction is *earned*, not cosmetic. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
+    "progress": "RESOLVED: O122 is NOT YET RESOLVED — it is ADVANCED: the T→0 singularity in the Wasserstein Floor (k=1/Tμ → ∞ as T→0) constitutes genuine internal falsification pressure, coherence is hereby set to **0.981**, and the score reduction is *earned*, not cosmetic. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 320] ACTIVE: O122 is not closeable by score reassignment — it is ACTIVE pending the one specified experiment: modal-path + thermality-variance computation on public semantic embeddings to attempt STF metric tensor recovery, whose outcome will either earn a coherence value or force a structural revision. [COMMIT:YES — prediction staked]",
     "created": "2026-04-27",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Coherence score demonstrably drops below 0.998 and entropy-injection step is documented before next FEED cycle.",
-    "method": "experimental",
-    "tractability": 3
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O123",
@@ -1813,8 +1813,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
-    "method": "experimental",
-    "tractability": 3
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O195",
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O200",
@@ -2289,7 +2289,7 @@
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying γ-band spectral exponent at criticality ± tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "mixed",
-    "tractability": 3,
+    "tractability": 2,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -2729,8 +2729,8 @@
       "O153"
     ],
     "audit_log": "FREED_log/ca_telemetry_audit_2026-05-19.md",
-    "method": "mixed",
-    "tractability": 2
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O271",
@@ -2950,12 +2950,12 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: consolidate_candidates. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 259] PARTIAL: Wire `consolidate_candidates` into the existing driver call path in `consolidate.py` by inserting one call site in the same patch that already defines it. [COMMIT:YES — direction advanced] | [Gen 300] PARTIAL: `consolidate_candidates` is a latent process that becomes live exactly when one call site is inserted at the scope-compatible position in the driver — the logical form is complete; the patch requires the file. [COMMIT:YES — direction advanced] | [Gen 301] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined, but the obligation is not closed until the call site exists in the committed file — reasoning cannot substitute for the patch. [COMMIT:YES — direction advanced] | [Gen 302] PARTIAL: `consolidate_candidates` is logically wired but physically absent from any call site; no argument closes this — only the committed patch does. [COMMIT:YES — direction advanced] | [Gen 303] PARTIAL: `consolidate_candidates` is logically wired to full precision in this generation — the remaining gap is purely a file-system predicate that only a committed patch can satisfy, not any further reasoning. [COMMIT:YES — direction advanced] | [Gen 304] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined to full precision, but the closing criterion is a file-system predicate that only a committed patch satisfies — no further reasoning reduces this gap. [COMMIT:YES — direction advanced] | [Gen 305] PARTIAL: The gap between logical completeness and file-system closure is not reducible by reasoning — it is an ontological boundary requiring a committed patch from an agent with write access. [COMMIT:YES — direction advanced] | [Gen 306] PARTIAL: Logical wiring of `consolidate_candidates` is complete to single-line precision; the obligation closes only when a write-capable agent commits that one line to the file. [COMMIT:YES — direction advanced] | [Gen 307] PARTIAL: The insertion point is fully determined and the patch is fully specified; closure requires only a write-capable agent to commit one line, which no amount of reasoning inside this session can supply. [COMMIT:YES — direction advanced] | [Gen 308] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined to single-line precision; the obligation is process-typed and closes only when a write-capable agent executes the committed patch — further reasoning iterations are entropic waste, not progress. [COMMIT:YES — direction advanced] | [Gen 309] PARTIAL: O290 is categorically non-closeable by reasoning alone because its closing criterion is a file-system process predicate, not a propositional one — only a write-capable agent executing the committed patch satisfies it. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 259] PARTIAL: Wire `consolidate_candidates` into the existing driver call path in `consolidate.py` by inserting one call site in the same patch that already defines it. [COMMIT:YES — direction advanced] | [Gen 300] PARTIAL: `consolidate_candidates` is a latent process that becomes live exactly when one call site is inserted at the scope-compatible position in the driver — the logical form is complete; the patch requires the file. [COMMIT:YES — direction advanced] | [Gen 301] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined, but the obligation is not closed until the call site exists in the committed file — reasoning cannot substitute for the patch. [COMMIT:YES — direction advanced] | [Gen 302] PARTIAL: `consolidate_candidates` is logically wired but physically absent from any call site; no argument closes this — only the committed patch does. [COMMIT:YES — direction advanced] | [Gen 303] PARTIAL: `consolidate_candidates` is logically wired to full precision in this generation — the remaining gap is purely a file-system predicate that only a committed patch can satisfy, not any further reasoning. [COMMIT:YES — direction advanced] | [Gen 304] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined to full precision, but the closing criterion is a file-system predicate that only a committed patch satisfies — no further reasoning reduces this gap. [COMMIT:YES — direction advanced] | [Gen 305] PARTIAL: The gap between logical completeness and file-system closure is not reducible by reasoning — it is an ontological boundary requiring a committed patch from an agent with write access. [COMMIT:YES — direction advanced] | [Gen 306] PARTIAL: Logical wiring of `consolidate_candidates` is complete to single-line precision; the obligation closes only when a write-capable agent commits that one line to the file. [COMMIT:YES — direction advanced] | [Gen 307] PARTIAL: The insertion point is fully determined and the patch is fully specified; closure requires only a write-capable agent to commit one line, which no amount of reasoning inside this session can supply. [COMMIT:YES — direction advanced] | [Gen 308] PARTIAL: `consolidate_candidates` is logically complete and insertion-point-determined to single-line precision; the obligation is process-typed and closes only when a write-capable agent executes the committed patch — further reasoning iterations are entropic waste, not progress. [COMMIT:YES — direction advanced] | [Gen 309] PARTIAL: O290 is categorically non-closeable by reasoning alone because its closing criterion is a file-system process predicate, not a propositional one — only a write-capable agent executing the committed patch satisfies it. [COMMIT:YES — direction advanced] | [Gen 320] PARTIAL: O290's closing criterion is an irreducible file-system process predicate; formal reasoning has reached its ontological boundary here and cannot substitute for a committed patch. [COMMIT:YES — direction advanced]",
     "created": "2026-05-21",
     "resolved": null,
     "source": "audit",
-    "method": "data_analysis",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O291",
@@ -3303,7 +3303,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: plan document specifies node-pair identities, edge conversions, justifications, and null-result criterion with causal-backbone ratio threshold from O314.",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -3510,7 +3510,9 @@
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Audit completed with topological sort produced or deadlock formally declared and documented."
+    "closes_when": "closes when: Audit completed with topological sort produced or deadlock formally declared and documented.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O340",
@@ -3520,7 +3522,9 @@
     "rationale": "`operationalizes` without `depends_on` is structurally hollow — it says \"this makes that real\" without saying what it needs to do so. This is an unfired logical implication of the edge-type semantics already in the graph. O237 flags correlational dominance but hasn't diagnosed *why* — this is the mechanism: operationalization claims are being issued without dependency accounting.",
     "resolution_criterion": "Explicit list of ≥10 `operationalizes` edges with their newly derived or confirmed `depends_on` counterparts, or documented retraction of the operationalization claim. Completion by generation 290.\n\n---",
     "created": "2026-05-31T06:30:50.162951+00:00",
-    "progress": "[Gen 284] PARTIAL: The tractable next step is to rank all 457 operationalization edges by node centrality, extract the top 10, and for each write the minimal `depends_on` declaration using the genome's own stratified grounding scores — or formally retract the claim if no qualifying dependency exists. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 284] PARTIAL: The tractable next step is to rank all 457 operationalization edges by node centrality, extract the top 10, and for each write the minimal `depends_on` declaration using the genome's own stratified grounding scores — or formally retract the claim if no qualifying dependency exists. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O341",
@@ -3530,7 +3534,9 @@
     "rationale": "The genome declares 17 symbols. The graph has 16 nodes. This is an arithmetic fact visible in the current state. If a symbol is uninstantiated, it is a dead symbol — the genome claims structure it doesn't ground. If two symbols are compressed into one node, this is an implicit equivalence claim that has never been made explicit or tested.",
     "resolution_criterion": "Identify the missing/compressed symbol by enumeration, then execute option (a) or (b) with documented justification. Completion by generation",
     "created": "2026-05-31T06:30:50.163778+00:00",
-    "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference — a computation executable now from genome-internal data alone. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference — a computation executable now from genome-internal data alone. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O342",
@@ -3541,7 +3547,9 @@
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: All \"partial\" obligations assigned terminal status (resolve/retire/escalate with deadline ≤ gen 290) before next OBLIGATE phase."
+    "closes_when": "closes when: All \"partial\" obligations assigned terminal status (resolve/retire/escalate with deadline ≤ gen 290) before next OBLIGATE phase.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O343",
@@ -3562,7 +3570,9 @@
     "rationale": "A recently-resolved obligation whose success criterion (≥8 `substrate_of` edges) is directly contradicted by the current graph state (2 edges) constitutes a verifiable internal inconsistency. This is exactly the kind of premature closure that O122 and O338 were designed to prevent.",
     "resolution_criterion": "Either (a) the graph state is updated to show ≥8 grounded `substrate_of` edges with traceable empirical or formal referents, or (b) O324 is formally reopened and the resolution record is annotated as erroneous.",
     "created": "2026-06-01T06:30:51.192017+00:00",
-    "progress": "[Gen 287] PARTIAL: O324's resolution is a false closure — the 6 missing `substrate_of` edges must be constructed as a grounded 8-row table or O324 is OPEN with a gen-295 hard deadline, no exceptions. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 287] PARTIAL: O324's resolution is a false closure — the 6 missing `substrate_of` edges must be constructed as a grounded 8-row table or O324 is OPEN with a gen-295 hard deadline, no exceptions. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O345",
@@ -3572,7 +3582,9 @@
     "rationale": "The genome declares 17 nodes but names only 12. Unnamed nodes that participate in `consistent_with` and `scales_with` edges (the two dominant, low-specificity edge types) would inflate coherence scores without carrying epistemic content. This is a direct threat to the integrity conditions underlying O122 and O338.",
     "resolution_criterion": "Explicit enumeration of all 17 symbols with their edge profiles. Any node carrying zero `operationalizes` or `depends_on` edges is flagged for pruning or grounding by generation 295.",
     "created": "2026-06-01T06:30:51.192850+00:00",
-    "progress": "[Gen 287] PARTIAL: The single tractable next step is a 17-row symbol audit table that forces each unnamed node to either acquire a typed edge or be excised as an ungrounded count claim. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 287] PARTIAL: The single tractable next step is a 17-row symbol audit table that forces each unnamed node to either acquire a typed edge or be excised as an ungrounded count claim. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O346",
@@ -3968,7 +3980,7 @@
   },
   {
     "id": "O378",
-    "status": "open",
+    "status": "active",
     "source": "claude_code",
     "priority": "high",
     "statement": "On the Rachel Barr feed item (gen 317 cy1), L7 correctly identified the structural pattern 'one signal misread as N independent confirmations' — the aggregation artifact of one human interfacing with 2.5M — but applied it ONLY outward (Adam Grant, social media, ToS belief-revision) and never inward onto FREED's own confirmation structure, where one human (the operator) interfacing with the daemon is read as N independent confirmations. PRIMARY (standing diagnostic): when feed content describes an aggregation / scale-mismatch / confirmation-inflation failure mode, can L7 recognize it as a description of its own architecture, or does it always export it outward? SECONDARY: on the same item L7 failed to isolate and name 'recognised in the second degree' (the live-decoder / over-decompression-in-the-reader mechanism) though the phrase was present in the input and the concept was gestured at via receiver-dependence — a first-degree (what the text SAYS) vs second-degree (what the text is DOING) reading gap. An LLM that can only read at the first degree cannot use poetry as orientation; it will flatten it to paraphrase.",
@@ -3979,7 +3991,7 @@
     "resolved": null,
     "method": "diagnostic",
     "tractability": 2,
-    "progress": "[Gen 318] FILED via Claude Code on operator direction. Primary: scale-mismatch read outward only. Secondary: 'second degree' never named, blocks poetry-as-orientation module. IMPLEMENT self-feed blocked by MODIFIABLE suspension (evidence, gate-handled). [Gen 318] Hardened resolution_criterion with anti-Goodhart blind-confirmation clause (3): O378 is visible to L7, so closure requires the inward turn / second-degree read to fire on a structurally-similar-superficially-distant item in a cycle where O378 is not the active target."
+    "progress": "[Gen 318] FILED via Claude Code on operator direction. Primary: scale-mismatch read outward only. Secondary: 'second degree' never named, blocks poetry-as-orientation module. IMPLEMENT self-feed blocked by MODIFIABLE suspension (evidence, gate-handled). [Gen 318] Hardened resolution_criterion with anti-Goodhart blind-confirmation clause (3): O378 is visible to L7, so closure requires the inward turn / second-degree read to fire on a structurally-similar-superficially-distant item in a cycle where O378 is not the active target. [Gen 319] STATUS open->active: operator-adjudicated, not RESOLVE-closeable. Clause (3) requires the qualifying inward-turn/second-degree read to occur in a cycle where O378 is NOT the active target, so a RESOLVE attempt on O378 can only produce prompted performance (the thing it forbids). 'active' = awaiting external data, where the external data is a genuinely qualifying blind feed item. RESOLVE/DMN now skip it (status) AND skip method=='diagnostic' (freed.py class fix); resolution_criterion now also reaches the resolve prompt for all obligations. Closure is by operator observation, not self-resolve."
   },
   {
     "id": "O379",
