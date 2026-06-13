@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 4,
-    "generation": 271,
-    "timestamp": "2026-05-26T16:29:59.944773+00:00",
-    "sweep": {
-      "input_count": 26,
-      "targeted": 8,
-      "passive": 18,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant with maximum confirmation surplus and minimum adversarial contact is not confirmed — it is unexamined, and its apparent coherence is a hygiene debt."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
-        "compress": "An empirical CA measurement independently confirms γ=1 SOC (σ=1.0234, α≈2.439) while revealing that criticality co-occurs with strong entropy suppression (H=0.165·H_max), a substrate-independent invariant the genome does not yet encode."
-      },
-      {
-        "title": "Photoacoustic detection of phase transitions at low temperatures in CsPbCl$_3$ crystals",
-        "compress": "Photoacoustic wavelet analysis of CsPbCl₃ confirms two thermoelastic-signature discontinuities near 200K, establishing phase transitions as scale-resolved symmetry-breaking events detectable via mechanical-thermal coupling — no genome invariant directly maps to this finding."
-      },
-      {
-        "title": "Low-Rank Prune-And-Factorize for Language Model Compression",
-        "compress": "Fine-tuning inflates weight-matrix rank to full, destroying compressibility; first-order pruning is the unique operation that recovers exploitable low-rank structure, establishing that rank management and parameter reduction are sequentially ordered, not commutative."
-      },
-      {
-        "title": "A Survey on Transformer Compression",
-        "compress": "Transformer compression independently confirms a critical-density ridge separating lossless from catastrophic compression, converging on INV_073 while providing the empirical corpus O21 requires."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O258"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 5,
     "generation": 272,
     "timestamp": "2026-05-27T02:29:59.953836+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O76",
+        "O302"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 322,
+    "timestamp": "2026-06-13T09:50:00.010042+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is itself evidence of under-challenge, not validity — the invariant requires a stated falsifying observable or it loses invariant status. CHALLENGE: challenges INV_094 — no recorded discriminating prediction exists that would distinguish INV_094's mechanism from an alternative mechanism producing identical observables, making its confirmation surplus epistemically hollow."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+        "compress": "Game of Truth CA independently self-organizes to σ ≈ 1.024 with power-law avalanche statistics, confirming the critical ridge as a natural attractor and advancing O148 toward resolution while revealing functional-role selection under criticality as an absent genome claim."
+      },
+      {
+        "title": "A Similarity Analysis for Heat Transfer in Newtonian and Power Law Fluids Using the Instantaneous Wall Shear Stress",
+        "compress": "Instantaneous wall shear stress acts as a universal similarity variable that collapses cross-fluid transport data, independently confirming that correct variable selection — not model complexity — is what achieves substrate-independent universality."
+      },
+      {
+        "title": "FCP_DIS_ViT: Efficient Vision Transformer with Neural Network Pruning",
+        "compress": ""
+      },
+      {
+        "title": "Convergence properties for a generalization of the Caginalp phase field system",
+        "compress": "Generalized Caginalp phase-field convergence independently confirms that maximal monotone dissipative structure is a topological invariant under singular perturbation, converging with INV_073 and providing a concrete variational method that advances O112's STF recovery specification."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
       "obligations": [
         "O290",
         "O76",
