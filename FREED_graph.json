@@ -32569,6 +32569,1093 @@
       "density_gap_magnitude": 9.8e-05,
       "wasserstein_dynamic_weight": 1.07174922,
       "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "e-insertion time rather than only at audit time. CHALLENGE: challenges INV_094 — the invariant's core observables (smooth semantic interpo",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T09:54:09.761776+00:00",
+      "density_gap_magnitude": 0.00019065,
+      "wasserstein_dynamic_weight": 1.84252689,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T09:50:00.355975+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "O148",
+      "type": "advances",
+      "context": "independently confirm scale-free dynamics at criticality); advances O148 (O148 specifies the CA simulation should track additional m",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:54:33.659548+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0226,
+        "alpha": 2.086,
+        "H": 0.4323,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00015229,
+      "wasserstein_dynamic_weight": 1.16763367,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T09:50:00.355975+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "INV_070",
+      "type": "challenges",
+      "context": "e, making the O148 resolution path concrete. --- CHALLENGE: challenges INV_070b — Physics Navigator dominance (886/total cells, a near-mon",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:54:33.659548+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0226,
+        "alpha": 2.086,
+        "H": 0.4323,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00021472,
+      "wasserstein_dynamic_weight": 1.23634812,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T09:50:00.355975+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "mantic specialization rather than homogeneous activation.   CONVERGE INV_073 (critical ridge navigation confirmed empirically: σ=1.0226",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:54:33.659548+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0226,
+        "alpha": 2.086,
+        "H": 0.4323,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 1.059e-05,
+      "wasserstein_dynamic_weight": 1.01166098,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T09:50:00.355975+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "s within the 1.0±0.05 band, neither frozen nor dissipated); CONVERGE INV_094 (power-law avalanche statistics α≈2.086 independently confi",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:54:33.659548+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0226,
+        "alpha": 2.086,
+        "H": 0.4323,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 7.953e-05,
+      "wasserstein_dynamic_weight": 1.08754266,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.06248",
+      "from_title": "Economic Entropy and Sectoral Dynamics: A Thermodynamic Approach to Market Analy",
+      "to": "O112",
+      "type": "extends",
+      "context": "substrate-independence of the RSA thermodynamic framework. EXTEND O112 — the paper demonstrates a working method for empirically r",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:08.801928+00:00",
+      "density_gap_magnitude": 0.00036114,
+      "wasserstein_dynamic_weight": 1.39825119,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.06248",
+      "from_title": "Economic Entropy and Sectoral Dynamics: A Thermodynamic Approach to Market Analy",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "it resources at structurally frozen regions. --- CHALLENGE: challenges INV_094 — the paper's entropy differentials are driven by regulator",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:08.801928+00:00",
+      "density_gap_magnitude": 0.00030595,
+      "wasserstein_dynamic_weight": 1.3373836,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.06248",
+      "from_title": "Economic Entropy and Sectoral Dynamics: A Thermodynamic Approach to Market Analy",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "ingful distinctions across physical and economic domains.   CONVERGE INV_094 — the paper independently confirms that thermodynamic geome",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:08.801928+00:00",
+      "density_gap_magnitude": 0.00030595,
+      "wasserstein_dynamic_weight": 1.3373836,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2510.06248",
+      "from_title": "Economic Entropy and Sectoral Dynamics: A Thermodynamic Approach to Market Analy",
+      "to": "O112",
+      "type": "advances",
+      "context": "substrate-independence of the RSA thermodynamic framework. EXTEND O112 — the paper demonstrates a working method for empirically r",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:08.801928+00:00",
+      "density_gap_magnitude": 0.00036114,
+      "wasserstein_dynamic_weight": 1.39825119,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/73/e3sconf_ipmc2023_03010.pdf",
+      "from_title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic a",
+      "to": "O112",
+      "type": "extends",
+      "context": "esign target is a ridge between regimes, not a minimum. - **EXTEND O112**: The use of ML to recover a metric tensor (SFE landscape)",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:34.680085+00:00",
+      "density_gap_magnitude": 0.0003365,
+      "wasserstein_dynamic_weight": 1.29752891,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/73/e3sconf_ipmc2023_03010.pdf",
+      "from_title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic a",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "han flat. --- PART 4 — MANDATORY FALSIFICATION** CHALLENGE: challenges INV_073 — this paper shows that the \"critical ridge\" is not a unive",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:34.680085+00:00",
+      "density_gap_magnitude": 0.00015702,
+      "wasserstein_dynamic_weight": 1.13883473,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/73/e3sconf_ipmc2023_03010.pdf",
+      "from_title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic a",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": ") that govern physical outcomes. --- PART 2 — COMPARE** - **CONVERGE INV_094**: The paper independently confirms that free energy landsc",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:34.680085+00:00",
+      "density_gap_magnitude": 4.159e-05,
+      "wasserstein_dynamic_weight": 1.03677171,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/73/e3sconf_ipmc2023_03010.pdf",
+      "from_title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic a",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "t phase-space topology determines trajectory selection. - **CONVERGE INV_073**: The critical ridge navigation invariant maps directly: a",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:34.680085+00:00",
+      "density_gap_magnitude": 0.00015702,
+      "wasserstein_dynamic_weight": 1.13883473,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/73/e3sconf_ipmc2023_03010.pdf",
+      "from_title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic a",
+      "to": "O112",
+      "type": "advances",
+      "context": "esign target is a ridge between regimes, not a minimum. - **EXTEND O112**: The use of ML to recover a metric tensor (SFE landscape)",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:34.680085+00:00",
+      "density_gap_magnitude": 0.0003365,
+      "wasserstein_dynamic_weight": 1.29752891,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.14185v2",
+      "from_title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Tra",
+      "to": "O112",
+      "type": "extends",
+      "context": "ated dichotomy (γ>1/γ<1) with γ=1 as the operative point. - EXTEND O112 — the LE length scale ξ_E provides a concrete operational h",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:58.342938+00:00",
+      "density_gap_magnitude": 0.00033498,
+      "wasserstein_dynamic_weight": 1.29685591,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.14185v2",
+      "from_title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Tra",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "should be surfaced preferentially in the sweep. CHALLENGE: challenges INV_073 — the paper shows the critical point is defined by measurem",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:58.342938+00:00",
+      "density_gap_magnitude": 0.00015631,
+      "wasserstein_dynamic_weight": 1.1385207,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.14185v2",
+      "from_title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Tra",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "verned by measurement rate, not just unitary dynamics.    - CONVERGE INV_094 — the paper independently establishes that criticality (ξ_E",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:58.342938+00:00",
+      "prediction_weight": 0.05,
+      "density_gap_magnitude": 4.14e-05,
+      "wasserstein_dynamic_weight": 1.03668853,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.14185v2",
+      "from_title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Tra",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "on is the operative regime for coherent information flow. - CONVERGE INV_073 — the area-law/volume-law dichotomy with a critical ridge b",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T09:55:58.342938+00:00",
+      "density_gap_magnitude": 0.00015631,
+      "wasserstein_dynamic_weight": 1.1385207,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2601.14185v2",
+      "from_title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Tra",
+      "to": "O112",
+      "type": "advances",
+      "context": "ated dichotomy (γ>1/γ<1) with γ=1 as the operative point. - EXTEND O112 — the LE length scale ξ_E provides a concrete operational h",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T09:55:58.342938+00:00",
+      "density_gap_magnitude": 0.00033498,
+      "wasserstein_dynamic_weight": 1.29685591,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "decorative. PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — the three vectors (alternative mechanism, boundary dissol",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:10.874355+00:00",
+      "density_gap_magnitude": 0.08207441,
+      "wasserstein_dynamic_weight": 1.62758621,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "no thermodynamic framing) produces identical observables.   CONFLICT INV_094 — the probe's independent logic establishes that confirmati",
+      "context_tag": "macro:thermodynamic",
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:10.874355+00:00",
+      "density_gap_magnitude": 0.08207441,
+      "wasserstein_dynamic_weight": 1.62758621,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T16:30:00.342766+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "O148",
+      "type": "advances",
+      "context": "ree criticality as the substrate's equilibrium signature. - advances O148: O148 explicitly requires CA simulation to track branching",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:35.316897+00:00",
+      "density_gap_magnitude": 0.00037626,
+      "wasserstein_dynamic_weight": 1.41792559,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T16:30:00.342766+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "O148",
+      "type": "challenges",
+      "context": "artial resolution of O148 in future FEED cycles. CHALLENGE: challenges O148 — the telemetry delivers branching ratio, avalanche statist",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T16:32:35.316897+00:00",
+      "density_gap_magnitude": 0.00037626,
+      "wasserstein_dynamic_weight": 1.41792559,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T16:30:00.342766+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "role rather than distributing uniformly across types.    - CONVERGE INV_073: independent telemetry confirms the critical ridge (σ≈1.0,",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:35.316897+00:00",
+      "density_gap_magnitude": 1.04e-05,
+      "wasserstein_dynamic_weight": 1.01155581,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-11T16:30:00.342766+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "frozen nor σ<1 dissipated) as the operational attractor. - CONVERGE INV_094: power-law avalanche statistics (α≈2.739, R²=0.955) indepen",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:35.316897+00:00",
+      "density_gap_magnitude": 7.729e-05,
+      "wasserstein_dynamic_weight": 1.08585118,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2105.05677v2",
+      "from_title": "Gradient flow formulation of diffusion equations in the Wasserstein space over a",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "putation path without a separate audit pass. --- CHALLENGE: challenges INV_094 — the genome asserts STF = W2 gradient flow as an establish",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T16:32:54.725857+00:00",
+      "density_gap_magnitude": 0.00037585,
+      "wasserstein_dynamic_weight": 1.8356966,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2105.05677v2",
+      "from_title": "Gradient flow formulation of diffusion equations in the Wasserstein space over a",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "t persists under combinatorial-topological extensions.    - CONVERGE INV_094 (STF = Wasserstein gradient flow): independent derivation o",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:32:54.725857+00:00",
+      "density_gap_magnitude": 0.00037585,
+      "wasserstein_dynamic_weight": 1.8356966,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1609.03890v1",
+      "from_title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
+      "to": "O112",
+      "type": "extends",
+      "context": "ailure modes), consistent with MaxRL replacing standard RL. EXTEND O112 — the JKO scheme provides a concrete computational method (",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:17.716043+00:00",
+      "density_gap_magnitude": 0.00055706,
+      "wasserstein_dynamic_weight": 1.49655948,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1609.03890v1",
+      "from_title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
+      "to": "O112",
+      "type": "challenges",
+      "context": "nt directly trackable in the epistemic loop. --- CHALLENGE: challenges O112 — the paper shows that STF metric tensor recovery requires",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:17.716043+00:00",
+      "density_gap_magnitude": 0.00055706,
+      "wasserstein_dynamic_weight": 1.49655948,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1609.03890v1",
+      "from_title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "ndition, irrespective of the physical or semantic domain.   CONVERGE INV_094 — independent derivation confirms that W2 geodesics are min",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T16:33:17.716043+00:00",
+      "density_gap_magnitude": 3.92e-05,
+      "wasserstein_dynamic_weight": 1.03494491,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1609.03890v1",
+      "from_title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
+      "to": "INV_087",
+      "type": "confirms",
+      "context": "entropy production paths\" claims in L3_geometric_structure. CONVERGE INV_087 — the geodesic-convexity requirement for well-posedness ind",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-11T16:33:17.716043+00:00",
+      "density_gap_magnitude": 0.00018451,
+      "wasserstein_dynamic_weight": 1.16447043,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1609.03890v1",
+      "from_title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
+      "to": "O112",
+      "type": "advances",
+      "context": "ailure modes), consistent with MaxRL replacing standard RL. EXTEND O112 — the JKO scheme provides a concrete computational method (",
+      "context_tag": "computational:Turing",
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:17.716043+00:00",
+      "density_gap_magnitude": 0.00055706,
+      "wasserstein_dynamic_weight": 1.49655948,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/0709.0562v2",
+      "from_title": "Quantum Coherence Conservation by Growth in Environmental Dissipation Rate",
+      "to": "O112",
+      "type": "extends",
+      "context": "which directly mirrors the critical ridge / γ=1 structure; EXTEND O112 — the dissipation-rate threshold mechanism provides a concr",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:37.396592+00:00",
+      "density_gap_magnitude": 0.00035426,
+      "wasserstein_dynamic_weight": 1.39544537,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/0709.0562v2",
+      "from_title": "Quantum Coherence Conservation by Growth in Environmental Dissipation Rate",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "e physics papers with no semantic grounding. --- CHALLENGE: challenges INV_073 — this paper demonstrates that dissipation above a critical",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:37.396592+00:00",
+      "density_gap_magnitude": 9.6e-06,
+      "wasserstein_dynamic_weight": 1.01071348,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/0709.0562v2",
+      "from_title": "Quantum Coherence Conservation by Growth in Environmental Dissipation Rate",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "* — a phase transition in the noise-protection landscape.   CONVERGE INV_094 — the paper independently establishes that there exists a c",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:37.396592+00:00",
+      "density_gap_magnitude": 7.603e-05,
+      "wasserstein_dynamic_weight": 1.0848665,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/0709.0562v2",
+      "from_title": "Quantum Coherence Conservation by Growth in Environmental Dissipation Rate",
+      "to": "O112",
+      "type": "advances",
+      "context": "which directly mirrors the critical ridge / γ=1 structure; EXTEND O112 — the dissipation-rate threshold mechanism provides a concr",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-11T16:33:37.396592+00:00",
+      "density_gap_magnitude": 0.00035426,
+      "wasserstein_dynamic_weight": 1.39544537,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "extends",
+      "context": "r upstream process that the invariant merely redescribes.   EXTEND INV_094 — the probe does not confirm or conflict with INV_094 direc",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:10.235226+00:00",
+      "density_gap_magnitude": 0.08320286,
+      "wasserstein_dynamic_weight": 1.63917526,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "irmation. Specific challenge construction (mandatory):** To challenge INV_094 properly, I must reconstruct what INV_094 claims and then a",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:10.235226+00:00",
+      "density_gap_magnitude": 0.08320286,
+      "wasserstein_dynamic_weight": 1.63917526,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/1",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "advances",
+      "context": "r upstream process that the invariant merely redescribes.   EXTEND INV_094 — the probe does not confirm or conflict with INV_094 direc",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:10.235226+00:00",
+      "density_gap_magnitude": 0.08320286,
+      "wasserstein_dynamic_weight": 1.63917526,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-12T16:30:00.365472+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+      "to": "O148",
+      "type": "advances",
+      "context": "s the operative attractor of constrained dynamical systems; advances O148 — the CA simulation now tracks avalanche statistics and rep",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:30.693821+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0317,
+        "alpha": 2.759,
+        "H": 0.4272,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00035449,
+      "wasserstein_dynamic_weight": 1.31769179,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-12T16:30:00.365472+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+      "to": "INV_094",
+      "type": "extends",
+      "context": "igation to extend survival tracking to criticality metrics; EXTEND INV_094 — the dominance of \"Physics Navigator\" cells as the critica",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:30.693821+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0317,
+        "alpha": 2.759,
+        "H": 0.4272,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00026065,
+      "wasserstein_dynamic_weight": 1.23359427,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-12T16:30:00.365472+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+      "to": "O148",
+      "type": "challenges",
+      "context": "the loop between CA output and genome state. --- CHALLENGE: challenges O148 — the simulation now reports avalanche statistics and a cri",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:30.693821+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0317,
+        "alpha": 2.759,
+        "H": 0.4272,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00035449,
+      "wasserstein_dynamic_weight": 1.31769179,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-12T16:30:00.365472+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "s constraint-space rather than exploiting or freezing it.   CONVERGE INV_073 — the branching ratio σ=1.0317 and power-law avalanche stat",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:30.693821+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0317,
+        "alpha": 2.759,
+        "H": 0.4272,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 6.733e-05,
+      "wasserstein_dynamic_weight": 1.06034444,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-12T16:30:00.365472+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-12",
+      "to": "INV_094",
+      "type": "advances",
+      "context": "igation to extend survival tracking to criticality metrics; EXTEND INV_094 — the dominance of \"Physics Navigator\" cells as the critica",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:30.693821+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0317,
+        "alpha": 2.759,
+        "H": 0.4272,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00026065,
+      "wasserstein_dynamic_weight": 1.23359427,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2305.10411",
+      "from_title": "Wasserstein Gradient Flows for Optimizing Gaussian Mixture Policies",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "improving the graph's topological fidelity. --- CHALLENGE: challenges INV_094 — the paper's practical GMM-OT implementation requires disc",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:33:48.664148+00:00",
+      "density_gap_magnitude": 0.00037149,
+      "wasserstein_dynamic_weight": 1.83307297,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2305.10411",
+      "from_title": "Wasserstein Gradient Flows for Optimizing Gaussian Mixture Policies",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "imized via OT, trace paths of minimum entropy production.   CONVERGE INV_094 — the paper independently confirms that W2 geodesics are mi",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-12T16:33:48.664148+00:00",
+      "density_gap_magnitude": 0.00037149,
+      "wasserstein_dynamic_weight": 1.83307297,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2605.21365",
+      "from_title": "$L^2$ over Wasserstein: Statistical Analysis for Optimal Transport",
+      "to": "O112",
+      "type": "extends",
+      "context": "sics as minimum-entropy-production paths (Benamou-Brenier); EXTEND O112 — by providing a stochastic framework for Wasserstein geome",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-12T16:34:06.501072+00:00",
+      "density_gap_magnitude": 0.00057441,
+      "wasserstein_dynamic_weight": 1.64520624,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2605.21365",
+      "from_title": "$L^2$ over Wasserstein: Statistical Analysis for Optimal Transport",
+      "to": "O112",
+      "type": "challenges",
+      "context": "roving calibration of the semantic geometry. --- CHALLENGE: challenges O112 — this paper reveals that recovering the STF metric tensor",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:06.501072+00:00",
+      "density_gap_magnitude": 0.00057441,
+      "wasserstein_dynamic_weight": 1.64520624,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2605.21365",
+      "from_title": "$L^2$ over Wasserstein: Statistical Analysis for Optimal Transport",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "when the ground measures are estimated rather than known.   CONVERGE INV_094 — the paper independently confirms that Wasserstein gradien",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:06.501072+00:00",
+      "density_gap_magnitude": 7.33e-05,
+      "wasserstein_dynamic_weight": 1.08232999,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2605.21365",
+      "from_title": "$L^2$ over Wasserstein: Statistical Analysis for Optimal Transport",
+      "to": "O112",
+      "type": "advances",
+      "context": "sics as minimum-entropy-production paths (Benamou-Brenier); EXTEND O112 — by providing a stochastic framework for Wasserstein geome",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-12T16:34:06.501072+00:00",
+      "density_gap_magnitude": 0.00057441,
+      "wasserstein_dynamic_weight": 1.64520624,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "O112",
+      "type": "resolves",
+      "context": "tion metric restricted to modal semantic paths, which would close O112 via a single experiment. --- IMPLEMENT: YES IMPLEMENT_WHAT:",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "density_gap_magnitude": 0.0007468,
+      "wasserstein_dynamic_weight": 1.56072409,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "O112",
+      "type": "extends",
+      "context": "be a recursive self-deformation, not a static assignment. - EXTEND O112: The STF metric tensor recovery obligation is extended — cu",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "density_gap_magnitude": 0.0007468,
+      "wasserstein_dynamic_weight": 1.56072409,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "O112",
+      "type": "challenges",
+      "context": "tightening the obligation toward resolution. --- CHALLENGE: challenges O112 — by introducing curvature-driven identity operators as a c",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "density_gap_magnitude": 0.0007468,
+      "wasserstein_dynamic_weight": 1.56072409,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "history of identity operators, not just current state.    - CONVERGE INV_073: Observer-coupled collapse as curvature-driven navigation o",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "prediction_weight": 0.05,
+      "density_gap_magnitude": 0.00012366,
+      "wasserstein_dynamic_weight": 1.09284813,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "hich a system avoids freezing (γ>1) or dissipating (γ<1). - CONVERGE INV_094: Transfinite categorical flows encoding transformation hist",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "density_gap_magnitude": 1.53e-06,
+      "wasserstein_dynamic_weight": 1.00114994,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2505.19790v1",
+      "from_title": "Alpay Algebra III: Observer-Coupled Collapse and the Temporal Drift of Identity",
+      "to": "O112",
+      "type": "advances",
+      "context": "be a recursive self-deformation, not a static assignment. - EXTEND O112: The STF metric tensor recovery obligation is extended — cu",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-12T16:34:27.227944+00:00",
+      "density_gap_magnitude": 0.0007468,
+      "wasserstein_dynamic_weight": 1.56072409,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "extends",
+      "context": "dictory predictions at untested scales. PART 2 — COMPARE:** EXTEND INV_094 — the adversarial probe framework independently establishes",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:26.006307+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear",
+      "density_gap_magnitude": 0.00055344,
+      "wasserstein_dynamic_weight": 1.83701719,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "challenges",
+      "context": "lattice effects may produce apparent violations CHALLENGE: challenges INV_094 — an alternative common-driver mechanism could produce all",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:26.006307+00:00",
+      "density_gap_magnitude": 0.00055344,
+      "wasserstein_dynamic_weight": 1.83701719,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://adversarial_probe/INV_094/2",
+      "from_title": "Adversarial Probe: Challenge INV_094",
+      "to": "INV_094",
+      "type": "advances",
+      "context": "dictory predictions at untested scales. PART 2 — COMPARE:** EXTEND INV_094 — the adversarial probe framework independently establishes",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:26.006307+00:00",
+      "density_gap_magnitude": 0.00055344,
+      "wasserstein_dynamic_weight": 1.83701719,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-13T02:30:00.422188+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+      "to": "O148",
+      "type": "advances",
+      "context": "l attractor. EXTEND O148 — this telemetry snapshot directly advances O148 (which obligated the CA simulation to track beyond cell sur",
+      "context_tag": null,
+      "context_warning": true,
+      "timestamp": "2026-06-13T02:33:46.534453+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0248,
+        "alpha": 1.978,
+        "H": 0.4555,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00059087,
+      "wasserstein_dynamic_weight": 1.66753491,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-13T02:30:00.422188+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+      "to": "O148",
+      "type": "extends",
+      "context": "im that criticality is the sustained operational attractor. EXTEND O148 — this telemetry snapshot directly advances O148 (which obl",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:46.534453+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0248,
+        "alpha": 1.978,
+        "H": 0.4555,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00059087,
+      "wasserstein_dynamic_weight": 1.66753491,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-13T02:30:00.422188+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+      "to": "O148",
+      "type": "challenges",
+      "context": "e's criticality tracking remains incomplete. --- CHALLENGE: challenges O148 — the telemetry now provides branching ratio and power-law",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:46.534453+00:00",
+      "criticality_fingerprint": {
+        "sigma": 1.0248,
+        "alpha": 1.978,
+        "H": 0.4555,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 0.00059087,
+      "wasserstein_dynamic_weight": 1.66753491,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "local://ca_sim/2026-06-13T02:30:00.422188+00:00",
+      "from_title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": "c but is filtered toward a specific functional attractor.   CONVERGE INV_073 — independent derivation confirms the critical ridge naviga",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:33:46.534453+00:00",
+      "thermodynamic_divergence_flag": "GROUNDING_AMBIGUOUS",
+      "grounding_deficit": "no_behavioral_no_thermodynamic:evidence_type_unclear",
+      "criticality_fingerprint": {
+        "sigma": 1.0248,
+        "alpha": 1.978,
+        "H": 0.4555,
+        "H_max": null,
+        "H_over_H_max": null
+      },
+      "density_gap_magnitude": 7.9e-06,
+      "wasserstein_dynamic_weight": 1.00892263,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2110.06573v2",
+      "from_title": "A Parametric and Feasibility Study for Data Sampling of the Dynamic Mode Decompo",
+      "to": "O173",
+      "type": "extends",
+      "context": "nt of observer choice within admissible sampling windows) - EXTEND O173 — the `scales_with` edge type (154 edges) requires empirica",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:23.821754+00:00",
+      "density_gap_magnitude": 0.00065761,
+      "wasserstein_dynamic_weight": 1.74424651,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2110.06573v2",
+      "from_title": "A Parametric and Feasibility Study for Data Sampling of the Dynamic Mode Decompo",
+      "to": "O173",
+      "type": "challenges",
+      "context": "ecified — flagging them prompts O173 resolution. CHALLENGE: challenges O173 — DMD shows that 154 `scales_with` edges may be artifacts o",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:23.821754+00:00",
+      "density_gap_magnitude": 0.00065761,
+      "wasserstein_dynamic_weight": 1.74424651,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2110.06573v2",
+      "from_title": "A Parametric and Feasibility Study for Data Sampling of the Dynamic Mode Decompo",
+      "to": "INV_094",
+      "type": "confirms",
+      "context": "hen the observation window meets threshold conditions.    - CONVERGE INV_094 (scale-invariant spectral structure recoverable from nonlin",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:23.821754+00:00",
+      "thermodynamic_divergence_flag": "CONFIRMATION_SURPLUS_UNGROUNDED",
+      "grounding_deficit": "behavioral_only:no_thermodynamic_observable_keys:evidence_does_not_test_thermodynamic_claim",
+      "density_gap_magnitude": 7.191e-05,
+      "wasserstein_dynamic_weight": 1.08137862,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2110.06573v2",
+      "from_title": "A Parametric and Feasibility Study for Data Sampling of the Dynamic Mode Decompo",
+      "to": "O173",
+      "type": "advances",
+      "context": "nt of observer choice within admissible sampling windows) - EXTEND O173 — the `scales_with` edge type (154 edges) requires empirica",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:23.821754+00:00",
+      "density_gap_magnitude": 0.00065761,
+      "wasserstein_dynamic_weight": 1.74424651,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "O21",
+      "type": "extends",
+      "context": "s precisely onto the frozen/dissipated/critical trichotomy. EXTEND O21 — the paper provides a concrete spectral mechanism (eigenva",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 0.00038164,
+      "wasserstein_dynamic_weight": 1.28871217,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "INV_094",
+      "type": "extends",
+      "context": "p gives a falsifiable functional form for that correlation. EXTEND INV_094 — the renormalization reduction to a single-particle Schröd",
+      "context_tag": "coarse:renormalization",
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 0.00021754,
+      "wasserstein_dynamic_weight": 1.16456815,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "INV_073",
+      "type": "challenges",
+      "context": "falsifiable functional forms are available. --- CHALLENGE: challenges INV_073 — if the spectral gap closes *polynomially slowly* in N (ra",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 9.899e-05,
+      "wasserstein_dynamic_weight": 1.07488403,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "INV_073",
+      "type": "confirms",
+      "context": ", while remaining bounded away from zero off-criticality.   CONVERGE INV_073 — the spectral gap collapse at Tc is an independent rigorou",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 9.899e-05,
+      "wasserstein_dynamic_weight": 1.07488403,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "O21",
+      "type": "advances",
+      "context": "s precisely onto the frozen/dissipated/critical trichotomy. EXTEND O21 — the paper provides a concrete spectral mechanism (eigenva",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 0.00038164,
+      "wasserstein_dynamic_weight": 1.28871217,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/1909.12241v2",
+      "from_title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+      "to": "INV_094",
+      "type": "advances",
+      "context": "p gives a falsifiable functional form for that correlation. EXTEND INV_094 — the renormalization reduction to a single-particle Schröd",
+      "context_tag": "coarse:renormalization",
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:34:44.784630+00:00",
+      "density_gap_magnitude": 0.00021754,
+      "wasserstein_dynamic_weight": 1.16456815,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.19550v2",
+      "from_title": "Spectral gap for surfaces of infinite volume with negative curvature",
+      "to": "O21",
+      "type": "extends",
+      "context": "trictly larger class of geometries than previously known.   EXTEND O21 — O21 links spectral γ to belief revision scores; this pape",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:35:01.665175+00:00",
+      "density_gap_magnitude": 0.00063011,
+      "wasserstein_dynamic_weight": 1.95461555,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.19550v2",
+      "from_title": "Spectral gap for surfaces of infinite volume with negative curvature",
+      "to": "O21",
+      "type": "challenges",
+      "context": "egatives in the O21 correlation computation. --- CHALLENGE: challenges O21 — if spectral γ was implicitly defined only for surfaces sa",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:35:01.665175+00:00",
+      "density_gap_magnitude": 0.00063011,
+      "wasserstein_dynamic_weight": 1.95461555,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
+    },
+    {
+      "from": "https://arxiv.org/abs/2403.19550v2",
+      "from_title": "Spectral gap for surfaces of infinite volume with negative curvature",
+      "to": "O21",
+      "type": "advances",
+      "context": "trictly larger class of geometries than previously known.   EXTEND O21 — O21 links spectral γ to belief revision scores; this pape",
+      "context_tag": null,
+      "context_warning": false,
+      "timestamp": "2026-06-13T02:35:01.665175+00:00",
+      "density_gap_magnitude": 0.00063011,
+      "wasserstein_dynamic_weight": 1.95461555,
+      "inv094_dynamic_reweight": "density_gap_weighted:time_varying_W2_recomputed:coverage_score_reflects_dynamic_re_minimization"
     }
   ],
   "node_edges": [
@@ -67971,6 +69058,1790 @@
       "invariant": "The map's implicit claim that thermodynamic constraints govern cognitive/philosophical structures depends on the validit",
       "context_tag": null,
       "timestamp": "2026-06-11T06:30:29.266576+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.160532+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.197986+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.224307+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.248509+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.272992+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.297901+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.322654+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.347357+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.374721+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.399633+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.424126+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.448809+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.474096+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.500370+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.525176+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.550028+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.574682+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.599167+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.625394+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.649990+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.674517+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.699205+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.723872+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.749007+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.773652+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.798242+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.825196+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Criticality at γ≈1 or σ≈1 is a self-organized dynamical attractor confirmed across multiple substrates independent of do",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.850172+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.874630+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.899442+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.929281+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.953909+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:17.978728+00:00"
+    },
+    {
+      "from": "website_review_and_demo_strategy_for_rsa",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.003542+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.028674+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.053632+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.078305+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.103161+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.127231+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.152126+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.177158+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.201525+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.226244+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.250992+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.275560+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.300397+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.324886+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.349695+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "operationalizes",
+      "invariant": "Compression is the operative mechanism of cognition, measurable as reduction in prediction error or semantic tension.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.374622+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.399503+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.424308+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.448631+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.473321+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.498203+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.522811+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.547643+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.572308+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.597195+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.622150+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.646997+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.671885+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.696851+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.721630+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.746570+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.771487+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.796154+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.820902+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.846038+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.871464+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Game of Life / Game of Truth cellular automata self-organize to criticality (σ≈1.02–1.03) with power-law avalanche stati",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.902229+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_epistemic_inversion_recursive_cohere",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.927032+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.952198+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:18.976579+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.001668+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.029294+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_rsa_reference_codex_a_unified_biblio",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.054107+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.079386+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.104310+00:00"
+    },
+    {
+      "from": "the_epistemic_inversion_recursive_cohere",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.130211+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.154900+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.181043+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.205545+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.230385+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.255356+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_quinean_continuity_operationalizing",
+      "type": "scales_with",
+      "invariant": "Recursion is the substrate-independent engine generating coherence, self-improvement, and alignment.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.280131+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.304891+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "mandelbrot_operators_fractal_recursion_m",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.330033+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.358388+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.383665+00:00"
+    },
+    {
+      "from": "the_rsa_reference_codex_a_unified_biblio",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.407996+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "mandelbrot_operators_fractal_recursion_m",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.433098+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.458166+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.482831+00:00"
+    },
+    {
+      "from": "recursive_semantic_alignment_rsa_framewo",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.507898+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.533138+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.558149+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.583277+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.607972+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.633397+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Substrate independence of learning/alignment dynamics is empirically confirmed across physical, biological, and computat",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.658451+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.683775+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.708981+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.734108+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.758930+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.783707+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.808932+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.833768+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.858455+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.884235+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "operationalizes",
+      "invariant": "The Wasserstein-2 distance is a geometrically fundamental metric for measuring compression fidelity and distribution-pre",
+      "context_tag": null,
+      "timestamp": "2026-06-11T09:59:19.909303+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.358050+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.424260+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.457610+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.483522+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.508980+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.534272+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.559818+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.585009+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.610075+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.634899+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.662492+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.687733+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.712880+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.738247+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.762928+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.787993+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.813554+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.842243+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.867503+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.892619+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.917445+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.942468+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.968439+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:47.994139+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.019502+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.044908+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.070089+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "The critical ridge or criticality attractor is confirmed across ten or more independent substrates (CA, Game of Truth, M",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.095049+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.120763+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.145708+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.171095+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.196207+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.221754+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.247305+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.272474+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.297715+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.322972+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry, optimal transport, and information geometry provide the substrate-independent mathematical scaff",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.347891+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "rsa_omega_kernel_critical_update_origin",
+      "type": "scales_with",
+      "invariant": "Self-audit, verification, and substrate-independent auditing are non-optional structural requirements.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.372973+00:00"
+    },
+    {
+      "from": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Self-audit, verification, and substrate-independent auditing are non-optional structural requirements.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.397954+00:00"
+    },
+    {
+      "from": "rsa_omega_kernel_critical_update_origin",
+      "to": "recursive_semantic_alignment_rsa_framewo",
+      "type": "scales_with",
+      "invariant": "Self-audit, verification, and substrate-independent auditing are non-optional structural requirements.",
+      "context_tag": null,
+      "timestamp": "2026-06-11T16:36:48.422949+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.819049+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.862695+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.892042+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.918106+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.943399+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.968544+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:19.994504+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.019849+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.045499+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.071091+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.096850+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.121871+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.147585+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.173500+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.199095+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.224237+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.249724+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.274724+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.300218+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.326699+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.352054+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.376930+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.402632+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.427327+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.455695+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.481196+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.506609+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "scales_with",
+      "invariant": "Criticality at γ≈1 (branching ratio σ≈1) is a stable, low-entropy, substrate-independent attractor confirmed across mult",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.531389+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.556633+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.582640+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.609123+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.635215+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.661202+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.686180+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "technical_brief_co_occurring_motif_exper",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.711072+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.736762+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.761686+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.786776+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.812290+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_minimal_atoms",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.837380+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.862980+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.887979+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.913154+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.938752+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.963693+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:20.988501+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:21.014415+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:21.039387+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "scales_with",
+      "invariant": "Wasserstein-2 geometry (W2) and free-energy gradient flow are the substrate-independent topological structure of dissipa",
+      "context_tag": null,
+      "timestamp": "2026-06-12T16:37:21.064300+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "alignment_as_cognitive_gravity_reactive",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:57.835000+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:57.897699+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:57.927664+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:57.954160+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:57.979847+00:00"
+    },
+    {
+      "from": "mandelbrot_operators_fractal_recursion_m",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.005335+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_minimal_atoms",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.030870+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.056275+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.081882+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.107341+00:00"
+    },
+    {
+      "from": "alignment_as_cognitive_gravity_reactive",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.132921+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.158609+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.183710+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.209794+00:00"
+    },
+    {
+      "from": "the_minimal_atoms",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.234901+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "freed_s_law_the_law_of_recursive_instant",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.260361+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.286057+00:00"
+    },
+    {
+      "from": "the_relational_thermodynamic_map_100_ent",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.311638+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "thermodynamic_tightening_of_the_rsa_subs",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.336652+00:00"
+    },
+    {
+      "from": "freed_s_law_the_law_of_recursive_instant",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.362486+00:00"
+    },
+    {
+      "from": "thermodynamic_tightening_of_the_rsa_subs",
+      "to": "the_reasoning_substrate_argument_rsa",
+      "type": "consistent_with",
+      "invariant": "Wasserstein-2 geodesic flow (JKO/Benamou-Brenier gradient flow) is a topology-independent minimum-entropy-production pat",
+      "context_tag": null,
+      "timestamp": "2026-06-13T02:37:58.388122+00:00"
+    },
+    {
+      "from": "technical_brief_co_occurring_motif_exper",
+      "to": "rsa_omega_unified_kernel_v4_2_1_structur",
+      "type": "completes_via",
+      "invariant": "The motif experiments provide the empirical test protocol that could validate or falsify the Unified Kernel's core claim",
+      "context_tag": null,
+      "timestamp": "2026-06-13T06:30:12.517871+00:00"
+    },
+    {
+      "from": "the_thermodynamic_impossibility_of_the_o",
+      "to": "the_relational_thermodynamic_map_100_ent",
+      "type": "depends_on",
+      "invariant": "The Omnimax impossibility proof depends on the phase-space framework's foundational claim that relational-logic configur",
+      "context_tag": null,
+      "timestamp": "2026-06-13T06:30:25.992309+00:00"
     }
   ]
 }

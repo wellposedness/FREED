@@ -48,6 +48,9 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
         state["criticality_r2"] = criticality.get("power_law_r2")
         state["criticality_survival"] = criticality.get("survival_rate")
         state["criticality_entropy"] = criticality.get("shannon_entropy")
+        state["criticality_h_max"] = criticality.get("h_max")
+        state["criticality_h_over_h_max"] = criticality.get("h_over_h_max")
+        state["criticality_entropy_criticality"] = criticality.get("entropy_criticality")
         state["criticality_verdict"] = criticality.get("criticality_verdict")
 
         # ── Running criticality score (σ, α, R²) ─────────────────────
@@ -1698,6 +1701,27 @@ def _write_cycles(cycle_log: dict):
                 }
             except (TypeError, ValueError):
                 pass
+        _sf_se = criticality.get("shannon_entropy")
+        if _sf_se is not None:
+            _sf_h_ratio = criticality.get("h_over_h_max")
+            _sf_h_max = criticality.get("h_max")
+            _se_entry = {
+                "value": _sf_se,
+                "unit": "bits",
+            }
+            if _sf_h_ratio is not None and _sf_h_max is not None:
+                try:
+                    _sf_hr = float(_sf_h_ratio)
+                    _se_entry["h_over_h_max"] = _sf_h_ratio
+                    _se_entry["h_max"] = _sf_h_max
+                    # AT_RIDGE band: H/H_max ∈ [0.15, 0.25]
+                    _se_entry["band_h_ratio"] = [0.15, 0.25]
+                    _se_entry["in_band"] = 0.15 <= _sf_hr <= 0.25
+                    # Score: 1.0 at band center (0.20), decaying linearly
+                    _se_entry["score"] = round(max(0.0, 1.0 - abs(_sf_hr - 0.20) / 0.10), 4)
+                except (TypeError, ValueError):
+                    pass
+            scored_fields["shannon_entropy"] = _se_entry
         _sf_sr = criticality.get("survival_rate")
         if _sf_sr is not None:
             scored_fields["survival_rate"] = {

@@ -70,7 +70,46 @@ ARXIV_KEYWORDS = [
     ("wasserstein", 3), ("quantum transport", 2), ("entanglement entropy", 2),
     ("spectral", 2), ("belief revision", 3), ("eeg", 1), ("neural oscillation", 2),
     ("ear", 1), ("intelligence", 1),
+    # O112: diverging length scales at phase transitions (STF metric tensor analogs)
+    ("length scale", 2), ("diverges", 2), ("finite.size scaling", 3),
+    ("order parameter", 2), ("localizable entanglement", 4),
+    ("intrinsic length", 4), ("correlation length", 2),
+    ("measurement.induced", 3), ("volume.law", 2), ("area.law", 2),
+    ("teleportation fidelity", 3), ("critical measurement", 3),
 ]
+
+# ─── O112 length-scale divergence co-occurrence patterns ─────────────────────
+# Papers reporting a diverging intrinsic length scale at a phase transition are
+# the closest structural analogs for empirical STF metric-tensor recovery.
+# When MIPT/entanglement signals co-occur with length-scale divergence signals,
+# a bonus is applied.
+
+O112_MIPT_PATTERNS = [
+    (r"measurement.induced\s+(phase\s+)?transition", 4),
+    (r"localizable\s+entanglement", 5),
+    (r"entanglement\s+(entropy|transition|phase)", 3),
+    (r"volume.law\s+(phase|entanglement)", 3),
+    (r"area.law\s+(phase|entanglement)", 3),
+    (r"teleportation\s+(fidelity|protocol)", 4),
+    (r"quantum\s+circuit.{0,30}(measurement|monitor)", 3),
+    (r"monitored\s+(quantum\s+)?(circuit|system)", 3),
+    (r"MIPT", 5),
+]
+
+O112_LENGTH_DIVERGENCE_PATTERNS = [
+    (r"(intrinsic\s+)?length\s+scale.{0,30}diverg", 6),
+    (r"correlation\s+length.{0,30}diverg", 5),
+    (r"xi\b.{0,20}diverg", 4),
+    (r"ξ.{0,20}diverg", 4),
+    (r"finite.size\s+scaling", 4),
+    (r"critical\s+exponent", 3),
+    (r"order\s+parameter.{0,30}(decay|exponential|phase)", 4),
+    (r"diverging\s+(length|correlation|scale)", 5),
+    (r"critical\s+(point|probability|threshold).{0,30}(p_c|measurement)", 4),
+]
+
+O112_COOCCUR_BONUS = 10
+O112_MIN_HITS_PER_VOCAB = 1
 
 # ─── σ-decay relevance scorer (O64: long-range stat-mech × optimal transport) ─
 # Papers co-occurring in BOTH vocabularies get a large bonus, surfacing the

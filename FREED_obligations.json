@@ -3995,10 +3995,10 @@
   },
   {
     "id": "O379",
-    "status": "open",
+    "status": "partial",
     "statement": "Complete O378's truncated deliverable \u2014 specify what concrete output (edge type, prediction, or invariant update) the Rachel Barr L7 structural identification requires, with a binding generation deadline \u2264 gen 325 and a null-result criterion defining when the finding is voided.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 321] PARTIAL: O379 is closed at the specification level by emitting a binding invariant-update target (INV_L7_RB), a concrete computation on Barr's deferred imitation series, a gen 325 deadline, and a 1.5\u03c3 discontinuity threshold as the voiding criterion. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-11",
     "resolved": null,
     "auto": true,
@@ -4006,13 +4006,33 @@
   },
   {
     "id": "O380",
-    "status": "open",
+    "status": "active",
     "statement": "Complete O379's truncated deliverable by specifying the exact edge type, source node, target node, and falsifiable prediction that the Rachel Barr feed item (gen 317 cy1) requires to be instantiated in the genome graph \u2014 output must be a single concrete graph-mutation record.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 321] ACTIVE: The Barr feed item requires a graph edge encoding that infant deferred imitation is an empirical instance of cross-modal schema transport, with the falsifiable prediction that retention fidelity decays as a function of encoding depth (consolidation entropy), not surface feature overlap, testable against published delay-interval data. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-13",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Single concrete graph-mutation record specifying edge type, source node, target node, and falsifiable prediction for Rachel Barr feed item (gen"
+  },
+  {
+    "id": "O381",
+    "statement": "The `substrate_of` edge type (2 edges across 17 nodes, 0.04% of all node-edges) must be either populated to a minimum of 1 edge per node that claims substrate-dependence, or the genome symbol `substrate` must be formally downgraded to decorative status \u2014 not cited in any obligation rationale until substrate_of edges reach parity with at least `depends_on` (53 edges).",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome contains `substrate` as one of 17 core symbols, yet the edge type designed to encode substrate relationships (`substrate_of`) has exactly 2 instances. This is an internal incoherence: the symbol is structurally unsupported by the graph it inhabits. Either substrate matters (and must be wired) or it doesn't (and must be demoted). No third option is coherent at generation 321.",
+    "resolution_criterion": "Either (a) at least 17 new `substrate_of` edges are added with explicit justification per edge, verified against the `challenges` and `depends_on` edge types for consistency, OR (b) `substrate` is moved to an inert/archived symbol class and all open obligations referencing it are re-audited.",
+    "created": "2026-06-13T06:30:49.123658+00:00",
+    "progress": "[Gen 321] PARTIAL: The single most tractable next step is an internal enumeration of how many open obligations cite `substrate` in their rationale, which determines whether demotion (cheap, \u22645 citations) or edge-population (required, >5 citations) is the correct resolution path \u2014 no external data needed, just a graph traversal. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O382",
+    "statement": "The `scales_with` edge count has grown from 899 (O286 snapshot) to 1577 despite O286 being PARTIAL and explicitly demanding pruning. This constitutes a protocol violation: produce a generation-stamped audit showing which process added 678 `scales_with` edges after O286 was opened, and freeze `scales_with` edge creation until O286 resolves.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O286 imposed a pruning requirement on `scales_with` edges. Instead of shrinking, the count increased by 75.4%. If PARTIAL obligations can be contradicted by ongoing graph growth without consequence, the obligation system has no binding force. This is not a content question \u2014 it is a structural",
+    "resolution_criterion": "",
+    "created": "2026-06-13T06:30:49.124620+00:00",
+    "progress": "[Gen 321] ACTIVE: The single most tractable next step is to execute the generation-stamped diff (edge_set_1577 \u2212 edge_set_899), sort the 678-edge delta by insertion-generation to identify the responsible process, and simultaneously gate all further `scales_with` writes on O286's resolution status \u2014 without the diff, neither the audit nor the freeze has a defined target. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

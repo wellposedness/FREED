@@ -1915,6 +1915,7 @@ Output only the classification lines, nothing else."""
         header = (
             f"RESOLVE: {target['id']}\n"
             f"Statement: {target['statement']}\n"
+            f"Closes when: {target.get('resolution_criterion', 'not specified')}\n"
             f"Current progress: {target.get('progress', 'none')}\n\n"
         )
         method = target.get("method", "mixed")
@@ -2059,8 +2060,12 @@ Output only the classification lines, nothing else."""
         # RESOLVE only retries open/partial. ACTIVE obligations have predictions
         # staked and are awaiting external data — burning L7 budget on them is
         # rumination, not progress.
+        # method=="diagnostic" obligations are operator-adjudicated: their closure
+        # criterion requires a blind event in a NON-target cycle, so a RESOLVE
+        # attempt can only produce prompted performance, never a valid close.
         open_obligs = [o for o in self.obligations
-                       if o["status"] in ("open", "partial")]
+                       if o["status"] in ("open", "partial")
+                       and o.get("method") != "diagnostic"]
         if not open_obligs:
             print("  No open or partial obligations to retry (active obligations await external data).")
             cycle_log["phases"]["resolve"] = {"status": "none_open"}
@@ -2099,6 +2104,7 @@ Output only the classification lines, nothing else."""
         untouched = [
             o for o in self.obligations
             if o["status"] == "open" and not o.get("progress", "").strip()
+            and o.get("method") != "diagnostic"
         ]
         if not untouched:
             print("[DMN] No untouched obligations to sweep.")
