@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 270,
-    "timestamp": "2026-05-26T09:50:00.063020+00:00",
-    "sweep": {
-      "input_count": 29,
-      "targeted": 8,
-      "passive": 21,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_047",
-        "compress": "INV_047's confirmation surplus is an artifact of the absence of a discriminating experiment — the Yule–Simon / Wasserstein degeneracy is unbroken, boundary conditions at small-N and high-T are unspecified, and O112 (STF empirical recovery) is the exact test that would either vindicate or shatter it."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-26",
-        "compress": "A 32×32 CA operating with σ=1.027, α≈2.64 power-law avalanches, and H=0.478 bits independently confirms critical ridge navigation (INV_073/INV_094) and resolves O148, while revealing that criticality is disproportionately carried by Physics Navigator cells — a cell-type-resolved finding the genome does not contain."
-      },
-      {
-        "title": "Calculation of Mutual Information for Partially Coherent Gaussian Channels with Applications to Fiber Optics",
-        "compress": "Mutual information in partially coherent channels decomposes geometrically into amplitude/phase components, with spectral loss quantifying exactly how coherence degradation taxes capacity — providing a formal model for the spectral-γ/belief-revision correlation demanded by O21."
-      },
-      {
-        "title": "Self-Referential Order",
-        "compress": "Self-referential order proves that disordered systems can be described by extracting high-mutual-information sub-structures that serve as their own templates — a physical instantiation of R[R]=R with an executable compression algorithm."
-      },
-      {
-        "title": "Scaling Theories of Kosterlitz-Thouless Phase Transitions",
-        "compress": "KT transitions prove that criticality can be governed by exponential rather than power-law divergences, with a self-referential rate exponent, extending INV_073's ridge-navigation claim to a richer geometric structure the genome has not yet formalized."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O258"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 271,
     "timestamp": "2026-05-26T16:29:59.944773+00:00",
@@ -2195,6 +2151,50 @@
         "O290",
         "O76",
         "O122"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 321,
+    "timestamp": "2026-06-13T02:29:59.998323+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 8,
+      "passive": 11,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is an epistemic liability — it demonstrates consistency but not necessity, and a common-driver alternative mechanism remains unconstructed and untested."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-13",
+        "compress": "Independent CA telemetry confirms critical-ridge operation (σ=1.025, α≈2) with low-entropy structured activation, converging on INV_073 and partially advancing O148."
+      },
+      {
+        "title": "A Parametric and Feasibility Study for Data Sampling of the Dynamic Mode Decomposition--Range, Resolution, and Universal Convergence States",
+        "compress": "DMD universal convergence states demonstrate that spectral attractors in nonlinear systems are real but resolution-gated, providing a concrete falsification protocol for claimed scaling relations (O173). IMPLEMENT: YES IMPLEMENT_WHAT: In the graph edge-validation loop, add a resolution-threshold check: for each `scales_with` edge, flag it as UNVERIFIED if the evidence supporting it lacks a specified observation window or sampling resolution criterion, analogous to DMD convergence floor requirements. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND validate_edges (or equivalent edge-audit function that iterates over typed edges) IMPLEMENT_WHY: DMD's finding that scaling relations only converge above sampling thresholds means `scales_with` edges without resolution provenance are epistemically underspecified — flagging them prompts O173 resolution. CHALLENGE: challenges O173 — DMD shows that 154 `scales_with` edges may be artifacts of inadequate sampling range/resolution rather than genuine substrate invariants, meaning the majority of scaling claims in the graph are unverified until a convergence-floor test is applied."
+      },
+      {
+        "title": "Spectral gap in mean-field $\\mathcal O(n)$-model",
+        "compress": "Rigorous spectral gap collapse at mean-field criticality independently confirms the γ=1 critical ridge as a proven dynamical singularity, and supplies a concrete N-scaling law that could operationalize the ToS/spectral-γ correlation demanded by O21."
+      },
+      {
+        "title": "Spectral gap for surfaces of infinite volume with negative curvature",
+        "compress": "Essential spectral gaps for infinite-volume negatively curved surfaces exist unconditionally (no pressure constraint), rigorously enlarging the geometric domain where spectral decay rates — and hence spectral γ correlates — are well-defined."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O76",
+        "O302"
       ]
     },
     "coherence": 0.97
