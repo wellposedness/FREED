@@ -1605,6 +1605,57 @@ def _write_cycles(cycle_log: dict):
     if criticality:
         summary["criticality"] = criticality
 
+    # O148 structured telemetry: build ca_telemetry_snapshot with σ, α,
+    # H/H_max as structured fields and AT_CRITICAL flag when σ ∈ [0.95,1.05]
+    # and power_law_likely = True.  This makes the criticality verdict
+    # auditable and linkable to O148 resolution tracking.
+    if criticality:
+        _snap_sigma = criticality.get("branching_ratio")
+        _snap_alpha = criticality.get("avalanche_exponent")
+        _snap_h_ratio = criticality.get("h_over_h_max")
+        _snap_r2 = criticality.get("power_law_r2")
+        _snap_verdict = criticality.get("criticality_verdict")
+
+        # Determine power_law_likely: R² ≥ 0.70 and α in plausible SOC range
+        _snap_pl_likely = False
+        if _snap_r2 is not None and _snap_alpha is not None:
+            try:
+                _snap_pl_likely = float(_snap_r2) >= 0.70 and float(_snap_alpha) > 0
+            except (TypeError, ValueError):
+                pass
+
+        # AT_CRITICAL flag: σ ∈ [0.95, 1.05] AND power_law_likely
+        _snap_at_critical = False
+        if _snap_sigma is not None:
+            try:
+                _s = float(_snap_sigma)
+                _snap_at_critical = (0.95 <= _s <= 1.05) and _snap_pl_likely
+            except (TypeError, ValueError):
+                pass
+
+        ca_telemetry_snapshot = {
+            "branching_ratio_sigma": _snap_sigma,
+            "avalanche_exponent_alpha": _snap_alpha,
+            "entropy_fraction_h_over_h_max": _snap_h_ratio,
+            "power_law_r2": _snap_r2,
+            "power_law_likely": _snap_pl_likely,
+            "AT_CRITICAL": _snap_at_critical,
+            "criticality_verdict": _snap_verdict,
+        }
+        # Include σ error bar when available
+        _snap_sigma_err = criticality.get("branching_ratio_err")
+        if _snap_sigma_err is not None:
+            ca_telemetry_snapshot["branching_ratio_sigma_err"] = _snap_sigma_err
+        # Include raw entropy and h_max for reproducibility
+        _snap_h = criticality.get("shannon_entropy")
+        if _snap_h is not None:
+            ca_telemetry_snapshot["shannon_entropy_bits"] = _snap_h
+        _snap_hmax = criticality.get("h_max")
+        if _snap_hmax is not None:
+            ca_telemetry_snapshot["h_max_bits"] = _snap_hmax
+
+        summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
+
     # O148 structured telemetry: promote key metrics to top-level summary
     # fields so subsequent FEED steps can cross-correlate without parsing
     # the nested criticality dict.  These flat fields enable the epistemic
@@ -2829,15 +2880,22 @@ function renderCycles(cycles) {
       const parts = [];
       if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
       if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
-      // O148: Always show Shannon entropy H as explicit metric alongside σ and α
+      // O148: Always show Shannon entropy H and H/H_max as explicit metrics alongside σ and α
+      // H/H_max (entropy fraction) is the normalized dimensionless criticality index,
+      // directly comparable across grid sizes — promoted to primary metric position.
       const seVal = c.shannon_entropy != null ? c.shannon_entropy : crit.shannon_entropy;
-      if (seVal != null) parts.push(`H=${seVal} bits`);
-      if (sr != null) parts.push(`survival=${sr}`);
-      if (hOverHmax != null) {
+      if (seVal != null) {
+        if (hOverHmax != null) {
+          parts.push(`H=${seVal} bits (${hOverHmax} of H_max${hMax != null ? '='+hMax : ''})`);
+        } else {
+          parts.push(`H=${seVal} bits`);
+        }
+      } else if (hOverHmax != null) {
         parts.push(`H/H_max=${hOverHmax}${hMax != null ? ' (H_max='+hMax+')' : ''}`);
-      } else if (er != null && seVal == null) {
+      } else if (er != null) {
         parts.push(`H=${er}`);
       }
+      if (sr != null) parts.push(`survival=${sr}`);
       if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
       // O148: Criticality-state badge — AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL
       const stateBadge = cv.includes('AT_CRITICAL') ? '🟢 AT_CRITICAL' :

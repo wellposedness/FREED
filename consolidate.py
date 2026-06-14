@@ -27,6 +27,7 @@ Triggered by:
 """
 
 import os
+import re
 import json
 import time
 import math
@@ -54,6 +55,111 @@ CONSOLIDATE_EVERY  = 5      # also consolidate every N daemon cycles
 MAX_NODES_PER_PASS = 8      # renormalize at most this many nodes per run
 MINE_COMPRESS_CAP  = 500    # chars per node in MINE digest
 MINE_INV_CAP       = 15     # invariants per node in MINE digest
+
+# ── scales_with accretion controls (O382 / O286 / DMN echo-clique) ────────────
+# Three coupled defenses against the γ=1 cluster re-asserting through node-edges:
+#   (1) FREEZE: while O286 is unresolved, scales_with edges are downgraded to
+#       consistent_with at mint time — O382's staked remedy.
+#   (2) SEMANTIC DEDUP: a node-pair already carrying a semantically-equivalent
+#       edge of the same type does not get a second one. Literal prefix-dedup
+#       (knowledge_graph.record_node_edge) catches nothing here — the redundancy
+#       is in rewording, so the check has to be on normalized claim content.
+#   (3) ECHO-CLIQUE ORIGIN GATE: a mined invariant whose APPEARS_IN nodes already
+#       form a dense co-assertion clique is treated as SHARED_SOURCE (echo), not
+#       independent confirmation — blocks the one-claim-across-a-fully-connected-
+#       subgraph inflation of PROMOTE recurrence. Extends the existing MINE
+#       ORIGIN filter from text self-report to graph topology.
+# Goodhart isolation: none of these gauges enter L7's prompt — operator/graph only.
+FREEZE_OBLIGATION_ID   = "O286"   # while unresolved, freeze scales_with minting
+CLAIM_DEDUP_JACCARD    = 0.5      # content-token overlap above which two claims are "the same".
+                                  # Calibrated on the live heavy-pair distribution: distinct
+                                  # co-occurring invariants sit at median 0.10 / p75 0.17, true
+                                  # restatements at 0.50–0.71 — 0.5 lands in the empty band, so
+                                  # dedup removes rewordings without collapsing distinct claims.
+ECHO_CLIQUE_DENSITY    = 0.6      # covered-pair fraction above which APPEARS_IN is an echo clique
+ECHO_CLIQUE_MIN_NODES  = 4        # need at least this many resolved nodes to judge a clique
+# Edge types that count as "these two nodes keep co-asserting" (echo evidence).
+# Excludes challenges/bounds_above/depends_on/operationalizes — real tension/structure.
+_CO_ASSERTION_TYPES    = frozenset({"scales_with", "substrate_independent", "consistent_with", "shares_invariant"})
+
+_CLAIM_STOPWORDS = frozenset(
+    "a an the is are be been being of to in on at by for with and or as that this "
+    "these those it its which from across both via using under over into within "
+    "more most less than then also not no can may must should each per such where "
+    "when while between among given any all some one two".split()
+)
+_CLAIM_TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+def _normalize_claim(text):
+    # type: (str) -> frozenset
+    """Content-token set of a claim — lowercase, stopworded, length-filtered.
+    Used to detect semantic restatements that differ only in wording."""
+    toks = _CLAIM_TOKEN_RE.findall((text or "").lower())
+    return frozenset(t for t in toks if t not in _CLAIM_STOPWORDS and len(t) >= 3)
+
+
+def _claims_equivalent(a, b, threshold=CLAIM_DEDUP_JACCARD):
+    # type: (str, str, float) -> bool
+    """True if two claims are restatements of each other (Jaccard >= threshold
+    on normalized content tokens). Symmetric; empty/disjoint claims never match."""
+    sa, sb = _normalize_claim(a), _normalize_claim(b)
+    if not sa or not sb:
+        return False
+    inter = len(sa & sb)
+    if inter == 0:
+        return False
+    return inter / float(len(sa | sb)) >= threshold
+
+
+def _obligation_unresolved(oid):
+    # type: (str) -> bool
+    """True if obligation `oid` exists and is not yet resolved. Fail-open
+    (returns False) if the file is unreadable — never over-freeze on error."""
+    try:
+        d = json.loads((FREED_DIR / "FREED_obligations.json").read_text())
+        obs = d if isinstance(d, list) else d.get("obligations", d)
+        if isinstance(obs, dict):
+            obs = list(obs.values())
+        for o in obs:
+            if o.get("id") == oid:
+                return o.get("status") != "resolved"
+    except Exception:
+        pass
+    return False
+
+
+def _echo_clique_density(graph, nodes):
+    # type: (object, list) -> tuple
+    """Fraction of node-pairs within `nodes` that already carry a co-assertion
+    edge in the graph. Returns (is_echo, density, resolved_n). Only nodes that
+    actually exist as edge endpoints count — too few resolved -> not an echo
+    (insufficient evidence; never suppress on ignorance)."""
+    try:
+        graph._ensure_loaded()
+        ne = graph._node_edges
+    except Exception:
+        return (False, 0.0, 0)
+    known = set()
+    pair_has_edge = set()
+    for e in ne:
+        f, t, ty = e.get("from"), e.get("to"), e.get("type")
+        known.add(f)
+        known.add(t)
+        if ty in _CO_ASSERTION_TYPES:
+            pair_has_edge.add(frozenset((f, t)))
+    resolved = [n for n in dict.fromkeys(nodes) if n in known]
+    n = len(resolved)
+    if n < ECHO_CLIQUE_MIN_NODES:
+        return (False, 0.0, n)
+    total_pairs = n * (n - 1) // 2
+    covered = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if frozenset((resolved[i], resolved[j])) in pair_has_edge:
+                covered += 1
+    density = covered / float(total_pairs) if total_pairs else 0.0
+    return (density >= ECHO_CLIQUE_DENSITY, density, n)
 
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
@@ -3025,8 +3131,8 @@ class Consolidator:
         )
 
         # Parse clusters
-        import re
         candidates = []
+        _mine_graph = get_graph()
         for block in raw.split("---"):
             block = block.strip()
             if not block:
@@ -3038,17 +3144,33 @@ class Consolidator:
             gw_m     = re.search(r'GENOME_WORTHY:\s*(YES|NO)', block, re.I)
 
             origin   = orig_m.group(1).upper() if orig_m else "UNKNOWN"
+            appears  = [s.strip() for s in (src_m.group(1) if src_m else "").split(",") if s.strip()]
+
+            # Echo-clique origin gate: if the APPEARS_IN nodes already form a dense
+            # co-assertion clique, this "independent" recurrence is one claim echoing
+            # across a fully-connected subgraph — override to SHARED_SOURCE so it is
+            # dropped as echo, never promoted. Extends MINE's text-level ORIGIN filter
+            # to graph topology. (O382 / O286 / DMN cross-connect.)
+            clique_echo = False
+            if origin != "SHARED_SOURCE" and inv_m:
+                is_echo, density, rn = _echo_clique_density(_mine_graph, appears)
+                if is_echo:
+                    origin = "SHARED_SOURCE"
+                    clique_echo = True
+                    print(f"  [MINE] echo (graph clique density={density:.2f} / {rn} nodes): "
+                          f"{inv_m.group(1).strip()[:50]}")
+
             is_gw    = gw_m and gw_m.group(1).upper() == "YES"
             is_indep = origin != "SHARED_SOURCE"
 
             if inv_m and is_gw and is_indep:
                 candidates.append({
                     "invariant":   inv_m.group(1).strip(),
-                    "appears_in":  [s.strip() for s in (src_m.group(1) if src_m else "").split(",")],
+                    "appears_in":  appears,
                     "recurrence":  int(rec_m.group(1)) if rec_m else 2,
                     "origin":      origin,
                 })
-            elif inv_m and origin == "SHARED_SOURCE":
+            elif inv_m and origin == "SHARED_SOURCE" and not clique_echo:
                 # Log but don't promote — echo, not convergence
                 print(f"  [MINE] echo (shared source): {inv_m.group(1).strip()[:70]}")
 
@@ -3212,6 +3334,20 @@ class Consolidator:
 
                 # Node-to-node edges for shared invariants — classify by relationship type
                 graph = get_graph()
+                graph._ensure_loaded()
+                # FREEZE (O382): while O286 is unresolved, scales_with edges carry no
+                # cited exponent/functional form, so route them to consistent_with
+                # instead of minting more indefensible scaling claims.
+                freeze_scales = _obligation_unresolved(FREEZE_OBLIGATION_ID)
+                # SEMANTIC DEDUP: index existing co-assertion invariants per (pair, type).
+                # Literal prefix-dedup in record_node_edge catches nothing — restatements
+                # differ in wording — so collapse on normalized claim content. The index
+                # is extended as we mint, so restatements within this pass collapse too.
+                pair_invariants = {}
+                for e in graph._node_edges:
+                    k = (frozenset((e.get("from"), e.get("to"))), e.get("type"))
+                    pair_invariants.setdefault(k, []).append(e.get("invariant", ""))
+                minted = skipped_dup = frozen = 0
                 for c in candidates:
                     nodes_in = c.get('appears_in', [])
                     edge_type = classify_node_edge(c['invariant'])
@@ -3219,13 +3355,28 @@ class Consolidator:
                     # never MINE keyword-match. Hard guard regardless of classify result.
                     if edge_type == "independent_confirmation":
                         edge_type = "consistent_with"
+                    if edge_type == "scales_with" and freeze_scales:
+                        edge_type = "consistent_with"
+                        frozen += 1
+                    inv = c['invariant']
                     for i in range(len(nodes_in)):
                         for j in range(i + 1, len(nodes_in)):
+                            k = (frozenset((nodes_in[i], nodes_in[j])), edge_type)
+                            existing = pair_invariants.setdefault(k, [])
+                            if any(_claims_equivalent(inv, ex) for ex in existing):
+                                skipped_dup += 1
+                                continue
                             graph.record_node_edge(
                                 nodes_in[i], nodes_in[j],
                                 edge_type,
-                                c['invariant'],
+                                inv,
                             )
+                            existing.append(inv)
+                            minted += 1
+                if minted or skipped_dup or frozen:
+                    print(f"  [MINE] node-edges: {minted} minted, {skipped_dup} semantic-dup "
+                          f"skipped, {frozen} candidate(s) scales_with→consistent_with "
+                          f"(O286 frozen={freeze_scales})")
 
                 # Promotion candidates — recurrence >= 3 across independent nodes
                 promotion = [

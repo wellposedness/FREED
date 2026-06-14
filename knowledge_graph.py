@@ -50,7 +50,8 @@ EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "support
 NODE_EDGE_TYPES = (
     "shares_invariant",         # fallback: nodes share the same abstract claim
     "operationalizes",          # node B implements/measures the abstract claim of node A
-    "scales_with",              # invariant holds across both nodes at different scales
+    "scales_with",              # invariant holds across both nodes at different scales/levels of one hierarchy
+    "substrate_independent",    # same pattern across different physical implementations (realizability, NOT scale) — core RSA claim
     "consistent_with",          # invariant text uses independence/domain language but source independence unverified
     "independent_confirmation", # reserved: bootstrap CONVERGE or verified cross-domain feed edge required
     "equivalent_to",            # two belief nodes marked as intersubstitutable (LFI replacement condition)
@@ -95,9 +96,22 @@ OWA_EDGE_STATUSES = ("observed_present", "observed_absent", "unobserved")
 # Lower values bias toward sparsity; higher toward density.
 OWA_UNOBSERVED_PRIOR = 0.5
 
-# Keywords used to classify node-edge type from invariant text
+# Keywords used to classify node-edge type from invariant text.
+#
+# Precedence note (O383, 2026-06-13): substrate-independence is a *realizability*
+# claim (same pattern across different physical implementations), NOT a scale
+# claim (same pattern across levels of one hierarchy). It must be matched FIRST and
+# routed to substrate_independent. The old broad _SCALE_KEYWORDS matched
+# substrate-independent + the over-broad level|layer|L\d tokens (the RSA corpus's
+# central vocabulary), funnelling ~1500 distinct claims into a scales_with
+# monoculture. _SCALE_KEYWORDS is now tightened to genuine scale-hierarchy language.
+_SUBSTRATE_KEYWORDS = re.compile(
+    r'\b(?:substrate.independen\w+|implementation.independen\w+|medium.independen\w+|'
+    r'multiply.realiz\w+|realizabilit\w+|substrate.agnostic)\b', re.I
+)
 _SCALE_KEYWORDS = re.compile(
-    r'\b(?:scale|L\d|substrate.independent|macro|micro|level|layer|multi.scale|cross.scale|hierarchy)\b', re.I
+    r'\b(?:multi.scale|cross.scale|scale.invarian\w+|across (?:scales|levels)|'
+    r'at (?:different|multiple) (?:scales|levels)|macro.*micro|micro.*macro|hierarchy of scales)\b', re.I
 )
 _IMPL_KEYWORDS = re.compile(
     r'\b(?:operationali\w+|implement\w*|measur\w+|method|algorithm\w*|technique\w*|computable|empirical|formula\w*|metric\w*)\b', re.I
@@ -498,16 +512,21 @@ def classify_node_edge(invariant_text):
     Classify the structural relationship between two nodes sharing an invariant.
     Uses keyword heuristics on invariant text — no extra API call required.
 
-    Returns one of NODE_EDGE_TYPES. Precedence:
-      1. scales_with — invariant explicitly mentions scale hierarchy or substrate-independence
-      2. consistent_with — invariant text uses independence/domain language, but source
+    Returns one of NODE_EDGE_TYPES. Precedence (O383, 2026-06-13):
+      1. substrate_independent — same pattern across different physical implementations
+         (realizability). The core RSA claim; previously collapsed into scales_with.
+      2. scales_with — invariant explicitly mentions scale hierarchy (same pattern across
+         levels of ONE hierarchy). Now tightened to genuine scale language.
+      3. consistent_with — invariant text uses independence/domain language, but source
          independence is unverified (nodes may share the same theoretical origin).
          Use independent_confirmation only when bootstrap CONVERGE or a verified
          cross-domain feed edge confirms actual source independence.
-      3. operationalizes — invariant involves implementation/measurement/method language
-      4. shares_invariant — fallback
+      4. operationalizes — invariant involves implementation/measurement/method language
+      5. shares_invariant — fallback
     """
     t = invariant_text
+    if _SUBSTRATE_KEYWORDS.search(t):
+        return "substrate_independent"
     if _SCALE_KEYWORDS.search(t):
         return "scales_with"
     if _DOMAIN_KEYWORDS.search(t):
@@ -6176,7 +6195,7 @@ class KnowledgeGraph:
             etype = e.get("type", "")
             # Node-edge types that imply evidential support
             if etype in ("operationalizes", "independent_confirmation",
-                         "scales_with"):
+                         "scales_with", "substrate_independent"):
                 from_id = e.get("from", "").upper()
                 to_id = e.get("to", "").upper()
                 if from_id and to_id and from_id != to_id:
