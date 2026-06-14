@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 8,
-    "generation": 275,
-    "timestamp": "2026-05-28T02:29:59.979654+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 8,
-      "passive": 11,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant with confirmation surplus and no serious challenge is an epistemic liability until its breaking conditions and alternative mechanisms are explicitly mapped."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-28",
-        "compress": "Game of Truth CA empirically confirms SOC at the critical ridge (σ≈1.025, α≈1.54) with low-entropy structured output, advancing O148 and grounding INV_073 in discrete-substrate telemetry."
-      },
-      {
-        "title": "Plaquette models, cellular automata, and measurement-induced criticality",
-        "compress": "Randomized plaquette models confirm that measurement-induced criticality is a universality-class phenomenon living at the boundary between extensive and localized symmetry operators, directly mappable to 1+1D absorbing-state CA dynamics with testable universality classes."
-      },
-      {
-        "title": "Quantifying and minimizing dissipation in a non-equilibrium phase transition",
-        "compress": "Finite-time phase transitions have a protocol-dependent but irreducible dissipation floor at the critical point, confirming critical ridge navigation as thermodynamically real while establishing that defect density and entropy production are separable optimization targets — a structural distinction the genome currently lacks."
-      },
-      {
-        "title": "SzCORE: Seizure Community Open‐Source Research Evaluation framework for the validation of electroencephalography‐based automated seizure detection algorithms",
-        "compress": "Comparability of performance claims requires protocol standardization as a load-bearing substrate, not optional scaffolding — heterogeneous evaluation destroys the invariant structure that makes scientific progress cumulative. IMPLEMENT: YES IMPLEMENT_WHAT: Add a metric-heterogeneity flag to edge-scoring that downgrades confidence on \"challenges\" edges when the two nodes being compared used different evaluation protocols or datasets, mirroring SzCORE's finding that cross-protocol comparisons are unreliable. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND score_edge (or equivalent edge-scoring function) to check for protocol-mismatch metadata and apply a confidence penalty before writing edge weight. IMPLEMENT_WHY: This prevents the graph from treating protocol-artifact performance differences as genuine capability challenges, keeping challenge edges epistemically honest. CHALLENGE: challenges O136 — SzCORE demonstrates that claimed challenge relationships between algorithms are frequently artifacts of evaluation heterogeneity rather than genuine capability differences, meaning the genome's four \"challenges\" edges may not be live in the epistemically meaningful sense without verified protocol equivalence."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O258"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 9,
     "generation": 276,
     "timestamp": "2026-05-28T09:49:59.944762+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Protocol Requirements for Self-organizing Artifacts: Towards an Ambient Intelligence",
         "compress": "Iterated coordination games over heterogeneous devices converge on shared semantic conventions at a critical ridge, extending O173's edge-weight operationalization while exposing a genome gap around open-boundary protocol extensibility."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O302",
+        "O312"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 326,
+    "timestamp": "2026-06-14T16:30:00.002924+00:00",
+    "sweep": {
+      "input_count": 13,
+      "targeted": 8,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's uncontested confirmation surplus is itself a falsification risk — robustness requires specifying what would kill it, what mimics it, and where it stops."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-14",
+        "compress": "The Game of Truth CA empirically self-tunes to criticality (σ=1.0229, α≈2.162) without external forcing, resolving O148 and independently confirming that the critical ridge is a dynamical attractor in semantically-structured discrete systems."
+      },
+      {
+        "title": "Unified non-metric (1,0) tensor-Einstein supergravity theories and (4,0) supergravity in six dimensions",
+        "compress": "Non-metric gravitational theories can be internally consistent and dimensionally reduce to standard metric gravity, demonstrating that metric structure is an emergent rather than foundational organizational commitment."
+      },
+      {
+        "title": "Measurement-Induced Dark State Phase Transitions in Long-Ranged Fermion Systems.",
+        "compress": "Monitored long-range fermions physically instantiate a three-phase criticality structure — algebraic intermediate, logarithmic critical, area-law frozen — confirming that the critical ridge is RG-stable and admits its own universality class described by modified sine-Gordon theory."
+      },
+      {
+        "title": "Purification timescales in monitored fermions",
+        "compress": "Global symmetry class enslaves purification universality — Z₂ gives L ln L timescales with residual entropy diagnostics, U(1) gives BKT criticality, establishing symmetry as the primary index of measurement-induced phase families."
       }
     ],
     "resolve": {
