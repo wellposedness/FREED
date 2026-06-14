@@ -866,15 +866,22 @@ function renderCycles(cycles) {
       const parts = [];
       if (sigma != null) parts.push(`σ=${sigma}${sigmaErr != null ? '±'+sigmaErr : ''}`);
       if (alpha != null) parts.push(`α=${alpha}${r2 != null ? ' (R²='+r2+')' : ''}`);
-      // O148: Always show Shannon entropy H as explicit metric alongside σ and α
+      // O148: Always show Shannon entropy H and H/H_max as explicit metrics alongside σ and α
+      // H/H_max (entropy fraction) is the normalized dimensionless criticality index,
+      // directly comparable across grid sizes — promoted to primary metric position.
       const seVal = c.shannon_entropy != null ? c.shannon_entropy : crit.shannon_entropy;
-      if (seVal != null) parts.push(`H=${seVal} bits`);
-      if (sr != null) parts.push(`survival=${sr}`);
-      if (hOverHmax != null) {
+      if (seVal != null) {
+        if (hOverHmax != null) {
+          parts.push(`H=${seVal} bits (${hOverHmax} of H_max${hMax != null ? '='+hMax : ''})`);
+        } else {
+          parts.push(`H=${seVal} bits`);
+        }
+      } else if (hOverHmax != null) {
         parts.push(`H/H_max=${hOverHmax}${hMax != null ? ' (H_max='+hMax+')' : ''}`);
-      } else if (er != null && seVal == null) {
+      } else if (er != null) {
         parts.push(`H=${er}`);
       }
+      if (sr != null) parts.push(`survival=${sr}`);
       if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
       // O148: Criticality-state badge — AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL
       const stateBadge = cv.includes('AT_CRITICAL') ? '🟢 AT_CRITICAL' :
