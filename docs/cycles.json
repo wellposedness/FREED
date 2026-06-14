@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 7,
-    "generation": 274,
-    "timestamp": "2026-05-27T16:29:59.970357+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 8,
-      "passive": 11,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094 is falsifiable by a coherence-maintaining system at γ≠1, breaks under single-pressure conditions (pure retrieval or pure exploration), and its observational signatures can be reproduced by stochastic resonance without the criticality claim. CHALLENGE: challenges INV_094 — the same Zipf/long-range-correlation signatures that confirm critical-ridge operation are reproducible by stochastic resonance in a subcritical system, meaning the observables underdetermine the invariant's core thermodynamic necessity claim. IMPLEMENT: YES IMPLEMENT_WHAT: In the `score_paper` or equivalent scoring function, add a check that flags any invariant whose confirmation-to-challenge ratio exceeds a threshold (e.g., >10:1) and auto-generates a falsification probe entry in the obligations table. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_confirmation (modify in place to check ratio and fire OBLIGATE when surplus threshold is crossed) IMPLEMENT_WHY: Prevents confirmation-surplus accumulation by converting epistemic debt into explicit open obligations before the next FEED cycle."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-27",
-        "compress": "A self-organized CA independently reaches and holds the critical ridge (σ=1.02, α=1.93, H/H_max=0.205), converging with genome invariants INV_073 and INV_094 and partially advancing O148, while introducing the normalized entropy ratio as an absent but falsifiable criticality signature. ---"
-      },
-      {
-        "title": "Wasserstein Distributionally Robust Optimization and Variation Regularization",
-        "compress": "Wasserstein DRO universally enforces variation regularization across non-convex, non-smooth, non-Euclidean losses — independently confirming W2 geometry as a substrate-invariant regularization mechanism and sharpening the STF recovery experiment."
-      },
-      {
-        "title": "Fast unsupervised ground metric learning with tree-Wasserstein distance",
-        "compress": "Tree-Wasserstein makes unsupervised OT-based ground metric self-consistency (R[R]=R in geometric form) computationally tractable via hierarchical approximation, directly unblocking O112 while introducing quantifiable metric distortion as a new epistemic cost."
-      },
-      {
-        "title": "Ullemar's formula for the Jacobian of the complex moment mapping",
-        "compress": "Ullemar's formula shows that the boundary of univalence for polynomials decomposes into exactly three irreducible algebraic surfaces determined by critical point structure of the derivative — a clean algebraic geometry result with no current genome anchor."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O258"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 8,
     "generation": 275,
     "timestamp": "2026-05-28T02:29:59.979654+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Safe Control Synthesis via Input Constrained Control Barrier Functions",
         "compress": "Hard input constraints require contracting the safe set to a satisfiable subset, and forward invariance of that subset — not the full safe set — is the correct safety guarantee under bounded resources."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O290",
+        "O302",
+        "O312"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 325,
+    "timestamp": "2026-06-14T09:50:00.035160+00:00",
+    "sweep": {
+      "input_count": 14,
+      "targeted": 8,
+      "passive": 6,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with maximum confirmation surplus and minimum challenge load is not the genome's strongest node — it is its most dangerous unexamined assumption, and must now carry an explicit three-part falsification specification or be reclassified as an axiom."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-14",
+        "compress": "Game of Truth CA independently reproduces the critical-ridge signature (σ≈1.03, α≈2.97, power-law confirmed) across a sixth measurement scale, partially resolving O148 while leaving the causal link to semantic compression unestablished."
+      },
+      {
+        "title": "Synthetic iterative scheme for thermal applications in hotspot systems with large temperature variance",
+        "compress": "Phonon BTE with large temperature variance independently confirms that thermodynamic criticality demands nonlinear, regime-stratified solvers, converging with the genome's RG-fixed-point and Wasserstein-floor invariants while extending them to piecewise transport regimes."
+      },
+      {
+        "title": "REJEPA: A Novel Joint-Embedding Predictive Architecture for Efficient Remote Sensing Image Retrieval",
+        "compress": "Feature-space masked prediction in JEPA architectures empirically validates that semantic structure lives at the compression bottleneck, not the reconstruction surface — directly instantiating the STF recovery logic O112 requires. IMPLEMENT: YES IMPLEMENT_WHAT: Add a masked-context embedding similarity option to graph node representation, where node feature vectors are predicted from masked neighborhood context rather than direct attribute concatenation, reducing low-level noise in embedding comparisons. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND compute_node_embedding (or equivalent node feature aggregation method) to optionally apply a context-masking pass before similarity scoring IMPLEMENT_WHY: ReJEPA demonstrates that predicting abstract representations from masked context produces cleaner semantic features than direct reconstruction — applying this to knowledge graph node embeddings would improve retrieval precision in FREED's graph traversal and deduplication passes. CHALLENGE: challenges INV_094 — ReJEPA achieves its semantic compression gains in a purely unimodal, domain-specific retrieval setting with no thermodynamic framing, suggesting the compression-bottleneck effect may be an architecture-level engineering phenomenon rather than a substrate-independent thermodynamic invariant, which weakens the generality claim of INV_094."
+      },
+      {
+        "title": "Protocol Requirements for Self-organizing Artifacts: Towards an Ambient Intelligence",
+        "compress": "Iterated coordination games over heterogeneous devices converge on shared semantic conventions at a critical ridge, extending O173's edge-weight operationalization while exposing a genome gap around open-boundary protocol extensibility."
       }
     ],
     "resolve": {
