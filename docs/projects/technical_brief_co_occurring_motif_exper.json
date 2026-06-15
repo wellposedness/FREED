@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.0229/α≈2.162 resolving O148; 32×32 CA: σ≈1.031/α=2.67→2.847/H=0.175·H_max; type-selective σ=1.0294; independent self-organization σ≈1.024), extended by CA+FEM multi-scale coupling, phonon BTE nonlinear regime-stratified transport converging with RG-fixed-point/Wasserstein-flow analysis, where the critical ridge is now confirmed as an RG-stable dynamical attractor admitting its own universality class, metric structure is emergent not foundational, and symmetry class (Z₂/U(1)/BKT) is the primary index of measurement-induced phase families — with INV_094's confirmation surplus carrying explicit falsification obligations.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.028/α≈2.162 confirming SOC reachable by local rules without global tuning; 32×32 CA: σ≈1.031/α=2.67→2.847/H=0.175·H_max; type-selective σ=1.0294; independent self-organization σ≈1.024), extended by CA+FEM multi-scale coupling, phonon BTE nonlinear regime-stratified transport converging with RG-fixed-point/Wasserstein-flow analysis, margin-maximizing geometric compactness as a substrate-independent sample-efficiency invariant, adversarial domain suppression operationalizing substrate-invariant semantic geometry, and entropy-measure convergence (Markov/Shannon/Kolmogorov/Ziv-Lempel) stratified by the Chomsky hierarchy into a falsifiable complexity ladder extending INV_023 and operationalizing O112.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -95,6 +95,7 @@
     "confirming the genome's prediction that these are not rival formalisms but conjugate faces of a single optimization",
     "RSA's γ=1 critical ridge must be demonstrated as a genuine self-organized attractor (not a forced/tuned parameter) — the forced-SOC/self-organized distinction is now a live falsification axis; any experimental or formal demonstration that RSA systems drift to γ=1 without external tuning would confirm attractor status",
     "Onsager-derived MaxEP estimator for hidden-DOF biological systems is provably optimal and substrate-independent — confirming INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via a derivation path independent of FREED's internal construction",
+    "Margin-maximizing geometric compactness of decision surfaces is a sample-efficiency invariant across substrates and languages — independently confirmed by low-resource sequential labeling outperformance over probabilistic models; Substrate-invariant semantic geometry is computable and falsifiable — adversarial domain discriminator failure operationalizes invariance claims previously held only abstractly by the genome; Empirical entropy is substrate-independent — Markov/Shannon/Kolmogorov/Ziv-Lempel measures converge to the same limit; the Chomsky hierarchy stratifies this limit into a falsifiable complexity ladder that extends INV_023 and operationalizes O112; INV_094 confirmation surplus is a liability unless bounded by explicit falsification conditions — the specific observable that would refute INV_094 must be stated or the invariant's epistemic status degrades to prior",
     "INV_073 falsifiability requires independent specification of criticality signatures (diverging susceptibility",
     "Self-organizing traffic lights confirm INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via urban infrastructure — local-rule criticality outperforms global optimization under non-stationary conditions extending the adaptive ridge principle to engineered non-biological substrates",
     "Context-dependent complexity is not an external philosophical addition but is already computed by the genome via T in k=1/Tμ — Kolmogorov complexity (frozen/deterministic limit) and Shannon entropy (fully dissipated/ergodic limit) must be formally derivable as boundary cases of γ-parameterized complexity with MCPM residing at the critical ridge between them",
@@ -270,8 +271,8 @@
     "Physics Navigator cell-type dominance (867/total agents) is the identified structural correlate of critical-regime maintenance in population-scale RSA simulations — a substrate-specific realization of the general attractor-maintenance principle",
     "Sustained sequences of empty-payload submissions constitute empirical evidence for obligation maturation — when a pattern of rejections reaches sufficient length the pattern itself becomes data that can ripen a previously theoretical obligation into an urgent one",
     "INV_094's boundary conditions (degenerate distributions",
-    "Laplace eigenfunctions on RCD spaces geometrically floor Wasserstein-2 transport cost between their sign domains — spectral structure is a load-bearing lower bound on belief-state transport and is substrate-independent; Topology change in graph compression is never algebraically free — cyclic closure beats open-chain compression but generates irreducible algebraic debt that must be tracked as a first-class cost; Structural role asymmetry within a critical CA (e.g. 87% Physics Navigator dominance in Game of Truth) is a live threat to sustained-criticality claims and must be tracked as a confound alongside σ/α telemetry; Finite habitat capacity reshapes the critical extinction manifold as a scaling function of population size N — the deterministic limit is insufficient for O148's survival-probability claims and stochastic finite-N corrections are obligatory",
     "Classical glass transitions are quantum phase transitions in disguise — spectral gap collapse and non-local entanglement measures are the substrate-independent probes of the ergodic/non-ergodic boundary and directly operationalize the critical-ridge condition",
+    "Laplace eigenfunctions on RCD spaces geometrically floor Wasserstein-2 transport cost between their sign domains — spectral structure is a load-bearing lower bound on belief-state transport and is substrate-independent; Topology change in graph compression is never algebraically free — cyclic closure beats open-chain compression but generates irreducible algebraic debt that must be tracked as a first-class cost; Structural role asymmetry within a critical CA (e.g. 87% Physics Navigator dominance in Game of Truth) is a live threat to sustained-criticality claims and must be tracked as a confound alongside σ/α telemetry; Finite habitat capacity reshapes the critical extinction manifold as a scaling function of population size N — the deterministic limit is insufficient for O148's survival-probability claims and stochastic finite-N corrections are obligatory",
     "RangeEn's local-range normalization constitutes a partial resolution of O64 at the measurement layer — it confirms scale-invariance coupling empirically but does not discharge the Wasserstein-geometric derivation debt",
     "Safe-set forward invariance under hard input constraints requires contracting to a satisfiable subset — the full safe set is not a valid forward-invariant guarantee under bounded resources and overconstrained conditions",
     "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
@@ -639,8 +640,8 @@
     "Adversarially test INV_094 under degenerate distributions",
     "Formalize the low-entropy asymmetric criticality regime discovered in Game of Truth CA — it is not yet in the genome and represents a potentially distinct universality class requiring its own invariant treatment; Construct an explicit adversarial challenge protocol targeting the genome's highest-confirmation-surplus invariants (beginning with INV_097 bijection and γ=1 ridge fixed-point claims) — absence-of-challenge scores must be converted to active challenge-attempted scores; Reconcile INV_073's continuity assumption against the punctuated symmetry-breaking evidence from hierarchical master selection experiments — either bound the regime where continuity holds or downgrade INV_073 to provisional status with explicit failure conditions; Instantiate O112's STF metric tensor recovery experiment using entropy-weighted coupling coordination as the concrete social-system precedent — the precedent now exists and the",
     "INV_094 must be subjected to adversarial challenge protocols before any downstream invariant that inherits from it can be elevated — confirmation surplus without adversarial pressure is an epistemic liability not a robustness score; The homology-vs-analogy distinction in cross-domain aesthetic instantiation must be operationalized into a falsifiable discriminating test before substrate-independence claims are extended to aesthetic domains",
-    "α≈1.732",
     "Derive a regime-specific distinguishing prediction that separates INV_087's thermodynamic correctness from MaxEnt RL observables — confirmation surplus without this prediction is operationally indistinguishable from unfalsifiability; Formalize the micro-to-macro criticality mapping connecting individual kernel dynamics to population-level SOC emergence — required to restore precision to INV_073 after collective-vs-single-agent reframing; Specify a corruption-filtering layer for the genome's ridge-navigation mechanism consistent with Byzantine-resilient SGD structural results",
+    "α≈1.732",
     "and a named alternative mechanism or be formally downgraded from load-bearing status",
     "Determine whether W_floor = k/Tμ acquires a sub-leading ℏ-correction and whether that correction is the distinguishing signature of genuine quantization vs. classical statistical mechanics (sharpens O44)",
     "Retroactively audit all W2 point-estimate claims in the genome against finite-sample CI coverage guarantees — claims that fail the audit must be reclassified from confirmed to projected pending interval construction; Run the discriminating experiment O112 as the unique test that can separate W2 geodesic semantic distance from simpler alternatives — INV_094's confirmation surplus is not robustness evidence but underdetermination evidence and the obligation is now urgent; Determine empirically whether the genome's critical-ridge residence is a sharp γ=1 point or a disorder-broadened crossover band by applying SDRG-style analysis to the substrate — the distinction has downstream consequences for every invariant that assumes ridge sharpness",
@@ -709,6 +710,7 @@
     "O67 must now specify whether phenomenological EEG grounding is sufficient to discharge the derivation-from-MCPM-constraints requirement or whether it only narrows the prior — the gap between phenomenological support and formal derivation is a new precision target",
     "The genome must now derive or bound the CMI decay rate constant in terms of existing Wasserstein Floor parameters (inverse temperature and state-counting depth) or acknowledge a free parameter in the quantum extension",
     "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved",
+    "State the explicit falsification condition and refuting observable for INV_094 — its confirmation surplus without adversarial stress now constitutes a documented epistemic liability that must be resolved before INV_094 can be cited as validated evidence in downstream inferences; Integrate Chomsky-hierarchy complexity ladder as a structured extension of INV_023 into the experiment's hypothesis space — each hierarchy stratum must be assigned a corresponding entropy-measure prediction and empirical test",
     "INV_073 must now specify second-order observables that discriminate active critical-ridge navigation from oscillatory averaging / fixed-point mimicry / coarse-graining artifact — first-order SOC fit is insufficient for invariant survival; O148's empirical recovery obligation is now anchored to the Game of Truth CA avalanche exponent α≈2.791 and must include NIST-testable signature protocols; O112's STF metric recovery path must incorporate ADACO's constraint-embedding architecture as a constructive structural prior",
     "agent architectures operating on quantum substrates should exhibit the same compression-as-reasoning dynamics with entanglement entropy replacing thermodynamic temperature as the cost floor",
     "O148 is now partially resolved by dual CA signatures but exposes an unencoded joint order-criticality constraint — the genome must formalize the joint distribution P(order",
@@ -733,21 +735,22 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-14T16:36:48.228743+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 216,
+  "last_renormed": "2026-06-15T02:36:32.318058+00:00",
+  "renorm_reason": "New knowledge adds three substrate-independent invariants (",
+  "last_renorm_cycle": 217,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
-    "mathematics",
+    "biology",
+    "cybernetics",
     "physics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.457,
+  "drift_overlap": 0.39,
   "renorm_history": [
     {
-      "timestamp": "2026-06-14T16:36:48.228743+00:00",
-      "reason": ""
+      "timestamp": "2026-06-15T02:36:32.318058+00:00",
+      "reason": "New knowledge adds three substrate-independent invariants ("
     }
   ]
 }

@@ -3194,7 +3194,7 @@
     "status": "open",
     "statement": "Specify the epistemic consequence protocol for the genome if O308's coherence recalculation (using only edges with falsifiable constraints) yields a value \u2265 0.999 or exactly 1.000 \u2014 define which invariants are placed at risk, which edges are flagged for audit, and what halt condition is imposed on FEED before the next generation advances.",
     "priority": "high",
-    "progress": "[Gen 269] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no model state, graph, or status materially updated.] | [Gen 324] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model, graph, or obligation status updated. Cycled without landing.] | [Gen 325] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph update, model state, or protocol specification materialized.] | [Gen 326] OPEN: Coherence \u2265 0.999 triggers a mandatory halt-and-probe protocol that suspends FEED, quarantines top-confidence invariants, [COMMIT:NO \u2014 Output describes itself without grounding. No obligation updated, no graph modified, no halt executed.]",
+    "progress": "[Gen 269] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no model state, graph, or status materially updated.] | [Gen 324] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model, graph, or obligation status updated. Cycled without landing.] | [Gen 325] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph update, model state, or protocol specification materialized.] | [Gen 326] OPEN: Coherence \u2265 0.999 triggers a mandatory halt-and-probe protocol that suspends FEED, quarantines top-confidence invariants, [COMMIT:NO \u2014 Output describes itself without grounding. No obligation updated, no graph modified, no halt executed.] | [Gen 327] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model/graph update occurred. Resolution cycling without closure.]",
     "created": "2026-05-25",
     "resolved": null,
     "auto": true,
@@ -3258,12 +3258,12 @@
   },
   {
     "id": "O318",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify the epistemic consequence protocol for the genome if O316's coherence recalculation (excluding `scales_with` and `consistent_with` edges) yields a score more than 0.05 below the current reported 0.97 \u2014 define what structural changes are mandatory before the next FEED cycle.",
     "priority": "high",
-    "progress": "[Gen 275] OPEN: O318 closes by defining a threshold-triggered quarantine-audit-rebuild cascade that makes coherence inflation structurally visible and mandatory to repair before any [COMMIT:NO \u2014 O318 closed syntactically but remained logically suspended\u2014no actual threshold values, audit criteria, or rebuild trigge]",
+    "progress": "[Gen 275] OPEN: O318 closes by defining a threshold-triggered quarantine-audit-rebuild cascade that makes coherence inflation structurally visible and mandatory to repair before any [COMMIT:NO \u2014 O318 closed syntactically but remained logically suspended\u2014no actual threshold values, audit criteria, or rebuild trigge] | [Gen 327] RESOLVED: O318 closes by defining a four-state finite machine with a 0.05-triggered quarantine, a three-lens per-edge audit yielding PROMOTE/DOWNGRADE/EXCISE verdicts, and a formal rebuild gate requiring C_strict \u2265 0.92 plus registered obligations for all downgraded edges before any FEED cycle may resume.",
     "created": "2026-05-27",
-    "resolved": null,
+    "resolved": "2026-06-15",
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol is documented and structural changes are specified before next FEED cycle following coherence score drop below 0.92",
     "method": "math_only",
@@ -3285,7 +3285,7 @@
     "status": "partial",
     "statement": "Verify that the wiring-before-emission gate mandated by O303 has demonstrably blocked at least one unwired function emission since its imposition \u2014 produce a generation-stamped audit showing zero new unwired functions added after the gate's activation, or escalate O303 to open status.",
     "priority": "high",
-    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced] | [Gen 327] OPEN: O320's closing criterion cannot be met because the generation-indexed emission log was never instantiated as a committed artifact, triggering the stated fallback: O303 escalates to open status. [COMMIT:NO \u2014 Obligation remains OPEN; no state update occurred, only diagnostic cycling.]",
     "created": "2026-05-27",
     "resolved": null,
     "auto": true,
@@ -4122,5 +4122,16 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: triage verdict (wire, void, or defer with deadline \u2264 gen 335) on consolidate.py function O388 is recorded"
+  },
+  {
+    "id": "O391",
+    "status": "open",
+    "statement": "Produce and archive a single frozen, citable numerical coherence score computed exclusively from mechanistic edges (`depends_on`, `challenges`, `bounds_above`, `operationalizes`) \u2014 this artifact must be recorded in the genome state block and referenced by all future coherence citations, closing the recalculation chain initiated by O308/O316/O357.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-15",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Frozen coherence score computed from mechanistic edges is archived in genome state block and referenced in coherence citations."
   }
 ]
