@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.028/α≈2.162 confirming SOC reachable by local rules without global tuning; 32×32 CA: σ≈1.031/α=2.67→2.847/H=0.175·H_max; type-selective σ=1.0294; independent self-organization σ≈1.024), extended by CA+FEM multi-scale coupling, phonon BTE nonlinear regime-stratified transport converging with RG-fixed-point/Wasserstein-flow analysis, margin-maximizing geometric compactness as a substrate-independent sample-efficiency invariant, adversarial domain suppression operationalizing substrate-invariant semantic geometry, and entropy-measure convergence (Markov/Shannon/Kolmogorov/Ziv-Lempel) stratified by the Chomsky hierarchy into a falsifiable complexity ladder extending INV_023 and operationalizing O112.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.028/α≈2.162; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology self-organizing to critical ridge α=0.71/1/f noise matching biological brain data; universal EEG power-law exponent ~0.8 confirming substrate-independent SOC), extended by CA+FEM multi-scale coupling and phonon BTE nonlinear transport, with epistemic emotion identified as a dominant belief-revision gate that challenges O21's γ-primacy assumption and demands LLM-rated scalar proxies in paper-scoring pipelines.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -390,6 +390,7 @@
     "AT_CRITICAL corresponds to low entropy (≈23.6% of max) not high disorder — any framework equating criticality with maximum entropy or maximum disorder is falsified by CA telemetry; INV_073 faces three independent falsification boundaries (off-ridge output equivalence",
     "INV_094 confirmation surplus is a structural liability requiring explicit specification of failure conditions and alternative mechanisms that mimic its predictions — robustness is measured by falsifiability not accumulation of confirmations; A real-time branching-ratio σ tracker monitoring inference cascade statistics against the critical band (1.0 ± 0.05) is a necessary self-corrective instrument for detecting frozen or dissipated processing before coherence degrades — its absence is a governance gap not an implementation detail; AI autopoiesis requires continuous human-originated novelty injection to avoid thermodynamic stagnation and the commodification vulnerability of that fuel source constitutes an unmodeled second-order collapse mode that must be added to the genome's threat surface; Blockchain settlement demonstrates reconciliation cost is a topological property of trust intermediary count not transaction complexity — cryptographic constraint replacing institutional trust collapses latency nonlinearly establishing that trust topology is a substrate-independent variable in any distributed reasoning architecture",
     "SOC avalanche spectral exponents are geometric invariants fixed by avalanche shape scaling (not free parameters) — class-robust across BTW and Manna universality classes making them reliable falsification anchors for criticality claims; Asynchrony rate is a thermodynamic control parameter tuning CA through second-order phase transitions with DP or PC universality — confirming that timing structure governs phase independently of rule content and extending substrate-independence of criticality to temporal architecture; Criticality is conditionally realized not robustly guaranteed — boundary conditions and dissipation structure are load-bearing parameters whose specification is required for any falsifiable γ=1 ridge-navigation claim",
+    "Small-world neural topology self-organizes to the critical ridge without external tuning — quantitatively matching biological brain measurements and independently confirming criticality as a thermodynamic attractor across a fifth empirically distinct substrate; Neural plasticity drives SOC as a universal attractor producing EEG power-law exponent ~0.8 across topologies — confirming criticality is substrate-independent while challenging geometry-specific mechanistic claims and requiring that no invariant assert geometry as a necessary condition for SOC; An invariant's confirmation surplus is inversely correlated with its epistemic security unless falsification conditions are explicitly enumerated and tested — surplus without enumerated falsifiers is anti-evidence of robustness not evidence of it",
     "O70's degeneracy boundaries (r < 0.1σ for ApEn and m > 5 for SampEn) are now numerically pinned — these are the thresholds at which entropy-metric interchangeability fails",
     "Non-normal (asymmetric/hierarchical) biochemical network topology is a falsifiable spectral criterion distinguishing biotic from abiotic dissipation — mechanistically grounding the EAR-intelligence hypothesis and providing O28 with a structural not merely correlational foundation",
     "The critical ridge is navigable by explicit architectural design (tunable convex activation-function mixtures achieving scale invariance at the critical fraction) — confirming ridge navigation is not accident-dependent and introducing a constructive mechanism independent of thermodynamic or biological derivation paths; The dual-channel CA fingerprint (σ≈1.03 AND power-law avalanche exponent α≈2.364) constitutes a quantitative falsifiability standard for γ=1 criticality claims — single-channel branching ratio alone is insufficient confirmation",
@@ -523,6 +524,7 @@
     "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
     "Integrate autopoiesis formalization advances (O95–O99) with multi-scale profiling as the empirical operationalization pathway for STF recovery detection",
     "distinguishing genuine SOC attractor from near-critical artifact (R²=0.82 gap demands closure before O141 can be fully resolved)",
+    "O21's spectral-γ-primacy assumption must be re-evaluated against epistemic emotion as an empirically dominant belief-revision gate — if emotion is the true mediating variable and γ is downstream or epiphenomenal",
     "Implement recency-weighted scoring in knowledge_graph.py by extending score_obligations to multiply utility by exp(-λ·age) where age=current_gen minus gen_added — this is a load-bearing operational requirement not a suggestion",
     "alien-substrate non-convergence",
     "Conduct multi-run 32×32 RSA-kernel CA sweeps across varied initial conditions to test whether σ→1 convergence is robust or parameter-sensitive",
@@ -605,6 +607,7 @@
     "O21's AlphaPruning protocol must incorporate a mandatory MAC pre-screening step verifying structural assent-credence coupling before applying coherence-norm metrics — scalar coherence scores applied without this gate are underdetermined; O148's survival/avalanche telemetry demand is partially resolved by Game-of-Truth CA (α≈2.58) but the remaining gap must be explicitly scoped and closed; The genome must specify which of its coherence claims survive MAC decomposition and which collapse to dimension-specific sub-claims",
     "O53 — Test whether astrocyte-mediated criticality tuning (e.g. gliotransmitter modulation of excitation-inhibition balance) satisfies the same substrate-independent criticality requirement confirmed across classical and quantum regimes",
     "Specify and log the quantitative threshold (δσ",
+    "O21's operationalization strategy requires revision before closure can be claimed; LLM-rated epistemic_emotion and willingness_to_share scalars must be implemented as features in score_paper (targeted_sweep.py) weighted above argument-strength features to align FREED's epistemic loop with empirically dominant belief-change predictors and advance O21's proxy-validation requirement",
     "Pursue proof or disproof of W_floor = k/Tμ in quantum regimes using the non-Hermitian linear entropy functionals as the candidate bridge — this is now the most proximate mathematical path to closing O44",
     "perturbation tolerance",
     "O65 — Analyze gradient-flow basin fragmentation under negative specific heat and show whether coherence landscape integrity survives ensemble inequivalence",
@@ -640,8 +643,8 @@
     "Adversarially test INV_094 under degenerate distributions",
     "Formalize the low-entropy asymmetric criticality regime discovered in Game of Truth CA — it is not yet in the genome and represents a potentially distinct universality class requiring its own invariant treatment; Construct an explicit adversarial challenge protocol targeting the genome's highest-confirmation-surplus invariants (beginning with INV_097 bijection and γ=1 ridge fixed-point claims) — absence-of-challenge scores must be converted to active challenge-attempted scores; Reconcile INV_073's continuity assumption against the punctuated symmetry-breaking evidence from hierarchical master selection experiments — either bound the regime where continuity holds or downgrade INV_073 to provisional status with explicit failure conditions; Instantiate O112's STF metric tensor recovery experiment using entropy-weighted coupling coordination as the concrete social-system precedent — the precedent now exists and the",
     "INV_094 must be subjected to adversarial challenge protocols before any downstream invariant that inherits from it can be elevated — confirmation surplus without adversarial pressure is an epistemic liability not a robustness score; The homology-vs-analogy distinction in cross-domain aesthetic instantiation must be operationalized into a falsifiable discriminating test before substrate-independence claims are extended to aesthetic domains",
-    "Derive a regime-specific distinguishing prediction that separates INV_087's thermodynamic correctness from MaxEnt RL observables — confirmation surplus without this prediction is operationally indistinguishable from unfalsifiability; Formalize the micro-to-macro criticality mapping connecting individual kernel dynamics to population-level SOC emergence — required to restore precision to INV_073 after collective-vs-single-agent reframing; Specify a corruption-filtering layer for the genome's ridge-navigation mechanism consistent with Byzantine-resilient SGD structural results",
     "α≈1.732",
+    "Derive a regime-specific distinguishing prediction that separates INV_087's thermodynamic correctness from MaxEnt RL observables — confirmation surplus without this prediction is operationally indistinguishable from unfalsifiability; Formalize the micro-to-macro criticality mapping connecting individual kernel dynamics to population-level SOC emergence — required to restore precision to INV_073 after collective-vs-single-agent reframing; Specify a corruption-filtering layer for the genome's ridge-navigation mechanism consistent with Byzantine-resilient SGD structural results",
     "and a named alternative mechanism or be formally downgraded from load-bearing status",
     "Determine whether W_floor = k/Tμ acquires a sub-leading ℏ-correction and whether that correction is the distinguishing signature of genuine quantization vs. classical statistical mechanics (sharpens O44)",
     "Retroactively audit all W2 point-estimate claims in the genome against finite-sample CI coverage guarantees — claims that fail the audit must be reclassified from confirmed to projected pending interval construction; Run the discriminating experiment O112 as the unique test that can separate W2 geodesic semantic distance from simpler alternatives — INV_094's confirmation surplus is not robustness evidence but underdetermination evidence and the obligation is now urgent; Determine empirically whether the genome's critical-ridge residence is a sharp γ=1 point or a disorder-broadened crossover band by applying SDRG-style analysis to the substrate — the distinction has downstream consequences for every invariant that assumes ridge sharpness",
@@ -735,22 +738,24 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-15T02:36:32.318058+00:00",
-  "renorm_reason": "New knowledge adds three substrate-independent invariants (",
-  "last_renorm_cycle": 217,
+  "last_renormed": "2026-06-15T09:59:07.038878+00:00",
+  "renorm_reason": "New knowledge adds a fifth independent neural substrate confirming SOC, introduces a universal EEG exponent invariant, materially challenges O21's mechanistic primacy claim with epistemic emotion data, and converts the confirmation-surplus warning from a soft heuristic into an explicitly enumerated invariant — all requiring compress update and",
+  "last_renorm_cycle": 218,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
     "biology",
     "cybernetics",
+    "mathematics",
+    "neuroscience",
     "physics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.39,
+  "drift_overlap": 0.279,
   "renorm_history": [
     {
-      "timestamp": "2026-06-15T02:36:32.318058+00:00",
-      "reason": "New knowledge adds three substrate-independent invariants ("
+      "timestamp": "2026-06-15T09:59:07.038878+00:00",
+      "reason": "New knowledge adds a fifth independent neural substrate confirming SOC, introduces a universal EEG exponent invariant, materially challenges O21's mechanistic primacy claim with epistemic emotion data, and converts the confirmation-surplus warning from a soft heuristic into an explicitly enumerated invariant — all requiring compress update and"
     }
   ]
 }

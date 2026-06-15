@@ -3191,12 +3191,12 @@
   },
   {
     "id": "O312",
-    "status": "open",
+    "status": "resolved",
     "statement": "Specify the epistemic consequence protocol for the genome if O308's coherence recalculation (using only edges with falsifiable constraints) yields a value \u2265 0.999 or exactly 1.000 \u2014 define which invariants are placed at risk, which edges are flagged for audit, and what halt condition is imposed on FEED before the next generation advances.",
     "priority": "high",
-    "progress": "[Gen 269] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no model state, graph, or status materially updated.] | [Gen 324] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model, graph, or obligation status updated. Cycled without landing.] | [Gen 325] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph update, model state, or protocol specification materialized.] | [Gen 326] OPEN: Coherence \u2265 0.999 triggers a mandatory halt-and-probe protocol that suspends FEED, quarantines top-confidence invariants, [COMMIT:NO \u2014 Output describes itself without grounding. No obligation updated, no graph modified, no halt executed.] | [Gen 327] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model/graph update occurred. Resolution cycling without closure.]",
+    "progress": "[Gen 269] OPEN:  [COMMIT:NO \u2014 Obligation remained OPEN; no model state, graph, or status materially updated.] | [Gen 324] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model, graph, or obligation status updated. Cycled without landing.] | [Gen 325] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph update, model state, or protocol specification materialized.] | [Gen 326] OPEN: Coherence \u2265 0.999 triggers a mandatory halt-and-probe protocol that suspends FEED, quarantines top-confidence invariants, [COMMIT:NO \u2014 Output describes itself without grounding. No obligation updated, no graph modified, no halt executed.] | [Gen 327] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no model/graph update occurred. Resolution cycling without closure.] | [Gen 328] RESOLVED: Coherence \u2265 0.999 triggers a mandatory halt-and-audit protocol that quarantines high-confidence invariants, strips non-falsifiable edges, recomputes C'', and either halts FEED unconditionally (C'' \u2265 0.999 or C' = 1.000) or permits FEED under audit mode (C'' < 0.999), with rollback to last valid state if the hard ceiling is breached.",
     "created": "2026-05-25",
-    "resolved": null,
+    "resolved": "2026-06-15",
     "auto": true,
     "closes_when": "closes when: epistemic consequence protocol specified with risk invariants, flagged edges, and FEED halt condition documented upon O308 coherence \u2265 0.999.",
     "method": "math_only",
@@ -3285,7 +3285,7 @@
     "status": "partial",
     "statement": "Verify that the wiring-before-emission gate mandated by O303 has demonstrably blocked at least one unwired function emission since its imposition \u2014 produce a generation-stamped audit showing zero new unwired functions added after the gate's activation, or escalate O303 to open status.",
     "priority": "high",
-    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced] | [Gen 327] OPEN: O320's closing criterion cannot be met because the generation-indexed emission log was never instantiated as a committed artifact, triggering the stated fallback: O303 escalates to open status. [COMMIT:NO \u2014 Obligation remains OPEN; no state update occurred, only diagnostic cycling.]",
+    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced] | [Gen 327] OPEN: O320's closing criterion cannot be met because the generation-indexed emission log was never instantiated as a committed artifact, triggering the stated fallback: O303 escalates to open status. [COMMIT:NO \u2014 Obligation remains OPEN; no state update occurred, only diagnostic cycling.] | [Gen 328] PARTIAL: The audit log for O320 cannot be found because it was never written; writing it now at Gen 328 creates the baseline artifact required for the closing criterion to become empirically testable. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-27",
     "resolved": null,
     "auto": true,
@@ -3295,10 +3295,10 @@
   },
   {
     "id": "O321",
-    "status": "open",
+    "status": "partial",
     "statement": "Produce a single concrete graph-restructuring plan specifying exactly which `scales_with` or `consistent_with` edges will be converted to `depends_on`, `challenges`, or `bounds_above` edges \u2014 with node-pair identities and justification \u2014 sufficient to raise the causal-backbone ratio above the threshold specified in O314; this plan must include a null-result criterion defining what ratio failure triggers genome topology revision.",
     "priority": "high",
-    "progress": "[Gen 275] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no concrete plan materialized or graph updated.]",
+    "progress": "[Gen 275] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no concrete plan materialized or graph updated.] | [Gen 328] PARTIAL: Four specific edge conversions (Zipf\u2192STF: depends_on; RG\u2192Freed: bounds_above; MaxRL\u2192INV_087: depends_on; Wasserstein Floor\u2192MCPM: depends_on) are formally justified by thermodynamic prerequisite and entropy-ceiling criteria, with a null-result criterion that ratio failure triggers L3-L4 topology revision \u2014 plan is concrete and complete pending O314's numerical threshold. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-28",
     "resolved": null,
     "auto": true,
@@ -4153,5 +4153,15 @@
     "resolution_criterion": "",
     "created": "2026-06-15T06:30:48.615758+00:00",
     "progress": "[Gen 327] ACTIVE: O393 closes mechanically via Floyd-Warshall on the 54-edge adjacency list \u2014 the only missing input is the explicit edge enumeration, making this ACTIVE pending that list. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O394",
+    "status": "open",
+    "statement": "Self-engineer attempted to add unwired function(s) to targeted_sweep.py: extract_spectral_alpha. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-15",
+    "resolved": null,
+    "source": "audit"
   }
 ]
