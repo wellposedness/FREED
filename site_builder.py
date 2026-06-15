@@ -1654,6 +1654,23 @@ def _write_cycles(cycle_log: dict):
         if _snap_hmax is not None:
             ca_telemetry_snapshot["h_max_bits"] = _snap_hmax
 
+        # O148: Record dominant cell-type count and fraction alongside σ
+        # and H at each snapshot interval.  This enables future correlation
+        # analysis between cell-type composition and criticality maintenance,
+        # directly advancing the Physics Navigator attractor hypothesis.
+        _snap_dom_type = criticality.get("dominant_cell_type")
+        _snap_dom_count = criticality.get("dominant_cell_count")
+        _snap_dom_frac = criticality.get("dominant_cell_fraction")
+        _snap_total = criticality.get("total_cells")
+        if _snap_dom_type is not None:
+            ca_telemetry_snapshot["dominant_cell_type"] = _snap_dom_type
+        if _snap_dom_count is not None:
+            ca_telemetry_snapshot["dominant_cell_count"] = _snap_dom_count
+        if _snap_dom_frac is not None:
+            ca_telemetry_snapshot["dominant_cell_fraction"] = _snap_dom_frac
+        if _snap_total is not None:
+            ca_telemetry_snapshot["total_cells"] = _snap_total
+
         summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
 
     # O148 structured telemetry: promote key metrics to top-level summary

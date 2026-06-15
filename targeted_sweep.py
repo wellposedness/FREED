@@ -603,12 +603,78 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
 
     def _score_relevance(self, text):
         # type: (str) -> int
-        """Score text against RSA-adjacent keywords. Pure regex — no API cost."""
+        """Score text against RSA-adjacent keywords. Pure regex — no API cost.
+
+        Includes INV_073 algebraic intermediate phase bonus: papers reporting
+        stable algebraic scaling phases (neither logarithmic nor constant
+        entanglement) receive a multiplier, since these represent the strongest
+        physical confirmations of critical-ridge universality (O112).
+        """
         text_lower = text.lower()
         score = 0
         for pattern, weight in ARXIV_KEYWORDS:
             if re.search(pattern, text_lower):
                 score += weight
+
+        # ── INV_073 algebraic intermediate phase bonus ───────────────────
+        # Papers confirming a stable algebraic scaling phase intermediate
+        # between logarithmic (critical) and area-law (trivial) phases are
+        # the strongest physical analogs of critical-ridge universality.
+        # We detect two vocabularies:
+        #   (1) algebraic/intermediate phase signals
+        #   (2) entanglement phase transition context
+        # Co-occurrence yields a large bonus; solo algebraic-phase signal
+        # gets a smaller bump.
+
+        _INV073_ALGEBRAIC_PHASE = [
+            (r"algebraic\s+(scaling\s+)?phase", 5),
+            (r"algebraic\s+entanglement\s+(entropy\s+)?growth", 6),
+            (r"fractional\s+exponent", 5),
+            (r"intermediate\s+(algebraic\s+)?(scaling\s+)?phase", 6),
+            (r"algebraic\s+decay.{0,40}(correlation|density)", 4),
+            (r"power.?law\s+entanglement\s+(growth|scaling)", 5),
+            (r"neither\s+(logarithmic|area.?law)", 5),
+            (r"unconventional\s+(algebraic|scaling)\s+phase", 6),
+            (r"stable\s+(algebraic|intermediate)\s+phase", 5),
+            (r"three\s+(distinct\s+)?(entanglement\s+)?phases", 4),
+            (r"long.?range\s+hopping.{0,40}(measurement|monitor)", 5),
+        ]
+
+        _INV073_ENTANGLEMENT_CONTEXT = [
+            (r"measurement.induced\s+(phase\s+)?transition", 4),
+            (r"monitored\s+(quantum\s+)?(system|circuit|fermion|dynamics)", 4),
+            (r"entanglement\s+(phase\s+)?transition", 4),
+            (r"volume.?law.{0,30}area.?law", 4),
+            (r"logarithmic\s+entanglement", 3),
+            (r"area.?law\s+(phase|entanglement)", 3),
+            (r"sine.?gordon\s+(theory|rg|renormalization)", 5),
+            (r"continuous\s+local\s+measurement", 4),
+            (r"entanglement\s+entropy\s+(growth|scaling|transition)", 3),
+            (r"critical\s+(phase|point).{0,30}(logarithmic|entanglement)", 4),
+        ]
+
+        _INV073_ALGEBRAIC_COOCCUR_BONUS = 14
+        _INV073_ALGEBRAIC_SOLO_BONUS = 5
+        _INV073_MIN_ALGEBRAIC_SCORE = 5
+        _INV073_MIN_CONTEXT_SCORE = 3
+
+        alg_score = 0
+        ctx_score = 0
+        for pattern, weight in _INV073_ALGEBRAIC_PHASE:
+            if re.search(pattern, text_lower):
+                alg_score += weight
+        for pattern, weight in _INV073_ENTANGLEMENT_CONTEXT:
+            if re.search(pattern, text_lower):
+                ctx_score += weight
+
+        if (alg_score >= _INV073_MIN_ALGEBRAIC_SCORE and
+                ctx_score >= _INV073_MIN_CONTEXT_SCORE):
+            # Full co-occurrence: algebraic phase + entanglement context
+            score += alg_score + ctx_score + _INV073_ALGEBRAIC_COOCCUR_BONUS
+        elif alg_score >= _INV073_MIN_ALGEBRAIC_SCORE:
+            # Algebraic phase signal alone — smaller bump
+            score += alg_score + _INV073_ALGEBRAIC_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────

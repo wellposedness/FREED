@@ -42,6 +42,7 @@ from typing import Dict, List, Optional, Tuple
 
 FREED_DIR   = Path(__file__).parent
 GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
+STATE_FILE  = FREED_DIR / "FREED_state.json"   # source of current generation for edge gen-stamping (O384)
 
 # ─── Edge types ───────────────────────────────────────────────────────────────
 EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges", "absent")
@@ -4113,6 +4114,23 @@ class KnowledgeGraph:
 
         return new_edges
 
+    def _current_generation(self):
+        # type: () -> Optional[int]
+        """
+        Read the daemon's current generation from FREED_state.json so every
+        node-edge can be gen-stamped at mint time (O384). Cheap small-file read;
+        node-edge minting happens a handful of times per cycle, not in hot loops.
+        Fails closed to None — a missing/corrupt state file must never block an
+        edge write, it just leaves that edge's gen unknown (and the next accretion
+        audit treats None as "pre-stamp legacy").
+        """
+        try:
+            data = json.loads(STATE_FILE.read_text())
+            g = data.get("generation")
+            return int(g) if g is not None else None
+        except Exception:
+            return None
+
     def record_node_edge(self, node_a_id, node_b_id, edge_type,
                          invariant_text="", context_tag=None,
                          ncd_score=None, text_length_a=0, text_length_b=0):
@@ -4161,6 +4179,7 @@ class KnowledgeGraph:
             "invariant":   invariant_text[:120],
             "context_tag": context_tag,
             "timestamp":   ts,
+            "gen":         self._current_generation(),  # O384: real mint-time generation stamp
         }
 
         # ── Length-Normalized NCD Outlier Flag (INV_094 challenge) ────────

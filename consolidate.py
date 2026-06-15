@@ -80,7 +80,11 @@ ECHO_CLIQUE_DENSITY    = 0.6      # covered-pair fraction above which APPEARS_IN
 ECHO_CLIQUE_MIN_NODES  = 4        # need at least this many resolved nodes to judge a clique
 # Edge types that count as "these two nodes keep co-asserting" (echo evidence).
 # Excludes challenges/bounds_above/depends_on/operationalizes — real tension/structure.
-_CO_ASSERTION_TYPES    = frozenset({"scales_with", "substrate_independent", "consistent_with", "shares_invariant"})
+# O387 audit (2026-06-14): operationalizes is a co-assertion family, not a directional
+# dependency — 0/736 edges carry dependency language, 736 edges collapse to 116 distinct
+# texts over 78 pairs (echo-inflated, same shape as scales_with). Added here so the
+# echo-clique gate counts it toward clique density and suppresses its echo inflation.
+_CO_ASSERTION_TYPES    = frozenset({"scales_with", "substrate_independent", "operationalizes", "consistent_with", "shares_invariant"})
 
 _CLAIM_STOPWORDS = frozenset(
     "a an the is are be been being of to in on at by for with and or as that this "
@@ -3174,7 +3178,75 @@ class Consolidator:
                 # Log but don't promote — echo, not convergence
                 print(f"  [MINE] echo (shared source): {inv_m.group(1).strip()[:70]}")
 
-        candidates.sort(key=lambda c: c["recurrence"], reverse=True)
+        # ── SVM-style margin proxy scoring (sample-efficiency signal) ─────
+        # For each candidate invariant, compute a geometric margin distance:
+        # the minimum Wasserstein distance between the candidate's semantic
+        # distribution and the nearest *non-appearing* node's distribution.
+        # High margin = the invariant is geometrically well-separated from
+        # competing clusters in embedding space, meaning it stabilizes with
+        # fewer samples (robust under low-data regimes, per SVM theory).
+        # Low margin = the invariant sits near a decision boundary and
+        # requires large corpora to disambiguate (fragile).
+        #
+        # This complements entropy-based scoring: entropy measures how
+        # concentrated the evidence is, margin measures how far from
+        # confusion the invariant sits. Together they discriminate
+        # invariants that are both concentrated AND well-separated.
+        _margin_scorer = MWDEScorer(wasserstein_order=1)
+        _node_id_set = {n.get("id", "") for n in nodes}
+        _node_text_cache = {}
+        for n in nodes:
+            nid = n.get("id", "")
+            _node_text_cache[nid] = " ".join(filter(None, [
+                n.get("compress", ""),
+                " ".join(n.get("invariants", [])),
+            ]))
+
+        for c in candidates:
+            appears_ids = set(c.get("appears_in", []))
+            non_appearing_ids = _node_id_set - appears_ids
+            if not non_appearing_ids or not appears_ids:
+                c["margin_distance"] = 0.0
+                c["margin_score"] = 0.0
+                continue
+
+            # Build the candidate's semantic distribution from appearing nodes
+            appearing_texts = " ".join(
+                _node_text_cache.get(nid, "") for nid in appears_ids
+            )
+            dist_candidate = MWDEScorer._text_to_distribution(appearing_texts)
+            if not dist_candidate:
+                c["margin_distance"] = 0.0
+                c["margin_score"] = 0.0
+                continue
+
+            # Minimum Wasserstein distance to any non-appearing node
+            min_w_dist = float('inf')
+            for nid in non_appearing_ids:
+                dist_other = MWDEScorer._text_to_distribution(
+                    _node_text_cache.get(nid, ""))
+                if not dist_other:
+                    continue
+                w_dist = _margin_scorer._discrete_wasserstein_1d(
+                    dist_candidate, dist_other)
+                if w_dist < min_w_dist:
+                    min_w_dist = w_dist
+
+            if min_w_dist == float('inf'):
+                min_w_dist = 0.0
+
+            c["margin_distance"] = round(min_w_dist, 4)
+            # Margin score: exp(-1/margin) so large margins → score near 1,
+            # small margins → score near 0. Floor margin at 1e-6.
+            safe_margin = max(min_w_dist, 1e-6)
+            c["margin_score"] = round(math.exp(-1.0 / (safe_margin * 10.0)), 4)
+
+        # Sort by composite: recurrence (primary) + margin_score (secondary,
+        # weighted 0.3 to break ties among equal-recurrence candidates)
+        candidates.sort(
+            key=lambda c: c["recurrence"] + 0.3 * c.get("margin_score", 0.0),
+            reverse=True,
+        )
         return candidates
 
     # ── Full consolidation pass ───────────────────────────────────────────────

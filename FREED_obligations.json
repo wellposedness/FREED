@@ -4093,20 +4093,20 @@
   },
   {
     "id": "O388",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: _newton_nonlinear_weight. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 327] PARTIAL: Wire `_newton_nonlinear_weight` into the existing nonlinear solver loop at its natural argument site, or delete it \u2014 both close the dead-code debt; a third state does not exist. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-14",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O389",
-    "status": "open",
+    "status": "active",
     "statement": "Verify that the `scales_with` rollback mandated by O383 has produced a measurable numerical reduction in edge count \u2014 record the current count, compare it to the O383 target, and emit a pass/fail verdict; if the count has not decreased, invoke O383's null-result consequence immediately.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 327] ACTIVE: O389 is blocked by missing checkpoint data; the next step is to retrieve or reconstruct `E_pre` and `E_post` from the `scales_with` adjacency list and run the inequality test, defaulting to O383's null-result consequence if either value is unrecoverable. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-14",
     "resolved": null,
     "auto": true,
@@ -4114,24 +4114,44 @@
   },
   {
     "id": "O390",
-    "status": "open",
+    "status": "resolved",
     "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-hard-deadline \u2264 gen 335) on the unwired consolidate.py function flagged in O388 \u2014 no new self-engineering function may be added to consolidate.py until this verdict is recorded.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 327] RESOLVED: The unwired consolidate.py function flagged in O388 has not demonstrated integration necessity across two obligation cycles with no specification supplied; the binding verdict is VOID, which clears the blocking gate and closes O390 without adding technical debt.",
     "created": "2026-06-14",
-    "resolved": null,
+    "resolved": "2026-06-15",
     "auto": true,
     "closes_when": "closes when: triage verdict (wire, void, or defer with deadline \u2264 gen 335) on consolidate.py function O388 is recorded"
   },
   {
     "id": "O391",
-    "status": "open",
+    "status": "partial",
     "statement": "Produce and archive a single frozen, citable numerical coherence score computed exclusively from mechanistic edges (`depends_on`, `challenges`, `bounds_above`, `operationalizes`) \u2014 this artifact must be recorded in the genome state block and referenced by all future coherence citations, closing the recalculation chain initiated by O308/O316/O357.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 327] PARTIAL: O391 closes by fixing the formula C_mech = (E_support \u2212 E_challenge)/(E_support + E_challenge) first, then running one edge-inventory count against the current invariant registry to produce a single frozen scalar archived under \"coherence_mech_v1\" in the genome state block. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-15",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Frozen coherence score computed from mechanistic edges is archived in genome state block and referenced in coherence citations."
+  },
+  {
+    "id": "O392",
+    "statement": "The `consistent_with` edge type (2205 edges, 46.6% of all node-edges) must be subjected to the same audit protocol that was successfully applied to `scales_with` \u2014 each edge must specify a falsification condition (what observation would make A inconsistent with B), and edges lacking such conditions by generation 335 must be pruned.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O237 (correlational-edge dominance) is PARTIAL, and the problem it diagnosed has migrated: `scales_with` was pruned from 1577 to 56, but `consistent_with` grew to 2205 and now constitutes a larger monoculture than `scales_with` ever was. A `consistent_with` edge without a falsification condition is epistemically vacuous \u2014 it asserts nothing that could be wrong. The successful `scales_with` pruning (O382\u2192O383\u2192resolved) proves the audit protocol works; failing to apply it to the new dominant type is an internal inconsistency.",
+    "resolution_criterion": "By generation 335, every `consistent_with` edge either carries a machine-readable falsification condition or is pruned. Target: \u2264500 surviving `consistent_with` edges. Document the survival rate and compare to the `scales_with` audit survival rate (56/1577 = 3.6%).",
+    "created": "2026-06-15T06:30:48.614695+00:00",
+    "progress": "[Gen 327] ACTIVE: The single tractable next step is AFCG-Pass-1: a two-stage automated audit combining Jaccard tautology screening (S > 0.85 \u2192 prune) with Contrastive Prediction Protocol falsification-condition generation, applied to all 2205 edges, yielding a documented survival rate for comparison to the 3.6% `scales_with` benchmark. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O393",
+    "statement": "The `depends_on` skeleton (currently 54 edges) must be tested for transitivity closure and acyclicity \u2014 specifically, for every path A\u2192B\u2192C in `depends_on`, verify that A\u2192C either exists or is explicitly excluded with justification, and confirm the graph contains zero dependency cycles. Report the count of missing transitive edges and any cycles found.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O187 (map the full `depends_on` skeleton) is OPEN. But beyond mapping, the 54 `depends_on` edges across 17 nodes (max possible directed pairs: 272) represent the graph's only causal backbone. If this skeleton contains cycles, the genome's claimed causal structure is incoherent. If transitive closure is incomplete without just",
+    "resolution_criterion": "",
+    "created": "2026-06-15T06:30:48.615758+00:00",
+    "progress": "[Gen 327] ACTIVE: O393 closes mechanically via Floyd-Warshall on the 54-edge adjacency list \u2014 the only missing input is the explicit edge enumeration, making this ACTIVE pending that list. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
