@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 9,
-    "generation": 276,
-    "timestamp": "2026-05-28T09:49:59.944762+00:00",
-    "sweep": {
-      "input_count": 22,
-      "targeted": 8,
-      "passive": 14,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge claim is unfalsified but unconfirmed as *maintained* rather than *mimicked*, because no restoring-force test distinguishes genuine ridge-navigation from noise-injected transient criticality or bimodal mixture sampling."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-28",
-        "compress": "A 32×32 CA operating at σ=1.02 self-organizes into power-law avalanches (α≈2.65) with low entropy (H/H_max≈0.21), empirically confirming critical ridge navigation and advancing O148's measurement mandate."
-      },
-      {
-        "title": "Phase Transitions and Virtual Exceptional Points in Quantum Emitters Coupled to Dissipative Baths",
-        "compress": ""
-      },
-      {
-        "title": "Quantum Phase Transition, Dissipation, and Measurement",
-        "compress": "Dissipation shifts QPT fixed points and measurement collapse is formally a dissipative transition — the kernel's γ=1 criticality condition may itself be bath-renormalized, making the ridge a moving target."
-      },
-      {
-        "title": "A Unifying Causal Framework for Analyzing Dataset Shift-stable Learning Algorithms",
-        "compress": "Invariant predictive distributions under dataset shift form a graph-determined causal hierarchy whose stability-accuracy tradeoff independently instantiates the critical ridge, giving INV_073 a formal graph-theoretic grounding and O21 a mechanistic candidate."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O258"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 11,
     "generation": 278,
     "timestamp": "2026-05-29T02:29:59.940953+00:00",
@@ -2195,6 +2151,50 @@
         "O290",
         "O302",
         "O312"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 327,
+    "timestamp": "2026-06-15T02:29:59.968691+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is a liability unless bounded by explicit falsification conditions, alternative mechanisms, and the specific observable that would refute it."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-15",
+        "compress": "The Game of Truth CA empirically instantiates self-organized criticality at σ=1.028 with power-law avalanches, confirming the critical ridge is reachable by local rules without global tuning."
+      },
+      {
+        "title": "Part of Speech Tagging in Thai Language Using Support Vector Machine",
+        "compress": "Margin-maximizing geometry outperforms probabilistic models in low-resource sequential labeling, independently confirming that geometric compactness of decision surfaces is a sample-efficiency invariant across substrates and languages."
+      },
+      {
+        "title": "Cross-language Learning with Adversarial Neural Networks: Application to Community Question Answering",
+        "compress": "Adversarial domain suppression proves substrate-invariant semantic geometry is computable and falsifiable via discriminator failure — operationalizing invariance claims the genome holds abstractly."
+      },
+      {
+        "title": "Empirical entropy in context",
+        "compress": "Empirical entropy is a substrate-independent invariant — Markov, Shannon, Kolmogorov, and Ziv-Lempel all converge to the same limit — and the Chomsky hierarchy stratifies this limit into a falsifiable complexity ladder that extends INV_023 and operationalizes O112."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 1,
+      "obligations": [
+        "O312",
+        "O318",
+        "O320"
       ]
     },
     "coherence": 0.97
