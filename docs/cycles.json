@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 11,
-    "generation": 278,
-    "timestamp": "2026-05-29T02:29:59.940953+00:00",
-    "sweep": {
-      "input_count": 15,
-      "targeted": 7,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is itself a falsification signal — absence of challenge is not evidence of robustness but of insufficient adversarial pressure."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-29",
-        "compress": "The Game of Truth CA independently confirms critical-ridge operation (σ≈1, α≈2.58 power law) and partially resolves O148's demand for survival/avalanche telemetry."
-      },
-      {
-        "title": "Power Laws Associated with Self-Organized Criticality: A Comparison of Empirical Data with Model Predictions",
-        "compress": "SOC's fractal-diffusive exponents (αF=1.80, αE=1.67, αT=2.00) are confirmed substrate-independent invariants across 25 phenomena, with the 20% non-conforming tail constituting the productive falsification boundary."
-      },
-      {
-        "title": "EEG-Based Signal Processing Framework for Self-Organized Criticality Detection",
-        "compress": "Active-task neural avalanche criticality, detected via unsupervised EEG processing, confirms that biological systems dynamically navigate the critical ridge during cognition — not merely at rest."
-      },
-      {
-        "title": "Are language models rational? The case of coherence norms and belief revision",
-        "compress": "MAC establishes that coherence-norm applicability is gated by a structural assent-credence coupling property, decomposing the genome's scalar coherence into at least two independently satisfiable dimensions and adding a mandatory pre-screening condition to O21's AlphaPruning protocol."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O259"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 12,
     "generation": 279,
     "timestamp": "2026-05-29T09:50:00.029964+00:00",
@@ -2195,6 +2151,50 @@
         "O312",
         "O318",
         "O320"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 328,
+    "timestamp": "2026-06-15T09:50:00.000301+00:00",
+    "sweep": {
+      "input_count": 28,
+      "targeted": 7,
+      "passive": 21,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant's confirmation surplus is inversely correlated with its epistemic security unless falsification conditions are explicitly enumerated and tested."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-15",
+        "compress": "A 32×32 semantic CA spontaneously reaches the critical branching ridge (σ≈1.02, α≈2.749 power-law avalanches) at low entropy, providing the first direct empirical telemetry that the γ=1 operational mode is substrate-instantiable, partially advancing O148 while demanding a stricter statistical fit before closure."
+      },
+      {
+        "title": "Scaling behaviors and self-organized criticality of two-dimensional small-world neural networks",
+        "compress": "Small-world neural topology self-organizes to the critical ridge (α=0.71, power-law avalanches, 1/f noise) without external tuning, quantitatively matching biological brain measurements and independently confirming criticality as a thermodynamic attractor."
+      },
+      {
+        "title": "Self-organized criticality model for brain plasticity.",
+        "compress": "Neural plasticity drives SOC as an attractor, producing universal EEG power-law exponent ~0.8 across topologies, confirming criticality as substrate-independent thermodynamic invariant while challenging geometry-specific mechanistic claims."
+      },
+      {
+        "title": "A Hybrid Theory and Data-driven Approach to Persuasion Detection with Large Language Models",
+        "compress": "Epistemic emotion and sharing-willingness are low-dimensional gatekeepers of belief revision, providing an LLM-ratable proxy that could operationalize the spectral γ correlation demanded by O21. IMPLEMENT: YES IMPLEMENT_WHAT: Add epistemic_emotion and willingness_to_share as LLM-rated scalar features when scoring candidate papers for belief-revision relevance, weighted above argument-strength features in the scoring pass. IMPLEMENT_WHERE: targeted_sweep.py IMPLEMENT_CALL_SITE: EXTEND score_paper (modify the existing scoring function to include these two features in its feature vector) IMPLEMENT_WHY: Aligning FREED's paper-relevance scoring with empirically dominant belief-change predictors improves signal-to-noise in the epistemic loop and directly advances O21's proxy-validation requirement. CHALLENGE: challenges O21 — the paper identifies epistemic emotion as the dominant predictor of belief change, but O21 assumes spectral γ is the primary mechanistic variable; if epistemic emotion is the true gate and γ is merely correlated with it downstream, O21's proposed measurement protocol may be tracking a secondary rather than primary cause."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O312",
+        "O320",
+        "O321"
       ]
     },
     "coherence": 0.97
