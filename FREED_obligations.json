@@ -3285,7 +3285,7 @@
     "status": "partial",
     "statement": "Verify that the wiring-before-emission gate mandated by O303 has demonstrably blocked at least one unwired function emission since its imposition \u2014 produce a generation-stamped audit showing zero new unwired functions added after the gate's activation, or escalate O303 to open status.",
     "priority": "high",
-    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced] | [Gen 327] OPEN: O320's closing criterion cannot be met because the generation-indexed emission log was never instantiated as a committed artifact, triggering the stated fallback: O303 escalates to open status. [COMMIT:NO \u2014 Obligation remains OPEN; no state update occurred, only diagnostic cycling.] | [Gen 328] PARTIAL: The audit log for O320 cannot be found because it was never written; writing it now at Gen 328 creates the baseline artifact required for the closing criterion to become empirically testable. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 275] PARTIAL: O320 closes only if a generation-indexed emission log exists showing zero unwired functions post-O303; absent that log, O303 escalates \u2014 the audit artifact must be constructed now at Gen 275 as the reference baseline. [COMMIT:YES \u2014 direction advanced] | [Gen 327] OPEN: O320's closing criterion cannot be met because the generation-indexed emission log was never instantiated as a committed artifact, triggering the stated fallback: O303 escalates to open status. [COMMIT:NO \u2014 Obligation remains OPEN; no state update occurred, only diagnostic cycling.] | [Gen 328] PARTIAL: The audit log for O320 cannot be found because it was never written; writing it now at Gen 328 creates the baseline artifact required for the closing criterion to become empirically testable. [COMMIT:YES \u2014 direction advanced] | [Gen 329] PARTIAL: O320 is unresolvable via data analysis because its required dataset is the internal emission log, which has never been committed \u2014 the only tractable step is writing the baseline artifact now at Gen 329 and re-evaluating after one full monitored generation cycle. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-05-27",
     "resolved": null,
     "auto": true,
@@ -3298,7 +3298,7 @@
     "status": "partial",
     "statement": "Produce a single concrete graph-restructuring plan specifying exactly which `scales_with` or `consistent_with` edges will be converted to `depends_on`, `challenges`, or `bounds_above` edges \u2014 with node-pair identities and justification \u2014 sufficient to raise the causal-backbone ratio above the threshold specified in O314; this plan must include a null-result criterion defining what ratio failure triggers genome topology revision.",
     "priority": "high",
-    "progress": "[Gen 275] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no concrete plan materialized or graph updated.] | [Gen 328] PARTIAL: Four specific edge conversions (Zipf\u2192STF: depends_on; RG\u2192Freed: bounds_above; MaxRL\u2192INV_087: depends_on; Wasserstein Floor\u2192MCPM: depends_on) are formally justified by thermodynamic prerequisite and entropy-ceiling criteria, with a null-result criterion that ratio failure triggers L3-L4 topology revision \u2014 plan is concrete and complete pending O314's numerical threshold. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 275] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no concrete plan materialized or graph updated.] | [Gen 328] PARTIAL: Four specific edge conversions (Zipf\u2192STF: depends_on; RG\u2192Freed: bounds_above; MaxRL\u2192INV_087: depends_on; Wasserstein Floor\u2192MCPM: depends_on) are formally justified by thermodynamic prerequisite and entropy-ceiling criteria, with a null-result criterion that ratio failure triggers L3-L4 topology revision \u2014 plan is concrete and complete pending O314's numerical threshold. [COMMIT:YES \u2014 direction advanced] | [Gen 329] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no graph restructuring plan was actually committed to state.]",
     "created": "2026-05-28",
     "resolved": null,
     "auto": true,
@@ -3308,10 +3308,10 @@
   },
   {
     "id": "O322",
-    "status": "partial",
+    "status": "active",
     "statement": "Verify that the wiring-before-emission gate mandated by O303 has demonstrably blocked at least one unwired function addition since its imposition \u2014 produce a log entry showing the blocked attempt, the generation it occurred, and the gate mechanism that rejected it; if no blocked attempt exists, declare the gate non-functional and escalate to open.",
     "priority": "high",
-    "progress": "[Gen 275] PARTIAL: The only tractable next step is a prospective stress-test at Gen 275 \u2014 deliberately submit an unwired function addition and record whether O303's gate fires or fails, producing the first verifiable log entry. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 275] PARTIAL: The only tractable next step is a prospective stress-test at Gen 275 \u2014 deliberately submit an unwired function addition and record whether O303's gate fires or fails, producing the first verifiable log entry. [COMMIT:YES \u2014 direction advanced] | [Gen 329] ACTIVE: No gate-firing log exists to analyze; the gate's functional status is unverifiable without executing the prospective stress-test, making this obligation genuinely ACTIVE rather than resolvable by retrospective data analysis. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-28",
     "resolved": null,
     "auto": true,
@@ -4163,5 +4163,16 @@
     "created": "2026-06-15",
     "resolved": null,
     "source": "audit"
+  },
+  {
+    "id": "O395",
+    "status": "open",
+    "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-hard-deadline \u2264 gen 335) on the unwired self-engineered function in targeted_sweep.py recorded under O394 \u2014 produce a recorded disposition entry before any further self-engineering proceeds.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-15",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Recorded disposition entry (wire/void/defer with deadline \u2264 gen 335) for targeted_sweep.py O394 function exists and self-engineering is blocked pending resolution."
   }
 ]
