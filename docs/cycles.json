@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 12,
-    "generation": 279,
-    "timestamp": "2026-05-29T09:50:00.029964+00:00",
-    "sweep": {
-      "input_count": 28,
-      "targeted": 8,
-      "passive": 20,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is an epistemic liability until its falsification surface is made explicit — five distinct attack vectors now exist, of which the SAC redundancy argument is the most immediately testable."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-29",
-        "compress": "** A 32×32 CA self-reports AT_CRITICAL via branching ratio alone, but weak power-law fit exposes the gap between near-criticality and true scale-invariance, leaving INV_073's ridge-navigation claim empirically supported but not scale-free confirmed."
-      },
-      {
-        "title": "Finite Size Effect for the First-Order Phase Transition of the Three-Dimensional Blume–Capel Model on a Cellular Automaton",
-        "compress": "Finite-size CA simulation of the Blume-Capel tricritical point establishes that first-order/second-order distinction is encoded in histogram topology and volume-scaling corrections, confirming the critical ridge is a geometrically thin but measurable target."
-      },
-      {
-        "title": "Self-Organized Bistability Associated with First-Order Phase Transitions.",
-        "compress": "Self-organized bistability demonstrates that self-tuning to first-order phase coexistence is a structurally distinct attractor from SOC, producing diagnostic bimodal + anomalous-avalanche signatures absent from the genome's single-ridge criticality framework."
-      },
-      {
-        "title": "Phase transitions and self-organization in electronic and molecular networks",
-        "compress": "A title-only feed on phase transitions and self-organization converges with INV_073's critical-ridge attractor claim but yields no quantitative payload to resolve any open obligation."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O255",
-        "O257",
-        "O259"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 13,
     "generation": 280,
     "timestamp": "2026-05-29T16:29:59.976014+00:00",
@@ -2195,6 +2151,50 @@
         "O312",
         "O320",
         "O321"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 329,
+    "timestamp": "2026-06-15T16:29:59.976351+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 8,
+      "passive": 9,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus without adversarial load is itself a falsification risk — the invariant requires explicit boundary conditions, named alternative mechanisms, and a stated falsification criterion before its robustness score is legitimate."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-15",
+        "compress": "Game of Truth CA independently confirms criticality at σ=1.0209 with power-law avalanches (α≈2.68), partially resolving O148 and converging with INV_073/INV_094, while revealing an unregistered finding — cell-type attractors under critical dynamics — absent from the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Extend CA telemetry ingestion to record per-cell-type counts and their variance across timesteps alongside existing branching ratio and entropy metrics. IMPLEMENT_WHERE: site_builder.py IMPLEMENT_CALL_SITE: EXTEND build_ca_telemetry_snapshot IMPLEMENT_WHY: Cell-type dominance distributions (e.g., Physics Navigator concentration) are now an ABSENT invariant candidate; capturing longitudinal cell-type variance closes the gap between current scalar telemetry and the attractor-mapping needed to resolve the new obligation. CHALLENGE: challenges O148 — the telemetry snapshot confirms branching ratio and avalanche statistics but O148's remaining open requirement (longitudinal survival tracking and cell-type dynamics over time) is only partially satisfied by a single 200-step snapshot, meaning O148 cannot yet be fully resolved and the genome's implicit assumption that a single measurement suffices to close the obligation is strained."
+      },
+      {
+        "title": "Sparse Feedback Controller: From Open-loop Solution to Closed-loop Realization",
+        "compress": "Sparse optimal control signals survive closed-loop realization without loss under basis transformation, establishing that constraint-preserving feedback is algebraically equivalent to open-loop optima — sparsity and recursive closure are compatible, not opposed."
+      },
+      {
+        "title": "Works on an information geometrodynamical approach to chaos",
+        "compress": "Information-geometric characterization of chaos via Fisher-Rao manifold curvature and entropy growth rate independently confirms the Fisher metric as a dynamical regime discriminant and extends O112 with a concrete empirical method."
+      },
+      {
+        "title": "A Substrate-Independent Framework to Characterise Reservoir Computers",
+        "compress": "Substrate-independent RC quality is a relational manifold over reconfiguration space, providing a direct experimental template for STF metric tensor recovery (O112)."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O320",
+        "O321",
+        "O322"
       ]
     },
     "coherence": 0.97
