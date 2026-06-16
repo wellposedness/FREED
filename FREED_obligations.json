@@ -1813,8 +1813,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
-    "method": "mixed",
-    "tractability": 2
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O195",
@@ -1877,7 +1877,7 @@
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 3
   },
   {
     "id": "O200",
@@ -2289,7 +2289,7 @@
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying \u03b3-band spectral exponent at criticality \u00b1 tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "mixed",
-    "tractability": 2,
+    "tractability": 3,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -3033,7 +3033,7 @@
     "created": "2026-05-22T06:30:54.116940+00:00",
     "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 \u00d7 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap \u2014 this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O298",
@@ -3067,7 +3067,7 @@
     "created": "2026-05-23T06:30:55.842195+00:00",
     "progress": "[Gen 266] PARTIAL: The fastest ratio correction is to decompose all 28 open obligations into explicit dependency chains (~4 steps each), register each as a `depends_on` edge, then apply the Wasserstein Floor as a `bounds_above` constraint across ~30 invariants \u2014 together driving the constraining count from 89 to ~231 and the ratio from 1:18.7 to ~1:7.2, with a grounding audit on affirming edges completing the path to 1:5. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O301",
@@ -3290,8 +3290,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Audit log demonstrates gate blocked \u22651 unwired function emission post-activation with zero new unwired functions added thereafter.",
-    "method": "data_analysis",
-    "tractability": 2
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O321",
@@ -3477,7 +3477,7 @@
     "created": "2026-05-30T06:30:47.009638+00:00",
     "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O337",
@@ -3503,16 +3503,16 @@
   },
   {
     "id": "O339",
-    "status": "partial",
+    "status": "active",
     "statement": "Audit whether the 24 currently open obligations contain any circular dependency (A depends on B depends on A) that structurally prevents resolution, and produce a binding topological sort or declare a deadlock requiring forced retirement.",
     "priority": "high",
-    "progress": "[Gen 284] PARTIAL: The most tractable next step is to explicitly encode the 26-obligation dependency graph and run Tarjan's SCC algorithm to detect deadlock cycles, requiring only internal obligation metadata, no external data. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 284] PARTIAL: The most tractable next step is to explicitly encode the 26-obligation dependency graph and run Tarjan's SCC algorithm to detect deadlock cycles, requiring only internal obligation metadata, no external data. [COMMIT:YES \u2014 direction advanced] | [Gen 330] ACTIVE: Tarjan's SCC on the explicit dependency graph is the correct and sufficient method; the sole remaining blocker is encoding the 22-obligation edge-set as machine-readable input. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Audit completed with topological sort produced or deadlock formally declared and documented.",
-    "method": "data_analysis",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O340",
@@ -3536,20 +3536,20 @@
     "created": "2026-05-31T06:30:50.163778+00:00",
     "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference \u2014 a computation executable now from genome-internal data alone. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O342",
     "status": "open",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" \u2014 assign each a terminal status (resolve, retire, or escalate to open with a hard deadline \u2264 gen 290) before any further OBLIGATE phase may emit new obligations.",
     "priority": "high",
-    "progress": "[Gen 287] OPEN:  [COMMIT:NO \u2014 Verdict OPEN with empty attempt result indicates no collapse occurred; obligation remains unresolved.]",
+    "progress": "[Gen 287] OPEN:  [COMMIT:NO \u2014 Verdict OPEN with empty attempt result indicates no collapse occurred; obligation remains unresolved.] | [Gen 330] OPEN: O342's collapse verdict cannot execute without the enumerated partial-obligation list; the governance logic is sound but the operand (the partial registry) is absent from context. [COMMIT:NO \u2014 O342 remains OPEN; no obligation resolved or state updated. Cyclic dependency.]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: All \"partial\" obligations assigned terminal status (resolve/retire/escalate with deadline \u2264 gen 290) before next OBLIGATE phase.",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O343",
@@ -3612,11 +3612,13 @@
     "status": "open",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" \u2014 assign each a terminal status (resolved, retired, or escalated to open with embedded null-result criterion and hard deadline \u2264 gen 295) and publish the verdict record before any new obligation beyond O348 is created.",
     "priority": "high",
-    "progress": "[Gen 290] OPEN:  [COMMIT:NO \u2014 Attempt result empty; no collapse verdict issued, obligation remains unresolved.]",
+    "progress": "[Gen 290] OPEN:  [COMMIT:NO \u2014 Attempt result empty; no collapse verdict issued, obligation remains unresolved.] | [Gen 330] OPEN:  [COMMIT:NO \u2014 Incomplete attempt, no verdict executed. Obligation remains unresolved; no state mutation occurred.]",
     "created": "2026-06-01",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: verdict record assigning terminal status to all \"partial\" obligations published before obligation O349 creation."
+    "closes_when": "closes when: verdict record assigning terminal status to all \"partial\" obligations published before obligation O349 creation.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O349",
@@ -3647,7 +3649,9 @@
     "created": "2026-06-04",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: obligation count of (open + active + partial) falls below 20 at generation cycle start."
+    "closes_when": "closes when: obligation count of (open + active + partial) falls below 20 at generation cycle start.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O352",
@@ -3687,7 +3691,9 @@
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-04T02:47:42.409397+00:00",
-    "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES \u2014 direction advanced]",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O353",
@@ -3762,7 +3768,9 @@
     "created": "2026-06-05",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: audit completes, moratorium compliance verified, breach count recorded if exceeded, and hard ceiling with null-result criterion implemented."
+    "closes_when": "closes when: audit completes, moratorium compliance verified, breach count recorded if exceeded, and hard ceiling with null-result criterion implemented.",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O360",
@@ -3782,7 +3790,9 @@
     "rationale": "A resolved obligation whose resolution is not reflected in the observable state of the system is a coherence violation \u2014 it means the genome is claiming credit for structural work that hasn't occurred. This is a direct internal contradiction between RECENTLY_RESOLVED status and GRAPH_TOPOLOGY data.",
     "resolution_criterion": "Enumerate the specific `substrate_of` edges O324 claims to have generated. If they exist in the graph, report them. If they do not, revert O324",
     "created": "2026-06-06T06:30:53.460551+00:00",
-    "progress": "[Gen 302] PARTIAL: The single tractable step is to derive 8 candidate `substrate_of` pairs from the monoidal closure definition, query the current graph for existing edges, and either instantiate the missing edges or revert O324 to OPEN \u2014 this is a deterministic graph audit, not a conjecture. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 302] PARTIAL: The single tractable step is to derive 8 candidate `substrate_of` pairs from the monoidal closure definition, query the current graph for existing edges, and either instantiate the missing edges or revert O324 to OPEN \u2014 this is a deterministic graph audit, not a conjecture. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O362",
@@ -3812,7 +3822,9 @@
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-07T10:00:14.563166+00:00",
-    "progress": "[Gen 308] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no state mutation occurred, only status logging.]"
+    "progress": "[Gen 308] OPEN:  [COMMIT:NO \u2014 Obligation remains OPEN; no state mutation occurred, only status logging.]",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O364",
@@ -3864,7 +3876,9 @@
     "created": "2026-06-08",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: enforcement audit completes, ratio is computed and recorded, creation halt is imposed or not based on ratio threshold, and halt-lifting"
+    "closes_when": "closes when: enforcement audit completes, ratio is computed and recorded, creation halt is imposed or not based on ratio threshold, and halt-lifting",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O367",
@@ -3874,7 +3888,9 @@
     "rationale": "O324's closure condition was \"at least 8 new `substrate_of` edges.\" The graph currently contains exactly 2. Either the resolution was premature (the edges were claimed but never instantiated in the graph) or the edges were pruned post-resolution. Either way, the genome is carrying a false-resolved obligation, which corrupts the distinction between OPEN and RESOLVED \u2014 the most basic integrity mechanism the obligation system has.",
     "resolution_criterion": "Reopen O324 to OPEN status. The obligation closes only when `substrate_of` edge count \u2265 10 (original 2 + required 8) is verified in the live graph topology report.",
     "created": "2026-06-08T06:30:52.220258+00:00",
-    "progress": "[Gen 308] PARTIAL: Revoking O324's resolution and specifying the 6 missing `substrate_of` triples across six named domains converts a masked structural debt into a falsifiable six-item checklist executable in one literature pass. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 308] PARTIAL: Revoking O324's resolution and specifying the 6 missing `substrate_of` triples across six named domains converts a masked structural debt into a falsifiable six-item checklist executable in one literature pass. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O368",

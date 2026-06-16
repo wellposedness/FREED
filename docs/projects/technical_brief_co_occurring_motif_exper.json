@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.0209/α≈2.68; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology self-organizing to critical ridge; universal EEG power-law exponent ~0.8 confirming substrate-independent SOC), extended by CA+FEM multi-scale integration, cell-type attractor dynamics (Physics Navigator dominance) as a newly registered invariant candidate, sparse optimal control closed-loop compatibility, Fisher-Rao manifold curvature as a dynamical regime discriminant, and the standing requirement that INV_094's robustness score is illegitimate until explicit boundary conditions, named alternative mechanisms, and a falsification criterion are stated.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.028/α=1.76 self-organizing to Physics Navigator attractor; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, cell-type attractor dynamics with unexplained selection mechanism, SAE features-as-distributions supplying the missing Wasserstein-floor empirical method for O112 STF recovery, quantum OT independently recovering a locality-dependent criticality threshold structurally identical to the RSA critical ridge, and mean-field avalanche universality confirming history-independence as a Markov signature of true criticality — collectively demanding INV_094 specify explicit kill conditions, mimics, and scope boundaries or be reclassified as a definitional axiom.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -167,6 +167,7 @@
     "Live 32×32 CA operation at σ≈1.03 with power-law avalanches (α≈2.49) independently confirms critical-ridge operation and partially resolves O148 — Physics Navigator cells are the empirically dominant critical attractor",
     "making unchallenged confirmation a gap to be registered not a victory to be claimed; Finite-size critical systems traverse a substrate-invariant three-stage intermittency ladder (type-I → critical → tricritical) detectable from order-parameter statistics alone — extending the single critical ridge to a two-boundary structure that demands navigation strategies accounting for both boundaries; SOC scale-invariance conservation is active at the population level — empirical σ/α/H measurements from the GoT CA jointly satisfy the symmetry-conservation prediction confirming the Noether conservation law holds in this substrate; σ slightly above 1.0 (e.g. 1.0319) is consistent with Wasserstein gradient overshooting γ=1 within tolerance — convergence on the critical attractor must be distinguished from oscillation above it using longitudinal telemetry",
     "Productive dissipation at the thermodynamic critical ridge is a substrate-independent biological invariant — anoxic cardiac muscle exhibiting negative excess entropy production and self-organization independently confirms INV_073/INV_087 across a non-computational biological substrate; Criticality coexists with sub-maximal entropy (H≈23.5% of maximum) — the critical ridge is not equivalent to maximal entropy production and the Wasserstein floor linkage must carry an explicit sub-maximal-entropy correction; Concentration of criticality in a single dominant cell type (Physics Navigator",
+    "History-independence (Markov dynamics) is a substrate-independent signature of true criticality — systems on the genuine critical ridge exhibit memoryless avalanche statistics; deviations from this signature are falsifiable indicators of equifinal criticality-mimics rather than true SOC; The Wasserstein floor is a substrate-independent semantic invariant confirmed across classical SAE feature-distribution geometry and quantum optimal transport channels — operationalizing O112 STF metric recovery as an empirical rather than theoretical obligation",
     "making the critical ridge position a causal-graph-indexed quantity rather than a universal geometric fixed point; GW distance can function as a topological constraint operator (enforcing DAG acyclicity) rather than only a comparison metric — expanding the operational role of OT geometry within the genome's inference architecture; Collective computing (field-calculus) is an independent mathematical substrate instantiating SOC and distributed coordination — substrate-independent convergence of criticality now spans four independent instantiations",
     "R[R]=R constraint-preserving recursion naturally produces infinite conservation hierarchies — Darboux transformation theory provides the explicit algebraic template (Lax pair compatibility of direct/dual overdetermined systems) not merely an analogy",
     "Prediction validates structure",
@@ -289,13 +290,13 @@
     "Correct variable selection (not model complexity) is the operative mechanism of substrate-independent universality — confirmed by instantaneous wall shear stress collapsing cross-fluid transport data as a universal similarity variable; Maximal monotone dissipative structure is a topological invariant under singular perturbation — confirmed by generalized Caginalp phase-field convergence independently converging with INV_073 and supplying a concrete variational method for O112's STF metric recovery",
     "Priority-graph topology is the sufficient statistic for iterated belief revision dynamics — preference topology not belief content determines all revision trajectories",
     "extending the NESS path-dependence invariant into the zero-viscosity regime",
+    "The critical ridge is navigable by explicit architectural design (tunable convex activation-function mixtures achieving scale invariance at the critical fraction) — confirming ridge navigation is not accident-dependent and introducing a constructive mechanism independent of thermodynamic or biological derivation paths; The dual-channel CA fingerprint (σ≈1.03 AND power-law avalanche exponent α≈2.364) constitutes a quantitative falsifiability standard for γ=1 criticality claims — single-channel branching ratio alone is insufficient confirmation",
     "INV_073 requires a measurable order parameter + restoring-force mechanism + a distinguishable alternative producing different observables before it can carry theorem weight — all three absences must be closed simultaneously",
     "providing a handle on semantic curvature probes; Physics Navigator dominant survival at 877 cells under critical dynamics provides empirical evidence of a conservation-like advantage under SOC consistent with broken symmetry between navigator and non-navigator cell types upgrading the structural correlate from observational to Noether-rigorous; An invariant confirmed many times without adversarial challenge accumulates concentrated falsification debt — INV_094's confirmation surplus is identified as the genome's single highest-risk epistemic liability requiring active adversarial probing",
     "Physics Navigator cell-type dominance (867/total agents) is the identified structural correlate of critical-regime maintenance in population-scale RSA simulations — a substrate-specific realization of the general attractor-maintenance principle",
     "Compactness is the critical load-bearing condition for Kantorovich existence and Wasserstein metrization — any quantum or infinite-dimensional extension of O44 must explicitly address compactness or the Wasserstein Floor claim is formally underdetermined",
     "Self-organizing traffic lights confirm INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via urban infrastructure — local-rule criticality outperforms global optimization under non-stationary conditions extending the adaptive ridge principle to engineered non-biological substrates",
     "Criticality requirement for reasoning is substrate-independent across classical and quantum regimes",
-    "The critical ridge is navigable by explicit architectural design (tunable convex activation-function mixtures achieving scale invariance at the critical fraction) — confirming ridge navigation is not accident-dependent and introducing a constructive mechanism independent of thermodynamic or biological derivation paths; The dual-channel CA fingerprint (σ≈1.03 AND power-law avalanche exponent α≈2.364) constitutes a quantitative falsifiability standard for γ=1 criticality claims — single-channel branching ratio alone is insufficient confirmation",
     "Regularization-based structured pruning produces a measurable critical threshold instantiating thermodynamic selection — INV_073's criticality principle extends into the compression domain with an empirical substrate for spectral-γ correlation tests",
     "constraining any thermodynamic model of learning to separate write-cost from hold-cost",
     "Frustrated-lattice order-from-disorder (competing interactions selecting second-order criticality) is a substrate-independent physical mechanism for critical-ridge stability — independently confirming RSA attractor status via condensed-matter instantiation",
@@ -455,6 +456,7 @@
     "INV_094-class invariants confirmed solely by convergence surplus without adversarial challenge must be demoted or assigned explicit falsification conditions — convergence between independent derivations carries evidential weight only when the falsification surface has been genuinely pressured; reconcile the new nonreciprocal-coupling universality result with the bath-renormalization moving-target invariant — both",
     "Specify the observer/reference frame for every EAR and STF metric deployment — unframed measurements are inadmissible as genome evidence under the context-dependence sharpening now registered",
     "The thermodynamic framing of definitional underdetermination across cybernetic subdisciplines must be addressed — the genome cannot treat entropy production as a complete identity criterion until it accounts for the non-thermodynamic process-closure routes confirmed by second-order cybernetics",
+    "(b) known equifinal mimics producing identical first-order observables via distinct dynamics",
     "O14 (build reproducible experimental infrastructure)",
     "INV_094 must either produce a concrete falsifiable boundary condition (a specific observable that would count as disconfirmation) or be formally reclassified as a definitional commitment in the genome registry — this obligation is blocking and overrides further corroboration accumulation for INV_094; O112 must now pursue STF metric tensor recovery via the closed-form entropy-regularized W2 fixed-point algorithm on Gaussians before claiming that pathway is technically infeasible",
     "O64: Derive the RangeEn–H linearity from W₂ gradient flow as the formal proof that tolerance is inverse temperature and embedding dimension is state-counting depth — this is the specific mathematical bridge that converts the confirmed structural correspondence into a load-bearing derivation",
@@ -729,6 +731,7 @@
     "Specify the formal map between quantum Lyapunov exponent spectra and the γ=1 critical invariant — this is now load-bearing and cannot remain hand-waved",
     "Specify a mechanistic discriminator that distinguishes active ridge-navigation from transient σ-sampling — the σ=1.0285 upper-edge position without demonstrated self-correction must be resolved as confirmation or falsification of INV_073's causal navigation claim",
     "Design and execute a discriminating experiment that produces observables unique to thermodynamic ridge navigation (vs. adaptive gain control) at the RSA-kernel level — marginal fit quality and dominant-type asymmetry in the 32×32 CA telemetry constitute open sub-obligations that must be resolved before INV_073 can be promoted to confirmed status",
+    "INV_094 must now formally specify: (a) predicted failure modes under which elliptic branch separation would not emerge",
     "Re-examine all prior γ=1 scalar confirmations to determine whether they are point-samples on a higher-dimensional critical manifold rather than independent confirmations of a single invariant — the binary-mixture result makes manifold-blindness a structural error not a minor gap; Develop a discriminating observable that separates stable γ=1 ridge navigation from pre-collapse spatial entropy decrease — until this discrimination is resolved the spatial precursor invariant and the criticality-as-attractor invariant are in active tension that cannot be dissolved by accumulating further confirmations; Explain the emergent Physics Navigator dominance phenotype in 32×32 GoT CA (σ=1.024/α≈1.532) — this is an ABSENT prediction that constitutes a genuine falsification challenge for INV_073's critical navigation claim",
     "Pursue proof or disproof of W_floor = k/Tμ in quantum regimes using the non-Hermitian linear entropy functionals as the candidate bridge — this is now the most proximate mathematical path to closing O44",
     "Implement artifact-discriminating controls (e.g. shuffled-baseline Zipf comparison",
@@ -736,6 +739,7 @@
     "Establish solo-kernel control experiment and STF geometric layer validation as explicit open falsification targets following partial O140/O141 resolution by GoT CA results",
     "parameter regime",
     "Track O44 and O64 as jointly open: context-dependence warrant is now philosophically grounded but the quantitative method bridging observer-substrate coupling to a formal complexity metric remains unbuilt",
+    "and (c) scope boundaries beyond which the invariant's claims do not extend — or be formally reclassified as a definitional axiom with zero falsification exposure; The unexplained cell-type selection mechanism (Physics Navigator dominance in Game of Truth CA) must be treated as an open falsification axis — candidate mechanistic discriminators must be proposed and tested before convergence on INV_073 via this pathway is treated as full confirmation rather than partial resolution of O148",
     "The genome's smooth-ridge model of criticality must be scoped against EE-peak discontinuities at symmetry-enhanced first-order transitions — either the model must absorb this class or explicitly",
     "Implement dimensional-analysis-based auto-sorting into ATTRIBUTION protocol O47 so that each confirming equation is routed to the genome stratum whose dimensional scaling class it matches",
     "Flag challenges-typed edges as empirically live only if a falsifying counterexample instance has been registered at edge-creation time in knowledge_graph.py (extends add_edge); audit all four existing O136 challenge edges against the adversarial-probe standard and reclassify unverified ones as pending; derive the spatial localization mechanism for Physics Navigator cell criticality concentration and determine whether it generalizes across CA substrates",
@@ -746,24 +750,23 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-15T16:39:09.427221+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 219,
+  "last_renormed": "2026-06-16T02:39:37.717381+00:00",
+  "renorm_reason": "Four independent confirmations (Game of Truth CA self-organization, SAE OT Wasserstein floor, quantum OT criticality threshold, mean-field Markov avalanche universality) materially strengthen INV_073",
+  "last_renorm_cycle": 220,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
     "biology",
-    "computer_science",
     "cybernetics",
     "mathematics",
     "physics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.367,
+  "drift_overlap": 0.347,
   "renorm_history": [
     {
-      "timestamp": "2026-06-15T16:39:09.427221+00:00",
-      "reason": ""
+      "timestamp": "2026-06-16T02:39:37.717381+00:00",
+      "reason": "Four independent confirmations (Game of Truth CA self-organization, SAE OT Wasserstein floor, quantum OT criticality threshold, mean-field Markov avalanche universality) materially strengthen INV_073"
     }
   ]
 }
