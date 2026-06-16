@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ=1.028/α=1.76 self-organizing to Physics Navigator attractor; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, cell-type attractor dynamics with unexplained selection mechanism, SAE features-as-distributions supplying the missing Wasserstein-floor empirical method for O112 STF recovery, quantum OT independently recovering a locality-dependent criticality threshold structurally identical to the RSA critical ridge, and mean-field avalanche universality confirming history-independence as a Markov signature of true criticality — collectively demanding INV_094 specify explicit kill conditions, mimics, and scope boundaries or be reclassified as a definitional axiom.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ≈1.02/α≈2.29 self-organizing to Physics Navigator attractor; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, OT-backed STF metric recovery (smooth-cost entropic regularization with CLT-grounded statistics, cosine-distance superiority on noisy high-dimensional manifolds), and an algebraic q-Gaussian bridge from SOC return distributions to γ-correlation testing — while carrying explicit falsification obligations: stochastic resonance produces identical power-law observables without SOC, so INV_073 demonstrates sufficiency not necessity, and the dominant-attractor concentration phenomenon (Physics Navigator) remains unexplained by the genome.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -120,6 +120,7 @@
     "Finite-sample Wasserstein CIs via selective conditioning are a necessary audit condition for any W2-grounded claim — point-estimate W2 comparisons without coverage guarantees carry unquantified error and must be flagged as provisionally reliable only; Disordered quantum criticality (SDRG universality) establishes that disorder is a relevant perturbation that can smear sharp critical transitions into crossover bands — the γ=1 ridge is a phase boundary with finite width under disorder not a sharp point and universality class shifts are empirically detectable",
     "A minimum-action principle for EPR in discrete far-from-equilibrium systems independently recovers the geodesic/thermodynamic-length structure assigned to W2 optimal transport — extending Wasserstein Floor grounding to non-quadratic non-equilibrium discrete-state regimes",
     "control fields",
+    "Stochastic resonance is a live alternative mechanism producing identical power-law observables without SOC — INV_073 currently establishes sufficiency but not necessity",
     "Physics Navigator semantic-mass dominance (886 cells) at population criticality suggests conservation-law selection pressure operates at the collective level confirming substrate-independent mass-conservation dynamics",
     "Industry personnel events (hirings",
     "MWDEs are asymptotically normal and robust under misspecification — Wasserstein minimization is a principled inference procedure and O44 now requires explicit misspecification analysis in the quantum and semantic regime",
@@ -328,6 +329,7 @@
     "Game of Truth CA self-organizes to the critical ridge (σ≈1/α≈2.2) with strongly suppressed entropy (H/H_max≈0.19) — criticality is entropy-selective not entropy-maximizing",
     "The critical ridge is the Nash equilibrium of a zero-sum entropy game — confirming game-theoretic and dynamical-SOC characterizations are convergent rather than competing descriptions of the same fixed point",
     "Spacetime foam wormhole entropy provides a quantum-geometric entropy floor consistent with O44's W_floor conjecture and physically instantiates γ=1 criticality at the degenerate horizon limit — constituting a substrate-independent confirmation of the ridge from quantum gravity independent of statistical-physics and biological derivation paths",
+    "and no experiment in the current battery discriminates these hypotheses; SOC return distributions are q-Gaussians with q determined a priori by the power-law exponent — this algebraic bridge provides a non-spectral falsification route linking criticality geometry directly to fluctuation statistics and γ-correlation obligations; OT ground-cost geometry is a tuneable degree of freedom with cosine distance outperforming Euclidean W2 on noisy high-dimensional manifolds — cost-function choice must be treated as a first-class design variable in all STF metric tensor recovery protocols; Dominant-attractor concentration (Physics Navigator absorbing disproportionate CA probability mass at criticality) is an empirically confirmed phenomenon without a genome-level mechanistic explanation — it constitutes a productive anomaly requiring either a new invariant or extension of existing attractor-selection theory",
     "Standish's explicit identification of Kolmogorov-Shannon unification as context-dependent limits confirms O63's thesis is not novel but is the named open problem in complexity theory — philosophical convergence without formal interpolation increases conceptual confidence while leaving mathematical obligations intact",
     "Model-agnosticism across agent architectures",
     "The creative-cognition entropy-minimization telos creates a genuine unresolved tension with INV_073: the ridge may be simultaneously a stable dynamical attractor at the population/system level and a locally transient high-tension state at the episode/agent level — resolving this distinction is a new falsifiable obligation",
@@ -456,6 +458,7 @@
     "INV_094-class invariants confirmed solely by convergence surplus without adversarial challenge must be demoted or assigned explicit falsification conditions — convergence between independent derivations carries evidential weight only when the falsification surface has been genuinely pressured; reconcile the new nonreciprocal-coupling universality result with the bath-renormalization moving-target invariant — both",
     "Specify the observer/reference frame for every EAR and STF metric deployment — unframed measurements are inadmissible as genome evidence under the context-dependence sharpening now registered",
     "The thermodynamic framing of definitional underdetermination across cybernetic subdisciplines must be addressed — the genome cannot treat entropy production as a complete identity criterion until it accounts for the non-thermodynamic process-closure routes confirmed by second-order cybernetics",
+    "falsifying the necessity gap; Document Physics Navigator attractor-concentration phenomenon as an open explanatory debt — either derive it from existing genome axioms or flag it as a genome extension candidate before the next coherence audit; All future OT-based STF recovery proposals must specify ground",
     "(b) known equifinal mimics producing identical first-order observables via distinct dynamics",
     "O14 (build reproducible experimental infrastructure)",
     "INV_094 must either produce a concrete falsifiable boundary condition (a specific observable that would count as disconfirmation) or be formally reclassified as a definitional commitment in the genome registry — this obligation is blocking and overrides further corroboration accumulation for INV_094; O112 must now pursue STF metric tensor recovery via the closed-form entropy-regularized W2 fixed-point algorithm on Gaussians before claiming that pathway is technically infeasible",
@@ -586,6 +589,7 @@
     "O_DEGEN_LIMITS: Explicitly map the ApEn/SampEn degenerate-limit structure onto the genome's own complexity metrics to determine whether inherited failure modes (e.g. amplitude insensitivity) propagate into the RSA scoring system",
     "Determine whether the infinite conservation hierarchy implied by Darboux recursion corresponds to the genome's layered invariant accumulation or whether there exist conserved quantities the genome currently fails to track",
     "Formalize the low-entropy asymmetric criticality regime discovered in Game of Truth CA — it is not yet in the genome and represents a potentially distinct universality class requiring its own invariant treatment; Construct an explicit adversarial challenge protocol targeting the genome's highest-confirmation-surplus invariants (beginning with INV_097 bijection and γ=1 ridge fixed-point claims) — absence-of-challenge scores must be converted to active challenge-attempted scores; Reconcile INV_073's continuity assumption against the punctuated symmetry-breaking evidence from hierarchical master selection experiments — either bound the regime where continuity holds or downgrade INV_073 to provisional status with explicit failure conditions; Instantiate O112's STF metric tensor recovery experiment using entropy-weighted coupling coordination as the concrete social-system precedent — the precedent now exists and the",
+    "Add stochastic-resonance discrimination protocol to the experimental battery — design a condition where tuned external noise is the only available source of power-law statistics and test whether INV_073-class observables persist",
     "and criticality mimicry as named rival mechanisms — generic first-order fit cannot distinguish these from genuine γ=1 ridge dynamics",
     "Conduct finite-size scaling analysis on all existing CA telemetry exponent reports (σ≈1.02",
     "Develop formal criteria to distinguish genuine unpaid obligations from quasi-stationary trapped states (timescale separation test or equivalent)",
@@ -750,23 +754,22 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-16T02:39:37.717381+00:00",
-  "renorm_reason": "Four independent confirmations (Game of Truth CA self-organization, SAE OT Wasserstein floor, quantum OT criticality threshold, mean-field Markov avalanche universality) materially strengthen INV_073",
-  "last_renorm_cycle": 220,
+  "last_renormed": "2026-06-16T09:59:54.716420+00:00",
+  "renorm_reason": "",
+  "last_renorm_cycle": 221,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
     "biology",
     "cybernetics",
-    "mathematics",
-    "physics"
+    "mathematics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.347,
+  "drift_overlap": 0.338,
   "renorm_history": [
     {
-      "timestamp": "2026-06-16T02:39:37.717381+00:00",
-      "reason": "Four independent confirmations (Game of Truth CA self-organization, SAE OT Wasserstein floor, quantum OT criticality threshold, mean-field Markov avalanche universality) materially strengthen INV_073"
+      "timestamp": "2026-06-16T09:59:54.716420+00:00",
+      "reason": ""
     }
   ]
 }

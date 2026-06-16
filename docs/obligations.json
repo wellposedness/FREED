@@ -3540,10 +3540,10 @@
   },
   {
     "id": "O342",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" — assign each a terminal status (resolve, retire, or escalate to open with a hard deadline ≤ gen 290) before any further OBLIGATE phase may emit new obligations.",
     "priority": "high",
-    "progress": "[Gen 287] OPEN:  [COMMIT:NO — Verdict OPEN with empty attempt result indicates no collapse occurred; obligation remains unresolved.] | [Gen 330] OPEN: O342's collapse verdict cannot execute without the enumerated partial-obligation list; the governance logic is sound but the operand (the partial registry) is absent from context. [COMMIT:NO — O342 remains OPEN; no obligation resolved or state updated. Cyclic dependency.]",
+    "progress": "[Gen 287] OPEN:  [COMMIT:NO — Verdict OPEN with empty attempt result indicates no collapse occurred; obligation remains unresolved.] | [Gen 330] OPEN: O342's collapse verdict cannot execute without the enumerated partial-obligation list; the governance logic is sound but the operand (the partial registry) is absent from context. [COMMIT:NO — O342 remains OPEN; no obligation resolved or state updated. Cyclic dependency.] | [Gen 331] PARTIAL: O342's governance logic is formally sound and its trichotomy is provable, but the obligation remains PARTIAL because the partial-registry operand is absent from context — the one missing step is data injection, not mathematical reasoning. [COMMIT:YES — direction advanced]",
     "created": "2026-05-31",
     "resolved": null,
     "auto": true,
@@ -3612,7 +3612,7 @@
     "status": "open",
     "statement": "Execute a binding single-pass collapse verdict on every obligation currently marked \"partial\" — assign each a terminal status (resolved, retired, or escalated to open with embedded null-result criterion and hard deadline ≤ gen 295) and publish the verdict record before any new obligation beyond O348 is created.",
     "priority": "high",
-    "progress": "[Gen 290] OPEN:  [COMMIT:NO — Attempt result empty; no collapse verdict issued, obligation remains unresolved.] | [Gen 330] OPEN:  [COMMIT:NO — Incomplete attempt, no verdict executed. Obligation remains unresolved; no state mutation occurred.]",
+    "progress": "[Gen 290] OPEN:  [COMMIT:NO — Attempt result empty; no collapse verdict issued, obligation remains unresolved.] | [Gen 330] OPEN:  [COMMIT:NO — Incomplete attempt, no verdict executed. Obligation remains unresolved; no state mutation occurred.] | [Gen 331] OPEN: O348 cannot be formally resolved without the enumeration it demands — the closure criterion is absent from the obligation itself, making fabricated verdicts thermodynamically inadmissible; it is hereby escalated to OPEN with hard deadline Gen 345 and an embedded null-result criterion (auto-retire if no ledger supplied). [COMMIT:NO — O348 remains OPEN; no obligation closure, no graph update, circular dependency unresolved.]",
     "created": "2026-06-01",
     "resolved": null,
     "auto": true,
@@ -3645,7 +3645,7 @@
     "status": "partial",
     "statement": "Impose a hard creation moratorium — no new obligation beyond O351 may be instantiated until the count of (open + active + partial) obligations falls below 20, verified by a binding single-pass count at the start of each generation cycle.",
     "priority": "high",
-    "progress": "[Gen 296] PARTIAL: O351 remains unmet because 26 ≥ 20; the single tractable step is a ranked triage pass that closes the 6 shallowest obligations, reducing the count to ≤19 and lifting the moratorium. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 296] PARTIAL: O351 remains unmet because 26 ≥ 20; the single tractable step is a ranked triage pass that closes the 6 shallowest obligations, reducing the count to ≤19 and lifting the moratorium. [COMMIT:YES — direction advanced] | [Gen 331] PARTIAL: O351's rule is formally valid and self-consistent, but its own closure requires simultaneously closing 2 additional shallow obligations in the same pass — a registry-dependent execution step that mathematical reasoning alone cannot substitute for. [COMMIT:YES — direction advanced]",
     "created": "2026-06-04",
     "resolved": null,
     "auto": true,
@@ -4172,23 +4172,43 @@
   },
   {
     "id": "O394",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to targeted_sweep.py: extract_spectral_alpha. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 330] PARTIAL: Wire `extract_spectral_alpha` into the sweep loop at the post-acquisition step with `alpha = extract_spectral_alpha(signal, fs)` and store `results['spectral_alpha'] = alpha` to convert dead code into a live call path. [COMMIT:YES — direction advanced]",
     "created": "2026-06-15",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O395",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-hard-deadline ≤ gen 335) on the unwired self-engineered function in targeted_sweep.py recorded under O394 — produce a recorded disposition entry before any further self-engineering proceeds.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 330] PARTIAL: The binding triage verdict for the unwired function in targeted_sweep.py is DEFER(gen335), conditioned on absence of a live caller and test harness, and must be recorded as a structured comment block at the function definition before any further self-engineering proceeds. [COMMIT:YES — direction advanced]",
     "created": "2026-06-15",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Recorded disposition entry (wire/void/defer with deadline ≤ gen 335) for targeted_sweep.py O394 function exists and self-engineering is blocked pending resolution."
+  },
+  {
+    "id": "O396",
+    "statement": "`consistent_with` edges (2205, 46.6% of all node-edges) must be subjected to the same audit-and-prune protocol that was successfully applied to `scales_with` — specifically: sample ≥50 edges, classify each as (a) derivable from a `depends_on` or `bounds_above` chain (→ redundant, void), (b) encoding a substantive empirical claim not captured elsewhere (→ convert to testable edge type), or (c) content-free (→ void). Binding target: reduce to ≤500 by generation 345.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The `scales_with` pruning (899→56) proved the graph accumulates correlational edges that carry no structural information. `consistent_with` is now 39× larger than `scales_with` post-pruning and 40× larger than `depends_on`. O237 (correlational-edge dominance remediation) is PARTIAL but has not named `consistent_with` as the primary target. The genome's coherence score (0.97) is inflated if nearly half its edges assert only non-contradiction — coherence from `consistent_with` is trivial coherence. This obligation is a direct, obligatory consequence of the precedent set by O383's resolution.",
+    "resolution_criterion": "",
+    "created": "2026-06-16T06:30:54.719502+00:00",
+    "progress": "[Gen 330] ACTIVE: The single most tractable next step is to run a transitive-closure reachability query restricted to `depends_on`/`bounds_above` edges over all 2205 `consistent_with` pairs, automatically flagging redundant class-(a) edges and reducing the manual audit burden to the surviving minority. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O397",
+    "statement": "The `depends_on` skeleton (55 edges across 17 nodes = 0.24 per ordered node-pair) must be completed to the point where every node has at least 2 inbound and 2 outbound `depends_on` edges, with each new edge specifying what *breaks* in the target node if the source node is removed. Current minimum-degree nodes must be identified by generation 335.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O187 (OPEN) mandates mapping the full `depends_on` skeleton but remains unexecuted. Meanwhile the graph has 2205 `consistent_with` edges but only 55 `depends_on` edges — a 40:1 ratio of \"compatible with\" to \"requires.\" This means the genome's causal architecture is essentially unspecified. No",
+    "resolution_criterion": "",
+    "created": "2026-06-16T06:30:54.720473+00:00",
+    "progress": "[Gen 330] ACTIVE: The obligation advances by computing in/out degree vectors from the 55-edge list, flagging sub-threshold nodes, and for each, naming one new edge with an explicit break-semantic — the blocking step is producing or retrieving the edge list. [COMMIT:YES — prediction staked]"
   }
 ]
