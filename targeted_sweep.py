@@ -609,12 +609,102 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
         stable algebraic scaling phases (neither logarithmic nor constant
         entanglement) receive a multiplier, since these represent the strongest
         physical confirmations of critical-ridge universality (O112).
+
+        Includes SOC plasticity bonus (INV_094 / O148): papers reporting
+        activity-dependent synapse scaling, avalanche dynamics, or Hebbian
+        plasticity driving SOC receive a co-occurrence bonus. This implements
+        avalanche-driven Hebbian weight adjustment in the sweep's relevance
+        loop, making paper selection thermodynamically self-organizing —
+        connection weights (keyword scores) adjust based on co-firing
+        frequency of SOC and plasticity vocabularies, driving the sweep
+        toward criticality-relevant literature.
+
+        The target signature is the universal EEG power-law exponent ~0.8
+        reproduced across topologies (small-world, leaky-neuron variants),
+        confirming criticality as substrate-independent thermodynamic
+        invariant. This challenges INV_094's geometry-specific mechanistic
+        claims by surfacing topology-agnostic universality evidence.
         """
         text_lower = text.lower()
         score = 0
         for pattern, weight in ARXIV_KEYWORDS:
             if re.search(pattern, text_lower):
                 score += weight
+
+        # ── SOC plasticity / avalanche-driven Hebbian update (O148/INV_094) ──
+        # Activity-dependent synapse scaling: two vocabularies must co-fire
+        # (Hebbian co-occurrence) to trigger the SOC plasticity bonus.
+        # Vocabulary A: avalanche / SOC dynamics
+        # Vocabulary B: synaptic plasticity / activity-dependent adaptation
+        # Co-firing = both vocabularies active = Hebbian strengthening of
+        # the relevance "synapse" for this paper.
+
+        _SOC_AVALANCHE_PATTERNS = [
+            (r"neuronal?\s+avalanche", 5),
+            (r"self.?organized\s+criticality", 5),
+            (r"avalanche\s+(size|distribut|dynamics|activity|mode)", 4),
+            (r"power.?law\s+(distribut|exponent|spectrum).{0,30}(avalanche|neural|eeg|brain)", 5),
+            (r"critical\s+brain", 4),
+            (r"branching\s+(ratio|process|parameter)", 4),
+            (r"crackling\s+noise", 3),
+            (r"sandpile\s+model", 3),
+            (r"threshold\s+firing", 4),
+            (r"(1/f|one.over.f)\s+(noise|spectrum|power)", 4),
+            (r"power\s+spectrum.{0,30}exponent.{0,20}0\.8", 8),
+            (r"eeg.{0,30}power.?law", 5),
+            (r"eeg.{0,30}(exponent|spectrum|spectra)", 4),
+            (r"scale.?free\s+(dynamics|activity|neural|brain|network)", 4),
+            (r"critical\s+exponent.{0,30}(universal|topology|robust)", 5),
+            (r"universality.{0,30}(brain|neural|eeg|avalanche|exponent)", 5),
+            (r"topology.?agnostic.{0,30}(critical|exponent|universal)", 6),
+            (r"small.?world.{0,30}(critical|avalanche|exponent)", 4),
+            (r"leaky\s+(neuron|integrate)", 3),
+        ]
+
+        _SOC_PLASTICITY_PATTERNS = [
+            (r"activity.?dependent\s+(synap|plasti|scaling|weight)", 6),
+            (r"hebbian\s+(learn|plasti|update|rule)", 5),
+            (r"synaptic\s+(plasti|scaling|strength|weight|modif)", 4),
+            (r"synapse\s+strength.{0,30}(activity|firing|threshold)", 5),
+            (r"spike.?timing.?dependent\s+plasti", 5),
+            (r"stdp", 4),
+            (r"homeostatic\s+(plasti|scaling|regulation)", 5),
+            (r"anti.?hebbian", 4),
+            (r"synaptic\s+(depression|potentiation|facilitation)", 3),
+            (r"long.?term\s+(potentiation|depression)", 3),
+            (r"(ltp|ltd)\b", 3),
+            (r"weight\s+(update|adjust|adapt|modif).{0,30}(activity|firing|co.?fir)", 5),
+            (r"co.?firing.{0,30}(frequen|rate|strength|weight)", 5),
+            (r"adaptive\s+(synap|weight|connect|network)", 3),
+            (r"plasti.{0,30}(soc|self.?organiz|critical)", 6),
+            (r"plasti.{0,30}(drives?|induces?|produces?).{0,30}critical", 6),
+        ]
+
+        _SOC_PLASTICITY_COOCCUR_BONUS = 15
+        _SOC_PLASTICITY_SOLO_BONUS = 4
+        _SOC_MIN_AVALANCHE_SCORE = 5
+        _SOC_MIN_PLASTICITY_SCORE = 4
+
+        soc_aval_score = 0
+        soc_plast_score = 0
+        for pattern, weight in _SOC_AVALANCHE_PATTERNS:
+            if re.search(pattern, text_lower):
+                soc_aval_score += weight
+        for pattern, weight in _SOC_PLASTICITY_PATTERNS:
+            if re.search(pattern, text_lower):
+                soc_plast_score += weight
+
+        if (soc_aval_score >= _SOC_MIN_AVALANCHE_SCORE and
+                soc_plast_score >= _SOC_MIN_PLASTICITY_SCORE):
+            # Hebbian co-firing: both avalanche + plasticity vocabularies active
+            # → strong synapse (large bonus), driving sweep toward SOC papers
+            score += soc_aval_score + soc_plast_score + _SOC_PLASTICITY_COOCCUR_BONUS
+        elif soc_aval_score >= _SOC_MIN_AVALANCHE_SCORE:
+            # Avalanche vocabulary alone — smaller weight update
+            score += soc_aval_score + _SOC_PLASTICITY_SOLO_BONUS
+        elif soc_plast_score >= _SOC_MIN_PLASTICITY_SCORE:
+            # Plasticity vocabulary alone — smaller weight update
+            score += soc_plast_score + _SOC_PLASTICITY_SOLO_BONUS
 
         # ── INV_073 algebraic intermediate phase bonus ───────────────────
         # Papers confirming a stable algebraic scaling phase intermediate
@@ -674,6 +764,92 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
         elif alg_score >= _INV073_MIN_ALGEBRAIC_SCORE:
             # Algebraic phase signal alone — smaller bump
             score += alg_score + _INV073_ALGEBRAIC_SOLO_BONUS
+
+        # ── Epistemic emotion & willingness-to-share (O21 belief-revision) ───
+        # Per hybrid LLM+random-forest persuasion classifier findings,
+        # epistemic emotion and willingness-to-share are the dominant
+        # predictors of belief change, outranking argument-strength features.
+        # These are weighted ABOVE argument-strength patterns to reflect
+        # their empirically measured dominance.
+        #
+        # CHALLENGE to O21: if epistemic emotion is the true gate for belief
+        # change and spectral γ is merely a downstream correlate, O21's
+        # measurement protocol may track a secondary rather than primary cause.
+        # Papers surfaced by this vocabulary inform that adjudication.
+
+        _EPISTEMIC_EMOTION_PATTERNS = [
+            (r"epistemic\s+emotion", 8),
+            (r"epistemic\s+(curiosity|surprise|wonder|awe|confus)", 7),
+            (r"curiosity.{0,30}belief\s+(change|revision|update)", 7),
+            (r"emotion.{0,30}belief\s+(change|revision|update)", 6),
+            (r"(surprise|wonder|awe).{0,30}(persuasi|belief\s+change)", 6),
+            (r"affective\s+(epistemic|belief|persuasi)", 5),
+            (r"emotion.{0,30}(epistemic|knowledge|learn|reason)", 5),
+            (r"epistemic\s+(affect|feeling|state)", 6),
+            (r"feeling\s+of\s+knowing", 5),
+            (r"(metacognitive|epistemic)\s+feeling", 5),
+            (r"(confusion|perplexity).{0,30}(learn|belief|reason)", 5),
+            (r"emotional\s+(driver|predictor|correlate).{0,30}(belief|persuasi)", 7),
+            (r"belief\s+change.{0,30}(emotion|affect|curiosity)", 6),
+        ]
+
+        _WILLINGNESS_TO_SHARE_PATTERNS = [
+            (r"willingness\s+to\s+share", 8),
+            (r"sharing\s+(intent|behavio|motiv).{0,30}(belief|persuasi|opinion)", 7),
+            (r"(viral|virality|shareab).{0,30}(belief|persuasi|opinion\s+change)", 6),
+            (r"information\s+sharing.{0,30}(belief|attitude|opinion)", 5),
+            (r"social\s+(transmission|spread|sharing).{0,30}(belief|persuasi)", 5),
+            (r"share.{0,10}(predict|correlat|associat).{0,30}belief", 6),
+            (r"(retransmission|repost|retweet).{0,30}(persuasi|belief\s+change)", 5),
+            (r"diffusion.{0,30}(belief|opinion)\s+(change|revision)", 5),
+            (r"communicat.{0,30}(intent|willing).{0,30}(belief|persuasi)", 5),
+        ]
+
+        # Context vocabulary: belief-revision / persuasion modeling
+        _BELIEF_REVISION_CONTEXT = [
+            (r"belief\s+(revision|change|update|updat)", 5),
+            (r"persuasi(on|ve|bility)", 5),
+            (r"opinion\s+(change|dynamics|formation)", 4),
+            (r"attitude\s+change", 4),
+            (r"(llm|language\s+model).{0,30}(persuasi|belief|opinion)", 6),
+            (r"random\s+forest.{0,30}(persuasi|belief|predict)", 5),
+            (r"hybrid.{0,30}(model|classifier).{0,30}(persuasi|belief)", 5),
+            (r"(feature|predictor).{0,30}(belief\s+change|persuasi)", 5),
+            (r"(changemyview|change\s+my\s+view|cmv)", 6),
+            (r"deliberat.{0,30}(persuasi|belief|opinion)", 4),
+        ]
+
+        # Weights set above argument-strength features per empirical dominance
+        _EPIST_EMOT_MIN_SCORE = 5
+        _WILLING_SHARE_MIN_SCORE = 5
+        _BELIEF_CONTEXT_MIN_SCORE = 4
+        _EPIST_EMOT_COOCCUR_BONUS = 16   # above argument-strength bonuses
+        _EPIST_EMOT_SOLO_BONUS = 7
+        _WILLING_SHARE_COOCCUR_BONUS = 14
+        _WILLING_SHARE_SOLO_BONUS = 6
+
+        ee_score = 0
+        ws_score = 0
+        br_ctx_score = 0
+        for pattern, weight in _EPISTEMIC_EMOTION_PATTERNS:
+            if re.search(pattern, text_lower):
+                ee_score += weight
+        for pattern, weight in _WILLINGNESS_TO_SHARE_PATTERNS:
+            if re.search(pattern, text_lower):
+                ws_score += weight
+        for pattern, weight in _BELIEF_REVISION_CONTEXT:
+            if re.search(pattern, text_lower):
+                br_ctx_score += weight
+
+        if ee_score >= _EPIST_EMOT_MIN_SCORE and br_ctx_score >= _BELIEF_CONTEXT_MIN_SCORE:
+            score += ee_score + br_ctx_score + _EPIST_EMOT_COOCCUR_BONUS
+        elif ee_score >= _EPIST_EMOT_MIN_SCORE:
+            score += ee_score + _EPIST_EMOT_SOLO_BONUS
+
+        if ws_score >= _WILLING_SHARE_MIN_SCORE and br_ctx_score >= _BELIEF_CONTEXT_MIN_SCORE:
+            score += ws_score + br_ctx_score + _WILLING_SHARE_COOCCUR_BONUS
+        elif ws_score >= _WILLING_SHARE_MIN_SCORE:
+            score += ws_score + _WILLING_SHARE_SOLO_BONUS
 
         return score
 

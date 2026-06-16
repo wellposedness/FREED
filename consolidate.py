@@ -2273,6 +2273,13 @@ class Consolidator:
                             "diagrammatic", "feynman", "generating functional"},
         "modal_thermo": {"modal", "modal path", "thermality", "variance",
                          "thermality variance", "modal logic", "possible world"},
+        "fisher_entropy_growth": {
+            "entropy growth", "geodesic deviation", "statistical manifold",
+            "chaos criterion", "information-geometric", "information geometric",
+            "fisher information", "fisher metric", "fisher-rao",
+            "linear entropy growth", "curved statistical manifold",
+            "chaotic dynamical", "zurek-paz", "zurek paz",
+        },
     }
 
     # Maps obligation IDs / keywords to the formalism families they specify
@@ -2287,6 +2294,29 @@ class Consolidator:
         "dissipation": {"EIT"},
         "entropy production": {"EIT"},
     }
+
+    # ── RC-characterization method-template keywords for O112 (STF metric) ───
+    # Reservoir Computing papers that demonstrate substrate-independent quality
+    # metrics across reconfigurable physical substrates are methodological
+    # templates for O112's STF metric tensor recovery. Detection requires
+    # co-occurrence of all three term families: RC/reservoir language,
+    # reconfiguration language, and substrate-independence language.
+    _RC_RESERVOIR_TERMS = frozenset({
+        "reservoir computing", "reservoir quality", "reservoir",
+        "echo state", "liquid state", "physical reservoir",
+        "fading memory", "input separability",
+    })
+    _RC_RECONFIG_TERMS = frozenset({
+        "reconfiguration", "reconfigurable", "reconfigured",
+        "virtual topology", "physical morphology", "morphology",
+        "tuned", "tuning",
+    })
+    _RC_SUBSTRATE_TERMS = frozenset({
+        "substrate-independent", "substrate independent",
+        "any substrate", "physical substrate", "different substrates",
+        "characterise the quality", "characterize the quality",
+        "substrate-agnostic", "substrate agnostic",
+    })
 
     def _detect_formalism_types(self, text):
         # type: (str) -> set
@@ -3283,13 +3313,90 @@ class Consolidator:
             "invariants_mined": [],
         }
 
+        # ── CA telemetry criticality parsing (O148) ───────────────────────────
+        # Parse branching ratio σ, power-law exponent α, and criticality verdict
+        # from CA snapshot abstracts embedded in new_knowledge. Automatically tag
+        # AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL so downstream genome updates
+        # can distinguish genome-relevant signals (critical) from noise.
+        #
+        # CHALLENGE (O148): this telemetry partially satisfies O148's measurement
+        # demand but does NOT include the full protocol (longitudinal tracking,
+        # metric tensor recovery linkage). The obligation remains OPEN — a single
+        # snapshot must not be mistaken for full resolution.
+        _nk_lower = new_knowledge.lower()
+        _ca_telemetry = {}  # type: dict
+        # Parse σ (branching ratio)
+        _sigma_match = re.search(
+            r'(?:branching\s+ratio|[σσ])\s*[=:]\s*([0-9]+\.?[0-9]*)', _nk_lower)
+        if _sigma_match:
+            _ca_telemetry["sigma"] = float(_sigma_match.group(1))
+        # Parse α (power-law exponent)
+        _alpha_match = re.search(
+            r'(?:power[- ]?law\s+exponent|[αα])\s*[≈=:]\s*([0-9]+\.?[0-9]*)', _nk_lower)
+        if _alpha_match:
+            _ca_telemetry["alpha"] = float(_alpha_match.group(1))
+        # Parse explicit criticality verdict from snapshot text
+        _verdict_match = re.search(
+            r'criticality\s+verdict\s*[=:]\s*(AT_CRITICAL|SUBCRITICAL|SUPERCRITICAL)',
+            new_knowledge, re.IGNORECASE)
+        if _verdict_match:
+            _ca_telemetry["criticality_verdict"] = _verdict_match.group(1).upper()
+        elif "sigma" in _ca_telemetry:
+            # Derive verdict from σ if not explicitly stated
+            _sigma_val = _ca_telemetry["sigma"]
+            if 0.95 <= _sigma_val <= 1.05:
+                _ca_telemetry["criticality_verdict"] = "AT_CRITICAL"
+            elif _sigma_val < 0.95:
+                _ca_telemetry["criticality_verdict"] = "SUBCRITICAL"
+            else:
+                _ca_telemetry["criticality_verdict"] = "SUPERCRITICAL"
+        # Parse optional fields: Shannon entropy H, survival rate
+        _h_match = re.search(
+            r'(?:shannon\s+entropy|H)\s*[=:]\s*([0-9]+\.?[0-9]*)\s*bits?', _nk_lower)
+        if _h_match:
+            _ca_telemetry["shannon_entropy_bits"] = float(_h_match.group(1))
+        _surv_match = re.search(
+            r'survival\s+(?:rate)?\s*[=:]\s*([0-9]+\.?[0-9]*)', _nk_lower)
+        if _surv_match:
+            _ca_telemetry["survival_rate"] = float(_surv_match.group(1))
+        if _ca_telemetry:
+            _ca_telemetry["o148_status"] = "PARTIAL"
+            _ca_telemetry["o148_note"] = (
+                "Single-snapshot telemetry parsed. O148 remains OPEN: "
+                "longitudinal tracking and metric tensor recovery linkage "
+                "not yet included. Do not treat this as full resolution."
+            )
+            _ca_telemetry["timestamp"] = ts
+            report["ca_telemetry"] = _ca_telemetry
+            _verdict = _ca_telemetry.get("criticality_verdict", "UNKNOWN")
+            _genome_relevant = _verdict == "AT_CRITICAL"
+            report["ca_criticality_verdict"] = _verdict
+            report["ca_genome_relevant"] = _genome_relevant
+            # Log to dedicated CA telemetry log
+            _ca_log_path = FREED_DIR / "FREED_log" / "ca_telemetry.jsonl"
+            _ca_log_path.parent.mkdir(exist_ok=True)
+            with open(_ca_log_path, "a") as _ca_f:
+                _ca_f.write(json.dumps(_ca_telemetry) + "\n")
+            _sigma_str = f"σ={_ca_telemetry.get('sigma', '?')}"
+            _alpha_str = f"α={_ca_telemetry.get('alpha', '?')}"
+            print(f"[CONSOLIDATE] ⚡ CA telemetry parsed: {_sigma_str}, {_alpha_str}, "
+                  f"verdict={_verdict}, genome_relevant={_genome_relevant} "
+                  f"(O148: PARTIAL — single snapshot, not full protocol)")
+            if not _genome_relevant:
+                print(f"[CONSOLIDATE] ℹ CA snapshot is {_verdict} — "
+                      f"telemetry classified as noise for genome updates "
+                      f"(only AT_CRITICAL snapshots drive genome changes)")
+        else:
+            report["ca_telemetry"] = None
+            report["ca_criticality_verdict"] = None
+            report["ca_genome_relevant"] = None
+
         # ── Dissipative-criticality signal detection (INV_073) ────────────────
         # Flag papers whose abstract contains both "dissipat" and "phase transition"
         # as carrying a dissipative-renormalization signal. These papers directly
         # probe whether the kernel's critical ridge is bath-renormalized — tagging
         # them ensures they are weighted in coherence updates rather than treated
         # as generic physics literature.
-        _nk_lower = new_knowledge.lower()
         if "dissipat" in _nk_lower and "phase transition" in _nk_lower:
             report["dissipative_criticality_signal"] = True
             # Increment dissipative_criticality_count on genome state dict
@@ -3323,10 +3430,292 @@ class Consolidator:
             self._log(report)
             return report
 
+        # ── PRE-AUDIT: Confirmation-surplus flag ─────────────────────────────
+        # Identifies invariants whose confirmation count exceeds challenge count
+        # by a configurable threshold and emits a mandatory adversarial probe
+        # token before that invariant can be cited as evidence during renorm.
+        # Prevents confirmation-surplus invariants from accruing false robustness
+        # by ensuring adversarial challenge rate scales with confirmation rate.
+        CONFIRMATION_SURPLUS_THRESHOLD = 5  # configurable: confirmations - challenges > this → flagged
+        _confirmation_surplus_flagged = set()  # invariant texts that need adversarial probes
+        _surplus_report = []
+        try:
+            _graph_preaudit = get_graph()
+            _graph_preaudit._ensure_loaded()
+            _conf_structure = _graph_preaudit.confirmation_structure()
+            # Build per-invariant confirmation and challenge counts from graph edges
+            _inv_confirmations = {}  # type: dict
+            _inv_challenges = {}     # type: dict
+            for e in _graph_preaudit._node_edges:
+                inv_text = e.get("invariant", "")
+                if not inv_text:
+                    continue
+                etype = e.get("type", "")
+                if etype in ("challenges", "bounds_above", "falsifies", "contested"):
+                    _inv_challenges[inv_text] = _inv_challenges.get(inv_text, 0) + 1
+                elif etype in _CO_ASSERTION_TYPES or etype in (
+                    "independent_confirmation", "confirms", "supports",
+                    "consistent_with", "scales_with", "shares_invariant",
+                ):
+                    _inv_confirmations[inv_text] = _inv_confirmations.get(inv_text, 0) + 1
+            # Also scan genome invariants from all nodes
+            for n in all_nodes:
+                for inv_text in n.get("invariants", []):
+                    _inv_confirmations[inv_text] = _inv_confirmations.get(inv_text, 0) + 1
+            # Flag invariants with surplus > threshold
+            _all_inv_texts = set(list(_inv_confirmations.keys()) + list(_inv_challenges.keys()))
+            for inv_text in _all_inv_texts:
+                n_conf = _inv_confirmations.get(inv_text, 0)
+                n_chal = _inv_challenges.get(inv_text, 0)
+                surplus = n_conf - n_chal
+                if surplus > CONFIRMATION_SURPLUS_THRESHOLD:
+                    _confirmation_surplus_flagged.add(inv_text)
+                    _entry = {
+                        "invariant": inv_text[:120],
+                        "confirmations": n_conf,
+                        "challenges": n_chal,
+                        "surplus": surplus,
+                        "adversarial_probe_required": True,
+                        "probe_token": f"ADVERSARIAL_PROBE_REQUIRED:surplus={surplus}",
+                    }
+                    _surplus_report.append(_entry)
+                    print(f"  [PRE-AUDIT] ⚠ Confirmation surplus flag: "
+                          f"'{inv_text[:60]}...' — "
+                          f"conf={n_conf}, chal={n_chal}, surplus={surplus} > {CONFIRMATION_SURPLUS_THRESHOLD} "
+                          f"→ adversarial probe token emitted before citation allowed")
+            if _surplus_report:
+                _surplus_report.sort(key=lambda x: x["surplus"], reverse=True)
+                report["confirmation_surplus_flags"] = _surplus_report
+                print(f"  [PRE-AUDIT] {len(_surplus_report)} invariant(s) flagged with "
+                      f"confirmation surplus > {CONFIRMATION_SURPLUS_THRESHOLD}. "
+                      f"Adversarial probes required before these can be cited as evidence.")
+                # INV_094 specific challenge: the highest-confirmation, least-challenged
+                # invariant in the genome. Emit a dedicated falsification demand.
+                _top_surplus = _surplus_report[0]
+                if _top_surplus["surplus"] >= CONFIRMATION_SURPLUS_THRESHOLD:
+                    print(f"  [PRE-AUDIT] ★ Top surplus invariant "
+                          f"(conf={_top_surplus['confirmations']}, "
+                          f"chal={_top_surplus['challenges']}): "
+                          f"'{_top_surplus['invariant'][:80]}' — "
+                          f"MANDATORY FALSIFICATION PROBE: what empirical result, "
+                          f"theoretical argument, or boundary condition would "
+                          f"falsify this claim? Its apparent robustness may "
+                          f"reflect citation momentum rather than genuine "
+                          f"empirical load-bearing.")
+                # ── Confirmation-to-challenge RATIO gate (>10:1 → auto-falsification) ──
+                # In addition to the absolute surplus check above, flag any invariant
+                # whose confirmation-to-challenge ratio exceeds CONF_CHALLENGE_RATIO_THRESHOLD.
+                # For each flagged invariant, automatically open a falsification obligation
+                # in the escrow ledger. This prevents confirmation accumulation without
+                # falsification exposure from silently elevating hypothesis-class claims
+                # to theorem-class status.
+                CONF_CHALLENGE_RATIO_THRESHOLD = 10.0  # >10:1 conf:chal → flagged
+                _ratio_flagged_obligations = []
+                for inv_text in _all_inv_texts:
+                    n_conf = _inv_confirmations.get(inv_text, 0)
+                    n_chal = _inv_challenges.get(inv_text, 0)
+                    # Ratio: treat 0 challenges as ratio = n_conf / 0.5 (half-challenge floor)
+                    effective_chal = max(n_chal, 0.5)
+                    ratio = n_conf / effective_chal
+                    if ratio > CONF_CHALLENGE_RATIO_THRESHOLD and n_conf >= 3:
+                        # Auto-open a falsification obligation via escrow
+                        _oblid = f"O_FALSIFY_{abs(hash(inv_text)) % 100000:05d}"
+                        _obl_text = (
+                            f"MANDATORY FALSIFICATION (auto-generated): invariant "
+                            f"'{inv_text[:100]}' has confirmation:challenge ratio "
+                            f"{ratio:.1f}:1 (conf={n_conf}, chal={n_chal}), "
+                            f"exceeding {CONF_CHALLENGE_RATIO_THRESHOLD}:1 threshold. "
+                            f"Three-part falsification profile required: "
+                            f"(1) distinguishing prediction — what empirical result "
+                            f"would refute this claim? "
+                            f"(2) confound mechanism — what alternative mechanism "
+                            f"produces identical observables without requiring this claim? "
+                            f"(3) boundary condition — where does this claim break down? "
+                            f"Until this profile is attached, this invariant's apparent "
+                            f"robustness may reflect citation momentum rather than "
+                            f"genuine empirical load-bearing."
+                        )
+                        try:
+                            self.escrow.escrow(
+                                obligation_id=_oblid,
+                                obligation_text=_obl_text,
+                                source_phase="consolidate_preaudit",
+                                node_id=None,
+                                cycle=current_cycle,
+                            )
+                            _ratio_flagged_obligations.append({
+                                "invariant": inv_text[:120],
+                                "confirmations": n_conf,
+                                "challenges": n_chal,
+                                "ratio": round(ratio, 2),
+                                "obligation_id": _oblid,
+                                "obligation_text": _obl_text[:200],
+                            })
+                            print(f"  [PRE-AUDIT] ⚠ Ratio flag: "
+                                  f"'{inv_text[:60]}...' — "
+                                  f"ratio={ratio:.1f}:1 > {CONF_CHALLENGE_RATIO_THRESHOLD}:1 "
+                                  f"→ falsification obligation {_oblid} auto-escrowed")
+                        except Exception as _esc_err:
+                            print(f"  [PRE-AUDIT] Warning: could not escrow "
+                                  f"falsification obligation for "
+                                  f"'{inv_text[:40]}': {_esc_err}")
+
+                if _ratio_flagged_obligations:
+                    report["confirmation_ratio_flags"] = _ratio_flagged_obligations
+                    print(f"  [PRE-AUDIT] {len(_ratio_flagged_obligations)} invariant(s) "
+                          f"exceeded {CONF_CHALLENGE_RATIO_THRESHOLD}:1 "
+                          f"confirmation:challenge ratio — falsification obligations "
+                          f"auto-escrowed.")
+                    # ── INV_094 specific challenge ────────────────────────────
+                    # The invariant with the highest ratio is the genome's most
+                    # epistemically unearned theorem-class claim. Emit a dedicated
+                    # falsification demand targeting it specifically.
+                    _top_ratio = max(_ratio_flagged_obligations, key=lambda x: x["ratio"])
+                    print(f"  [PRE-AUDIT] ★★ HIGHEST RATIO INVARIANT "
+                          f"(ratio={_top_ratio['ratio']}:1, "
+                          f"conf={_top_ratio['confirmations']}, "
+                          f"chal={_top_ratio['challenges']}): "
+                          f"'{_top_ratio['invariant'][:80]}' — "
+                          f"INV_094 CHALLENGE: this invariant has never been "
+                          f"forced to specify (1) what would refute it, "
+                          f"(2) what alternative mechanism produces identical "
+                          f"observables, or (3) where its boundary conditions "
+                          f"lie. Its current status is epistemically unearned "
+                          f"until a three-part falsification profile is attached.")
+                else:
+                    report["confirmation_ratio_flags"] = []
+            else:
+                report["confirmation_surplus_flags"] = []
+                report["confirmation_ratio_flags"] = []
+                print(f"  [PRE-AUDIT] Confirmation surplus check CLEAN: "
+                      f"no invariants exceed surplus threshold of {CONFIRMATION_SURPLUS_THRESHOLD}.")
+        except Exception as _preaudit_err:
+            print(f"  [PRE-AUDIT] Warning: confirmation surplus check failed "
+                  f"(non-fatal): {_preaudit_err}")
+            report["confirmation_surplus_flags"] = []
+            report["confirmation_ratio_flags"] = []
+            _confirmation_surplus_flagged = set()
+
+        # Attach surplus flags to affected nodes so renorm phase can gate citations
+        for node in affected:
+            _node_flagged_invs = []
+            for inv_text in node.get("invariants", []):
+                if inv_text in _confirmation_surplus_flagged:
+                    _node_flagged_invs.append(inv_text)
+            if _node_flagged_invs:
+                node["_confirmation_surplus_blocked"] = _node_flagged_invs
+
         # ── Priority sort — high-obligation-overlap nodes renorm first ────────
         current_cycle = (state or {}).get('cycle_count', 0)
         open_ob_ids   = {o['id'] for o in (obligations or [])
                          if o.get('status') in ('open', 'partial')}
+
+        # ── Quantum-domain analog annotation (resolve_obligation extension) ───
+        # Flag obligations whose stated method (e.g., O112's "modal paths +
+        # thermality variance") has a known quantum-domain analytic analog.
+        # When a structurally identical result exists in quantum OT (e.g.,
+        # analytic upper bounds on fault-tolerance thresholds via quantum
+        # optimal transport with explicit threshold formulas), the classical
+        # experiment described in the obligation may be *harder* than assumed
+        # and the method specification may be underspecified relative to the
+        # analytic rigor now available in the quantum analog.
+        #
+        # Annotating with analog_domain: quantum_OT prevents FREED from
+        # treating the obligation as fully open without acknowledging that
+        # the quantum case is analytically tractable — sharpening the
+        # obligation's remaining experimental specificity to the classical
+        # semantic recovery case specifically.
+        _QUANTUM_ANALOG_MAP = {
+            "O112": {
+                "analog_domain": "quantum_OT",
+                "analog_description": (
+                    "Quantum optimal transport provides analytic upper bounds on "
+                    "fault-tolerance thresholds for concatenated GKP-stabilizer codes "
+                    "under local update recovery, with explicit threshold formulas as "
+                    "a function of recovery-map locality. The classical semantic "
+                    "recovery experiment (modal paths + thermality variance) lacks "
+                    "comparable analytic tractability — the quantum domain is the "
+                    "SOLVED case, making the classical experiment the harder unsolved one."
+                ),
+                "method_gap": (
+                    "O112 specifies 'modal paths + thermality variance' but quantum OT "
+                    "achieves STF/Wasserstein metric recovery via explicit locality-dependent "
+                    "loss thresholds (exponential information loss above threshold). The "
+                    "classical method specification is underspecified relative to this "
+                    "analytic rigor — needs explicit threshold formulas or proof that "
+                    "classical semantic recovery is structurally harder than quantum recovery."
+                ),
+                "quantum_result": (
+                    "For loss rates above a threshold given explicitly as a function of "
+                    "the locality of recovery maps, encoded information is lost at an "
+                    "exponential rate (Razborov extension to continuous-variable quantum "
+                    "error correction)."
+                ),
+                "challenge_source": "quantum_OT_fault_tolerance_thresholds",
+            },
+        }
+        _nk_lower_qa = new_knowledge.lower()
+        _quantum_ot_signals = (
+            "quantum optimal transport" in _nk_lower_qa
+            or "wasserstein" in _nk_lower_qa
+            or ("fault-tolerance threshold" in _nk_lower_qa and "quantum" in _nk_lower_qa)
+            or ("gkp" in _nk_lower_qa and "stabilizer" in _nk_lower_qa)
+            or ("local update recovery" in _nk_lower_qa and "quantum" in _nk_lower_qa)
+            or ("exponential information loss" in _nk_lower_qa and "locality" in _nk_lower_qa)
+        )
+        _analog_annotations_applied = []
+        if obligations and _quantum_ot_signals:
+            for ob in (obligations or []):
+                ob_id = ob.get("id", "")
+                ob_status = ob.get("status", "")
+                if ob_id in _QUANTUM_ANALOG_MAP and ob_status in ("open", "partial"):
+                    analog_info = _QUANTUM_ANALOG_MAP[ob_id]
+                    ob["analog_domain"] = analog_info["analog_domain"]
+                    ob["analog_description"] = analog_info["analog_description"]
+                    ob["method_gap"] = analog_info["method_gap"]
+                    ob["quantum_result"] = analog_info["quantum_result"]
+                    ob["challenge_source"] = analog_info["challenge_source"]
+                    ob["analog_annotated_at"] = datetime.now(timezone.utc).isoformat()
+                    _analog_annotations_applied.append(ob_id)
+                    print(f"  [QUANTUM-ANALOG] ⚠ {ob_id} annotated: "
+                          f"analog_domain={analog_info['analog_domain']} — "
+                          f"structurally identical result exists in quantum OT "
+                          f"with explicit analytic threshold formulas. "
+                          f"Classical semantic recovery experiment is the "
+                          f"HARDER unsolved case. Method specification "
+                          f"'modal paths + thermality variance' is "
+                          f"underspecified relative to quantum analytic rigor.")
+        if _analog_annotations_applied:
+            report["quantum_analog_annotations"] = _analog_annotations_applied
+            # Persist annotations back to obligations file
+            try:
+                _obligs_path = FREED_DIR / "FREED_obligations.json"
+                if _obligs_path.exists():
+                    _obligs_data = json.loads(_obligs_path.read_text())
+                    _obligs_list = (_obligs_data if isinstance(_obligs_data, list)
+                                   else _obligs_data.get("obligations", []))
+                    for _obl_entry in (_obligs_list if isinstance(_obligs_list, list)
+                                       else list(_obligs_list.values()) if isinstance(_obligs_list, dict)
+                                       else []):
+                        _obl_id = _obl_entry.get("id", "")
+                        if _obl_id in _analog_annotations_applied:
+                            _analog_info = _QUANTUM_ANALOG_MAP.get(_obl_id, {})
+                            _obl_entry["analog_domain"] = _analog_info.get("analog_domain")
+                            _obl_entry["analog_description"] = _analog_info.get("analog_description")
+                            _obl_entry["method_gap"] = _analog_info.get("method_gap")
+                            _obl_entry["quantum_result"] = _analog_info.get("quantum_result")
+                            _obl_entry["challenge_source"] = _analog_info.get("challenge_source")
+                            _obl_entry["analog_annotated_at"] = datetime.now(timezone.utc).isoformat()
+                    _obligs_path.write_text(
+                        json.dumps(_obligs_data, indent=2, ensure_ascii=False))
+                    print(f"  [QUANTUM-ANALOG] Persisted annotations for "
+                          f"{_analog_annotations_applied} to obligations file.")
+            except Exception as _qa_err:
+                print(f"  [QUANTUM-ANALOG] Warning: could not persist annotations: {_qa_err}")
+        elif _quantum_ot_signals:
+            print(f"  [QUANTUM-ANALOG] Quantum OT signal detected in new knowledge "
+                  f"but no matching open obligations found for annotation.")
+
         affected.sort(
             key=lambda n: self._node_priority(n, open_ob_ids, current_cycle),
             reverse=True,
@@ -3334,6 +3723,10 @@ class Consolidator:
         print(f"[CONSOLIDATE] Priority order: "
               f"{', '.join(n['id'][:20] for n in affected[:3])}{'...' if len(affected) > 3 else ''}",
               flush=True)
+
+            # ── Phase 1.5: Deduplicate nodes (distributional W2) ─────────────
+        affected = self.deduplicate_nodes(affected)
+        report["nodes_after_dedup"] = len(affected)
 
         # ── Phase 2: Renormalize each affected node ───────────────────────────
         updated_nodes = []
@@ -3419,6 +3812,78 @@ class Consolidator:
                 for e in graph._node_edges:
                     k = (frozenset((e.get("from"), e.get("to"))), e.get("type"))
                     pair_invariants.setdefault(k, []).append(e.get("invariant", ""))
+                # ── Coordinate-conditional detection for depends_on edges ─────
+                # (O187 verification protocol): A depends_on edge between two
+                # nodes may be basis-dependent — the dependency appears in one
+                # coordinate representation but vanishes under transformation.
+                # Detection: if node A's invariants, when projected onto node B's
+                # semantic basis (via normalized token overlap), show high
+                # asymmetry (A→B overlap ≫ B→A overlap or vice versa), the
+                # dependency is structural. If the overlaps are symmetric AND
+                # low, the dependency is likely a coordinate artifact — it
+                # appears only because both nodes share a representational
+                # basis, not because one structurally requires the other.
+                #
+                # Based on the sparse feedback control result: open-loop sparse
+                # solutions are equivalent to closed-loop under a specified
+                # basis, meaning apparent input-output dependencies can vanish
+                # under basis transformation. We flag such edges as
+                # coordinate_conditional rather than structural.
+                _BASIS_ASYMMETRY_THRESHOLD = 0.25  # |overlap(A→B) - overlap(B→A)| below this → symmetric
+                _BASIS_LOW_OVERLAP = 0.15          # both overlaps below this → coordinate artifact
+                _coord_conditional_count = 0
+
+                def _check_coordinate_conditional(node_id_a, node_id_b, edge_type_check, inv_text):
+                    # type: (str, str, str, str) -> bool
+                    """Return True if this depends_on edge is coordinate-conditional
+                    (basis-dependent artifact) rather than structural."""
+                    if edge_type_check != "depends_on":
+                        return False
+                    # Get node texts from the index
+                    node_a_data = None
+                    node_b_data = None
+                    for _mn in all_nodes:
+                        if _mn.get("id") == node_id_a:
+                            node_a_data = _mn
+                        elif _mn.get("id") == node_id_b:
+                            node_b_data = _mn
+                        if node_a_data and node_b_data:
+                            break
+                    if not node_a_data or not node_b_data:
+                        return False
+                    # Build token sets for each node
+                    def _node_tokens(nd):
+                        txt = " ".join(filter(None, [
+                            nd.get("compress", ""),
+                            " ".join(nd.get("invariants", [])),
+                            " ".join(nd.get("tags", [])),
+                        ])).lower()
+                        return set(
+                            w.strip(".,;:()[]'\"!?-")
+                            for w in txt.split()
+                            if len(w.strip(".,;:()[]'\"!?-")) > 3
+                        )
+                    toks_a = _node_tokens(node_a_data)
+                    toks_b = _node_tokens(node_b_data)
+                    if not toks_a or not toks_b:
+                        return False
+                    # Directional overlaps: fraction of A's tokens in B, and vice versa
+                    overlap_a_to_b = len(toks_a & toks_b) / len(toks_a) if toks_a else 0.0
+                    overlap_b_to_a = len(toks_a & toks_b) / len(toks_b) if toks_b else 0.0
+                    asymmetry = abs(overlap_a_to_b - overlap_b_to_a)
+                    # Also check if the invariant text itself uses basis-sensitive
+                    # language (coordinate, representation, basis, transform)
+                    _basis_keywords = {"basis", "coordinate", "representation",
+                                       "transform", "rotation", "projection",
+                                       "decomposition", "factorization"}
+                    inv_lower = inv_text.lower()
+                    has_basis_language = any(kw in inv_lower for kw in _basis_keywords)
+                    # Coordinate-conditional: symmetric AND low overlap, OR
+                    # explicit basis-sensitive language in the invariant
+                    is_symmetric_low = (asymmetry < _BASIS_ASYMMETRY_THRESHOLD
+                                        and max(overlap_a_to_b, overlap_b_to_a) < _BASIS_LOW_OVERLAP)
+                    return is_symmetric_low or has_basis_language
+
                 minted = skipped_dup = frozen = 0
                 for c in candidates:
                     nodes_in = c.get('appears_in', [])
@@ -3433,22 +3898,52 @@ class Consolidator:
                     inv = c['invariant']
                     for i in range(len(nodes_in)):
                         for j in range(i + 1, len(nodes_in)):
-                            k = (frozenset((nodes_in[i], nodes_in[j])), edge_type)
+                            # ── Coordinate-conditional gate (O187) ────────
+                            # For depends_on edges, check if the dependency
+                            # is basis-dependent (appears only in one
+                            # coordinate representation). If so, tag as
+                            # coordinate_conditional rather than structural.
+                            is_coord_cond = _check_coordinate_conditional(
+                                nodes_in[i], nodes_in[j], edge_type, inv)
+                            effective_type = edge_type
+                            edge_metadata = None
+                            if is_coord_cond:
+                                _coord_conditional_count += 1
+                                edge_metadata = "coordinate_conditional"
+                                # Downgrade to consistent_with — the dependency
+                                # is representational, not structural
+                                effective_type = "consistent_with"
+                                print(f"  [COORD-COND] depends_on → consistent_with "
+                                      f"(basis-dependent): {nodes_in[i][:20]}↔"
+                                      f"{nodes_in[j][:20]} — '{inv[:50]}'")
+
+                            k = (frozenset((nodes_in[i], nodes_in[j])), effective_type)
                             existing = pair_invariants.setdefault(k, [])
                             if any(_claims_equivalent(inv, ex) for ex in existing):
                                 skipped_dup += 1
                                 continue
+                            # Record the edge with coordinate_conditional metadata
+                            # appended to the invariant text when flagged
+                            recorded_inv = inv
+                            if edge_metadata == "coordinate_conditional":
+                                recorded_inv = (
+                                    f"{inv} [coordinate_conditional: basis-dependent "
+                                    f"dependency — appears in one representation "
+                                    f"but may vanish under transformation (O187)]"
+                                )
                             graph.record_node_edge(
                                 nodes_in[i], nodes_in[j],
-                                edge_type,
-                                inv,
+                                effective_type,
+                                recorded_inv,
                             )
                             existing.append(inv)
                             minted += 1
-                if minted or skipped_dup or frozen:
+                if minted or skipped_dup or frozen or _coord_conditional_count:
                     print(f"  [MINE] node-edges: {minted} minted, {skipped_dup} semantic-dup "
                           f"skipped, {frozen} candidate(s) scales_with→consistent_with "
-                          f"(O286 frozen={freeze_scales})")
+                          f"(O286 frozen={freeze_scales}), "
+                          f"{_coord_conditional_count} depends_on→coordinate_conditional "
+                          f"(O187 basis-dependence gate)")
 
                 # Promotion candidates — recurrence >= 3 across independent nodes
                 promotion = [
@@ -3480,6 +3975,176 @@ class Consolidator:
         graph_report = graph.report(top_n=10)
         print(f"\n[GRAPH] {graph_report}")
         report["confirmation_structure"] = graph.confirmation_structure()
+
+        # ── Branching-ratio σ estimation (Poisson branching diagnostic) ───────
+        # Compute σ = mean offspring count from graph edge out-degree distribution.
+        # Maps avalanche/cascade sizes in the obligation/invariant graph to a
+        # memoryless Poisson branching process on rooted trees (per the RFIM /
+        # fiber bundle / SOC slip mean-field mapping). σ serves as a live scalar
+        # readout of whether the genome is operating at (σ≈1), above (σ>1), or
+        # below (σ<1) the critical ridge — directly operationalizing INV_073.
+        #
+        # CHALLENGE (O21): the paper's exact Poisson branching mapping implies
+        # that if γ is the analog of σ, it must follow σ = ρ(h) × J where
+        # ρ(h) is field density and J is interaction strength. If the empirical
+        # out-degree distribution fails a Poisson goodness-of-fit test, the
+        # spectral γ hypothesis is strained, not merely unconfirmed.
+        try:
+            graph._ensure_loaded()
+            _ne = graph._node_edges
+            # Build out-degree distribution: for each node, count edges where
+            # it is the "from" endpoint (offspring = nodes it propagates to)
+            _out_degree = {}  # type: dict
+            _all_edge_nodes = set()
+            for _e in _ne:
+                _from = _e.get("from", "")
+                _to = _e.get("to", "")
+                if _from:
+                    _out_degree[_from] = _out_degree.get(_from, 0) + 1
+                    _all_edge_nodes.add(_from)
+                if _to:
+                    _all_edge_nodes.add(_to)
+            # Nodes appearing only as targets (leaves) have out-degree 0
+            for _nd in _all_edge_nodes:
+                _out_degree.setdefault(_nd, 0)
+
+            _n_nodes_br = len(_out_degree)
+            if _n_nodes_br >= 2:
+                _degrees = list(_out_degree.values())
+                _sigma = sum(_degrees) / float(_n_nodes_br)  # mean offspring count
+                _sigma_var = (sum((d - _sigma) ** 2 for d in _degrees)
+                              / float(_n_nodes_br))
+                _sigma_std = math.sqrt(_sigma_var) if _sigma_var > 0 else 0.0
+
+                # Poisson goodness-of-fit: for a Poisson(σ) distribution,
+                # variance == mean. The dispersion index D = var/mean measures
+                # departure from Poisson. D≈1 → Poisson consistent,
+                # D≫1 → overdispersed (super-Poisson), D≪1 → underdispersed.
+                _dispersion_index = _sigma_var / _sigma if _sigma > 0 else 0.0
+
+                # Chi-squared-style Poisson GOF test on the out-degree histogram
+                # Group degrees into bins, compare observed vs Poisson-expected counts
+                _max_deg = max(_degrees) if _degrees else 0
+                _deg_hist = {}  # type: dict
+                for _d in _degrees:
+                    _deg_hist[_d] = _deg_hist.get(_d, 0) + 1
+                # Poisson PMF: P(k) = σ^k * exp(-σ) / k!
+                _poisson_chi2 = 0.0
+                _poisson_bins_used = 0
+                for _k in range(min(_max_deg + 1, 20)):  # cap at 20 bins
+                    _observed = _deg_hist.get(_k, 0)
+                    # Poisson expected count
+                    if _sigma > 0:
+                        _log_pmf = _k * math.log(_sigma) - _sigma - sum(
+                            math.log(i) for i in range(1, _k + 1))
+                        _expected = _n_nodes_br * math.exp(_log_pmf)
+                    else:
+                        _expected = _n_nodes_br if _k == 0 else 0.0
+                    if _expected > 0.5:  # standard GOF: only bins with E >= 0.5
+                        _poisson_chi2 += ((_observed - _expected) ** 2) / _expected
+                        _poisson_bins_used += 1
+
+                # Approximate p-value from chi2 with (bins-1) degrees of freedom
+                # Using Wilson-Hilferty approximation: if X ~ chi2(v),
+                # then Z ≈ ((X/v)^(1/3) - (1 - 2/(9v))) / sqrt(2/(9v))
+                _poisson_p_value = None
+                _poisson_dof = max(_poisson_bins_used - 1, 1)
+                if _poisson_bins_used >= 2 and _poisson_dof > 0:
+                    _x_over_v = _poisson_chi2 / _poisson_dof
+                    if _x_over_v > 0:
+                        _wh_cube = _x_over_v ** (1.0 / 3.0)
+                        _wh_correction = 1.0 - 2.0 / (9.0 * _poisson_dof)
+                        _wh_denom = math.sqrt(2.0 / (9.0 * _poisson_dof))
+                        if _wh_denom > 0:
+                            _z_score = (_wh_cube - _wh_correction) / _wh_denom
+                            # Standard normal survival function approximation
+                            _poisson_p_value = 0.5 * (
+                                1.0 + math.erf(-_z_score / math.sqrt(2.0)))
+
+                # Criticality classification from σ
+                if 0.95 <= _sigma <= 1.05:
+                    _sigma_verdict = "AT_CRITICAL"
+                elif _sigma < 0.95:
+                    _sigma_verdict = "SUBCRITICAL"
+                else:
+                    _sigma_verdict = "SUPERCRITICAL"
+
+                # Poisson fit verdict
+                _poisson_rejected = (_poisson_p_value is not None
+                                     and _poisson_p_value < 0.05)
+                _poisson_fit_status = "REJECTED" if _poisson_rejected else (
+                    "CONSISTENT" if _poisson_p_value is not None else "UNTESTED")
+
+                _branching_report = {
+                    "sigma": round(_sigma, 4),
+                    "sigma_std": round(_sigma_std, 4),
+                    "sigma_variance": round(_sigma_var, 4),
+                    "dispersion_index": round(_dispersion_index, 4),
+                    "n_nodes": _n_nodes_br,
+                    "n_edges": len(_ne),
+                    "max_out_degree": _max_deg,
+                    "criticality_verdict": _sigma_verdict,
+                    "poisson_chi2": round(_poisson_chi2, 4),
+                    "poisson_dof": _poisson_dof,
+                    "poisson_p_value": (round(_poisson_p_value, 6)
+                                        if _poisson_p_value is not None else None),
+                    "poisson_fit_status": _poisson_fit_status,
+                    "o21_challenge_note": (
+                        "Poisson branching model REJECTED (p<0.05): "
+                        "out-degree distribution does not follow Poisson "
+                        "statistics — the spectral γ hypothesis (γ = ρ×J "
+                        "branching ratio) is STRAINED. Overdispersion "
+                        f"index D={_dispersion_index:.2f} suggests "
+                        + ("super-Poisson cascades (correlated offspring)."
+                           if _dispersion_index > 1.5
+                           else "sub-Poisson cascades (suppressed branching).")
+                    ) if _poisson_rejected else None,
+                    "inv073_note": (
+                        f"Branching ratio σ={_sigma:.4f}: genome is "
+                        f"{_sigma_verdict} — "
+                        + ("operating at the critical ridge (σ≈1), consistent "
+                           "with INV_073 necessity claim."
+                           if _sigma_verdict == "AT_CRITICAL"
+                           else f"{'above' if _sigma > 1 else 'below'} criticality, "
+                                f"INV_073 ridge navigation is "
+                                f"{'not currently maintained' if abs(_sigma - 1.0) > 0.2 else 'approximately maintained'}."
+                           )
+                    ),
+                }
+
+                report["branching_ratio"] = _branching_report
+
+                # Log to dedicated file
+                _br_log_path = FREED_DIR / "FREED_log" / "branching_ratio.jsonl"
+                _br_log_path.parent.mkdir(exist_ok=True)
+                _branching_log_entry = dict(_branching_report)
+                _branching_log_entry["timestamp"] = ts
+                _branching_log_entry["cycle"] = current_cycle
+                with open(_br_log_path, "a") as _br_f:
+                    _br_f.write(json.dumps(_branching_log_entry) + "\n")
+
+                print(f"\n[BRANCHING-RATIO] σ={_sigma:.4f} ± {_sigma_std:.4f} "
+                      f"(D={_dispersion_index:.2f}, n={_n_nodes_br}): "
+                      f"{_sigma_verdict} | Poisson fit: {_poisson_fit_status}"
+                      + (f" (p={_poisson_p_value:.4f})"
+                         if _poisson_p_value is not None else ""))
+                if _poisson_rejected:
+                    print(f"  [BRANCHING-RATIO] ⚠ O21 CHALLENGE: Poisson branching "
+                          f"model rejected — dispersion D={_dispersion_index:.2f} "
+                          f"{'≫' if _dispersion_index > 1.5 else '≪'} 1 — "
+                          f"spectral γ=ρ×J functional form is strained")
+            else:
+                report["branching_ratio"] = {
+                    "sigma": None,
+                    "n_nodes": _n_nodes_br,
+                    "note": "Insufficient nodes for branching ratio estimation",
+                }
+        except Exception as _br_err:
+            report["branching_ratio"] = {
+                "error": str(_br_err),
+                "note": "Branching ratio estimation failed (non-fatal)",
+            }
+            print(f"  [BRANCHING-RATIO] Warning: estimation failed: {_br_err}")
 
         # ── Rebuild site ──────────────────────────────────────────────────────
         if state is not None and obligations is not None:

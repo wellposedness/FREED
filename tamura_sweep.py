@@ -3223,27 +3223,172 @@ class BranchingRatioTracker:
         using discrete MLE (Hill estimator) and compute R² of the fit
         against the empirical complementary CDF on a log-log scale.
 
+        Also performs MLE-based xmin selection via KS-distance minimisation
+        and a bootstrap KS goodness-of-fit p-value (stored on self for
+        downstream telemetry).
+
         Returns (alpha, r_squared). Returns (0.0, 0.0) if insufficient data.
 
         The Hill estimator for discrete power-law:
             α = 1 + n / Σ ln(x_i / x_min)
         where x_min is the minimum avalanche size (typically 1).
         """
+        # Reset MLE fields each call (consumed by _compute_telemetry)
+        self._mle_xmin = 0.0
+        self._mle_alpha = 0.0
+        self._mle_ks_statistic = 0.0
+        self._mle_ks_pvalue = 0.0
+        self._mle_n_tail = 0
+        self._mle_detail = ""
+
         # Filter to positive avalanche sizes
         sizes = [s for s in self._avalanche_sizes if s > 0]
         if len(sizes) < 10:
             return (0.0, 0.0)
 
-        # x_min: use the smallest observed size (at least 1.0)
-        x_min = max(1.0, min(sizes))
+        # ── MLE xmin selection via KS-distance minimisation ──────────────
+        # For each candidate xmin, compute the Hill MLE α and the KS
+        # distance between the empirical CCDF and the fitted power-law
+        # CCDF.  Select the xmin that minimises KS distance.
+        # Reference: Clauset, Shalizi, Newman (2009) — power-law fitting.
+        sorted_sizes = sorted(sizes)
+        unique_candidates = sorted(set(sorted_sizes))
+        # Only consider candidates that leave at least 10 tail observations
+        # and at most the bottom 90% of unique values (avoid fitting to 1 point)
+        max_candidates = min(len(unique_candidates) - 1, 50)
+        if max_candidates < 1:
+            max_candidates = 1
+        candidates = unique_candidates[:max_candidates]
 
-        # Filter sizes >= x_min
+        best_ks = float('inf')
+        best_xmin = max(1.0, sorted_sizes[0])
+        best_alpha_mle = 0.0
+        best_n_tail = 0
+
+        for xm_cand in candidates:
+            tail_c = [s for s in sorted_sizes if s >= xm_cand]
+            n_c = len(tail_c)
+            if n_c < 10:
+                continue
+            # Hill MLE for this xmin
+            log_sum_c = 0.0
+            for s in tail_c:
+                ratio_c = float(s) / float(xm_cand)
+                if ratio_c > 0:
+                    log_sum_c += math.log(ratio_c)
+            if log_sum_c <= 0.0:
+                continue
+            alpha_c = 1.0 + float(n_c) / log_sum_c
+
+            # KS distance between empirical CCDF and fitted power-law CCDF
+            # Empirical CCDF: F_emp(x_i) = i / n_c  (for sorted tail)
+            # Theoretical CCDF: F_pl(x) = 1 - (x / xmin)^{-(alpha-1)}
+            #                   but for P(X >= x): (x / xmin)^{-(alpha-1)}
+            # We compare P_emp(X >= x_i) vs P_pl(X >= x_i)
+            tail_sorted_c = sorted(tail_c)
+            n_c_f = float(n_c)
+            ks_c = 0.0
+            for i_c, x_i in enumerate(tail_sorted_c):
+                p_emp = 1.0 - float(i_c) / n_c_f  # P(X >= x_i)
+                p_pl = (float(x_i) / float(xm_cand)) ** (-(alpha_c - 1.0))
+                d_c = abs(p_emp - p_pl)
+                if d_c > ks_c:
+                    ks_c = d_c
+
+            if ks_c < best_ks:
+                best_ks = ks_c
+                best_xmin = float(xm_cand)
+                best_alpha_mle = alpha_c
+                best_n_tail = n_c
+
+        # ── Bootstrap KS p-value (semi-parametric) ───────────────────────
+        # Generate synthetic power-law samples from the fitted model,
+        # refit each, compute KS stat, count how often synthetic KS >= observed.
+        # Use a fixed seed for reproducibility; limit iterations for speed.
+        import random as _ks_rng
+        _KS_N_BOOT = 200
+        _ks_rng.seed(20240615)
+        n_ge = 0
+        mle_pvalue = 0.0
+
+        if best_n_tail >= 10 and best_alpha_mle > 1.0:
+            for _b in range(_KS_N_BOOT):
+                # Generate n_tail samples from power law with xmin, alpha
+                # Inverse-CDF: X = xmin * U^{-1/(alpha-1)} where U ~ Uniform(0,1)
+                inv_exp = 1.0 / (best_alpha_mle - 1.0)
+                syn_tail = []  # type: List[float]
+                for _ in range(best_n_tail):
+                    u = _ks_rng.random()
+                    if u < 1e-15:
+                        u = 1e-15
+                    syn_tail.append(best_xmin * (u ** (-inv_exp)))
+
+                # Refit Hill MLE on synthetic sample
+                syn_sorted = sorted(syn_tail)
+                syn_log_sum = 0.0
+                for sv in syn_sorted:
+                    r_v = float(sv) / best_xmin
+                    if r_v > 0:
+                        syn_log_sum += math.log(r_v)
+                if syn_log_sum <= 0.0:
+                    continue
+                syn_alpha = 1.0 + float(best_n_tail) / syn_log_sum
+
+                # KS stat for synthetic sample
+                syn_n_f = float(best_n_tail)
+                syn_ks = 0.0
+                for i_s, x_s in enumerate(syn_sorted):
+                    p_emp_s = 1.0 - float(i_s) / syn_n_f
+                    p_pl_s = (float(x_s) / best_xmin) ** (-(syn_alpha - 1.0))
+                    d_s = abs(p_emp_s - p_pl_s)
+                    if d_s > syn_ks:
+                        syn_ks = d_s
+
+                if syn_ks >= best_ks:
+                    n_ge += 1
+
+            mle_pvalue = float(n_ge) / float(_KS_N_BOOT)
+
+        # Store MLE results for _compute_telemetry
+        self._mle_xmin = round(best_xmin, 4)
+        self._mle_alpha = round(best_alpha_mle, 6)
+        self._mle_ks_statistic = round(best_ks, 8)
+        self._mle_ks_pvalue = round(mle_pvalue, 4)
+        self._mle_n_tail = best_n_tail
+
+        if mle_pvalue >= 0.1 and best_n_tail >= 10:
+            self._mle_detail = (
+                "MLE POWER-LAW CONFIRMED (O148): xmin={:.2f}, alpha={:.4f}, "
+                "KS={:.6f}, p-value={:.3f} (>= 0.10, {} bootstrap samples). "
+                "The power-law hypothesis cannot be rejected at the 10% level. "
+                "n_tail={}. This supersedes the OLS R^2 fit for criticality "
+                "assessment."
+            ).format(best_xmin, best_alpha_mle, best_ks, mle_pvalue,
+                     _KS_N_BOOT, best_n_tail)
+        elif best_n_tail >= 10:
+            self._mle_detail = (
+                "MLE POWER-LAW REJECTED (O148): xmin={:.2f}, alpha={:.4f}, "
+                "KS={:.6f}, p-value={:.3f} (< 0.10, {} bootstrap samples). "
+                "The power-law hypothesis IS rejected at the 10% level. "
+                "n_tail={}. The avalanche distribution may follow a different "
+                "form (log-normal, exponential, stretched-exponential). "
+                "Criticality verdict based on power-law fit is NOT defensible."
+            ).format(best_xmin, best_alpha_mle, best_ks, mle_pvalue,
+                     _KS_N_BOOT, best_n_tail)
+        else:
+            self._mle_detail = (
+                "MLE INSUFFICIENT DATA: fewer than 10 tail observations "
+                "(n_tail={}). Cannot perform reliable MLE power-law test."
+            ).format(best_n_tail)
+
+        # ── Legacy: use optimal xmin for the returned alpha/R² ───────────
+        x_min = best_xmin
         tail = [s for s in sizes if s >= x_min]
         n = len(tail)
         if n < 5:
             return (0.0, 0.0)
 
-        # Hill estimator: α = 1 + n / Σ ln(x_i / x_min)
+        # Hill estimator with optimal xmin
         log_sum = 0.0
         for s in tail:
             ratio = float(s) / x_min
@@ -3256,12 +3401,10 @@ class BranchingRatioTracker:
         alpha = 1.0 + float(n) / log_sum
 
         # Compute R² on log-log CCDF
-        # Sort sizes descending, compute empirical CCDF
         tail_sorted = sorted(tail)
         unique_sizes = sorted(set(tail_sorted))
         n_total = float(len(tail_sorted))
 
-        # Empirical CCDF: P(X >= x) for each unique x
         log_x = []   # type: List[float]
         log_ccdf = []  # type: List[float]
         for x_val in unique_sizes:
@@ -3274,9 +3417,6 @@ class BranchingRatioTracker:
         if len(log_x) < 3:
             return (alpha, 0.0)
 
-        # Theoretical CCDF for power-law: P(X >= x) ∝ x^(-(α-1))
-        # log P = const - (α-1) * log x
-        # Fit via linear regression to get R²
         k = len(log_x)
         sum_lx = sum(log_x)
         sum_ly = sum(log_ccdf)

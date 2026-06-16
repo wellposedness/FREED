@@ -1671,6 +1671,73 @@ def _write_cycles(cycle_log: dict):
         if _snap_total is not None:
             ca_telemetry_snapshot["total_cells"] = _snap_total
 
+        # O148: Per-cell-type counts and longitudinal variance across timesteps.
+        # Records the full cell-type distribution at snapshot time and, when
+        # step_distributions are available from the CA runner, computes the
+        # variance of each type's count across timesteps.  This closes the
+        # ABSENT invariant candidate gap: cell-type dominance distributions
+        # become a tracked, falsifiable time-series signal rather than a
+        # single-point observation.
+        _snap_ctd = criticality.get("cell_type_distribution")
+        if isinstance(_snap_ctd, dict) and _snap_ctd:
+            _snap_type_counts = {}
+            for _ct_name, _ct_info in _snap_ctd.items():
+                if isinstance(_ct_info, dict):
+                    _snap_type_counts[_ct_name] = {
+                        "count": _ct_info.get("count"),
+                        "fraction": _ct_info.get("fraction"),
+                    }
+            if _snap_type_counts:
+                ca_telemetry_snapshot["cell_type_counts"] = _snap_type_counts
+                ca_telemetry_snapshot["cell_type_n_types"] = len(_snap_type_counts)
+
+        # Longitudinal cell-type variance: when step_distributions is available,
+        # compute per-type mean count and variance across timesteps.  This is
+        # the definitive signal for whether Physics Navigator dominance is a
+        # stable attractor or a transient fluctuation (O148 requirement).
+        _snap_step_dists = ca_telemetry.get("step_distributions")
+        if isinstance(_snap_step_dists, list) and len(_snap_step_dists) >= 2:
+            # Collect per-type counts across all timesteps
+            _type_series = {}  # type_name -> list of counts/fractions
+            for _sd in _snap_step_dists:
+                _sd_keys = set()
+                if isinstance(_sd, dict):
+                    for _tk, _tv in _sd.items():
+                        _sd_keys.add(_tk)
+                        _type_series.setdefault(_tk, []).append(float(_tv))
+                elif isinstance(_sd, (list, tuple)):
+                    for _ti, _tv in enumerate(_sd):
+                        _tk = str(_ti)
+                        _sd_keys.add(_tk)
+                        _type_series.setdefault(_tk, []).append(float(_tv))
+                # Pad missing types with 0 for this step
+                for _existing_k in list(_type_series.keys()):
+                    if _existing_k not in _sd_keys:
+                        _type_series[_existing_k].append(0.0)
+
+            if _type_series:
+                _type_variance = {}
+                _all_variances = []
+                for _tk, _vals in _type_series.items():
+                    if len(_vals) >= 2:
+                        _tmean = sum(_vals) / len(_vals)
+                        _tvar = sum((_v - _tmean) ** 2 for _v in _vals) / len(_vals)
+                        _type_variance[_tk] = {
+                            "mean": round(_tmean, 6),
+                            "variance": round(_tvar, 6),
+                            "std": round(_tvar ** 0.5, 6),
+                            "n_steps": len(_vals),
+                        }
+                        _all_variances.append(_tvar)
+                if _type_variance:
+                    ca_telemetry_snapshot["cell_type_longitudinal"] = _type_variance
+                    ca_telemetry_snapshot["cell_type_longitudinal_n_steps"] = len(_snap_step_dists)
+                    # Aggregate variance across all types — high value means
+                    # composition is unstable; low means frozen attractor
+                    _mean_var = sum(_all_variances) / len(_all_variances)
+                    ca_telemetry_snapshot["cell_type_mean_variance"] = round(_mean_var, 6)
+                    ca_telemetry_snapshot["cell_type_composition_stable"] = _mean_var < 0.01
+
         summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
 
     # O148 structured telemetry: promote key metrics to top-level summary

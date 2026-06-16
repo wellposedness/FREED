@@ -32,7 +32,7 @@ from site_builder import build as build_site
 from consolidate  import Consolidator
 from feed_guard      import sanitize as guard_sanitize
 from knowledge_graph import get_graph
-from self_engineer   import SelfEngineer
+from self_engineer   import SelfEngineer, MODIFIABLE
 from cerebellum      import Cerebellum
 from dmn             import DMNAgent
 from batch_feed      import fetch_url
@@ -1240,7 +1240,11 @@ class FREEDDaemon:
                 f"If yes, emit exactly:\n"
                 f"IMPLEMENT: YES\n"
                 f"IMPLEMENT_WHAT: [one sentence — the specific thing to add or change]\n"
-                f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','knowledge_graph.py','site_builder.py','voice.py']))}]\n"
+                # Menu is filtered through self_engineer.MODIFIABLE so a file frozen out of the
+                # write whitelist (e.g. knowledge_graph.py, pulled 2026-05-24) is removed from
+                # L7's options automatically — no more proposing targets self_engineer will block.
+                # Coupling enforced, not remembered. (Spin B fix, 2026-06-15.)
+                f"IMPLEMENT_WHERE: [the .py filename from: {', '.join(sorted(f for f in ['targeted_sweep.py','tamura_sweep.py','l7_agent.py','consolidate.py','site_builder.py','voice.py'] if f in MODIFIABLE))}]\n"
                 f"IMPLEMENT_CALL_SITE: [either EXTEND <function_name> if you are modifying an existing function in place, OR <function_name> / <ClassName.method_name> that will call the new code in the same patch]\n"
                 f"IMPLEMENT_WHY: [one sentence — why this improves FREED's epistemic loop]\n"
                 f"If you cannot name a call site, omit the IMPLEMENT block entirely.\n\n"

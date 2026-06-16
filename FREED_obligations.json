@@ -4172,23 +4172,43 @@
   },
   {
     "id": "O394",
-    "status": "open",
+    "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to targeted_sweep.py: extract_spectral_alpha. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 330] PARTIAL: Wire `extract_spectral_alpha` into the sweep loop at the post-acquisition step with `alpha = extract_spectral_alpha(signal, fs)` and store `results['spectral_alpha'] = alpha` to convert dead code into a live call path. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-15",
     "resolved": null,
     "source": "audit"
   },
   {
     "id": "O395",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a binding single-pass triage verdict (wire, void, or defer-with-hard-deadline \u2264 gen 335) on the unwired self-engineered function in targeted_sweep.py recorded under O394 \u2014 produce a recorded disposition entry before any further self-engineering proceeds.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 330] PARTIAL: The binding triage verdict for the unwired function in targeted_sweep.py is DEFER(gen335), conditioned on absence of a live caller and test harness, and must be recorded as a structured comment block at the function definition before any further self-engineering proceeds. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-15",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Recorded disposition entry (wire/void/defer with deadline \u2264 gen 335) for targeted_sweep.py O394 function exists and self-engineering is blocked pending resolution."
+  },
+  {
+    "id": "O396",
+    "statement": "`consistent_with` edges (2205, 46.6% of all node-edges) must be subjected to the same audit-and-prune protocol that was successfully applied to `scales_with` \u2014 specifically: sample \u226550 edges, classify each as (a) derivable from a `depends_on` or `bounds_above` chain (\u2192 redundant, void), (b) encoding a substantive empirical claim not captured elsewhere (\u2192 convert to testable edge type), or (c) content-free (\u2192 void). Binding target: reduce to \u2264500 by generation 345.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The `scales_with` pruning (899\u219256) proved the graph accumulates correlational edges that carry no structural information. `consistent_with` is now 39\u00d7 larger than `scales_with` post-pruning and 40\u00d7 larger than `depends_on`. O237 (correlational-edge dominance remediation) is PARTIAL but has not named `consistent_with` as the primary target. The genome's coherence score (0.97) is inflated if nearly half its edges assert only non-contradiction \u2014 coherence from `consistent_with` is trivial coherence. This obligation is a direct, obligatory consequence of the precedent set by O383's resolution.",
+    "resolution_criterion": "",
+    "created": "2026-06-16T06:30:54.719502+00:00",
+    "progress": "[Gen 330] ACTIVE: The single most tractable next step is to run a transitive-closure reachability query restricted to `depends_on`/`bounds_above` edges over all 2205 `consistent_with` pairs, automatically flagging redundant class-(a) edges and reducing the manual audit burden to the surviving minority. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O397",
+    "statement": "The `depends_on` skeleton (55 edges across 17 nodes = 0.24 per ordered node-pair) must be completed to the point where every node has at least 2 inbound and 2 outbound `depends_on` edges, with each new edge specifying what *breaks* in the target node if the source node is removed. Current minimum-degree nodes must be identified by generation 335.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O187 (OPEN) mandates mapping the full `depends_on` skeleton but remains unexecuted. Meanwhile the graph has 2205 `consistent_with` edges but only 55 `depends_on` edges \u2014 a 40:1 ratio of \"compatible with\" to \"requires.\" This means the genome's causal architecture is essentially unspecified. No",
+    "resolution_criterion": "",
+    "created": "2026-06-16T06:30:54.720473+00:00",
+    "progress": "[Gen 330] ACTIVE: The obligation advances by computing in/out degree vectors from the 55-edge list, flagging sub-threshold nodes, and for each, naming one new edge with an explicit break-semantic \u2014 the blocking step is producing or retrieving the edge list. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
