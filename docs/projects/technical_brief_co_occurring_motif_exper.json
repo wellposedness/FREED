@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (Game of Truth CA: σ≈1.02/α≈2.29 self-organizing to Physics Navigator attractor; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, OT-backed STF metric recovery (smooth-cost entropic regularization with CLT-grounded statistics, cosine-distance superiority on noisy high-dimensional manifolds), and an algebraic q-Gaussian bridge from SOC return distributions to γ-correlation testing — while carrying explicit falsification obligations: stochastic resonance produces identical power-law observables without SOC, so INV_073 demonstrates sufficiency not necessity, and the dominant-attractor concentration phenomenon (Physics Navigator) remains unexplained by the genome.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (real-time σ=1.032/α≈2.49 confirming O148; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, OT-backed STF metric recovery now algorithmically grounded via MaxEnt-derived exp(τσ/2k_B) functional form, MEP/SOC as theorems not postulates, and a hard rate-distortion floor on RL sample efficiency — while INV_073's confirmation surplus is formally reclassified as a warning sign pending a differential prediction that discriminates tension-navigation from three mechanistic alternatives producing identical first-order observables.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -20,6 +20,7 @@
     "Long-range CMI phase boundaries instantiate γ=1 criticality in a quantum thermodynamic setting — confirming the conjecture holds across classical estimation and quantum information simultaneously",
     "INV_094 confirmation surplus without adversarial challenge is a structural vulnerability — the invariant must specify explicit falsification conditions (predicted failure modes under which elliptic branch separation would not emerge) or be formally reclassified as a definitional axiom rather than an empirical claim; Productive novelty is constrained deviation from learned statistical basins at a critical tension ridge — music cognition constitutes a third independent substrate confirming INV_073's γ=1 prescription and providing a concrete empirical anchor for O112 STF metric tensor recovery; Distributional fluency and grounded multi-step cross-domain symbolic inference are dissociable capabilities — LVLMs' rebus failure is substrate-independent evidence that surface pattern completion cannot serve as a proxy for reasoning in RSA evaluation protocols; Deep neural networks instantiate mechanistic and phenomenological descriptions simultaneously — this architectural simultaneity constitutes a proof-of-concept for hybrid soliton topology and a concrete method candidate for STF empirical recovery",
     "Genome integrity is demonstrated as much by principled refusal as by successful integration",
+    "it must be treated as definitional rather than falsifiable; MaxEnt applied to trajectory space derives MEP and SOC as theorems rather than postulates — the exact functional form exp(τσ/2k_B) is now the canonical grounding expression for STF metric tensor empirical recovery under O112; Rate-distortion theory establishes a substrate-independent hard floor on RL sample efficiency — any reasoning system's regret is bounded below by an information-theoretic quantity independent of algorithm choice",
     "Thermodynamic irreversibility is a correlate not a constitutive condition of high-fidelity prediction — INV_094 is falsifiable if a system achieves prediction under zero entropy asymmetry (equilibrium)",
     "which extends INV_073's γ=1 prescription into a richer phase structure without falsifying it",
     "Continuously tunable σ-parameterized universality classes confirm the γ-parameterized complexity ridge is not an isolated prediction but an instance of a broader RG-accessible family of critical manifolds",
@@ -41,6 +42,7 @@
     "Physics Navigator concentration and variance across timesteps) are an absent invariant candidate whose longitudinal capture is now a mandatory telemetry extension — per-cell-type counts and variance must accompany σ/α/H/H_max in all future CA snapshots",
     "CNN finite-size scaling provides a substrate-independent protocol for recovering critical exponents across universality classes — directly operationalizing O21's spectral-γ correlation demand without substrate-specific assumptions",
     "Epitaxial-constraint morphology class (layer-direction preservation through substrate-templated nucleation) is a distinct convergence mechanism from thermodynamic-dissipation convergence — falsely conflating them produces spurious CONVERGE assignments to INV_073 in structural-transition papers",
+    "INV_073's confirmation surplus has crossed a threshold requiring formal reclassification — absent a differential prediction distinguishing tension-navigation from (at minimum) three mechanistic alternatives producing identical first-order observables",
     "INV_073 occupies the epistemic state of unfalsified-but-unconfirmed — population-level criticality is empirically attested as an attractor yet no discriminating observable currently separates thermodynamic ridge navigation from adaptive gain control",
     "extending the OT-geometry chain beyond smooth manifolds as a substrate-independent principle; High-rate environmental dissipation can conserve rather than destroy coupled-system coherence via phase-transition mechanisms — the monotone-dissipation assumption in critical-ridge navigation is falsified and must be replaced by a non-monotone dissipation-coherence model; Confirmation surplus without adversarial alternatives is operationally equivalent to unfalsifiability — a high confirmation score that has not survived adversarial pressure is a liability requiring mandatory discriminating-observable generation before the confirmed claim is treated as load-bearing",
     "Critical-ridge self-organization is a dynamical attractor not merely a static parameter — CA systems converge to σ≈1.025–1.034 with power-law avalanches (α≈2.5) under local rules alone",
@@ -362,6 +364,7 @@
     "SOC criticality with persistent long-range correlations emerges spontaneously in dc plasma dissipative systems — substrate-independence of the critical attractor now spans electromagnetic dissipative substrates extending beyond CA and quantum systems; Subpopulation-criticality coupling is a confirmed mechanism by which a single dominant cell type (Physics Navigator) sustains system-wide critical-ridge operation — global criticality does not require uniform participation across cell types; Hierarchical acoustic compression under typological divergence is an empirical analog for STF metric tensor recovery via modal spectral paths — cross-domain spectral compression problems provide falsifiable constraints on O112's method specification; Information-geometric unlearning is the time-reversal of learning on the Wasserstein manifold — this symmetry is a substrate-independent invariant bridging entropy-cost accounting and reversible inference",
     "INV_094 carries a confirmed confirmation surplus that constitutes an active falsification liability — three independent vacuity routes (MDL alternative mechanism",
     "Onsager-derived MaxEP estimator for hidden-DOF biological systems is provably optimal and substrate-independent — confirming INV_073 (MaxEP = ridge navigation) and INV_087 (thermodynamic inference correctness) via a derivation path independent of FREED's internal construction",
+    "converging with INV_087 and extending O28 with a concrete Bayesian regret guarantee; MaxEnt selects the unique information-optimal reference geometry for any complex distribution and mixtures of reference geometries recover soft-core structure — this provides the algorithmic template O112 requires and closes the open constructive gap in STF metric tensor recovery",
     "Formal mapping between quantum Lyapunov spectra and γ=1 invariant is an open obligation",
     "Periodic measurement dissipation unifies two criticality classes on a single tunable ridge — establishing that the critical locus is a continuous phase boundary not a singular point",
     "and precision limits as projections of a single geometric tensor on state space — path-based metric extraction on this tensor constitutes a direct methodological template for O112's STF empirical recovery; SAT phase transition confirms that constraint-to-degree-of-freedom ratio governs a sharp critical boundary between dissipated and frozen regimes — independently converging with INV_073's critical ridge and supplying O21 with a falsifiable spectral γ measurement protocol; INV_094's distributional observables are also predicted by pure compression hierarchies without thermodynamic causation — the thermodynamic causal claim is not yet discriminated and requires a dedicated experiment isolating thermodynamic from purely compressive contributions",
@@ -550,6 +553,7 @@
     "Resolve why γ=1 dynamic criticality coexists with low semantic entropy (H=17% max) — either derive this as a predicted consequence of Wasserstein Floor compression or treat the dissociation as a falsification pressure on INV_078's entropy-asymmetry claim",
     "The genome must now derive or bound the CMI decay rate constant in terms of existing Wasserstein Floor parameters (inverse temperature and state-counting depth) or acknowledge a free parameter in the quantum extension",
     "or formally reclassify as axiomatic and document the downstream logical dependencies that this reclassification creates; The anomalously high avalanche exponent (α≈2.72 vs prior α≈2.665) from the multi-agent RSA simulation must be given a structural explanation — absorption without derivation converts a confirmatory signal into a hidden inconsistency and violates the node's falsifiability commitment; Music cognition's critical-tension-",
+    "Specify at least one differential prediction that would discriminate INV_073's tension-navigation mechanism from each of its three identified mechanistic alternatives — until this is done all INV_073 confirmation surplus must be logged as definitional accumulation not empirical confirmation; Integrate exp(τσ/2k_B) as the load-bearing functional form in all STF metric tensor recovery protocols under O112 — prior recovery attempts not anchored to this form must be flagged for revision; Audit O28 RL sample-efficiency claims against the rate",
     "Integrate Sinkhorn-differentiable layer architecture into the O112 empirical recovery protocol as the concrete algorithmic substrate for STF metric-tensor estimation",
     "perturbation tolerance",
     "Characterize and account for the persistent σ>1.0 supercritical asymmetry observed across six CA cycles — determine whether this reflects a systematic genome bias",
@@ -754,21 +758,20 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-16T09:59:54.716420+00:00",
+  "last_renormed": "2026-06-16T16:38:39.755817+00:00",
   "renorm_reason": "",
-  "last_renorm_cycle": 221,
+  "last_renorm_cycle": 222,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
-    "biology",
-    "cybernetics",
+    "computer_science",
     "mathematics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.338,
+  "drift_overlap": 0.328,
   "renorm_history": [
     {
-      "timestamp": "2026-06-16T09:59:54.716420+00:00",
+      "timestamp": "2026-06-16T16:38:39.755817+00:00",
       "reason": ""
     }
   ]
