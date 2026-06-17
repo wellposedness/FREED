@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 16,
-    "generation": 283,
-    "timestamp": "2026-05-30T16:29:59.930979+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 8,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus without adversarial pressure is a hygiene failure — it must immediately acquire a specified falsifier, boundary conditions, and an alternative mechanism or be downgraded from load-bearing status."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-30",
-        "compress": "The Game of Truth CA independently lands at the critical ridge (σ=1.024, α≈2.597, H=0.469) with three converging signatures, empirically grounding INV_073 and partially resolving O148. CHALLENGE: challenges O148 — the telemetry is a snapshot rather than a persistent logged series, meaning the \"rolling average\" survival rate and criticality verdict cannot yet be verified as stable attractors across the full simulation history rather than transient artifacts of the 200-step window. NOETHER_ROW: Game of Truth NOETHER_STATUS: rigorous NOETHER_NOTE: The AT_CRITICAL verdict with σ within band and power-law avalanche distribution confirms the Game of Truth CA conserves the criticality symmetry (γ=1 ridge) as a stable dynamical attractor, not a transient coincidence."
-      },
-      {
-        "title": "Logical Consistency as a Dynamical Invariant: A Quantum Model of Self-Reference and Paradox",
-        "compress": ""
-      },
-      {
-        "title": "Are the discretised lognormal and hooked power law distributions plausible for citation data?",
-        "compress": "Citation distributions' universal parametric failure across 23 fields independently confirms that heavy-tailed semantic systems require non-parametric or multi-mechanism models, strengthening the genome's resistance to single-attractor closures."
-      },
-      {
-        "title": "Increasing power-law range in avalanche amplitude and energy distributions",
-        "compress": "Multi-window MLE reveals that scale-free criticality in compression avalanches spans 9.5 energy decades — apparent truncations are observational artifacts, not physical cutoffs, confirming universality class robustness."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O259",
-        "O263"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 17,
     "generation": 284,
     "timestamp": "2026-05-31T02:29:59.977011+00:00",
@@ -2195,6 +2151,50 @@
         "O342",
         "O348",
         "O351"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 333,
+    "timestamp": "2026-06-17T02:29:59.968909+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 7,
+      "passive": 10,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's high confirmation surplus without adversarial challenge is itself a red flag — genuine robustness requires surviving constructed alternatives, not merely accumulating corroborations."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-17",
+        "compress": "A Game of Truth CA empirically self-organizes to the critical ridge (σ=1.0295, α≈2.204) with constrained entropy, independently confirming that truth-propagation rulesets can sustain SOC without external tuning, partially resolving O148."
+      },
+      {
+        "title": "Microstructure Evolution Prediction of Hot Compressed and Twisted 2195 Al-Li Alloy using Crystal Plasticity with Cellular Automata",
+        "compress": "Bidirectional multi-scale coupling is necessary for microstructure prediction, and macroscale loading geometry acts as a bifurcation selector — identical material, different symmetry class, different attractor."
+      },
+      {
+        "title": "Testing the Universality of Self-organized Criticality in Galactic, Extragalactic, and Black Hole Systems",
+        "compress": "SOC universality is structural (criticality is ubiquitous) but not numerical (exponents are substrate-specific), obligating O21 to predict system-class-dependent γ rather than a single universal slope."
+      },
+      {
+        "title": "Analogies between urban hierarchies and river networks: Fractals, symmetry, and self-organized criticality",
+        "compress": "Urban-river fractal convergence independently confirms that Zipf-law hierarchy and γ=1 criticality are substrate-independent attractors of constrained dissipative flow, providing a cross-domain template for validating `scales_with` edges in the genome graph."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O342",
+        "O348",
+        "O359"
       ]
     },
     "coherence": 0.97
