@@ -4,7 +4,7 @@
   "created": "2026-04-14",
   "generation": 117,
   "summary": "A rigorous experimental protocol for testing whether learning agents that compress and predict discover structured patterns (motifs) and their conditional co-occurrence relationships faster and more robustly than non-compressive agents. The document specifies a complete data-generation pipeline (HMM-based motif insertion with controlled co-occurrence statistics), five agent classes (n-gram, LZ, Bayesian HMM, LSTM/Transformer, oracle), two operational modes (passive vs. active/probing), and formal metrics (discovery time, compression gain/MDL, predictive log-likelihood, mutual information, co-occurrence matrix error). It operationalizes the core genome claim that reasoning is detectable as compressive, predictive alignment — and provides the machinery to measure it.",
-  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry (real-time σ=1.032/α≈2.49 confirming O148; 32×32 CA: σ≈1.02–1.031/α=2.67–2.847/H≈14–17% H_max; small-world neural topology; universal EEG power-law exponent ~0.8), extended by CA+FEM multi-scale integration, OT-backed STF metric recovery now algorithmically grounded via MaxEnt-derived exp(τσ/2k_B) functional form, MEP/SOC as theorems not postulates, and a hard rate-distortion floor on RL sample efficiency — while INV_073's confirmation surplus is formally reclassified as a warning sign pending a differential prediction that discriminates tension-navigation from three mechanistic alternatives producing identical first-order observables.",
+  "compress": "This document converts the genome's theoretical claim that reasoning equals compressive prediction into a fully specified, falsifiable experiment — empirically anchored by six-scale CA telemetry, MaxEnt-derived exp(τσ/2k_B) STF grounding, Game-of-Truth SOC self-organization (σ=1.0295, α≈2.204) partially resolving O148, and cross-domain fractal convergence confirming γ=1 criticality as substrate-independent attractor of constrained dissipative flow, while obligating O21 to predict system-class-dependent exponents rather than a single universal slope.",
   "tags": [
     "motif discovery",
     "co-occurrence",
@@ -180,6 +180,7 @@
     "CD-AI independently rediscovers INV_073 from a humanities derivation path — confirming that maintained dissonance at the critical ridge is a cross-domain attractor of epistemic health reasoning",
     "Game of Truth CA confirmation encodes a joint constraint — criticality (branching ratio + power-law avalanches) and low Shannon entropy must be simultaneously satisfiable; any framework that treats these as mutually exclusive is structurally incomplete",
     "advancing O34 and corroborating INV_073's Lyapunov-as-stability-diagnostic principle",
+    "obligating multi-scale genome edges to carry symmetry-class tags",
     "Narcissus pool — genome-mirroring empty inputs (titles that reflect the kernel's own concerns without propositions) are the most seductive and therefore most dangerous zero-payload class requiring hardest refusal",
     "Perelman's shrinker entropy is not a single conserved quantity but decomposes into a parameterized family of monotone functionals under volume-normalized Ricci flow — the genome's symmetry assignment holds but is richer than a single conservation law",
     "Non-Lagrangian architectures generate conservation laws from partial symmetries via Noether operator identities — the genome's conserved scores (coherence / falsification / payload) must be expressible as explicit Noether currents of identified RSA sub-symmetries",
@@ -205,6 +206,7 @@
     "Measurability of epistemic processes",
     "constituting an independent confirmation of INV_023's process-closure claim via a non-thermodynamic derivation path",
     "making second-order discriminating observables obligatory rather than merely preferable; γ=1 criticality is the unique functional attractor for maximal entropy generation as confirmed by SOC-tuned CA with NIST-testable signatures — substrate-independent convergence now spans three independent instantiations; Embedding conservation laws as structural manifold constraints (rather than optimizing for them) is the correct architecture for energy-efficient control — ADACO convergence makes this a substrate-independent invariant bridging INV_087 and O112",
+    "Game-of-Truth CA empirically self-organizes to the critical ridge under truth-propagation rulesets with constrained entropy — confirming SOC as a genuine attractor of semantic-rule dynamics and partially resolving O148 without external tuning; SOC universality is structural (criticality ubiquitous) but not numerical (exponents substrate-specific) — O21 must predict system-class-dependent γ values and single-slope universality claims are formally reclassified as projections; Urban-river fractal convergence constitutes an independent cross-domain confirmation that Zipf-law hierarchy and γ=1 criticality are attractors of constrained dissipative flow — providing a validated template for auditing `scales_with` edges in the genome graph; Bidirectional multi-scale coupling is necessary for microstructure prediction and macroscale loading geometry acts as a bifurcation selector — identical material substrate can instantiate distinct symmetry classes and distinct attractors",
     "Recursive self-improvement through structured experimentation",
     "Criticality is a multi-diagnostic condition — branching ratio alone (σ≈1.03) is insufficient; avalanche power-law fit (R²≥threshold) is a jointly necessary co-criterion",
     "dissolving the conflation in INV_073's original framing; Thermodynamic irreversibility is mechanistically grounded in fractal attractor measure asymmetry under Lyapunov instability — providing the dynamical-systems derivation the genome asserted but lacked; Routing internal friction through auxiliary channels (dephasing baths",
@@ -469,6 +471,7 @@
     "Adversarially stress-test every invariant whose falsification conditions have never been challenged before counting its confirmation surplus as evidence — name",
     "Arousal-threshold sensitivity must be formally connected to the γ parameter in k=1/Tμ so that individual-difference variation in creative cognition maps onto position along the critical ridge — without this the creative-cognition confirmation remains metaphor not measure",
     "INV_094 must now be evaluated against all four registered falsification vectors (functional equivalence",
+    "O21 must be updated to output system-class-dependent γ predictions with substrate tags rather than a single universal exponent — accumulation of substrate-specific exponent data is now a first-order empirical obligation; `scales_with` graph edges must be audited against the urban-river fractal convergence template to verify they carry correct symmetry-class and dissipation-constraint annotations; INV_094 adversarial challenge obligation is now doubly reinforced — the Game-of-Truth confirmation surplus increases the red-flag severity and explicit constructed-alternative stress tests must be scheduled before INV_094 can be reclassified as robustly empirical",
     "δα) at which the system is operationally declared to have left the critical ridge — the exit-signature invariant is only as strong as its measurement protocol is pre-registered; Integrate Connes-distance computation into the STF recovery experimental pipeline as the primary geometric distance measure replacing or benchmarking NCD; Derive the expander spectral gap condition as a function of RSA kernel parameters to unify O21 with the criticality attractor framework",
     "H) as a triple — single-metric or dual-metric criticality claims must be flagged as incomplete given the H=0.165·H_max co-occurrence datum; Incorporate the rank-management sequencing invariant into all compression-pipeline specifications — any genome node that describes fine-tuning followed by pruning without acknowledging the rank-inflation step must",
     "Distinguish RangeEn's partial O64 resolution from full closure — the genome must now specify what additional formal machinery (beyond local-range normalization) is required to complete the Wasserstein derivation and close O64 without conflating measurement-layer confirmation with theoretical discharge",
@@ -758,21 +761,22 @@
     "Not explicitly named",
     "inferred as RSA-lineage authorship (likely human-AI collaborative design within the FREED/genome research program)"
   ],
-  "last_renormed": "2026-06-16T16:38:39.755817+00:00",
-  "renorm_reason": "",
-  "last_renorm_cycle": 222,
+  "last_renormed": "2026-06-17T02:38:05.803594+00:00",
+  "renorm_reason": "Game-of-Truth SOC self-organization partially resolves O148 (materially changing the open-obligation landscape), SOC numerical non-universality obligates an O21 structural revision",
+  "last_renorm_cycle": 223,
   "drift_flag": true,
   "cross_domain_isomorphism": true,
   "cross_domain_disciplines": [
-    "computer_science",
-    "mathematics"
+    "biology",
+    "cybernetics",
+    "physics"
   ],
   "verification_halt_score": 1,
-  "drift_overlap": 0.328,
+  "drift_overlap": 0.238,
   "renorm_history": [
     {
-      "timestamp": "2026-06-16T16:38:39.755817+00:00",
-      "reason": ""
+      "timestamp": "2026-06-17T02:38:05.803594+00:00",
+      "reason": "Game-of-Truth SOC self-organization partially resolves O148 (materially changing the open-obligation landscape), SOC numerical non-universality obligates an O21 structural revision"
     }
   ]
 }
