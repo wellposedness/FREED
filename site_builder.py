@@ -96,6 +96,40 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
             state["criticality_score_components"] = _cs_components
             state["criticality_score_weight"] = round(_cs_total_weight, 2)
 
+        # ── Criticality-proximity coherence weighting (O148 feedback) ─
+        # Close the loop between CA telemetry measurement and genome
+        # coherence: when σ and α are available, blend the composite
+        # criticality score into the genome coherence value.  The
+        # adjustment is small (±0.02 max) so it nudges without
+        # destabilising, but it makes coherence *responsive* to
+        # criticality drift — the genome's epistemic score now reflects
+        # whether the CA substrate is operating at the critical ridge.
+        #
+        # Formula: coherence_adjusted = coherence_base + δ_crit
+        #   δ_crit = CRIT_WEIGHT * (criticality_score - 0.5)
+        #   clamped to [-MAX_DELTA, +MAX_DELTA]
+        # When criticality_score > 0.5 (near critical), coherence gets
+        # a small positive bump; when < 0.5 (drifting), a small penalty.
+        CRIT_WEIGHT = 0.04     # max swing = ±0.02
+        MAX_DELTA = 0.02
+        _crit_score = state.get("criticality_score")
+        _base_coherence = state.get("coherence")
+        if _crit_score is not None and _base_coherence is not None:
+            try:
+                _cs = float(_crit_score)
+                _bc = float(_base_coherence)
+                _delta = CRIT_WEIGHT * (_cs - 0.5)
+                _delta = max(-MAX_DELTA, min(MAX_DELTA, _delta))
+                _adjusted = round(_bc + _delta, 4)
+                # Coherence must stay in (0, 1) — open obligations keep it < 1
+                _adjusted = max(0.0001, min(0.9999, _adjusted))
+                state["coherence"] = _adjusted
+                state["coherence_base"] = round(_bc, 4)
+                state["coherence_crit_delta"] = round(_delta, 4)
+                state["coherence_crit_score_used"] = round(_cs, 4)
+            except (TypeError, ValueError):
+                pass
+
         # ── State-transition detection ────────────────────────────────
         # Compare current verdict against previous to flag regime shifts.
         # Verdict mapping to coarse state:
@@ -1068,6 +1102,147 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
             if "soc_wavefront_verdict" in result:
                 ca_telemetry["soc_wavefront_verdict"] = result["soc_wavefront_verdict"]
 
+    # ── O148: Dislocation-density field & nucleation tracking ─────────────
+    # CPFEM-CA bidirectional coupling: each CA cell carries a continuous
+    # dislocation_density scalar (ρ) that accumulates from neighbor activity.
+    # When ρ crosses a nucleation threshold (ρ_crit), the cell undergoes a
+    # DRX nucleation event — replacing binary survival with a two-variable
+    # (state, dislocation_density) update rule.
+    #
+    # The CA telemetry may supply:
+    #   dislocation_density_field: list[float] — per-cell ρ values (flattened)
+    #   dislocation_density_mean: float — pre-computed mean ρ
+    #   dislocation_density_max: float — pre-computed max ρ
+    #   nucleation_threshold: float — ρ_crit (default 0.85)
+    #   nucleation_events: int — count of cells that crossed ρ_crit this step
+    #   neighbor_activity_per_step: list[float] — mean neighbor activity per step
+    #
+    # When only per-cell densities are supplied, we compute nucleation count,
+    # mean/max/std, and the nucleation_fraction in situ.
+    _dd_field = ca_telemetry.get("dislocation_density_field")
+    _dd_mean = ca_telemetry.get("dislocation_density_mean")
+    _dd_max = ca_telemetry.get("dislocation_density_max")
+    _nuc_threshold = ca_telemetry.get("nucleation_threshold", 0.85)
+    _nuc_events = ca_telemetry.get("nucleation_events")
+    _neighbor_activity = ca_telemetry.get("neighbor_activity_per_step")
+
+    dislocation_info = {}
+
+    # Derive statistics from raw field when available
+    if isinstance(_dd_field, list) and len(_dd_field) > 0:
+        try:
+            _valid_dd = [float(d) for d in _dd_field if d is not None]
+            if _valid_dd:
+                _dd_n = len(_valid_dd)
+                _dd_mean_c = sum(_valid_dd) / _dd_n
+                _dd_max_c = max(_valid_dd)
+                _dd_min_c = min(_valid_dd)
+                _dd_std_c = (sum((d - _dd_mean_c) ** 2 for d in _valid_dd) / _dd_n) ** 0.5
+
+                _nuc_thr = float(_nuc_threshold)
+                _nuc_count = sum(1 for d in _valid_dd if d >= _nuc_thr)
+                _nuc_frac = _nuc_count / _dd_n if _dd_n > 0 else 0.0
+
+                dislocation_info["density_mean"] = round(_dd_mean_c, 6)
+                dislocation_info["density_max"] = round(_dd_max_c, 6)
+                dislocation_info["density_min"] = round(_dd_min_c, 6)
+                dislocation_info["density_std"] = round(_dd_std_c, 6)
+                dislocation_info["density_n_cells"] = _dd_n
+                dislocation_info["nucleation_threshold"] = round(_nuc_thr, 6)
+                dislocation_info["nucleation_count"] = _nuc_count
+                dislocation_info["nucleation_fraction"] = round(_nuc_frac, 6)
+
+                # Nucleation regime classification:
+                # QUIESCENT: < 5% cells above threshold (no DRX)
+                # INCIPIENT: 5-20% cells above threshold (early DRX)
+                # ACTIVE_DRX: 20-60% cells above threshold (dynamic recrystallization)
+                # SATURATED: > 60% cells above threshold (fully recrystallized)
+                if _nuc_frac < 0.05:
+                    dislocation_info["nucleation_regime"] = "QUIESCENT"
+                elif _nuc_frac < 0.20:
+                    dislocation_info["nucleation_regime"] = "INCIPIENT"
+                elif _nuc_frac < 0.60:
+                    dislocation_info["nucleation_regime"] = "ACTIVE_DRX"
+                else:
+                    dislocation_info["nucleation_regime"] = "SATURATED"
+
+                # Bidirectional coupling signal: when nucleation is active,
+                # the mean dislocation density should decrease (DRX softening).
+                # Track the density-nucleation correlation for feedback.
+                if _nuc_count > 0 and _dd_mean_c > 0:
+                    # Softening ratio: lower means more effective DRX
+                    _above_thr = [d for d in _valid_dd if d >= _nuc_thr]
+                    _below_thr = [d for d in _valid_dd if d < _nuc_thr]
+                    if _above_thr and _below_thr:
+                        _mean_above = sum(_above_thr) / len(_above_thr)
+                        _mean_below = sum(_below_thr) / len(_below_thr)
+                        dislocation_info["density_above_threshold_mean"] = round(_mean_above, 6)
+                        dislocation_info["density_below_threshold_mean"] = round(_mean_below, 6)
+                        dislocation_info["density_contrast"] = round(_mean_above - _mean_below, 6)
+
+                # Store computed values back for downstream
+                ca_telemetry["dislocation_density_mean"] = dislocation_info["density_mean"]
+                ca_telemetry["dislocation_density_max"] = dislocation_info["density_max"]
+                ca_telemetry["nucleation_events"] = _nuc_count
+        except (TypeError, ValueError):
+            pass
+    elif _dd_mean is not None:
+        # Pre-computed summary statistics from CA runner
+        try:
+            dislocation_info["density_mean"] = round(float(_dd_mean), 6)
+            if _dd_max is not None:
+                dislocation_info["density_max"] = round(float(_dd_max), 6)
+            _nuc_thr = float(_nuc_threshold)
+            dislocation_info["nucleation_threshold"] = round(_nuc_thr, 6)
+            if _nuc_events is not None:
+                dislocation_info["nucleation_count"] = int(_nuc_events)
+        except (TypeError, ValueError):
+            pass
+
+    # Neighbor-activity accumulation tracking: the dislocation pressure
+    # accumulates from neighbor activity over time steps
+    if isinstance(_neighbor_activity, list) and len(_neighbor_activity) >= 2:
+        try:
+            _na_valid = [float(a) for a in _neighbor_activity if a is not None]
+            if _na_valid:
+                _na_mean = sum(_na_valid) / len(_na_valid)
+                _na_trend = _na_valid[-1] - _na_valid[0] if len(_na_valid) >= 2 else 0.0
+                dislocation_info["neighbor_activity_mean"] = round(_na_mean, 6)
+                dislocation_info["neighbor_activity_trend"] = round(_na_trend, 6)
+                dislocation_info["neighbor_activity_n_steps"] = len(_na_valid)
+                # Accumulation rate: positive trend means pressure building
+                dislocation_info["pressure_accumulating"] = _na_trend > 0
+        except (TypeError, ValueError):
+            pass
+
+    # Cross-reference with criticality: nucleation events should correlate
+    # with σ drift — active DRX pushes σ away from 1.0 as cell population
+    # composition changes rapidly during recrystallization
+    if dislocation_info and sigma is not None:
+        try:
+            _nuc_regime = dislocation_info.get("nucleation_regime", "QUIESCENT")
+            _s_val = float(sigma)
+            if _nuc_regime in ("ACTIVE_DRX", "SATURATED") and abs(_s_val - 1.0) > 0.05:
+                dislocation_info["drx_sigma_coupling"] = "CONFIRMED"
+                dislocation_info["drx_sigma_coupling_note"] = (
+                    f"Active nucleation ({_nuc_regime}) correlates with "
+                    f"σ={_s_val} outside critical band — DRX is driving "
+                    f"population composition change"
+                )
+            elif _nuc_regime == "QUIESCENT" and abs(_s_val - 1.0) <= 0.05:
+                dislocation_info["drx_sigma_coupling"] = "QUIESCENT_CRITICAL"
+            else:
+                dislocation_info["drx_sigma_coupling"] = "UNCORRELATED"
+        except (TypeError, ValueError):
+            pass
+
+    if dislocation_info:
+        result["dislocation_density"] = dislocation_info
+        # Surface nucleation regime in verdict basis
+        _nuc_regime = dislocation_info.get("nucleation_regime")
+        if _nuc_regime and isinstance(verdict_basis, list):
+            verdict_basis.append("nucleation=" + _nuc_regime)
+
     # O148: Track frozen-seed count — permanently-active cells that act as
     # catalytic substrates for phase-stratified emergence (per frozen-GoL paper).
     # Without this variable the measurement protocol cannot detect the causally
@@ -1738,7 +1913,27 @@ def _write_cycles(cycle_log: dict):
                     ca_telemetry_snapshot["cell_type_mean_variance"] = round(_mean_var, 6)
                     ca_telemetry_snapshot["cell_type_composition_stable"] = _mean_var < 0.01
 
+        # O148: Append branching_ratio, avalanche_exponent, and
+        # entropy_fraction_of_max to the per-step snapshot record so
+        # downstream analysis can track their time evolution rather than
+        # snapshot averages.  These clean-named keys complement the
+        # verbose keys already present and close the O148 tracking gap.
+        if _snap_sigma is not None:
+            ca_telemetry_snapshot["branching_ratio"] = _snap_sigma
+        if _snap_alpha is not None:
+            ca_telemetry_snapshot["avalanche_exponent"] = _snap_alpha
+        if _snap_h_ratio is not None:
+            ca_telemetry_snapshot["entropy_fraction_of_max"] = _snap_h_ratio
+
         summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
+
+    # O148: Promote entropy_fraction_of_max to the per-step summary record
+    # alongside branching_ratio and avalanche_exponent so all three primary
+    # criticality time-series signals are directly queryable per cycle.
+    if criticality:
+        _efm = criticality.get("h_over_h_max")
+        if _efm is not None:
+            summary["entropy_fraction_of_max"] = _efm
 
     # O148 structured telemetry: promote key metrics to top-level summary
     # fields so subsequent FEED steps can cross-correlate without parsing
@@ -1932,6 +2127,28 @@ def _append_criticality_timeseries(criticality: dict, timestamp: str = None):
         entry["shannon_entropy"] = entropy
     if survival is not None:
         entry["survival_rate"] = survival
+
+    # O148: Record dominant cell-type identity and fractional prevalence in
+    # every timeseries entry.  This converts the dominant semantic attractor
+    # from a single-snapshot observation into a longitudinal falsifiable
+    # signal — enabling detection of attractor shifts across generations
+    # (e.g. Physics Navigator losing dominance signals a phase transition).
+    dom_type = criticality.get("dominant_cell_type")
+    dom_count = criticality.get("dominant_cell_count")
+    dom_frac = criticality.get("dominant_cell_fraction")
+    if dom_type is not None:
+        entry["dominant_type"] = dom_type
+    if dom_count is not None:
+        entry["dominant_count"] = dom_count
+    if dom_frac is not None:
+        entry["dominant_fraction"] = dom_frac
+        # Pair identity + prevalence as a single structured record for
+        # downstream consumers that need the attractor signature atomically
+        entry["dominant_type_identity"] = {
+            "type": dom_type,
+            "count": dom_count,
+            "fraction": dom_frac,
+        }
 
     # INV_073: Log H/H_max (entropy ratio) alongside σ and α in every
     # time-series entry, enabling longitudinal tracking of whether the

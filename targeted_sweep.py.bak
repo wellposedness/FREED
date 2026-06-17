@@ -765,6 +765,92 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
             # Algebraic phase signal alone — smaller bump
             score += alg_score + _INV073_ALGEBRAIC_SOLO_BONUS
 
+        # ── Epistemic emotion & willingness-to-share (O21 belief-revision) ───
+        # Per hybrid LLM+random-forest persuasion classifier findings,
+        # epistemic emotion and willingness-to-share are the dominant
+        # predictors of belief change, outranking argument-strength features.
+        # These are weighted ABOVE argument-strength patterns to reflect
+        # their empirically measured dominance.
+        #
+        # CHALLENGE to O21: if epistemic emotion is the true gate for belief
+        # change and spectral γ is merely a downstream correlate, O21's
+        # measurement protocol may track a secondary rather than primary cause.
+        # Papers surfaced by this vocabulary inform that adjudication.
+
+        _EPISTEMIC_EMOTION_PATTERNS = [
+            (r"epistemic\s+emotion", 8),
+            (r"epistemic\s+(curiosity|surprise|wonder|awe|confus)", 7),
+            (r"curiosity.{0,30}belief\s+(change|revision|update)", 7),
+            (r"emotion.{0,30}belief\s+(change|revision|update)", 6),
+            (r"(surprise|wonder|awe).{0,30}(persuasi|belief\s+change)", 6),
+            (r"affective\s+(epistemic|belief|persuasi)", 5),
+            (r"emotion.{0,30}(epistemic|knowledge|learn|reason)", 5),
+            (r"epistemic\s+(affect|feeling|state)", 6),
+            (r"feeling\s+of\s+knowing", 5),
+            (r"(metacognitive|epistemic)\s+feeling", 5),
+            (r"(confusion|perplexity).{0,30}(learn|belief|reason)", 5),
+            (r"emotional\s+(driver|predictor|correlate).{0,30}(belief|persuasi)", 7),
+            (r"belief\s+change.{0,30}(emotion|affect|curiosity)", 6),
+        ]
+
+        _WILLINGNESS_TO_SHARE_PATTERNS = [
+            (r"willingness\s+to\s+share", 8),
+            (r"sharing\s+(intent|behavio|motiv).{0,30}(belief|persuasi|opinion)", 7),
+            (r"(viral|virality|shareab).{0,30}(belief|persuasi|opinion\s+change)", 6),
+            (r"information\s+sharing.{0,30}(belief|attitude|opinion)", 5),
+            (r"social\s+(transmission|spread|sharing).{0,30}(belief|persuasi)", 5),
+            (r"share.{0,10}(predict|correlat|associat).{0,30}belief", 6),
+            (r"(retransmission|repost|retweet).{0,30}(persuasi|belief\s+change)", 5),
+            (r"diffusion.{0,30}(belief|opinion)\s+(change|revision)", 5),
+            (r"communicat.{0,30}(intent|willing).{0,30}(belief|persuasi)", 5),
+        ]
+
+        # Context vocabulary: belief-revision / persuasion modeling
+        _BELIEF_REVISION_CONTEXT = [
+            (r"belief\s+(revision|change|update|updat)", 5),
+            (r"persuasi(on|ve|bility)", 5),
+            (r"opinion\s+(change|dynamics|formation)", 4),
+            (r"attitude\s+change", 4),
+            (r"(llm|language\s+model).{0,30}(persuasi|belief|opinion)", 6),
+            (r"random\s+forest.{0,30}(persuasi|belief|predict)", 5),
+            (r"hybrid.{0,30}(model|classifier).{0,30}(persuasi|belief)", 5),
+            (r"(feature|predictor).{0,30}(belief\s+change|persuasi)", 5),
+            (r"(changemyview|change\s+my\s+view|cmv)", 6),
+            (r"deliberat.{0,30}(persuasi|belief|opinion)", 4),
+        ]
+
+        # Weights set above argument-strength features per empirical dominance
+        _EPIST_EMOT_MIN_SCORE = 5
+        _WILLING_SHARE_MIN_SCORE = 5
+        _BELIEF_CONTEXT_MIN_SCORE = 4
+        _EPIST_EMOT_COOCCUR_BONUS = 16   # above argument-strength bonuses
+        _EPIST_EMOT_SOLO_BONUS = 7
+        _WILLING_SHARE_COOCCUR_BONUS = 14
+        _WILLING_SHARE_SOLO_BONUS = 6
+
+        ee_score = 0
+        ws_score = 0
+        br_ctx_score = 0
+        for pattern, weight in _EPISTEMIC_EMOTION_PATTERNS:
+            if re.search(pattern, text_lower):
+                ee_score += weight
+        for pattern, weight in _WILLINGNESS_TO_SHARE_PATTERNS:
+            if re.search(pattern, text_lower):
+                ws_score += weight
+        for pattern, weight in _BELIEF_REVISION_CONTEXT:
+            if re.search(pattern, text_lower):
+                br_ctx_score += weight
+
+        if ee_score >= _EPIST_EMOT_MIN_SCORE and br_ctx_score >= _BELIEF_CONTEXT_MIN_SCORE:
+            score += ee_score + br_ctx_score + _EPIST_EMOT_COOCCUR_BONUS
+        elif ee_score >= _EPIST_EMOT_MIN_SCORE:
+            score += ee_score + _EPIST_EMOT_SOLO_BONUS
+
+        if ws_score >= _WILLING_SHARE_MIN_SCORE and br_ctx_score >= _BELIEF_CONTEXT_MIN_SCORE:
+            score += ws_score + br_ctx_score + _WILLING_SHARE_COOCCUR_BONUS
+        elif ws_score >= _WILLING_SHARE_MIN_SCORE:
+            score += ws_score + _WILLING_SHARE_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────
@@ -793,7 +879,156 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                 if inp.get("sigma_decay_crossover"):
                     entry["sigma_decay_crossover"] = True
                     entry["sigma_decay_detail"] = inp.get("sigma_decay_detail")
+                # Log confirmation-surplus flags when present
+                if inp.get("confirmation_surplus_flags"):
+                    entry["confirmation_surplus_flags"] = inp.get("confirmation_surplus_flags")
                 f.write(json.dumps(entry) + '\n')
+
+    # ── Pre-audit: confirmation-surplus detection ────────────────────────────
+
+    def pre_audit(self, invariants, sweep_results):
+        # type: (list, list) -> dict
+        """
+        Pre-audit prediction step: flag invariants with >N confirmations and
+        zero recorded challenges as 'confirmation-surplus: PROBE REQUIRED'.
+
+        Systematically detects under-challenged invariants to close the
+        falsification debt that accumulates when confirmation bias inflates
+        coherence scores. The scheduler can use these flags to preferentially
+        generate adversarial inputs.
+
+        invariants: list of dicts with keys:
+            id, confirmations (int), challenges (int), statement
+        sweep_results: list of paper dicts from sweep() — will be annotated
+            in-place with confirmation_surplus_flags where applicable.
+
+        Returns: audit dict with:
+            flagged_invariants: list of {id, confirmations, status, reason}
+            probe_targets: list of invariant IDs needing adversarial probes
+            sweep_annotations: count of sweep results annotated
+        """
+        CONFIRMATION_SURPLUS_THRESHOLD = 3  # >N confirmations with 0 challenges
+
+        flagged = []
+        probe_targets = []
+
+        for inv in invariants:
+            inv_id = inv.get("id", "")
+            confirmations = inv.get("confirmations", 0)
+            challenges = inv.get("challenges", 0)
+
+            if confirmations > CONFIRMATION_SURPLUS_THRESHOLD and challenges == 0:
+                flag = {
+                    "id": inv_id,
+                    "confirmations": confirmations,
+                    "challenges": challenges,
+                    "status": "confirmation-surplus: PROBE REQUIRED",
+                    "reason": (
+                        f"{inv_id} has {confirmations} confirmations and "
+                        f"zero recorded challenges — falsification debt "
+                        f"is accumulating. Adversarial inputs required."
+                    ),
+                }
+                flagged.append(flag)
+                probe_targets.append(inv_id)
+
+        # Annotate sweep results that confirm flagged invariants —
+        # these are the papers where confirmation bias is most dangerous.
+        # Also boost score for papers that CHALLENGE flagged invariants.
+        annotations_count = 0
+        probe_target_set = set(probe_targets)
+
+        # Build pattern sets for flagged invariants.
+        # INV_073 has dedicated patterns; others get generic ID matching.
+        for paper in sweep_results:
+            text_lower = (paper.get("title", "") + " " + paper.get("abstract", "")).lower()
+            surplus_flags = []
+
+            for target_id in probe_target_set:
+                # Check if paper is relevant to this invariant
+                is_relevant = False
+
+                if target_id == "INV_073":
+                    # Use dedicated INV_073 confirm patterns
+                    inv073_score = 0
+                    for pattern, weight in INV_073_CONFIRM_PATTERNS:
+                        if re.search(pattern, text_lower):
+                            inv073_score += weight
+                    if inv073_score >= INV_073_CONFIRM_THRESHOLD:
+                        is_relevant = True
+
+                    # Check mimicry patterns — papers discussing alternative
+                    # mechanisms are adversarial probes, not confirmations
+                    mimicry_detected = []
+                    for mech_name, patterns in INV_073_MIMICRY_PATTERNS.items():
+                        mech_score = 0
+                        for pattern, weight in patterns:
+                            if re.search(pattern, text_lower):
+                                mech_score += weight
+                        if mech_score >= INV_073_MIMICRY_DETECT_THRESHOLD:
+                            mimicry_detected.append(mech_name)
+
+                    if mimicry_detected:
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "adversarial_probe",
+                            "mimicry_mechanisms": mimicry_detected,
+                            "note": (
+                                f"Paper discusses alternative mechanisms "
+                                f"({', '.join(mimicry_detected)}) that could "
+                                f"replicate {target_id} observables without "
+                                f"requiring its necessity claim."
+                            ),
+                        })
+                        # Boost adversarial papers against surplus invariants
+                        paper["score"] = paper.get("score", 0) + 15
+                    elif is_relevant:
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "MIMICRY_UNCONTROLLED",
+                            "note": (
+                                f"Confirms {target_id} but does not control "
+                                f"for mimicry mechanisms. {target_id} has "
+                                f"confirmation-surplus — this confirmation "
+                                f"deepens falsification debt."
+                            ),
+                        })
+                else:
+                    # Generic invariant-ID matching for other flagged invariants
+                    inv_pattern = target_id.replace("_", ".?")
+                    if re.search(inv_pattern, text_lower, re.IGNORECASE):
+                        is_relevant = True
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "confirmation_surplus_context",
+                            "note": (
+                                f"Paper references {target_id} which has "
+                                f"confirmation-surplus. Prioritize adversarial "
+                                f"reading over confirmatory integration."
+                            ),
+                        })
+
+            if surplus_flags:
+                paper["confirmation_surplus_flags"] = surplus_flags
+                annotations_count += 1
+
+        audit = {
+            "flagged_invariants": flagged,
+            "probe_targets": probe_targets,
+            "sweep_annotations": annotations_count,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "threshold_used": CONFIRMATION_SURPLUS_THRESHOLD,
+        }
+
+        if flagged:
+            print(f"[PRE-AUDIT] {len(flagged)} invariant(s) flagged as confirmation-surplus:")
+            for f_inv in flagged:
+                print(f"  ⚠ {f_inv['id']}: {f_inv['confirmations']} confirmations, "
+                      f"0 challenges — PROBE REQUIRED")
+        else:
+            print("[PRE-AUDIT] No confirmation-surplus invariants detected.")
+
+        return audit
 
 
 # ─── Quick test ───────────────────────────────────────────────────────────────

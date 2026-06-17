@@ -851,6 +851,82 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
         elif ws_score >= _WILLING_SHARE_MIN_SCORE:
             score += ws_score + _WILLING_SHARE_SOLO_BONUS
 
+        # ── O112 trajectory-probability functional form (Jaynes bridge) ──────
+        # Papers containing the Jaynes trajectory-weighting formula
+        #   p_Γ ∝ exp(τσ_Γ / 2k_B)
+        # are directly actionable for STF metric tensor recovery (O112).
+        # This functional form is the operative bridge connecting MaxEnt
+        # formalism to fluctuation theorems, MEP for NESS, and SOC as
+        # unified consequences — per Deringer (2003).
+        #
+        # CHALLENGE INV_073: if SOC is a *theorem* of MEP rather than an
+        # independent critical-ridge navigation principle, INV_073's
+        # framing of SOC as a distinct mechanism requiring separate
+        # invariant status may be redundant, collapsing into INV_087.
+        # Papers triggering this detector inform that adjudication.
+        #
+        # Vocabulary A: trajectory-probability / Jaynes functional form
+        # Vocabulary B: O112 STF / metric tensor / length-scale context
+
+        _O112_JAYNES_TRAJ_PATTERNS = [
+            (r"p.{0,5}(\u0393|gamma|traj).{0,20}(exp|proport).{0,30}(entropy\s+produc|sigma|\\sigma)", 8),
+            (r"exp\s*\(.{0,30}(entropy\s+produc|sigma).{0,10}\)", 7),
+            (r"trajectory\s+(probabilit|weight|distribut).{0,40}(exp|entropy\s+produc)", 7),
+            (r"jaynes.{0,40}(trajectory|non.?equilibri|stationary\s+state)", 7),
+            (r"maxent.{0,40}(trajectory|path\s+probabilit|phase\s+space\s+traj)", 7),
+            (r"maximum\s+entropy.{0,30}(trajectory|microscopic|phase\s+space)", 6),
+            (r"p.{0,3}\\?gamma.{0,20}\\propto.{0,20}exp", 7),
+            (r"tau\s*sigma.{0,10}2\s*k", 8),
+            (r"τ\s*σ.{0,10}2\s*k", 8),
+            (r"(fluctuation\s+theorem).{0,60}(maximum\s+entropy\s+produc)", 6),
+            (r"(maximum\s+entropy\s+produc).{0,60}(fluctuation\s+theorem)", 6),
+            (r"entropy\s+produc.{0,30}(exponential|exp\b).{0,30}(trajectory|path)", 6),
+            (r"microscopic.{0,30}trajectory.{0,30}entropy\s+produc", 6),
+            (r"non.?equilibri.{0,30}stationary.{0,30}(jaynes|maxent|maximum\s+entropy)", 6),
+            (r"(mep|maximum\s+entropy\s+produc).{0,40}(soc|self.?organiz.{0,20}critical)", 7),
+            (r"(fluctuation\s+theorem).{0,40}(soc|self.?organiz.{0,20}critical)", 6),
+            (r"(soc|self.?organiz.{0,20}critical).{0,40}(consequence|deriv|theorem).{0,30}(mep|maximum\s+entropy)", 8),
+        ]
+
+        _O112_STF_CONTEXT_PATTERNS = [
+            (r"metric\s+tensor", 4),
+            (r"(stf|structure\s+tensor\s+field)", 5),
+            (r"length\s+scale.{0,30}diverg", 5),
+            (r"correlation\s+length", 3),
+            (r"critical\s+exponent", 3),
+            (r"phase\s+transition", 3),
+            (r"(non.?equilibri|ness|stationary\s+state)", 3),
+            (r"entropy\s+produc", 3),
+            (r"fluctuation\s+theorem", 4),
+            (r"maximum\s+entropy\s+produc", 5),
+            (r"second\s+law", 3),
+            (r"(rsa|freed).{0,20}(framework|law|formalism)", 4),
+            (r"autopoie", 3),
+        ]
+
+        _O112_JAYNES_COOCCUR_BONUS = 18
+        _O112_JAYNES_SOLO_BONUS = 8
+        _O112_MIN_JAYNES_SCORE = 6
+        _O112_MIN_STF_CONTEXT_SCORE = 3
+
+        jaynes_score = 0
+        stf_ctx_score = 0
+        for pattern, weight in _O112_JAYNES_TRAJ_PATTERNS:
+            if re.search(pattern, text_lower):
+                jaynes_score += weight
+        for pattern, weight in _O112_STF_CONTEXT_PATTERNS:
+            if re.search(pattern, text_lower):
+                stf_ctx_score += weight
+
+        if (jaynes_score >= _O112_MIN_JAYNES_SCORE and
+                stf_ctx_score >= _O112_MIN_STF_CONTEXT_SCORE):
+            # Full co-occurrence: Jaynes trajectory formula + STF/O112 context
+            # This paper demonstrates the operative bridge for metric tensor recovery
+            score += jaynes_score + stf_ctx_score + _O112_JAYNES_COOCCUR_BONUS
+        elif jaynes_score >= _O112_MIN_JAYNES_SCORE:
+            # Jaynes trajectory formula alone — still highly actionable for O112
+            score += jaynes_score + _O112_JAYNES_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────
@@ -879,7 +955,156 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
                 if inp.get("sigma_decay_crossover"):
                     entry["sigma_decay_crossover"] = True
                     entry["sigma_decay_detail"] = inp.get("sigma_decay_detail")
+                # Log confirmation-surplus flags when present
+                if inp.get("confirmation_surplus_flags"):
+                    entry["confirmation_surplus_flags"] = inp.get("confirmation_surplus_flags")
                 f.write(json.dumps(entry) + '\n')
+
+    # ── Pre-audit: confirmation-surplus detection ────────────────────────────
+
+    def pre_audit(self, invariants, sweep_results):
+        # type: (list, list) -> dict
+        """
+        Pre-audit prediction step: flag invariants with >N confirmations and
+        zero recorded challenges as 'confirmation-surplus: PROBE REQUIRED'.
+
+        Systematically detects under-challenged invariants to close the
+        falsification debt that accumulates when confirmation bias inflates
+        coherence scores. The scheduler can use these flags to preferentially
+        generate adversarial inputs.
+
+        invariants: list of dicts with keys:
+            id, confirmations (int), challenges (int), statement
+        sweep_results: list of paper dicts from sweep() — will be annotated
+            in-place with confirmation_surplus_flags where applicable.
+
+        Returns: audit dict with:
+            flagged_invariants: list of {id, confirmations, status, reason}
+            probe_targets: list of invariant IDs needing adversarial probes
+            sweep_annotations: count of sweep results annotated
+        """
+        CONFIRMATION_SURPLUS_THRESHOLD = 3  # >N confirmations with 0 challenges
+
+        flagged = []
+        probe_targets = []
+
+        for inv in invariants:
+            inv_id = inv.get("id", "")
+            confirmations = inv.get("confirmations", 0)
+            challenges = inv.get("challenges", 0)
+
+            if confirmations > CONFIRMATION_SURPLUS_THRESHOLD and challenges == 0:
+                flag = {
+                    "id": inv_id,
+                    "confirmations": confirmations,
+                    "challenges": challenges,
+                    "status": "confirmation-surplus: PROBE REQUIRED",
+                    "reason": (
+                        f"{inv_id} has {confirmations} confirmations and "
+                        f"zero recorded challenges — falsification debt "
+                        f"is accumulating. Adversarial inputs required."
+                    ),
+                }
+                flagged.append(flag)
+                probe_targets.append(inv_id)
+
+        # Annotate sweep results that confirm flagged invariants —
+        # these are the papers where confirmation bias is most dangerous.
+        # Also boost score for papers that CHALLENGE flagged invariants.
+        annotations_count = 0
+        probe_target_set = set(probe_targets)
+
+        # Build pattern sets for flagged invariants.
+        # INV_073 has dedicated patterns; others get generic ID matching.
+        for paper in sweep_results:
+            text_lower = (paper.get("title", "") + " " + paper.get("abstract", "")).lower()
+            surplus_flags = []
+
+            for target_id in probe_target_set:
+                # Check if paper is relevant to this invariant
+                is_relevant = False
+
+                if target_id == "INV_073":
+                    # Use dedicated INV_073 confirm patterns
+                    inv073_score = 0
+                    for pattern, weight in INV_073_CONFIRM_PATTERNS:
+                        if re.search(pattern, text_lower):
+                            inv073_score += weight
+                    if inv073_score >= INV_073_CONFIRM_THRESHOLD:
+                        is_relevant = True
+
+                    # Check mimicry patterns — papers discussing alternative
+                    # mechanisms are adversarial probes, not confirmations
+                    mimicry_detected = []
+                    for mech_name, patterns in INV_073_MIMICRY_PATTERNS.items():
+                        mech_score = 0
+                        for pattern, weight in patterns:
+                            if re.search(pattern, text_lower):
+                                mech_score += weight
+                        if mech_score >= INV_073_MIMICRY_DETECT_THRESHOLD:
+                            mimicry_detected.append(mech_name)
+
+                    if mimicry_detected:
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "adversarial_probe",
+                            "mimicry_mechanisms": mimicry_detected,
+                            "note": (
+                                f"Paper discusses alternative mechanisms "
+                                f"({', '.join(mimicry_detected)}) that could "
+                                f"replicate {target_id} observables without "
+                                f"requiring its necessity claim."
+                            ),
+                        })
+                        # Boost adversarial papers against surplus invariants
+                        paper["score"] = paper.get("score", 0) + 15
+                    elif is_relevant:
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "MIMICRY_UNCONTROLLED",
+                            "note": (
+                                f"Confirms {target_id} but does not control "
+                                f"for mimicry mechanisms. {target_id} has "
+                                f"confirmation-surplus — this confirmation "
+                                f"deepens falsification debt."
+                            ),
+                        })
+                else:
+                    # Generic invariant-ID matching for other flagged invariants
+                    inv_pattern = target_id.replace("_", ".?")
+                    if re.search(inv_pattern, text_lower, re.IGNORECASE):
+                        is_relevant = True
+                        surplus_flags.append({
+                            "invariant": target_id,
+                            "type": "confirmation_surplus_context",
+                            "note": (
+                                f"Paper references {target_id} which has "
+                                f"confirmation-surplus. Prioritize adversarial "
+                                f"reading over confirmatory integration."
+                            ),
+                        })
+
+            if surplus_flags:
+                paper["confirmation_surplus_flags"] = surplus_flags
+                annotations_count += 1
+
+        audit = {
+            "flagged_invariants": flagged,
+            "probe_targets": probe_targets,
+            "sweep_annotations": annotations_count,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "threshold_used": CONFIRMATION_SURPLUS_THRESHOLD,
+        }
+
+        if flagged:
+            print(f"[PRE-AUDIT] {len(flagged)} invariant(s) flagged as confirmation-surplus:")
+            for f_inv in flagged:
+                print(f"  ⚠ {f_inv['id']}: {f_inv['confirmations']} confirmations, "
+                      f"0 challenges — PROBE REQUIRED")
+        else:
+            print("[PRE-AUDIT] No confirmation-surplus invariants detected.")
+
+        return audit
 
 
 # ─── Quick test ───────────────────────────────────────────────────────────────
