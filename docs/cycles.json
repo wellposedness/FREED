@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 17,
-    "generation": 284,
-    "timestamp": "2026-05-31T02:29:59.977011+00:00",
-    "sweep": {
-      "input_count": 14,
-      "targeted": 7,
-      "passive": 7,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is falsifiable via three mechanistic alternatives (oscillatory averaging, fixed-point mimicry, coarse-graining artifact) none of which require active critical-ridge navigation, leaving the invariant's core claim underdetermined."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-31",
-        "compress": "The Game of Truth CA independently self-organizes to the critical ridge (σ=1.027, α=2.791 power-law avalanches), advancing O148 and converging with INV_073/INV_094 while extending the genome with a concrete avalanche exponent."
-      },
-      {
-        "title": "Maximum Entropy Production Principle of Thermodynamics for the Birth and Evolution of Life",
-        "compress": ""
-      },
-      {
-        "title": "Pseudo Random Number Generator Based on Cellular Automata with Self Organized Criticality",
-        "compress": "SOC-tuned cellular automata empirically validate that γ=1 criticality is the unique functional attractor for maximal entropy generation, providing NIST-testable signatures that could anchor O148's empirical recovery obligation."
-      },
-      {
-        "title": "Optimal control of the dynamics of nonlinear oscillating systems using synergetic principles of self-organization",
-        "compress": "ADACO independently confirms that embedding conservation laws as structural manifold constraints — rather than optimizing for them — is the correct architecture for energy-efficient control, converging with INV_073 and INV_087 and offering a constructive bridge toward O112's STF recovery."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O259",
-        "O263"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 18,
     "generation": 285,
     "timestamp": "2026-05-31T09:49:59.953295+00:00",
@@ -2195,6 +2151,50 @@
         "O342",
         "O348",
         "O359"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 6,
+    "generation": 334,
+    "timestamp": "2026-06-17T09:49:59.963479+00:00",
+    "sweep": {
+      "input_count": 30,
+      "targeted": 7,
+      "passive": 23,
+      "curated": 1
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "High confirmation surplus without adversarial challenge is a liability, not an asset — INV_094's apparent robustness is an artifact of untested boundary conditions, not demonstrated invariance."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-17",
+        "compress": "The Game of Truth CA independently demonstrates self-organized criticality (σ=1.025, α=1.215, R²=0.987) across 200 steps, resolving O148 and numerically anchoring INV_073's critical ridge claim. CHALLENGE: challenges O148 — this is a single 200-step snapshot, not a continuous longitudinal record; if the CA drifts off-criticality between snapshots, O148 remains only partially resolved and the AT_CRITICAL verdict may not generalize across the full simulation history."
+      },
+      {
+        "title": "Noise-robust Contrastive Learning for Critical Transition Detection in Dynamical Systems",
+        "compress": "Critical transition detection is a constrained low-rank geometry problem; SVD + semi-orthogonality isolates the order-parameter subspace from noise, independently confirming that criticality lives in compressed, geometrically structured representations."
+      },
+      {
+        "title": "Weighted dynamic transfer network and spectral entropy for weak nonlinear time series detection",
+        "compress": "Weighted dynamic transfer networks expose weak nonlinear structure via spectral entropy of phase-space transition graphs, providing a concrete γ-estimator that could operationalize O21's obligated ToS–spectral-γ correlation. IMPLEMENT: YES IMPLEMENT_WHAT: Inside the coherence-scoring pass, compute spectral entropy of the co-occurrence transition matrix (treat existing edge-weight matrix as a WDTN adjacency) and store it as a `spectral_gamma` field on the scored batch. IMPLEMENT_WHERE: consolidate.py IMPLEMENT_CALL_SITE: EXTEND score_batch IMPLEMENT_WHY: Adds a computable spectral-γ proxy directly inside the existing scoring loop, giving the O21 AlphaPruning protocol an empirical handle without adding any uncalled helper. CHALLENGE: challenges O21 — the paper shows spectral γ is SNR-sensitive and bin-resolution-dependent, meaning any ToS–spectral-γ correlation claimed by O21 could be an artifact of coarse-graining choices rather than a substrate-independent invariant."
+      },
+      {
+        "title": "Maximum disorder model for dense steady-state flow of granular materials",
+        "compress": "Granular critical-state flow independently confirms that driven dissipative systems select the maximum-entropy microstate on a stationary macroscopic ridge, providing a concrete constrained-MaxEnt construction that directly operationalizes the missing STF metric tensor recovery method in O112."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O359",
+        "O366",
+        "O297"
       ]
     },
     "coherence": 0.97
