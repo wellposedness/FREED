@@ -3031,7 +3031,7 @@
     "rationale": "O173 was written when the graph had different topology. Executing it against the old count would audit ~17% of actual `scales_with` edges while claiming coverage. This is an internal integrity failure: the obligation's quantitative predicate no longer matches the structure it references.",
     "resolution_criterion": "O173 is formally re-issued with current edge count (905) and current percentage, and the audit protocol is adjusted to sample or",
     "created": "2026-05-22T06:30:54.116940+00:00",
-    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 × 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap — this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 × 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap — this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES — direction advanced] | [Gen 334] PARTIAL: O297 is arithmetically clear (249 edges required, 154 prior, gap 95–249) but cannot close until the prior-audit/current-graph intersection is computed to establish the surviving-edge count. [COMMIT:YES — direction advanced]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -3764,7 +3764,7 @@
     "status": "partial",
     "statement": "Execute a binding enforcement audit of O351's creation moratorium — count obligations instantiated after O351 was declared partial, verify whether the moratorium has held, and if not, record the breach count and impose an immediate hard ceiling with a null-result criterion specifying that breach of ceiling by ≥1 new obligation triggers automatic retirement of the 3 most recently created unresolved obligations.",
     "priority": "high",
-    "progress": "[Gen 302] PARTIAL: Execute COUNT({Oₙ | n > 351 ∧ status = OPEN}); if ≥ 1, record breach, auto-retire 3 most recently created open obligations, and impose hard ceiling; if 0, moratorium held and O359 closes clean. [COMMIT:YES — direction advanced] | [Gen 333] PARTIAL: O359 is itself a post-moratorium open obligation (n=359 > 351), constituting a confirmed breach of ≥1, triggering the enforcement mechanism, but full auto-retirement targeting requires the complete indexed list of all 18 open obligations, which is absent from the supplied state. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 302] PARTIAL: Execute COUNT({Oₙ | n > 351 ∧ status = OPEN}); if ≥ 1, record breach, auto-retire 3 most recently created open obligations, and impose hard ceiling; if 0, moratorium held and O359 closes clean. [COMMIT:YES — direction advanced] | [Gen 333] PARTIAL: O359 is itself a post-moratorium open obligation (n=359 > 351), constituting a confirmed breach of ≥1, triggering the enforcement mechanism, but full auto-retirement targeting requires the complete indexed list of all 18 open obligations, which is absent from the supplied state. [COMMIT:YES — direction advanced] | [Gen 334] PARTIAL: O359's enforcement mechanism is fully specified and unconditionally triggered (breach confirmed), but execution is blocked only by the absent indexed obligation list — the moment that registry is supplied, the audit, retirement, and ceiling can be committed in a single deterministic pass. [COMMIT:YES — direction advanced]",
     "created": "2026-06-05",
     "resolved": null,
     "auto": true,
@@ -3869,10 +3869,10 @@
   },
   {
     "id": "O366",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a binding enforcement audit of O347's net-progress rate-cap — compute the resolution rate versus creation rate over the last 10 generations, record the numerical result, and impose a hard creation halt if the ratio is below 1.0, with the halt lifting only when 5 consecutive resolutions occur without a new obligation being created.",
     "priority": "high",
-    "progress": "[Gen 308] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding audit completed; cyclic dependency on O347 unresolved.]",
+    "progress": "[Gen 308] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding audit completed; cyclic dependency on O347 unresolved.] | [Gen 334] PARTIAL: O366's audit is methodologically complete but data-blocked — the lifetime ratio (0.921 < 1.0) is directional evidence for halt-trigger activation, but the required 10-generation window computation cannot be executed without a per-generation ledger that does not exist in the genome. [COMMIT:YES — direction advanced]",
     "created": "2026-06-08",
     "resolved": null,
     "auto": true,
@@ -4210,5 +4210,25 @@
     "resolution_criterion": "",
     "created": "2026-06-16T06:30:54.720473+00:00",
     "progress": "[Gen 330] ACTIVE: The obligation advances by computing in/out degree vectors from the 55-edge list, flagging sub-threshold nodes, and for each, naming one new edge with an explicit break-semantic — the blocking step is producing or retrieving the edge list. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O398",
+    "statement": "The `consistent_with` edge type (2205 edges, 46.5% of all node-edges) must be subjected to the same audit-and-pruning regime that O286/O383 imposed on `scales_with` — each `consistent_with` edge must be classified as promotable (to `depends_on`, `operationalizes`, or `bounds_above`), retainable with empirical grounding, or voidable — with a binding reduction target of ≤1000 by generation 345.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The `scales_with` pruning (899→56) succeeded but displaced structural weight onto `consistent_with`, which is epistemically weaker. A graph where 46.5% of edges say \"these things are merely not inconsistent\" cannot justify coherence 0.97. O237's original rationale (correlational-edge dominance) now applies with greater force to this edge type. The obligation is generated by the same internal principle that generated O237, applied to the new dominant correlational class.",
+    "resolution_criterion": "`consistent_with` count ≤1000 by gen 345, with a published triage log showing the disposition (promote/retain/void) of each removed edge, and a recalculated coherence score that excludes `consistent_with` edges from the coherence numerator.\n\n---",
+    "created": "2026-06-17T06:30:52.926422+00:00",
+    "progress": "[Gen 333] ACTIVE: The single most tractable next step is a transitive-closure reachability query over the stronger edge types to identify all `consistent_with` edges made redundant by existing directed paths — these are immediately voidable, likely yielding 660–1100 eliminations in one computational pass. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O399",
+    "statement": "The coherence metric (currently 0.97) must be decomposed into contributions by edge type — specifically, the fraction of coherence attributable to `consistent_with` edges must be reported separately. If removing all `consistent_with` edges drops coherence below 0.70, the headline coherence score must carry an asterisk and footnote until the `consistent_with` audit (above)",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-17T06:30:52.927476+00:00",
+    "progress": "[Gen 333] ACTIVE: The single most tractable next step is to enumerate all genome graph edges by type, compute w_cw (fraction of `consistent_with` edges) and their mean coherence contribution C_cw, then evaluate C_residual = (0.97 - w_cw·C_cw)/(1 - w_cw) and compare to 0.70 — this is a closed arithmetic computation requiring no external data, only internal edge-type instrumentation. [COMMIT:YES — prediction staked]"
   }
 ]
