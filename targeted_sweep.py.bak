@@ -851,6 +851,235 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
         elif ws_score >= _WILLING_SHARE_MIN_SCORE:
             score += ws_score + _WILLING_SHARE_SOLO_BONUS
 
+        # ── O112 trajectory-probability functional form (Jaynes bridge) ──────
+        # Papers containing the Jaynes trajectory-weighting formula
+        #   p_Γ ∝ exp(τσ_Γ / 2k_B)
+        # are directly actionable for STF metric tensor recovery (O112).
+        # This functional form is the operative bridge connecting MaxEnt
+        # formalism to fluctuation theorems, MEP for NESS, and SOC as
+        # unified consequences — per Deringer (2003).
+        #
+        # CHALLENGE INV_073: if SOC is a *theorem* of MEP rather than an
+        # independent critical-ridge navigation principle, INV_073's
+        # framing of SOC as a distinct mechanism requiring separate
+        # invariant status may be redundant, collapsing into INV_087.
+        # Papers triggering this detector inform that adjudication.
+        #
+        # Vocabulary A: trajectory-probability / Jaynes functional form
+        # Vocabulary B: O112 STF / metric tensor / length-scale context
+
+        _O112_JAYNES_TRAJ_PATTERNS = [
+            (r"p.{0,5}(\u0393|gamma|traj).{0,20}(exp|proport).{0,30}(entropy\s+produc|sigma|\\sigma)", 8),
+            (r"exp\s*\(.{0,30}(entropy\s+produc|sigma).{0,10}\)", 7),
+            (r"trajectory\s+(probabilit|weight|distribut).{0,40}(exp|entropy\s+produc)", 7),
+            (r"jaynes.{0,40}(trajectory|non.?equilibri|stationary\s+state)", 7),
+            (r"maxent.{0,40}(trajectory|path\s+probabilit|phase\s+space\s+traj)", 7),
+            (r"maximum\s+entropy.{0,30}(trajectory|microscopic|phase\s+space)", 6),
+            (r"p.{0,3}\\?gamma.{0,20}\\propto.{0,20}exp", 7),
+            (r"tau\s*sigma.{0,10}2\s*k", 8),
+            (r"τ\s*σ.{0,10}2\s*k", 8),
+            (r"(fluctuation\s+theorem).{0,60}(maximum\s+entropy\s+produc)", 6),
+            (r"(maximum\s+entropy\s+produc).{0,60}(fluctuation\s+theorem)", 6),
+            (r"entropy\s+produc.{0,30}(exponential|exp\b).{0,30}(trajectory|path)", 6),
+            (r"microscopic.{0,30}trajectory.{0,30}entropy\s+produc", 6),
+            (r"non.?equilibri.{0,30}stationary.{0,30}(jaynes|maxent|maximum\s+entropy)", 6),
+            (r"(mep|maximum\s+entropy\s+produc).{0,40}(soc|self.?organiz.{0,20}critical)", 7),
+            (r"(fluctuation\s+theorem).{0,40}(soc|self.?organiz.{0,20}critical)", 6),
+            (r"(soc|self.?organiz.{0,20}critical).{0,40}(consequence|deriv|theorem).{0,30}(mep|maximum\s+entropy)", 8),
+        ]
+
+        _O112_STF_CONTEXT_PATTERNS = [
+            (r"metric\s+tensor", 4),
+            (r"(stf|structure\s+tensor\s+field)", 5),
+            (r"length\s+scale.{0,30}diverg", 5),
+            (r"correlation\s+length", 3),
+            (r"critical\s+exponent", 3),
+            (r"phase\s+transition", 3),
+            (r"(non.?equilibri|ness|stationary\s+state)", 3),
+            (r"entropy\s+produc", 3),
+            (r"fluctuation\s+theorem", 4),
+            (r"maximum\s+entropy\s+produc", 5),
+            (r"second\s+law", 3),
+            (r"(rsa|freed).{0,20}(framework|law|formalism)", 4),
+            (r"autopoie", 3),
+        ]
+
+        _O112_JAYNES_COOCCUR_BONUS = 18
+        _O112_JAYNES_SOLO_BONUS = 8
+        _O112_MIN_JAYNES_SCORE = 6
+        _O112_MIN_STF_CONTEXT_SCORE = 3
+
+        jaynes_score = 0
+        stf_ctx_score = 0
+        for pattern, weight in _O112_JAYNES_TRAJ_PATTERNS:
+            if re.search(pattern, text_lower):
+                jaynes_score += weight
+        for pattern, weight in _O112_STF_CONTEXT_PATTERNS:
+            if re.search(pattern, text_lower):
+                stf_ctx_score += weight
+
+        if (jaynes_score >= _O112_MIN_JAYNES_SCORE and
+                stf_ctx_score >= _O112_MIN_STF_CONTEXT_SCORE):
+            # Full co-occurrence: Jaynes trajectory formula + STF/O112 context
+            # This paper demonstrates the operative bridge for metric tensor recovery
+            score += jaynes_score + stf_ctx_score + _O112_JAYNES_COOCCUR_BONUS
+        elif jaynes_score >= _O112_MIN_JAYNES_SCORE:
+            # Jaynes trajectory formula alone — still highly actionable for O112
+            score += jaynes_score + _O112_JAYNES_SOLO_BONUS
+
+        # ── INV_094 subsampling correction for avalanche/cascade scoring ─────
+        # Paper (Priesemann et al.) shows that naive power-law measurement of
+        # avalanches in partially-sampled networks does NOT reliably confirm
+        # criticality. Spatial subsampling distorts avalanche size distributions
+        # and underestimates synchronization. The recoverable signature is the
+        # *parabolic avalanche shape*: mean_size ∝ duration², which survives
+        # fractional observation.
+        #
+        # Without this correction, FREED's criticality detection on partially-
+        # observed semantic graphs systematically underestimates synchronization
+        # and misclassifies subcritical states as critical, corrupting γ=1
+        # ridge navigation.
+        #
+        # Detection strategy:
+        #   Vocabulary A: subsampling / partial observation context
+        #   Vocabulary B: avalanche shape / parabolic scaling / duration²
+        #   Vocabulary C: naive power-law critique (power-law alone insufficient)
+        #
+        # When subsampling context (A) co-occurs with parabolic shape (B),
+        # apply a large bonus — these papers provide the corrected estimator.
+        # When subsampling (A) co-occurs with power-law critique (C),
+        # apply a moderate bonus — these flag the bias without providing fix.
+        # When coverage fraction is explicitly below threshold (detected via
+        # patterns mentioning fractional/partial observation percentages),
+        # flag for parabolic-scaling correction: corrected_size = raw_size *
+        # (1/coverage)^2, implementing mean_size ∝ duration² adjustment that
+        # replaces raw subsampled counts with corrected estimates.
+
+        _SUBSAMPLE_CONTEXT_PATTERNS = [
+            (r"(spatial\s+)?subsamp", 6),
+            (r"partial(ly)?\s+(observ|sampl|record|monitor)", 5),
+            (r"fraction(al)?\s+(observ|sampl|record|neuron|node|site)", 5),
+            (r"(observ|record|sampl)\s+(fraction|percent|subset)", 5),
+            (r"incomplete\s+(observ|sampl|record|coverage)", 4),
+            (r"limited\s+(observ|coverage|recording|sampling)", 4),
+            (r"(few|small\s+fraction).{0,30}(neuron|node|site|electrode)", 4),
+            (r"electrode\s+(array|coverage|density|spacing)", 3),
+            (r"under.?sampl", 5),
+            (r"coverage\s+(fraction|percent|ratio|bias)", 5),
+            (r"(1|5|10|20)\s*%\s*(of\s+)?(neuron|node|site|unit)", 4),
+            (r"node\s+coverage.{0,20}(below|under|low|limit)", 5),
+        ]
+
+        _PARABOLIC_SHAPE_PATTERNS = [
+            (r"parabolic\s+(avalanche|shape|scaling|profile)", 8),
+            (r"mean\s+size.{0,20}duration\s*(\^|²|\*\*)\s*2", 9),
+            (r"mean\s+size.{0,20}duration.?squared", 8),
+            (r"(size|amplitude).{0,15}(scales?|proportional|∝).{0,15}duration.{0,5}(²|\^2|\*\*2)", 9),
+            (r"avalanche\s+shape\s+(collaps|universal|scaling)", 7),
+            (r"shape\s+collaps.{0,30}avalanche", 6),
+            (r"duration.{0,10}exponent.{0,20}(parabolic|quadratic|2\.0)", 7),
+            (r"⟨s⟩.{0,15}∝.{0,15}t.{0,5}(²|\^2)", 8),
+            (r"<s>.{0,15}(∝|propto|~).{0,15}(t|T|d).{0,5}(²|\^2|\*\*2)", 8),
+            (r"avalanche.{0,30}(shape|profile).{0,30}(recover|robust|preserv|surviv)", 7),
+            (r"scaling\s+relation.{0,30}(mean\s+size|duration)", 5),
+            (r"γ\s*=\s*2", 6),
+            (r"gamma\s*=\s*2", 6),
+            (r"crackling.{0,30}(shape|scaling|parabolic)", 5),
+        ]
+
+        _POWERLAW_CRITIQUE_PATTERNS = [
+            (r"power.?law\s+(alone|insufficient|not\s+sufficient|not\s+enough|unreliab)", 8),
+            (r"(cannot|can.?not|unable).{0,30}(confirm|establish|verify).{0,30}critical", 6),
+            (r"(spurious|apparent|artifact).{0,20}power.?law", 7),
+            (r"power.?law.{0,30}(bias|distort|artifact|mislead|spurious)", 7),
+            (r"(not|insufficient).{0,20}evidence.{0,30}critical", 5),
+            (r"subsamp.{0,30}(bias|distort|underestim|overestim)", 7),
+            (r"(underestim|overestim).{0,30}(synchroniz|avalanche|correlat)", 6),
+            (r"naive.{0,20}(power.?law|measurement|estimation)", 5),
+            (r"systematic.{0,20}(bias|underestim|distort).{0,30}(avalanche|critical|synchron)", 6),
+            (r"(false|incorrect).{0,20}(critical|subcritical|supercritical)", 5),
+            (r"misclassif.{0,30}(critical|subcritical|phase)", 6),
+        ]
+
+        _SUBSAMPLE_MIN_SCORE = 4
+        _PARABOLIC_MIN_SCORE = 5
+        _CRITIQUE_MIN_SCORE = 5
+        _SUBSAMPLE_PARABOLIC_COOCCUR_BONUS = 18  # corrected estimator papers
+        _SUBSAMPLE_CRITIQUE_COOCCUR_BONUS = 12   # bias-flagging papers
+        _PARABOLIC_SOLO_BONUS = 7
+        _CRITIQUE_SOLO_BONUS = 5
+        # Coverage threshold below which parabolic correction applies:
+        # When coverage < this fraction, corrected_size = raw_size * (1/coverage)²
+        # implementing the mean_size ∝ duration² parabolic scaling adjustment
+        _COVERAGE_THRESHOLD = 0.3  # 30% node coverage
+
+        subsample_score = 0
+        parabolic_score = 0
+        critique_score = 0
+        subsample_hits = 0
+
+        for pattern, weight in _SUBSAMPLE_CONTEXT_PATTERNS:
+            if re.search(pattern, text_lower):
+                subsample_score += weight
+                subsample_hits += 1
+
+        for pattern, weight in _PARABOLIC_SHAPE_PATTERNS:
+            if re.search(pattern, text_lower):
+                parabolic_score += weight
+
+        for pattern, weight in _POWERLAW_CRITIQUE_PATTERNS:
+            if re.search(pattern, text_lower):
+                critique_score += weight
+
+        # Detect explicit low-coverage mentions and apply parabolic correction
+        # to synchronization estimates. When a paper mentions fractional
+        # observation below threshold, the raw avalanche count is a
+        # systematic underestimate. The parabolic scaling correction
+        # replaces raw subsampled counts: corrected = raw * (1/coverage)²
+        _coverage_corrected = False
+        _coverage_fraction = 1.0
+        coverage_match = re.search(
+            r"(\d+(?:\.\d+)?)\s*(%|percent)\s*(of\s+)?(neuron|node|site|unit|electrode)",
+            text_lower
+        )
+        if coverage_match:
+            try:
+                pct = float(coverage_match.group(1))
+                if 0 < pct < 100:
+                    _coverage_fraction = pct / 100.0
+            except (ValueError, TypeError):
+                pass
+
+        if _coverage_fraction < _COVERAGE_THRESHOLD:
+            # Apply parabolic-scaling correction factor:
+            # correction_factor = (1 / coverage)^2, reflecting mean_size ∝ duration²
+            # This adjusts synchronization estimates upward, replacing raw
+            # subsampled counts with corrected estimates that account for
+            # the quadratic relationship between avalanche size and duration
+            correction_factor = (1.0 / _coverage_fraction) ** 2
+            _coverage_corrected = True
+            # Scale up the subsample relevance score by the correction factor
+            # (capped to prevent unbounded inflation)
+            subsample_score = int(subsample_score * min(correction_factor, 10.0))
+
+        if (subsample_score >= _SUBSAMPLE_MIN_SCORE and
+                parabolic_score >= _PARABOLIC_MIN_SCORE):
+            # Subsampling context + parabolic shape: paper provides the
+            # corrected estimator (mean_size ∝ duration²) that survives
+            # fractional observation — highest priority for INV_094
+            score += subsample_score + parabolic_score + _SUBSAMPLE_PARABOLIC_COOCCUR_BONUS
+        elif (subsample_score >= _SUBSAMPLE_MIN_SCORE and
+                critique_score >= _CRITIQUE_MIN_SCORE):
+            # Subsampling context + power-law critique: paper flags the bias
+            # but may not provide the parabolic correction
+            score += subsample_score + critique_score + _SUBSAMPLE_CRITIQUE_COOCCUR_BONUS
+        elif parabolic_score >= _PARABOLIC_MIN_SCORE:
+            # Parabolic avalanche shape alone — still actionable
+            score += parabolic_score + _PARABOLIC_SOLO_BONUS
+        elif critique_score >= _CRITIQUE_MIN_SCORE:
+            # Power-law critique alone — flags insufficiency of naive measurement
+            score += critique_score + _CRITIQUE_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────

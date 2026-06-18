@@ -1911,6 +1911,10 @@ Output only the classification lines, nothing else."""
     def _resolve_rank(self, o):
         """Rank open obligations for RESOLVE priority. Lower = attempt first."""
         t = o.get("tractability", 3)
+        # Coerce non-int tractability (e.g. a hand-filed "high"/"medium"/"low")
+        # so a single bad value can't crash the whole RESOLVE phase at min().
+        if not isinstance(t, int):
+            t = {"high": 1, "medium": 2, "low": 3}.get(str(t).strip().lower(), 3)
         p = 0 if o.get("priority") == "high" else 1
         return (t, p)
 

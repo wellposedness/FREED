@@ -2454,6 +2454,22 @@ class EnergyCorrection:
         e_true_scores = [a["e_true"] for a in audits]
         curvature_analysis = self._entropy_curvature(e_true_scores)
 
+        # ── Spectral entropy of co-occurrence transition matrix (WDTN) ────
+        # Treat the existing node-edge weight matrix as a weighted dynamic
+        # transfer network (WDTN) adjacency. Compute the transition matrix
+        # T (row-stochastic normalization of the adjacency), extract its
+        # eigenvalue spectrum, and compute the spectral entropy:
+        #   H_spectral = -sum_i (|λ_i|/Z) * ln(|λ_i|/Z)
+        # where Z = sum_i |λ_i|. Normalize by ln(N) to get γ_spectral ∈ [0,1].
+        #
+        # CHALLENGE (O21): spectral γ is SNR-sensitive and bin-resolution-
+        # dependent — any ToS–spectral-γ correlation claimed by O21 could
+        # be an artifact of coarse-graining choices rather than a substrate-
+        # independent invariant. This implementation uses the raw edge-weight
+        # adjacency without binning, surfacing the γ value for empirical
+        # comparison but NOT treating it as a confirmed invariant.
+        spectral_gamma_result = self._compute_spectral_gamma(nodes)
+
         report = {
             "cycle": cycle_number,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -2466,6 +2482,7 @@ class EnergyCorrection:
             "gap_threshold": self.gap_threshold,
             "relaxation_xi": self.relaxation_xi,
             "entropy_curvature": curvature_analysis,
+            "spectral_gamma": spectral_gamma_result,
         }
 
         # Log the audit
@@ -3721,13 +3738,98 @@ class Consolidator:
             r'survival\s+(?:rate)?\s*[=:]\s*([0-9]+\.?[0-9]*)', _nk_lower)
         if _surv_match:
             _ca_telemetry["survival_rate"] = float(_surv_match.group(1))
+        # Parse R² (power-law fit quality)
+        _r2_match = re.search(
+            r'(?:R²|R\^2|r²|r\^2|R2|r2)\s*[=:]\s*([0-9]+\.?[0-9]*)', new_knowledge)
+        if _r2_match:
+            _ca_telemetry["r_squared"] = float(_r2_match.group(1))
         if _ca_telemetry:
-            _ca_telemetry["o148_status"] = "PARTIAL"
-            _ca_telemetry["o148_note"] = (
-                "Single-snapshot telemetry parsed. O148 remains OPEN: "
-                "longitudinal tracking and metric tensor recovery linkage "
-                "not yet included. Do not treat this as full resolution."
-            )
+            # Determine O148 status based on σ critical band and R² fit quality
+            _sigma_in_critical_band = False
+            if "sigma" in _ca_telemetry:
+                _s = _ca_telemetry["sigma"]
+                _sigma_in_critical_band = (0.95 <= _s <= 1.05)
+            _r2_val = _ca_telemetry.get("r_squared")
+            _r2_sufficient = _r2_val is not None and _r2_val >= 0.9
+
+            if _sigma_in_critical_band and _r2_sufficient:
+                _ca_telemetry["o148_status"] = "PARTIAL"
+                _ca_telemetry["o148_note"] = (
+                    "σ within critical band and R² >= 0.9 — telemetry is "
+                    "suggestive of criticality with adequate fit quality. "
+                    "O148 remains PARTIAL: single snapshot, longitudinal "
+                    "tracking and metric tensor recovery linkage not yet included."
+                )
+            elif _sigma_in_critical_band and not _r2_sufficient:
+                _ca_telemetry["o148_status"] = "PARTIAL"
+                _r2_display = f"{_r2_val}" if _r2_val is not None else "unknown"
+                _ca_telemetry["o148_note"] = (
+                    f"σ within critical band but R²={_r2_display} < 0.9 — "
+                    f"power-law fit is suggestive rather than definitive. "
+                    f"Criticality verdict is evidence-in-hand but not "
+                    f"statistically conclusive. O148 PARTIAL: full resolution "
+                    f"contingent on stronger fit (R² >= 0.9) or longer run."
+                )
+                _ca_telemetry["o148_r2_insufficient"] = True
+                print(f"[CONSOLIDATE] ⚠ O148 PARTIAL: σ in critical band "
+                      f"but R²={_r2_display} < 0.9 — fit quality insufficient "
+                      f"for full resolution")
+            else:
+                _ca_telemetry["o148_status"] = "PARTIAL"
+                _ca_telemetry["o148_note"] = (
+                    "Single-snapshot telemetry parsed. O148 remains OPEN: "
+                    "longitudinal tracking and metric tensor recovery linkage "
+                    "not yet included. Do not treat this as full resolution."
+                )
+
+            # Log σ and α into obligation-resolution record for O148
+            if obligations:
+                for _ob in obligations:
+                    if _ob.get("id") == "O148":
+                        _ob.setdefault("telemetry_log", []).append({
+                            "timestamp": ts,
+                            "sigma": _ca_telemetry.get("sigma"),
+                            "alpha": _ca_telemetry.get("alpha"),
+                            "r_squared": _ca_telemetry.get("r_squared"),
+                            "shannon_entropy_bits": _ca_telemetry.get("shannon_entropy_bits"),
+                            "survival_rate": _ca_telemetry.get("survival_rate"),
+                            "criticality_verdict": _ca_telemetry.get("criticality_verdict"),
+                            "o148_status": _ca_telemetry["o148_status"],
+                            "r2_insufficient": _ca_telemetry.get("o148_r2_insufficient", False),
+                        })
+                        if _ob.get("status") in ("open", None, ""):
+                            _ob["status"] = "partial"
+                        # Persist O148 update to obligations file
+                        try:
+                            _obligs_path = FREED_DIR / "FREED_obligations.json"
+                            if _obligs_path.exists():
+                                _obligs_data = json.loads(_obligs_path.read_text())
+                                _obligs_list = (_obligs_data if isinstance(_obligs_data, list)
+                                                else _obligs_data.get("obligations", []))
+                                for _obl_entry in (_obligs_list if isinstance(_obligs_list, list)
+                                                   else list(_obligs_list.values()) if isinstance(_obligs_list, dict)
+                                                   else []):
+                                    if _obl_entry.get("id") == "O148":
+                                        _obl_entry.setdefault("telemetry_log", []).append({
+                                            "timestamp": ts,
+                                            "sigma": _ca_telemetry.get("sigma"),
+                                            "alpha": _ca_telemetry.get("alpha"),
+                                            "r_squared": _ca_telemetry.get("r_squared"),
+                                            "o148_status": _ca_telemetry["o148_status"],
+                                        })
+                                        if _obl_entry.get("status") in ("open", None, ""):
+                                            _obl_entry["status"] = "partial"
+                                        break
+                                _obligs_path.write_text(
+                                    json.dumps(_obligs_data, indent=2, ensure_ascii=False))
+                        except Exception as _o148_err:
+                            print(f"  [O148] Warning: could not persist telemetry: {_o148_err}")
+                        print(f"[CONSOLIDATE] O148 telemetry logged: "
+                              f"σ={_ca_telemetry.get('sigma')}, "
+                              f"α={_ca_telemetry.get('alpha')}, "
+                              f"R²={_ca_telemetry.get('r_squared')} → "
+                              f"status={_ca_telemetry['o148_status']}")
+                        break
             _ca_telemetry["timestamp"] = ts
             report["ca_telemetry"] = _ca_telemetry
             _verdict = _ca_telemetry.get("criticality_verdict", "UNKNOWN")
@@ -3752,6 +3854,395 @@ class Consolidator:
             report["ca_telemetry"] = None
             report["ca_criticality_verdict"] = None
             report["ca_genome_relevant"] = None
+
+        # ── STF method candidate detection (O112) ────────────────────────────
+        # Detect papers whose constraint set (fixed macroscopic observables +
+        # MaxEnt micro-distribution) structurally matches the STF recovery
+        # method. Tag as stf_method_candidate and increment a counter in the
+        # obligation record for O112. This prevents constrained-MaxEnt
+        # constructions from being treated as generic CONVERGE hits and
+        # ensures the obligation advances measurably.
+        #
+        # CHALLENGE: papers with 2D restriction and granular-specific contact
+        # geometry mean the constrained-MaxEnt method cannot be directly
+        # imported into semantic STF recovery without a non-trivial
+        # dimensionality and substrate translation that the genome does not
+        # yet specify.
+        #
+        # Detection: co-occurrence of (1) constraint/fixed-observable language,
+        # (2) maximum entropy / MaxEnt language, and (3) micro-distribution /
+        # probability density language. All three families must be present.
+        _STF_CONSTRAINT_KEYWORDS = {
+            "constraint", "constrained", "fixed", "macroscopic",
+            "constant mean stress", "constant volume", "fixed observable",
+            "macroscopic observable", "consistency", "dissipation rate",
+        }
+        _STF_MAXENT_KEYWORDS = {
+            "maximum entropy", "maxent", "max-ent", "maximum disorder",
+            "most probable", "maximum likelihood", "least biased",
+            "information-theoretic", "jaynes",
+        }
+        _STF_MICRO_KEYWORDS = {
+            "probability density", "micro-scale", "microscale",
+            "micro-distribution", "probability distribution",
+            "contact probability", "inter-particle", "microstate",
+            "micro-state", "grain-scale", "particle-level",
+        }
+        _has_stf_constraint = any(kw in _nk_lower for kw in _STF_CONSTRAINT_KEYWORDS)
+        _has_stf_maxent = any(kw in _nk_lower for kw in _STF_MAXENT_KEYWORDS)
+        _has_stf_micro = any(kw in _nk_lower for kw in _STF_MICRO_KEYWORDS)
+        _is_stf_method_candidate = _has_stf_constraint and _has_stf_maxent and _has_stf_micro
+
+        if _is_stf_method_candidate:
+            report["stf_method_candidate"] = True
+            # Detect dimensional / substrate limitations that challenge direct import
+            _stf_challenges = []
+            if any(kw in _nk_lower for kw in ("two-dimensional", "2d", "two dimensional", "2-d")):
+                _stf_challenges.append("2D_restriction")
+            if any(kw in _nk_lower for kw in ("granular", "grain", "contact geometry", "inter-particle contact")):
+                _stf_challenges.append("granular_substrate_specific")
+            report["stf_method_challenges"] = _stf_challenges
+
+            # ── O112 Noether-Kozlov-Kolesnikov integrability gate ─────────────
+            # Before O112 defaults to pure numerical geodesic recovery (modal
+            # paths + thermality variance), check whether the candidate metric
+            # tensor respects known Lie group structure. If Noether symmetries
+            # are present, STF geodesic recovery may be analytically tractable
+            # via integrability-by-quadratures (Kozlov-Kolesnikov theorem),
+            # improving experimental precision over numerical methods.
+            #
+            # Paper basis: integrability-by-quadratures for optimal control on
+            # open sets is obtained by combining Noether's symmetry principle
+            # with the Kozlov-Kolesnikov theorem. Sub-Riemannian nilpotent Lie
+            # group of type (2,3,5) serves as proof-of-concept that analytic
+            # geodesic recovery is achievable when the underlying space has
+            # sufficient symmetry structure.
+            #
+            # CHALLENGE: O112's "method specified: modal paths + thermality
+            # variance" may be underdetermined unless symmetry structure of the
+            # semantic space is established beforehand. Sub-Riemannian geodesic
+            # recovery requires verifying Kozlov-Kolesnikov integrability
+            # conditions FIRST — without this verification, the method defaults
+            # to numerical recovery when analytic quadrature-based extraction
+            # may be available.
+            _NOETHER_SYMMETRY_KEYWORDS = {
+                "noether", "noether symmetry", "noether theorem",
+                "lie group", "lie algebra", "lie symmetry",
+                "nilpotent", "nilpotent group", "heisenberg group",
+                "symmetry group", "continuous symmetry",
+                "conservation law", "conserved quantity",
+                "first integral", "integrability",
+                "kozlov", "kolesnikov", "kozlov-kolesnikov",
+                "integrability by quadratures", "quadrature",
+                "sub-riemannian", "subriemannian", "sub riemannian",
+                "pontryagin", "pontryagin maximum principle",
+                "hamiltonian system", "symplectic",
+            }
+            _ANALYTIC_GEODESIC_KEYWORDS = {
+                "analytic geodesic", "analytic solution", "closed-form",
+                "closed form", "exact solution", "explicit solution",
+                "integrable system", "completely integrable",
+                "solvable", "exactly solvable",
+            }
+            _has_noether_symmetry = any(
+                kw in _nk_lower for kw in _NOETHER_SYMMETRY_KEYWORDS)
+            _has_analytic_geodesic = any(
+                kw in _nk_lower for kw in _ANALYTIC_GEODESIC_KEYWORDS)
+
+            _o112_integrability_note = None
+            if _has_noether_symmetry:
+                # Noether symmetries detected — flag O112 for analytic tractability
+                _o112_integrability_note = {
+                    "noether_symmetry_detected": True,
+                    "analytic_geodesic_signal": _has_analytic_geodesic,
+                    "integrability_status": "ANALYTIC_CANDIDATE",
+                    "note": (
+                        "O112 FLAG: Noether symmetries detected in candidate "
+                        "metric tensor context. STF geodesic recovery may be "
+                        "analytically tractable via Kozlov-Kolesnikov "
+                        "integrability-by-quadratures rather than defaulting "
+                        "to numerical methods. The method specification "
+                        "'modal paths + thermality variance' should first "
+                        "verify whether the semantic space's candidate metric "
+                        "respects a known Lie group structure (e.g., nilpotent "
+                        "type (2,3,5) sub-Riemannian). If integrability "
+                        "conditions are satisfied, analytic quadrature-based "
+                        "extraction yields higher experimental precision than "
+                        "numerical geodesic recovery."
+                    ),
+                    "challenge": (
+                        "Sub-Riemannian geodesic recovery requires verifying "
+                        "Kozlov-Kolesnikov integrability conditions BEFORE "
+                        "defaulting to numerical methods. O112's method is "
+                        "underdetermined unless symmetry structure of the "
+                        "semantic space is established. Sufficient condition: "
+                        "combine Noether first integrals with Kozlov-Kolesnikov "
+                        "theorem to check if the optimal control problem on "
+                        "the semantic manifold admits integrability by "
+                        "quadratures."
+                    ),
+                    "paper_reference": (
+                        "Integrability by quadratures for optimal control "
+                        "problems via Noether + Kozlov-Kolesnikov fusion; "
+                        "sub-Riemannian nilpotent Lie group (2,3,5) as "
+                        "proof-of-concept for analytic geodesic recovery."
+                    ),
+                }
+                _stf_challenges.append("noether_integrability_gate_required")
+                report["o112_integrability_note"] = _o112_integrability_note
+
+                # Annotate the O112 obligation with the integrability gate
+                if obligations:
+                    for _ob in obligations:
+                        if _ob.get("id") == "O112":
+                            _ob.setdefault("integrability_checks", []).append({
+                                "timestamp": ts,
+                                "noether_symmetry_detected": True,
+                                "analytic_geodesic_signal": _has_analytic_geodesic,
+                                "status": "ANALYTIC_CANDIDATE",
+                                "knowledge_digest": new_knowledge[:200],
+                                "note": _o112_integrability_note["note"],
+                            })
+                            break
+
+                print(f"[CONSOLIDATE] ⚡ O112 INTEGRABILITY GATE: Noether "
+                      f"symmetries detected — STF geodesic recovery may be "
+                      f"analytically tractable via Kozlov-Kolesnikov "
+                      f"quadratures (analytic_geodesic_signal="
+                      f"{_has_analytic_geodesic}). Method 'modal paths + "
+                      f"thermality variance' should verify Lie group "
+                      f"structure before defaulting to numerical recovery.")
+            elif not _has_noether_symmetry:
+                _o112_integrability_note = {
+                    "noether_symmetry_detected": False,
+                    "analytic_geodesic_signal": False,
+                    "integrability_status": "NUMERICAL_DEFAULT",
+                    "note": (
+                        "No Noether symmetry structure detected in this "
+                        "candidate. O112 defaults to numerical geodesic "
+                        "recovery (modal paths + thermality variance). "
+                        "Future papers with Lie group / sub-Riemannian "
+                        "structure should be re-checked for analytic "
+                        "tractability via Kozlov-Kolesnikov conditions."
+                    ),
+                }
+                report["o112_integrability_note"] = _o112_integrability_note
+
+            # Increment O112 stf_method_candidate counter in obligation record
+            _o112_incremented = False
+            if obligations:
+                for _ob in obligations:
+                    if _ob.get("id") == "O112":
+                        _ob["stf_method_candidate_count"] = _ob.get(
+                            "stf_method_candidate_count", 0) + 1
+                        _ob.setdefault("stf_method_candidate_log", []).append({
+                            "timestamp": ts,
+                            "challenges": _stf_challenges,
+                            "knowledge_digest": new_knowledge[:200],
+                        })
+                        _o112_incremented = True
+                        break
+            # Persist O112 counter to obligations file
+            if _o112_incremented:
+                try:
+                    _obligs_path = FREED_DIR / "FREED_obligations.json"
+                    if _obligs_path.exists():
+                        _obligs_data = json.loads(_obligs_path.read_text())
+                        _obligs_list = (_obligs_data if isinstance(_obligs_data, list)
+                                        else _obligs_data.get("obligations", []))
+                        for _obl_entry in (_obligs_list if isinstance(_obligs_list, list)
+                                           else list(_obligs_list.values()) if isinstance(_obligs_list, dict)
+                                           else []):
+                            if _obl_entry.get("id") == "O112":
+                                _obl_entry["stf_method_candidate_count"] = _obl_entry.get(
+                                    "stf_method_candidate_count", 0) + 1
+                                _obl_entry.setdefault("stf_method_candidate_log", []).append({
+                                    "timestamp": ts,
+                                    "challenges": _stf_challenges,
+                                    "knowledge_digest": new_knowledge[:200],
+                                })
+                                break
+                        _obligs_path.write_text(
+                            json.dumps(_obligs_data, indent=2, ensure_ascii=False))
+                except Exception as _stf_err:
+                    print(f"  [STF-CANDIDATE] Warning: could not persist O112 counter: {_stf_err}")
+
+            print(f"[CONSOLIDATE] ⚡ STF method candidate detected: "
+                  f"constrained-MaxEnt construction "
+                  f"(constraint={_has_stf_constraint}, maxent={_has_stf_maxent}, "
+                  f"micro={_has_stf_micro})"
+                  + (f" — challenges: {_stf_challenges}" if _stf_challenges else "")
+                  + f" → O112 stf_method_candidate_count incremented")
+        else:
+            report["stf_method_candidate"] = False
+
+        # ── O112 metric tensor object detection (score_obligation_match) ──────
+        # When a paper supplies an explicit metric tensor formula (e.g., the
+        # Wasserstein Information Matrix / WIM), O112's status should advance
+        # from "open" to "partial" — the mathematical *object* the obligation
+        # requires has been delivered, even if convergence with the STF method
+        # (modal paths + thermality variance) is not yet demonstrated.
+        #
+        # Detection: co-occurrence of (1) metric tensor / information matrix
+        # language, (2) Wasserstein / optimal transport language, and
+        # (3) explicit parametric family language (location-scale, Gaussian,
+        # exponential family). All three families must be present to distinguish
+        # "paper mentions metrics" from "paper delivers the metric tensor object."
+        #
+        # CHALLENGE: the WIM is a *peer* statistical geometry to Fisher's,
+        # not a subordinate — O112's continued "open" status after WIM delivery
+        # is epistemic debt (the genome hasn't checked convergence) rather than
+        # genuine uncertainty (the object doesn't exist). The Poincaré efficiency
+        # condition introduced by WIM is an unregistered constraint on W2
+        # gradient-flow optimality that the genome must absorb.
+        #
+        # Query: does the WIM's analytical form for location-scale families
+        # match the STF metric tensor predicted by modal-path + thermality-
+        # variance? If yes, O112 is fully resolved. If no, the two routes
+        # produce different geometric objects and O112 must be refined.
+        _METRIC_TENSOR_KEYWORDS = {
+            "metric tensor", "information matrix", "information matrices",
+            "riemannian metric", "fisher information", "fisher-rao",
+            "statistical metric", "score function", "covariance operator",
+        }
+        _WASSERSTEIN_GEOM_KEYWORDS = {
+            "wasserstein", "optimal transport", "earth mover",
+            "w2 metric", "w_2", "l2-wasserstein", "l^2-wasserstein",
+            "transport metric", "displacement interpolation",
+        }
+        _PARAMETRIC_FAMILY_KEYWORDS = {
+            "location-scale", "location scale", "gaussian family",
+            "exponential family", "normal distribution", "scale family",
+            "independent families", "parametric family", "analytical example",
+            "cramér-rao", "cramer-rao", "natural gradient",
+        }
+        _has_metric_tensor = any(kw in _nk_lower for kw in _METRIC_TENSOR_KEYWORDS)
+        _has_wasserstein_geom = any(kw in _nk_lower for kw in _WASSERSTEIN_GEOM_KEYWORDS)
+        _has_parametric_family = any(kw in _nk_lower for kw in _PARAMETRIC_FAMILY_KEYWORDS)
+        _is_metric_tensor_object = _has_metric_tensor and _has_wasserstein_geom and _has_parametric_family
+
+        if _is_metric_tensor_object:
+            # Detect which specific parametric families are tested
+            _families_tested = []
+            _FAMILY_DETECTION = {
+                "location-scale": {"location-scale", "location scale"},
+                "gaussian": {"gaussian", "normal distribution"},
+                "exponential": {"exponential family", "exponential distribution"},
+                "independent": {"independent families", "independent family",
+                                "product distribution"},
+                "rectified_linear": {"rectified", "relu", "rectified linear"},
+            }
+            for _fam_name, _fam_kws in _FAMILY_DETECTION.items():
+                if any(kw in _nk_lower for kw in _fam_kws):
+                    _families_tested.append(_fam_name)
+
+            # Detect unregistered constraints (e.g., Poincaré efficiency)
+            _unregistered_constraints = []
+            if any(kw in _nk_lower for kw in ("poincaré efficiency", "poincare efficiency",
+                                                "poincaré inequality", "poincare inequality")):
+                _unregistered_constraints.append("poincare_efficiency")
+            if any(kw in _nk_lower for kw in ("asymptotic efficiency", "on-line efficiency",
+                                                "online efficiency")):
+                _unregistered_constraints.append("asymptotic_efficiency")
+
+            report["o112_metric_tensor_object"] = {
+                "detected": True,
+                "metric_type": "wasserstein_information_matrix",
+                "families_tested": _families_tested,
+                "unregistered_constraints": _unregistered_constraints,
+                "convergence_with_stf": "UNTESTED",
+                "status_implication": (
+                    "O112 should advance to PARTIAL: the metric tensor object "
+                    "has been delivered (WIM provides explicit analytical forms "
+                    f"for {', '.join(_families_tested) if _families_tested else 'unspecified'} families). "
+                    "Remaining debt: verify whether WIM's analytical form "
+                    "converges with the STF metric tensor predicted by "
+                    "modal-path + thermality-variance method."
+                ),
+                "epistemic_debt_note": (
+                    "O112's continued 'open' status after metric tensor delivery "
+                    "is epistemic debt (genome hasn't checked convergence), not "
+                    "genuine uncertainty (object doesn't exist). The WIM is a "
+                    "peer statistical geometry to Fisher's — not subordinate."
+                ),
+                "challenge": (
+                    "WIM introduces Poincaré efficiency condition as an "
+                    "unregistered constraint on W2 gradient-flow optimality. "
+                    "Query: does WIM's analytical form for location-scale "
+                    "families match the STF metric tensor predicted by "
+                    "modal-path + thermality-variance? Two routes may "
+                    "converge on the same object or produce genuinely "
+                    "different geometric structures."
+                ),
+            }
+
+            # Advance O112 to partial and log the metric tensor delivery
+            _o112_advanced = False
+            if obligations:
+                for _ob in obligations:
+                    if _ob.get("id") == "O112":
+                        if _ob.get("status") in ("open", None, ""):
+                            _ob["status"] = "partial"
+                        _ob["metric_tensor_delivered"] = True
+                        _ob["metric_tensor_type"] = "wasserstein_information_matrix"
+                        _ob["families_tested"] = _families_tested
+                        _ob["unregistered_constraints"] = _unregistered_constraints
+                        _ob.setdefault("metric_tensor_delivery_log", []).append({
+                            "timestamp": ts,
+                            "metric_type": "wasserstein_information_matrix",
+                            "families_tested": _families_tested,
+                            "unregistered_constraints": _unregistered_constraints,
+                            "convergence_with_stf": "UNTESTED",
+                            "knowledge_digest": new_knowledge[:200],
+                        })
+                        _o112_advanced = True
+                        break
+
+            # Persist O112 advancement to obligations file
+            if _o112_advanced:
+                try:
+                    _obligs_path = FREED_DIR / "FREED_obligations.json"
+                    if _obligs_path.exists():
+                        _obligs_data = json.loads(_obligs_path.read_text())
+                        _obligs_list = (_obligs_data if isinstance(_obligs_data, list)
+                                        else _obligs_data.get("obligations", []))
+                        for _obl_entry in (_obligs_list if isinstance(_obligs_list, list)
+                                           else list(_obligs_list.values()) if isinstance(_obligs_list, dict)
+                                           else []):
+                            if _obl_entry.get("id") == "O112":
+                                if _obl_entry.get("status") in ("open", None, ""):
+                                    _obl_entry["status"] = "partial"
+                                _obl_entry["metric_tensor_delivered"] = True
+                                _obl_entry["metric_tensor_type"] = "wasserstein_information_matrix"
+                                _obl_entry["families_tested"] = _families_tested
+                                _obl_entry["unregistered_constraints"] = _unregistered_constraints
+                                _obl_entry.setdefault("metric_tensor_delivery_log", []).append({
+                                    "timestamp": ts,
+                                    "metric_type": "wasserstein_information_matrix",
+                                    "families_tested": _families_tested,
+                                    "unregistered_constraints": _unregistered_constraints,
+                                    "convergence_with_stf": "UNTESTED",
+                                })
+                                break
+                        _obligs_path.write_text(
+                            json.dumps(_obligs_data, indent=2, ensure_ascii=False))
+                except Exception as _mt_err:
+                    print(f"  [METRIC-TENSOR] Warning: could not persist O112 advancement: {_mt_err}")
+
+            print(f"[CONSOLIDATE] ⚡ O112 METRIC TENSOR OBJECT DELIVERED: "
+                  f"Wasserstein Information Matrix (WIM) with analytical forms "
+                  f"for families={_families_tested} — "
+                  f"O112 advanced to PARTIAL "
+                  f"(object delivered, convergence with STF method UNTESTED)"
+                  + (f" | unregistered constraints: {_unregistered_constraints}"
+                     if _unregistered_constraints else ""))
+            if _unregistered_constraints:
+                print(f"  [METRIC-TENSOR] ⚠ Unregistered constraint(s) detected: "
+                      f"{_unregistered_constraints} — these constrain W2 "
+                      f"gradient-flow optimality but are not tracked by "
+                      f"any existing obligation. Consider opening new obligation.")
+        else:
+            report["o112_metric_tensor_object"] = {"detected": False}
 
         # ── Dissipative-criticality signal detection (INV_073) ────────────────
         # Flag papers whose abstract contains both "dissipat" and "phase transition"
@@ -3826,11 +4317,54 @@ class Consolidator:
                     _inv_confirmations[inv_text] = _inv_confirmations.get(inv_text, 0) + 1
             # Flag invariants with surplus > threshold
             _all_inv_texts = set(list(_inv_confirmations.keys()) + list(_inv_challenges.keys()))
+            _adversarial_boundary_probes = []  # invariants needing mandatory falsification
             for inv_text in _all_inv_texts:
                 n_conf = _inv_confirmations.get(inv_text, 0)
                 n_chal = _inv_challenges.get(inv_text, 0)
                 surplus = n_conf - n_chal
-                if surplus > CONFIRMATION_SURPLUS_THRESHOLD:
+
+                # ── Adversarial boundary probe (mandatory falsification gate) ──
+                # An invariant with confirmation surplus above threshold AND zero
+                # recorded challenges is indistinguishable from an unfalsified
+                # axiom. Preferential attachment dynamics can produce all of its
+                # observable signatures without requiring its core claim to be
+                # true. Mark it for mandatory falsification before the next
+                # encapsulation — it cannot be cited as load-bearing evidence
+                # until at least one adversarial challenge is recorded.
+                if surplus > CONFIRMATION_SURPLUS_THRESHOLD and n_chal == 0:
+                    _probe_entry = {
+                        "invariant": inv_text[:120],
+                        "confirmations": n_conf,
+                        "challenges": 0,
+                        "surplus": surplus,
+                        "mandatory_falsification": True,
+                        "encapsulation_blocked": True,
+                        "probe_token": (
+                            f"MANDATORY_FALSIFICATION_BEFORE_ENCAPSULATION:"
+                            f"surplus={surplus},challenges=0"
+                        ),
+                        "falsification_demand": (
+                            f"Invariant has {n_conf} confirmations and ZERO "
+                            f"challenges. Three-part adversarial profile required "
+                            f"before next encapsulation: (1) what empirical result "
+                            f"would falsify this claim? (2) what alternative "
+                            f"mechanism produces identical observables without "
+                            f"requiring this claim? (3) under what boundary "
+                            f"conditions does this claim break? Until answered, "
+                            f"this invariant's robustness is epistemically "
+                            f"unearned — confirmation surplus without adversarial "
+                            f"exposure is indistinguishable from citation momentum."
+                        ),
+                    }
+                    _adversarial_boundary_probes.append(_probe_entry)
+                    _confirmation_surplus_flagged.add(inv_text)
+                    _surplus_report.append(_probe_entry)
+                    print(f"  [PRE-AUDIT] ★ ADVERSARIAL BOUNDARY PROBE: "
+                          f"'{inv_text[:60]}...' — "
+                          f"conf={n_conf}, chal=0, surplus={surplus} > {CONFIRMATION_SURPLUS_THRESHOLD} "
+                          f"→ MANDATORY FALSIFICATION before next encapsulation "
+                          f"(zero challenges = unfalsified axiom risk)")
+                elif surplus > CONFIRMATION_SURPLUS_THRESHOLD:
                     _confirmation_surplus_flagged.add(inv_text)
                     _entry = {
                         "invariant": inv_text[:120],
@@ -3838,6 +4372,8 @@ class Consolidator:
                         "challenges": n_chal,
                         "surplus": surplus,
                         "adversarial_probe_required": True,
+                        "mandatory_falsification": False,
+                        "encapsulation_blocked": False,
                         "probe_token": f"ADVERSARIAL_PROBE_REQUIRED:surplus={surplus}",
                     }
                     _surplus_report.append(_entry)

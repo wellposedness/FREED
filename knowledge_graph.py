@@ -45,7 +45,13 @@ GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 STATE_FILE  = FREED_DIR / "FREED_state.json"   # source of current generation for edge gen-stamping (O384)
 
 # ─── Edge types ───────────────────────────────────────────────────────────────
-EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges", "absent")
+EDGE_TYPES = ("confirms", "refutes", "advances", "resolves", "extends", "supports", "contradicts", "challenges", "absent",
+              # O400 (2026-06-17): FREED's own Game-of-Truth CA (local://ca_sim)
+              # "confirming" a genome invariant is the model exhibiting the dynamic
+              # it was built to instantiate — categorically NOT independent external
+              # confirmation. Such edges are retyped here and excluded from every
+              # confirmation/deficit count (the _CONF_TYPES sets are all explicit).
+              "simulation_consistent")
 
 # Node-to-node edge types (structural, written by consolidate.py MINE phase)
 NODE_EDGE_TYPES = (
@@ -3250,6 +3256,19 @@ class KnowledgeGraph:
         self._ensure_loaded()
         new_edges = extract_edges(kernel_output, source_url, source_title,
                                   context_tag=context_tag)
+        # O400 mint-time reclassification: ca_sim is FREED's own simulation.
+        # A "confirms"/"supports" edge from it onto a genome invariant is the
+        # model confirming the theory it instantiates, not independent evidence.
+        # Retype before any counting so it can never re-inflate the keystone
+        # confirm/deficit math (the self-confirmation metronome — see
+        # FREED_log/casim_selfconfirmation_FINDING_2026-06-17.md).
+        if str(source_url).startswith("local://ca_sim"):
+            for e in new_edges:
+                if (e.get("type") in ("confirms", "supports")
+                        and str(e.get("to", "")).upper().startswith("INV_")):
+                    e["reclassified_from"] = e["type"]
+                    e["reclassified_by"] = "O400"
+                    e["type"] = "simulation_consistent"
         if prediction_weights and new_edges:
             for e in new_edges:
                 w = prediction_weights.get(e.get("to", ""), 1.0)
