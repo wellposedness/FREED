@@ -3164,6 +3164,190 @@ class Consolidator:
                 # Power-law exponents mentioned but universality not challenged
                 node.setdefault("exponent_variance", False)
 
+            # ── Wasserstein-Lipschitz co-occurrence flag (O112 advance) ───────
+            # Papers enforcing Lipschitz-Wasserstein constraints are the highest-
+            # signal evidence class for O112 (STF metric tensor recovery): the
+            # 1-Lipschitz constraint on discriminators is the operational form of
+            # the W1 dual representation, directly connecting to the Wasserstein
+            # geometry underlying the genome's metric tensor claims.
+            #
+            # Detection: both "lipschitz" and "wasserstein" must appear within
+            # 40 tokens of each other in the combined text. Simple proximity
+            # avoids false positives from papers that mention each term in
+            # unrelated sections.
+            #
+            # CHALLENGE (INV_094): WGAN-GP stabilizes training via gradient
+            # penalty enforcing 1-Lipschitz continuity, but IS/FID metrics used
+            # to validate "semantic accuracy" are known to be insensitive to mode
+            # collapse subtypes, leaving open whether the W2 proxy genuinely
+            # tracks the geometry the genome claims or merely suppresses variance
+            # in a coarser metric.
+            _WASSERSTEIN_LIPSCHITZ_BOOST = 0.15
+            _wl_combined = (_nk_lower_ec + " " +
+                            node.get("compress", "").lower() + " " +
+                            " ".join(node.get("invariants", [])).lower() + " " +
+                            " ".join(node.get("tags", [])).lower())
+            _wl_tokens = _wl_combined.split()
+            _wl_lipschitz_positions = [
+                i for i, tok in enumerate(_wl_tokens)
+                if "lipschitz" in tok
+            ]
+            _wl_wasserstein_positions = [
+                i for i, tok in enumerate(_wl_tokens)
+                if "wasserstein" in tok
+            ]
+            _wl_proximity_hit = False
+            for _lp in _wl_lipschitz_positions:
+                for _wp in _wl_wasserstein_positions:
+                    if abs(_lp - _wp) <= 40:
+                        _wl_proximity_hit = True
+                        break
+                if _wl_proximity_hit:
+                    break
+            if _wl_proximity_hit:
+                total_score += _WASSERSTEIN_LIPSCHITZ_BOOST
+                node["wasserstein_lipschitz_flag"] = True
+                node.setdefault("o112_advance_signals", []).append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "signal": "wasserstein_lipschitz_proximity",
+                    "boost_applied": _WASSERSTEIN_LIPSCHITZ_BOOST,
+                    "source": "wasserstein_lipschitz_co_occurrence",
+                    "inv094_challenge": (
+                        "WGAN-GP enforces 1-Lipschitz via gradient penalty "
+                        "but IS/FID validation metrics are insensitive to "
+                        "mode collapse subtypes — W2 proxy may suppress "
+                        "variance in a coarser metric rather than tracking "
+                        "the geometry the genome claims (INV_094)."
+                    ),
+                })
+                print(f"  [WASSERSTEIN-LIPSCHITZ] +{_WASSERSTEIN_LIPSCHITZ_BOOST} "
+                      f"O112-advance boost: Lipschitz+Wasserstein co-occur "
+                      f"within 40 tokens (highest-signal evidence class for "
+                      f"STF metric tensor recovery)")
+
+            # ── Logarithmic-correction detection at d=d_c (INV_094 challenge) ─
+            # Papers operating at or near the upper critical dimension (d=d_c)
+            # exhibit logarithmic corrections to mean-field power-law scaling.
+            # Naive power-law FSS mis-identifies these as standard universality,
+            # creating false-equivalence between "dressed mean-field" (log-corrected)
+            # and generic power-law universality classes. Detect co-occurrence of
+            # (1) upper-critical-dimension language, (2) logarithmic-correction
+            # language, and (3) finite-size-scaling / mean-field language. Tag
+            # the node with log_correction_at_dc so downstream consolidation
+            # scoring distinguishes dimensional regimes before mapping papers
+            # to genome invariants.
+            #
+            # CHALLENGE (INV_094): substrate-independence of universality at d=d_c
+            # requires logarithmic corrections not captured by naive power-law FSS.
+            # The claim of clean substrate-independent universality is incomplete
+            # without specifying dimensional regime.
+            _LOG_CORR_DC_KEYWORDS = {
+                "upper critical dimension", "upper-critical dimension",
+                "d_c", "d=d_c", "d = d_c", "critical dimension",
+                "marginal dimension", "borderline dimension",
+                "d=4", "d = 4", "d=6", "d = 6",
+                "four dimensions", "six dimensions",
+                "4d ising", "6d ising", "four-dimensional", "six-dimensional",
+            }
+            _LOG_CORRECTION_KEYWORDS = {
+                "logarithmic correction", "logarithmic corrections",
+                "log correction", "log corrections", "log-correction",
+                "multiplicative logarithm", "additive logarithm",
+                "ln(l)", "log(l)", "logarithmic factor",
+                "logarithmic modification", "logarithmic scaling",
+                "dressed mean-field", "dressed mean field",
+                "mean-field with corrections", "corrected mean-field",
+                "hatted exponent", "effective exponent",
+            }
+            _FSS_MF_KEYWORDS = {
+                "finite-size scaling", "finite size scaling", "fss",
+                "mean-field", "mean field", "landau theory",
+                "mean-field exponent", "mean field exponent",
+                "classical exponent", "gaussian fixed point",
+                "creutz cellular automaton", "creutz automaton",
+                "thermodynamic singularity", "thermodynamic singularities",
+                "susceptibility", "specific heat", "magnetization",
+                "binder cumulant", "scaling relation",
+            }
+            _has_dc_kw = any(kw in _nk_combined_lower for kw in _LOG_CORR_DC_KEYWORDS)
+            _has_log_corr_kw = any(kw in _nk_combined_lower for kw in _LOG_CORRECTION_KEYWORDS)
+            _has_fss_mf_kw = any(kw in _nk_combined_lower for kw in _FSS_MF_KEYWORDS)
+            _log_correction_bonus = 0.0
+            if _has_dc_kw and _has_log_corr_kw:
+                # Strong signal: both d_c language and log-correction language
+                _log_correction_bonus = 0.10
+                total_score += _log_correction_bonus
+                node["log_correction_at_dc"] = True
+                node["universality_regime"] = "dressed_mean_field"
+                node.setdefault("log_correction_signals", []).append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "dc_keywords_matched": [
+                        kw for kw in _LOG_CORR_DC_KEYWORDS
+                        if kw in _nk_combined_lower
+                    ],
+                    "log_correction_keywords_matched": [
+                        kw for kw in _LOG_CORRECTION_KEYWORDS
+                        if kw in _nk_combined_lower
+                    ],
+                    "fss_mf_keywords_matched": [
+                        kw for kw in _FSS_MF_KEYWORDS
+                        if kw in _nk_combined_lower
+                    ],
+                    "bonus_applied": _log_correction_bonus,
+                    "source": "log_correction_dc_detection",
+                    "inv094_challenge": (
+                        "Paper operates at or near d=d_c where mean-field "
+                        "exponents acquire logarithmic corrections. Naive "
+                        "power-law FSS produces false-equivalence with "
+                        "generic power-law universality. This node is tagged "
+                        "universality_regime=dressed_mean_field to prevent "
+                        "mis-mapping to standard power-law genome invariants. "
+                        "Substrate-independence of universality at d=d_c "
+                        "requires specifying dimensional regime and "
+                        "logarithmic correction structure."
+                    ),
+                })
+                print(f"  [LOG-CORR-DC] +{_log_correction_bonus:.2f} bonus: "
+                      f"upper critical dimension with logarithmic corrections "
+                      f"detected — tagged universality_regime=dressed_mean_field "
+                      f"(INV_094: prevents false-equivalence with standard "
+                      f"power-law universality)")
+            elif _has_dc_kw and _has_fss_mf_kw and not _has_log_corr_kw:
+                # Weaker signal: d_c + FSS/mean-field but no explicit log
+                # corrections mentioned — paper may be MISSING the corrections
+                _log_correction_bonus = 0.06
+                total_score += _log_correction_bonus
+                node["log_correction_at_dc"] = False
+                node["universality_regime"] = "unspecified_dc"
+                node.setdefault("log_correction_signals", []).append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "dc_keywords_matched": [
+                        kw for kw in _LOG_CORR_DC_KEYWORDS
+                        if kw in _nk_combined_lower
+                    ],
+                    "fss_mf_keywords_matched": [
+                        kw for kw in _FSS_MF_KEYWORDS
+                        if kw in _nk_combined_lower
+                    ],
+                    "bonus_applied": _log_correction_bonus,
+                    "source": "dc_without_log_correction_warning",
+                    "inv094_warning": (
+                        "Paper operates at d=d_c with FSS/mean-field analysis "
+                        "but does NOT mention logarithmic corrections. This "
+                        "may indicate naive power-law FSS applied at the upper "
+                        "critical dimension — results may conflate dressed "
+                        "mean-field with standard universality. Tagged "
+                        "universality_regime=unspecified_dc for review."
+                    ),
+                })
+                print(f"  [LOG-CORR-DC] +{_log_correction_bonus:.2f} bonus: "
+                      f"upper critical dimension detected WITHOUT explicit "
+                      f"log corrections — tagged universality_regime="
+                      f"unspecified_dc (INV_094 WARNING: naive power-law FSS "
+                      f"at d=d_c risks false-equivalence)")
+            else:
+                node.setdefault("log_correction_at_dc", False)
+
             if total_score > 0:
                 scored.append((total_score, node))
 
@@ -3650,10 +3834,48 @@ class Consolidator:
             safe_margin = max(min_w_dist, 1e-6)
             c["margin_score"] = round(math.exp(-1.0 / (safe_margin * 10.0)), 4)
 
-        # Sort by composite: recurrence (primary) + margin_score (secondary,
-        # weighted 0.3 to break ties among equal-recurrence candidates)
+        # ── Normalized excitation-ratio scoring (winner / sum-of-all) ─────
+        # Replace raw competitive-winner magnitude with a locally calibrated
+        # ordinal confidence value. Each candidate's raw score is computed as
+        # a composite of recurrence and margin; the excitation ratio normalizes
+        # this by the sum of all candidates' scores, producing a confidence
+        # signal that is comparable across different candidate pools regardless
+        # of pool size or raw magnitude scale.
+        #
+        # Paper basis: sensory-neural network diagnosis ranks disease neurons
+        # by the ratio of the most-excited neuron's activation to the total
+        # network excitation, yielding a locally calibrated likelihood rather
+        # than a raw magnitude. This is directly applicable: each candidate
+        # invariant is a "neuron" excited by symptom-like evidence signals,
+        # and the excitation ratio gives comparable confidence across pools.
+        #
+        # INV_073 challenge acknowledgment: the paper achieves diagnosis via
+        # frozen winner-takes-all maximization without critical-ridge tension,
+        # demonstrating useful epistemic work without γ=1 criticality. This
+        # strains INV_073's necessity claim but does not refute it — the
+        # paper's system is non-adaptive (frozen weights), while INV_073
+        # concerns adaptive systems navigating epistemic phase transitions.
+        for c in candidates:
+            raw_score = c["recurrence"] + 0.3 * c.get("margin_score", 0.0)
+            c["_raw_excitation"] = raw_score
+
+        # Compute sum of all raw excitations for normalization
+        total_excitation = sum(c["_raw_excitation"] for c in candidates)
+        if total_excitation > 0:
+            for c in candidates:
+                c["excitation_ratio"] = round(
+                    c["_raw_excitation"] / total_excitation, 6)
+                c["confidence"] = c["excitation_ratio"]
+        else:
+            # Degenerate case: uniform confidence
+            n_cand = len(candidates) if candidates else 1
+            for c in candidates:
+                c["excitation_ratio"] = round(1.0 / n_cand, 6)
+                c["confidence"] = c["excitation_ratio"]
+
+        # Sort by excitation_ratio (normalized) rather than raw magnitude
         candidates.sort(
-            key=lambda c: c["recurrence"] + 0.3 * c.get("margin_score", 0.0),
+            key=lambda c: c.get("excitation_ratio", 0.0),
             reverse=True,
         )
         return candidates
@@ -4315,12 +4537,100 @@ class Consolidator:
             for n in all_nodes:
                 for inv_text in n.get("invariants", []):
                     _inv_confirmations[inv_text] = _inv_confirmations.get(inv_text, 0) + 1
+            # ── INV_087 regime-conditional gate (entropy production threshold) ──
+            # INV_087 (MaxRL as thermodynamically correct RL) is empirically
+            # equivalent to the null hypothesis (standard RL) in low-gradient
+            # environments where entropy production is negligible. Confirmations
+            # from such environments inflate INV_087's surplus without genuine
+            # discriminative power. Before counting confirmations, estimate the
+            # environment's entropy production rate via the EPR scorer. If the
+            # estimate falls below ε (REGIME_EPSILON), mark the confirmation as
+            # "regime_conditional" rather than general — it does not count toward
+            # INV_087's confirmation surplus.
+            #
+            # FALSIFICATION BOUNDARY (INV_087):
+            #   - What would falsify it: an environment with HIGH entropy production
+            #     gradient where standard RL outperforms or matches MaxRL on
+            #     thermodynamic efficiency metrics (dissipation, entropy production
+            #     rate). If MaxRL's advantage vanishes even far from equilibrium,
+            #     the "thermodynamically correct" claim is false.
+            #   - Alternative mechanism: standard RL with entropy regularization
+            #     (SAC, MaxEnt RL) produces identical observables in practice
+            #     without requiring the thermodynamic correctness framing —
+            #     preferential attachment to the "thermodynamic" label rather
+            #     than empirical distinguishability.
+            #   - Boundary conditions: near-equilibrium (low entropy production
+            #     gradient) environments where MaxRL and standard RL are
+            #     observationally identical. INV_087 has no falsification power
+            #     in this regime and confirmations from it are epistemically void.
+            REGIME_EPSILON = 0.02  # entropy production rate below this → regime-conditional
+            _inv087_regime_conditional_count = 0
+            _inv087_keywords = {"maxrl", "max-rl", "thermodynamically correct",
+                                "thermodynamic reinforcement", "maximum entropy rl",
+                                "inv_087", "inv087"}
+            _epr_scorer_rc = NonQuadraticEPRScorer()
+
+            def _is_inv087(inv_text_check):
+                # type: (str) -> bool
+                """Check if an invariant text refers to INV_087."""
+                inv_lower_check = inv_text_check.lower()
+                return any(kw in inv_lower_check for kw in _inv087_keywords)
+
+            def _estimate_environment_epr(inv_text_check, node_list):
+                # type: (str, list) -> float
+                """Estimate the entropy production rate of the evaluation
+                environment for an invariant by computing EPR between the
+                invariant's semantic distribution and the corpus baseline."""
+                inv_dist = MWDEScorer._text_to_distribution(inv_text_check)
+                if not inv_dist:
+                    return 0.0
+                # Corpus baseline: aggregate distribution across all nodes
+                corpus_text = " ".join(
+                    n.get("compress", "") for n in node_list
+                )
+                corpus_dist = MWDEScorer._text_to_distribution(corpus_text)
+                if not corpus_dist:
+                    return 0.0
+                flux_ratios, eq_fluxes, _ = _epr_scorer_rc.semantic_flux_ratios(
+                    corpus_dist, inv_dist)
+                if not flux_ratios:
+                    return 0.0
+                epr_result = _epr_scorer_rc.epr_action(flux_ratios, eq_fluxes)
+                return epr_result.get("epr_nonquad", 0.0)
+
+            # Track which INV_087 confirmations are regime-conditional
+            _regime_conditional_inv087 = {}  # type: dict  # inv_text -> epr_estimate
+
             # Flag invariants with surplus > threshold
             _all_inv_texts = set(list(_inv_confirmations.keys()) + list(_inv_challenges.keys()))
             _adversarial_boundary_probes = []  # invariants needing mandatory falsification
             for inv_text in _all_inv_texts:
                 n_conf = _inv_confirmations.get(inv_text, 0)
                 n_chal = _inv_challenges.get(inv_text, 0)
+
+                # ── INV_087 regime-conditional confirmation downgrade ─────────
+                # If this invariant is INV_087 (or references MaxRL/thermo-RL),
+                # check the environment's entropy production estimate. If below
+                # ε, downgrade confirmations to regime-conditional: they do not
+                # count as general confirmations for surplus calculation.
+                if _is_inv087(inv_text) and n_conf > 0:
+                    _env_epr = _estimate_environment_epr(inv_text, all_nodes)
+                    if _env_epr < REGIME_EPSILON:
+                        # Mark as regime-conditional: reduce effective confirmations
+                        _regime_conditional_inv087[inv_text] = round(_env_epr, 6)
+                        _original_conf = n_conf
+                        # Regime-conditional confirmations count at 0.25× weight
+                        # (not zero — they are evidence, just not discriminative)
+                        n_conf = max(1, int(n_conf * 0.25))
+                        _inv087_regime_conditional_count += 1
+                        print(f"  [INV-087-REGIME] ⚠ '{inv_text[:60]}...' — "
+                              f"EPR={_env_epr:.4f} < ε={REGIME_EPSILON}: "
+                              f"confirmations downgraded from {_original_conf} → "
+                              f"{n_conf} (regime-conditional, not general). "
+                              f"Near-equilibrium environment cannot distinguish "
+                              f"MaxRL from standard RL — confirmation is "
+                              f"epistemically void for falsification purposes.")
+
                 surplus = n_conf - n_chal
 
                 # ── Adversarial boundary probe (mandatory falsification gate) ──
@@ -4495,13 +4805,38 @@ class Consolidator:
             _confirmation_surplus_flagged = set()
 
         # Attach surplus flags to affected nodes so renorm phase can gate citations
+        # and tag each flagged invariant's metadata with ADVERSARIAL_PROBE_REQUIRED
         for node in affected:
             _node_flagged_invs = []
+            _node_inv_metadata = node.get("_invariant_metadata", {})
             for inv_text in node.get("invariants", []):
                 if inv_text in _confirmation_surplus_flagged:
                     _node_flagged_invs.append(inv_text)
+                    # Tag invariant metadata with ADVERSARIAL_PROBE_REQUIRED
+                    _inv_conf = _inv_confirmations.get(inv_text, 0)
+                    _inv_chal = _inv_challenges.get(inv_text, 0)
+                    _inv_eff_chal = max(_inv_chal, 0.5)
+                    _inv_ratio = _inv_conf / _inv_eff_chal
+                    _node_inv_metadata[inv_text[:120]] = {
+                        "status": "ADVERSARIAL_PROBE_REQUIRED",
+                        "confirmations": _inv_conf,
+                        "challenges": _inv_chal,
+                        "confirmation_challenge_ratio": round(_inv_ratio, 2),
+                        "surplus": _inv_conf - _inv_chal,
+                        "flagged_at": datetime.now(timezone.utc).isoformat(),
+                        "citation_blocked": True,
+                        "probe_demand": (
+                            "Three-part adversarial profile required before "
+                            "this invariant can be cited as load-bearing evidence: "
+                            "(1) distinguishing prediction that would refute it, "
+                            "(2) alternative mechanism producing identical observables, "
+                            "(3) boundary conditions under which it breaks."
+                        ),
+                    }
             if _node_flagged_invs:
                 node["_confirmation_surplus_blocked"] = _node_flagged_invs
+            if _node_inv_metadata:
+                node["_invariant_metadata"] = _node_inv_metadata
 
         # ── Priority sort — high-obligation-overlap nodes renorm first ────────
         current_cycle = (state or {}).get('cycle_count', 0)
@@ -4887,6 +5222,104 @@ class Consolidator:
                                     return True  # cross-domain match found
 
                     return False
+
+                # ── Sinkhorn-regularized OT cost for edge scoring (INV_094) ──
+                # Replace/augment dot-product similarity with entropic OT cost
+                # between node distribution embeddings. Uses a fixed small number
+                # of Sinkhorn iterations (8) to compute the regularized transport
+                # cost between two nodes' semantic distributions. Edges whose OT
+                # cost exceeds OT_EDGE_COST_THRESHOLD are demoted to
+                # consistent_with (distributional shape mismatch), testing whether
+                # OT geometry improves deduplication and cluster quality vs. cosine.
+                #
+                # CHALLENGE (INV_094): the OTESGN paper demonstrates OT superiority
+                # in a supervised, task-specific fine-tuned setting (ABSA). Whether
+                # OT's advantage over dot-product persists in unsupervised/zero-shot
+                # distributional alignment (our case) is the open question this
+                # implementation directly tests.
+                OT_EDGE_SINKHORN_ITERS = 8       # fixed small iteration count
+                OT_EDGE_SINKHORN_REG = 0.05      # entropic regularization ε
+                OT_EDGE_COST_THRESHOLD = 0.65    # OT cost above this → demotion
+                _ot_edge_scorer = MWDEScorer(wasserstein_order=1)
+                _ot_demoted = 0
+
+                def _sinkhorn_ot_edge_cost(node_id_a, node_id_b):
+                    # type: (str, str) -> float
+                    """Compute Sinkhorn-regularized OT cost between two nodes'
+                    semantic distribution embeddings. Returns cost in [0, 1].
+                    Falls back to 0.0 (no demotion) if distributions are empty."""
+                    text_a = _node_text_cache.get(node_id_a, "")
+                    text_b = _node_text_cache.get(node_id_b, "")
+                    dist_a = MWDEScorer._text_to_distribution(text_a)
+                    dist_b = MWDEScorer._text_to_distribution(text_b)
+                    if not dist_a or not dist_b:
+                        return 0.0  # insufficient data → don't penalize
+
+                    # Build shared vocabulary
+                    shared_keys = sorted(set(dist_a.keys()) | set(dist_b.keys()))
+                    n = len(shared_keys)
+                    if n < 3:
+                        return 0.0
+
+                    # Marginal vectors over shared support
+                    p = [dist_a.get(k, 0.0) for k in shared_keys]
+                    q = [dist_b.get(k, 0.0) for k in shared_keys]
+                    p_sum = sum(p)
+                    q_sum = sum(q)
+                    if p_sum <= 0 or q_sum <= 0:
+                        return 0.0
+                    p = [x / p_sum for x in p]
+                    q = [x / q_sum for x in q]
+
+                    # Cost matrix: normalized rank distance |rank_a(i) - rank_b(j)| / n
+                    def _rank_vec_ot(vals):
+                        # type: (list) -> list
+                        indexed = sorted(range(len(vals)), key=lambda idx: vals[idx])
+                        ranks = [0.0] * len(vals)
+                        for r, idx in enumerate(indexed):
+                            ranks[idx] = (r + 1.0) / len(vals)
+                        return ranks
+
+                    ranks_a = _rank_vec_ot(p)
+                    ranks_b = _rank_vec_ot(q)
+
+                    # Gibbs kernel K[i][j] = exp(-C[i][j] / ε)
+                    eps = max(OT_EDGE_SINKHORN_REG, 1e-10)
+                    K = []
+                    for i_k in range(n):
+                        row = []
+                        for j_k in range(n):
+                            c_ij = abs(ranks_a[i_k] - ranks_b[j_k])
+                            row.append(math.exp(-c_ij / eps))
+                        K.append(row)
+
+                    # Sinkhorn iterations (fixed count, no early stopping)
+                    u = [1.0] * n
+                    v = [1.0] * n
+                    for _ in range(OT_EDGE_SINKHORN_ITERS):
+                        # u_i = p_i / sum_j K[i][j] * v_j
+                        u_new = []
+                        for i_s in range(n):
+                            kv = sum(K[i_s][j_s] * v[j_s] for j_s in range(n))
+                            u_new.append(p[i_s] / max(kv, 1e-12))
+                        # v_j = q_j / sum_i K[i][j] * u_i
+                        v_new = []
+                        for j_s in range(n):
+                            ku = sum(K[i_s][j_s] * u_new[i_s] for i_s in range(n))
+                            v_new.append(q[j_s] / max(ku, 1e-12))
+                        u = u_new
+                        v = v_new
+
+                    # Transport cost: sum_ij u_i * K[i][j] * v_j * C[i][j]
+                    ot_cost = 0.0
+                    for i_c in range(n):
+                        for j_c in range(n):
+                            c_ij = abs(ranks_a[i_c] - ranks_b[j_c])
+                            pi_ij = u[i_c] * K[i_c][j_c] * v[j_c]
+                            ot_cost += pi_ij * c_ij
+
+                    # Normalize to [0, 1] — max possible rank distance is 1.0
+                    return min(1.0, max(0.0, ot_cost))
 
                 minted = skipped_dup = frozen = 0
                 _unverified_universality = 0
