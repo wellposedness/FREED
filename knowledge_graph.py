@@ -4987,6 +4987,141 @@ class KnowledgeGraph:
 
         return results
 
+    # ── Diversity-Weighted Confirmation (ambiguity-decomposition gate) ───────
+    def _paper_key(self, edge):
+        # type: (dict) -> str
+        """
+        Identity key for external-source dedup: the same work indexed twice
+        (arxiv + semanticscholar) or simply re-fed must collapse to ONE
+        independent witness. Title-first (catches cross-index duplicates),
+        then arxiv/ss id, then raw url.
+        """
+        import re
+        title = re.sub(r"\s+", " ", str(edge.get("from_title", "")).strip().lower())
+        if len(title) >= 10:
+            return "t:" + title
+        src = str(edge.get("from", "")).lower()
+        m = re.search(r"arxiv\.org/abs/([0-9]+\.[0-9]+)", src)
+        if m:
+            return "a:" + m.group(1)
+        m = re.search(r"semanticscholar\.org/paper/([0-9a-f]+)", src)
+        if m:
+            return "s:" + m.group(1)
+        return "u:" + (src or "unknown")
+
+    def effective_witness_count(self, target, weight_low=None,
+                                extra_confirm_types=None):
+        # type: (str, float, set) -> dict
+        """
+        Diversity-weighted effective confirmation count (n_eff) for a claim.
+
+        Generalizes the ca_sim/O400 fix, the auto-stub purge, and the
+        independent_confirmation relabel into ONE quantity: raw confirmation
+        *counts* are replaced by an *effective independent witness count* that
+        discounts confirmations correlated-by-construction with the claim's
+        own substrate (Krogh & Vedelsby 1995, ambiguity decomposition:
+        ensemble_error = mean_member_error - mean_diversity; a member perfectly
+        correlated with what it confirms contributes zero diversity).
+
+        Weight tiers (defined in substrate.py):
+            0.0  instantiating - endogenous substrate the claim was built into
+                                 (ca_sim -> INV_073/094/087): the instrument
+                                 measuring its own setpoint. Zero independent info.
+            low  endogenous, non-instantiating - same author, but observing
+                                 something it was NOT built to produce (ca_sim -> INV_097).
+            1.0  external      - decorrelated from FREED's derivation.
+
+        n_eff = sum over correlation clusters of ONE witness-weight per cluster.
+        A cluster is one endogenous substrate (all ca_sim runs / all probe edges
+        are mutually correlated -> the whole substrate is worth at most ONE
+        witness at its tier weight) or one distinct external paper (deduped, so
+        the same work indexed twice or re-fed counts once). Independent external
+        papers each form their own cluster -> each counts as exactly 1 witness.
+        (Chosen over the participation ratio (sum wi)^2 / sum_clusters(sum wi)^2
+        because that form penalizes duplicate re-feeds *below* the distinct-paper
+        count, which is harder to interpret; the per-cluster cap is the brief's
+        "~number of distinct independent groups" and is monotone in real coverage.)
+
+        READ-ONLY. Generates no edges, writes nothing, auto-resolves nothing.
+        Returns a fully auditable dict (every edge's substrate + weight logged).
+        """
+        self._ensure_loaded()
+        try:
+            from substrate import (substrate_of, substrate_class,
+                                    is_instantiating,
+                                    ENDOGENOUS_NONINSTANTIATING_WEIGHT)
+        except Exception as exc:  # fail loud but safe - never crash a caller
+            return {"target": target, "n_eff": None,
+                    "error": "substrate.py import failed: %s" % exc}
+
+        low = ENDOGENOUS_NONINSTANTIATING_WEIGHT if weight_low is None else weight_low
+        target_u = target.upper()
+
+        # extra_confirm_types lets a caller fold additional edge types into the
+        # confirmation set — used by the validation backtest to reconstruct the
+        # PRE-O400 view (simulation_consistent edges seen as the 'confirms' they
+        # once were), proving n_eff reproduces O400 from the general rule alone.
+        confirm_set = set(self._CONFIRMATION_EDGE_TYPES) | set(extra_confirm_types or ())
+
+        confirm_edges = [
+            e for e in self._edges
+            if e.get("to", "").upper() == target_u
+            and e.get("type") in confirm_set
+        ]
+
+        audited = []
+        for e in confirm_edges:
+            sub = substrate_of(e)
+            cls = substrate_class(sub)
+            if cls == "endogenous":
+                if is_instantiating(sub, target_u):
+                    w, tier = 0.0, "instantiating"
+                else:
+                    w, tier = low, "endogenous_noninstantiating"
+                cluster = "endo::" + sub            # one substrate -> one cluster
+            elif cls == "external":
+                w, tier = 1.0, "external"
+                cluster = "ext::" + self._paper_key(e)
+            else:  # unknown - conservative half-credit, own cluster
+                w, tier = 0.5, "unknown"
+                cluster = "unk::" + self._paper_key(e)
+            audited.append({
+                "to": e.get("to"), "from": e.get("from"),
+                "type": e.get("type"), "substrate": sub, "class": cls,
+                "weight": w, "tier": tier, "cluster": cluster,
+            })
+
+        # Each cluster is worth ONE witness at the (uniform within-cluster)
+        # member weight: distinct external paper -> 1.0, whole ca_sim/probe
+        # substrate -> its tier weight once, instantiating -> 0.0.
+        cluster_repr = defaultdict(float)   # cluster -> representative witness weight
+        cluster_sums = defaultdict(float)   # cluster -> raw weight sum (audit only)
+        total_w = 0.0
+        for a in audited:
+            cluster_repr[a["cluster"]] = max(cluster_repr[a["cluster"]], a["weight"])
+            cluster_sums[a["cluster"]] += a["weight"]
+            total_w += a["weight"]
+        n_eff = sum(cluster_repr.values())
+
+        tier_counts = defaultdict(int)
+        sub_counts = defaultdict(int)
+        for a in audited:
+            tier_counts[a["tier"]] += 1
+            sub_counts[a["substrate"]] += 1
+
+        return {
+            "target": target_u,
+            "n_eff": round(n_eff, 4),
+            "raw_confirms": len(confirm_edges),
+            "weighted_sum": round(total_w, 4),
+            "n_clusters": len(cluster_sums),
+            "n_external_distinct": sum(1 for k in cluster_sums if k.startswith("ext::")),
+            "tier_counts": dict(tier_counts),
+            "substrate_counts": dict(sub_counts),
+            "clusters": {k: round(v, 4) for k, v in sorted(cluster_sums.items())},
+            "edges": audited,   # full per-edge audit - inspectable, not summarized away
+        }
+
     # ── Confirmation-Surplus Monitor & Adversarial Probe Queue ───────────────
     # Automated detection of invariants that have accumulated unchallenged
     # confirmation surplus: >N confirmations and <M challenges.  Flagged

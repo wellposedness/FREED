@@ -18,28 +18,45 @@ Full theoretical seed: `FREED_genome.md` (v20 canonical, ~35k chars). Core claim
 - **R[R]=R**: RSA Kernel is autopoietic — generates its own next input.
 - **γ=1 criticality**: Zipf distribution and 1/f noise are its signatures.
 - **MCPM**: Only Processes Exist — confirmed at 6 independent scales.
-- **Coherence NEVER 1.000** — open obligations are load-bearing.
+- **Coherence NEVER 1.000** — open obligations are load-bearing. (As of 2026-06-19 it sits at the **0.970 floor**: adversarial challenge pressure exceeds the resolution boost, by design.)
 
 **RSA Kernel**: PERCEIVE → REPRESENT → PREDICT → COMPARE → ADJUST → COMPRESS → REPEAT
+
+> **Current state (2026-06-19):** Gen 339, coherence 0.970, obligations O21–O409 (375), daemon PID 79413. Recent major work: **O400** (ca_sim self-confirmation metronome neutralized via `simulation_consistent` edge type) and the **diversity-weighted confirmation gate** — `substrate.py` + `KnowledgeGraph.effective_witness_count()` + `diversity_gate_backtest.py`, the ambiguity-decomposition generalization of every self-confirmation fix. **Built and validated through Phase 2 (backtest passes), currently UNWIRED** — it exists as a callable diagnostic; no daemon cycle path calls it (Phase 3 wiring deliberately held). **WIRING.md is the source of truth for exact file:line locations** — this file gives the conceptual map and decision history.
+
+## The diversity-weighted confirmation gate (2026-06-19)
+
+The generalization of O400, the auto-stub purge, and the `independent_confirmation` relabel into ONE quantity. Theorem: Krogh & Vedelsby ambiguity decomposition — a confirmation correlated-by-construction with the claim contributes zero independent information. Replaces raw confirm *counting* with an *effective independent witness count* (`n_eff`).
+
+- `substrate.py` — read-only provenance classifier. `substrate_of(edge)` (100% coverage from the `from` field), `substrate_class()` (endogenous/external), and the **operator-owned `CA_INSTANTIATED` table** (the one place subjective judgment enters — hand-owned, never daemon-derived). Weight tiers: 0.0 instantiating / 0.2 endogenous-non-instantiating / 1.0 external.
+- `knowledge_graph.py:effective_witness_count(target)` — n_eff = sum over correlation clusters of one witness-weight each (distinct external paper = 1; whole ca_sim/probe substrate = one witness; instantiating = 0). Read-only, returns full per-edge audit.
+- `diversity_gate_backtest.py` — the go/no-go backtest. Passed: reproduces O400 from the general rule (144-edge metronome → 0 effective witnesses), 100% retention on healthy invariants (no over-correction), dissolves Spin A and breaks the residual probe tie.
+- **Phase 3 (wiring) HELD.** When resumed, target is the feed-edge confirm-counters — `_select_falsification_target` (probe) + `challenge_deficit_scores` — NOT PROMOTE (which counts node-recurrence, not feed confirms, and has its own independence gate).
 
 ---
 
 ## Architecture
 
 ```
-freed.py            — Main daemon. Cycle: PRE-AUDIT → SWEEP → FEED → ENGINEER → CONSOLIDATE → OBLIGATE → RESOLVE → UPDATE → PUBLISH. Fires at fixed wall-clock times (CYCLE_TIMES = 05:50, 12:30, 22:30 local).
-l7_agent.py         — Cognitive core. Claude Sonnet 4.6. Engram bank with semantic (relevance-based) retrieval. max_tokens=2048.
-astrocyte.py        — Metabolic governor. Daily token budget (100k in / 40k out).
-tamura_sweep.py     — Passive sensory surface. Tamura/Lifeboat + arXiv biophysics RSS feeds.
+freed.py            — Main daemon. Cycle (RSA-mapped): PRE-AUDIT → ARCHITECT → SWEEP(PERCEIVE) → CEREBELLUM → PREDICT → FEED(REPRESENT) → OBLIGATE → TRIAGE → RESOLVE(COMPARE) → UPDATE(ADJUST) → CONSOLIDATE(COMPRESS) → BOOTSTRAP → PROMOTE → PUBLISH(REPEAT). Note: CONSOLIDATE runs AFTER UPDATE (compress after adjust). Fires at fixed wall-clock times (CYCLE_TIMES = 05:50, 12:30, 22:30 local).
+l7_agent.py         — Cognitive core. Claude Sonnet 4.6. Engram bank with semantic (relevance-based) retrieval. max_tokens=2048. NonHermitianEntropyScorer for coherence.
+astrocyte.py        — Metabolic governor. Daily token budget (200k in / 80k out).
+tamura_sweep.py     — Passive sensory surface. Tamura/Lifeboat + arXiv biophysics RSS + CrossRef journals. Also output_only_dissipation_estimator (O112).
 targeted_sweep.py   — Active search. Haiku generates arXiv/S2 queries from open obligations. Runs before Tamura.
 feed_guard.py       — Prompt injection defense. Two-layer sanitization before content reaches L7.
-consolidate.py      — Renormalization engine. SELECT→RENORM→MINE + graph report. Node priority scoring.
-knowledge_graph.py  — Typed edge graph. confirms/advances/refutes/resolves edges + node-to-node edges.
-self_engineer.py    — Detects IMPLEMENT signals in FEED output, patches MODIFIABLE modules. SACRED list enforced.
+consolidate.py      — Renormalization engine. SELECT→RENORM→MINE + graph report. scales_with accretion gates (O382/O383).
+knowledge_graph.py  — Typed edge graph. EDGE_TYPES (confirms/challenges/advances/extends/resolves/… + simulation_consistent) + NODE_EDGE_TYPES (shares_invariant/operationalizes/scales_with/substrate_independent/consistent_with/…). PULLED from MODIFIABLE 2026-05-24.
+self_engineer.py    — Detects IMPLEMENT signals in FEED output, patches MODIFIABLE modules. SACRED list enforced. AUDIT verdict after each patch.
+promote.py          — Autonomous genome promotion. Opus reviews high-recurrence candidates; cross-substrate gate (_source_tag).
+dmn.py              — Nightly dead-zone agent (02:30). Cross-connect + internal-origin + coherence checks → edges + obligations.
+simulation_observer.py — Game-of-Truth CA telemetry (σ/α/H/avalanches) → docs/ca_telemetry.json. Source of local://ca_sim edges.
+substrate.py        — Read-only provenance/diversity classifier (Phase 0 of the n_eff confirmation gate). substrate_of() + operator-owned CA_INSTANTIATED table.
+voice.py            — Optional audio compression of cycle output.
 node_builder.py     — Document → project node. Auto-generates obligations from NEXT fields via Haiku.
-batch_feed.py       — Manual queue processor. Drains links_queue.json through L7.
+batch_feed.py       — Manual queue processor (fetch_url). Drains links_queue.json through L7. NOT in MODIFIABLE.
 extract_links.py    — Parses Claude export JSON or plain URL lists into links_queue.json.
 site_builder.py     — Static site generator. Semantic color grammar: red=voice, amber=open, blue=partial, green=resolved.
+bootstrap_derive.py — Genome-free first-principles derivation (BOOTSTRAP phase, every 10 cycles).
 coherence_audit.py  — Symbol registry auditor. Checks against genome_symbols.json.
 backfill.py         — Smart Tamura archive backfill.
 ```
@@ -49,7 +66,7 @@ backfill.py         — Smart Tamura archive backfill.
 ```
 FREED_genome.md             — Sacred seed. NEVER modify.
 FREED_state.json            — Living state: generation, coherence, cycle count, promotion_candidates.
-FREED_obligations.json      — Active obligations (O28–O73+). Open=amber, Partial=blue, Resolved=green.
+FREED_obligations.json      — Active obligations (O21–O409, ~375). Open=amber, Partial=blue, Resolved=green.
 FREED_graph.json            — Knowledge graph: feed edges + node_edges list.
 genome_symbols.json         — Canonical symbol registry (12 terms, recurrence scores).
 links_queue.json            — ~279 entries, ~170 queued. Human-submitted + Claude export links.
@@ -113,17 +130,21 @@ cd ~/FREED && source ~/.zshrc && bash start_freed.sh
 ## self_engineer.py — Safety model
 
 ```python
-# Only these files can be patched by the ENGINEER phase:
+# Only these files can be patched by the ENGINEER phase (verified 2026-06-19):
 MODIFIABLE = {
     "targeted_sweep.py", "tamura_sweep.py", "l7_agent.py",
-    "consolidate.py", "knowledge_graph.py", "site_builder.py",
-    "batch_feed.py", "voice.py",
+    "consolidate.py", "site_builder.py", "voice.py",
+    "promote.py", "simulation_observer.py",
 }
+# NOTE: knowledge_graph.py was PULLED 2026-05-24 (confirmation-surplus gate was
+# writing synthetic challenge edges it then counted — graph-level mirror dynamic).
+# batch_feed.py removed (no driver; one live symbol fetch_url). Both are now
+# Claude-Code-only hand-edits.
 
 # These are NEVER touched, no matter what:
 SACRED = {
     "FREED_genome.md", "feed_guard.py", "freed.py", "self_engineer.py",
-    "astrocyte.py", "docs/game_of_life.html",
+    "astrocyte.py", "docs/noethers_table.html",
 }
 ```
 
@@ -141,26 +162,17 @@ New page (Apr 2026). Live at `wellposedness.github.io/FREED/dashboard.html`. NOT
 
 ---
 
-## docs/game_of_life.html — Protection (two layers)
+## The CA has MOVED — `wellposedness/FREED-CA` (separate repo)
 
-This file is **hand-edited** and must never be overwritten by the daemon.
+**As of 2026-06-19, the Game-of-Truth CA pages are no longer in this repo.** They live at `wellposedness.github.io/FREED-CA/`. In site_builder.py, `_write_game_of_life()` is now a no-op `pass` with an `ENGINEER: DO NOT MODIFY or recreate` docstring — do not re-add CA HTML generation here. `docs/game_of_life.html` no longer exists in this repo, and `game_of_life.html` is no longer in the SACRED set (that slot is now `docs/noethers_table.html`).
 
-**Layer 1 — site_builder.py** (`_write_game_of_life()`, line ~84):
-```python
-if target.exists() and "HAND-EDITED" in target.read_text(encoding="utf-8"):
-    return
-```
-The function has an `ENGINEER: DO NOT MODIFY` docstring so the self-engineer won't remove the guard.
+The **Python telemetry port still lives here**: `simulation_observer.py` produces `docs/ca_telemetry.json` and the `local://ca_sim` edges. That is the CA's only remaining footprint in this repo.
 
-**Layer 2 — self_engineer.py SACRED list**: `"docs/game_of_life.html"` is in SACRED — the engineer cannot patch it even if given a direct signal.
-
-**Layer 3 — file sentinel**: First line of game_of_life.html is `<!-- HAND-EDITED: do not overwrite -->`.
-
-All three layers must be broken simultaneously to lose the file. That won't happen.
+The simulation design below documents the CA as it runs in the FREED-CA repo (kept for reference; not generated from this repo).
 
 ---
 
-## docs/game_of_life.html — Current simulation state (as of Apr 2026)
+## Game-of-Truth CA — simulation design (now in FREED-CA repo)
 
 **The Game of Truth** — Voronoi foam Mandelbrot CA with six cognitive types.
 
