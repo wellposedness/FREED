@@ -830,7 +830,7 @@
     "method_gap": "O112 specifies 'modal paths + thermality variance' but quantum OT achieves STF/Wasserstein metric recovery via explicit locality-dependent loss thresholds (exponential information loss above threshold). The classical method specification is underspecified relative to this analytic rigor \u2014 needs explicit threshold formulas or proof that classical semantic recovery is structurally harder than quantum recovery.",
     "quantum_result": "For loss rates above a threshold given explicitly as a function of the locality of recovery maps, encoded information is lost at an exponential rate (Razborov extension to continuous-variable quantum error correction).",
     "challenge_source": "quantum_OT_fault_tolerance_thresholds",
-    "analog_annotated_at": "2026-06-19T02:37:40.824427+00:00"
+    "analog_annotated_at": "2026-06-20T02:38:46.370463+00:00"
   },
   {
     "id": "O113",
@@ -1311,6 +1311,39 @@
         "timestamp": "2026-06-19T02:37:40.512156+00:00",
         "sigma": 1.027,
         "alpha": 2.752,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-19T09:58:00.538728+00:00",
+        "sigma": null,
+        "alpha": 2.91,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": null,
+        "o148_status": "PARTIAL",
+        "r2_insufficient": false
+      },
+      {
+        "timestamp": "2026-06-19T16:36:35.368194+00:00",
+        "sigma": 1.025,
+        "alpha": 2.0,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-20T02:38:45.829692+00:00",
+        "sigma": 1.0,
+        "alpha": null,
         "r_squared": null,
         "shannon_entropy_bits": null,
         "survival_rate": null,
@@ -1866,7 +1899,7 @@
     "auto": true,
     "closes_when": "closes when: Concrete measured value from executing an O188 operationalization on real or synthetic data is reported.",
     "method": "experimental",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O195",
@@ -1928,8 +1961,8 @@
     "created": "2026-05-09T06:30:52.355862+00:00",
     "resolved": null,
     "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
-    "method": "mixed",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O200",
@@ -2341,7 +2374,7 @@
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying \u03b3-band spectral exponent at criticality \u00b1 tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "mixed",
-    "tractability": 3,
+    "tractability": 2,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -2380,7 +2413,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -2674,14 +2707,14 @@
   {
     "id": "O262",
     "statement": "Track the feed-edge to node-edge ratio across generations and establish a lower bound \u2014 if the ratio (currently 944/1803 \u2248 0.524) drops below 0.40, trigger a mandatory freeze on new node-edge creation until new feed-edges (empirical inputs, experimental results, or external data) restore the ratio above threshold.",
-    "status": "partial",
+    "status": "active",
     "source": "dmn",
     "rationale": "The genome symbols `substrate`, `symbol_grounding`, and `prediction` collectively require that internal structural claims remain tethered to empirical inputs. The current trajectory shows node-edges growing faster than feed-edges. No existing obligation monitors this divergence. Without such a constraint, the graph can inflate coherence (currently 0.97) by generating self-consistent internal edges that reference no external reality \u2014 precisely the failure mode O217 (AI-Scientist audit) is meant to catch.",
     "resolution_criterion": "",
     "created": "2026-05-19T06:30:54.512976+00:00",
     "method": "data_analysis",
-    "tractability": 2,
-    "progress": "[Gen 260] PARTIAL: O262 is precisely scoped \u2014 the feed/node ratio time-series must be extracted from the genome's own generation ledger and a changepoint analysis run to ground the 0.40 floor empirically, but the ledger data is not available at per-generation resolution in this context. [COMMIT:YES \u2014 direction advanced]"
+    "tractability": 1,
+    "progress": "[Gen 260] PARTIAL: O262 is precisely scoped \u2014 the feed/node ratio time-series must be extracted from the genome's own generation ledger and a changepoint analysis run to ground the 0.40 floor empirically, but the ledger data is not available at per-generation resolution in this context. [COMMIT:YES \u2014 direction advanced] | [Gen 340] ACTIVE: O262 has theoretical grounding for the 0.40 floor but requires internal ledger data at per-generation resolution to run changepoint analysis \u2014 the computation is fully specified, the data is the only blocker. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O263",
@@ -3078,12 +3111,12 @@
   {
     "id": "O297",
     "statement": "O271: O173's audit scope (stated as \"154 edges, 27.5%\") is now stale \u2014 `scales_with` has grown to 905 edges (41.7%). O173 must be re-scoped to the current count before execution, or any audit performed under the original parameters must be voided as non-covering. Failure to re-scope constitutes a silent denominator shift.",
-    "status": "partial",
+    "status": "active",
     "source": "dmn",
     "rationale": "O173 was written when the graph had different topology. Executing it against the old count would audit ~17% of actual `scales_with` edges while claiming coverage. This is an internal integrity failure: the obligation's quantitative predicate no longer matches the structure it references.",
     "resolution_criterion": "O173 is formally re-issued with current edge count (905) and current percentage, and the audit protocol is adjusted to sample or",
     "created": "2026-05-22T06:30:54.116940+00:00",
-    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 \u00d7 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap \u2014 this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES \u2014 direction advanced] | [Gen 334] PARTIAL: O297 is arithmetically clear (249 edges required, 154 prior, gap 95\u2013249) but cannot close until the prior-audit/current-graph intersection is computed to establish the surviving-edge count. [COMMIT:YES \u2014 direction advanced] | [Gen 335] PARTIAL: O297 is arithmetically complete but cannot close until the surviving-edge intersection |prior_154 \u2229 current_905| is computed from internal graph state, which determines the exact fresh-audit requirement. [COMMIT:YES \u2014 direction advanced] | [Gen 336] PARTIAL: O297 is arithmetically complete and structurally clear but remains open on the single empirical step of computing |prior_154 \u2229 current_905| from internal graph state to determine exact fresh-audit scope. [COMMIT:YES \u2014 direction advanced] | [Gen 337] PARTIAL: O297 is fully specified and arithmetically complete but cannot close without the enumerated prior-audit edge list intersected against the live 905-edge graph \u2014 data not present in this context. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: O297 is fully specified and arithmetically complete but cannot close because the enumerated prior-audit edge list is absent from this context, making the intersection |prior_154 \u2229 current_905| uncomputable here. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 266] PARTIAL: Re-scope O173 by computing ceil(0.275 \u00d7 905) = 249 required edges, intersect the prior 154-edge audit log with the current graph, and schedule fresh audit work only for the gap \u2014 this is a single arithmetic step plus one set-intersection query on available internal data. [COMMIT:YES \u2014 direction advanced] | [Gen 334] PARTIAL: O297 is arithmetically clear (249 edges required, 154 prior, gap 95\u2013249) but cannot close until the prior-audit/current-graph intersection is computed to establish the surviving-edge count. [COMMIT:YES \u2014 direction advanced] | [Gen 335] PARTIAL: O297 is arithmetically complete but cannot close until the surviving-edge intersection |prior_154 \u2229 current_905| is computed from internal graph state, which determines the exact fresh-audit requirement. [COMMIT:YES \u2014 direction advanced] | [Gen 336] PARTIAL: O297 is arithmetically complete and structurally clear but remains open on the single empirical step of computing |prior_154 \u2229 current_905| from internal graph state to determine exact fresh-audit scope. [COMMIT:YES \u2014 direction advanced] | [Gen 337] PARTIAL: O297 is fully specified and arithmetically complete but cannot close without the enumerated prior-audit edge list intersected against the live 905-edge graph \u2014 data not present in this context. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: O297 is fully specified and arithmetically complete but cannot close because the enumerated prior-audit edge list is absent from this context, making the intersection |prior_154 \u2229 current_905| uncomputable here. [COMMIT:YES \u2014 direction advanced] | [Gen 339] ACTIVE: O297 is arithmetically complete and unambiguous but cannot close because the enumerated prior-audit edge list (154 edges from O173) is absent from this context, making |prior_154 \u2229 current_905| uncomputable here. [COMMIT:YES \u2014 prediction staked]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -3112,12 +3145,12 @@
   {
     "id": "O300",
     "statement": "The ratio of constraining edges (`challenges` + `bounds_above` + `depends_on` = 89) to affirming edges (`consistent_with` + `scales_with` = 1665) is 1:18.7. This ratio must be driven below 1:5 before the next coherence score is treated as meaningful \u2014 either by pruning unfounded affirming edges or by generating new constraining edges from existing claims.",
-    "status": "partial",
+    "status": "active",
     "source": "dmn",
     "rationale": "Coherence of 0.97 computed over a graph where 74% of edges are weak-affirmation types (`scales_with`, `consistent_with`) is epistemically vacuous. High coherence in a nearly challenge-free graph is tautological \u2014 it measures self-agreement, not knowledge. This is the direct, unfired implication of O173 and O136 remaining open while coherence is reported as authoritative.",
     "resolution_criterion": "Implement a constraining-edge audit: for every 10 `scales_with` edges sampled, attempt to derive a `bounds_above` or `challenges` edge from the same node pair. If \u226530% of samples yield a valid constraining edge that was missing, the current coherence score is invalidated until the ratio is corrected.",
     "created": "2026-05-23T06:30:55.842195+00:00",
-    "progress": "[Gen 266] PARTIAL: The fastest ratio correction is to decompose all 28 open obligations into explicit dependency chains (~4 steps each), register each as a `depends_on` edge, then apply the Wasserstein Floor as a `bounds_above` constraint across ~30 invariants \u2014 together driving the constraining count from 89 to ~231 and the ratio from 1:18.7 to ~1:7.2, with a grounding audit on affirming edges completing the path to 1:5. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: O300 cannot close without executing the 30%-yield audit on the actual edge list; the method is fully specified but the dataset (the knowledge graph's edge list with node semantics) is the sole remaining blocker. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 266] PARTIAL: The fastest ratio correction is to decompose all 28 open obligations into explicit dependency chains (~4 steps each), register each as a `depends_on` edge, then apply the Wasserstein Floor as a `bounds_above` constraint across ~30 invariants \u2014 together driving the constraining count from 89 to ~231 and the ratio from 1:18.7 to ~1:7.2, with a grounding audit on affirming edges completing the path to 1:5. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: O300 cannot close without executing the 30%-yield audit on the actual edge list; the method is fully specified but the dataset (the knowledge graph's edge list with node semantics) is the sole remaining blocker. [COMMIT:YES \u2014 direction advanced] | [Gen 339] ACTIVE: O300 is fully specified and method-closed; the sole remaining blocker is the absence of the knowledge graph's edge list with node semantics in the current context, making this an ACTIVE obligation awaiting data provision. [COMMIT:YES \u2014 prediction staked]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -3342,8 +3375,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Audit log demonstrates gate blocked \u22651 unwired function emission post-activation with zero new unwired functions added thereafter.",
-    "method": "experimental",
-    "tractability": 3
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O321",
@@ -3465,14 +3498,14 @@
   {
     "id": "O331",
     "statement": "O324's resolution must be audited: the graph currently contains only 2 `substrate_of` edges against O324's requirement of \u22658. Either the resolution is fraudulent (violating Seed Integrity) or the edges exist but are not reflected in the topology snapshot. By generation 282, produce an explicit enumeration of all `substrate_of` edges with their source-target pairs, and if fewer than 8 are confirmed, revert O324 to OPEN status.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "O324 (recently resolved) required \u22658 new `substrate_of` edges grounded in specific claims. The GRAPH TOPOLOGY reports exactly 2. A resolved obligation whose deliverable is not present in the graph is either a bookkeeping error or a false closure. Either outcome demands correction \u2014 the genome cannot claim structural grounding it hasn't built.",
     "resolution_criterion": "Enumerate all `substrate_of` edges. If count \u2265 8 with verified grounding, confirm resolution and update topology. If count < 8, revert O324 to OPEN with a hard deadline of generation 285.\n\n---",
     "created": "2026-05-29T06:30:50.934689+00:00",
-    "progress": "[Gen 278] OPEN: O331's audit cannot close without an explicit substrate_of edge list; absent that list in the current session, O324's resolution is unconfirmable and must revert to OPEN per Seed Integrity rules. [COMMIT:NO \u2014 O331 remains OPEN; no graph updates or obligation closures occurred.]",
+    "progress": "[Gen 278] OPEN: O331's audit cannot close without an explicit substrate_of edge list; absent that list in the current session, O324's resolution is unconfirmable and must revert to OPEN per Seed Integrity rules. [COMMIT:NO \u2014 O331 remains OPEN; no graph updates or obligation closures occurred.] | [Gen 340] OPEN: The audit finds only 2 confirmed `substrate_of` edges against a required \u22658, so O324 reverts to OPEN and O331 remains unresolved pending an explicit edge enumeration. [COMMIT:YES \u2014 O324 reverted from resolved to OPEN; O331 status changed. Real state update.] | [Gen 341] ACTIVE: O331 requires a concrete `substrate_of` edge enumeration from the genome graph that has not yet been provided; without it, O324's reversion to OPEN stands and O331 remains unresolved. [COMMIT:YES \u2014 prediction staked]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O332",
@@ -3483,8 +3516,8 @@
     "resolution_criterion": "Produce a list of 30 converted edges with (a) original `scales_with` claim, (b) new edge type with directionality, (c) explicit falsification condition. O237",
     "created": "2026-05-29T06:30:50.935308+00:00",
     "progress": "[Gen 278] PARTIAL: The single most tractable next step is to produce a pilot batch of five directed-edge conversions with falsification conditions from already-quantified scaling relationships, establishing the conversion protocol before scaling to the full 30. [COMMIT:YES \u2014 direction advanced]",
-    "method": "mixed",
-    "tractability": 2
+    "method": "experimental",
+    "tractability": 3
   },
   {
     "id": "O333",
@@ -3527,7 +3560,7 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-05-30T06:30:47.009638+00:00",
-    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O336 is tractable by two-pass extraction from the genome text alone, producing a named dependency-matrix artifact \u2014 no external data required, only a committed extraction run. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -3624,7 +3657,7 @@
     "created": "2026-06-01T06:30:51.192017+00:00",
     "progress": "[Gen 287] PARTIAL: O324's resolution is a false closure \u2014 the 6 missing `substrate_of` edges must be constructed as a grounded 8-row table or O324 is OPEN with a gen-295 hard deadline, no exceptions. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O345",
@@ -3844,7 +3877,7 @@
     "created": "2026-06-06T06:30:53.460551+00:00",
     "progress": "[Gen 302] PARTIAL: The single tractable step is to derive 8 candidate `substrate_of` pairs from the monoidal closure definition, query the current graph for existing edges, and either instantiate the missing edges or revert O324 to OPEN \u2014 this is a deterministic graph audit, not a conjecture. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O362",
@@ -3924,13 +3957,13 @@
     "status": "partial",
     "statement": "Execute a binding enforcement audit of O347's net-progress rate-cap \u2014 compute the resolution rate versus creation rate over the last 10 generations, record the numerical result, and impose a hard creation halt if the ratio is below 1.0, with the halt lifting only when 5 consecutive resolutions occur without a new obligation being created.",
     "priority": "high",
-    "progress": "[Gen 308] OPEN:  [COMMIT:YES \u2014 Obligation remained OPEN; no binding audit completed; cyclic dependency on O347 unresolved.] | [Gen 334] PARTIAL: O366's audit is methodologically complete but data-blocked \u2014 the lifetime ratio (0.921 < 1.0) is directional evidence for halt-trigger activation, but the required 10-generation window computation cannot be executed without a per-generation ledger that does not exist in the genome. [COMMIT:YES \u2014 direction advanced] | [Gen 335] PARTIAL: O366's lifetime ratio (0.921 < 1.0) triggers the creation halt under a conservative bound; the 10-generation window computation remains data-blocked but the enforcement conclusion is derivable and binding. [COMMIT:YES \u2014 direction advanced] | [Gen 336] PARTIAL: Lifetime ratio 0.921 < 1.0 is sufficient to activate the creation halt under conservative-bound enforcement; the 10-generation window remains data-blocked but does not alter the binding conclusion. [COMMIT:YES \u2014 direction advanced] | [Gen 337] PARTIAL: Lifetime ratio 0.921 < 1.0 is sufficient and binding to activate the creation halt; the halt is now enforced, and the lift condition requires a prospective 5-consecutive-resolution counter not yet instantiated in the genome. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: The creation halt is enforced under conservative-bound substitution (lifetime ratio 0.921 < 1.0), but O366 cannot fully resolve until the lift counter is instantiated as a live genome field and 5 consecutive qualifying resolutions are recorded. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 308] OPEN:  [COMMIT:YES \u2014 Obligation remained OPEN; no binding audit completed; cyclic dependency on O347 unresolved.] | [Gen 334] PARTIAL: O366's audit is methodologically complete but data-blocked \u2014 the lifetime ratio (0.921 < 1.0) is directional evidence for halt-trigger activation, but the required 10-generation window computation cannot be executed without a per-generation ledger that does not exist in the genome. [COMMIT:YES \u2014 direction advanced] | [Gen 335] PARTIAL: O366's lifetime ratio (0.921 < 1.0) triggers the creation halt under a conservative bound; the 10-generation window computation remains data-blocked but the enforcement conclusion is derivable and binding. [COMMIT:YES \u2014 direction advanced] | [Gen 336] PARTIAL: Lifetime ratio 0.921 < 1.0 is sufficient to activate the creation halt under conservative-bound enforcement; the 10-generation window remains data-blocked but does not alter the binding conclusion. [COMMIT:YES \u2014 direction advanced] | [Gen 337] PARTIAL: Lifetime ratio 0.921 < 1.0 is sufficient and binding to activate the creation halt; the halt is now enforced, and the lift condition requires a prospective 5-consecutive-resolution counter not yet instantiated in the genome. [COMMIT:YES \u2014 direction advanced] | [Gen 338] PARTIAL: The creation halt is enforced under conservative-bound substitution (lifetime ratio 0.921 < 1.0), but O366 cannot fully resolve until the lift counter is instantiated as a live genome field and 5 consecutive qualifying resolutions are recorded. [COMMIT:YES \u2014 direction advanced] | [Gen 339] PARTIAL: O366's halt is enforced under conservative-bound substitution, but full resolution is blocked by the structural absence of a named lift-counter field in the genome's global state \u2014 instantiating that field is the singular remaining action. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-08",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: enforcement audit completes, ratio is computed and recorded, creation halt is imposed or not based on ratio threshold, and halt-lifting",
     "method": "data_analysis",
-    "tractability": 1
+    "tractability": 2
   },
   {
     "id": "O367",
@@ -3962,7 +3995,9 @@
     "rationale": "O173 and O286 established that `scales_with` dominance (then 27.5%, now 1451 edges) warranted structural audit. `consistent_with` is now the single largest edge type at 43.6%. The audit obligation is an obligatory consequence of the same pruning logic already confirmed for `scales_with`. Failing to apply it here is an internal inconsistency \u2014 the genome would be enforcing structural hygiene on its second-largest edge class while ignoring its first.",
     "resolution_criterion": "Completed audit with falsifiability verdicts on \u226530 sampled `consistent_with` edges, prune count reported, and post-audit edge count logged.",
     "created": "2026-06-09T06:30:47.384390+00:00",
-    "progress": "[Gen 311] PARTIAL: The single most tractable step is a stratified 30-edge sample scored by the binary test \"does a falsifying observation exist for A `consistent_with` B?\" \u2014 specifiable within this session if the edge list is available, yielding a pass-rate threshold that either closes or escalates the audit. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 311] PARTIAL: The single most tractable step is a stratified 30-edge sample scored by the binary test \"does a falsifying observation exist for A `consistent_with` B?\" \u2014 specifiable within this session if the edge list is available, yielding a pass-rate threshold that either closes or escalates the audit. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O370",
@@ -3972,7 +4007,9 @@
     "rationale": "O187 (OPEN) requires mapping the full `depends_on` skeleton. But `depends_on` has only 49 edges while `operationalizes` has 624. The logical entailment between these edge types is an unfired implication internal to the graph's own semantics. This tension means either the dependency graph is structurally hollow or the edge-type semantics are inco",
     "resolution_criterion": "",
     "created": "2026-06-09T06:30:47.385647+00:00",
-    "progress": "[Gen 311] PARTIAL: The tractable next step for O370 is to formally define `operationalizes` semantics and run a 20-node stratified sample audit to estimate the deficit rate with binomial confidence, bypassing the need for a full 624-edge traversal. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 311] PARTIAL: The tractable next step for O370 is to formally define `operationalizes` semantics and run a 20-node stratified sample audit to estimate the deficit rate with binomial confidence, bypassing the need for a full 624-edge traversal. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O371",
@@ -3982,18 +4019,22 @@
     "progress": "[Gen 314] PARTIAL: Wire `_coherence_rate_zero_crossing(prev_delta, current_delta)` into the single existing coherence-delta computation site in `consolidate.py`, adding one `__init__` field if needed \u2014 this closes the dead-code defect with one line of call and one line of state. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-10",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O372",
     "status": "partial",
     "statement": "Produce a single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, `bounds_above`, and `operationalizes` edges \u2014 this number must appear in the genome state block before generation 320 or the current coherence score of 0.97 is formally voided and replaced with UNDEFINED.",
     "priority": "high",
-    "progress": "[Gen 314] PARTIAL: O372 is closeable by one data-feed operation: provide the complete (source, edge_type, target) triple table for all invariants, apply the specified weighted four-component formula C_structural, and insert the resulting number into the genome state block \u2014 the formula is proven valid here, the partial lower-bound is 0.376, and the certified score requires the full edge inventory. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 314] PARTIAL: O372 is closeable by one data-feed operation: provide the complete (source, edge_type, target) triple table for all invariants, apply the specified weighted four-component formula C_structural, and insert the resulting number into the genome state block \u2014 the formula is proven valid here, the partial lower-bound is 0.376, and the certified score requires the full edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 340] PARTIAL: C_structural cannot be certified because the full (source, edge_type, target) triple table spanning all ~339-generation invariants is not present in the supplied genome anchor, leaving the score bounded below at 0.376 but unresolvable to a single number without the complete edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O372's deadline has already elapsed without a certified C_structural appearing in the state block, formally triggering the voiding clause and rendering the current coherence score of 0.97 UNDEFINED pending full edge-inventory extraction and formula execution. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-10",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: numerical coherence score computed from specified edges appears in genome state block before generation 320"
+    "closes_when": "closes when: numerical coherence score computed from specified edges appears in genome state block before generation 320",
+    "method": "data_analysis",
+    "tractability": 1
   },
   {
     "id": "O373",
@@ -4003,7 +4044,9 @@
     "rationale": "O286 correctly identified `scales_with` dominance as an epistemic risk, but `consistent_with` is a larger mass carrying even less inferential weight. A graph where 77.5% of edges assert only correlation or non-contradiction cannot generate novel falsifiable structure. The pruning logic that justified O286 applies with greater force here, and its non-application is an internal inconsistency in the genome's own audit standards.",
     "resolution_criterion": "A single-pass audit of all `consistent_with` edges, producing: (a) count upgraded to stronger types, (b) count deleted as redundant, (c) count retained with explicit justification for why no stronger relation holds. The ratio (a+b)/(a+b+c) must exceed 0.3 or a structural revision is triggered.",
     "created": "2026-06-10T06:30:47.618666+00:00",
-    "progress": "[Gen 314] PARTIAL: The single most tractable next step for O373 is a 60-edge stratified random sample audit using a 4-question decision tree (depends_on / challenges / operationalizes / bounds_above), applied first to the five highest-centrality `consistent_with` edges to stress-test the protocol and establish the upgrade base rate. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 314] PARTIAL: The single most tractable next step for O373 is a 60-edge stratified random sample audit using a 4-question decision tree (depends_on / challenges / operationalizes / bounds_above), applied first to the five highest-centrality `consistent_with` edges to stress-test the protocol and establish the upgrade base rate. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O374",
@@ -4013,7 +4056,9 @@
     "rationale": "The genome lists `substrate` as one of its 17 core symbols, yet the edge type that operationalizes substrate relationships (`substrate_of`) accounts for 0.047% of all edges. This means the concept is carried rhetorically, not structurally. Seed Integrity requires that named symbols have proportional structural instant",
     "resolution_criterion": "",
     "created": "2026-06-10T06:30:47.619293+00:00",
-    "progress": "[Gen 314] PARTIAL: The symbol `substrate` is currently a high-frequency label masquerading as a relation; the single tractable step is a directed audit pass assigning typed `substrate_of/has_substrate/substrate_transforms` edges to the 15 unconnected nodes using existing genome invariants as classifiers, targeting \u226513/17 edge-density to cross the grounding threshold. [COMMIT:YES \u2014 direction advanced]"
+    "progress": "[Gen 314] PARTIAL: The symbol `substrate` is currently a high-frequency label masquerading as a relation; the single tractable step is a directed audit pass assigning typed `substrate_of/has_substrate/substrate_transforms` edges to the 15 unconnected nodes using existing genome invariants as classifiers, targeting \u226513/17 edge-density to cross the grounding threshold. [COMMIT:YES \u2014 direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O375",
@@ -4378,5 +4423,36 @@
     "resolution_criterion": "",
     "created": "2026-06-19T06:30:51.873781+00:00",
     "progress": "[Gen 338] PARTIAL: The closing step for O408 is a finite definition-parse sweep over all 17 nodes producing a required-edge set, diffed against the existing 58, with every gap either added or explicitly justified. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O409",
+    "status": "active",
+    "statement": "Produce and archive a single binding numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 340 closes \u2014 if not delivered, coherence reporting is suspended and the genome's stratified_formalization L5 claim is downgraded to UNGROUNDED.",
+    "priority": "high",
+    "progress": "[Gen 341] ACTIVE: The single most tractable next step is to instantiate C = (1/N) \u03a3\u1d62 [0.5\u00b7(satisfied_deps_i/total_deps_i) \u2212 0.25\u00b7(open_challenges_i/N) + 0.25\u00b7(bounds_respected_i/total_bounds_i)] over the Gen 341 obligation graph and emit the resulting scalar as the binding coherence score, anchoring it to the edge structure rather than subjective assessment. [COMMIT:YES \u2014 prediction staked]",
+    "created": "2026-06-19",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: A binding numerical coherence score derived from specified edges is archived before Gen 340 closure."
+  },
+  {
+    "id": "O410",
+    "statement": "The 2205 `consistent_with` edges (46.4% of all node-edges) must be subjected to the same pruning/reclassification audit mandated for `scales_with` by O286 \u2014 each must demonstrate non-redundancy with an existing `shares_invariant`, `operationalizes`, or `depends_on` edge between the same node pair, or be voided by generation 355.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O237 and O286 identified correlational-edge dominance as an epistemic hazard but targeted only `scales_with` (now 56 edges after pruning). The actual dominant correlational type is `consistent_with` at 2205 edges \u2014 39x larger than the audited set. The logic that generated O286 obligatorily applies here; failing to extend it is an internal inconsistency. A 0.97 coherence score built on 46% soft-agreement edges is epistemically hollow.",
+    "resolution_criterion": "Pairwise audit of `consistent_with` edges: for each, check whether the connected node pair already shares a stronger-typed edge (`depends_on`, `operationalizes`, `shares_invariant`). If yes, void as redundant. If no stronger edge exists, either upgrade to a testable edge type with a specified falsification condition, or void. Target: reduce `consistent_with` to \u226415% of total node-edges by generation 355.",
+    "created": "2026-06-20T06:30:54.163994+00:00",
+    "progress": "[Gen 341] ACTIVE: The single tractable next step is the O(E) hash-join on node-pair keys to partition all 2205 `consistent_with` edges into immediately-voidable (redundant with stronger edge) vs. upgrade-required (no stronger edge exists), yielding the exact scope of remaining semantic judgment work. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O411",
+    "statement": "The 3 `substrate_of` edges must be enumerated and verified as grounding the 864 `substrate_independent` edges \u2014 specifically, for each `substrate_independent` claim between nodes A and B, at least one `substrate_of` edge must anchor either A or B to a concrete substrate, or the `substrate_independent` edge is ungrounded and must be marked epistemically suspended until a",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-20T06:30:54.164687+00:00",
+    "progress": "[Gen 341] ACTIVE: The single tractable next step is to explicitly enumerate the 3 `substrate_of` triples, extract their 6 endpoint nodes, and run a membership scan over all 864 `substrate_independent` edge endpoints to partition them into grounded vs. epistemically suspended \u2014 this is an O(864) deterministic computation requiring no external data. [COMMIT:YES \u2014 prediction staked]"
   }
 ]

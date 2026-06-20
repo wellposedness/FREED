@@ -6682,6 +6682,114 @@ def ridge_position_scorer(
         var_score * (1.0 - frozen_penalty) * (1.0 - collapse_penalty)
     ))
 
+    # ── W2-Geodesic Maximum Principle: Boundary-Localization Check ───────
+    # For convex energy functionals on quadratic Wasserstein minimal
+    # networks, the maximum principle constrains energy extrema to occur
+    # at boundary (endpoint) nodes, not at interior nodes.  Any interior
+    # semantic node whose convex energy proxy (variance of coherence in a
+    # local neighbourhood) exceeds the energy at BOTH path endpoints
+    # violates W2-geodesic consistency and is flagged as spurious.
+    #
+    # Energy proxy: local variance (curvature proxy) computed over a
+    # sliding sub-window of 3 points centered on each interior node.
+    # Endpoints: first and last points of the coherence window.
+    #
+    # This is a geometric integrity filter for STF metric recovery:
+    # paths that violate the maximum principle are not valid W2 geodesics
+    # and should be down-weighted or excluded from epistemic loop scoring.
+    #
+    # Reference: "Suitable convex energy functionals on a quadratic
+    # Wasserstein space satisfy a maximum principle on minimal networks."
+    w2_violations = []      # type: list
+    w2_violation_count = 0
+    w2_max_principle_holds = True
+    w2_endpoint_energy_left = 0.0
+    w2_endpoint_energy_right = 0.0
+    w2_max_interior_energy = 0.0
+
+    cw = coherence_window  # alias for brevity
+    n_cw = len(cw)
+
+    if n_cw >= 4:
+        # Compute convex energy proxy (local variance) at each node.
+        # For endpoints, use a 2-point one-sided window.
+        # For interior nodes, use a 3-point centered window.
+        def _local_variance(vals):
+            # type: (List[float]) -> float
+            """Variance of a small list of floats."""
+            nv = len(vals)
+            if nv < 2:
+                return 0.0
+            mu = sum(vals) / float(nv)
+            return sum((v - mu) ** 2 for v in vals) / float(nv)
+
+        # Endpoint energies (boundary nodes)
+        w2_endpoint_energy_left = _local_variance(cw[:min(3, n_cw)])
+        w2_endpoint_energy_right = _local_variance(cw[max(0, n_cw - 3):])
+        endpoint_max_energy = max(w2_endpoint_energy_left, w2_endpoint_energy_right)
+
+        # Check each interior node (indices 1 .. n_cw-2)
+        for idx in range(1, n_cw - 1):
+            lo = max(0, idx - 1)
+            hi = min(n_cw, idx + 2)
+            interior_energy = _local_variance(cw[lo:hi])
+
+            if interior_energy > w2_max_interior_energy:
+                w2_max_interior_energy = interior_energy
+
+            # Violation: interior energy exceeds BOTH endpoint energies
+            if interior_energy > endpoint_max_energy and endpoint_max_energy > 1e-15:
+                excess_ratio = interior_energy / endpoint_max_energy
+                # Only flag if excess is non-trivial (> 5% above endpoints)
+                if excess_ratio > 1.05:
+                    w2_violation_count += 1
+                    w2_max_principle_holds = False
+                    w2_violations.append({
+                        "interior_index": idx,
+                        "interior_energy": round(interior_energy, 8),
+                        "endpoint_max_energy": round(endpoint_max_energy, 8),
+                        "excess_ratio": round(excess_ratio, 6),
+                        "coherence_at_node": round(cw[idx], 6),
+                    })
+
+    # Penalize ridge_score when W2 maximum principle is violated
+    if not w2_max_principle_holds and n_cw >= 4:
+        # Fraction of interior nodes violating the principle
+        n_interior = max(1, n_cw - 2)
+        violation_fraction = float(w2_violation_count) / float(n_interior)
+        # Apply multiplicative penalty: more violations → stronger penalty
+        w2_penalty = max(0.3, 1.0 - violation_fraction)
+        ridge_score = round(ridge_score * w2_penalty, 6)
+
+    w2_detail = ""
+    if not w2_max_principle_holds:
+        w2_detail = (
+            "W2 MAXIMUM PRINCIPLE VIOLATED: {} interior node(s) have convex "
+            "energy (local variance) exceeding both path endpoints. "
+            "Endpoint energies: left={:.8f}, right={:.8f}. Max interior "
+            "energy={:.8f}. These nodes are geometrically inconsistent "
+            "with W2-geodesic structure — the path contains spurious "
+            "interior-energy peaks that a valid Wasserstein minimal "
+            "network would not exhibit. Ridge score penalized. "
+            "NOTE: this principle holds for convex energy functionals; "
+            "non-convex or entropy-type functionals may admit interior "
+            "maxima, which would indicate where the STF/W2 geodesic "
+            "analogy breaks down."
+        ).format(
+            w2_violation_count,
+            w2_endpoint_energy_left, w2_endpoint_energy_right,
+            w2_max_interior_energy,
+        )
+    elif n_cw >= 4:
+        w2_detail = (
+            "W2 maximum principle HOLDS: no interior node exceeds endpoint "
+            "convex energy. Endpoint energies: left={:.8f}, right={:.8f}. "
+            "Max interior energy={:.8f}. Path is W2-geodesic consistent."
+        ).format(
+            w2_endpoint_energy_left, w2_endpoint_energy_right,
+            w2_max_interior_energy,
+        )
+
     return {
         "status":               status,
         "dc_dt_variance":       round(dc_var, 8),
@@ -6692,6 +6800,13 @@ def ridge_position_scorer(
         "fraction_above_ceil":  round(frac_above, 4),
         "fraction_below_floor": round(frac_below, 4),
         "ridge_score":          round(ridge_score, 6),
+        "w2_max_principle_holds": w2_max_principle_holds,
+        "w2_violation_count":   w2_violation_count,
+        "w2_violations":        w2_violations[:10],
+        "w2_endpoint_energy_left":  round(w2_endpoint_energy_left, 8),
+        "w2_endpoint_energy_right": round(w2_endpoint_energy_right, 8),
+        "w2_max_interior_energy":   round(w2_max_interior_energy, 8),
+        "w2_detail":            w2_detail,
         "falsifiable":          True,
         "inv073_testable":      (
             "Falsification condition: partition cycles into ON_RIDGE vs "

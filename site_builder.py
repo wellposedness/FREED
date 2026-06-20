@@ -52,6 +52,9 @@ def build(state: dict, obligations: list, cycle_log: dict = None):
         state["criticality_h_over_h_max"] = criticality.get("h_over_h_max")
         state["criticality_entropy_criticality"] = criticality.get("entropy_criticality")
         state["criticality_verdict"] = criticality.get("criticality_verdict")
+        state["dominant_cell_type"] = criticality.get("dominant_cell_type")
+        state["dominant_cell_count"] = criticality.get("dominant_cell_count")
+        state["dominant_cell_fraction"] = criticality.get("dominant_cell_fraction")
 
         # ── Running criticality score (σ, α, R²) ─────────────────────
         # Composite score queryable by the epistemic loop:
@@ -844,6 +847,30 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
             verdict_basis.append(
                 "fss_bias=" + str(finite_size_scaling.get("survival_bias", 0))
             )
+
+    # ── O148: Integrate entropy_criticality into joint verdict ────────────
+    # H/H_max (normalized entropy) is now a co-equal diagnostic alongside σ
+    # and α.  When H/H_max is available, append it to verdict_basis and,
+    # when the entropy structure contradicts the σ-based verdict, downgrade
+    # the verdict to flag the epistemic incompleteness.
+    _ent_crit = result.get("entropy_criticality")
+    _h_ratio_val = result.get("h_over_h_max")
+    if _h_ratio_val is not None:
+        verdict_basis.append(
+            "H/H_max=" + str(_h_ratio_val)
+            + ("(" + _ent_crit + ")" if _ent_crit else "")
+        )
+        # O148 challenge gate: if σ says AT_CRITICAL but entropy structure
+        # is FROZEN or DISORDERED, the measurement protocol is incomplete.
+        # Downgrade to CRITICAL_ENTROPY_MISMATCH so downstream consumers
+        # know the verdict carries an unresolved tension.
+        if verdict is not None and "AT_CRITICAL" in str(verdict):
+            if _ent_crit in ("FROZEN", "DISORDERED"):
+                verdict = "CRITICAL_ENTROPY_MISMATCH"
+                verdict_basis.append(
+                    "entropy_mismatch=sigma_AT_CRITICAL_but_H/H_max_"
+                    + str(_ent_crit)
+                )
 
     if verdict is not None:
         result["criticality_verdict"] = verdict

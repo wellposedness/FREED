@@ -389,6 +389,63 @@ class NonHermitianEntropyScorer:
             for _, s_val in self._entropy_history[1:]:
                 ema_s = alpha * s_val + (1.0 - alpha) * ema_s
 
+        # ── Dissipation-penalty: subcritical drift detection ─────────────
+        # From the mean-field sandpile dissipation paper: dissipation is an
+        # RG-relevant perturbation that generically pulls the dynamical fixed
+        # point subcritical. We detect this as monotone coherence decay
+        # (successive decreasing S_linear values) and compensate by scaling
+        # the novelty injection weight upward — implementing the explicit
+        # compensatory driving term that maintains γ=1 criticality.
+        #
+        # Detection: count consecutive steps where S_linear decreased
+        # (monotone decay = energy leaking without replacement = subcritical drift).
+        # Compensation: novelty_injection_weight scales exponentially with
+        # the length of the monotone decay run, capped to prevent blowup.
+        DISSIPATION_DECAY_WINDOW = 3   # minimum consecutive decays to flag
+        NOVELTY_BASE_WEIGHT = 1.0      # baseline novelty injection weight
+        NOVELTY_SCALE_RATE = 0.25      # exponential scale rate per decay step
+        NOVELTY_MAX_WEIGHT = 4.0       # ceiling to prevent runaway injection
+
+        monotone_decay_length = 0
+        subcritical_drift = False
+        novelty_injection_weight = NOVELTY_BASE_WEIGHT
+
+        if len(self._entropy_history) >= 2:
+            # Walk backward through history counting consecutive S decreases
+            for idx in range(len(self._entropy_history) - 1, 0, -1):
+                _, s_curr = self._entropy_history[idx]
+                _, s_prev = self._entropy_history[idx - 1]
+                if s_curr < s_prev - 1e-9:  # strict decrease (with epsilon)
+                    monotone_decay_length += 1
+                else:
+                    break  # monotone run broken
+
+            if monotone_decay_length >= DISSIPATION_DECAY_WINDOW:
+                subcritical_drift = True
+                # Scale novelty weight exponentially with decay length
+                # This implements the compensatory driving term: the longer
+                # dissipation persists, the stronger the driving must be
+                # to push the fixed point back to criticality.
+                excess = monotone_decay_length - DISSIPATION_DECAY_WINDOW + 1
+                novelty_injection_weight = min(
+                    NOVELTY_MAX_WEIGHT,
+                    NOVELTY_BASE_WEIGHT * math.exp(NOVELTY_SCALE_RATE * excess)
+                )
+
+                # Override regime to subcritical if not already dissipated
+                if regime == "critical":
+                    regime = "dissipated"
+                    dissipated_flag = True
+                    recommendation = (
+                        f"Subcritical drift detected: {monotone_decay_length} consecutive "
+                        f"coherence decays (dissipation as RG-relevant perturbation). "
+                        f"Novelty injection weight scaled to {novelty_injection_weight:.3f}x. "
+                        "Inject perturbation to compensate energy leak and restore γ=1."
+                    )
+
+                # Adjust gamma_proxy downward to reflect subcritical state
+                gamma_proxy = max(0.5, gamma_proxy - 0.1 * monotone_decay_length)
+
         return {
             "s_linear": round(s_lin, 6),
             "ds_dt": round(ds_dt, 6) if ds_dt is not None else None,
@@ -399,6 +456,9 @@ class NonHermitianEntropyScorer:
             "dissipated_flag": dissipated_flag,
             "s_ema": round(ema_s, 6),
             "history_len": len(self._entropy_history),
+            "subcritical_drift": subcritical_drift,
+            "monotone_decay_length": monotone_decay_length,
+            "novelty_injection_weight": round(novelty_injection_weight, 4),
             "recommendation": recommendation,
         }
 

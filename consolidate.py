@@ -1114,6 +1114,50 @@ class MWDEScorer:
                 "fallback": "scalar_entropic_wasserstein_blend",
             }
 
+        # ── Markov-order admissibility gate (INV_087 challenge response) ──
+        # Filter the scoring functional against the two invariant additivity
+        # conditions characterizing thermodynamically admissible Lyapunov
+        # functionals for continuous-time Markov chains:
+        #
+        #   (i)  Joining additivity: ∃ monotonic φ s.t. φ(F(P⊗Q)) = φ(F(P)) + φ(F(Q))
+        #        for independent systems P, Q. This constrains F to the Rényi/Tsallis
+        #        family H_q(P) = (1/(1-q)) * ln(Σ p_i^q) parameterized by q ∈ (0,∞).
+        #
+        #   (ii) Partition additivity: ∃ monotonic ψ s.t. ψ(F(P)) = Σ_k ψ(F(P|A_k)) * w_k
+        #        for any partition {A_k} of the state space. This further constrains
+        #        the functional to the same Rényi/Tsallis family.
+        #
+        # The intersection of (i) and (ii) is exactly the Rényi entropy family
+        # parameterized by q. Free-choice entropy proxies (e.g., ad hoc weighted
+        # sums, unnormalized log-likelihoods) that fail either condition are
+        # rejected — the edge weight is flagged as inadmissible and attenuated.
+        #
+        # Implementation: estimate q from the evidence distribution by fitting
+        # the Rényi entropy's defining relation, then verify both additivity
+        # conditions hold within tolerance. If they fail, the scoring functional
+        # is not in the admissible family and the weight is attenuated.
+        #
+        # INV_087 CHALLENGE: the admissible family is a CONTINUUM parameterized
+        # by q ∈ (0,∞). MaxRL's specific choice (Shannon entropy, q=1) must be
+        # justified as selecting one privileged member, not as THE unique
+        # admissible functional. This gate enforces membership in the family
+        # but does NOT privilege any particular q value.
+        markov_order_result = self._markov_order_admissibility_gate(
+            dist_node, dist_evidence)
+        markov_admissible = markov_order_result["admissible"]
+        markov_attenuation = markov_order_result.get("attenuation_factor", 1.0)
+
+        if not markov_admissible:
+            # Attenuate the MWDE weight — the scoring functional is not in the
+            # Rényi/Tsallis admissible family, so the edge weight is unreliable
+            mwde_weight *= markov_attenuation
+            print(f"  [MARKOV-ORDER] ⚠ Scoring functional INADMISSIBLE: "
+                  f"q_est={markov_order_result.get('q_estimate', '?')}, "
+                  f"joining_residual={markov_order_result.get('joining_residual', '?')}, "
+                  f"partition_residual={markov_order_result.get('partition_residual', '?')} "
+                  f"→ weight attenuated by {markov_attenuation:.3f}× "
+                  f"(INV_087: free-choice entropy proxy rejected)")
+
         # ── Entropy-weighted effective weight ─────────────────────────────
         # Scale MWDE weight by inverse local entropy of evidence distribution.
         # Concentrated evidence (low entropy) → full update strength.
@@ -1133,6 +1177,113 @@ class MWDEScorer:
         # means the node's model family likely doesn't contain the truth
         misspec_threshold = 0.7
         misspec = w_dist > misspec_threshold and support_ratio < 0.3
+
+        # ── Fisher-regularized variance dynamics (O112 regime detection) ──
+        # The paper derives exact reduced-variance ODE for Fisher-regularized
+        # Wasserstein gradient flow on Gaussian manifold:
+        #     u̇ = 2(1 - u) + ε/u
+        # where u = σ²(t) is variance and ε > 0 is Fisher regularization
+        # strength. The cross-dissipation term ε/u changes sign at the
+        # critical scale σ = 1 (u = 1), separating:
+        #   - Cooperative regime (u < 1): transport and Fisher dissipation
+        #     reinforce each other, accelerating convergence
+        #   - Competitive regime (u > 1): transport and Fisher dissipation
+        #     oppose each other, creating transient overshoot
+        #
+        # We estimate u from the ratio of evidence variance to node variance
+        # in the shared semantic space, then compute the instantaneous
+        # cross-dissipation sign to label the thermodynamic regime.
+        #
+        # This makes STF metric recovery (O112) tractable: the regime label
+        # distinguishes transient dynamics (sign-change transient) from
+        # equilibrium geometry, which O112's single-experiment specification
+        # conflates without this flag.
+        FISHER_EPSILON = 0.01  # regularization strength ε
+
+        # Estimate variance proxy u from the two distributions:
+        # u = Var(evidence) / Var(node), treating probability masses as samples
+        _node_vals = list(dist_node.values())
+        _evid_vals = list(dist_evidence.values())
+
+        def _distribution_variance(vals):
+            # type: (list) -> float
+            if len(vals) < 2:
+                return 1e-12
+            mean_v = sum(vals) / len(vals)
+            return sum((v - mean_v) ** 2 for v in vals) / len(vals)
+
+        _var_node = _distribution_variance(_node_vals)
+        _var_evid = _distribution_variance(_evid_vals)
+        # u = σ²(evidence) / σ²(node) — variance ratio as proxy for
+        # the reduced variance on the Gaussian manifold
+        _u_variance = _var_evid / max(_var_node, 1e-12)
+        # Clamp to avoid numerical issues at extreme ratios
+        _u_variance = max(1e-6, min(_u_variance, 100.0))
+
+        # Instantaneous dynamics: u̇ = 2(1 - u) + ε/u
+        _u_dot = 2.0 * (1.0 - _u_variance) + FISHER_EPSILON / _u_variance
+
+        # Cross-dissipation term: ε/u (always positive, but its interaction
+        # with the transport term 2(1-u) determines the regime)
+        _cross_dissipation = FISHER_EPSILON / _u_variance
+
+        # Transport dissipation term: 2(1-u)
+        _transport_dissipation = 2.0 * (1.0 - _u_variance)
+
+        # Regime classification based on cross-dissipation polarity:
+        # At u < 1: transport term > 0 (drives toward equilibrium),
+        #           cross-dissipation > 0 (reinforces) → COOPERATIVE
+        # At u > 1: transport term < 0 (drives toward equilibrium from above),
+        #           cross-dissipation > 0 (opposes transport) → COMPETITIVE
+        # At u ≈ 1: critical scale, sign change → CRITICAL_TRANSITION
+        _CRITICAL_BAND = 0.05  # |u - 1| < this → critical transition zone
+        if abs(_u_variance - 1.0) < _CRITICAL_BAND:
+            _fisher_regime = "CRITICAL_TRANSITION"
+        elif _u_variance < 1.0:
+            _fisher_regime = "COOPERATIVE"
+        else:
+            _fisher_regime = "COMPETITIVE"
+
+        # Fixed point: u̇ = 0 → 2(1-u) + ε/u = 0 → 2u² - 2u - ε = 0
+        # u* = (1 + sqrt(1 + 2ε)) / 2 (positive root)
+        _u_fixed_point = (1.0 + math.sqrt(1.0 + 2.0 * FISHER_EPSILON)) / 2.0
+        _distance_to_fixed_point = abs(_u_variance - _u_fixed_point)
+
+        _fisher_regime_result = {
+            "u_variance": round(_u_variance, 6),
+            "u_dot": round(_u_dot, 6),
+            "cross_dissipation": round(_cross_dissipation, 6),
+            "transport_dissipation": round(_transport_dissipation, 6),
+            "fisher_epsilon": FISHER_EPSILON,
+            "regime": _fisher_regime,
+            "u_fixed_point": round(_u_fixed_point, 6),
+            "distance_to_fixed_point": round(_distance_to_fixed_point, 6),
+            "critical_scale_sigma": 1.0,
+            "o112_note": (
+                f"Fisher-regularized Wasserstein regime: {_fisher_regime} "
+                f"(u={_u_variance:.4f}, u̇={_u_dot:.4f}). "
+                + ("Cross-dissipation and transport REINFORCE — "
+                   "accelerated convergence toward equilibrium."
+                   if _fisher_regime == "COOPERATIVE"
+                   else "Cross-dissipation OPPOSES transport — "
+                        "transient overshoot before equilibrium."
+                   if _fisher_regime == "COMPETITIVE"
+                   else "At critical scale σ=1 — cross-dissipation "
+                        "sign change in progress, regime transition."
+                   )
+                + f" Fixed point u*={_u_fixed_point:.4f}, "
+                  f"distance={_distance_to_fixed_point:.4f}. "
+                  f"STF metric recovery (O112) requires distinguishing "
+                  f"this transient regime from equilibrium geometry."
+            ),
+        }
+
+        if _fisher_regime != "COOPERATIVE":
+            print(f"  [FISHER-REGIME] {_fisher_regime}: u={_u_variance:.4f}, "
+                  f"u̇={_u_dot:.4f}, ε/u={_cross_dissipation:.4f}, "
+                  f"2(1-u)={_transport_dissipation:.4f} — "
+                  f"{'sign-change transient at σ=1' if _fisher_regime == 'CRITICAL_TRANSITION' else 'competitive cross-dissipation'} "
+                  f"(O112: transient regime ≠ equilibrium geometry)")
 
         # ── KS goodness-of-fit test (INV_073 challenge response) ─────────
         # Test whether the empirical score/citation distribution fits
@@ -2644,6 +2795,165 @@ class Consolidator:
                     break
         return detected
 
+    # ── O112 thermality-parameterization terms ───────────────────────────────
+    # Papers that parameterize a continuous order parameter (fractional
+    # derivative α, temperature β, or analogous thermality handle) are
+    # high-priority O112 candidates because O112 (STF metric tensor
+    # recovery) requires identifying papers with continuous thermality
+    # parameterizations. This keyword list surfaces the exact class of
+    # evidence needed to close O112.
+    _O112_THERMALITY_TERMS = [
+        "fractional", "order parameter", "thermality",
+        "non-integer", "memory kernel",
+    ]
+
+    # ── Correlation-length scaling exponent keywords for O112 metric recovery ─
+    # Papers reporting ξ∼μ^{-σ} or equivalent correlation-length scaling laws
+    # are structurally analogous to the STF metric tensor recovery experiment:
+    # the scaling exponent σ encodes how the effective metric (correlation
+    # length) depends on a control parameter (quench rate μ), which is the
+    # operational definition of metric tensor recovery from observable dynamics.
+    _O112_CORRELATION_LENGTH_TERMS = [
+        "correlation length", "correlation-length", "ξ",
+        "xi", "coherence length", "domain size",
+    ]
+    _O112_SCALING_EXPONENT_TERMS = [
+        "scaling exponent", "power-law", "power law",
+        "μ^{-", "mu^{-", "∼μ", "~μ", "∼ μ", "~ μ",
+        "quench rate", "crossing rate", "ramp rate",
+    ]
+    _O112_KZ_MECHANISM_TERMS = [
+        "kibble-zurek", "kibble zurek", "kz mechanism",
+        "defect density", "domain wall", "front dynamics",
+    ]
+
+    def _score_o112_thermality(self, paper_text):
+        # type: (str) -> float
+        """
+        Score a paper's relevance to O112 (STF metric tensor recovery)
+        by checking for continuous thermality parameterization signals
+        AND correlation-length scaling exponent reports.
+
+        Papers that parameterize a continuous order parameter (e.g.,
+        fractional derivative α, temperature β, or analogous thermality
+        handle) are high-priority O112 candidates. Papers reporting
+        empirical ξ-scaling laws (ξ∼μ^{-σ}) are flagged as metric-
+        recovery analogs — the scaling exponent σ encodes how the
+        effective metric (correlation length) depends on a control
+        parameter, which is the operational definition of metric tensor
+        recovery from observable dynamics.
+
+        Returns an additive boost >= 0.0.
+
+        INV_073 challenge acknowledgment: the FMHNN paper's encryption
+        scheme *maximizes* security by operating in deep chaos (maximum
+        Lyapunov exponent, large attractor dimension) rather than at the
+        critical ridge, suggesting that for engineering applications the
+        optimal operating point may be fully chaotic rather than
+        edge-of-chaos. This strains the universality of the critical
+        ridge principle as the single optimal operating regime.
+
+        INV_073 challenge (Kibble-Zurek bifurcation): papers showing
+        that even at the critical transition point, two qualitatively
+        distinct outcomes (coherent vs. incoherent) exist depending on
+        quench rate μ imply the "critical ridge" is not a single
+        navigable path but a rate-dependent bifurcation of paths. This
+        strains the genome's treatment of criticality as a unique
+        attractor state — the critical manifold has internal structure
+        (μ_c separating dynamical regimes) not captured by a scalar
+        γ≈1 criterion.
+        """
+        text_lower = paper_text.lower()
+        boost = 0.0
+
+        # ── Stage 1: Continuous thermality parameterization detection ─────
+        hits = [term for term in self._O112_THERMALITY_TERMS
+                if term in text_lower]
+        if hits:
+            # Base boost: 0.08 per matched term, capped at 0.30
+            boost = min(len(hits) * 0.08, 0.30)
+
+            # Extra boost (+0.10) when fractional-order dynamics co-occur with
+            # chaotic / attractor language — these papers demonstrate continuous
+            # α-parameterization of dynamical regime transitions, which is
+            # exactly the thermality handle O112 needs.
+            _chaos_terms = {"chaotic", "lyapunov", "attractor", "bifurcation",
+                            "hopfield", "memristive", "sensitivity to initial"}
+            has_chaos = any(ct in text_lower for ct in _chaos_terms)
+            if "fractional" in hits and has_chaos:
+                boost += 0.10
+
+            print(f"  [O112-THERMALITY] +{boost:.2f} boost: continuous "
+                  f"thermality parameterization detected "
+                  f"(terms={hits}"
+                  + (", chaos_co_occurrence=True" if has_chaos else "")
+                  + f") — high-priority O112 candidate for STF metric "
+                  f"tensor recovery")
+
+        # ── Stage 2: Correlation-length scaling exponent detection ────────
+        # Papers reporting ξ∼μ^{-σ} or equivalent are metric-recovery
+        # analogs: the scaling exponent σ IS the metric tensor component
+        # relating correlation length to control parameter, recovered
+        # empirically from observable dynamics.
+        _corr_hits = [t for t in self._O112_CORRELATION_LENGTH_TERMS
+                      if t in text_lower]
+        _scaling_hits = [t for t in self._O112_SCALING_EXPONENT_TERMS
+                         if t in text_lower]
+        _kz_hits = [t for t in self._O112_KZ_MECHANISM_TERMS
+                    if t in text_lower]
+
+        # Require co-occurrence: correlation-length language AND scaling
+        # exponent language. KZ mechanism terms provide additional boost.
+        if _corr_hits and _scaling_hits:
+            # Base metric-recovery analog boost
+            _corr_boost = 0.15
+
+            # KZ mechanism boost: papers explicitly citing Kibble-Zurek
+            # are the highest-fidelity metric-recovery analogs because
+            # they derive σ from universality class exponents (ν, z)
+            if _kz_hits:
+                _corr_boost += 0.10
+
+            # Rate-dependent bifurcation detection (INV_073 challenge):
+            # papers reporting TWO distinct dynamical regimes separated
+            # by a critical crossing rate μ_c demonstrate that the
+            # critical manifold has internal structure — tag this as
+            # an INV_073 challenge signal
+            _bifurcation_terms = {
+                "critical crossing rate", "critical rate", "μ_c",
+                "mu_c", "two different mechanisms", "two regimes",
+                "two distinct", "coherent", "incoherent",
+                "subcritical bifurcation", "rate-dependent",
+                "rate dependent", "crossing rate",
+            }
+            _has_rate_bifurcation = sum(
+                1 for bt in _bifurcation_terms if bt in text_lower
+            ) >= 2  # require ≥2 co-occurring bifurcation signals
+
+            if _has_rate_bifurcation:
+                _corr_boost += 0.05
+                print(f"  [O112-METRIC-RECOVERY] ⚠ INV_073 CHALLENGE: "
+                      f"rate-dependent bifurcation at critical point "
+                      f"detected — critical ridge has internal structure "
+                      f"(μ_c separating coherent/incoherent regimes). "
+                      f"Scalar γ≈1 criterion insufficient to characterize "
+                      f"the critical manifold's dynamical topology.")
+
+            boost += _corr_boost
+
+            print(f"  [O112-METRIC-RECOVERY] +{_corr_boost:.2f} boost: "
+                  f"correlation-length scaling exponent detected "
+                  f"(corr_length={_corr_hits}, scaling={_scaling_hits}"
+                  + (f", kz_mechanism={_kz_hits}" if _kz_hits else "")
+                  + (f", rate_bifurcation=True" if _has_rate_bifurcation else "")
+                  + f") — metric-recovery analog for O112 "
+                  f"(ξ∼μ^{{-σ}} ≅ STF metric tensor recovery)")
+
+        if boost == 0.0:
+            return 0.0
+
+        return boost
+
     def _formalism_obligation_boost(self, paper_text, open_obligations):
         # type: (str, list) -> float
         """
@@ -2658,8 +2968,21 @@ class Consolidator:
         binding invariants (O112 / INV_094 tracking). This ensures papers
         showing depth/temporal-scale coupling are surfaced rather than scored
         only on keyword overlap.
+
+        Also includes O112 thermality-parameterization scoring: papers that
+        parameterize a continuous order parameter (fractional derivative α,
+        temperature β, or analogous thermality handle) are flagged as
+        high-priority O112 candidates via _score_o112_thermality().
         """
         paper_formalisms = self._detect_formalism_types(paper_text)
+
+        # ── O112 thermality-parameterization scoring ─────────────────────────
+        # Flag papers with continuous order parameters as high-priority O112
+        # candidates. O112 has been open since early genome versions and
+        # requires identifying papers with continuous thermality
+        # parameterizations; this filter surfaces the exact class of
+        # evidence needed to close it.
+        o112_thermality_boost = self._score_o112_thermality(paper_text)
 
         # ── Hierarchical temporal receptive window bonus (O112 / INV_094) ────
         # Papers demonstrating that hierarchical architectures develop
@@ -2675,10 +2998,10 @@ class Consolidator:
             print(f"  [SEMANTIC-RICHNESS] +0.05 bonus: hierarchical temporal "
                   f"receptive window pattern detected (O112/INV_094 evidence)")
 
-        if not paper_formalisms and hierarchical_temporal_bonus == 0.0:
+        if not paper_formalisms and hierarchical_temporal_bonus == 0.0 and o112_thermality_boost == 0.0:
             return 0.0
 
-        boost = hierarchical_temporal_bonus
+        boost = hierarchical_temporal_bonus + o112_thermality_boost
         for ob in open_obligations:
             # Extract obligation text — handle both dict and string obligations
             if isinstance(ob, dict):
@@ -2715,13 +3038,67 @@ class Consolidator:
     def _node_priority(self, node, open_ob_ids, current_cycle):
         """Priority score: higher = renorm first. Zipf weighting toward γ=1 nodes.
         Includes formalism-type matching: thermodynamically grounded papers that
-        directly operationalize open obligations get boosted priority."""
+        directly operationalize open obligations get boosted priority.
+
+        Sparse-ADMM–inspired inverse-dependency weighting: obligations with fewer
+        dependent edges (sparser dependency skeleton) are cheaper to resolve and
+        receive higher urgency scores. This mirrors the sparse MPC-for-tracking
+        algorithm's exploitation of sparse structure to reduce computational debt —
+        resolve the cheapest obligations first to maximize throughput.
+
+        INV_073 challenge acknowledgment: the MPC-for-tracking formulation achieves
+        recursive feasibility by AUGMENTING the decision-variable space (adding
+        slack/artificial variables), directly stressing the claim that critical-ridge
+        navigation is achievable without expanding the representational substrate.
+        Pure compression may be insufficient when the constraint topology shifts."""
         ob_refs    = node.get('obligations', [])
         ob_overlap = sum(1 for ref in ob_refs
                          if any(ref == oid or ref in oid or oid in ref
                                 for oid in open_ob_ids))
         inv_density   = len(node.get('invariants', []))
         cycles_stale  = current_cycle - node.get('last_renorm_cycle', 0)
+
+        # ── Sparse-obligation urgency boost (inverse-dependency-count) ───────
+        # For each open obligation referenced by this node, count the number of
+        # dependent edges (other obligations/invariants that reference it) in the
+        # knowledge graph. Obligations with fewer dependents have sparser
+        # dependency skeletons and are cheaper to resolve — boost their urgency
+        # via inverse weighting: urgency_boost += 1 / (1 + dep_count).
+        # This surfaces low-hanging-fruit obligations that would otherwise be
+        # treated identically to high-dependency-count obligations, preventing
+        # debt accumulation where the genome is most tractable.
+        sparsity_boost = 0.0
+        try:
+            _graph_sp = get_graph()
+            _graph_sp._ensure_loaded()
+            _ne_sp = _graph_sp._node_edges
+            # Build dependency count per obligation: how many edges reference it
+            _ob_dep_counts = {}  # type: dict
+            for _e_sp in _ne_sp:
+                _inv_text = (_e_sp.get("invariant", "") or "").lower()
+                _from_sp = _e_sp.get("from", "")
+                _to_sp = _e_sp.get("to", "")
+                for oid in open_ob_ids:
+                    oid_lower = oid.lower()
+                    if (oid_lower in _inv_text
+                            or oid_lower in _from_sp.lower()
+                            or oid_lower in _to_sp.lower()):
+                        _ob_dep_counts[oid] = _ob_dep_counts.get(oid, 0) + 1
+
+            # Compute inverse-dependency boost for obligations this node references
+            for ref in ob_refs:
+                matching_oids = [
+                    oid for oid in open_ob_ids
+                    if ref == oid or ref in oid or oid in ref
+                ]
+                for oid in matching_oids:
+                    dep_count = _ob_dep_counts.get(oid, 0)
+                    # Inverse weighting: fewer deps → higher boost
+                    # 1/(1+dep_count) gives 1.0 for isolated obligations,
+                    # 0.5 for 1-dep, 0.33 for 2-dep, etc.
+                    sparsity_boost += 1.0 / (1.0 + dep_count)
+        except Exception:
+            pass  # fail-open: graph unavailable → no sparsity boost
 
         # ── Formalism-obligation matching boost ──────────────────────────────
         # Weight the correlation between thermodynamic grounding depth and
@@ -3056,6 +3433,85 @@ class Consolidator:
             if _has_landauer and _has_stabilization:
                 _stabilization_cost_bonus = 0.05
                 total_score += _stabilization_cost_bonus
+
+            # ── Fractional-order / non-Markovian memory kernel detection ─────
+            # (INV_073 challenge): Papers describing fractional-order dynamics,
+            # non-Markovian memory kernels, or history-dependent criticality
+            # represent a mechanistically distinct route to the critical ridge.
+            # Without tagging these, CONVERGE mappings to INV_073 conflate
+            # fractional (history-dependent) and integer (Markovian/instantaneous)
+            # memory substrates, degrading the genome's causal resolution.
+            #
+            # Detection: co-occurrence of (1) fractional-order / fractional
+            # calculus language AND (2) memory / history-dependence language.
+            # Both families must be present to distinguish "paper mentions
+            # fractional" from "paper demonstrates fractional memory dynamics."
+            #
+            # When detected, the node is tagged with memory_kernel=fractional
+            # so downstream invariant tagging distinguishes fractional from
+            # Markovian criticality claims before genome comparison.
+            _FRACTIONAL_ORDER_KEYWORDS = {
+                "fractional-order", "fractional order", "fractional calculus",
+                "fractional derivative", "caputo", "riemann-liouville",
+                "grünwald-letnikov", "grunwald-letnikov", "mittag-leffler",
+                "fractional differential", "fractional dynamics",
+                "adomian decomposition", "adomian", "fractional hopfield",
+                "fractional memristor", "fractional-order memrist",
+                "non-integer order", "non-integer-order",
+            }
+            _MEMORY_KERNEL_KEYWORDS = {
+                "memory kernel", "memory-kernel", "non-markovian",
+                "non markovian", "nonmarkovian", "history-dependent",
+                "history dependent", "long-range memory", "long range memory",
+                "memory effect", "memory effects", "fading memory",
+                "hereditary", "viscoelastic memory", "power-law memory",
+                "coupling strength", "memristive", "memristor",
+                "electromagnetic radiation", "hidden attractor",
+                "hidden chaotic", "dual-wing", "dual wing",
+            }
+            _has_fractional = any(kw in _nk_lower_ec for kw in _FRACTIONAL_ORDER_KEYWORDS)
+            _has_memory_kernel = any(kw in _nk_lower_ec for kw in _MEMORY_KERNEL_KEYWORDS)
+            _memory_kernel_bonus = 0.0
+            if _has_fractional and _has_memory_kernel:
+                _memory_kernel_bonus = 0.10
+                total_score += _memory_kernel_bonus
+                node["memory_kernel"] = "fractional"
+                node.setdefault("memory_kernel_signals", []).append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "fractional_keywords_matched": [
+                        kw for kw in _FRACTIONAL_ORDER_KEYWORDS
+                        if kw in _nk_lower_ec
+                    ],
+                    "memory_keywords_matched": [
+                        kw for kw in _MEMORY_KERNEL_KEYWORDS
+                        if kw in _nk_lower_ec
+                    ],
+                    "bonus_applied": _memory_kernel_bonus,
+                    "source": "fractional_memory_kernel_detection",
+                    "inv073_challenge": (
+                        "Paper demonstrates criticality sustained by a "
+                        "fractional (non-Markovian, history-dependent) memory "
+                        "mechanism. INV_073's implicit assumption that "
+                        "criticality navigation is fully characterized by "
+                        "instantaneous coupling-strength tuning is strained: "
+                        "the critical ridge can be maintained by memory-kernel "
+                        "structure (fractional order parameter) rather than "
+                        "Markovian coupling alone. CONVERGE mappings to INV_073 "
+                        "must distinguish memory_kernel=fractional from "
+                        "memory_kernel=markovian to preserve causal resolution."
+                    ),
+                })
+                print(f"  [MEMORY-KERNEL] +{_memory_kernel_bonus:.2f} bonus: "
+                      f"fractional-order non-Markovian memory kernel detected "
+                      f"— tagged memory_kernel=fractional (INV_073 challenge: "
+                      f"history-dependent criticality ≠ Markovian criticality)")
+            elif _has_fractional and not _has_memory_kernel:
+                # Fractional calculus mentioned but no memory kernel language —
+                # weaker signal, tag but don't boost
+                node.setdefault("memory_kernel", "unspecified")
+            elif _has_memory_kernel and not _has_fractional:
+                # Memory language without fractional order — standard memristive
+                node.setdefault("memory_kernel", "integer")
 
             # ── Spectral-heterogeneity signal for O21 (γ-correlation) ────────
             # Papers reporting per-layer variation in compression ratios or
@@ -3518,13 +3974,69 @@ class Consolidator:
         """
         Minimal targeted update of one node given new knowledge.
         Returns a delta dict — only the fields that changed.
+
+        Confirmation-surplus gate: before renormalization, checks each
+        invariant on the node for confirmation surplus (confirmations -
+        challenges > CONFIRMATION_SURPLUS_THRESHOLD with zero challenges).
+        Flagged invariants are annotated in the prompt with
+        ADVERSARIAL_PROBE_REQUIRED, preventing the LLM from further
+        confirming them and forcing falsification-oriented updates instead.
+        This prevents confirmation runaway on high-surplus invariants by
+        structurally injecting adversarial challenge demands into the
+        renormalization pass.
         """
         import re
 
         # Cap fields to keep prompt size bounded regardless of node growth
         compress_text = node.get('compress', '')[:500]
         invariants    = node.get('invariants', [])[:15]   # max 15 invariants in prompt
-        inv_text      = ', '.join(invariants)
+
+        # ── Confirmation-surplus gate (adversarial probe injection) ────────
+        # Check each invariant for confirmation surplus. When an invariant
+        # has confirmation_count > threshold and zero challenges, annotate
+        # it with [ADVERSARIAL_PROBE_REQUIRED] in the prompt so the LLM
+        # is structurally forced to challenge rather than further confirm.
+        CONF_SURPLUS_RENORM_THRESHOLD = 5
+        _blocked_invs = set(node.get("_confirmation_surplus_blocked", []))
+        _inv_metadata = node.get("_invariant_metadata", {})
+        annotated_invariants = []
+        _n_adversarial_flagged = 0
+        for inv in invariants:
+            if inv in _blocked_invs:
+                # Inject adversarial probe annotation
+                _meta = _inv_metadata.get(inv[:120], {})
+                _conf_count = _meta.get("confirmations", 0)
+                _chal_count = _meta.get("challenges", 0)
+                annotated_invariants.append(
+                    f"{inv} [ADVERSARIAL_PROBE_REQUIRED: {_conf_count} "
+                    f"confirmations, {_chal_count} challenges — DO NOT "
+                    f"CONFIRM, challenge or falsify instead]"
+                )
+                _n_adversarial_flagged += 1
+            else:
+                annotated_invariants.append(inv)
+
+        inv_text = ', '.join(annotated_invariants)
+
+        # Build adversarial injection block for the prompt when any
+        # invariants are flagged — forces the LLM to produce challenges
+        _adversarial_block = ""
+        if _n_adversarial_flagged > 0:
+            _adversarial_block = (
+                f"\n\nADVERSARIAL GATE: {_n_adversarial_flagged} invariant(s) "
+                f"marked [ADVERSARIAL_PROBE_REQUIRED] have confirmation "
+                f"surplus above threshold with insufficient challenges. "
+                f"You MUST NOT add further confirmations for these invariants. "
+                f"Instead: (1) identify what would falsify each flagged "
+                f"invariant, (2) specify boundary conditions where it breaks, "
+                f"(3) name an alternative mechanism producing identical "
+                f"observables. Add these as NEW_OBLIGATIONS, not as "
+                f"NEW_INVARIANTS. Confirmation accumulation without "
+                f"adversarial testing is epistemically void."
+            )
+            print(f"  [RENORM-ADVERSARIAL] {_n_adversarial_flagged} invariant(s) "
+                  f"on {node['id'][:40]} flagged for adversarial probe "
+                  f"(confirmation surplus gate active)")
 
         prompt = (
             f"EXISTING NODE:\n"
@@ -3534,6 +4046,7 @@ class Consolidator:
             f"Current invariants: {inv_text}\n"
             f"Current coherence_score: {node.get('coherence_score', '?')}\n\n"
             f"NEW KNOWLEDGE:\n{new_knowledge[:2000]}"
+            f"{_adversarial_block}"
         )
 
         message = self._api_call(
@@ -4642,6 +5155,43 @@ class Consolidator:
                 # encapsulation — it cannot be cited as load-bearing evidence
                 # until at least one adversarial challenge is recorded.
                 if surplus > CONFIRMATION_SURPLUS_THRESHOLD and n_chal == 0:
+                    # ── Falsification profile check (Seed Integrity Rule 2) ──
+                    # An invariant with confirmation_count > threshold and zero
+                    # challenges edges is epistemically under-constrained. Its
+                    # apparent robustness may reflect preferential attachment
+                    # (citation momentum) rather than genuine empirical load-
+                    # bearing. The falsification_profile field records this
+                    # structural deficiency so downstream scoring can discount
+                    # the invariant's weight until adversarial testing occurs.
+                    _falsification_profile = {
+                        "status": "UNDER_CONSTRAINED",
+                        "confirmation_count": n_conf,
+                        "challenge_count": 0,
+                        "surplus": surplus,
+                        "epistemic_weight_discount": max(0.1, 1.0 - (surplus / (surplus + 5.0))),
+                        "reason": (
+                            f"Invariant has {n_conf} confirmations and ZERO "
+                            f"challenge edges — epistemically under-constrained. "
+                            f"Confirmation surplus without adversarial testing "
+                            f"violates Seed Integrity Rule 2: high-confirmation "
+                            f"invariants must not accrue epistemic weight without "
+                            f"adversarial exposure. Weight discounted by "
+                            f"{1.0 - max(0.1, 1.0 - (surplus / (surplus + 5.0))):.2f} "
+                            f"until at least one challenge edge is recorded."
+                        ),
+                        "required_actions": [
+                            "Record at least one falsification criterion",
+                            "Identify alternative mechanism producing same observables",
+                            "Specify boundary conditions under which claim breaks",
+                        ],
+                        "inv094_specific": (
+                            "INV_094 CHALLENGE: this invariant has accumulated "
+                            "confirmation surplus without a stated falsifier, "
+                            "boundary regime, or named competitor mechanism. "
+                            "Its apparent robustness is a symptom of under-"
+                            "testing rather than structural necessity."
+                        ) if "inv_094" in inv_text.lower() or "inv094" in inv_text.lower() or n_conf == max(_inv_confirmations.values(), default=0) else None,
+                    }
                     _probe_entry = {
                         "invariant": inv_text[:120],
                         "confirmations": n_conf,
@@ -4649,6 +5199,7 @@ class Consolidator:
                         "surplus": surplus,
                         "mandatory_falsification": True,
                         "encapsulation_blocked": True,
+                        "falsification_profile": _falsification_profile,
                         "probe_token": (
                             f"MANDATORY_FALSIFICATION_BEFORE_ENCAPSULATION:"
                             f"surplus={surplus},challenges=0"
@@ -4674,6 +5225,9 @@ class Consolidator:
                           f"conf={n_conf}, chal=0, surplus={surplus} > {CONFIRMATION_SURPLUS_THRESHOLD} "
                           f"→ MANDATORY FALSIFICATION before next encapsulation "
                           f"(zero challenges = unfalsified axiom risk)")
+                    print(f"  [FALSIFICATION-PROFILE] status=UNDER_CONSTRAINED, "
+                          f"weight_discount={_falsification_profile['epistemic_weight_discount']:.3f} "
+                          f"(Seed Integrity Rule 2: no epistemic weight without adversarial testing)")
                 elif surplus > CONFIRMATION_SURPLUS_THRESHOLD:
                     _confirmation_surplus_flagged.add(inv_text)
                     _entry = {
