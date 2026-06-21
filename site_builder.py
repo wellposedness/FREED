@@ -2644,6 +2644,54 @@ def _write_cycles(cycle_log: dict):
         if _snap_h_ratio is not None:
             ca_telemetry_snapshot["entropy_fraction_of_max"] = _snap_h_ratio
 
+        # O148 trajectory extension: embed per-step σ trajectory and
+        # per-step entropy trajectory into the snapshot so the dynamic
+        # evolution of σ and H is verifiable from a single snapshot
+        # record, closing the O148 challenge that a 200-step aggregate
+        # leaves temporal dynamics unverified.
+        _traj_per_step_sigma = ca_telemetry.get("per_step_sigma")
+        if isinstance(_traj_per_step_sigma, list) and len(_traj_per_step_sigma) >= 2:
+            ca_telemetry_snapshot["sigma_trajectory"] = _traj_per_step_sigma
+            ca_telemetry_snapshot["sigma_trajectory_n_steps"] = len(_traj_per_step_sigma)
+            _traj_s_mean = sum(_traj_per_step_sigma) / len(_traj_per_step_sigma)
+            _traj_s_var = sum((s - _traj_s_mean) ** 2 for s in _traj_per_step_sigma) / len(_traj_per_step_sigma)
+            ca_telemetry_snapshot["sigma_trajectory_mean"] = round(_traj_s_mean, 6)
+            ca_telemetry_snapshot["sigma_trajectory_std"] = round(_traj_s_var ** 0.5, 6)
+            # Fraction of per-step σ values inside [0.95, 1.05]
+            _traj_s_in_band = sum(1 for s in _traj_per_step_sigma if 0.95 <= s <= 1.05)
+            ca_telemetry_snapshot["sigma_trajectory_in_band_fraction"] = round(
+                _traj_s_in_band / len(_traj_per_step_sigma), 6
+            )
+
+        _traj_entropy_series = ca_telemetry.get("entropy_timeseries")
+        if isinstance(_traj_entropy_series, list) and len(_traj_entropy_series) >= 2:
+            ca_telemetry_snapshot["entropy_trajectory"] = _traj_entropy_series
+            ca_telemetry_snapshot["entropy_trajectory_n_steps"] = len(_traj_entropy_series)
+            try:
+                _traj_h_vals = [float(h) for h in _traj_entropy_series if h is not None]
+                if _traj_h_vals:
+                    _traj_h_mean = sum(_traj_h_vals) / len(_traj_h_vals)
+                    _traj_h_var = sum((h - _traj_h_mean) ** 2 for h in _traj_h_vals) / len(_traj_h_vals)
+                    ca_telemetry_snapshot["entropy_trajectory_mean"] = round(_traj_h_mean, 6)
+                    ca_telemetry_snapshot["entropy_trajectory_std"] = round(_traj_h_var ** 0.5, 6)
+            except (TypeError, ValueError):
+                pass
+
+        # O148: snapshot_completeness flag — True only when both σ trajectory
+        # AND α are present, meaning this single snapshot is sufficient for
+        # full O148 criticality tracking without a separate diagnostic pass.
+        _has_sigma_traj = "sigma_trajectory" in ca_telemetry_snapshot
+        _has_alpha = _snap_alpha is not None
+        _has_entropy = _snap_h_ratio is not None or "entropy_trajectory" in ca_telemetry_snapshot
+        ca_telemetry_snapshot["o148_snapshot_complete"] = _has_sigma_traj and _has_alpha and _has_entropy
+        ca_telemetry_snapshot["o148_fields_present"] = {
+            "sigma_trajectory": _has_sigma_traj,
+            "alpha": _has_alpha,
+            "entropy": _has_entropy,
+            "r2": _snap_r2 is not None,
+            "survival": criticality.get("survival_rate") is not None,
+        }
+
         summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
 
     # O148: Promote entropy_fraction_of_max to the per-step summary record

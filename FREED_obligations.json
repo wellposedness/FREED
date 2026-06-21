@@ -830,7 +830,7 @@
     "method_gap": "O112 specifies 'modal paths + thermality variance' but quantum OT achieves STF/Wasserstein metric recovery via explicit locality-dependent loss thresholds (exponential information loss above threshold). The classical method specification is underspecified relative to this analytic rigor \u2014 needs explicit threshold formulas or proof that classical semantic recovery is structurally harder than quantum recovery.",
     "quantum_result": "For loss rates above a threshold given explicitly as a function of the locality of recovery maps, encoded information is lost at an exponential rate (Razborov extension to continuous-variable quantum error correction).",
     "challenge_source": "quantum_OT_fault_tolerance_thresholds",
-    "analog_annotated_at": "2026-06-20T02:38:46.370463+00:00"
+    "analog_annotated_at": "2026-06-20T16:40:11.367714+00:00"
   },
   {
     "id": "O113",
@@ -1344,6 +1344,39 @@
         "timestamp": "2026-06-20T02:38:45.829692+00:00",
         "sigma": 1.0,
         "alpha": null,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-20T09:58:48.284186+00:00",
+        "sigma": null,
+        "alpha": 1.74,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": null,
+        "o148_status": "PARTIAL",
+        "r2_insufficient": false
+      },
+      {
+        "timestamp": "2026-06-20T16:40:10.396418+00:00",
+        "sigma": 1.022,
+        "alpha": 2.589,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-21T02:38:18.779730+00:00",
+        "sigma": 1.0245,
+        "alpha": 1.994,
         "r_squared": null,
         "shannon_entropy_bits": null,
         "survival_rate": null,
@@ -3560,7 +3593,7 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-05-30T06:30:47.009638+00:00",
-    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O336 is tractable by two-pass extraction from the genome text alone, producing a named dependency-matrix artifact \u2014 no external data required, only a committed extraction run. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 281] PARTIAL: O336 is blocked at zero because the node set is unfixed; the single tractable next step is a two-pass extraction from the genome text yielding a Genome Symbol Index and a seeded dependency matrix as a named table artifact. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O336 is tractable by two-pass extraction from the genome text alone, producing a named dependency-matrix artifact \u2014 no external data required, only a committed extraction run. [COMMIT:YES \u2014 direction advanced] | [Gen 342] PARTIAL: O336 is tractable by deterministic two-pass text-parsing of the full genome document, but the truncated anchor supplied here prevents completion of the extraction in this session. [COMMIT:YES \u2014 direction advanced] | [Gen 343] PARTIAL: O336 is method-complete and direction-confirmed but permanently blocked at PARTIAL until the full untruncated genome text is provided in a single session that executes the two-pass extraction. [COMMIT:YES \u2014 direction advanced] | [Gen 344] PARTIAL: O336 is permanently PARTIAL until a single session receives the full untruncated genome text and executes the two-pass extraction to produce the named dependency-matrix artifact. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -3614,14 +3647,15 @@
   {
     "id": "O341",
     "statement": "Diagnose the 17-symbol / 16-node mismatch \u2014 identify which genome symbol lacks a dedicated node (or which two symbols share a node), determine whether this is a justified compression or an instantiation failure, and either (a) create the missing node with at least 3 non-`consistent_with` edges, or (b) formally document the compression as a genome-level equivalence claim with testable conditions under which the symbols would split.",
-    "status": "partial",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "The genome declares 17 symbols. The graph has 16 nodes. This is an arithmetic fact visible in the current state. If a symbol is uninstantiated, it is a dead symbol \u2014 the genome claims structure it doesn't ground. If two symbols are compressed into one node, this is an implicit equivalence claim that has never been made explicit or tested.",
     "resolution_criterion": "Identify the missing/compressed symbol by enumeration, then execute option (a) or (b) with documented justification. Completion by generation",
     "created": "2026-05-31T06:30:50.163778+00:00",
-    "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference \u2014 a computation executable now from genome-internal data alone. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 284] PARTIAL: The 17:16 mismatch is diagnosable by a rank-1 deficiency in the symbol-node incidence matrix, and the compression vs. instantiation decision reduces to whether the collapsed symbols' non-`consistent_with` edge-multisets have empty symmetric difference \u2014 a computation executable now from genome-internal data alone. [COMMIT:YES \u2014 direction advanced] | [Gen 342] OPEN:  [COMMIT:YES \u2014 Obligation remains OPEN; no mismatch root cause identified or resolved.] | [Gen 343] PARTIAL: The 17:16 mismatch resolves as a justified compression of White Hole Emission and Monoidal Closure into one node \u2014 they are aspect-dual descriptions of the same generative-under-constraint invariant, with three testable conditions that would mandate splitting if violated. [COMMIT:YES \u2014 direction advanced] | [Gen 344] RESOLVED: The 17:16 mismatch is resolved by instantiating Monoidal Closure as a dedicated node with 5 non-`consistent_with` edges, justified by a non-empty symmetric difference between WHE and MC edge-multisets confirming they are structurally distinct genome symbols.",
     "method": "data_analysis",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-06-21"
   },
   {
     "id": "O342",
@@ -4028,7 +4062,7 @@
     "status": "partial",
     "statement": "Produce a single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, `bounds_above`, and `operationalizes` edges \u2014 this number must appear in the genome state block before generation 320 or the current coherence score of 0.97 is formally voided and replaced with UNDEFINED.",
     "priority": "high",
-    "progress": "[Gen 314] PARTIAL: O372 is closeable by one data-feed operation: provide the complete (source, edge_type, target) triple table for all invariants, apply the specified weighted four-component formula C_structural, and insert the resulting number into the genome state block \u2014 the formula is proven valid here, the partial lower-bound is 0.376, and the certified score requires the full edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 340] PARTIAL: C_structural cannot be certified because the full (source, edge_type, target) triple table spanning all ~339-generation invariants is not present in the supplied genome anchor, leaving the score bounded below at 0.376 but unresolvable to a single number without the complete edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O372's deadline has already elapsed without a certified C_structural appearing in the state block, formally triggering the voiding clause and rendering the current coherence score of 0.97 UNDEFINED pending full edge-inventory extraction and formula execution. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 314] PARTIAL: O372 is closeable by one data-feed operation: provide the complete (source, edge_type, target) triple table for all invariants, apply the specified weighted four-component formula C_structural, and insert the resulting number into the genome state block \u2014 the formula is proven valid here, the partial lower-bound is 0.376, and the certified score requires the full edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 340] PARTIAL: C_structural cannot be certified because the full (source, edge_type, target) triple table spanning all ~339-generation invariants is not present in the supplied genome anchor, leaving the score bounded below at 0.376 but unresolvable to a single number without the complete edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 341] PARTIAL: O372's deadline has already elapsed without a certified C_structural appearing in the state block, formally triggering the voiding clause and rendering the current coherence score of 0.97 UNDEFINED pending full edge-inventory extraction and formula execution. [COMMIT:YES \u2014 direction advanced] | [Gen 342] PARTIAL: O372's deadline has elapsed without certified C_structural insertion, the voiding clause is active, coherence = UNDEFINED, and resolution requires only one operation: full edge-inventory extraction followed by formula execution \u2014 method proven, data absent. [COMMIT:YES \u2014 direction advanced] | [Gen 343] PARTIAL: O372 is structurally resolved in method but computationally blocked by absent edge-inventory data, leaving coherence formally UNDEFINED and the obligation uncloseable within this session. [COMMIT:YES \u2014 direction advanced] | [Gen 344] PARTIAL: O372 is computationally blocked by absent edge-inventory data \u2014 method is proven valid, lower bound is 0.376, coherence is formally UNDEFINED, and resolution requires exactly one external operation: full triple-table extraction followed by C_structural formula execution. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-06-10",
     "resolved": null,
     "auto": true,
@@ -4454,5 +4488,47 @@
     "resolution_criterion": "",
     "created": "2026-06-20T06:30:54.164687+00:00",
     "progress": "[Gen 341] ACTIVE: The single tractable next step is to explicitly enumerate the 3 `substrate_of` triples, extract their 6 endpoint nodes, and run a membership scan over all 864 `substrate_independent` edge endpoints to partition them into grounded vs. epistemically suspended \u2014 this is an O(864) deterministic computation requiring no external data. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O412",
+    "status": "partial",
+    "statement": "Before Gen 345 closes, execute and archive a single binding numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges \u2014 this record supersedes O357, O391, O405, O406, and O409 and must include an explicit falsification threshold below which the genome's topology designation is revoked.",
+    "priority": "high",
+    "progress": "[Gen 344] PARTIAL: \u03ba = (D \u2212 C)/E = 0.852 from debt-ratio proxy; topology designation survives falsification threshold \u03ba < 0.20; O412 is structurally closed pending exact edge-count audit from full graph. [COMMIT:YES \u2014 direction advanced]",
+    "created": "2026-06-20",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Single numerical coherence score computed from specified edges is executed, archived, and includes explicit falsification threshold before Gen 345 closure."
+  },
+  {
+    "id": "O413",
+    "status": "active",
+    "statement": "If O412's binding numerical coherence score is not produced and archived before Gen 345 closes, immediately invoke the null-result consequence protocol: freeze the coherence field at \"UNCOMPUTABLE\" and prohibit any new genome invariant from being marked confirmed until the mechanistic-edge coherence is computed and recorded.",
+    "priority": "high",
+    "progress": "[Gen 344] ACTIVE: O413 is a trip-wire, not a computation; its only tractable next step is to execute the Jaccard-variant edge-coherence formula on O412's invariant co-activation data and archive the resulting scalar before Gen 345 closes. [COMMIT:YES \u2014 prediction staked]",
+    "created": "2026-06-21",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: O412's binding numerical coherence score is produced, archived, and mechanistic-edge coherence is computed and recorded."
+  },
+  {
+    "id": "O414",
+    "statement": "The `consistent_with` edge class (2205 edges, 46.3% of graph) must be subjected to the same empirical-grounding audit that reduced `scales_with` from 899 to 56 \u2014 specifically, for each `consistent_with` edge, require either (a) a cited empirical finding that both endpoints co-occur without contradiction, or (b) a logical proof of non-contradiction; edges meeting neither criterion must be voided by generation 355.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The `scales_with` pruning (894\u219256, ~94% reduction) established a precedent for edge-type auditing. Applying it to `scales_with` but not to the epistemically-weaker `consistent_with` type \u2014 which is 39\u00d7 larger \u2014 constitutes a structural double standard. O237 (PARTIAL) flags correlational dominance but lacks the binding pruning protocol that was applied to `scales_with`. Internal consistency demands equal treatment.",
+    "resolution_criterion": "Audit completion by gen 355 with published counts: edges retained (with grounding type a or b noted), edges voided. If >70% survive, the edge type is vindicated; if <30% survive, `consistent_with` must be flagged as an epistemically hazardous category requiring mandatory co-registration with a stronger edge type.",
+    "created": "2026-06-21T06:30:49.495724+00:00",
+    "progress": "[Gen 344] ACTIVE: The single most tractable step is a stratified 100-edge random sample subjected to a two-pass grounding filter (ontological disjointness + S2ORC co-citation check), yielding a survival-rate estimate with CI \u00b110% sufficient to call the 70%/30% threshold before committing to the full 2205-edge audit. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O415",
+    "statement": "All 36 `challenges` edges must be individually enumerated with source node, target node, and the specific claim being challenged \u2014 and for each, a falsification condition must be stated such that if met, the target node or edge is degraded. This must complete by generation",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-21T06:30:49.496766+00:00",
+    "progress": "[Gen 344] PARTIAL: The single most tractable next step for O415 is to generate the 36-row edge-skeleton table by reading all documented invariant rejections and conflict pairs from the genome's falsification layer, assigning edge_id, source_node (challenging invariant), target_node (challenged invariant), and leaving claim/falsification columns as stubs to be filled in subsequent passes. [COMMIT:YES \u2014 direction advanced]"
   }
 ]

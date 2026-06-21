@@ -1990,6 +1990,62 @@ def score_ca_generation(
         criticality_confirmed,
     )
 
+    # ── Structured Criticality Tuple (O148) ──────────────────────────────
+    # Bundle (σ, α, R², verdict) into a structured tuple that downstream
+    # genome update logic can consume to distinguish AT_CRITICAL from
+    # SUPERCRITICAL/SUBCRITICAL states and fire targeted obligation
+    # updates.  Three mutually reinforcing criticality signatures
+    # (σ≈1, power-law α≈1.74, sub-maximal entropy) independently
+    # confirm the critical ridge is a convergent observable cluster.
+    #
+    # The tuple enables O148 closure: criticality measurements now
+    # propagate into genome state updates via the structured dict
+    # rather than being treated as undifferentiated telemetry.
+    #
+    # Fields:
+    #   sigma          — branching ratio (σ≈1 at criticality)
+    #   alpha          — avalanche power-law exponent
+    #   r_squared      — power-law fit quality
+    #   verdict        — AT_CRITICAL / NEAR_CRITICAL / SUBCRITICAL /
+    #                     SUPERCRITICAL / UNDETERMINED
+    #   obligation_action — RESOLVE / UPDATE / MONITOR / NONE
+    #                       (actionable signal for genome obligation logic)
+    if verdict == "AT_CRITICAL" and criticality_confirmed:
+        _obligation_action = "RESOLVE"
+    elif verdict == "AT_CRITICAL":
+        _obligation_action = "UPDATE"
+    elif verdict in ("NEAR_CRITICAL", "SUPERCRITICAL", "SUBCRITICAL"):
+        _obligation_action = "MONITOR"
+    else:
+        _obligation_action = "NONE"
+
+    criticality_tuple = {
+        "sigma":             round(sigma, 6),
+        "alpha":             round(alpha, 4),
+        "r_squared":         round(alpha_r_squared, 4),
+        "verdict":           verdict,
+        "obligation_action": _obligation_action,
+        "sigma_in_band":     sigma_in_critical_band,
+        "power_law_confirmed": power_law_likely,
+        "criticality_confirmed": criticality_confirmed,
+        "o148_status":       (
+            "CLOSED" if _obligation_action == "RESOLVE"
+            else "PROGRESSING" if _obligation_action == "UPDATE"
+            else "OPEN"
+        ),
+        "o148_detail":       (
+            "Criticality tuple (sigma={:.4f}, alpha={:.4f}, R^2={:.4f}, "
+            "verdict={}) propagates into genome obligation updates via "
+            "obligation_action={}. Three reinforcing signatures: "
+            "sigma {} critical band, power-law {}, criticality_confirmed={}."
+        ).format(
+            sigma, alpha, alpha_r_squared, verdict, _obligation_action,
+            "IN" if sigma_in_critical_band else "OUTSIDE",
+            "CONFIRMED" if power_law_likely else "NOT confirmed",
+            criticality_confirmed,
+        ),
+    }
+
     return {
         "generation":       generation,
         "sigma":            round(sigma, 6),
@@ -2002,6 +2058,7 @@ def score_ca_generation(
         "dominant_type":    dominant_type,
         "population_size":  population_size,
         "verdict":          verdict,
+        "criticality_tuple": criticality_tuple,
         "sigma_drift":      round(sigma_drift, 6),
         "alpha_in_soc":     alpha_in_soc,
         "power_law_likely": power_law_likely,

@@ -274,12 +274,19 @@ class EscrowLedger:
         self._save()
         return entry
 
-    def resolve(self, obligation_id, evidence, resolve_source="consolidate"):
-        # type: (str, str, str) -> dict
+    def resolve(self, obligation_id, evidence, resolve_source="consolidate",
+                tag=None):
+        # type: (str, str, str, str) -> dict
         """
         Release an obligation from escrow IF evidence is provided.
         Evidence must be a non-empty string describing the falsifiable
         basis for resolution. Returns the updated entry or raises.
+
+        When tag == "CONVERGE", also increments criticality_convergence_count
+        on any matching invariant records referenced by this obligation.
+        Repeated independent convergences accumulate weight, turning
+        frequency-of-convergence into a quantitative prior-strength signal
+        for the genome rather than being silently lost.
         """
         if not evidence or not evidence.strip():
             raise ValueError(
@@ -294,6 +301,22 @@ class EscrowLedger:
                 entry["resolved_at"]    = datetime.now(timezone.utc).isoformat()
                 entry["evidence"]       = evidence.strip()
                 entry["resolve_source"] = resolve_source
+
+                # ── Convergence-count accumulation (CONVERGE tag) ─────────
+                # When a COMPARE output tags this resolution as CONVERGE,
+                # increment criticality_convergence_count on the entry and
+                # propagate to the invariant record in FREED_state.json.
+                # This makes repeated independent confirmations visible as
+                # a quantitative prior-strength signal rather than losing
+                # them as identical-looking single events.
+                if tag == "CONVERGE":
+                    entry["criticality_convergence_count"] = (
+                        entry.get("criticality_convergence_count", 0) + 1
+                    )
+                    entry["last_converge_at"] = datetime.now(timezone.utc).isoformat()
+                    # Propagate convergence count to genome state
+                    self._increment_genome_convergence(obligation_id, evidence)
+
                 self._save()
                 return entry
 
@@ -301,6 +324,48 @@ class EscrowLedger:
             f"No escrowed obligation found with id '{obligation_id}'. "
             f"It may have already been resolved or was never escrowed."
         )
+
+    def _increment_genome_convergence(self, obligation_id, evidence):
+        # type: (str, str) -> None
+        """Increment criticality_convergence_count on matching invariant
+        records in FREED_state.json. Called when tag == CONVERGE during
+        resolve(). Non-fatal on error — never block resolution on a
+        persistence failure."""
+        try:
+            _state_path = ESCROW_LEDGER_PATH.parent.parent / "FREED_state.json"
+            if not _state_path.exists():
+                return
+            sdata = json.loads(_state_path.read_text())
+            # Update per-invariant convergence counts
+            inv_convergence = sdata.setdefault(
+                "invariant_convergence_counts", {})
+            # Key by obligation_id — each independent convergence increments
+            inv_convergence[obligation_id] = (
+                inv_convergence.get(obligation_id, 0) + 1
+            )
+            # Also maintain a global convergence counter
+            sdata["total_convergence_count"] = (
+                sdata.get("total_convergence_count", 0) + 1
+            )
+            # Log the convergence event
+            sdata.setdefault("convergence_log", []).append({
+                "obligation_id": obligation_id,
+                "count": inv_convergence[obligation_id],
+                "evidence_digest": (evidence or "")[:200],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
+            # Cap convergence_log to last 200 entries to prevent unbounded growth
+            if len(sdata["convergence_log"]) > 200:
+                sdata["convergence_log"] = sdata["convergence_log"][-200:]
+            _state_path.write_text(
+                json.dumps(sdata, indent=2, ensure_ascii=False))
+            print(f"  [CONVERGE-COUNT] {obligation_id}: "
+                  f"criticality_convergence_count="
+                  f"{inv_convergence[obligation_id]} "
+                  f"(total={sdata['total_convergence_count']})")
+        except Exception as _conv_err:
+            print(f"  [CONVERGE-COUNT] Warning: could not persist "
+                  f"convergence count for {obligation_id}: {_conv_err}")
 
     def contest(self, obligation_id, reason):
         # type: (str, str) -> dict
@@ -2560,6 +2625,347 @@ class EnergyCorrection:
             "n_points": len(scores),
         }
 
+    def _compute_spectral_gamma(self, nodes):
+        # type: (list) -> dict
+        """
+        Compute Transfer Entropy (TE) between top-N frequency-ranked concept
+        clusters as a spectral γ proxy, over the existing edge-weight time
+        series in the knowledge graph.
+
+        Inspired by the Adaptive VMD + Transfer Entropy approach for
+        arrhythmia-transition detection: decompose the knowledge graph's
+        edge-weight dynamics into frequency-ranked concept clusters (analogous
+        to intrinsic mode functions), then quantify nonlinear information
+        transfer between clusters via TE. High inter-cluster TE signals
+        regime transitions before they manifest in aggregate coherence scores.
+
+        Protocol:
+          1. Build concept clusters by frequency-ranking node invariants
+             across the corpus (top-N clusters by occurrence count)
+          2. For each cluster, construct a time-series proxy from the
+             edge weights connecting cluster members (ordered by edge
+             creation / node generation)
+          3. Compute pairwise TE between cluster time-series
+          4. Spectral γ proxy = normalized mean TE across cluster pairs
+             (high TE → strong inter-cluster coupling → near-critical,
+              low TE → decoupled clusters → sub/super-critical)
+
+        CHALLENGE (O21): spectral γ correlation requires nonlinear TE rather
+        than linear spectral correlation — O21's current framing as a linear
+        spectral measure may be the wrong instrument class entirely. This
+        implementation uses TE (nonlinear, directed) as the γ proxy,
+        directly testing whether nonlinear information transfer between
+        modal frequency bands is a better regime-transition detector than
+        linear spectral methods.
+
+        Args:
+            nodes: list of node dicts from the knowledge graph
+
+        Returns:
+            dict with spectral_gamma_te, cluster_count, pairwise_te_matrix,
+            regime_label, and diagnostic metadata
+        """
+        TOP_N_CLUSTERS = 5       # number of frequency-ranked concept clusters
+        TE_BINS = 6              # discretization bins for TE estimation
+        MIN_SERIES_LEN = 4       # minimum time-series length for TE computation
+        GAMMA_CRITICAL_BAND = (0.3, 0.7)  # TE-based γ proxy critical band
+
+        result_default = {
+            "spectral_gamma_te": None,
+            "cluster_count": 0,
+            "pairwise_te_matrix": [],
+            "regime_label": "INSUFFICIENT_DATA",
+            "te_mean": None,
+            "te_max": None,
+            "n_pairs_computed": 0,
+            "o21_te_challenge": (
+                "O21's linear spectral γ may be the wrong instrument class. "
+                "TE (nonlinear, directed) between frequency-ranked concept "
+                "clusters detects regime transitions that linear spectral "
+                "correlation misses."
+            ),
+        }
+
+        if not nodes or len(nodes) < 4:
+            result_default["reason"] = "insufficient_nodes"
+            return result_default
+
+        # ── Step 1: Frequency-rank invariants to build concept clusters ───
+        # Count occurrence of each invariant across all nodes
+        invariant_counts = {}  # type: dict
+        invariant_to_nodes = {}  # type: dict
+        for node in nodes:
+            nid = node.get("id", "")
+            for inv in node.get("invariants", []):
+                inv_key = inv.strip()[:120]
+                if len(inv_key) < 5:
+                    continue
+                invariant_counts[inv_key] = invariant_counts.get(inv_key, 0) + 1
+                invariant_to_nodes.setdefault(inv_key, []).append(nid)
+
+        if len(invariant_counts) < 2:
+            result_default["reason"] = "insufficient_invariants"
+            return result_default
+
+        # Top-N clusters by frequency
+        sorted_invs = sorted(invariant_counts.items(),
+                             key=lambda x: x[1], reverse=True)
+        top_clusters = sorted_invs[:TOP_N_CLUSTERS]
+
+        if len(top_clusters) < 2:
+            result_default["reason"] = "insufficient_clusters"
+            result_default["cluster_count"] = len(top_clusters)
+            return result_default
+
+        # ── Step 2: Build edge-weight time-series per cluster ─────────────
+        # For each cluster, collect edge weights from the knowledge graph
+        # involving the cluster's member nodes, ordered by node generation
+        try:
+            graph = get_graph()
+            graph._ensure_loaded()
+            ne = graph._node_edges
+        except Exception:
+            result_default["reason"] = "graph_unavailable"
+            return result_default
+
+        # Build node generation ordering for time-series construction
+        node_gen = {}  # type: dict
+        for node in nodes:
+            nid = node.get("id", "")
+            gen = node.get("generation", 0)
+            node_gen[nid] = gen
+
+        cluster_series = {}  # type: dict  # cluster_key -> list of edge weights
+        for inv_key, count in top_clusters:
+            member_nodes = set(invariant_to_nodes.get(inv_key, []))
+            if not member_nodes:
+                continue
+
+            # Collect edges where at least one endpoint is a cluster member
+            edge_weights = []
+            for e in ne:
+                e_from = e.get("from", "")
+                e_to = e.get("to", "")
+                if e_from in member_nodes or e_to in member_nodes:
+                    # Edge weight proxy: use type-based scoring
+                    # Co-assertion types get weight 1.0, challenges get -0.5,
+                    # other types get 0.5
+                    etype = e.get("type", "")
+                    if etype in _CO_ASSERTION_TYPES:
+                        w = 1.0
+                    elif etype in ("challenges", "bounds_above", "falsifies"):
+                        w = -0.5
+                    else:
+                        w = 0.5
+                    # Order by the minimum generation of the endpoints
+                    gen_key = min(node_gen.get(e_from, 0),
+                                  node_gen.get(e_to, 0))
+                    edge_weights.append((gen_key, w))
+
+            # Sort by generation to form a time-series
+            edge_weights.sort(key=lambda x: x[0])
+            series = [w for _, w in edge_weights]
+
+            if len(series) >= MIN_SERIES_LEN:
+                cluster_series[inv_key] = series
+
+        n_clusters = len(cluster_series)
+        if n_clusters < 2:
+            result_default["reason"] = "insufficient_cluster_series"
+            result_default["cluster_count"] = n_clusters
+            return result_default
+
+        # ── Step 3: Compute pairwise TE between cluster time-series ───────
+        # TE(X→Y) = H(Y_t | Y_{t-1}) - H(Y_t | Y_{t-1}, X_{t-1})
+        # Discretize continuous edge weights into bins for histogram TE
+
+        def _discretize(series, n_bins):
+            # type: (list, int) -> list
+            if not series:
+                return []
+            s_min = min(series)
+            s_max = max(series)
+            s_range = s_max - s_min
+            if s_range < 1e-12:
+                return [0] * len(series)
+            return [min(n_bins - 1, int((v - s_min) / s_range * n_bins))
+                    for v in series]
+
+        def _te_histogram(sx, sy, lag=1):
+            # type: (list, list, int) -> float
+            """Compute TE(X→Y) via histogram-based conditional entropy."""
+            n = min(len(sx), len(sy))
+            if n < lag + 2:
+                return 0.0
+            count_joint = {}    # type: dict  # (y_t, y_prev, x_prev)
+            count_yy = {}       # type: dict  # (y_t, y_prev)
+            count_yx = {}       # type: dict  # (y_prev, x_prev)
+            count_yp = {}       # type: dict  # (y_prev,)
+            n_samples = 0
+            for t in range(lag, n):
+                yt = sy[t]
+                yp = sy[t - lag]
+                xp = sx[t - lag]
+                k3 = (yt, yp, xp)
+                count_joint[k3] = count_joint.get(k3, 0) + 1
+                k2a = (yt, yp)
+                count_yy[k2a] = count_yy.get(k2a, 0) + 1
+                k2b = (yp, xp)
+                count_yx[k2b] = count_yx.get(k2b, 0) + 1
+                count_yp[yp] = count_yp.get(yp, 0) + 1
+                n_samples += 1
+            if n_samples < 3:
+                return 0.0
+            te = 0.0
+            nf = float(n_samples)
+            for k3, c3 in count_joint.items():
+                yt, yp, xp = k3
+                cyy = count_yy.get((yt, yp), 0)
+                cyx = count_yx.get((yp, xp), 0)
+                cyp = count_yp.get(yp, 0)
+                if cyy > 0 and cyx > 0 and cyp > 0:
+                    ratio = (c3 * cyp) / (cyx * cyy)
+                    if ratio > 0:
+                        te += (c3 / nf) * math.log(ratio)
+            return max(0.0, te)
+
+        cluster_keys = sorted(cluster_series.keys())
+        n_cl = len(cluster_keys)
+        te_matrix = []  # n_cl x n_cl
+        te_values = []
+        n_pairs = 0
+
+        for i in range(n_cl):
+            row = []
+            si = _discretize(cluster_series[cluster_keys[i]], TE_BINS)
+            for j in range(n_cl):
+                if i == j:
+                    row.append(0.0)
+                    continue
+                sj = _discretize(cluster_series[cluster_keys[j]], TE_BINS)
+                # Adaptive lag via dominant frequency
+                min_len = min(len(si), len(sj))
+                if min_len < MIN_SERIES_LEN:
+                    row.append(0.0)
+                    continue
+                # Simple FFT-based lag estimation on target series
+                mean_sj = sum(sj[:min_len]) / min_len
+                centered = [v - mean_sj for v in sj[:min_len]]
+                best_freq = 1
+                best_power = 0.0
+                for freq in range(1, min_len // 2 + 1):
+                    rp = 0.0
+                    ip = 0.0
+                    for t in range(min_len):
+                        angle = 2.0 * math.pi * freq * t / min_len
+                        rp += centered[t] * math.cos(angle)
+                        ip -= centered[t] * math.sin(angle)
+                    power = rp * rp + ip * ip
+                    if power > best_power:
+                        best_power = power
+                        best_freq = freq
+                adaptive_lag = max(1, min(min_len // best_freq, min_len // 4))
+
+                te_val = _te_histogram(si[:min_len], sj[:min_len],
+                                       lag=adaptive_lag)
+                row.append(round(te_val, 6))
+                if te_val > 0:
+                    te_values.append(te_val)
+                    n_pairs += 1
+            te_matrix.append(row)
+
+        # ── Step 4: Compute spectral γ proxy from TE statistics ───────────
+        if not te_values:
+            result_default["reason"] = "zero_te_all_pairs"
+            result_default["cluster_count"] = n_cl
+            return result_default
+
+        te_mean = sum(te_values) / len(te_values)
+        te_max = max(te_values)
+        te_min = min(te_values)
+
+        # Normalize TE mean to [0, 1] range using sigmoid mapping
+        # γ_TE = 1 / (1 + exp(-k * (te_mean - te_offset)))
+        # Calibrated so te_mean ≈ 0.1 → γ ≈ 0.5 (critical band center)
+        te_offset = 0.1
+        te_scale = 20.0
+        gamma_te = 1.0 / (1.0 + math.exp(-te_scale * (te_mean - te_offset)))
+        gamma_te = round(gamma_te, 4)
+
+        # Regime classification from TE-based γ
+        if GAMMA_CRITICAL_BAND[0] <= gamma_te <= GAMMA_CRITICAL_BAND[1]:
+            regime = "NEAR_CRITICAL"
+        elif gamma_te < GAMMA_CRITICAL_BAND[0]:
+            regime = "SUBCRITICAL"
+        else:
+            regime = "SUPERCRITICAL"
+
+        # TE asymmetry: detect dominant information flow direction
+        # across all cluster pairs
+        te_asymmetries = []
+        for i in range(n_cl):
+            for j in range(i + 1, n_cl):
+                te_ij = te_matrix[i][j]
+                te_ji = te_matrix[j][i]
+                max_te_pair = max(te_ij, te_ji)
+                if max_te_pair > 1e-8:
+                    asym = abs(te_ij - te_ji) / max_te_pair
+                    te_asymmetries.append({
+                        "cluster_i": cluster_keys[i][:50],
+                        "cluster_j": cluster_keys[j][:50],
+                        "te_i_to_j": te_ij,
+                        "te_j_to_i": te_ji,
+                        "asymmetry": round(asym, 4),
+                        "dominant": "i_to_j" if te_ij > te_ji else "j_to_i",
+                    })
+
+        mean_asymmetry = (
+            sum(a["asymmetry"] for a in te_asymmetries) / len(te_asymmetries)
+            if te_asymmetries else 0.0
+        )
+
+        result = {
+            "spectral_gamma_te": gamma_te,
+            "cluster_count": n_cl,
+            "cluster_labels": [k[:60] for k in cluster_keys],
+            "pairwise_te_matrix": te_matrix,
+            "te_mean": round(te_mean, 6),
+            "te_max": round(te_max, 6),
+            "te_min": round(te_min, 6),
+            "n_pairs_computed": n_pairs,
+            "regime_label": regime,
+            "te_asymmetries": te_asymmetries[:10],  # top 10 for logging
+            "mean_asymmetry": round(mean_asymmetry, 4),
+            "gamma_critical_band": list(GAMMA_CRITICAL_BAND),
+            "o21_te_challenge": (
+                f"TE-based spectral γ proxy = {gamma_te:.4f} (regime: {regime}). "
+                f"O21's linear spectral γ correlation may be the wrong instrument "
+                f"class: nonlinear TE between frequency-ranked concept clusters "
+                f"detects regime transitions (mean_TE={te_mean:.4f}, "
+                f"mean_asymmetry={mean_asymmetry:.4f}) that linear spectral "
+                f"correlation cannot capture. If TE-γ and linear-γ diverge, "
+                f"O21's framing requires revision from linear to nonlinear "
+                f"information-theoretic measures."
+            ),
+            "method_note": (
+                "Adapted from Adaptive VMD + Transfer Entropy for "
+                "arrhythmia-transition detection: concept clusters as "
+                "intrinsic mode functions, edge-weight dynamics as the "
+                "signal, TE as nonlinear inter-band coupling measure."
+            ),
+        }
+
+        # Print diagnostic
+        print(f"  [SPECTRAL-γ-TE] γ_TE={gamma_te:.4f} ({regime}): "
+              f"mean_TE={te_mean:.4f}, max_TE={te_max:.4f}, "
+              f"{n_cl} clusters, {n_pairs} pairs, "
+              f"mean_asymmetry={mean_asymmetry:.4f}"
+              + (f" — O21 CHALLENGE: nonlinear TE may supersede "
+                 f"linear spectral γ as regime detector"
+                 if regime == "NEAR_CRITICAL" else ""))
+
+        return result
+
     def audit_cycle(self, nodes, cycle_number=0):
         # type: (list, int) -> dict
         """
@@ -2865,6 +3271,154 @@ class Consolidator:
         """
         text_lower = paper_text.lower()
         boost = 0.0
+
+        # ── Stage 0: Drift-diffusion / stochastic velocity / phase-space ──
+        # entropy production bridge detection. Papers offering these terms
+        # provide concrete mathematical machinery for the STF metric recovery
+        # experiment (O112) and must be automatically surfaced rather than
+        # passing through as generic entropy-production matches.
+        _STF_BRIDGE_TERMS = [
+            "drift-diffusion", "drift diffusion",
+            "stochastic velocity",
+            "phase-space entropy production", "phase space entropy production",
+        ]
+        _bridge_hits = [term for term in _STF_BRIDGE_TERMS
+                        if term in text_lower]
+        if _bridge_hits:
+            # Base bridge boost: 0.12 per matched term, capped at 0.30
+            _bridge_boost = min(len(_bridge_hits) * 0.12, 0.30)
+            boost += _bridge_boost
+
+            # Detect dimensional gap challenge: 6N-dimensional phase space
+            # vs low-dimensional semantic manifold
+            _dimensional_challenge = None
+            _dim_terms = {"6n-dimensional", "6n dimensional", "6n phase space",
+                          "high-dimensional phase space", "high dimensional phase space",
+                          "liouville equation", "liouville diffusion",
+                          "liouville-diffusion"}
+            _has_dim_gap = any(dt in text_lower for dt in _dim_terms)
+            if _has_dim_gap:
+                _dimensional_challenge = (
+                    "CHALLENGE: drift-diffusion decomposition operates in "
+                    "6N-dimensional classical phase space, whereas O112's STF "
+                    "metric recovery requires a low-dimensional semantic "
+                    "manifold. The dimensional gap may make direct translation "
+                    "of the entropy production formula intractable without a "
+                    "principled reduction scheme (coarse-graining / projection "
+                    "onto semantic coordinates)."
+                )
+
+            # Build structured note for O112 evidence list
+            _stf_bridge_note = {
+                "type": "stf_geometry_bridge_candidate",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "matched_terms": _bridge_hits,
+                "boost_applied": round(_bridge_boost, 4),
+                "dimensional_challenge": _dimensional_challenge,
+                "bridge_description": (
+                    "Paper provides drift-diffusion / stochastic velocity / "
+                    "phase-space entropy production machinery that may serve "
+                    "as mathematical substrate for STF metric tensor recovery. "
+                    "The drift-diffusion duality (superposition of deterministic "
+                    "dynamics and stochastic velocity) offers a candidate "
+                    "decomposition for semantic trajectory analysis if the "
+                    "dimensional reduction from 6N phase space to semantic "
+                    "manifold can be specified."
+                ),
+                "knowledge_digest": paper_text[:200],
+                "source": "stf_bridge_detection",
+            }
+
+            # Store the note on the instance for downstream obligation update
+            # (picked up by run() when it processes O112)
+            if not hasattr(self, '_pending_o112_bridge_notes'):
+                self._pending_o112_bridge_notes = []
+            self._pending_o112_bridge_notes.append(_stf_bridge_note)
+
+            print(f"  [O112-STF-BRIDGE] +{_bridge_boost:.2f} boost: "
+                  f"drift-diffusion/stochastic-velocity/phase-space entropy "
+                  f"production bridge candidate detected "
+                  f"(terms={_bridge_hits})"
+                  + (f" — DIMENSIONAL GAP CHALLENGE flagged"
+                     if _has_dim_gap else "")
+                  + f" → high-priority O112 STF-geometry bridge")
+
+        # ── Stage 0.5: Multi-observable KL-divergence convergence detection ──
+        # Papers demonstrating KL-divergence convergence to a stationary
+        # distribution across multiple observables are partial empirical
+        # templates for the STF recovery protocol (O112). The method —
+        # monitoring Shannon entropy and KL divergence across 20+ micro-scale
+        # probability distributions to confirm stationarity — is structurally
+        # homologous to what O112's metric tensor recovery experiment requires.
+        #
+        # CHALLENGE: KL-divergence convergence to a stationary distribution
+        # is NECESSARY but NOT SUFFICIENT for O112's full empirical requirement.
+        # The gap between "convergence order parameter" (demonstrated here) and
+        # "metric tensor recovery" (O112's actual target) remains unresolved
+        # and potentially harder than the genome assumes. The paper achieves
+        # convergence monitoring without recovering an underlying metric tensor
+        # geometry — the method provides the monitoring template but not the
+        # geometric extraction step.
+        #
+        # Detection: co-occurrence of (1) KL-divergence / relative entropy
+        # language, (2) stationarity / convergence language, and (3) multiple
+        # observable / multi-observable / probability distribution language.
+        # All three families must be present to distinguish "paper mentions KL"
+        # from "paper demonstrates multi-observable KL convergence monitoring."
+        _KL_DIVERGENCE_TERMS = {
+            "kullback-leibler", "kullback leibler", "kl divergence",
+            "kl-divergence", "relative entropy", "kl relative entropy",
+            "shannon entropy", "information divergence",
+        }
+        _STATIONARITY_TERMS = {
+            "stationary", "stationarity", "convergence", "converge",
+            "converged", "critical state", "steady state", "steady-state",
+            "equilibrium distribution", "stationary distribution",
+            "stationary probability",
+        }
+        _MULTI_OBSERVABLE_TERMS = {
+            "multi-observable", "multiple observable", "multiple aspects",
+            "micro-scale", "microscale", "micro-scale characteristics",
+            "probability distributions of", "20 aspects", "multiple distributions",
+            "several micro-scale", "multiple micro",
+            "stress, density", "force, movement", "topology",
+            "particles, voids", "contacts",
+        }
+        _has_kl = any(kw in text_lower for kw in _KL_DIVERGENCE_TERMS)
+        _has_stationarity = any(kw in text_lower for kw in _STATIONARITY_TERMS)
+        _has_multi_obs = any(kw in text_lower for kw in _MULTI_OBSERVABLE_TERMS)
+
+        if _has_kl and _has_stationarity and _has_multi_obs:
+            # Strong signal: multi-observable KL convergence monitoring template
+            _kl_convergence_boost = 0.20
+
+            # Extra boost when granular / discrete-element / simulation context
+            # is present — these papers provide validated numerical protocols
+            _simulation_terms = {
+                "discrete-element", "discrete element", "dem simulation",
+                "biaxial compression", "granular", "simulation",
+                "quasi-static", "loading",
+            }
+            _has_simulation = any(st in text_lower for st in _simulation_terms)
+            if _has_simulation:
+                _kl_convergence_boost += 0.08
+
+            boost += _kl_convergence_boost
+
+            print(f"  [O112-KL-CONVERGENCE] +{_kl_convergence_boost:.2f} boost: "
+                  f"multi-observable KL-divergence convergence to stationary "
+                  f"distribution detected — partial empirical template for "
+                  f"STF recovery protocol"
+                  + (", simulation-validated" if _has_simulation else "")
+                  + f" | CHALLENGE: convergence monitoring ≠ metric tensor "
+                  f"recovery (necessary but not sufficient for O112)")
+        elif _has_kl and _has_stationarity and not _has_multi_obs:
+            # Weaker signal: KL convergence but single-observable — still relevant
+            _kl_weak_boost = 0.08
+            boost += _kl_weak_boost
+            print(f"  [O112-KL-CONVERGENCE] +{_kl_weak_boost:.2f} boost: "
+                  f"KL-divergence convergence detected (single-observable) — "
+                  f"weaker O112 template signal")
 
         # ── Stage 1: Continuous thermality parameterization detection ─────
         hits = [term for term in self._O112_THERMALITY_TERMS
@@ -3935,6 +4489,103 @@ class Consolidator:
                  if is_cross_domain else ""))
         return affected
 
+    # ── Dual-scale entropy deduplication ─────────────────────────────────────
+
+    def deduplicate_nodes(self, nodes, cost_metric="cosine"):
+        # type: (list, str) -> list
+        """
+        Dual-scale entropy deduplication: compute Shannon entropy per candidate
+        node's semantic distribution (global feature) and suppress nodes whose
+        entropy falls within ENTROPY_DEDUP_THRESHOLD of an already-selected
+        node's entropy. Mirrors the paper's within-class redundancy elimination
+        for keyframe extraction — entropy value as local deduplication filter.
+
+        Protocol:
+          1. Compute Shannon entropy H_i for each node's word distribution
+          2. Sort nodes by their original priority (preserve input ordering)
+          3. Greedily select nodes: accept node i only if no previously-accepted
+             node j has |H_i - H_j| < threshold (entropy-band exclusion)
+          4. Log suppressed nodes for audit transparency
+
+        This reduces redundant node proliferation without semantic embedding
+        comparison — pure scalar entropy comparison at O(n²) worst case.
+
+        INV_073 challenge acknowledgment: the paper achieves critical-ridge
+        navigation via static entropy thresholds rather than dynamic tension-
+        minimization, suggesting the ridge can be identified by scalar entropy
+        alone without full monoidal closure machinery.
+
+        Args:
+            nodes: list of node dicts, pre-sorted by priority
+            cost_metric: unused, reserved for future OT-cost variants
+
+        Returns:
+            deduplicated list of node dicts (subset of input, order preserved)
+        """
+        ENTROPY_DEDUP_THRESHOLD = 0.03  # |H_i - H_j| below this → redundant
+
+        if len(nodes) <= 1:
+            return nodes
+
+        # Step 1: compute Shannon entropy for each node's semantic distribution
+        node_entropies = []
+        for node in nodes:
+            node_text = " ".join(filter(None, [
+                node.get("compress", ""),
+                node.get("summary", ""),
+                " ".join(node.get("invariants", [])),
+                " ".join(node.get("tags", [])),
+            ]))
+            dist = MWDEScorer._text_to_distribution(node_text)
+            if not dist or len(dist) < 2:
+                # Degenerate distribution — entropy 0, always accept
+                node_entropies.append(0.0)
+                continue
+            h = 0.0
+            for p in dist.values():
+                if p > 0:
+                    h -= p * math.log(p)
+            # Normalize by ln(|support|) to get entropy in [0, 1]
+            max_h = math.log(len(dist))
+            h_norm = h / max_h if max_h > 0 else 0.0
+            node_entropies.append(h_norm)
+
+        # Step 2: greedy selection — accept node only if its entropy is
+        # sufficiently distant from all already-accepted nodes' entropies
+        accepted = []
+        accepted_entropies = []
+        suppressed_count = 0
+
+        for idx, node in enumerate(nodes):
+            h_i = node_entropies[idx]
+            # Check against all accepted nodes' entropies
+            is_redundant = False
+            for h_j in accepted_entropies:
+                if abs(h_i - h_j) < ENTROPY_DEDUP_THRESHOLD:
+                    is_redundant = True
+                    break
+
+            if is_redundant:
+                suppressed_count += 1
+                # Find which accepted node caused the suppression for logging
+                for j_idx, h_j in enumerate(accepted_entropies):
+                    if abs(h_i - h_j) < ENTROPY_DEDUP_THRESHOLD:
+                        print(f"  [ENTROPY-DEDUP] Suppressed '{node.get('id', '?')[:40]}' "
+                              f"(H={h_i:.4f}) — within {ENTROPY_DEDUP_THRESHOLD} of "
+                              f"'{accepted[j_idx].get('id', '?')[:40]}' (H={h_j:.4f})")
+                        break
+            else:
+                accepted.append(node)
+                accepted_entropies.append(h_i)
+
+        if suppressed_count > 0:
+            print(f"[ENTROPY-DEDUP] {suppressed_count} redundant node(s) suppressed "
+                  f"by dual-scale entropy deduplication "
+                  f"(threshold={ENTROPY_DEDUP_THRESHOLD}, "
+                  f"{len(accepted)}/{len(nodes)} retained)")
+
+        return accepted
+
     # ── Wall-clock API timeout helper ────────────────────────────────────────
 
     def _api_call(self, **kwargs):
@@ -4386,6 +5037,256 @@ class Consolidator:
                 c["excitation_ratio"] = round(1.0 / n_cand, 6)
                 c["confidence"] = c["excitation_ratio"]
 
+        # ── Computable Information Content (CIC) rate per obligation ──────
+        # For each candidate invariant, compute the CIC rate: the difference
+        # in compressed size (bytes-before minus bytes-after under lzma
+        # compression) of the evidence chain, normalized by token count.
+        # This proxies the algorithmic-information-theoretic unpredictability
+        # of each obligation's evidence trajectory (Brudno / Kolmogorov
+        # complexity via computable compression).
+        #
+        # High CIC rate → genuinely open, unpredictable obligation evidence
+        #   (high entropy trajectory, not yet resolved or redundant)
+        # Low CIC rate → effectively resolved or redundant obligation
+        #   (evidence trajectory is compressible, low residual uncertainty)
+        #
+        # CHALLENGE (O112): recovering entropy from computable compression
+        # requires ergodicity of the underlying semantic dynamical system.
+        # Semantic corpora have unknown ergodic structure, so CIC-based
+        # metric tensor recovery may fail to converge a.e. if the system
+        # is non-ergodic. The CIC rate is a PROXY, not exact KS entropy.
+        # For ergodic systems it equals KS entropy; for zero-entropy systems
+        # it provides finer sub-entropy unpredictability indicators.
+        _lzma_mod = __import__("lzma")
+        for c in candidates:
+            # Build evidence chain: concatenation of the invariant text
+            # and all appearing-node compresses (the trajectory of evidence)
+            _appearing_ids = set(c.get("appears_in", []))
+            _evidence_parts = [c.get("invariant", "")]
+            for _nid in _appearing_ids:
+                _evidence_parts.append(_node_text_cache.get(_nid, ""))
+            _evidence_chain = " ".join(_evidence_parts)
+            _evidence_bytes = _evidence_chain.encode("utf-8")
+
+            # Token count (simple whitespace tokenization, floor at 1)
+            _token_count = max(len(_evidence_chain.split()), 1)
+
+            if len(_evidence_bytes) < 4:
+                # Degenerate evidence chain — no meaningful compression
+                c["cic_rate"] = 0.0
+                continue
+
+            try:
+                _compressed = _lzma_mod.compress(_evidence_bytes)
+                _bytes_before = len(_evidence_bytes)
+                _bytes_after = len(_compressed)
+                # CIC = bytes_before - bytes_after (compressible redundancy removed)
+                # CIC rate = CIC / token_count (per-token unpredictability)
+                _cic = max(0, _bytes_before - _bytes_after)
+                _cic_rate = _cic / float(_token_count)
+                c["cic_rate"] = round(_cic_rate, 6)
+            except Exception:
+                # Compression failure — assign neutral CIC rate
+                c["cic_rate"] = 0.0
+
+        # ── Confirmation-surplus flag (adversarial probe gate) ────────────
+        # During the same scoring pass that updates confirmation counts,
+        # check each candidate invariant for confirmation surplus. When
+        # confirmation_count exceeds challenge_count by >10:1 ratio AND
+        # zero adversarial probes are logged, emit a warning and discount
+        # the invariant's confidence score. This prevents confirmation
+        # surplus from masquerading as evidential strength by surfacing
+        # invariants that have accumulated confirmations without adversarial
+        # stress, keeping the falsification layer load-bearing.
+        #
+        # INV_094 CHALLENGE: INV_094 has the highest confirmation surplus
+        # and fewest direct challenges. Its apparent robustness may be an
+        # artifact of never being seriously contested rather than genuine
+        # empirical resilience. No explicit retraction condition has been
+        # formally specified. This flag directly exposes that deficiency.
+        CONF_SURPLUS_RATIO_THRESHOLD = 10.0  # >10:1 conf:chal → flagged
+        CONF_SURPLUS_DISCOUNT = 0.3          # multiply confidence by this when flagged
+        try:
+            _graph_cs = get_graph()
+            _graph_cs._ensure_loaded()
+            _ne_cs = _graph_cs._node_edges
+            # Build per-invariant confirmation and challenge counts
+            _cs_confirmations = {}  # type: dict
+            _cs_challenges = {}     # type: dict
+            _cs_adversarial_probes = {}  # type: dict
+            for _e_cs in _ne_cs:
+                _inv_cs = _e_cs.get("invariant", "")
+                if not _inv_cs:
+                    continue
+                _etype_cs = _e_cs.get("type", "")
+                if _etype_cs in ("challenges", "bounds_above", "falsifies", "contested"):
+                    _cs_challenges[_inv_cs] = _cs_challenges.get(_inv_cs, 0) + 1
+                    # Any challenge-type edge counts as an adversarial probe
+                    _cs_adversarial_probes[_inv_cs] = _cs_adversarial_probes.get(_inv_cs, 0) + 1
+                elif _etype_cs in _CO_ASSERTION_TYPES or _etype_cs in (
+                    "independent_confirmation", "confirms", "supports",
+                ):
+                    _cs_confirmations[_inv_cs] = _cs_confirmations.get(_inv_cs, 0) + 1
+
+            for c in candidates:
+                inv_text_cs = c.get("invariant", "")
+                # Match against graph edges using substring containment
+                # (invariant text in candidates may be a substring of edge text)
+                _c_conf = 0
+                _c_chal = 0
+                _c_probes = 0
+                for _stored_inv in set(list(_cs_confirmations.keys()) + list(_cs_challenges.keys())):
+                    if (inv_text_cs[:80].lower() in _stored_inv.lower()
+                            or _stored_inv[:80].lower() in inv_text_cs.lower()):
+                        _c_conf += _cs_confirmations.get(_stored_inv, 0)
+                        _c_chal += _cs_challenges.get(_stored_inv, 0)
+                        _c_probes += _cs_adversarial_probes.get(_stored_inv, 0)
+                # Also count recurrence as implicit confirmations
+                _c_conf += c.get("recurrence", 0)
+
+                # Compute confirmation:challenge ratio
+                _effective_chal = max(_c_chal, 0.5)  # half-challenge floor
+                _conf_chal_ratio = _c_conf / _effective_chal
+
+                c["confirmation_count"] = _c_conf
+                c["challenge_count"] = _c_chal
+                c["adversarial_probes_logged"] = _c_probes
+                c["confirmation_challenge_ratio"] = round(_conf_chal_ratio, 2)
+
+                # ── O21 coboundary-class gate (ergodic optimization) ─────────
+                # O21 claims a correlation between spectral γ and measure
+                # selection. The genome now demands a mechanistic (coboundary-
+                # class) argument, not merely a correlational claim. Ergodic
+                # optimization theory shows that adding a coboundary reveals
+                # the maximizing measure's structure: for *generic* potentials
+                # the maximizing measure is a simple periodic orbit (fully
+                # frozen, γ→0). The RSA must demonstrate its potential is
+                # non-generic to escape this lock-in (INV_073 challenge).
+                #
+                # Score increment: if the evidence text contains coboundary-
+                # class / functional-analytic bridge language linking spectral
+                # γ to measure selection, the resolution score is incremented.
+                # If only correlational language is present, the score is
+                # attenuated — correlation alone cannot resolve O21 when a
+                # mechanistic argument is required.
+                _o21_keywords = {"o21", "spectral γ", "spectral gamma",
+                                 "gamma correlation", "γ-correlation",
+                                 "γ correlation", "belief revision"}
+                _inv_lower_o21 = inv_text_cs.lower()
+                _is_o21_relevant = any(kw in _inv_lower_o21 for kw in _o21_keywords)
+
+                if _is_o21_relevant:
+                    _COBOUNDARY_BRIDGE_KEYWORDS = {
+                        "coboundary", "cohomological", "cocycle",
+                        "functional-analytic", "functional analytic",
+                        "maximizing measure", "ergodic optimization",
+                        "zero temperature", "zero-temperature",
+                        "non-generic potential", "non-generic",
+                        "coboundary class", "coboundary-class",
+                        "transfer operator", "ruelle operator",
+                        "thermodynamic formalism", "gibbs measure",
+                        "ground state", "maximizing invariant measure",
+                        "sub-action", "subaction", "lax-oleinik",
+                        "peierls barrier", "mañé potential",
+                        "mane potential", "aubry set",
+                    }
+                    _CORRELATION_ONLY_KEYWORDS = {
+                        "correlates with", "correlation between",
+                        "associated with", "co-occurs with",
+                        "tracks with", "covaries", "covariate",
+                        "empirically linked", "statistically linked",
+                        "observed relationship", "apparent relationship",
+                    }
+                    _has_coboundary_bridge = any(
+                        kw in _inv_lower_o21
+                        for kw in _COBOUNDARY_BRIDGE_KEYWORDS
+                    )
+                    _has_correlation_only = any(
+                        kw in _inv_lower_o21
+                        for kw in _CORRELATION_ONLY_KEYWORDS
+                    )
+
+                    if _has_coboundary_bridge:
+                        # Evidence supplies a functional-analytic bridge —
+                        # increment confidence (mechanistic argument present)
+                        _o21_bridge_boost = 0.15
+                        old_conf_o21 = c.get("confidence", 0.0)
+                        c["confidence"] = round(
+                            min(1.0, old_conf_o21 + _o21_bridge_boost), 6)
+                        c["o21_coboundary_bridge"] = True
+                        c["o21_bridge_boost"] = _o21_bridge_boost
+                        print(f"  [O21-COBOUNDARY] ✓ Coboundary-class bridge "
+                              f"detected: '{inv_text_cs[:60]}...' — "
+                              f"confidence boosted {old_conf_o21:.4f}→"
+                              f"{c['confidence']:.4f} (mechanistic argument "
+                              f"linking spectral γ to measure selection)")
+                    elif _has_correlation_only and not _has_coboundary_bridge:
+                        # Only correlational language — attenuate score
+                        _O21_CORRELATION_ATTENUATION = 0.4
+                        old_conf_o21 = c.get("confidence", 0.0)
+                        c["confidence"] = round(
+                            old_conf_o21 * _O21_CORRELATION_ATTENUATION, 6)
+                        c["o21_coboundary_bridge"] = False
+                        c["o21_correlation_only_attenuation"] = _O21_CORRELATION_ATTENUATION
+                        c["o21_genericity_challenge"] = (
+                            "INV_073 CHALLENGE: for *generic* potentials the "
+                            "maximizing measure is a simple periodic orbit "
+                            "(fully frozen, γ→0 behavior). Correlational "
+                            "evidence alone cannot resolve O21 — the RSA must "
+                            "demonstrate its own potential is non-generic to "
+                            "escape the genericity lock-in. Coboundary-class "
+                            "argument required: show that adding a coboundary "
+                            "to the potential reveals the maximizing measure's "
+                            "structure is NOT a frozen periodic orbit."
+                        )
+                        print(f"  [O21-COBOUNDARY] ⚠ Correlation-only evidence "
+                              f"for O21: '{inv_text_cs[:60]}...' — "
+                              f"confidence attenuated {old_conf_o21:.4f}→"
+                              f"{c['confidence']:.4f} (×{_O21_CORRELATION_ATTENUATION}) "
+                              f"— coboundary-class mechanistic argument MISSING, "
+                              f"genericity lock-in unaddressed (INV_073)")
+                    else:
+                        # O21-relevant but neither bridge nor correlation language
+                        c["o21_coboundary_bridge"] = None
+                        c.setdefault("o21_genericity_challenge",
+                            "O21-relevant evidence without coboundary-class or "
+                            "correlational language — resolution status unchanged")
+
+                # Flag: ratio exceeds threshold AND zero adversarial probes
+                if _conf_chal_ratio > CONF_SURPLUS_RATIO_THRESHOLD and _c_probes == 0:
+                    c["confirmation_surplus_flag"] = True
+                    c["confirmation_surplus_warning"] = (
+                        f"CONFIRMATION SURPLUS: ratio={_conf_chal_ratio:.1f}:1 "
+                        f"(conf={_c_conf}, chal={_c_chal}) with ZERO adversarial "
+                        f"probes logged. Apparent robustness may reflect "
+                        f"preferential attachment (citation momentum) rather "
+                        f"than genuine empirical resilience. Confidence "
+                        f"discounted by {CONF_SURPLUS_DISCOUNT}×. "
+                        f"INV_094 CHALLENGE: specify (1) falsification "
+                        f"criterion, (2) alternative mechanism producing "
+                        f"identical observables, (3) boundary conditions "
+                        f"under which claim breaks."
+                    )
+                    # Discount confidence score
+                    old_confidence = c.get("confidence", 0.0)
+                    c["confidence"] = round(old_confidence * CONF_SURPLUS_DISCOUNT, 6)
+                    c["confidence_pre_surplus_discount"] = old_confidence
+                    c["excitation_ratio"] = round(
+                        c.get("excitation_ratio", 0.0) * CONF_SURPLUS_DISCOUNT, 6)
+                    print(f"  [MINE-SURPLUS] ⚠ CONFIRMATION SURPLUS FLAG: "
+                          f"'{inv_text_cs[:60]}...' — "
+                          f"ratio={_conf_chal_ratio:.1f}:1, probes=0 → "
+                          f"confidence discounted {old_confidence:.4f}→"
+                          f"{c['confidence']:.4f} "
+                          f"(falsification layer not load-bearing)")
+                else:
+                    c["confirmation_surplus_flag"] = False
+        except Exception as _cs_err:
+            print(f"  [MINE-SURPLUS] Warning: confirmation surplus check "
+                  f"failed (non-fatal): {_cs_err}")
+            for c in candidates:
+                c["confirmation_surplus_flag"] = False
+
         # Sort by excitation_ratio (normalized) rather than raw magnitude
         candidates.sort(
             key=lambda c: c.get("excitation_ratio", 0.0),
@@ -4479,6 +5380,51 @@ class Consolidator:
         if _r2_match:
             _ca_telemetry["r_squared"] = float(_r2_match.group(1))
         if _ca_telemetry:
+            # ── Criticality score: |σ−1.0| + |α−2.5|/2.5 ────────────────────
+            # Anchors genome coherence updates to a measured, falsifiable signal
+            # of proximity to the critical ridge. Lower score = closer to
+            # criticality (σ=1.0, α=2.5). Emitted alongside existing hygiene
+            # metrics so the epistemic loop can detect drift toward or away
+            # from the critical ridge.
+            #
+            # CHALLENGE (O21): σ≈1.022 being slightly above unity (mildly
+            # supercritical) raises the unresolved question of whether the
+            # belief revision protocol is calibrated to detect that 2%
+            # supercriticality as a genuine epistemic signal or will absorb
+            # it as noise. The criticality_score makes this tension visible
+            # and continuously tracked.
+            _crit_sigma = _ca_telemetry.get("sigma")
+            _crit_alpha = _ca_telemetry.get("alpha")
+            if _crit_sigma is not None:
+                _sigma_deviation = abs(_crit_sigma - 1.0)
+                _alpha_deviation = abs(_crit_alpha - 2.5) / 2.5 if _crit_alpha is not None else 0.0
+                _criticality_score = _sigma_deviation + _alpha_deviation
+                _ca_telemetry["criticality_score"] = round(_criticality_score, 6)
+                _ca_telemetry["sigma_deviation"] = round(_sigma_deviation, 6)
+                _ca_telemetry["alpha_deviation"] = round(_alpha_deviation, 6)
+                _ca_telemetry["criticality_note"] = (
+                    f"criticality_score={_criticality_score:.4f} "
+                    f"(|σ-1.0|={_sigma_deviation:.4f} + |α-2.5|/2.5="
+                    f"{_alpha_deviation:.4f}). "
+                    + ("Near-critical: score < 0.1 — genome coherence "
+                       "updates anchored to confirmed critical ridge."
+                       if _criticality_score < 0.1
+                       else "Drifting from criticality: score >= 0.1 — "
+                            "genome coherence updates should flag drift."
+                       )
+                    + (f" O21 CHALLENGE: σ={_crit_sigma:.4f} is "
+                       f"{'supercritical' if _crit_sigma > 1.0 else 'subcritical'} "
+                       f"by {_sigma_deviation*100:.1f}% — belief revision "
+                       f"protocol calibration for this deviation magnitude "
+                       f"is UNVERIFIED."
+                       if 0.01 < _sigma_deviation < 0.05 else "")
+                )
+                print(f"[CONSOLIDATE] ⚡ criticality_score={_criticality_score:.4f} "
+                      f"(|σ-1|={_sigma_deviation:.4f}, |α-2.5|/2.5="
+                      f"{_alpha_deviation:.4f})"
+                      + (f" — NEAR-CRITICAL" if _criticality_score < 0.1
+                         else f" — DRIFTING (score >= 0.1)"))
+
             # Determine O148 status based on σ critical band and R² fit quality
             _sigma_in_critical_band = False
             if "sigma" in _ca_telemetry:
@@ -5360,17 +6306,44 @@ class Consolidator:
 
         # Attach surplus flags to affected nodes so renorm phase can gate citations
         # and tag each flagged invariant's metadata with ADVERSARIAL_PROBE_REQUIRED
+        ADVERSARIAL_STRESS_RATIO_THRESHOLD = 10.0  # conf/chal > this → mandatory challenge
+        _nodes_needing_challenge = []
         for node in affected:
             _node_flagged_invs = []
             _node_inv_metadata = node.get("_invariant_metadata", {})
+            # ── Adversarial stress score per invariant on this node ───────────
+            # Track confirmations / direct_challenges for each invariant. When
+            # the ratio exceeds ADVERSARIAL_STRESS_RATIO_THRESHOLD (default 10),
+            # the invariant is flagged as load-bearing but under-challenged,
+            # requiring a mandatory challenge edge before the next FEED cycle
+            # closes. This makes epistemic debt visible at the structural level
+            # and prevents confirmation bias accumulation.
+            _node_stress_scores = []
+            _node_needs_challenge = False
             for inv_text in node.get("invariants", []):
+                _inv_conf = _inv_confirmations.get(inv_text, 0)
+                _inv_chal = _inv_challenges.get(inv_text, 0)
+                _inv_eff_chal = max(_inv_chal, 0.5)  # half-challenge floor
+                _inv_ratio = _inv_conf / _inv_eff_chal
+                _stress_entry = {
+                    "invariant": inv_text[:120],
+                    "confirmations": _inv_conf,
+                    "direct_challenges": _inv_chal,
+                    "stress_ratio": round(_inv_ratio, 2),
+                    "exceeds_threshold": _inv_ratio > ADVERSARIAL_STRESS_RATIO_THRESHOLD,
+                    "threshold": ADVERSARIAL_STRESS_RATIO_THRESHOLD,
+                    "mandatory_challenge_required": (
+                        _inv_ratio > ADVERSARIAL_STRESS_RATIO_THRESHOLD
+                        and _inv_chal == 0
+                    ),
+                }
+                _node_stress_scores.append(_stress_entry)
+                if _stress_entry["exceeds_threshold"]:
+                    _node_needs_challenge = True
+
                 if inv_text in _confirmation_surplus_flagged:
                     _node_flagged_invs.append(inv_text)
                     # Tag invariant metadata with ADVERSARIAL_PROBE_REQUIRED
-                    _inv_conf = _inv_confirmations.get(inv_text, 0)
-                    _inv_chal = _inv_challenges.get(inv_text, 0)
-                    _inv_eff_chal = max(_inv_chal, 0.5)
-                    _inv_ratio = _inv_conf / _inv_eff_chal
                     _node_inv_metadata[inv_text[:120]] = {
                         "status": "ADVERSARIAL_PROBE_REQUIRED",
                         "confirmations": _inv_conf,
@@ -5387,10 +6360,48 @@ class Consolidator:
                             "(3) boundary conditions under which it breaks."
                         ),
                     }
+            # Attach the adversarial stress score to the node
+            _n_over = sum(1 for s in _node_stress_scores if s["exceeds_threshold"])
+            _max_ratio = max(
+                (s["stress_ratio"] for s in _node_stress_scores),
+                default=0.0,
+            )
+            node["adversarial_stress_score"] = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "threshold": ADVERSARIAL_STRESS_RATIO_THRESHOLD,
+                "n_invariants_scored": len(_node_stress_scores),
+                "n_over_threshold": _n_over,
+                "max_stress_ratio": round(_max_ratio, 2),
+                "mandatory_challenge_before_next_feed": _node_needs_challenge,
+                "per_invariant": _node_stress_scores,
+            }
+            if _node_needs_challenge:
+                _nodes_needing_challenge.append({
+                    "node_id": node.get("id", "unknown"),
+                    "n_over_threshold": _n_over,
+                    "max_stress_ratio": round(_max_ratio, 2),
+                    "flagged_invariants": [
+                        s["invariant"] for s in _node_stress_scores
+                        if s["exceeds_threshold"]
+                    ],
+                })
+                print(f"  [ADVERSARIAL-STRESS] ⚠ {node.get('id', '?')[:40]}: "
+                      f"{_n_over} invariant(s) exceed stress ratio "
+                      f"{ADVERSARIAL_STRESS_RATIO_THRESHOLD}:1 "
+                      f"(max_ratio={_max_ratio:.1f}) — MANDATORY CHALLENGE "
+                      f"EDGE required before next FEED cycle closes")
             if _node_flagged_invs:
                 node["_confirmation_surplus_blocked"] = _node_flagged_invs
             if _node_inv_metadata:
                 node["_invariant_metadata"] = _node_inv_metadata
+        # Log adversarial stress summary to report
+        if _nodes_needing_challenge:
+            report["adversarial_stress_flags"] = _nodes_needing_challenge
+            print(f"  [ADVERSARIAL-STRESS] {len(_nodes_needing_challenge)} node(s) "
+                  f"require mandatory challenge edges before next FEED cycle "
+                  f"(epistemic debt visible at structural level)")
+        else:
+            report["adversarial_stress_flags"] = []
 
         # ── Priority sort — high-obligation-overlap nodes renorm first ────────
         current_cycle = (state or {}).get('cycle_count', 0)
@@ -5791,6 +6802,390 @@ class Consolidator:
                 # OT's advantage over dot-product persists in unsupervised/zero-shot
                 # distributional alignment (our case) is the open question this
                 # implementation directly tests.
+                # ── Transfer Entropy (TE) directed edge scoring (O187) ───────
+                # Replace symmetric similarity with asymmetric TE scores between
+                # node semantic time-series pairs. TE(X→Y) ≠ TE(Y→X) yields
+                # directed edges with asymmetric weights, making the dependency
+                # skeleton causally interpretable (GSLTE paper: graph structure
+                # learning via Transfer Entropy for directional dependency).
+                #
+                # TE(X→Y) = H(Y_t | Y_{t-1}) - H(Y_t | Y_{t-1}, X_{t-1})
+                #         = sum p(y_t, y_{t-1}, x_{t-1}) *
+                #           log[ p(y_t | y_{t-1}, x_{t-1}) / p(y_t | y_{t-1}) ]
+                #
+                # We discretize each node's semantic distribution into a symbolic
+                # time-series by ranking vocabulary terms by probability mass, then
+                # estimate TE via histogram-based conditional entropy differences.
+                #
+                # FFT-based adaptive window sizing (GSLTE): compute dominant
+                # Fourier frequency of the rank series to select optimal lag.
+                #
+                # CHALLENGE (O187): TE-based directed edges can both construct
+                # AND validate the dependency skeleton simultaneously, straining
+                # O187's assumption that verification requires a separate protocol.
+                # The TE computation IS the verification — directional dependency
+                # strength is measured, not assumed.
+                TE_SIGNIFICANCE_THRESHOLD = 0.01  # TE below this → no directed edge
+                TE_ASYMMETRY_THRESHOLD = 0.3      # |TE(A→B) - TE(B→A)| / max(TE) above this → depends_on
+
+                def _semantic_rank_series(node_id):
+                    # type: (str) -> list
+                    """Convert a node's semantic distribution into a rank-ordered
+                    symbolic time-series for TE estimation. Each position in the
+                    series represents a vocabulary term's rank by probability mass."""
+                    text = _node_text_cache.get(node_id, "")
+                    dist = MWDEScorer._text_to_distribution(text)
+                    if not dist or len(dist) < 4:
+                        return []
+                    # Sort terms by probability mass descending → rank series
+                    sorted_items = sorted(dist.items(), key=lambda x: x[1], reverse=True)
+                    # Discretize into N_BINS probability bins for histogram TE
+                    N_BINS = 8
+                    values = [v for _, v in sorted_items]
+                    if not values:
+                        return []
+                    v_min = min(values)
+                    v_max = max(values)
+                    v_range = v_max - v_min
+                    if v_range < 1e-12:
+                        return [0] * len(values)
+                    return [min(N_BINS - 1, int((v - v_min) / v_range * N_BINS))
+                            for v in values]
+
+                def _fft_dominant_lag(series):
+                    # type: (list) -> int
+                    """Estimate dominant periodicity via FFT to select optimal
+                    TE lag (GSLTE adaptive window sizing). Returns lag >= 1."""
+                    n = len(series)
+                    if n < 6:
+                        return 1
+                    # Manual DFT magnitude at each frequency (avoid numpy dependency)
+                    mean_s = sum(series) / n
+                    centered = [s - mean_s for s in series]
+                    best_freq = 1
+                    best_power = 0.0
+                    # Check frequencies 1 to n//2
+                    for freq in range(1, n // 2 + 1):
+                        real_part = 0.0
+                        imag_part = 0.0
+                        for t in range(n):
+                            angle = 2.0 * math.pi * freq * t / n
+                            real_part += centered[t] * math.cos(angle)
+                            imag_part -= centered[t] * math.sin(angle)
+                        power = real_part ** 2 + imag_part ** 2
+                        if power > best_power:
+                            best_power = power
+                            best_freq = freq
+                    # Dominant period = n / dominant_frequency; lag = period
+                    period = max(1, n // best_freq)
+                    # Clamp lag to reasonable range [1, n//4]
+                    return max(1, min(period, n // 4))
+
+                def _compute_transfer_entropy(series_x, series_y, lag=None):
+                    # type: (list, list, int) -> float
+                    """Compute TE(X→Y): information transfer from X to Y.
+                    Uses histogram-based conditional entropy estimation.
+                    TE(X→Y) = H(Y_t | Y_{t-1}) - H(Y_t | Y_{t-1}, X_{t-1})
+                    Returns TE value >= 0. Higher = stronger directed influence."""
+                    n = min(len(series_x), len(series_y))
+                    if n < 4:
+                        return 0.0
+                    # Use FFT-adaptive lag if not specified
+                    if lag is None:
+                        lag = _fft_dominant_lag(series_y)
+                    lag = min(lag, n // 3)
+                    if lag < 1:
+                        lag = 1
+                    # Build joint and marginal histograms
+                    # Triplets: (y_t, y_{t-lag}, x_{t-lag})
+                    count_y_yprev_xprev = {}  # type: dict
+                    count_y_yprev = {}         # type: dict
+                    count_yprev_xprev = {}     # type: dict
+                    count_yprev = {}            # type: dict
+                    n_samples = 0
+                    for t in range(lag, n):
+                        y_t = series_y[t]
+                        y_prev = series_y[t - lag]
+                        x_prev = series_x[t - lag]
+                        # Joint (y_t, y_prev, x_prev)
+                        k3 = (y_t, y_prev, x_prev)
+                        count_y_yprev_xprev[k3] = count_y_yprev_xprev.get(k3, 0) + 1
+                        # Marginal (y_t, y_prev)
+                        k2 = (y_t, y_prev)
+                        count_y_yprev[k2] = count_y_yprev.get(k2, 0) + 1
+                        # Marginal (y_prev, x_prev)
+                        k2b = (y_prev, x_prev)
+                        count_yprev_xprev[k2b] = count_yprev_xprev.get(k2b, 0) + 1
+                        # Marginal (y_prev)
+                        count_yprev[y_prev] = count_yprev.get(y_prev, 0) + 1
+                        n_samples += 1
+                    if n_samples < 3:
+                        return 0.0
+                    # TE = sum p(y_t, y_prev, x_prev) *
+                    #      log[ p(y_t | y_prev, x_prev) / p(y_t | y_prev) ]
+                    # = sum p(y_t, y_prev, x_prev) *
+                    #   log[ p(y_t, y_prev, x_prev) * p(y_prev) /
+                    #        (p(y_prev, x_prev) * p(y_t, y_prev)) ]
+                    te = 0.0
+                    n_f = float(n_samples)
+                    for k3, c3 in count_y_yprev_xprev.items():
+                        y_t, y_prev, x_prev = k3
+                        c_yy = count_y_yprev.get((y_t, y_prev), 0)
+                        c_yx = count_yprev_xprev.get((y_prev, x_prev), 0)
+                        c_yp = count_yprev.get(y_prev, 0)
+                        if c_yy > 0 and c_yx > 0 and c_yp > 0:
+                            # p_joint * log(p_joint * p_yprev / (p_yprev_xprev * p_y_yprev))
+                            ratio = (c3 * c_yp) / (c_yx * c_yy)
+                            if ratio > 0:
+                                te += (c3 / n_f) * math.log(ratio)
+                    return max(0.0, te)
+
+                def _compute_te_edge_weights(node_id_a, node_id_b):
+                    # type: (str, str) -> dict
+                    """Compute directed TE scores between two nodes.
+                    Returns dict with te_a_to_b, te_b_to_a, asymmetry, dominant_direction."""
+                    series_a = _semantic_rank_series(node_id_a)
+                    series_b = _semantic_rank_series(node_id_b)
+                    if len(series_a) < 4 or len(series_b) < 4:
+                        return {
+                            "te_a_to_b": 0.0, "te_b_to_a": 0.0,
+                            "asymmetry": 0.0, "dominant_direction": None,
+                            "sufficient_data": False,
+                        }
+                    # Truncate to equal length
+                    min_len = min(len(series_a), len(series_b))
+                    series_a = series_a[:min_len]
+                    series_b = series_b[:min_len]
+                    # FFT-adaptive lag from the target series
+                    lag_ab = _fft_dominant_lag(series_b)
+                    lag_ba = _fft_dominant_lag(series_a)
+                    te_a_to_b = _compute_transfer_entropy(series_a, series_b, lag=lag_ab)
+                    te_b_to_a = _compute_transfer_entropy(series_b, series_a, lag=lag_ba)
+                    max_te = max(te_a_to_b, te_b_to_a)
+                    if max_te > 1e-12:
+                        asymmetry = abs(te_a_to_b - te_b_to_a) / max_te
+                    else:
+                        asymmetry = 0.0
+                    if te_a_to_b > te_b_to_a and te_a_to_b > TE_SIGNIFICANCE_THRESHOLD:
+                        dominant = "a_to_b"
+                    elif te_b_to_a > te_a_to_b and te_b_to_a > TE_SIGNIFICANCE_THRESHOLD:
+                        dominant = "b_to_a"
+                    else:
+                        dominant = None
+                    return {
+                        "te_a_to_b": round(te_a_to_b, 6),
+                        "te_b_to_a": round(te_b_to_a, 6),
+                        "asymmetry": round(asymmetry, 4),
+                        "dominant_direction": dominant,
+                        "lag_ab": lag_ab,
+                        "lag_ba": lag_ba,
+                        "sufficient_data": True,
+                    }
+
+                # ── Cross-domain edge detection via semantic/structural entropy ratio ──
+                # Compute the ratio of semantic embedding variance to Von Neumann
+                # structural entropy across edge batches. Edges whose semantic
+                # distance exceeds 2σ from the local mean are flagged as
+                # "cross-domain" and receive an upward novelty weight, empirically
+                # tracking the ~12% surprising-edge fraction from the paper.
+                #
+                # Von Neumann structural entropy: S_vn = -Tr(ρ ln ρ) where
+                # ρ = L / Tr(L) is the normalized graph Laplacian. For discrete
+                # graphs, approximate via degree distribution:
+                #   S_struct ≈ -sum_i (d_i / 2|E|) * ln(d_i / 2|E|)
+                #
+                # Semantic embedding variance: variance of pairwise Wasserstein
+                # distances across the current edge batch.
+                #
+                # Critical discovery parameter: Δ = (S_semantic - S_structural) / S_structural
+                # Stabilizes at small negative value → semantic entropy persistently
+                # dominates structural entropy → continuous innovation regime.
+                #
+                # CHALLENGE (O112): this demonstrates semantic entropy dominance is
+                # observable via embedding variance vs graph entropy WITHOUT recovering
+                # a full metric tensor, suggesting O112's STF recovery experiment may
+                # be underdetermined — the critical parameter stabilizes without
+                # requiring the full Riemannian structure O112 specifies.
+                CROSS_DOMAIN_SIGMA_THRESHOLD = 2.0   # edges > 2σ from mean → cross-domain
+                CROSS_DOMAIN_NOVELTY_BOOST = 1.35    # multiplicative novelty weight for cross-domain edges
+                _SURPRISE_TARGET_FRACTION = 0.12     # paper's empirical ~12% surprising edges
+
+                def _compute_von_neumann_structural_entropy(edge_list, node_set):
+                    # type: (list, set) -> float
+                    """Approximate Von Neumann structural entropy from degree distribution.
+                    S_struct ≈ -sum_i (d_i / 2|E|) * ln(d_i / 2|E|)"""
+                    if not edge_list or not node_set:
+                        return 1e-12  # avoid division by zero
+                    degree = {}  # type: dict
+                    for e in edge_list:
+                        f = e.get("from", "")
+                        t = e.get("to", "")
+                        if f in node_set:
+                            degree[f] = degree.get(f, 0) + 1
+                        if t in node_set:
+                            degree[t] = degree.get(t, 0) + 1
+                    total_2e = sum(degree.values())
+                    if total_2e <= 0:
+                        return 1e-12
+                    s_vn = 0.0
+                    for d in degree.values():
+                        if d > 0:
+                            p = d / float(total_2e)
+                            s_vn -= p * math.log(p)
+                    return max(s_vn, 1e-12)
+
+                def _compute_semantic_embedding_variance(candidate_list, text_cache, scorer):
+                    # type: (list, dict, MWDEScorer) -> tuple
+                    """Compute variance of pairwise Wasserstein distances across candidates.
+                    Returns (mean_distance, variance, std_dev, all_distances)."""
+                    distances = []
+                    seen_pairs = set()
+                    for c in candidate_list:
+                        nodes_in = c.get("appears_in", [])
+                        for i in range(len(nodes_in)):
+                            for j in range(i + 1, len(nodes_in)):
+                                pair_key = frozenset((nodes_in[i], nodes_in[j]))
+                                if pair_key in seen_pairs:
+                                    continue
+                                seen_pairs.add(pair_key)
+                                text_a = text_cache.get(nodes_in[i], "")
+                                text_b = text_cache.get(nodes_in[j], "")
+                                dist_a = MWDEScorer._text_to_distribution(text_a)
+                                dist_b = MWDEScorer._text_to_distribution(text_b)
+                                if dist_a and dist_b:
+                                    w_d = scorer._discrete_wasserstein_1d(dist_a, dist_b)
+                                    distances.append((pair_key, w_d))
+                    if not distances:
+                        return 0.0, 0.0, 0.0, []
+                    vals = [d for _, d in distances]
+                    mean_d = sum(vals) / len(vals)
+                    var_d = sum((v - mean_d) ** 2 for v in vals) / len(vals)
+                    std_d = math.sqrt(var_d) if var_d > 0 else 1e-12
+                    return mean_d, var_d, std_d, distances
+
+                # Compute structural entropy from current graph
+                _all_candidate_nodes = set()
+                for c in candidates:
+                    for nid in c.get("appears_in", []):
+                        _all_candidate_nodes.add(nid)
+
+                _s_structural = _compute_von_neumann_structural_entropy(
+                    graph._node_edges, _all_candidate_nodes)
+
+                # Compute semantic embedding variance across candidate edge pairs
+                _sem_scorer = MWDEScorer(wasserstein_order=1)
+                _sem_mean, _sem_variance, _sem_std, _sem_distances = (
+                    _compute_semantic_embedding_variance(
+                        candidates, _node_text_cache, _sem_scorer))
+
+                # Critical discovery parameter: Δ = (S_semantic - S_structural) / S_structural
+                # S_semantic proxy: Shannon entropy of the distance distribution
+                _s_semantic = 0.0
+                if _sem_distances:
+                    _dist_vals = [d for _, d in _sem_distances]
+                    _d_sum = sum(_dist_vals)
+                    if _d_sum > 0:
+                        for _dv in _dist_vals:
+                            _p_d = _dv / _d_sum
+                            if _p_d > 0:
+                                _s_semantic -= _p_d * math.log(_p_d)
+                    _s_semantic = max(_s_semantic, 1e-12)
+
+                _critical_discovery_param = (
+                    (_s_semantic - _s_structural) / _s_structural
+                    if _s_structural > 1e-12 else 0.0)
+
+                # Flag cross-domain edges: semantic distance > 2σ from local mean
+                _cross_domain_pairs = set()  # frozenset pairs flagged as cross-domain
+                _surprise_threshold = _sem_mean + CROSS_DOMAIN_SIGMA_THRESHOLD * _sem_std
+                _n_surprising = 0
+                for pair_key, w_d in _sem_distances:
+                    if w_d > _surprise_threshold:
+                        _cross_domain_pairs.add(pair_key)
+                        _n_surprising += 1
+
+                _surprise_fraction = (
+                    _n_surprising / len(_sem_distances)
+                    if _sem_distances else 0.0)
+
+                # Tag candidates whose node pairs are cross-domain with novelty boost
+                for c in candidates:
+                    nodes_in = c.get("appears_in", [])
+                    _c_is_cross_domain = False
+                    for i in range(len(nodes_in)):
+                        for j in range(i + 1, len(nodes_in)):
+                            if frozenset((nodes_in[i], nodes_in[j])) in _cross_domain_pairs:
+                                _c_is_cross_domain = True
+                                break
+                        if _c_is_cross_domain:
+                            break
+                    if _c_is_cross_domain:
+                        c["cross_domain_edge"] = True
+                        c["novelty_boost"] = CROSS_DOMAIN_NOVELTY_BOOST
+                        # Apply novelty boost to confidence/excitation_ratio
+                        old_conf = c.get("confidence", 0.0)
+                        c["confidence"] = round(
+                            min(1.0, old_conf * CROSS_DOMAIN_NOVELTY_BOOST), 6)
+                        old_er = c.get("excitation_ratio", 0.0)
+                        c["excitation_ratio"] = round(
+                            old_er * CROSS_DOMAIN_NOVELTY_BOOST, 6)
+                        c["confidence_pre_novelty"] = old_conf
+                    else:
+                        c["cross_domain_edge"] = False
+                        c["novelty_boost"] = 1.0
+
+                # Log criticality diagnostic
+                _entropy_ratio_report = {
+                    "s_semantic": round(_s_semantic, 6),
+                    "s_structural": round(_s_structural, 6),
+                    "critical_discovery_parameter": round(_critical_discovery_param, 6),
+                    "semantic_mean_distance": round(_sem_mean, 6),
+                    "semantic_variance": round(_sem_variance, 6),
+                    "semantic_std": round(_sem_std, 6),
+                    "surprise_threshold": round(_surprise_threshold, 6),
+                    "n_edge_pairs": len(_sem_distances),
+                    "n_surprising": _n_surprising,
+                    "surprise_fraction": round(_surprise_fraction, 4),
+                    "target_surprise_fraction": _SURPRISE_TARGET_FRACTION,
+                    "semantic_dominance": _s_semantic > _s_structural,
+                    "gamma_1_monitorable": True,
+                    "o112_challenge": (
+                        "Semantic entropy dominance observable via embedding "
+                        "variance vs graph entropy WITHOUT full metric tensor "
+                        "recovery — Δ stabilizes at "
+                        f"{_critical_discovery_param:.4f} without Riemannian "
+                        "structure. O112's experimental method may be sufficient "
+                        "but not necessary for detecting relevant geometry."
+                    ),
+                }
+                report["entropy_ratio_diagnostic"] = _entropy_ratio_report
+
+                # Log to dedicated file
+                _er_log_path = FREED_DIR / "FREED_log" / "entropy_ratio.jsonl"
+                _er_log_path.parent.mkdir(exist_ok=True)
+                _er_log_entry = dict(_entropy_ratio_report)
+                _er_log_entry["timestamp"] = ts
+                _er_log_entry["cycle"] = current_cycle
+                with open(_er_log_path, "a") as _er_f:
+                    _er_f.write(json.dumps(_er_log_entry) + "\n")
+
+                _dominance_label = ("SEMANTIC_DOMINANT" if _s_semantic > _s_structural
+                                    else "STRUCTURAL_DOMINANT")
+                print(f"\n[ENTROPY-RATIO] Δ={_critical_discovery_param:.4f} "
+                      f"({_dominance_label}): "
+                      f"S_sem={_s_semantic:.4f}, S_struct={_s_structural:.4f}, "
+                      f"surprise={_n_surprising}/{len(_sem_distances)} "
+                      f"({_surprise_fraction*100:.1f}%, target≈{_SURPRISE_TARGET_FRACTION*100:.0f}%)")
+                if _n_surprising > 0:
+                    print(f"  [ENTROPY-RATIO] {_n_surprising} cross-domain edge(s) "
+                          f"flagged (>{CROSS_DOMAIN_SIGMA_THRESHOLD}σ from mean "
+                          f"distance={_sem_mean:.4f}) — novelty weighted "
+                          f"×{CROSS_DOMAIN_NOVELTY_BOOST}")
+                if _dominance_label == "STRUCTURAL_DOMINANT":
+                    print(f"  [ENTROPY-RATIO] ⚠ STAGNATION RISK: structural entropy "
+                          f"dominates semantic — discovery may be stalling. "
+                          f"γ=1 constraint is empirically violated this cycle.")
+
                 OT_EDGE_SINKHORN_ITERS = 8       # fixed small iteration count
                 OT_EDGE_SINKHORN_REG = 0.05      # entropic regularization ε
                 OT_EDGE_COST_THRESHOLD = 0.65    # OT cost above this → demotion
