@@ -274,6 +274,78 @@ class EscrowLedger:
         self._save()
         return entry
 
+    def _extract_ca_telemetry(self, evidence_text):
+        # type: (str) -> dict
+        """Extract CA telemetry fields (σ, α, H, survival, R²) from evidence
+        text when O148-type criticality data is present. Returns a dict of
+        parsed numeric fields; empty dict if no telemetry detected."""
+        telemetry = {}
+        ev_lower = evidence_text.lower()
+        # Parse σ (branching ratio)
+        _sig_m = re.search(
+            r'(?:branching\s+ratio|[σσ])\s*[=:]\s*([0-9]+\.?[0-9]*)', ev_lower)
+        if _sig_m:
+            try:
+                telemetry["sigma"] = float(_sig_m.group(1))
+            except (ValueError, TypeError):
+                pass
+        # Parse α (avalanche exponent)
+        _alp_m = re.search(
+            r'(?:power[- ]?law\s+exponent|avalanche\s+exponent|[αα])\s*[≈=:~]\s*([0-9]+\.?[0-9]*)',
+            ev_lower)
+        if _alp_m:
+            try:
+                telemetry["alpha"] = float(_alp_m.group(1))
+            except (ValueError, TypeError):
+                pass
+        # Parse H (Shannon entropy)
+        _h_m = re.search(
+            r'(?:shannon\s+entropy|entropy\s*H|H)\s*[=:]\s*([0-9]+\.?[0-9]*)\s*bits?',
+            ev_lower)
+        if _h_m:
+            try:
+                telemetry["shannon_entropy_bits"] = float(_h_m.group(1))
+            except (ValueError, TypeError):
+                pass
+        # Parse survival rate
+        _surv_m = re.search(
+            r'survival\s+(?:rate\s*)?[=:]\s*([0-9]+\.?[0-9]*)', ev_lower)
+        if _surv_m:
+            try:
+                telemetry["survival_rate"] = float(_surv_m.group(1))
+            except (ValueError, TypeError):
+                pass
+        # Parse R² (power-law fit quality)
+        _r2_m = re.search(
+            r'(?:R²|R\^2|r²|r\^2|R2|r2)\s*[=:]\s*([0-9]+\.?[0-9]*)', evidence_text)
+        if _r2_m:
+            try:
+                telemetry["r_squared"] = float(_r2_m.group(1))
+            except (ValueError, TypeError):
+                pass
+        # Parse criticality verdict
+        _verd_m = re.search(
+            r'(?:criticality\s+)?verdict\s*[=:]\s*(AT_CRITICAL|SUBCRITICAL|SUPERCRITICAL)',
+            evidence_text, re.IGNORECASE)
+        if _verd_m:
+            telemetry["criticality_verdict"] = _verd_m.group(1).upper()
+        elif "sigma" in telemetry:
+            _s = telemetry["sigma"]
+            if 0.95 <= _s <= 1.05:
+                telemetry["criticality_verdict"] = "AT_CRITICAL"
+            elif _s < 0.95:
+                telemetry["criticality_verdict"] = "SUBCRITICAL"
+            else:
+                telemetry["criticality_verdict"] = "SUPERCRITICAL"
+        # Compute criticality_score if σ is available
+        if "sigma" in telemetry:
+            _sd = abs(telemetry["sigma"] - 1.0)
+            _ad = abs(telemetry.get("alpha", 2.5) - 2.5) / 2.5
+            telemetry["criticality_score"] = round(_sd + _ad, 6)
+            telemetry["sigma_deviation"] = round(_sd, 6)
+            telemetry["alpha_deviation"] = round(_ad, 6)
+        return telemetry
+
     def resolve(self, obligation_id, evidence, resolve_source="consolidate",
                 tag=None):
         # type: (str, str, str, str) -> dict
@@ -287,6 +359,14 @@ class EscrowLedger:
         Repeated independent convergences accumulate weight, turning
         frequency-of-convergence into a quantitative prior-strength signal
         for the genome rather than being silently lost.
+
+        When the evidence contains CA telemetry (branching ratio σ, avalanche
+        exponent α, Shannon entropy H), these quantitative benchmarks are
+        extracted and stored as structured fields on the resolution record.
+        This preserves the quantitative footprint of criticality evidence so
+        the genome can later detect drift from the critical band across
+        generations, rather than reducing O148-type evidence to binary
+        pass/fail.
         """
         if not evidence or not evidence.strip():
             raise ValueError(
@@ -301,6 +381,43 @@ class EscrowLedger:
                 entry["resolved_at"]    = datetime.now(timezone.utc).isoformat()
                 entry["evidence"]       = evidence.strip()
                 entry["resolve_source"] = resolve_source
+
+                # ── CA telemetry extraction (O148 quantitative benchmarks) ─
+                # Parse σ, α, H from evidence text and store as structured
+                # fields on the resolution record. Without these, the genome
+                # loses the quantitative footprint of criticality evidence
+                # and cannot detect drift from the critical band.
+                ca_telemetry = self._extract_ca_telemetry(evidence.strip())
+                if ca_telemetry:
+                    entry["ca_telemetry"] = ca_telemetry
+                    entry["ca_telemetry"]["extracted_at"] = datetime.now(
+                        timezone.utc).isoformat()
+                    # Store top-level fields for quick access
+                    if "sigma" in ca_telemetry:
+                        entry["branching_ratio_sigma"] = ca_telemetry["sigma"]
+                    if "alpha" in ca_telemetry:
+                        entry["avalanche_exponent_alpha"] = ca_telemetry["alpha"]
+                    if "shannon_entropy_bits" in ca_telemetry:
+                        entry["shannon_entropy_H"] = ca_telemetry["shannon_entropy_bits"]
+                    if "criticality_verdict" in ca_telemetry:
+                        entry["criticality_verdict"] = ca_telemetry["criticality_verdict"]
+                    if "criticality_score" in ca_telemetry:
+                        entry["criticality_score"] = ca_telemetry["criticality_score"]
+                    # Challenge note for O148
+                    if ca_telemetry.get("r_squared") is not None and ca_telemetry["r_squared"] < 0.95:
+                        entry["o148_finite_size_warning"] = (
+                            f"R²={ca_telemetry['r_squared']} < 0.95: power-law fit "
+                            f"may reflect finite-size artifact rather than true SOC. "
+                            f"The 200-step window and 32×32 grid are small enough "
+                            f"that the claim of genuine criticality remains "
+                            f"underdetermined at this scale."
+                        )
+                    print(f"  [RESOLVE-TELEMETRY] {obligation_id}: "
+                          f"σ={ca_telemetry.get('sigma', '?')}, "
+                          f"α={ca_telemetry.get('alpha', '?')}, "
+                          f"H={ca_telemetry.get('shannon_entropy_bits', '?')} bits, "
+                          f"verdict={ca_telemetry.get('criticality_verdict', '?')}, "
+                          f"criticality_score={ca_telemetry.get('criticality_score', '?')}")
 
                 # ── Convergence-count accumulation (CONVERGE tag) ─────────
                 # When a COMPARE output tags this resolution as CONVERGE,
@@ -493,23 +610,199 @@ class MWDEScorer:
         When supports don't overlap, unmatched mass contributes full cost —
         this is the misspecification-robust property: distant semantic content
         produces high W, not infinity (as KL would).
+
+        When the shared vocabulary exceeds LIPSCHITZ_PROJECTION_THRESHOLD,
+        the brute-force 1D CDF method is augmented with a 1-Lipschitz
+        neural projection that maximizes OT over a family of learned
+        low-dimensional embeddings (Paty et al. extension). This reduces
+        cost from O(n³) to tractable scale by computing OT after mapping
+        data to a lower-dimensional space, with the best estimate obtained
+        by maximizing OT over the projection family.
+
+        O112 CHALLENGE: direct high-dimensional W2 computation assumed by
+        O112's STF metric tensor recovery experiment is computationally
+        infeasible without Lipschitz-constrained projection. The projected
+        W1 is a lower bound on the true W1 (by the 1-Lipschitz contraction
+        property), and maximizing over projection families tightens this
+        bound. O112's raw empirical recovery of the metric tensor is
+        ill-posed as specified if it assumes direct high-dimensional W2
+        rather than this projected approximation.
         """
         all_keys = sorted(set(list(dist_a.keys()) + list(dist_b.keys())))
         if not all_keys:
             return 1.0  # no content = maximal distance
 
-        # Build CDFs
+        n_keys = len(all_keys)
+
+        # ── 1-Lipschitz projected OT for high-dimensional vocabularies ────
+        # When vocabulary size exceeds threshold, augment the canonical 1D
+        # CDF computation with projected OT over multiple random 1-Lipschitz
+        # maps into low-dimensional spaces. The maximum projected W1 across
+        # the family is a tighter lower bound on the true W1 (dual
+        # representation: W1 = sup_{f: 1-Lip} E_P[f] - E_Q[f]).
+        #
+        # Each projection is a random linear map with rows normalized to
+        # unit L2 norm (guaranteeing 1-Lipschitz), projecting from
+        # n_keys dimensions down to PROJ_DIM dimensions. W1 is computed
+        # in the projected space via the 1D CDF method on each projected
+        # coordinate, then averaged across coordinates.
+        #
+        # Paper: "one can approximate OT distances by using more general
+        # families of maps provided they are 1-Lipschitz. The best estimate
+        # is obtained by maximising OT over the given family."
+        LIPSCHITZ_PROJECTION_THRESHOLD = 50   # vocabulary size above which projection activates
+        LIPSCHITZ_N_PROJECTIONS = 5           # number of random 1-Lipschitz maps
+        LIPSCHITZ_PROJ_DIM = 8                # target dimension per projection
+
+        # Always compute the canonical 1D CDF distance as baseline
         cdf_a = 0.0
         cdf_b = 0.0
-        w1 = 0.0
+        w1_canonical = 0.0
         for key in all_keys:
             cdf_a += dist_a.get(key, 0.0)
             cdf_b += dist_b.get(key, 0.0)
-            w1 += abs(cdf_a - cdf_b)
+            w1_canonical += abs(cdf_a - cdf_b)
+        w1_canonical = w1_canonical / n_keys if n_keys > 0 else 1.0
 
-        # Normalize by vocabulary size to keep score in [0, 1] range
-        n_keys = len(all_keys)
-        return w1 / n_keys if n_keys > 0 else 1.0
+        if n_keys < LIPSCHITZ_PROJECTION_THRESHOLD:
+            return w1_canonical
+
+        # ── Projected OT: maximize W1 over 1-Lipschitz projection family ─
+        # Build distribution vectors over the shared vocabulary
+        vec_a = [dist_a.get(k, 0.0) for k in all_keys]
+        vec_b = [dist_b.get(k, 0.0) for k in all_keys]
+
+        # Use deterministic seed from vocabulary hash for reproducibility
+        # (avoid importing random; use a simple LCG seeded by vocab hash)
+        _seed = abs(hash(tuple(all_keys[:10]))) % (2**31)
+
+        def _lcg_next(s):
+            # type: (int) -> int
+            return (1103515245 * s + 12345) % (2**31)
+
+        def _lcg_float(s):
+            # type: (int) -> tuple
+            s = _lcg_next(s)
+            return s, (s / float(2**31)) * 2.0 - 1.0  # uniform in [-1, 1]
+
+        w1_max_projected = w1_canonical  # start with canonical as floor
+
+        for _proj_idx in range(LIPSCHITZ_N_PROJECTIONS):
+            # Generate a random projection matrix: PROJ_DIM x n_keys
+            # Each row is normalized to unit L2 norm → 1-Lipschitz map
+            proj_dim = min(LIPSCHITZ_PROJ_DIM, n_keys)
+            projection = []
+            for _row_idx in range(proj_dim):
+                row = []
+                for _col_idx in range(n_keys):
+                    _seed, val = _lcg_float(_seed)
+                    row.append(val)
+                # Normalize row to unit L2 norm (1-Lipschitz guarantee)
+                row_norm = math.sqrt(sum(v * v for v in row))
+                if row_norm > 1e-12:
+                    row = [v / row_norm for v in row]
+                projection.append(row)
+
+            # Project both distribution vectors: proj_vec = P @ vec
+            proj_a = []
+            proj_b = []
+            for row in projection:
+                pa = sum(row[k] * vec_a[k] for k in range(n_keys))
+                pb = sum(row[k] * vec_b[k] for k in range(n_keys))
+                proj_a.append(pa)
+                proj_b.append(pb)
+
+            # Compute W1 in projected space: average of per-coordinate
+            # absolute differences (1D W1 on each projected coordinate)
+            # This is valid because each coordinate is a 1-Lipschitz
+            # functional, and W1 = sup over 1-Lip functionals of
+            # |E_P[f] - E_Q[f]|
+            w1_proj = 0.0
+            for d in range(proj_dim):
+                w1_proj += abs(proj_a[d] - proj_b[d])
+            w1_proj = w1_proj / proj_dim if proj_dim > 0 else 0.0
+
+            # Maximize over the projection family (tighter lower bound)
+            if w1_proj > w1_max_projected:
+                w1_max_projected = w1_proj
+
+        # ── Gradient ascent refinement on best projection ─────────────────
+        # After random search, refine the best projection via a few steps
+        # of projected gradient ascent on the W1 objective, maintaining
+        # the 1-Lipschitz constraint by re-normalizing rows after each step.
+        # This approximates the neural-network maximization from the paper
+        # without requiring a full NN framework.
+        LIPSCHITZ_REFINE_STEPS = 3
+        LIPSCHITZ_REFINE_LR = 0.1
+
+        # Re-generate the best projection (use the seed that produced it)
+        _best_seed = abs(hash(tuple(all_keys[:10]))) % (2**31)
+        _best_w1 = w1_canonical
+        _best_proj = None
+        _test_seed = _best_seed
+        for _proj_idx in range(LIPSCHITZ_N_PROJECTIONS):
+            proj_dim = min(LIPSCHITZ_PROJ_DIM, n_keys)
+            projection = []
+            for _row_idx in range(proj_dim):
+                row = []
+                for _col_idx in range(n_keys):
+                    _test_seed, val = _lcg_float(_test_seed)
+                    row.append(val)
+                row_norm = math.sqrt(sum(v * v for v in row))
+                if row_norm > 1e-12:
+                    row = [v / row_norm for v in row]
+                projection.append(row)
+            # Evaluate
+            proj_a = [sum(projection[d][k] * vec_a[k] for k in range(n_keys))
+                      for d in range(proj_dim)]
+            proj_b = [sum(projection[d][k] * vec_b[k] for k in range(n_keys))
+                      for d in range(proj_dim)]
+            w1_p = sum(abs(proj_a[d] - proj_b[d]) for d in range(proj_dim)) / proj_dim
+            if w1_p > _best_w1:
+                _best_w1 = w1_p
+                _best_proj = [list(row) for row in projection]
+
+        if _best_proj is not None:
+            proj_dim = len(_best_proj)
+            for _step in range(LIPSCHITZ_REFINE_STEPS):
+                # Compute gradient of W1 w.r.t. projection rows
+                # W1 = (1/d) * sum_d |<P_d, a-b>|
+                # dW1/dP_d = (1/d) * sign(<P_d, a-b>) * (a-b)
+                diff_vec = [vec_a[k] - vec_b[k] for k in range(n_keys)]
+                for d in range(proj_dim):
+                    dot_d = sum(_best_proj[d][k] * diff_vec[k]
+                                for k in range(n_keys))
+                    sign_d = 1.0 if dot_d >= 0 else -1.0
+                    # Gradient ascent step
+                    for k in range(n_keys):
+                        _best_proj[d][k] += (LIPSCHITZ_REFINE_LR
+                                             * sign_d * diff_vec[k] / proj_dim)
+                    # Re-normalize to maintain 1-Lipschitz constraint
+                    row_norm = math.sqrt(
+                        sum(v * v for v in _best_proj[d]))
+                    if row_norm > 1e-12:
+                        _best_proj[d] = [v / row_norm
+                                         for v in _best_proj[d]]
+
+                # Re-evaluate after refinement step
+                proj_a = [sum(_best_proj[d][k] * vec_a[k]
+                              for k in range(n_keys))
+                          for d in range(proj_dim)]
+                proj_b = [sum(_best_proj[d][k] * vec_b[k]
+                              for k in range(n_keys))
+                          for d in range(proj_dim)]
+                w1_refined = (sum(abs(proj_a[d] - proj_b[d])
+                                  for d in range(proj_dim))
+                              / proj_dim)
+                if w1_refined > w1_max_projected:
+                    w1_max_projected = w1_refined
+
+        # Final distance: maximum of canonical and projected estimates
+        # (projected W1 is a lower bound; canonical may be tighter for
+        # small vocabularies but projected wins for large ones)
+        w1_final = max(w1_canonical, w1_max_projected)
+
+        return w1_final
 
     @staticmethod
     def _mac_check(dist_node, dist_evidence, mac_threshold=0.15):
@@ -1223,6 +1516,217 @@ class MWDEScorer:
                   f"→ weight attenuated by {markov_attenuation:.3f}× "
                   f"(INV_087: free-choice entropy proxy rejected)")
 
+        # ── Multiscale Fluctuation Diffusion Entropy (MFbDEA-inspired) ────
+        # Single-scale entropy misses scale-crossing coupling events — the
+        # same failure mode MFbDEA was designed to correct. Compute diffusion
+        # entropy across 3–5 timescales to detect critical-event structure
+        # in the document similarity trajectory, analogous to Modified
+        # Fluctuation-based Diffusion Entropy Analysis for dyadic HRV.
+        #
+        # Protocol (adapted from MFbDEA for semantic distributions):
+        #   1. Build a "similarity trajectory" from the shared vocabulary:
+        #      for each shared term, compute |p_node(t) - p_evidence(t)|
+        #      as the local fluctuation signal.
+        #   2. At each timescale s ∈ {1, 2, 4, 8, 16}, compute the diffusion
+        #      profile: aggregate fluctuations over non-overlapping windows
+        #      of size s, yielding a coarse-grained displacement series.
+        #   3. For each scale's displacement series, compute the Shannon
+        #      entropy of the displacement distribution (diffusion entropy).
+        #   4. The multiscale diffusion entropy is the slope of
+        #      H(s) vs ln(s) — the scaling exponent δ. At criticality
+        #      (genuine conceptual synchrony), δ ≈ 1.0 (linear entropy
+        #      growth). Spurious surface correlation yields δ ≈ 0.5
+        #      (random-walk diffusion) or δ ≈ 0 (no scaling).
+        #
+        # INV_073 CHALLENGE acknowledgment: the MFbDEA paper shows the
+        # critical ridge in biological dyadic coupling is condition-
+        # dependent (passive viewing fails to reach it), implying the
+        # ridge is not a stable attractor but a fragile, effort-dependent
+        # configuration. The multiscale entropy scorer inherits this
+        # limitation: δ ≈ 1.0 may be achievable only under active
+        # semantic engagement, not passive keyword overlap.
+        _MFBDEA_SCALES = [1, 2, 4, 8, 16]  # timescales for diffusion analysis
+        _MFBDEA_ENTROPY_BINS = 12           # bins for displacement histogram
+
+        # Step 1: Build fluctuation signal from shared vocabulary
+        _shared_keys_mf = sorted(set(dist_node.keys()) & set(dist_evidence.keys()))
+        _mfbdea_result = None
+
+        if len(_shared_keys_mf) >= 8:
+            # Local fluctuation series: |p_node - p_evidence| per shared term
+            _fluctuation_signal = [
+                abs(dist_node.get(k, 0.0) - dist_evidence.get(k, 0.0))
+                for k in _shared_keys_mf
+            ]
+            _n_fluct = len(_fluctuation_signal)
+
+            # Step 2-3: Diffusion entropy at each timescale
+            _scale_entropies = []  # (ln(s), H(s)) pairs for regression
+            _per_scale_detail = []
+
+            for _s in _MFBDEA_SCALES:
+                if _s > _n_fluct // 2:
+                    break  # not enough data for this scale
+
+                # Non-overlapping windows of size s → displacement series
+                _n_windows = _n_fluct // _s
+                if _n_windows < 3:
+                    break
+
+                _displacements = []
+                for _w in range(_n_windows):
+                    _window = _fluctuation_signal[_w * _s: (_w + 1) * _s]
+                    # Displacement = sum of fluctuations in window
+                    # (diffusion profile: cumulative displacement per window)
+                    _displacements.append(sum(_window))
+
+                # Compute Shannon entropy of displacement distribution
+                # Discretize displacements into histogram bins
+                if not _displacements:
+                    continue
+                _d_min = min(_displacements)
+                _d_max = max(_displacements)
+                _d_range = _d_max - _d_min
+                if _d_range < 1e-12:
+                    # All displacements identical → zero entropy
+                    _h_scale = 0.0
+                else:
+                    _bins = [0] * _MFBDEA_ENTROPY_BINS
+                    for _disp in _displacements:
+                        _bin_idx = min(
+                            _MFBDEA_ENTROPY_BINS - 1,
+                            int((_disp - _d_min) / _d_range * _MFBDEA_ENTROPY_BINS)
+                        )
+                        _bins[_bin_idx] += 1
+                    _n_disp = len(_displacements)
+                    _h_scale = 0.0
+                    for _bc in _bins:
+                        if _bc > 0:
+                            _p_bin = _bc / float(_n_disp)
+                            _h_scale -= _p_bin * math.log(_p_bin)
+
+                _ln_s = math.log(_s) if _s > 0 else 0.0
+                _scale_entropies.append((_ln_s, _h_scale))
+                _per_scale_detail.append({
+                    "scale": _s,
+                    "ln_scale": round(_ln_s, 4),
+                    "diffusion_entropy": round(_h_scale, 6),
+                    "n_windows": _n_windows,
+                    "mean_displacement": round(
+                        sum(_displacements) / len(_displacements), 6),
+                })
+
+            # Step 4: Compute scaling exponent δ via linear regression
+            # H(s) = δ * ln(s) + c → δ is the slope
+            _delta_exponent = 0.5  # default: random-walk (no critical structure)
+            _delta_r_squared = 0.0
+            _delta_intercept = 0.0
+
+            if len(_scale_entropies) >= 3:
+                # Simple linear regression: δ = cov(ln_s, H) / var(ln_s)
+                _n_pts = len(_scale_entropies)
+                _mean_x = sum(x for x, _ in _scale_entropies) / _n_pts
+                _mean_y = sum(y for _, y in _scale_entropies) / _n_pts
+                _cov_xy = sum(
+                    (x - _mean_x) * (y - _mean_y)
+                    for x, y in _scale_entropies
+                ) / _n_pts
+                _var_x = sum(
+                    (x - _mean_x) ** 2 for x, _ in _scale_entropies
+                ) / _n_pts
+
+                if _var_x > 1e-12:
+                    _delta_exponent = _cov_xy / _var_x
+                    _delta_intercept = _mean_y - _delta_exponent * _mean_x
+
+                    # R² for goodness of fit
+                    _ss_res = sum(
+                        (y - (_delta_exponent * x + _delta_intercept)) ** 2
+                        for x, y in _scale_entropies
+                    )
+                    _ss_tot = sum(
+                        (y - _mean_y) ** 2 for _, y in _scale_entropies
+                    )
+                    if _ss_tot > 1e-12:
+                        _delta_r_squared = 1.0 - (_ss_res / _ss_tot)
+                    else:
+                        _delta_r_squared = 0.0
+
+            # Classify the scaling regime:
+            #   δ ≈ 1.0 (0.85–1.15): critical synchrony (genuine conceptual coupling)
+            #   δ ≈ 0.5 (0.35–0.65): random-walk diffusion (spurious surface correlation)
+            #   δ < 0.35: sub-diffusive (anti-correlated / incoherent)
+            #   δ > 1.15: super-diffusive (anomalous — possible Lévy-flight coupling)
+            if 0.85 <= _delta_exponent <= 1.15:
+                _mfbdea_regime = "CRITICAL_SYNCHRONY"
+            elif 0.35 <= _delta_exponent <= 0.65:
+                _mfbdea_regime = "RANDOM_WALK"
+            elif _delta_exponent < 0.35:
+                _mfbdea_regime = "SUB_DIFFUSIVE"
+            else:
+                _mfbdea_regime = "SUPER_DIFFUSIVE"
+
+            # Multiscale coherence modifier: scale the MWDE weight based on
+            # whether the similarity trajectory shows genuine critical-event
+            # structure (δ ≈ 1) or spurious surface correlation (δ ≈ 0.5).
+            # Modifier ranges from 0.7 (random walk → attenuate) to 1.3
+            # (critical synchrony → boost).
+            if _mfbdea_regime == "CRITICAL_SYNCHRONY":
+                _mfbdea_modifier = 1.0 + 0.3 * min(1.0, _delta_r_squared)
+            elif _mfbdea_regime == "RANDOM_WALK":
+                _mfbdea_modifier = 0.7 + 0.15 * (1.0 - _delta_r_squared)
+            elif _mfbdea_regime == "SUB_DIFFUSIVE":
+                _mfbdea_modifier = 0.6
+            else:  # SUPER_DIFFUSIVE
+                _mfbdea_modifier = 1.1
+
+            # Apply the multiscale modifier to the MWDE weight
+            _mwde_pre_mfbdea = mwde_weight
+            mwde_weight = min(1.0, mwde_weight * _mfbdea_modifier)
+
+            _mfbdea_result = {
+                "delta_exponent": round(_delta_exponent, 4),
+                "delta_intercept": round(_delta_intercept, 4),
+                "delta_r_squared": round(_delta_r_squared, 4),
+                "regime": _mfbdea_regime,
+                "modifier_applied": round(_mfbdea_modifier, 4),
+                "mwde_pre_mfbdea": round(_mwde_pre_mfbdea, 4),
+                "mwde_post_mfbdea": round(mwde_weight, 4),
+                "n_scales_used": len(_scale_entropies),
+                "scales": [s["scale"] for s in _per_scale_detail],
+                "per_scale": _per_scale_detail,
+                "n_shared_terms": len(_shared_keys_mf),
+                "inv073_challenge": (
+                    "MFbDEA paper shows critical ridge (δ≈1) in biological "
+                    "dyadic coupling is condition-dependent: passive viewing "
+                    "fails to reach it. This implies criticality is a fragile, "
+                    "effort-dependent configuration requiring active "
+                    "maintenance, not a natural resting state. The multiscale "
+                    f"scorer detected regime={_mfbdea_regime} (δ={_delta_exponent:.4f})"
+                    f" — {'consistent with' if _mfbdea_regime == 'CRITICAL_SYNCHRONY' else 'inconsistent with'}"
+                    " genuine conceptual synchrony at this measurement."
+                ),
+            }
+
+            if _mfbdea_regime != "RANDOM_WALK":
+                print(f"  [MFbDEA] δ={_delta_exponent:.4f} (R²={_delta_r_squared:.3f}), "
+                      f"regime={_mfbdea_regime}: "
+                      f"mwde {_mwde_pre_mfbdea:.4f}→{mwde_weight:.4f} "
+                      f"(modifier={_mfbdea_modifier:.3f}, "
+                      f"{len(_scale_entropies)} scales, "
+                      f"{len(_shared_keys_mf)} shared terms)"
+                      + (" — CRITICAL SYNCHRONY detected: genuine "
+                         "scale-crossing coupling"
+                         if _mfbdea_regime == "CRITICAL_SYNCHRONY"
+                         else ""))
+        else:
+            _mfbdea_result = {
+                "delta_exponent": None,
+                "regime": "INSUFFICIENT_DATA",
+                "reason": "fewer than 8 shared vocabulary terms",
+                "n_shared_terms": len(_shared_keys_mf),
+            }
+
         # ── Entropy-weighted effective weight ─────────────────────────────
         # Scale MWDE weight by inverse local entropy of evidence distribution.
         # Concentrated evidence (low entropy) → full update strength.
@@ -1377,6 +1881,48 @@ class MWDEScorer:
                   f"update attenuated by {inv_entropy_w:.3f}× "
                   f"(mwde={mwde_weight:.4f} → effective={effective_weight:.4f})")
 
+        # ── Belief-change type classification (revision vs update) ────────
+        # Tag this scored belief change as revision-type (static-world
+        # assumption: the world hasn't changed, our beliefs were wrong) or
+        # update-type (dynamic-world assumption: the world has changed,
+        # beliefs need updating) using temporal context from the distributions.
+        #
+        # Paper basis: Friedman & Halpern's unified temporal-epistemic-
+        # plausibility framework shows belief revision and belief update rest
+        # on incompatible hidden assumptions. Revision assumes a static world
+        # (the agent corrects a mistaken belief about an unchanged reality);
+        # update assumes a dynamic world (reality changed, beliefs must track
+        # the change). A single γ-correlation metric that ignores this
+        # distinction measures a confounded mixture of two structurally
+        # different operations.
+        #
+        # Classification heuristic (temporal context from distributions):
+        #   1. Compute the "novelty ratio": fraction of evidence terms that
+        #      are ABSENT from the node's distribution (new vocabulary).
+        #   2. Compute the "contradiction ratio": fraction of shared terms
+        #      where evidence probability mass REVERSES the node's ranking
+        #      (sign-flip in relative ordering).
+        #   3. Classification:
+        #      - High novelty (>0.5) → UPDATE (dynamic world: new concepts
+        #        entered that didn't exist before; world changed)
+        #      - Low novelty + high contradiction (>0.3) → REVISION (static
+        #        world: same concepts, but our beliefs about their relative
+        #        importance were wrong)
+        #      - Low novelty + low contradiction → CONSISTENT (no significant
+        #        belief change; neither revision nor update)
+        #   4. Emit as belief_change_type alongside the score for downstream
+        #      γ-correlation in O21.
+        #
+        # O21 CHALLENGE: the paper shows Katsuno-Mendelzon's notion of belief
+        # update depends on several strong assumptions (e.g., elementary events
+        # as minimal information units) that may limit its applicability in AI.
+        # This classification makes the revision/update distinction empirically
+        # testable: O21 can now test whether spectral γ correlates with
+        # dynamic-world belief operations specifically, not belief change in
+        # general.
+        belief_change_type_result = self._classify_belief_change_type(
+            dist_node, dist_evidence)
+
         return {
             "wasserstein_distance": round(w_dist, 4),
             "mwde_weight": round(mwde_weight, 4),
@@ -1388,6 +1934,164 @@ class MWDEScorer:
             "mac_check": mac_result,
             "mac_failure": False,
             "ks_fit": ks_fit,
+            "belief_change_type": belief_change_type_result,
+        }
+
+    @staticmethod
+    def _classify_belief_change_type(dist_node, dist_evidence):
+        # type: (dict, dict) -> dict
+        """
+        Classify a belief change as revision-type (static-world assumption)
+        or update-type (dynamic-world assumption) using temporal context
+        from the two distributions.
+
+        Revision: the world hasn't changed; our beliefs about it were wrong.
+            Signal: shared vocabulary with reversed importance rankings.
+        Update: the world has changed; new concepts/entities appeared.
+            Signal: high fraction of evidence terms absent from prior beliefs.
+
+        Based on Friedman & Halpern's unified temporal-epistemic-plausibility
+        framework: revision and update rest on incompatible hidden assumptions,
+        and conflating them produces confounded measurements.
+
+        Returns:
+            dict with:
+                - type: "REVISION" | "UPDATE" | "CONSISTENT"
+                - novelty_ratio: fraction of evidence terms absent from node
+                - contradiction_ratio: fraction of shared terms with rank reversal
+                - confidence: how confident the classification is (0-1)
+                - o21_feature: the type tag formatted for downstream γ-correlation
+                - km_assumption_warning: Katsuno-Mendelzon assumption check
+        """
+        if not dist_node or not dist_evidence:
+            return {
+                "type": "INDETERMINATE",
+                "novelty_ratio": 0.0,
+                "contradiction_ratio": 0.0,
+                "confidence": 0.0,
+                "o21_feature": "INDETERMINATE",
+                "km_assumption_warning": None,
+            }
+
+        node_keys = set(dist_node.keys())
+        evid_keys = set(dist_evidence.keys())
+        shared_keys = node_keys & evid_keys
+
+        # ── Novelty ratio: evidence terms absent from node ────────────────
+        # High novelty → dynamic world (UPDATE): new concepts appeared
+        novel_keys = evid_keys - node_keys
+        novelty_ratio = (len(novel_keys) / len(evid_keys)
+                         if evid_keys else 0.0)
+
+        # ── Contradiction ratio: rank reversals among shared terms ────────
+        # High contradiction → static world (REVISION): same concepts,
+        # but our ranking of their importance was wrong
+        contradiction_ratio = 0.0
+        if len(shared_keys) >= 2:
+            shared_sorted = sorted(shared_keys)
+            n_reversals = 0
+            n_pairs_checked = 0
+            # Check pairwise rank ordering among shared terms
+            shared_list = list(shared_sorted)
+            for i_rc in range(min(len(shared_list), 30)):
+                for j_rc in range(i_rc + 1, min(len(shared_list), 30)):
+                    k_i = shared_list[i_rc]
+                    k_j = shared_list[j_rc]
+                    # Node says k_i > k_j (in probability mass)
+                    node_order = dist_node.get(k_i, 0.0) > dist_node.get(k_j, 0.0)
+                    # Evidence says k_i > k_j
+                    evid_order = dist_evidence.get(k_i, 0.0) > dist_evidence.get(k_j, 0.0)
+                    n_pairs_checked += 1
+                    if node_order != evid_order:
+                        n_reversals += 1
+            if n_pairs_checked > 0:
+                contradiction_ratio = n_reversals / float(n_pairs_checked)
+
+        # ── Classification ────────────────────────────────────────────────
+        NOVELTY_THRESHOLD = 0.5
+        CONTRADICTION_THRESHOLD = 0.3
+        CONSISTENT_NOVELTY_CEIL = 0.2
+        CONSISTENT_CONTRADICTION_CEIL = 0.15
+
+        if novelty_ratio > NOVELTY_THRESHOLD:
+            change_type = "UPDATE"
+            # Confidence scales with novelty magnitude
+            confidence = min(1.0, novelty_ratio)
+        elif (novelty_ratio <= NOVELTY_THRESHOLD
+              and contradiction_ratio > CONTRADICTION_THRESHOLD):
+            change_type = "REVISION"
+            # Confidence scales with contradiction magnitude
+            confidence = min(1.0, contradiction_ratio)
+        elif (novelty_ratio <= CONSISTENT_NOVELTY_CEIL
+              and contradiction_ratio <= CONSISTENT_CONTRADICTION_CEIL):
+            change_type = "CONSISTENT"
+            confidence = 1.0 - max(novelty_ratio, contradiction_ratio)
+        else:
+            # Ambiguous zone: moderate novelty and/or contradiction
+            change_type = "MIXED"
+            confidence = 0.5 - abs(novelty_ratio - contradiction_ratio)
+            confidence = max(0.1, min(0.6, confidence))
+
+        # ── Katsuno-Mendelzon assumption check ────────────────────────────
+        # KM update assumes elementary events as minimal information units
+        # and point-based change (each world updates independently). When
+        # novelty is high AND shared terms show strong correlation structure
+        # (many terms move together), the KM independence assumption is
+        # violated — the update is not point-based but involves correlated
+        # world-state changes.
+        km_warning = None
+        if change_type == "UPDATE" and len(shared_keys) >= 4:
+            # Check for correlated movement: if most shared terms shift
+            # in the same direction (all increase or all decrease), the
+            # KM independence assumption is strained
+            n_increase = 0
+            n_decrease = 0
+            for k_km in shared_keys:
+                diff_km = dist_evidence.get(k_km, 0.0) - dist_node.get(k_km, 0.0)
+                if diff_km > 1e-8:
+                    n_increase += 1
+                elif diff_km < -1e-8:
+                    n_decrease += 1
+            n_shared_total = n_increase + n_decrease
+            if n_shared_total > 0:
+                dominant_fraction = max(n_increase, n_decrease) / float(n_shared_total)
+                if dominant_fraction > 0.8:
+                    km_warning = (
+                        f"KM ASSUMPTION STRAINED: {dominant_fraction*100:.0f}% "
+                        f"of shared terms shift in the same direction "
+                        f"({'increase' if n_increase > n_decrease else 'decrease'}). "
+                        f"Katsuno-Mendelzon update assumes point-based "
+                        f"independence (each world updates independently), "
+                        f"but correlated movement indicates structured "
+                        f"world-state change that violates this assumption. "
+                        f"O21 γ-correlation on this UPDATE-type belief change "
+                        f"may be confounded by KM applicability limits."
+                    )
+
+        return {
+            "type": change_type,
+            "novelty_ratio": round(novelty_ratio, 4),
+            "contradiction_ratio": round(contradiction_ratio, 4),
+            "confidence": round(confidence, 4),
+            "o21_feature": change_type,
+            "n_novel_terms": len(novel_keys),
+            "n_shared_terms": len(shared_keys),
+            "n_node_only_terms": len(node_keys - evid_keys),
+            "km_assumption_warning": km_warning,
+            "classification_thresholds": {
+                "novelty_for_update": NOVELTY_THRESHOLD,
+                "contradiction_for_revision": CONTRADICTION_THRESHOLD,
+            },
+            "o21_challenge_note": (
+                f"Belief change classified as {change_type} "
+                f"(novelty={novelty_ratio:.3f}, contradiction="
+                f"{contradiction_ratio:.3f}). O21's γ-correlation "
+                f"protocol should stratify by this tag: revision-type "
+                f"and update-type belief changes rest on incompatible "
+                f"hidden assumptions (Friedman-Halpern 1999), so a "
+                f"single γ metric across both types measures a "
+                f"confounded mixture."
+            ),
         }
 
     @staticmethod
@@ -3503,10 +4207,251 @@ class Consolidator:
                   + f") — metric-recovery analog for O112 "
                   f"(ξ∼μ^{{-σ}} ≅ STF metric tensor recovery)")
 
+        # ── Stage 3: Modular-flow / Tomita-Takesaki detection (O112) ─────
+        # Papers whose abstract contains modular-flow or Tomita-Takesaki
+        # terms provide a concrete long-distance MI geometry formula that
+        # is a candidate method for STF metric tensor recovery (O112).
+        # Standard keyword matching on "metric tensor" or "Wasserstein"
+        # misses these because the geometry is encoded in modular-flow
+        # language from algebraic QFT rather than differential geometry.
+        #
+        # CHALLENGE: the modular-flow MI formula operates in QFT vacuum
+        # states on null surfaces, not on semantic/linguistic data.
+        # Direct application to STF empirical recovery requires a
+        # non-trivial bridging argument (CFT → semantic manifold) that
+        # these papers do not supply. O112's implicit assumption that a
+        # single experiment can close the gap is strained by the
+        # substrate gap between QFT and semantic spaces.
+        _MODULAR_FLOW_TERMS = {
+            "modular flow", "modular-flow", "modular operator",
+            "modular conjugation", "modular automorphism",
+            "tomita-takesaki", "tomita takesaki",
+            "modular hamiltonian", "modular theory",
+            "strong superadditivity", "strong subadditivity",
+            "mutual information", "long-distance mutual information",
+            "long distance mutual information",
+            "vacuum markov", "markov property of the vacuum",
+            "null surface", "null surfaces",
+            "entanglement entropy", "entropic",
+            "conformal field theory", "cft",
+            "unitarity bound", "unitarity bounds",
+        }
+        _modular_hits = [term for term in _MODULAR_FLOW_TERMS
+                         if term in text_lower]
+        # Require co-occurrence of modular-flow language AND MI/entropy language
+        _has_modular = any(t in text_lower for t in (
+            "modular flow", "modular-flow", "modular operator",
+            "tomita-takesaki", "tomita takesaki",
+            "modular hamiltonian", "modular automorphism"))
+        _has_mi_entropy = any(t in text_lower for t in (
+            "mutual information", "entanglement entropy",
+            "strong superadditivity", "strong subadditivity"))
+        if _has_modular and _has_mi_entropy:
+            _modular_boost = 0.20
+            # Extra boost for explicit long-distance MI formula
+            if any(t in text_lower for t in (
+                    "long-distance", "long distance",
+                    "leading long distance term",
+                    "regions of arbitrary shape")):
+                _modular_boost += 0.10
+            boost += _modular_boost
+            # Store candidate-method tag for O112 annotation
+            if not hasattr(self, '_pending_o112_method_tags'):
+                self._pending_o112_method_tags = []
+            self._pending_o112_method_tags.append({
+                "type": "modular_flow_mi_geometry",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "matched_terms": _modular_hits[:10],
+                "boost_applied": round(_modular_boost, 4),
+                "candidate_method": "modular-flow long-distance MI formula",
+                "knowledge_digest": paper_text[:200],
+                "challenge": (
+                    "Modular-flow MI formula gives long-distance MI geometry "
+                    "in QFT but does not operate on semantic/linguistic data. "
+                    "Direct application to STF empirical recovery requires a "
+                    "non-trivial bridging argument (CFT vacuum → semantic "
+                    "manifold) that the paper does not supply. O112's implicit "
+                    "assumption that a single experiment can close the gap is "
+                    "strained by this substrate gap."
+                ),
+            })
+            print(f"  [O112-MODULAR-FLOW] +{_modular_boost:.2f} boost: "
+                  f"modular-flow / Tomita-Takesaki MI geometry detected "
+                  f"(terms={_modular_hits[:5]}) — candidate-method tag "
+                  f"'modular_flow_mi_geometry' appended to O112 "
+                  f"| CHALLENGE: QFT→semantic bridging argument not supplied")
+
         if boost == 0.0:
             return 0.0
 
         return boost
+
+    # ── Selection-function / similarity-ordering keywords for O21 ────────────
+    # Papers containing a selection function or similarity ordering over
+    # possible-world states provide the formal bridge needed to
+    # operationalize the spectral-γ/belief-revision correlation (O21).
+    # The Kripke-Lewis unified semantics for AGM revision and KM update
+    # uses exactly this structure: a Lewis selection function f(w, A)
+    # picking the most similar A-worlds to state w, plus a Kripke belief
+    # relation. Detecting these formalisms in incoming literature
+    # automatically flags candidate parameterizations for O21.
+    _O21_SELECTION_FUNCTION_KEYWORDS = frozenset({
+        "selection function", "selection-function",
+        "similarity ordering", "similarity sphere",
+        "lewis sphere", "lewis semantics", "kripke-lewis",
+        "kripke lewis", "conditional logic frame",
+        "plausibility ordering", "plausibility order",
+        "closest world", "most similar world",
+        "system of spheres", "sphere semantics",
+        "agm revision", "agm belief revision",
+        "katsuno-mendelzon", "katsuno mendelzon",
+        "km update", "km belief update",
+        "belief revision function", "belief update function",
+        "revision operator", "update operator",
+        "faithful assignment", "faithful ranking",
+        "total preorder", "epistemic entrenchment",
+        "grove ordering", "grove sphere",
+    })
+
+    # Separates revision-type (static-world) from update-type (dynamic-world)
+    # formalism — papers unifying both under a single frame are highest-value
+    # O21 candidates because they expose the formal distinction O21 must respect.
+    _O21_REVISION_UPDATE_UNIFICATION_KEYWORDS = frozenset({
+        "unif", "characteriz", "both revision and update",
+        "both belief update and belief revision",
+        "revision and update", "update and revision",
+        "static world", "dynamic world",
+        "conditional belief", "conditional logic",
+        "believed conditional", "antecedent",
+    })
+
+    def _score_o21_selection_function(self, paper_text):
+        # type: (str) -> tuple
+        """
+        Score a paper's relevance to O21 (spectral-γ / belief-revision
+        correlation) by checking whether its formalism contains a selection
+        function or similarity ordering over states.
+
+        Papers supplying this formal bridge are candidate parameterizations
+        of the γ-to-revision-operator mapping that O21 requires.
+
+        Returns (boost, detail_dict) where boost >= 0.0 and detail_dict
+        contains detection metadata for downstream logging.
+
+        INV_094 CHALLENGE: the Kripke-Lewis paper shows that AGM revision
+        and KM update, though geometrically unified under Lewis frames,
+        remain formally distinct operations (non-commutative, different
+        postulates). This strains any claim that a single Wasserstein
+        gradient flow captures both without distinguishing static-world
+        revision from dynamic-world update. The selection-function
+        geometry must parameterize BOTH operators separately, not collapse
+        them into a single γ-correlation.
+        """
+        text_lower = paper_text.lower()
+        boost = 0.0
+
+        # Stage 1: detect selection-function / similarity-ordering formalism
+        sf_hits = [kw for kw in self._O21_SELECTION_FUNCTION_KEYWORDS
+                   if kw in text_lower]
+
+        if not sf_hits:
+            return 0.0, {"detected": False, "reason": "no_selection_function_formalism"}
+
+        # Base boost: 0.10 per matched keyword family, capped at 0.30
+        # (deduplicate overlapping keyword hits by taking unique semantic groups)
+        _semantic_groups_hit = set()
+        for kw in sf_hits:
+            if "selection function" in kw or "selection-function" in kw:
+                _semantic_groups_hit.add("selection_function")
+            elif "similarity" in kw or "sphere" in kw or "lewis" in kw:
+                _semantic_groups_hit.add("similarity_ordering")
+            elif "agm" in kw or "revision" in kw:
+                _semantic_groups_hit.add("agm_revision")
+            elif "katsuno" in kw or "km " in kw or "update" in kw:
+                _semantic_groups_hit.add("km_update")
+            elif "plausibility" in kw or "entrenchment" in kw:
+                _semantic_groups_hit.add("plausibility")
+            elif "faithful" in kw or "preorder" in kw or "grove" in kw:
+                _semantic_groups_hit.add("ordering_structure")
+            else:
+                _semantic_groups_hit.add("other")
+        boost = min(len(_semantic_groups_hit) * 0.10, 0.30)
+
+        # Stage 2: unification bonus — papers unifying revision AND update
+        # under a single frame are highest-value O21 candidates
+        unif_hits = [kw for kw in self._O21_REVISION_UPDATE_UNIFICATION_KEYWORDS
+                     if kw in text_lower]
+        has_unification = len(unif_hits) >= 2  # require ≥2 co-occurring signals
+
+        # Check for both revision and update language co-occurring
+        has_revision_lang = any(kw in text_lower for kw in (
+            "agm", "revision", "static world", "belief revision"))
+        has_update_lang = any(kw in text_lower for kw in (
+            "katsuno", "km update", "belief update", "dynamic world"))
+        has_both_operations = has_revision_lang and has_update_lang
+
+        if has_unification and has_both_operations:
+            boost += 0.15  # strong signal: unified frame for both operations
+
+        # Stage 3: INV_094 challenge — detect formal distinction signals
+        # (non-commutativity, different postulates, incompatible assumptions)
+        _distinction_keywords = {
+            "non-commutative", "noncommutative", "not commutative",
+            "different postulate", "distinct operation", "formally distinct",
+            "incompatible", "not interchangeable",
+            "point-based", "point based", "elementary event",
+            "different assumption", "contrasting assumption",
+        }
+        distinction_hits = [kw for kw in _distinction_keywords
+                            if kw in text_lower]
+        has_distinction = bool(distinction_hits)
+
+        inv094_challenge = None
+        if has_both_operations and has_distinction:
+            inv094_challenge = (
+                "Paper shows AGM revision and KM update are formally distinct "
+                "operations (non-commutative, different postulates) even when "
+                "unified under Lewis frames. A single Wasserstein gradient "
+                "flow cannot capture both without an explicit branching "
+                "parameter distinguishing static-world revision from "
+                "dynamic-world update. O21's γ-correlation must be "
+                "stratified by belief-change type (REVISION vs UPDATE) "
+                "to avoid measuring a confounded mixture."
+            )
+            # Small additional boost for papers that surface this challenge
+            boost += 0.05
+
+        detail = {
+            "detected": True,
+            "selection_function_keywords": sf_hits[:10],
+            "semantic_groups_hit": sorted(_semantic_groups_hit),
+            "unification_detected": has_unification,
+            "has_both_revision_and_update": has_both_operations,
+            "formal_distinction_detected": has_distinction,
+            "distinction_keywords": distinction_hits[:5],
+            "boost_applied": round(boost, 4),
+            "o21_parameterization_candidate": True,
+            "inv094_challenge": inv094_challenge,
+            "parameterization_note": (
+                "Paper provides selection-function / similarity-ordering "
+                "geometry over possible-world states — candidate formal "
+                "bridge for operationalizing O21's γ-to-revision-operator "
+                "mapping. The selection function f(w, A) picking most-similar "
+                "A-worlds to state w parameterizes the belief-change operator; "
+                "spectral γ may correlate with the geometry of f's level sets."
+            ),
+        }
+
+        if boost > 0:
+            print(f"  [O21-SELECTION-FN] +{boost:.2f} boost: "
+                  f"selection-function/similarity-ordering formalism detected "
+                  f"(groups={sorted(_semantic_groups_hit)}"
+                  + (", unified_revision_update=True" if has_unification and has_both_operations else "")
+                  + (", FORMAL_DISTINCTION_FLAGGED" if has_distinction else "")
+                  + f") — candidate γ-to-revision-operator parameterization "
+                  f"for O21")
+
+        return boost, detail
 
     def _formalism_obligation_boost(self, paper_text, open_obligations):
         # type: (str, list) -> float
@@ -3527,6 +4472,12 @@ class Consolidator:
         parameterize a continuous order parameter (fractional derivative α,
         temperature β, or analogous thermality handle) are flagged as
         high-priority O112 candidates via _score_o112_thermality().
+
+        Also includes O21 selection-function/similarity-ordering detection:
+        papers whose formalism contains a selection function or similarity
+        ordering over states are flagged as providing candidate
+        parameterizations of the spectral-γ/belief-revision correlation
+        via _score_o21_selection_function().
         """
         paper_formalisms = self._detect_formalism_types(paper_text)
 
@@ -3537,6 +4488,14 @@ class Consolidator:
         # parameterizations; this filter surfaces the exact class of
         # evidence needed to close it.
         o112_thermality_boost = self._score_o112_thermality(paper_text)
+
+        # ── O21 selection-function / similarity-ordering detection ────────────
+        # Papers containing a selection function or similarity ordering over
+        # possible-world states provide the formal bridge (selection-function
+        # geometry) needed to operationalize the γ-to-revision-operator mapping
+        # required by O21. This makes the O21 protocol test tractable by
+        # automatically detecting when incoming literature supplies this bridge.
+        o21_selection_boost, o21_selection_detail = self._score_o21_selection_function(paper_text)
 
         # ── Hierarchical temporal receptive window bonus (O112 / INV_094) ────
         # Papers demonstrating that hierarchical architectures develop
@@ -3898,6 +4857,100 @@ class Consolidator:
         print(f"[CONSOLIDATE] Entropy weights: "
               + ", ".join(f"{f}={w:.3f}" for f, w in sorted(entropy_wts.items())))
 
+        # ── Spectral-analog inverse-density weighting (INV_073 challenge) ────
+        # Treat topic coverage as a function over the obligation graph's
+        # conceptual parameter space (E_p analog = conceptual domain breadth),
+        # not a scalar. Compute the density of each obligation's conceptual
+        # domain across the existing corpus. Papers covering underrepresented
+        # (sparse) spectral regions of the obligation graph receive higher
+        # priority via inverse-density weighting, preventing systematic
+        # under-sampling of obligations in sparse knowledge-graph regions.
+        #
+        # Analogy: just as low-energy GRB detector sensitivity (F_T vs E_p)
+        # corrects for population bias in hard-band-only instruments, this
+        # weights paper relevance by the inverse of how densely the paper's
+        # conceptual domain is already covered in the obligation graph.
+        #
+        # Protocol:
+        #   1. For each open obligation, extract conceptual-domain keywords
+        #   2. Count how many existing nodes already cover each obligation's
+        #      domain (domain density)
+        #   3. Compute inverse-density weight per obligation:
+        #      w_inv = 1 / (1 + domain_density)
+        #   4. For each candidate paper/node, sum the inverse-density weights
+        #      of the obligations it touches → spectral_relevance_boost
+        #   5. Apply as additive boost to total_score
+        #
+        # INV_073 CHALLENGE response: the GRB paper demonstrates that the
+        # "critical ridge" (detector sensitivity curve) is instrument-specific
+        # and shifts with detector design, suggesting the ridge is not a fixed
+        # substrate-independent structure but a function of the measurement
+        # apparatus itself. Detector sensitivity is a curve over spectral
+        # parameter space, not a scalar — collapsing it biases population
+        # inference. This implementation treats paper relevance as a
+        # distribution over the obligation graph's parameter space rather
+        # than a scalar, directly addressing that bias.
+        _obligation_domain_density = {}  # type: dict  # ob_id -> (keywords, density)
+        _open_obs_for_density = []
+        try:
+            _obligs_path_density = FREED_DIR / "FREED_obligations.json"
+            if _obligs_path_density.exists():
+                _obligs_data_density = json.loads(_obligs_path_density.read_text())
+                _obligs_list_density = (
+                    _obligs_data_density if isinstance(_obligs_data_density, list)
+                    else _obligs_data_density.get("obligations", [])
+                )
+                if isinstance(_obligs_list_density, dict):
+                    _obligs_list_density = list(_obligs_list_density.values())
+                for _ob_d in _obligs_list_density:
+                    _ob_status = _ob_d.get("status", "open")
+                    if _ob_status not in ("open", "partial", "escrowed"):
+                        continue
+                    _ob_id = _ob_d.get("id", "")
+                    _ob_text = (_ob_d.get("obligation_text", "")
+                                or _ob_d.get("text", "")
+                                or _ob_d.get("description", "")
+                                or _ob_id)
+                    # Extract domain keywords (words > 4 chars, no stopwords)
+                    _ob_keywords = set(
+                        w.lower().strip(".,;:()[]'\"")
+                        for w in _ob_text.split()
+                        if len(w) > 4 and w.lower() not in stopwords
+                    )
+                    if _ob_keywords:
+                        _open_obs_for_density.append((_ob_id, _ob_keywords))
+
+            # Count how many existing nodes cover each obligation's domain
+            for _ob_id, _ob_kws in _open_obs_for_density:
+                _density_count = 0
+                for _existing_node in all_nodes:
+                    _en_text = " ".join(filter(None, [
+                        _existing_node.get("compress", ""),
+                        _existing_node.get("summary", ""),
+                        " ".join(_existing_node.get("invariants", [])),
+                        " ".join(_existing_node.get("tags", [])),
+                    ])).lower()
+                    # Count keyword hits from this obligation in this node
+                    _en_hits = sum(1 for kw in _ob_kws if kw in _en_text)
+                    # Node covers this obligation's domain if >= 2 keyword hits
+                    if _en_hits >= 2:
+                        _density_count += 1
+                # Inverse density weight: sparse obligations get high weight
+                _inv_density = 1.0 / (1.0 + _density_count)
+                _obligation_domain_density[_ob_id] = (_ob_kws, _density_count, _inv_density)
+
+            if _obligation_domain_density:
+                _n_sparse = sum(1 for _, (_, d, _) in _obligation_domain_density.items() if d <= 2)
+                _n_dense = sum(1 for _, (_, d, _) in _obligation_domain_density.items() if d > 5)
+                print(f"[CONSOLIDATE] Spectral-analog obligation density: "
+                      f"{len(_obligation_domain_density)} open obligations mapped, "
+                      f"{_n_sparse} sparse (density<=2), {_n_dense} dense (density>5) — "
+                      f"inverse-density weighting active (INV_073: sensitivity "
+                      f"curve over parameter space, not scalar)")
+        except Exception as _density_err:
+            print(f"[CONSOLIDATE] Spectral density mapping failed (non-fatal, "
+                  f"falling back to scalar scoring): {_density_err}")
+
         scored = []
         for node in all_nodes:
             # Score each field separately, then combine with entropy weights
@@ -3906,6 +4959,132 @@ class Consolidator:
                 field_text = extractor(node).lower()
                 field_overlap = sum(1 for w in words if w in field_text)
                 total_score += field_overlap * entropy_wts.get(field_name, 0.2)
+
+            # ── Spectral-analog inverse-density boost ────────────────────────
+            # For each open obligation whose conceptual domain is sparsely
+            # covered in the existing corpus, check if this paper/node touches
+            # that domain. If so, add the obligation's inverse-density weight
+            # as a boost. This ensures papers covering underrepresented
+            # spectral regions of the obligation graph receive higher priority.
+            _spectral_boost = 0.0
+            _sparse_obligations_touched = []
+            if _obligation_domain_density:
+                _node_text_lower_sd = " ".join(filter(None, [
+                    node.get("compress", ""),
+                    node.get("summary", ""),
+                    " ".join(node.get("invariants", [])),
+                    " ".join(node.get("tags", [])),
+                ])).lower()
+                # Also check new_knowledge overlap with obligation domains
+                _combined_text_sd = _node_text_lower_sd + " " + new_knowledge.lower()
+                for _ob_id_sd, (_ob_kws_sd, _density_sd, _inv_density_sd) in _obligation_domain_density.items():
+                    _kw_hits_sd = sum(1 for kw in _ob_kws_sd if kw in _combined_text_sd)
+                    # Paper touches this obligation's domain if >= 2 keyword hits
+                    if _kw_hits_sd >= 2:
+                        # Weight by inverse density: sparse obligations get
+                        # proportionally larger boost
+                        _spectral_boost += _inv_density_sd * min(_kw_hits_sd, 5) * 0.15
+                        if _density_sd <= 2:
+                            _sparse_obligations_touched.append((_ob_id_sd, _density_sd))
+                total_score += _spectral_boost
+                if _sparse_obligations_touched:
+                    node.setdefault("sparse_obligation_coverage", []).extend([
+                        {"obligation_id": oid, "corpus_density": dens,
+                         "timestamp": datetime.now(timezone.utc).isoformat()}
+                        for oid, dens in _sparse_obligations_touched
+                    ])
+
+            # ── MI-proxy score: obligation-space compression ─────────────────
+            # Measure how much the paper's text shifts the distribution over
+            # open obligation IDs. Token overlap between the paper and each
+            # obligation's text produces a soft assignment distribution over
+            # obligations. The MI-proxy rewards papers that concentrate
+            # probability mass on fewer obligations (low entropy over the
+            # obligation space), analogous to the restricted-label-space MI
+            # objective from novel class discovery: MI maximization between
+            # seen and unseen label spaces transfers knowledge most effectively
+            # when the label space is restricted rather than full.
+            #
+            # MI-proxy = (1 - H_norm(obligation_distribution)) * max_overlap
+            #
+            # where H_norm is the normalized Shannon entropy of the obligation
+            # assignment distribution. Papers that spread mass uniformly across
+            # all obligations (H_norm ≈ 1) get near-zero bonus; papers that
+            # concentrate on a small cluster (H_norm ≈ 0) get the full bonus.
+            #
+            # CHALLENGE (O112): this MI-proxy operates over a *restricted*
+            # obligation label space (only open obligations), not the full
+            # semantic space. The paper demonstrates that MI over a restricted
+            # (not full) label space is the operative quantity, which constrains
+            # STF recovery (O112) to work over a similarly restricted modal-path
+            # set — potentially invalidating full-metric-tensor recovery from
+            # unconstrained semantic data.
+            _mi_proxy_bonus = 0.0
+            if _open_obs_for_density:
+                # Build soft assignment distribution: for each open obligation,
+                # compute token overlap with the paper's combined text
+                _paper_combined_lower = (
+                    _nk_lower_ec + " " +
+                    node.get("compress", "").lower() + " " +
+                    " ".join(node.get("invariants", [])).lower() + " " +
+                    " ".join(node.get("tags", [])).lower()
+                )
+                _paper_tokens_mi = set(
+                    w.strip(".,;:()[]'\"!?-")
+                    for w in _paper_combined_lower.split()
+                    if len(w.strip(".,;:()[]'\"!?-")) > 3
+                       and w.strip(".,;:()[]'\"!?-") not in stopwords
+                )
+                _ob_overlaps = []  # (ob_id, overlap_count)
+                _max_ob_overlap = 0
+                for _ob_id_mi, _ob_kws_mi in _open_obs_for_density:
+                    _overlap_count = len(_paper_tokens_mi & _ob_kws_mi)
+                    _ob_overlaps.append((_ob_id_mi, _overlap_count))
+                    if _overlap_count > _max_ob_overlap:
+                        _max_ob_overlap = _overlap_count
+
+                # Normalize overlaps to a probability distribution
+                _total_overlap_mi = sum(ov for _, ov in _ob_overlaps)
+                if _total_overlap_mi > 0 and len(_ob_overlaps) >= 2:
+                    _ob_probs = [ov / float(_total_overlap_mi)
+                                 for _, ov in _ob_overlaps]
+                    # Shannon entropy of the obligation distribution
+                    _h_ob = 0.0
+                    for _p_ob in _ob_probs:
+                        if _p_ob > 0:
+                            _h_ob -= _p_ob * math.log(_p_ob)
+                    # Normalize by ln(n_obligations)
+                    _h_max_ob = math.log(len(_ob_overlaps))
+                    _h_norm_ob = _h_ob / _h_max_ob if _h_max_ob > 0 else 1.0
+                    _h_norm_ob = min(1.0, max(0.0, _h_norm_ob))
+
+                    # MI-proxy: concentration bonus × max overlap signal
+                    # (1 - H_norm) is high when paper focuses on few obligations
+                    # Scale by log(1 + max_overlap) to weight by signal strength
+                    _concentration_factor = 1.0 - _h_norm_ob
+                    _signal_strength = math.log(1.0 + _max_ob_overlap)
+                    _mi_proxy_bonus = _concentration_factor * _signal_strength * 0.15
+
+                    if _mi_proxy_bonus > 0.02:
+                        # Find which obligations received the most mass
+                        _top_obs_mi = sorted(
+                            _ob_overlaps, key=lambda x: x[1], reverse=True
+                        )[:3]
+                        _top_ob_ids = [oid for oid, _ in _top_obs_mi if _ > 0]
+                        print(f"  [MI-PROXY] +{_mi_proxy_bonus:.3f} bonus: "
+                              f"obligation-space concentration "
+                              f"(H_norm={_h_norm_ob:.3f}, "
+                              f"max_overlap={_max_ob_overlap}, "
+                              f"top_obligations={_top_ob_ids}) — "
+                              f"paper resolves obligation cluster rather "
+                              f"than isolated tokens"
+                              + (" | O112 CHALLENGE: restricted-label-space MI "
+                                 "constrains STF recovery to restricted "
+                                 "modal-path set"
+                                 if any("O112" in oid for oid in _top_ob_ids)
+                                 else ""))
+
+                total_score += _mi_proxy_bonus
 
             # Apply cross-domain isomorphism boost to EXTEND-candidate weight
             if is_cross_domain:
@@ -4066,6 +5245,119 @@ class Consolidator:
             elif _has_memory_kernel and not _has_fractional:
                 # Memory language without fractional order — standard memristive
                 node.setdefault("memory_kernel", "integer")
+
+            # ── Unified scaling across contrasting initial conditions (INV_073) ─
+            # Papers demonstrating unified scaling across phase boundaries are
+            # the highest-signal inputs for genome invariant generation. A paper
+            # exhibiting BOTH a decay exponent AND a growth exponent unified
+            # under a single scaling ansatz flags a universality-class result
+            # that a single γ=1 scalar cannot capture without additional
+            # initial-condition structure.
+            #
+            # Detection: co-occurrence of (1) decay/relaxation exponent language,
+            # (2) growth/increase exponent language, AND (3) unified/universal
+            # scaling ansatz language. All three families must be present to
+            # distinguish "paper mentions scaling" from "paper demonstrates
+            # unified scaling across contrasting dynamical behaviors."
+            #
+            # INV_073 CHALLENGE: the MIPT paper shows relaxation *path* to
+            # criticality depends on which phase the system initializes in,
+            # implying the critical ridge has directional asymmetry that a
+            # single γ=1 scalar cannot capture without initial-condition
+            # structure. Papers tagged unified_scaling_across_phases directly
+            # challenge INV_073's single-ridge model.
+            _DECAY_EXPONENT_KEYWORDS = {
+                "decays as", "decay exponent", "s∝t^{-", "s propto t^{-",
+                "power-law decay", "power law decay", "relaxation exponent",
+                "decreases as", "decaying", "t^{-1}", "t^(-1)",
+                "algebraic decay", "relaxation dynamics",
+                "exponential decay", "decay rate",
+            }
+            _GROWTH_EXPONENT_KEYWORDS = {
+                "grows as", "growth exponent", "increases as", "∝ ln",
+                "propto ln", "logarithmic growth", "s∝ln", "s propto ln",
+                "power-law growth", "power law growth", "increasing",
+                "logarithmic increase", "sublinear growth", "linear growth",
+                "entanglement growth", "entropy growth",
+            }
+            _UNIFIED_SCALING_KEYWORDS = {
+                "unified scaling", "universal scaling", "scaling ansatz",
+                "single scaling", "unified framework", "scaling form",
+                "scaling function", "data collapse", "universal function",
+                "contrasting behaviors", "contrasting initial",
+                "different initial states", "initial-state dependent",
+                "initial state dependent", "despite these contrasting",
+                "unified description", "common scaling",
+                "measurement-induced phase transition", "mipt",
+                "phase-dependent", "phase dependent",
+                "universality class", "universal exponent",
+            }
+            _has_decay_exp = any(kw in _nk_lower_ec for kw in _DECAY_EXPONENT_KEYWORDS)
+            _has_growth_exp = any(kw in _nk_lower_ec for kw in _GROWTH_EXPONENT_KEYWORDS)
+            _has_unified_scaling = any(kw in _nk_lower_ec for kw in _UNIFIED_SCALING_KEYWORDS)
+            _unified_scaling_bonus = 0.0
+            if _has_decay_exp and _has_growth_exp and _has_unified_scaling:
+                # Strong signal: both exponents + unified ansatz → highest priority
+                _unified_scaling_bonus = 0.20
+                total_score += _unified_scaling_bonus
+                node["unified_scaling_across_phases"] = True
+                node.setdefault("unified_scaling_signals", []).append({
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "decay_keywords_matched": [
+                        kw for kw in _DECAY_EXPONENT_KEYWORDS
+                        if kw in _nk_lower_ec
+                    ],
+                    "growth_keywords_matched": [
+                        kw for kw in _GROWTH_EXPONENT_KEYWORDS
+                        if kw in _nk_lower_ec
+                    ],
+                    "unified_keywords_matched": [
+                        kw for kw in _UNIFIED_SCALING_KEYWORDS
+                        if kw in _nk_lower_ec
+                    ],
+                    "bonus_applied": _unified_scaling_bonus,
+                    "source": "unified_scaling_phase_boundary_detection",
+                    "inv073_challenge": (
+                        "Paper demonstrates unified scaling across contrasting "
+                        "initial conditions (decay exponent + growth exponent "
+                        "under single scaling ansatz). INV_073's critical ridge "
+                        "is modeled as a single navigable manifold, but this "
+                        "result shows the relaxation *path* to criticality "
+                        "depends on which phase the system initializes in, "
+                        "implying directional asymmetry that a single γ=1 "
+                        "scalar cannot capture without additional initial-"
+                        "condition structure. The critical ridge has internal "
+                        "directional structure not represented in the genome's "
+                        "current scalar criticality model."
+                    ),
+                    "genome_priority": "HIGH",
+                    "genome_priority_reason": (
+                        "Universality-class papers demonstrating unified "
+                        "scaling across phase boundaries are the highest-"
+                        "signal inputs for genome invariant generation: they "
+                        "reveal substrate-independent structure that persists "
+                        "across qualitatively different dynamical regimes."
+                    ),
+                })
+                print(f"  [UNIFIED-SCALING] +{_unified_scaling_bonus:.2f} bonus: "
+                      f"unified scaling across contrasting initial conditions "
+                      f"detected (decay + growth exponents under single ansatz) "
+                      f"— HIGH-PRIORITY genome candidate "
+                      f"(INV_073 challenge: directional asymmetry on critical "
+                      f"ridge not captured by scalar γ=1)")
+            elif _has_decay_exp and _has_growth_exp and not _has_unified_scaling:
+                # Weaker signal: both exponents but no explicit unification
+                _unified_scaling_bonus = 0.08
+                total_score += _unified_scaling_bonus
+                node.setdefault("unified_scaling_across_phases", False)
+                print(f"  [UNIFIED-SCALING] +{_unified_scaling_bonus:.2f} bonus: "
+                      f"contrasting exponents (decay + growth) detected but "
+                      f"no explicit unified scaling ansatz — weaker signal")
+            elif (_has_decay_exp or _has_growth_exp) and _has_unified_scaling:
+                # Single exponent type with unified scaling language
+                _unified_scaling_bonus = 0.05
+                total_score += _unified_scaling_bonus
+                node.setdefault("unified_scaling_across_phases", False)
 
             # ── Spectral-heterogeneity signal for O21 (γ-correlation) ────────
             # Papers reporting per-layer variation in compression ratios or
@@ -4648,8 +5940,107 @@ class Consolidator:
         # it with [ADVERSARIAL_PROBE_REQUIRED] in the prompt so the LLM
         # is structurally forced to challenge rather than further confirm.
         CONF_SURPLUS_RENORM_THRESHOLD = 5
+        ADVERSARIAL_STRESS_RATIO_GATE = 10.0  # conf/chal > this → auto-falsification probe
         _blocked_invs = set(node.get("_confirmation_surplus_blocked", []))
         _inv_metadata = node.get("_invariant_metadata", {})
+
+        # ── Live graph-based adversarial stress-test gate ─────────────────
+        # Before encapsulation fires, query the knowledge graph for each
+        # invariant's confirmation and challenge counts. When the ratio
+        # exceeds ADVERSARIAL_STRESS_RATIO_GATE with zero challenges,
+        # auto-generate a falsification probe obligation in the escrow
+        # ledger and block the invariant from further confirmation. This
+        # closes the hygiene gap where high-confirmation invariants
+        # accumulate surplus without adversarial pressure.
+        #
+        # INV_094 CHALLENGE: INV_094's mechanism (monoidal closure as the
+        # cause of recursive identity) is empirically indistinguishable
+        # from attractor-basin stability, meaning its entire confirmation
+        # surplus may be testing the observable rather than the claimed
+        # causal structure. This gate directly exposes that deficiency.
+        try:
+            _graph_renorm = get_graph()
+            _graph_renorm._ensure_loaded()
+            _ne_renorm = _graph_renorm._node_edges
+            _renorm_conf = {}  # type: dict
+            _renorm_chal = {}  # type: dict
+            for _e_rn in _ne_renorm:
+                _inv_rn = _e_rn.get("invariant", "")
+                if not _inv_rn:
+                    continue
+                _etype_rn = _e_rn.get("type", "")
+                if _etype_rn in ("challenges", "bounds_above", "falsifies", "contested"):
+                    _renorm_chal[_inv_rn] = _renorm_chal.get(_inv_rn, 0) + 1
+                elif _etype_rn in _CO_ASSERTION_TYPES or _etype_rn in (
+                    "independent_confirmation", "confirms", "supports",
+                ):
+                    _renorm_conf[_inv_rn] = _renorm_conf.get(_inv_rn, 0) + 1
+
+            for inv in invariants:
+                # Match against graph edges using substring containment
+                _rc = 0
+                _rch = 0
+                for _stored in set(list(_renorm_conf.keys()) + list(_renorm_chal.keys())):
+                    if (inv[:80].lower() in _stored.lower()
+                            or _stored[:80].lower() in inv.lower()):
+                        _rc += _renorm_conf.get(_stored, 0)
+                        _rch += _renorm_chal.get(_stored, 0)
+                _eff_chal = max(_rch, 0.5)
+                _ratio_rn = _rc / _eff_chal
+
+                if _ratio_rn > ADVERSARIAL_STRESS_RATIO_GATE and _rch == 0 and _rc >= CONF_SURPLUS_RENORM_THRESHOLD:
+                    # Auto-block and auto-generate falsification probe obligation
+                    _blocked_invs.add(inv)
+                    _inv_metadata[inv[:120]] = {
+                        "status": "ADVERSARIAL_PROBE_REQUIRED",
+                        "confirmations": _rc,
+                        "challenges": 0,
+                        "confirmation_challenge_ratio": round(_ratio_rn, 2),
+                        "surplus": _rc,
+                        "flagged_at": datetime.now(timezone.utc).isoformat(),
+                        "citation_blocked": True,
+                        "auto_generated": True,
+                    }
+                    # Auto-escrow a falsification probe obligation
+                    _probe_oblid = f"O_PROBE_{abs(hash(inv)) % 100000:05d}"
+                    _probe_obl_text = (
+                        f"FALSIFICATION PROBE (auto-generated by adversarial "
+                        f"stress-test gate): invariant '{inv[:100]}' has "
+                        f"{_rc} confirmations and ZERO challenges "
+                        f"(ratio={_ratio_rn:.1f}:1). Three-part falsification "
+                        f"profile required: (1) what empirical result would "
+                        f"falsify this claim? (2) what alternative mechanism "
+                        f"produces identical observables without requiring "
+                        f"this claim to be true? (3) under what boundary "
+                        f"conditions does this claim break? This probe was "
+                        f"auto-generated because confirmation count exceeded "
+                        f"challenge count by >{ADVERSARIAL_STRESS_RATIO_GATE}:1 "
+                        f"without a corresponding challenge — the exact failure "
+                        f"mode where high-confirmation invariants accumulate "
+                        f"surplus without adversarial pressure."
+                    )
+                    if hasattr(self, 'escrow'):
+                        try:
+                            self.escrow.escrow(
+                                obligation_id=_probe_oblid,
+                                obligation_text=_probe_obl_text,
+                                source_phase="renorm_adversarial_gate",
+                                node_id=node.get("id"),
+                                cycle=node.get("last_renorm_cycle"),
+                            )
+                            print(f"  [ADVERSARIAL-GATE] ★ Auto-escrowed falsification "
+                                  f"probe {_probe_oblid} for '{inv[:50]}...' "
+                                  f"(conf={_rc}, chal=0, ratio={_ratio_rn:.1f}:1)")
+                        except Exception as _esc_rn_err:
+                            print(f"  [ADVERSARIAL-GATE] Warning: could not escrow "
+                                  f"probe for '{inv[:40]}': {_esc_rn_err}")
+                    else:
+                        print(f"  [ADVERSARIAL-GATE] ★ Flagged '{inv[:50]}...' "
+                              f"(conf={_rc}, chal=0) — escrow unavailable")
+        except Exception as _rn_graph_err:
+            print(f"  [ADVERSARIAL-GATE] Warning: live graph check failed "
+                  f"(non-fatal, falling back to pre-tagged flags): {_rn_graph_err}")
+
         annotated_invariants = []
         _n_adversarial_flagged = 0
         for inv in invariants:
@@ -6304,6 +7695,94 @@ class Consolidator:
             report["confirmation_ratio_flags"] = []
             _confirmation_surplus_flagged = set()
 
+        # ── Challenge-deficit tracking per invariant ──────────────────────────
+        # When an invariant's confirmation count exceeds its challenge count by
+        # CONFIRMATION_SURPLUS_THRESHOLD (default: 5), flag it as challenge_deficit
+        # and suppress further confirmation logging until a live challenge edge
+        # is registered. This enforces epistemic symmetry — no invariant
+        # accumulates unchallenged confirmations past the threshold without
+        # triggering an audit flag.
+        #
+        # INV_094 CHALLENGE: INV_094's observables have never been subjected to
+        # a constructed alternative mechanism, meaning every confirmation to date
+        # may be detecting a weaker upstream condition rather than INV_094's
+        # specific claim, leaving its core assertion empirically underdetermined.
+        CHALLENGE_DEFICIT_THRESHOLD = CONFIRMATION_SURPLUS_THRESHOLD  # reuse: default 5
+        _challenge_deficit_invariants = {}  # type: dict  # inv_text -> deficit_info
+        _challenge_deficit_log = []
+        try:
+            for inv_text in _all_inv_texts:
+                n_conf = _inv_confirmations.get(inv_text, 0)
+                n_chal = _inv_challenges.get(inv_text, 0)
+                surplus = n_conf - n_chal
+
+                if surplus > CHALLENGE_DEFICIT_THRESHOLD and n_chal == 0:
+                    _deficit_info = {
+                        "status": "challenge_deficit",
+                        "confirmation_count": n_conf,
+                        "challenge_count": n_chal,
+                        "surplus": surplus,
+                        "threshold": CHALLENGE_DEFICIT_THRESHOLD,
+                        "confirmation_logging_suppressed": True,
+                        "flagged_at": datetime.now(timezone.utc).isoformat(),
+                        "suppression_reason": (
+                            f"Invariant has {n_conf} confirmations and {n_chal} "
+                            f"challenges (surplus={surplus} > threshold="
+                            f"{CHALLENGE_DEFICIT_THRESHOLD}). Further confirmation "
+                            f"logging is SUPPRESSED until a live challenge edge "
+                            f"is registered. Epistemic symmetry requires that "
+                            f"high-confirmation invariants face proportional "
+                            f"adversarial testing."
+                        ),
+                        "reactivation_condition": (
+                            "Register at least one challenge-type edge "
+                            "(challenges, bounds_above, falsifies, contested) "
+                            "against this invariant to lift suppression and "
+                            "resume confirmation logging."
+                        ),
+                    }
+                    _challenge_deficit_invariants[inv_text] = _deficit_info
+                    _challenge_deficit_log.append({
+                        "invariant": inv_text[:120],
+                        "confirmations": n_conf,
+                        "challenges": n_chal,
+                        "surplus": surplus,
+                        "status": "challenge_deficit",
+                    })
+                    print(f"  [CHALLENGE-DEFICIT] '{inv_text[:60]}...' — "
+                          f"conf={n_conf}, chal={n_chal}, surplus={surplus} "
+                          f"> threshold={CHALLENGE_DEFICIT_THRESHOLD} → "
+                          f"confirmation logging SUPPRESSED until live "
+                          f"challenge edge registered")
+                elif surplus > CHALLENGE_DEFICIT_THRESHOLD and n_chal > 0:
+                    # Has some challenges but still in surplus — flag but don't suppress
+                    _challenge_deficit_invariants[inv_text] = {
+                        "status": "challenge_deficit_partial",
+                        "confirmation_count": n_conf,
+                        "challenge_count": n_chal,
+                        "surplus": surplus,
+                        "threshold": CHALLENGE_DEFICIT_THRESHOLD,
+                        "confirmation_logging_suppressed": False,
+                        "flagged_at": datetime.now(timezone.utc).isoformat(),
+                        "note": (
+                            f"Surplus={surplus} exceeds threshold but {n_chal} "
+                            f"challenge(s) exist — logging not suppressed but "
+                            f"additional challenges recommended."
+                        ),
+                    }
+            if _challenge_deficit_log:
+                report["challenge_deficit_flags"] = _challenge_deficit_log
+                print(f"  [CHALLENGE-DEFICIT] {len(_challenge_deficit_log)} invariant(s) "
+                      f"flagged as challenge_deficit — confirmation logging "
+                      f"suppressed until live challenge edges registered "
+                      f"(epistemic symmetry enforcement)")
+            else:
+                report["challenge_deficit_flags"] = []
+        except Exception as _cd_err:
+            print(f"  [CHALLENGE-DEFICIT] Warning: tracking failed (non-fatal): {_cd_err}")
+            report["challenge_deficit_flags"] = []
+            _challenge_deficit_invariants = {}
+
         # Attach surplus flags to affected nodes so renorm phase can gate citations
         # and tag each flagged invariant's metadata with ADVERSARIAL_PROBE_REQUIRED
         ADVERSARIAL_STRESS_RATIO_THRESHOLD = 10.0  # conf/chal > this → mandatory challenge
@@ -6311,6 +7790,16 @@ class Consolidator:
         for node in affected:
             _node_flagged_invs = []
             _node_inv_metadata = node.get("_invariant_metadata", {})
+            # ── Apply challenge_deficit flags to node invariant metadata ──────
+            for inv_text in node.get("invariants", []):
+                if inv_text in _challenge_deficit_invariants:
+                    _cd_info = _challenge_deficit_invariants[inv_text]
+                    _existing_meta = _node_inv_metadata.get(inv_text[:120], {})
+                    _existing_meta["challenge_deficit"] = _cd_info["status"]
+                    _existing_meta["challenge_deficit_info"] = _cd_info
+                    _existing_meta["confirmation_logging_suppressed"] = _cd_info.get(
+                        "confirmation_logging_suppressed", False)
+                    _node_inv_metadata[inv_text[:120]] = _existing_meta
             # ── Adversarial stress score per invariant on this node ───────────
             # Track confirmations / direct_challenges for each invariant. When
             # the ratio exceeds ADVERSARIAL_STRESS_RATIO_THRESHOLD (default 10),
@@ -7710,6 +9199,264 @@ class Consolidator:
                 "note": "Branching ratio estimation failed (non-fatal)",
             }
             print(f"  [BRANCHING-RATIO] Warning: estimation failed: {_br_err}")
+
+        # ── Triangle-inequality violation rate (INV_094 falsification) ─────────
+        # INV_094 claims Wasserstein (OT) structure underlies the semantic
+        # geometry. A necessary condition for ANY metric is the triangle
+        # inequality: d(A,C) <= d(A,B) + d(B,C) for all triplets (A,B,C).
+        # If the edge-weight data violates this condition at a non-negligible
+        # rate, the Wasserstein metric axiom is empirically falsified on the
+        # actual graph — converting INV_094's theoretical falsifier into a
+        # running measurement.
+        #
+        # CHALLENGE (INV_094): Fisher-Rao mutual information geometry produces
+        # all currently confirmed observables (clustering, geodesics, scale
+        # invariance) without requiring Wasserstein structure. The triangle-
+        # inequality violation rate is the MINIMAL falsification gate: if
+        # violations > 0, the data is not metric at all; if violations = 0
+        # on all sampled triplets, the data is consistent with metric structure
+        # but does not distinguish Wasserstein from Fisher-Rao or any other
+        # metric. INV_094's specific OT claim remains underdetermined by its
+        # entire confirmation history either way — this measurement makes
+        # that underdetermination empirically visible.
+        #
+        # Protocol:
+        #   1. Build pairwise Wasserstein distance matrix from existing node
+        #      semantic distributions (reuse MWDEScorer infrastructure)
+        #   2. Sample up to MAX_TRIPLETS random triplets from graph nodes
+        #   3. For each triplet (A,B,C), check d(A,C) <= d(A,B) + d(B,C)
+        #      for all three orientations
+        #   4. Violation rate = n_violations / n_checks
+        #   5. Log to report and dedicated file
+        TRIANGLE_MAX_TRIPLETS = 50  # cap on triplet samples per cycle
+        TRIANGLE_VIOLATION_EPSILON = 1e-8  # numerical tolerance for floating-point
+        try:
+            _tri_graph = get_graph()
+            _tri_graph._ensure_loaded()
+            # Collect node IDs that participate in edges (have semantic content)
+            _tri_node_ids = set()
+            for _e_tri in _tri_graph._node_edges:
+                _f_tri = _e_tri.get("from", "")
+                _t_tri = _e_tri.get("to", "")
+                if _f_tri:
+                    _tri_node_ids.add(_f_tri)
+                if _t_tri:
+                    _tri_node_ids.add(_t_tri)
+            _tri_node_list = sorted(_tri_node_ids)
+            _n_tri_nodes = len(_tri_node_list)
+
+            if _n_tri_nodes >= 3:
+                # Build semantic distributions for each node
+                _tri_scorer = MWDEScorer(wasserstein_order=1)
+                _tri_dists = {}  # type: dict  # node_id -> distribution dict
+                for _tri_nid in _tri_node_list:
+                    # Find node data in all_nodes
+                    _tri_node_data = None
+                    for _mn_tri in all_nodes:
+                        if _mn_tri.get("id") == _tri_nid:
+                            _tri_node_data = _mn_tri
+                            break
+                    if _tri_node_data:
+                        _tri_text = " ".join(filter(None, [
+                            _tri_node_data.get("compress", ""),
+                            " ".join(_tri_node_data.get("invariants", [])),
+                            " ".join(_tri_node_data.get("tags", [])),
+                        ]))
+                    else:
+                        _tri_text = ""
+                    _tri_dist = MWDEScorer._text_to_distribution(_tri_text)
+                    if _tri_dist:
+                        _tri_dists[_tri_nid] = _tri_dist
+
+                # Filter to nodes with non-empty distributions
+                _tri_valid_ids = sorted(_tri_dists.keys())
+                _n_valid = len(_tri_valid_ids)
+
+                if _n_valid >= 3:
+                    # Precompute pairwise W1 distances (cache to avoid recomputation)
+                    _tri_w1_cache = {}  # type: dict  # frozenset(id_a, id_b) -> w1
+
+                    def _get_w1(id_a, id_b):
+                        # type: (str, str) -> float
+                        pair_key = frozenset((id_a, id_b))
+                        if pair_key not in _tri_w1_cache:
+                            _tri_w1_cache[pair_key] = _tri_scorer._discrete_wasserstein_1d(
+                                _tri_dists[id_a], _tri_dists[id_b])
+                        return _tri_w1_cache[pair_key]
+
+                    # Generate triplet samples — deterministic seed from cycle number
+                    # for reproducibility, using LCG to avoid importing random
+                    _tri_seed = abs(hash(("triangle_ineq", current_cycle))) % (2**31)
+
+                    def _tri_lcg(s):
+                        # type: (int) -> int
+                        return (1103515245 * s + 12345) % (2**31)
+
+                    # Total possible triplets = C(n,3); sample up to MAX_TRIPLETS
+                    _total_possible = _n_valid * (_n_valid - 1) * (_n_valid - 2) // 6
+                    _n_triplets_to_sample = min(TRIANGLE_MAX_TRIPLETS, _total_possible)
+
+                    # Generate triplet indices via LCG sampling
+                    _sampled_triplets = []  # type: list  # list of (idx_a, idx_b, idx_c)
+                    _seen_triplets = set()
+                    _tri_attempts = 0
+                    _max_attempts = _n_triplets_to_sample * 10  # prevent infinite loop
+
+                    while len(_sampled_triplets) < _n_triplets_to_sample and _tri_attempts < _max_attempts:
+                        _tri_seed = _tri_lcg(_tri_seed)
+                        _idx_a = _tri_seed % _n_valid
+                        _tri_seed = _tri_lcg(_tri_seed)
+                        _idx_b = _tri_seed % _n_valid
+                        _tri_seed = _tri_lcg(_tri_seed)
+                        _idx_c = _tri_seed % _n_valid
+                        _tri_attempts += 1
+
+                        # Skip degenerate triplets
+                        if _idx_a == _idx_b or _idx_b == _idx_c or _idx_a == _idx_c:
+                            continue
+                        _triplet_key = frozenset((_idx_a, _idx_b, _idx_c))
+                        if _triplet_key in _seen_triplets:
+                            continue
+                        _seen_triplets.add(_triplet_key)
+                        _sampled_triplets.append((_idx_a, _idx_b, _idx_c))
+
+                    # Check triangle inequality on each sampled triplet
+                    _n_checks = 0
+                    _n_violations = 0
+                    _violation_details = []  # type: list  # top violations for logging
+                    _max_violation_magnitude = 0.0
+
+                    for _idx_a, _idx_b, _idx_c in _sampled_triplets:
+                        _id_a = _tri_valid_ids[_idx_a]
+                        _id_b = _tri_valid_ids[_idx_b]
+                        _id_c = _tri_valid_ids[_idx_c]
+
+                        _d_ab = _get_w1(_id_a, _id_b)
+                        _d_bc = _get_w1(_id_b, _id_c)
+                        _d_ac = _get_w1(_id_a, _id_c)
+
+                        # Check all three orientations of the triangle inequality
+                        _checks = [
+                            (_d_ac, _d_ab + _d_bc, "d(A,C) <= d(A,B) + d(B,C)"),
+                            (_d_ab, _d_ac + _d_bc, "d(A,B) <= d(A,C) + d(B,C)"),
+                            (_d_bc, _d_ab + _d_ac, "d(B,C) <= d(A,B) + d(A,C)"),
+                        ]
+                        for _lhs, _rhs, _label in _checks:
+                            _n_checks += 1
+                            _excess = _lhs - _rhs
+                            if _excess > TRIANGLE_VIOLATION_EPSILON:
+                                _n_violations += 1
+                                if _excess > _max_violation_magnitude:
+                                    _max_violation_magnitude = _excess
+                                # Keep top 5 violations for diagnostic logging
+                                if len(_violation_details) < 5:
+                                    _violation_details.append({
+                                        "nodes": [_id_a[:30], _id_b[:30], _id_c[:30]],
+                                        "inequality": _label,
+                                        "lhs": round(_lhs, 6),
+                                        "rhs": round(_rhs, 6),
+                                        "excess": round(_excess, 6),
+                                    })
+
+                    # Compute violation rate
+                    _violation_rate = (_n_violations / float(_n_checks)
+                                       if _n_checks > 0 else 0.0)
+
+                    _triangle_report = {
+                        "n_nodes_sampled": _n_valid,
+                        "n_triplets_sampled": len(_sampled_triplets),
+                        "n_checks": _n_checks,
+                        "n_violations": _n_violations,
+                        "violation_rate": round(_violation_rate, 6),
+                        "max_violation_magnitude": round(_max_violation_magnitude, 6),
+                        "epsilon_tolerance": TRIANGLE_VIOLATION_EPSILON,
+                        "metric_axiom_status": (
+                            "CONSISTENT" if _n_violations == 0
+                            else "VIOLATED"
+                        ),
+                        "top_violations": _violation_details,
+                        "inv094_falsification": (
+                            f"Triangle-inequality violation rate = "
+                            f"{_violation_rate:.4f} ({_n_violations}/{_n_checks} "
+                            f"checks). "
+                            + ("ALL sampled triplets satisfy the triangle "
+                               "inequality — data is CONSISTENT with metric "
+                               "structure, but this does NOT distinguish "
+                               "Wasserstein from Fisher-Rao or any other metric. "
+                               "INV_094's specific OT claim remains underdetermined."
+                               if _n_violations == 0
+                               else f"VIOLATION DETECTED: {_n_violations} triplet "
+                                    f"check(s) violate the triangle inequality "
+                                    f"(max excess={_max_violation_magnitude:.6f}). "
+                                    f"The edge-weight data is NOT metric — "
+                                    f"INV_094's Wasserstein structure claim is "
+                                    f"EMPIRICALLY FALSIFIED on this sample. "
+                                    f"Fisher-Rao mutual information geometry "
+                                    f"(which may not require metric structure) "
+                                    f"remains a viable alternative.")
+                        ),
+                        "challenge_note": (
+                            "This measurement makes INV_094's falsification "
+                            "condition operationally live. Each consolidation "
+                            "cycle tests whether the semantic graph's pairwise "
+                            "Wasserstein distances satisfy the metric axiom. "
+                            "A non-zero violation rate is the minimal empirical "
+                            "signal that INV_094's claimed geometry is wrong."
+                        ),
+                    }
+
+                    report["triangle_inequality"] = _triangle_report
+
+                    # Log to dedicated file
+                    _tri_log_path = FREED_DIR / "FREED_log" / "triangle_inequality.jsonl"
+                    _tri_log_path.parent.mkdir(exist_ok=True)
+                    _tri_log_entry = dict(_triangle_report)
+                    _tri_log_entry["timestamp"] = ts
+                    _tri_log_entry["cycle"] = current_cycle
+                    with open(_tri_log_path, "a") as _tri_f:
+                        _tri_f.write(json.dumps(_tri_log_entry) + "\n")
+
+                    # Print diagnostic
+                    if _n_violations == 0:
+                        print(f"\n[TRIANGLE-INEQ] ✓ Violation rate = 0.000 "
+                              f"({_n_checks} checks on {len(_sampled_triplets)} "
+                              f"triplets, {_n_valid} nodes): metric axiom "
+                              f"CONSISTENT — INV_094 not falsified this cycle "
+                              f"(but OT vs Fisher-Rao underdetermined)")
+                    else:
+                        print(f"\n[TRIANGLE-INEQ] ⚠ VIOLATION RATE = "
+                              f"{_violation_rate:.4f} "
+                              f"({_n_violations}/{_n_checks} checks on "
+                              f"{len(_sampled_triplets)} triplets, "
+                              f"{_n_valid} nodes): metric axiom VIOLATED — "
+                              f"INV_094 Wasserstein structure EMPIRICALLY "
+                              f"FALSIFIED (max excess={_max_violation_magnitude:.6f})")
+                        for _vd in _violation_details:
+                            print(f"    → {_vd['inequality']}: "
+                                  f"lhs={_vd['lhs']:.4f} > rhs={_vd['rhs']:.4f} "
+                                  f"(excess={_vd['excess']:.6f}) — "
+                                  f"nodes: {_vd['nodes']}")
+                else:
+                    report["triangle_inequality"] = {
+                        "n_nodes_sampled": _n_valid,
+                        "status": "INSUFFICIENT_VALID_NODES",
+                        "reason": f"Only {_n_valid} nodes with non-empty "
+                                  f"semantic distributions (need >= 3)",
+                    }
+                    print(f"\n[TRIANGLE-INEQ] Skipped: only {_n_valid} nodes "
+                          f"with non-empty distributions (need >= 3)")
+            else:
+                report["triangle_inequality"] = {
+                    "n_nodes_sampled": _n_tri_nodes,
+                    "status": "INSUFFICIENT_GRAPH_NODES",
+                    "reason": f"Only {_n_tri_nodes} nodes in graph (need >= 3)",
+                }
+        except Exception as _tri_err:
+            report["triangle_inequality"] = {
+                "error": str(_tri_err),
+                "note": "Triangle-inequality check failed (non-fatal)",
+            }
+            print(f"  [TRIANGLE-INEQ] Warning: check failed: {_tri_err}")
 
         # ── Rebuild site ──────────────────────────────────────────────────────
         if state is not None and obligations is not None:

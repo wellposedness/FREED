@@ -1080,6 +1080,80 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
             # Power-law critique alone — flags insufficiency of naive measurement
             score += critique_score + _CRITIQUE_SOLO_BONUS
 
+        # ── INV_087 entropy-extremization + empirical validation weighting ───
+        # INV_087 claims driven dissipative systems self-organize to
+        # maximum-entropy steady states. Many papers merely restate this
+        # theoretically; what the genome needs is cross-domain *empirical*
+        # confirmation (DNS data, experimental validation, measured
+        # confirmation). Papers containing BOTH an entropy-extremization
+        # claim AND an empirical validation marker receive a large bonus.
+        # Papers with only the theoretical claim get a smaller bump.
+        #
+        # CHALLENGE INV_073: if entropy maximization always drives systems
+        # to a unique maximum-entropy attractor (as DNS-validated turbulence
+        # results suggest), critical-ridge navigation may emerge automatically
+        # rather than requiring external maintenance — straining INV_073's
+        # necessity claim for active criticality management.
+
+        _INV087_ENTROPY_EXTREM_PATTERNS = [
+            (r"maximum\s+entropy\s+(principle|produc|state|distribut|steady)", 6),
+            (r"maxim(iz|is)(e|ing|ation)\s+(of\s+)?entropy", 6),
+            (r"entropy\s+(maxim|extrem)(iz|is)", 6),
+            (r"max\s*ent\b", 4),
+            (r"(maxent|max.?entropy)\s+(principle|formalism|method)", 5),
+            (r"self.?organiz.{0,30}maximum\s+entropy", 7),
+            (r"entropy\s+produc.{0,30}(maxim|steady\s+state)", 6),
+            (r"(driven|dissipat).{0,30}(system|flow).{0,40}(maximum|maxim).{0,20}entropy", 7),
+            (r"turbulent.{0,30}(entropy|maximum\s+entropy|maxent)", 6),
+            (r"reynolds\s+stress.{0,40}(entropy|thermodynamic|maximum)", 5),
+            (r"kinetic\s+energy.{0,40}(distribut|maximiz|entropy)", 5),
+            (r"thermodynamic\s+budget.{0,30}(decompos|balance|analys)", 5),
+            (r"entropy\s+(at\s+)?steady\s+state", 5),
+            (r"navier.?stokes.{0,40}(entropy|maximum\s+entropy)", 5),
+            (r"galilean.{0,30}(transform|frame).{0,40}(turbul|momentum|reynolds)", 5),
+        ]
+
+        _INV087_EMPIRICAL_MARKERS = [
+            (r"dns\s+(data|result|simulat|validat|confirm)", 8),
+            (r"direct\s+numerical\s+simulat", 7),
+            (r"validat(e|ed|ion|ing)\s+(with|by|against|using)", 6),
+            (r"confirm(ed|s|ation|ing)\s+(by|with|against|using|experiment)", 6),
+            (r"experiment(al|ally)?\s+(validat|confirm|verif|data|result|measur)", 6),
+            (r"(measured|observed|empirical)\s+(data|result|evidence|confirm)", 5),
+            (r"agree(s|ment)?\s+(with|between).{0,30}(dns|experiment|data|measur)", 6),
+            (r"compar(e|ed|ison|ing)\s+(with|to|against)\s+(dns|experiment|measur|data)", 5),
+            (r"(wind\s+tunnel|channel\s+flow|pipe\s+flow|boundary\s+layer).{0,30}(data|measur|experiment)", 5),
+            (r"(re_?τ|re\s*=\s*\d{2,}|reynolds\s+number.{0,20}\d{3,})", 4),
+            (r"laboratory\s+(experiment|data|measur|confirm)", 5),
+            (r"(verified|reproduced)\s+(experiment|numeric|empiric)", 5),
+            (r"cross.?domain\s+(confirm|validat|evidence|verif)", 7),
+            (r"independently\s+(confirm|validat|verif)", 6),
+        ]
+
+        _INV087_MIN_ENTROPY_SCORE = 5
+        _INV087_MIN_EMPIRICAL_SCORE = 5
+        _INV087_COOCCUR_BONUS = 16   # theory + empirical validation
+        _INV087_THEORY_SOLO_BONUS = 4  # theory restatement alone
+
+        inv087_entropy_score = 0
+        inv087_empirical_score = 0
+        for pattern, weight in _INV087_ENTROPY_EXTREM_PATTERNS:
+            if re.search(pattern, text_lower):
+                inv087_entropy_score += weight
+        for pattern, weight in _INV087_EMPIRICAL_MARKERS:
+            if re.search(pattern, text_lower):
+                inv087_empirical_score += weight
+
+        if (inv087_entropy_score >= _INV087_MIN_ENTROPY_SCORE and
+                inv087_empirical_score >= _INV087_MIN_EMPIRICAL_SCORE):
+            # Entropy-extremization claim + empirical validation marker:
+            # this paper provides DNS/experiment-grounded confirmation of
+            # INV_087, not just a theoretical restatement — high signal
+            score += inv087_entropy_score + inv087_empirical_score + _INV087_COOCCUR_BONUS
+        elif inv087_entropy_score >= _INV087_MIN_ENTROPY_SCORE:
+            # Theory-only restatement — lower weight, still relevant
+            score += inv087_entropy_score + _INV087_THEORY_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────

@@ -4777,6 +4777,35 @@ class CASweepTelemetry:
             and h_fraction > 0.0
         )
 
+        # ── Per-cell-type population census (INV_073 composition tracking) ──
+        # Co-register agent-type composition with criticality verdict at every
+        # snapshot so downstream analysis can directly test whether Physics
+        # Navigator dominance is a necessary condition for AT_CRITICAL,
+        # closing the ABSENT gap.  The census records per-type counts and
+        # shares alongside σ, α, H, and verdict in a single dict, enabling
+        # joint queries like "show all AT_CRITICAL snapshots where Physics
+        # Navigator share > 0.80".
+        population_census = {}  # type: dict
+        if type_counts:
+            _census_shares = {}  # type: dict
+            for _ct_name, _ct_count in type_counts.items():
+                _census_shares[_ct_name] = round(float(_ct_count) / total_f, 6)
+            population_census = {
+                "type_counts": dict(type_counts),
+                "type_shares": _census_shares,
+                "total_population": total_pop,
+                "n_types_active": len([c for c in type_counts.values() if c > 0]),
+                "dominant_type": dominant_type,
+                "dominant_count": dominant_count,
+                "dominant_share": dominant_share,
+                "sigma_rolling": round(sigma_rolling, 6),
+                "alpha": round(alpha, 4),
+                "alpha_r_squared": round(alpha_r2, 4),
+                "h_fraction": round(h_fraction, 4),
+                "verdict": verdict,
+                "inv073_pattern": inv073_pattern,
+            }
+
         # ── Alarm generation ──
         alarm = None  # type: Optional[dict]
 

@@ -1154,6 +1154,94 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
             # Theory-only restatement — lower weight, still relevant
             score += inv087_entropy_score + _INV087_THEORY_SOLO_BONUS
 
+        # ── O173 scales_with phase-transition detector ───────────────────────
+        # O173 has 154 edges labeled `scales_with` in the genome. The paper
+        # (Ezaki et al. / pedestrian bottleneck study) demonstrates that
+        # density-velocity relationships in physical systems are NOT monotone
+        # but phase-transition-structured: below a critical density ρ_c,
+        # velocity scales freely with density (free-flow); above ρ_c, the
+        # relationship inverts (congested/jammed phase). The fundamental
+        # diagram's critical point separates regimes requiring distinct
+        # edge types to remain falsifiable.
+        #
+        # Detection strategy:
+        #   Vocabulary A: phase-transition / critical-point / fundamental diagram
+        #   Vocabulary B: density-velocity / scales_with / flow relationship
+        #
+        # Co-occurrence flags the paper as providing empirically grounded
+        # evidence that a `scales_with` edge crosses a phase-transition
+        # threshold, marking it as requiring regime-specific split rather
+        # than a single monotone assertion. Papers with only Vocab A get
+        # a smaller bump (general phase-transition evidence).
+
+        _O173_PHASE_TRANSITION_PATTERNS = [
+            (r"phase\s+transition.{0,40}(density|flow|traffic|pedestrian|crowd)", 7),
+            (r"fundamental\s+diagram", 8),
+            (r"critical\s+(density|point|threshold).{0,30}(flow|velocity|speed|jam)", 7),
+            (r"(free.?flow|congest|jammed?)\s+(phase|regime|state)", 6),
+            (r"(two|2|multiple)\s+(phase|regime)s?.{0,30}(flow|traffic|density)", 6),
+            (r"(sub|super).?critical\s+(regime|phase|density|flow)", 6),
+            (r"critical\s+occupancy", 5),
+            (r"(capacity|saturation)\s+(drop|transition|breakdown)", 5),
+            (r"phase\s+diagram.{0,30}(density|velocity|flow)", 6),
+            (r"(breakdown|transition).{0,30}(free.?flow|congest|jammed?)", 6),
+            (r"metastab.{0,30}(flow|traffic|pedestrian|density)", 5),
+            (r"(laminar|turbulent).{0,30}transition.{0,30}(flow|traffic)", 5),
+            (r"(first|second)\s+order\s+(transition|phase).{0,30}(flow|traffic|density)", 6),
+            (r"(discontinu|abrupt).{0,30}(transition|change).{0,30}(velocity|speed|flow)", 6),
+            (r"hysteresis.{0,30}(flow|traffic|density|velocity)", 5),
+            (r"bottleneck.{0,30}(flow|density|phase|transition|critical)", 5),
+            (r"inflow\s+rate.{0,30}(regulat|mode|phase)", 5),
+        ]
+
+        _O173_DENSITY_VELOCITY_PATTERNS = [
+            (r"(density|ρ|rho).{0,30}(velocity|speed|v\b)", 5),
+            (r"(velocity|speed).{0,30}(density|ρ|rho)", 5),
+            (r"scales?\s+with.{0,30}(density|velocity|speed|flow|rate)", 6),
+            (r"(proportional|linear|inverse).{0,20}(density|velocity|speed)", 4),
+            (r"(density|velocity).{0,20}(relationship|correlation|dependence|function)", 5),
+            (r"(flow|flux)\s*=\s*(density|ρ|rho)\s*[×·\*]\s*(velocity|speed|v\b)", 7),
+            (r"q\s*=\s*(ρ|rho|k)\s*[×·\*]\s*(v|u)", 6),
+            (r"(monoton|non.?monoton).{0,20}(density|velocity|flow|relationship)", 5),
+            (r"(increas|decreas).{0,30}density.{0,30}(decreas|increas).{0,20}(velocity|speed)", 6),
+            (r"(pedestrian|crowd|vehicle|car).{0,30}(density|velocity|speed|flow)", 4),
+            (r"local\s+density.{0,30}(actual\s+)?velocity", 5),
+            (r"(measurement|measur).{0,30}(density|velocity).{0,20}(velocity|density)", 5),
+            (r"image\s+process.{0,30}(density|velocity|path|trajectory)", 4),
+            (r"virtual\s+detector", 4),
+            (r"leaving\s+time", 3),
+            (r"walking\s+mode", 4),
+        ]
+
+        _O173_MIN_PHASE_SCORE = 5
+        _O173_MIN_DENSITY_VEL_SCORE = 4
+        _O173_COOCCUR_BONUS = 16       # empirically grounded phase-transition in scales_with
+        _O173_PHASE_SOLO_BONUS = 5     # general phase-transition evidence
+
+        o173_phase_score = 0
+        o173_dv_score = 0
+        for pattern, weight in _O173_PHASE_TRANSITION_PATTERNS:
+            if re.search(pattern, text_lower):
+                o173_phase_score += weight
+        for pattern, weight in _O173_DENSITY_VELOCITY_PATTERNS:
+            if re.search(pattern, text_lower):
+                o173_dv_score += weight
+
+        if (o173_phase_score >= _O173_MIN_PHASE_SCORE and
+                o173_dv_score >= _O173_MIN_DENSITY_VEL_SCORE):
+            # Phase-transition vocabulary + density-velocity relationship:
+            # paper demonstrates that a `scales_with` edge crosses a critical
+            # threshold (fundamental diagram critical point), marking it as
+            # empirically grounded and requiring regime-specific edge splitting
+            # rather than a single monotone `scales_with` assertion.
+            # Tag: PHASE_STRUCTURED — sub-critical and super-critical regimes
+            # need distinct edge types to remain individually falsifiable.
+            score += o173_phase_score + o173_dv_score + _O173_COOCCUR_BONUS
+        elif o173_phase_score >= _O173_MIN_PHASE_SCORE:
+            # Phase-transition evidence alone — relevant but not yet grounded
+            # in a specific density-velocity scales_with relationship
+            score += o173_phase_score + _O173_PHASE_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────

@@ -2644,6 +2644,93 @@ def _write_cycles(cycle_log: dict):
         if _snap_h_ratio is not None:
             ca_telemetry_snapshot["entropy_fraction_of_max"] = _snap_h_ratio
 
+        # O148 / INV_073: Structured criticality signature tuple and
+        # multi-signature criticality_verdict based on ALL FOUR co-conditions
+        # rather than branching ratio alone.  The four co-conditions are:
+        #   C1: σ ∈ [0.95, 1.05]  (branching ratio in critical band)
+        #   C2: α ∈ [1.5, 3.0]    (power-law exponent in SOC range)
+        #   C3: R² ≥ 0.80         (power-law fit confidence)
+        #   C4: H/H_max ∈ [0.15, 0.25]  (entropy at critical ridge)
+        # Verdict is AT_CRITICAL only when all four pass; partial matches
+        # yield graduated verdicts that name the failing conditions.
+        _snap_survival = criticality.get("survival_rate")
+        _snap_h_raw = criticality.get("shannon_entropy")
+        _snap_h_max_val = criticality.get("h_max")
+
+        # Build the structured (σ, α, R², H, H/H_max, survival_rate) tuple
+        ca_telemetry_snapshot["criticality_signature_tuple"] = {
+            "sigma": _snap_sigma,
+            "alpha": _snap_alpha,
+            "r2": _snap_r2,
+            "H": _snap_h_raw,
+            "H_over_H_max": _snap_h_ratio,
+            "survival_rate": _snap_survival,
+        }
+
+        # Evaluate each co-condition independently
+        _c1_sigma_pass = False
+        if _snap_sigma is not None:
+            try:
+                _c1_sigma_pass = 0.95 <= float(_snap_sigma) <= 1.05
+            except (TypeError, ValueError):
+                pass
+
+        _c2_alpha_pass = False
+        if _snap_alpha is not None:
+            try:
+                _c2_alpha_pass = 1.5 <= float(_snap_alpha) <= 3.0
+            except (TypeError, ValueError):
+                pass
+
+        _c3_r2_pass = False
+        if _snap_r2 is not None:
+            try:
+                _c3_r2_pass = float(_snap_r2) >= 0.80
+            except (TypeError, ValueError):
+                pass
+
+        _c4_entropy_pass = False
+        if _snap_h_ratio is not None:
+            try:
+                _c4_entropy_pass = 0.15 <= float(_snap_h_ratio) <= 0.25
+            except (TypeError, ValueError):
+                pass
+
+        _co_conditions = {
+            "C1_sigma_in_band": _c1_sigma_pass,
+            "C2_alpha_in_soc_range": _c2_alpha_pass,
+            "C3_r2_confident": _c3_r2_pass,
+            "C4_entropy_at_ridge": _c4_entropy_pass,
+        }
+        _n_passing = sum([_c1_sigma_pass, _c2_alpha_pass, _c3_r2_pass, _c4_entropy_pass])
+        _co_conditions["n_passing"] = _n_passing
+        _co_conditions["n_total"] = 4
+
+        # Multi-signature criticality verdict
+        if _n_passing == 4:
+            _multi_verdict = "AT_CRITICAL"
+        elif _n_passing == 3:
+            _failing = [k for k, v in _co_conditions.items()
+                        if k.startswith("C") and not v]
+            _multi_verdict = "CRITICAL_PARTIAL_3of4"
+            if _failing:
+                _multi_verdict += "(" + ",".join(_failing) + "_FAIL)"
+        elif _n_passing == 2:
+            _multi_verdict = "CRITICAL_WEAK_2of4"
+        elif _n_passing == 1:
+            _multi_verdict = "NEAR_CRITICAL_1of4"
+        else:
+            _multi_verdict = "NOT_CRITICAL_0of4"
+
+        # Override: if σ is not in band, system cannot be AT_CRITICAL
+        # regardless of other conditions (σ is the primary invariant)
+        if not _c1_sigma_pass and _n_passing >= 3:
+            _multi_verdict = "CRITICAL_PARTIAL_SIGMA_FAIL"
+
+        ca_telemetry_snapshot["co_conditions"] = _co_conditions
+        ca_telemetry_snapshot["criticality_verdict"] = _multi_verdict
+        ca_telemetry_snapshot["criticality_verdict_method"] = "multi_signature_4_co_conditions"
+
         # O148 trajectory extension: embed per-step σ trajectory and
         # per-step entropy trajectory into the snapshot so the dynamic
         # evolution of σ and H is verifiable from a single snapshot
