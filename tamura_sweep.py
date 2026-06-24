@@ -1848,11 +1848,133 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
             "(need >= 10, got {})."
         ).format(_bm_n)
 
+    # ── Bump-Ratio Detection at Distribution Cutoff (INV_073) ────────────
+    # Near the critical point of depinning transitions, avalanches with
+    # different starting heights relative to the mean interface experience
+    # different excess driving forces due to elasticity.  The asymmetric
+    # height distribution results in an excess of supercritical avalanches,
+    # manifested as a "bump" in the avalanche size distribution cutoff.
+    #
+    # We compute the ratio of observed counts in the top 5% of the size
+    # distribution to the power-law extrapolation at those sizes.  A ratio
+    # >1.15 flags a supercritical-excess signature — the system is above
+    # the critical ridge, with mixed sub/super-critical avalanche
+    # populations producing geometric distortion of the clean power-law.
+    #
+    # This directly operationalizes INV_073's ridge-navigation imperative
+    # with a falsifiable geometric signal: bump_ratio > 1.15 means the
+    # system is navigating ABOVE the ridge (supercritical excess);
+    # bump_ratio < 0.85 means BELOW (subcritical deficit); bump_ratio
+    # ≈ 1.0 means the power-law is clean (on-ridge or far from criticality).
+    #
+    # Reference: Depinning transition paper — asymmetric interface height
+    # distribution produces bump in avalanche size distribution cutoff.
+    _BUMP_SUPERCRITICAL_THRESHOLD = 1.15
+    _BUMP_SUBCRITICAL_THRESHOLD = 0.85
+
+    bump_ratio = 1.0
+    bump_observed_count = 0
+    bump_expected_count = 0.0
+    bump_top5_threshold = 0.0
+    bump_flag = False
+    bump_direction = ""
+    bump_detail = ""
+    bump_n_sizes = 0
+
+    _bump_sizes = sorted([float(s) for s in avalanche_sizes if s > 0])
+    bump_n_sizes = len(_bump_sizes)
+
+    if bump_n_sizes >= 20 and alpha > 0.0:
+        # Determine the 95th percentile threshold (top 5%)
+        _p95_idx = int(math.ceil(0.95 * bump_n_sizes)) - 1
+        _p95_idx = max(0, min(_p95_idx, bump_n_sizes - 1))
+        bump_top5_threshold = _bump_sizes[_p95_idx]
+
+        # Observed count in the top 5%
+        bump_observed_count = sum(1 for s in _bump_sizes if s >= bump_top5_threshold)
+
+        # Power-law extrapolation: expected count in top 5%
+        # For P(S >= s) ~ s^{-(alpha-1)}, the expected fraction above
+        # threshold s_t given minimum size s_min is:
+        #   P(S >= s_t) = (s_t / s_min)^{-(alpha-1)}
+        # Expected count = N * P(S >= s_t)
+        _s_min = _bump_sizes[0]
+        if _s_min > 0 and bump_top5_threshold > 0 and alpha > 1.0:
+            _ccdf_ratio = (bump_top5_threshold / _s_min) ** (-(alpha - 1.0))
+            bump_expected_count = float(bump_n_sizes) * _ccdf_ratio
+        elif _s_min > 0 and bump_top5_threshold > 0:
+            # alpha <= 1: use direct ratio as fallback
+            bump_expected_count = float(bump_n_sizes) * 0.05  # naive 5%
+
+        # Compute bump ratio
+        if bump_expected_count > 0.5:  # need at least ~1 expected count
+            bump_ratio = float(bump_observed_count) / bump_expected_count
+        else:
+            bump_ratio = 1.0  # degenerate — no meaningful comparison
+
+        # Flag and classify
+        if bump_ratio > _BUMP_SUPERCRITICAL_THRESHOLD:
+            bump_flag = True
+            bump_direction = "supercritical_excess"
+            bump_detail = (
+                "SUPERCRITICAL EXCESS (INV_073 bump-detection): bump_ratio="
+                "{:.4f} > {:.2f}. Observed {} avalanches above 95th percentile "
+                "(s >= {:.2f}), power-law predicts {:.1f}. The excess of large "
+                "avalanches indicates asymmetric driving forces from geometric "
+                "substrate — the system is navigating ABOVE the critical ridge. "
+                "Mixed sub/super-critical avalanche populations are distorting "
+                "the clean power-law. A clean gamma=1 power-law is NOT a "
+                "reliable indicator of true criticality here; the bump signals "
+                "confounding by substrate geometry (depinning transition paper). "
+                "alpha={:.4f}, N={}."
+            ).format(
+                bump_ratio, _BUMP_SUPERCRITICAL_THRESHOLD,
+                bump_observed_count, bump_top5_threshold,
+                bump_expected_count, alpha, bump_n_sizes,
+            )
+        elif bump_ratio < _BUMP_SUBCRITICAL_THRESHOLD:
+            bump_flag = True
+            bump_direction = "subcritical_deficit"
+            bump_detail = (
+                "SUBCRITICAL DEFICIT (INV_073 bump-detection): bump_ratio="
+                "{:.4f} < {:.2f}. Observed {} avalanches above 95th percentile "
+                "(s >= {:.2f}), power-law predicts {:.1f}. The deficit of large "
+                "avalanches indicates the system is navigating BELOW the critical "
+                "ridge — subcritical populations dominate. alpha={:.4f}, N={}."
+            ).format(
+                bump_ratio, _BUMP_SUBCRITICAL_THRESHOLD,
+                bump_observed_count, bump_top5_threshold,
+                bump_expected_count, alpha, bump_n_sizes,
+            )
+        else:
+            bump_detail = (
+                "ON-RIDGE (INV_073 bump-detection): bump_ratio={:.4f} within "
+                "[{:.2f}, {:.2f}]. No significant excess or deficit at the "
+                "distribution cutoff. The power-law extrapolation matches "
+                "observed counts in the top 5% (observed={}, expected={:.1f}, "
+                "threshold s>={:.2f}). The clean power-law is consistent with "
+                "true criticality without geometric distortion. alpha={:.4f}, "
+                "N={}."
+            ).format(
+                bump_ratio, _BUMP_SUBCRITICAL_THRESHOLD,
+                _BUMP_SUPERCRITICAL_THRESHOLD,
+                bump_observed_count, bump_expected_count,
+                bump_top5_threshold, alpha, bump_n_sizes,
+            )
+    else:
+        bump_detail = (
+            "Insufficient data for bump-detection (need >= 20 positive "
+            "avalanche sizes, got {}; alpha={:.4f})."
+        ).format(bump_n_sizes, alpha)
+
     return {
         "alpha": round(alpha, 4),
+        "alpha_uncorrected": round(alpha_uncorrected, 4),
         "alpha_r_squared": round(alpha_r_squared, 4),
         "alpha_in_soc": alpha_in_soc,
         "power_law_likely": power_law_likely,
+        "two_hypothesis_test": two_hyp,
+        "exponent_inflation_detected": two_hyp.get("inflation_detected", False),
         "dsi": dsi,
         "universality_class": dsi["universality_class"],
         "l4_rg_assessment": l4_rg,
@@ -1871,6 +1993,16 @@ def score_distribution(avalanche_sizes, alpha, alpha_r_squared):
         "bimodality_peak_positions": bimodality_peak_positions,
         "bimodality_detail": bimodality_detail,
         "attractor_type": attractor_type,
+        "bump_ratio": round(bump_ratio, 6),
+        "bump_flag": bump_flag,
+        "bump_direction": bump_direction,
+        "bump_observed_count": bump_observed_count,
+        "bump_expected_count": round(bump_expected_count, 4),
+        "bump_top5_threshold": round(bump_top5_threshold, 4),
+        "bump_n_sizes": bump_n_sizes,
+        "bump_supercritical_threshold": _BUMP_SUPERCRITICAL_THRESHOLD,
+        "bump_subcritical_threshold": _BUMP_SUBCRITICAL_THRESHOLD,
+        "bump_detail": bump_detail,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 

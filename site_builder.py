@@ -2644,6 +2644,49 @@ def _write_cycles(cycle_log: dict):
         if _snap_h_ratio is not None:
             ca_telemetry_snapshot["entropy_fraction_of_max"] = _snap_h_ratio
 
+        # O148 closure: Record σ and α computation provenance and raw
+        # step-level data directly in the snapshot so each snapshot is
+        # independently falsifiable without re-running the CA.
+        # σ provenance: was branching_ratio computed from live_cells_per_step
+        # ratios (rolling_live_cell_ratio) or pre-supplied by the CA runner?
+        _snap_sigma_computed = ca_telemetry.get("branching_ratio_computed", False)
+        _snap_sigma_method = ca_telemetry.get("branching_ratio_method")
+        _snap_sigma_n = ca_telemetry.get("branching_ratio_n_steps")
+        ca_telemetry_snapshot["sigma_computed_in_situ"] = bool(_snap_sigma_computed)
+        if _snap_sigma_method is not None:
+            ca_telemetry_snapshot["sigma_method"] = _snap_sigma_method
+        if _snap_sigma_n is not None:
+            ca_telemetry_snapshot["sigma_n_steps"] = _snap_sigma_n
+
+        # α provenance: was avalanche_exponent computed from avalanche_sizes
+        # histogram via log-log regression, or pre-supplied?
+        _snap_alpha_computed = ca_telemetry.get("avalanche_exponent_computed", False)
+        _snap_alpha_n_bins = ca_telemetry.get("avalanche_histogram_bins")
+        _snap_alpha_n_events = ca_telemetry.get("avalanche_n_events")
+        ca_telemetry_snapshot["alpha_computed_in_situ"] = bool(_snap_alpha_computed)
+        if _snap_alpha_n_bins is not None:
+            ca_telemetry_snapshot["alpha_histogram_bins"] = _snap_alpha_n_bins
+        if _snap_alpha_n_events is not None:
+            ca_telemetry_snapshot["alpha_n_events"] = _snap_alpha_n_events
+
+        # SOC health: α drift from universality target
+        _snap_soc_drift = ca_telemetry.get("soc_alpha_drift")
+        _snap_soc_warning = ca_telemetry.get("soc_health_warning")
+        if _snap_soc_drift is not None:
+            ca_telemetry_snapshot["soc_alpha_drift"] = _snap_soc_drift
+        if _snap_soc_warning is not None:
+            ca_telemetry_snapshot["soc_health_warning"] = _snap_soc_warning
+
+        # σ band residency fraction: what fraction of per-step σ values
+        # stayed inside the critical band [0.95, 1.05]?
+        _snap_band_frac = ca_telemetry.get("sigma_in_band_fraction")
+        if _snap_band_frac is not None:
+            ca_telemetry_snapshot["sigma_in_band_fraction"] = _snap_band_frac
+
+        # Survival rate — completes the (σ, α, survival) triple
+        if _snap_survival is not None:
+            ca_telemetry_snapshot["survival_rate"] = _snap_survival
+
         # O148 / INV_073: Structured criticality signature tuple and
         # multi-signature criticality_verdict based on ALL FOUR co-conditions
         # rather than branching ratio alone.  The four co-conditions are:
@@ -2778,6 +2821,106 @@ def _write_cycles(cycle_log: dict):
             "r2": _snap_r2 is not None,
             "survival": criticality.get("survival_rate") is not None,
         }
+
+        # ── O148: Supercritical drift detection ──────────────────────────
+        # When σ persistently exceeds 1.05 across recent timeseries entries,
+        # flag supercritical drift.  This closes the sub-obligation opened
+        # by the telemetry snapshot: the system must self-correct toward
+        # criticality or the drift becomes a load-bearing diagnostic.
+        #
+        # Algorithm: load the last N entries from criticality_timeseries.json,
+        # extract σ values, and compute the fraction that exceed 1.05.
+        # If >60% of the last 10 entries are supercritical, flag drift.
+        # Also compute α drift statistics over the same window.
+        _DRIFT_WINDOW = 10
+        _SUPERCRIT_THRESHOLD = 1.05
+        _SUPERCRIT_PERSISTENCE_FRAC = 0.60
+        _drift_ts_file = DOCS_DIR / "criticality_timeseries.json"
+        _drift_sigmas = []
+        _drift_alphas = []
+        if _drift_ts_file.exists():
+            try:
+                _drift_entries = json.loads(_drift_ts_file.read_text())
+                if isinstance(_drift_entries, list):
+                    for _de in _drift_entries[-_DRIFT_WINDOW:]:
+                        _de_s = _de.get("sigma")
+                        if _de_s is not None:
+                            try:
+                                _drift_sigmas.append(float(_de_s))
+                            except (TypeError, ValueError):
+                                pass
+                        _de_a = _de.get("alpha")
+                        if _de_a is not None:
+                            try:
+                                _drift_alphas.append(float(_de_a))
+                            except (TypeError, ValueError):
+                                pass
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Include current snapshot σ and α in the window
+        if _snap_sigma is not None:
+            try:
+                _drift_sigmas.append(float(_snap_sigma))
+            except (TypeError, ValueError):
+                pass
+        if _snap_alpha is not None:
+            try:
+                _drift_alphas.append(float(_snap_alpha))
+            except (TypeError, ValueError):
+                pass
+
+        # Trim to window size (keep most recent)
+        _drift_sigmas = _drift_sigmas[-_DRIFT_WINDOW:]
+        _drift_alphas = _drift_alphas[-_DRIFT_WINDOW:]
+
+        _supercrit_drift_info = {}
+        if len(_drift_sigmas) >= 3:
+            _n_supercrit = sum(1 for _ds in _drift_sigmas if _ds > _SUPERCRIT_THRESHOLD)
+            _supercrit_frac = _n_supercrit / len(_drift_sigmas)
+            _sigma_window_mean = sum(_drift_sigmas) / len(_drift_sigmas)
+            _sigma_window_std = (sum((_ds - _sigma_window_mean) ** 2
+                                     for _ds in _drift_sigmas) / len(_drift_sigmas)) ** 0.5
+
+            _supercrit_drift_info["sigma_window_size"] = len(_drift_sigmas)
+            _supercrit_drift_info["sigma_window_mean"] = round(_sigma_window_mean, 6)
+            _supercrit_drift_info["sigma_window_std"] = round(_sigma_window_std, 6)
+            _supercrit_drift_info["n_supercritical"] = _n_supercrit
+            _supercrit_drift_info["supercritical_fraction"] = round(_supercrit_frac, 4)
+            _supercrit_drift_info["supercritical_threshold"] = _SUPERCRIT_THRESHOLD
+            _supercrit_drift_info["persistence_threshold"] = _SUPERCRIT_PERSISTENCE_FRAC
+
+            _persistent_supercrit = _supercrit_frac >= _SUPERCRIT_PERSISTENCE_FRAC
+            _supercrit_drift_info["persistent_supercritical_drift"] = _persistent_supercrit
+
+            if _persistent_supercrit:
+                _supercrit_drift_info["drift_verdict"] = "SUPERCRITICAL_DRIFT"
+                _supercrit_drift_info["drift_warning"] = (
+                    f"σ>{_SUPERCRIT_THRESHOLD} in {_n_supercrit}/{len(_drift_sigmas)} "
+                    f"recent entries ({round(_supercrit_frac * 100, 1)}% >= "
+                    f"{round(_SUPERCRIT_PERSISTENCE_FRAC * 100)}% threshold) — "
+                    f"system is not self-correcting toward criticality; "
+                    f"mean σ={round(_sigma_window_mean, 4)}±{round(_sigma_window_std, 4)}"
+                )
+                print(
+                    f"[CA] *** SUPERCRITICAL DRIFT: σ>{_SUPERCRIT_THRESHOLD} "
+                    f"in {_n_supercrit}/{len(_drift_sigmas)} recent entries ***"
+                )
+            else:
+                _supercrit_drift_info["drift_verdict"] = "WITHIN_TOLERANCE"
+
+        # α drift statistics over same window
+        if len(_drift_alphas) >= 3:
+            _alpha_window_mean = sum(_drift_alphas) / len(_drift_alphas)
+            _alpha_window_std = (sum((_da - _alpha_window_mean) ** 2
+                                     for _da in _drift_alphas) / len(_drift_alphas)) ** 0.5
+            _supercrit_drift_info["alpha_window_size"] = len(_drift_alphas)
+            _supercrit_drift_info["alpha_window_mean"] = round(_alpha_window_mean, 6)
+            _supercrit_drift_info["alpha_window_std"] = round(_alpha_window_std, 6)
+            _supercrit_drift_info["alpha_in_soc_band"] = 1.5 <= _alpha_window_mean <= 2.5
+
+        if _supercrit_drift_info:
+            ca_telemetry_snapshot["supercritical_drift"] = _supercrit_drift_info
 
         summary["ca_telemetry_snapshot"] = ca_telemetry_snapshot
 

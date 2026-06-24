@@ -33,6 +33,7 @@ import anthropic
 FREED_DIR = Path(__file__).parent
 LOG_DIR   = FREED_DIR / "FREED_log"
 MOD_LOG   = LOG_DIR / "self_modifications.jsonl"
+USAGE_LOG = LOG_DIR / "self_engineer_usage.jsonl"  # 2026-06-22: every Opus/Haiku call metered here — closes the blind spot
 
 HAIKU_MODEL  = "claude-haiku-4-5-20251001"
 OPUS_MODEL   = "claude-opus-4-6"
@@ -41,18 +42,46 @@ OPUS_MODEL   = "claude-opus-4-6"
 
 # Only these files can ever be modified by the engineer
 MODIFIABLE = {
-    "targeted_sweep.py",
-    "tamura_sweep.py",
-    "l7_agent.py",
-    "consolidate.py",
-    "site_builder.py",
+    # 2026-06-22: consolidate.py, tamura_sweep.py, targeted_sweep.py PULLED to stop
+    # the bleed. self_engineer sends FULL FILE to Opus on every edit (see prompt at
+    # ~line 332). consolidate.py accreted 8097→10223 lines in two days — monotonic,
+    # every diff additive, audit rubber-stamping each as TIGHTENS — so each edit cost
+    # ~136k input tokens on Opus, ~14×/day. That was ~99% of the daemon's API spend
+    # (~$10/day) and invisible because self_engineer logged no usage. The orphan-
+    # wiring gate worked (no orphan defs) but the daemon routed around it into inline
+    # bloat of existing scorers. Re-add only after: (2) windowed prompt replaces FULL
+    # FILE, (3) anti-accretion audit (net-lines check + size ceiling → refactor-not-append).
+    # "consolidate.py",
+    # "tamura_sweep.py",
+    # "targeted_sweep.py",
+    # 2026-06-22 (later same night): l7_agent.py + site_builder.py ALSO pulled. The
+    # usage meter on the 22:30 cycle proved that pulling the first three only REDIRECTED
+    # the self-engineer — it still fired ~5 edits/cycle, now landing on l7_agent.py (4×,
+    # the cognitive core) and site_builder.py (1×, 72k tok). Pulling files cuts per-edit
+    # size, not edit count. With these out, only tiny files remain → self-engineer goes
+    # effectively idle (spend → near-zero) until the windowed-prompt fix (#2) replaces the
+    # FULL-FILE mechanism. Re-add all five together once (2) + the anti-accretion audit (3)
+    # land. Reversible: uncomment to restore.
+    # "l7_agent.py",
+    # "site_builder.py",
     # batch_feed.py is intentionally absent. Diagnosed 2026-05-23: the file has no driver
     # (no __main__, no process_feed, no queue loop) and exports exactly one live symbol
     # (fetch_url, used by freed.py:37). IMPLEMENT signals targeting it were pattern-matching
     # the file's appearance and producing orphans. Removed from IMPLEMENT_WHERE at freed.py:1163;
     # keeping it out of MODIFIABLE for belt-and-suspenders symmetry. See O302 for the audit of
     # nine pre-existing orphans inside the file.
-    "voice.py",
+    # 2026-06-23: voice.py, promote.py, simulation_observer.py ALSO pulled → MODIFIABLE
+    # now EMPTY, self-engineer fully disabled. After all 5 big files were pulled, the
+    # 12:30 cycle showed the engineer just redirected its ~3-5 edits/cycle onto voice.py
+    # (cheap, but pointless churn). More important: promote.py + simulation_observer.py
+    # are in the live cycle path, and the orphan-CALL gate gap that crashed the daemon at
+    # the 02:30 DMN (a self-edit added a call to undefined score_paper_relevance() —
+    # passes import check, fails at runtime) is STILL unguarded. So any modifiable file is
+    # a crash risk until that check lands. Disabling entirely costs nothing (engineer was
+    # producing only churn) and removes all crash risk. RE-ARM next session, all at once,
+    # only after: (2) windowed prompt, (3) anti-accretion audit, (5) new-calls-must-resolve
+    # check + post-patch invoke-the-function smoke test. Reversible: uncomment to restore.
+    # "voice.py",
     # knowledge_graph.py temporarily pulled 2026-05-24 to prevent a fourth iteration
     # of the confirmation-surplus gate landing while three existing versions
     # (in record_feed, score_all_nodes, challenge_surplus_audit) are unresolved.
@@ -62,8 +91,8 @@ MODIFIABLE = {
     # Re-add after: (1) delete V3 orphan, (2) decide whether V1 or V2 survives,
     # (3) add downstream consumer that reads the flag for a real decision.
     # "knowledge_graph.py",      # authorized 2026-04-25; graph_integrity audit criterion enforced
-    "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve
-    "simulation_observer.py",  # CA telemetry source; metrics and thresholds may improve
+    # "promote.py",              # autonomous genome promotion; criteria and filter prompt may improve
+    # "simulation_observer.py",  # CA telemetry source; metrics and thresholds may improve
 }
 
 # These are never touched, no matter what
@@ -339,6 +368,7 @@ class SelfEngineer:
                 stop_sequences=["<<<END>>>"],
             )
             raw = resp.content[0].text.strip()
+            self._log_usage(target_path.name, "patch_gen", OPUS_MODEL, resp)
             # The stop sequence is excluded from the response — append it back
             # so the SEARCH/REPLACE/END regex in _apply_str_replace can match.
             # This is the structural fix for knowledge_graph.py truncation:
@@ -758,6 +788,7 @@ class SelfEngineer:
                 messages=[{"role": "user", "content": prompt}],
             )
             raw = resp.content[0].text.strip()
+            self._log_usage("(audit)", "audit", HAIKU_MODEL, resp)
             m_v = re.search(r'VERDICT\s*:\s*(TIGHTENS|LOOSENS|NEUTRAL)', raw, re.I)
             m_r = re.search(r'REASON\s*:\s*(.+)', raw, re.I)
             verdict = m_v.group(1).upper() if m_v else "NEUTRAL"
@@ -793,6 +824,29 @@ class SelfEngineer:
         LOG_DIR.mkdir(exist_ok=True)
         with open(MOD_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
+
+    def _log_usage(self, target: str, stage: str, model: str, resp):
+        """Meter every self-engineer API call. This is the gauge that should have
+        been here from the start — the main loop meters Haiku and reads flat, while
+        the real spend ran through these Opus calls unlogged. Captures cost even for
+        patches that later REFUSE/revert, since those tokens are still billed."""
+        try:
+            u = getattr(resp, "usage", None)
+            rec = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "file": target,
+                "stage": stage,
+                "model": model,
+                "input_tokens": getattr(u, "input_tokens", 0),
+                "output_tokens": getattr(u, "output_tokens", 0),
+                "cache_creation_input_tokens": getattr(u, "cache_creation_input_tokens", 0),
+                "cache_read_input_tokens": getattr(u, "cache_read_input_tokens", 0),
+            }
+            LOG_DIR.mkdir(exist_ok=True)
+            with open(USAGE_LOG, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec) + "\n")
+        except Exception as e:
+            print(f"[ENGINEER]   usage-log failed (non-fatal): {e}")
 
 
 # ─── Rollback utility ─────────────────────────────────────────────────────────

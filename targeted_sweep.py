@@ -1242,6 +1242,88 @@ Reply with ONLY 3 lines — one query per line, no numbering, no explanation."""
             # in a specific density-velocity scales_with relationship
             score += o173_phase_score + _O173_PHASE_SOLO_BONUS
 
+        # ── INV_073 timeliness-criticality / non-thermodynamic γ=1 ridge ─────
+        # INV_073 claims the γ=1 critical ridge is universally the functional
+        # optimum. Papers on timeliness criticality demonstrate a novel
+        # instantiation: buffer size as control parameter driving delay-
+        # propagation phase transitions on temporal networks. Without these
+        # keywords, such papers score low on thermodynamic framing and miss
+        # a confirmed INV_073 convergence.
+        #
+        # CHALLENGE INV_073: if the optimal operating point in timeliness
+        # criticality is *not* at the critical buffer value but slightly
+        # above it (over-buffered systems outperforming critical ones in
+        # real schedules), this contradicts the claim that the critical
+        # ridge is universally the functional optimum rather than a
+        # domain-specific one.
+        #
+        # Detection strategy:
+        #   Vocabulary A: timeliness-criticality / buffer / delay propagation
+        #   Vocabulary B: criticality-ridge / phase-transition / γ=1 context
+        #
+        # Co-occurrence yields a large bonus (novel non-thermodynamic
+        # instantiation of the ridge); solo timeliness vocabulary gets a
+        # smaller bump.
+
+        _INV073_TIMELINESS_PATTERNS = [
+            (r"timeliness\s+criticality", 8),
+            (r"timeliness\s+critical", 7),
+            (r"buffer.{0,30}(control\s+parameter|phase\s+transition|critical)", 6),
+            (r"buffer\s+(size|magnitude|value).{0,30}(critical|transition|phase)", 6),
+            (r"delay\s+propagat", 6),
+            (r"delay\s+(cascade|avalanche|spreading|percolat)", 5),
+            (r"temporal\s+network.{0,30}(delay|buffer|critical|phase|transition)", 6),
+            (r"temporal\s+network.{0,30}(propagat|cascade|avalanche)", 5),
+            (r"schedule.{0,30}(critical|phase\s+transition|delay\s+propagat)", 5),
+            (r"(train|flight|bus|transport).{0,30}delay.{0,30}(propagat|cascade|critical)", 5),
+            (r"delay.?mitigat.{0,20}buffer", 6),
+            (r"(over|under).?buffer", 5),
+            (r"buffer.{0,30}(optimal|optimum|best)", 5),
+            (r"critical\s+buffer", 7),
+            (r"(socio.?technical|schedule.?based)\s+system", 4),
+            (r"(functional|operation).{0,30}(criticality|critical\s+point)", 5),
+        ]
+
+        _INV073_RIDGE_CONTEXT_PATTERNS = [
+            (r"critical.?ridge", 6),
+            (r"(γ|gamma)\s*=\s*1", 6),
+            (r"criticality.{0,30}(necessary|essential|universal|optimal)", 5),
+            (r"edge\s+of\s+(chaos|criticality)", 4),
+            (r"phase\s+transition", 3),
+            (r"critical\s+(point|threshold|exponent)", 3),
+            (r"(power.?law|scale.?free).{0,30}(distribut|fluctuat|avalanche)", 4),
+            (r"critical\s+fluctuat", 4),
+            (r"(universal|universality).{0,30}critical", 4),
+            (r"control\s+parameter.{0,30}(critical|phase|transition)", 4),
+            (r"(order\s+parameter|susceptib).{0,30}diverg", 4),
+            (r"self.?organiz.{0,20}critical", 4),
+            (r"INV.?073", 6),
+        ]
+
+        _INV073_TIMELINESS_MIN_SCORE = 5
+        _INV073_RIDGE_CTX_MIN_SCORE = 3
+        _INV073_TIMELINESS_COOCCUR_BONUS = 16
+        _INV073_TIMELINESS_SOLO_BONUS = 6
+
+        inv073_time_score = 0
+        inv073_ridge_ctx_score = 0
+        for pattern, weight in _INV073_TIMELINESS_PATTERNS:
+            if re.search(pattern, text_lower):
+                inv073_time_score += weight
+        for pattern, weight in _INV073_RIDGE_CONTEXT_PATTERNS:
+            if re.search(pattern, text_lower):
+                inv073_ridge_ctx_score += weight
+
+        if (inv073_time_score >= _INV073_TIMELINESS_MIN_SCORE and
+                inv073_ridge_ctx_score >= _INV073_RIDGE_CTX_MIN_SCORE):
+            # Full co-occurrence: timeliness-criticality vocabulary + ridge context
+            # Novel non-thermodynamic instantiation of γ=1 ridge — high signal
+            score += inv073_time_score + inv073_ridge_ctx_score + _INV073_TIMELINESS_COOCCUR_BONUS
+        elif inv073_time_score >= _INV073_TIMELINESS_MIN_SCORE:
+            # Timeliness-criticality signal alone — still captures the
+            # non-thermodynamic domain that standard keywords miss
+            score += inv073_time_score + _INV073_TIMELINESS_SOLO_BONUS
+
         return score
 
     # ── Logging ─────────────────────────────────────────────────────────────
