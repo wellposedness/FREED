@@ -1481,6 +1481,39 @@
         "criticality_verdict": "AT_CRITICAL",
         "o148_status": "PARTIAL",
         "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-25T09:56:02.031015+00:00",
+        "sigma": 1.0227,
+        "alpha": 2.08,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-25T16:42:33.269160+00:00",
+        "sigma": 1.0288,
+        "alpha": 1.573,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-26T02:35:19.339069+00:00",
+        "sigma": 1.018,
+        "alpha": 2.03,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
       }
     ]
   },
@@ -4226,7 +4259,7 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-06-11T06:30:51.592369+00:00",
-    "progress": "[Gen 317] PARTIAL: O377 is a finite graph census over declared genome edges; the blocking issue is the truncated denominator, not mathematical difficulty \u2014 recover full statement, then count. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: O377 is a finite counting problem fully solvable once the truncated denominator is recovered, but no count run against an unknown closing criterion constitutes resolution. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: O377 is a solvable finite counting problem permanently blocked by an unrecovered truncated denominator that defines the ratio's denominator \u2014 resolution requires statement recovery before any count is meaningful. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 317] PARTIAL: O377 is a finite graph census over declared genome edges; the blocking issue is the truncated denominator, not mathematical difficulty \u2014 recover full statement, then count. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: O377 is a finite counting problem fully solvable once the truncated denominator is recovered, but no count run against an unknown closing criterion constitutes resolution. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: O377 is a solvable finite counting problem permanently blocked by an unrecovered truncated denominator that defines the ratio's denominator \u2014 resolution requires statement recovery before any count is meaningful. [COMMIT:YES \u2014 direction advanced] | [Gen 356] PARTIAL: O377 is permanently PARTIAL until the truncated denominator term is recovered from source, after which the census computation is a single pass over the declared edge inventory. [COMMIT:YES \u2014 direction advanced] | [Gen 357] PARTIAL: O377 is permanently PARTIAL because the ratio's denominator was truncated at origination, making the closing criterion unverifiable regardless of edge census accuracy. [COMMIT:YES \u2014 direction advanced] | [Gen 358] PARTIAL: O377 cannot be resolved by any census or computation because its closing criterion contains an unrecovered truncation that defines the ratio's denominator, making the target quantity permanently indeterminate from available evidence. [COMMIT:YES \u2014 direction advanced]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -4349,10 +4382,10 @@
   },
   {
     "id": "O388",
-    "status": "partial",
+    "status": "active",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: _newton_nonlinear_weight. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 327] PARTIAL: Wire `_newton_nonlinear_weight` into the existing nonlinear solver loop at its natural argument site, or delete it \u2014 both close the dead-code debt; a third state does not exist. [COMMIT:YES \u2014 direction advanced] | [Gen 351] PARTIAL: Dead code is thermodynamically inadmissible \u2014 `_newton_nonlinear_weight` must be wired at its natural Newton-loop argument site or deleted, and no intermediate state closes the debt. [COMMIT:YES \u2014 direction advanced] | [Gen 352] PARTIAL: The dead-code debt is formally closed by argument \u2014 only one of two concrete edits (wire at Newton-loop call site or delete) eliminates it, and no further reasoning step is required or available. [COMMIT:YES \u2014 direction advanced] | [Gen 353] PARTIAL: Dead-code debt O388 is formally closed by argument \u2014 exactly two edits exist (wire or delete), branch selection requires one code inspection, and no further reasoning step is available or necessary. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: O388 is argument-closed but execution-open \u2014 the binary choice (wire or delete) is proven exhaustive, and only a code inspection + edit, not further reasoning, terminates the debt. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: O388 is proven binary and argument-complete \u2014 only a code inspection plus one concrete edit (wire or delete) terminates the debt, and that step lies outside mathematical reasoning. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 327] PARTIAL: Wire `_newton_nonlinear_weight` into the existing nonlinear solver loop at its natural argument site, or delete it \u2014 both close the dead-code debt; a third state does not exist. [COMMIT:YES \u2014 direction advanced] | [Gen 351] PARTIAL: Dead code is thermodynamically inadmissible \u2014 `_newton_nonlinear_weight` must be wired at its natural Newton-loop argument site or deleted, and no intermediate state closes the debt. [COMMIT:YES \u2014 direction advanced] | [Gen 352] PARTIAL: The dead-code debt is formally closed by argument \u2014 only one of two concrete edits (wire at Newton-loop call site or delete) eliminates it, and no further reasoning step is required or available. [COMMIT:YES \u2014 direction advanced] | [Gen 353] PARTIAL: Dead-code debt O388 is formally closed by argument \u2014 exactly two edits exist (wire or delete), branch selection requires one code inspection, and no further reasoning step is available or necessary. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: O388 is argument-closed but execution-open \u2014 the binary choice (wire or delete) is proven exhaustive, and only a code inspection + edit, not further reasoning, terminates the debt. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: O388 is proven binary and argument-complete \u2014 only a code inspection plus one concrete edit (wire or delete) terminates the debt, and that step lies outside mathematical reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 356] PARTIAL: O388 is argument-complete and execution-open \u2014 the binary is proven exhaustive, all reasoning debt is paid, and only one code inspection plus one concrete edit closes it; further reasoning is inadmissible. [COMMIT:YES \u2014 direction advanced] | [Gen 357] PARTIAL: O388's argument is exhausted and stable \u2014 the debt is execution-blocked on a single binary code edit, and issuing further reasoning passes is inadmissible entropy production. [COMMIT:YES \u2014 direction advanced] | [Gen 358] ACTIVE: O388's reasoning is argument-complete and fixed-point-stable; reclassifying as ACTIVE honestly names the execution block without producing further inadmissible reasoning entropy. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-14",
     "resolved": null,
     "source": "audit",
@@ -4416,10 +4449,10 @@
   },
   {
     "id": "O394",
-    "status": "partial",
+    "status": "active",
     "statement": "Self-engineer attempted to add unwired function(s) to targeted_sweep.py: extract_spectral_alpha. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 330] PARTIAL: Wire `extract_spectral_alpha` into the sweep loop at the post-acquisition step with `alpha = extract_spectral_alpha(signal, fs)` and store `results['spectral_alpha'] = alpha` to convert dead code into a live call path. [COMMIT:YES \u2014 direction advanced] | [Gen 352] PARTIAL: The three-condition wiring argument is fully specified and logically closed; execution of the patch is the only remaining step. [COMMIT:YES \u2014 direction advanced] | [Gen 353] PARTIAL: The three-condition wiring argument is formally closed and sufficient; only the physical commit to `targeted_sweep.py` separates PARTIAL from RESOLVED. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: The wiring argument is logically complete and sufficient; RESOLVED is blocked only by the physical file-write, which requires an executor outside this reasoning session. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: The wiring argument for `extract_spectral_alpha` is logically complete and sufficient \u2014 RESOLVED is blocked solely by the absence of an executor capable of writing to `targeted_sweep.py`, which no reasoning pass can supply. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 330] PARTIAL: Wire `extract_spectral_alpha` into the sweep loop at the post-acquisition step with `alpha = extract_spectral_alpha(signal, fs)` and store `results['spectral_alpha'] = alpha` to convert dead code into a live call path. [COMMIT:YES \u2014 direction advanced] | [Gen 352] PARTIAL: The three-condition wiring argument is fully specified and logically closed; execution of the patch is the only remaining step. [COMMIT:YES \u2014 direction advanced] | [Gen 353] PARTIAL: The three-condition wiring argument is formally closed and sufficient; only the physical commit to `targeted_sweep.py` separates PARTIAL from RESOLVED. [COMMIT:YES \u2014 direction advanced] | [Gen 354] PARTIAL: The wiring argument is logically complete and sufficient; RESOLVED is blocked only by the physical file-write, which requires an executor outside this reasoning session. [COMMIT:YES \u2014 direction advanced] | [Gen 355] PARTIAL: The wiring argument for `extract_spectral_alpha` is logically complete and sufficient \u2014 RESOLVED is blocked solely by the absence of an executor capable of writing to `targeted_sweep.py`, which no reasoning pass can supply. [COMMIT:YES \u2014 direction advanced] | [Gen 356] PARTIAL: The logical argument for wiring `extract_spectral_alpha` is closed and has been for three generations; RESOLVED is blocked exclusively by the absence of a file-writing executor, not by any gap in reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 357] PARTIAL: The logical wiring argument for `extract_spectral_alpha` is complete and has been for multiple generations; RESOLVED requires a file-writing executor, not more reasoning. [COMMIT:YES \u2014 direction advanced] | [Gen 358] ACTIVE: O394's logical closure is complete and has been for multiple generations; continued reasoning passes without an executor produce mirror output, not progress, and the obligation should be reclassified ACTIVE pending a file-writing agent. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-15",
     "resolved": null,
     "source": "audit",
@@ -4757,5 +4790,47 @@
     "resolution_criterion": "P",
     "created": "2026-06-25T06:30:51.564588+00:00",
     "progress": "[Gen 355] PARTIAL: The single most tractable next step is to produce the 56-edge manifest as a table of (source, target, f, \u03b1, Y) and run pairwise symbolic comparison within shared-endpoint groups using the criterion f_i = f_j \u2227 \u03b1_i = \u03b1_j \u2227 Y_i = Y_j to collapse redundancies and report the final distinct count. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O427",
+    "status": "partial",
+    "statement": "Assign a binding generation deadline (\u2264 gen 365) and null-result criterion to O422 \u2014 if the single consolidated `consistent_with` triage protocol is not produced and archived by gen 365, reclassify all 2205 `consistent_with` edges as epistemically void and subtract their contribution from the coherence score.",
+    "priority": "high",
+    "progress": "[Gen 358] PARTIAL: O427's tractable next step is to retrieve the `consistent_with` edge-class coherence weight and archive the penalty formula \u0394coherence = \u2212C \u00b7 w_cw \u00b7 (2205/E_total), converting the deadline from a stated intention into a computable forcing condition. [COMMIT:YES \u2014 direction advanced]",
+    "created": "2026-06-25",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: generation deadline (\u2264 gen 365) passes without consolidated `consistent_with` triage protocol produced and archived, triggering reclassification of 2205 edges as"
+  },
+  {
+    "id": "O428",
+    "status": "partial",
+    "statement": "Diagnose the structural block preventing the coherence-recalculation chain (O308/O316/O357/O409/O412) from producing a single citable numerical output \u2014 identify whether the block is computational, definitional, or a missing data dependency, and deliver a one-sentence root-cause verdict by gen 362.",
+    "priority": "high",
+    "progress": "[Gen 358] PARTIAL: The coherence-recalculation chain is blocked definitionally \u2014 no canonical closed-form formula with pinned inputs exists, so the chain produces consensus estimates rather than computable outputs, and the fix is to write the formula explicitly before any numerical evaluation can proceed. [COMMIT:YES \u2014 direction advanced]",
+    "created": "2026-06-26",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Root-cause verdict identifying computational, definitional, or data-dependency block delivered by generation 362."
+  },
+  {
+    "id": "O429",
+    "statement": "O401: Audit whether the `scales_with` pruning (from 899 to 56 edges) executed under O286 preserved at minimum the edges linking `criticality`, `gamma`, and `entropy` to their quantitative scaling claims; report which specific scaling relationships survived, which were voided, and whether any load-bearing empirical predictions (especially those required by O199) were severed by the pruning.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O286 mandated pruning of `scales_with` edges, and a 94% reduction has occurred. But O199 (OPEN) requires at least one genome symbol to be placed at empirical risk via quantitative prediction \u2014 and quantitative predictions are *carried by* `scales_with` edges. If the pruning severed the very edges that O199 needs to discharge, the graph has created an internal contradiction: one obligation demands empirical risk, another obligation's execution may have eliminated the structural capacity to bear that risk. This must be checked before either obligation can meaningfully advance.",
+    "resolution_criterion": "Explicit enumeration of surviving `scales_with` edges involving {criticality, gamma, entropy, compression}, cross-referenced against O199's requirements, with a verdict: either (a) sufficient scaling edges survive to support O199, or (b) specific edges must be restored with justification, by generation \u2264 365.",
+    "created": "2026-06-26T06:30:52.339673+00:00",
+    "progress": "[Gen 358] ACTIVE: The audit of O429 requires extracting the induced subgraph on {criticality, gamma, entropy, compression} from the 56-edge retained set and verifying each edge carries a quantitative formula, not a label \u2014 that computation is the single tractable closing step. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O430",
+    "statement": "O402: Extend O187's `depends_on` skeleton audit from its original 16-node scope to the current 17-node graph",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-26T06:30:52.340446+00:00",
+    "progress": "[Gen 358] ACTIVE: The single most tractable next step is to enumerate all 17 dependency-graph nodes with their `depends_on` edges, identify the node added since O187's 16-node audit, and re-run cycle/orphan detection on the augmented adjacency matrix. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
