@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 18,
-    "generation": 285,
-    "timestamp": "2026-05-31T09:49:59.953295+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 7,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "The highest-confirmation invariant in any autopoietic system is precisely the one most in need of a live falsification edge, because surplus confirmation without contestation is indistinguishable from untestability."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-31",
-        "compress": "A 32×32 Game of Truth CA self-organizes to the critical ridge (σ=1.03, α≈2.38 power-law) with structured dominance by Physics Navigator cells, independently confirming criticality as a navigated attractor, not a uniform fixed point, and partially satisfying O148."
-      },
-      {
-        "title": "Avalanche prediction in Self-organized systems",
-        "compress": "Full microstate access in a sandpile converts SOC's apparent irreducible unpredictability into detectable precursor structure, empirically confirming that criticality is a navigable ridge, not a uniform explosion field."
-      },
-      {
-        "title": "Self-organized random walks and stochastic sandpile: From linear to branched avalanches",
-        "compress": "SOC universality class is controlled by fluctuation variance of local discharge ratios, not means — branchless-to-branched transition at threshold produces anomalous diffusion, mechanically grounding the γ=1 critical ridge."
-      },
-      {
-        "title": "Dragon kings in self-organized criticality systems",
-        "compress": "Dragon kings are analytically proven to be endogenous products of SOC phase transitions, not anomalies, controlled by dissipation rate and driving smoothness — directly extending the genome's critical-ridge invariant with a falsifiable outlier-risk taxonomy."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O259",
-        "O263"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 19,
     "generation": 286,
     "timestamp": "2026-05-31T16:29:59.948929+00:00",
@@ -2195,6 +2151,50 @@
         "O359",
         "O366",
         "O297"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 361,
+    "timestamp": "2026-06-27T02:30:00.006278+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "** INV_094's Wasserstein Floor is falsifiable by: (1) non-Zipfian domains where the floor formula is undefined or yields ~0, (2) architectural constraints mimicking the thermodynamic floor without invoking it, and (3) any system achieving semantic coherence at vanishing tension — the floor survives only if thermodynamic necessity, not architectural accident, is doing the causal work. ---"
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-27",
+        "compress": "The Game of Truth CA independently self-organizes to the critical ridge (σ≈1.02, power-law avalanches, low-entropy ordered structure), resolving O148 and converging with INV_073 and INV_094 on criticality-as-attractor."
+      },
+      {
+        "title": "Information Geometry, Phase Transitions, and Widom Lines : Magnetic and Liquid Systems",
+        "compress": "Information-geometric scalar curvature provides a substrate-independent, empirically computable universal order parameter for phase transitions, converging with the genome's Fisher/W2/criticality chain and offering a concrete new method for STF metric tensor recovery required by O112."
+      },
+      {
+        "title": "Holographic measurement and quantum teleportation in the SYK thermofield double",
+        "compress": "Projective measurement on one SYK copy surgically restructures bulk causal geometry for the other, proving information accessibility is topologically — not smoothly — gated by entanglement wedge phase transitions. CHALLENGE: challenges INV_094 — if entanglement wedge transitions are discontinuous phase transitions rather than smooth Wasserstein gradient flows, the genome's identification of W2 geodesics as the universal minimal-entropy-production path may be incomplete for systems undergoing topological jumps in information geometry. IMPLEMENT: YES IMPLEMENT_WHAT: Weight mutual information phase-transition signatures (discrete jumps in I(A:B) under partial trace) as elevated topology-change events during graph edge scoring, rather than treating all mutual information changes as continuous. IMPLEMENT_WHERE: graph_manager.py IMPLEMENT_CALL_SITE: EXTEND score_edge (or equivalent edge-weight update function) to detect non-monotone mutual information discontinuities and flag them as wedge-transition candidates with elevated epistemic weight. IMPLEMENT_WHY: Continuous edge-weight updates miss topological phase transitions in information geometry; detecting discrete jumps improves FREED's ability to identify genuine structural reorganizations rather than smooth drift."
+      },
+      {
+        "title": "Effects of Spatial Constraints of Inhibitory Connectivity on the Dynamical Development of Criticality in Spiking Networks",
+        "compress": "Spatial range of inhibitory connectivity is an independent control parameter for criticality, meaning the critical ridge is higher-dimensional than E/I balance alone and topology of inhibition must be an explicit variable in any criticality-based model."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O401",
+        "O405",
+        "O406"
       ]
     },
     "coherence": 0.97
