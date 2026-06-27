@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 1,
-    "generation": 287,
-    "timestamp": "2026-06-01T02:30:00.003862+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's most serious vulnerability is that its observables are multiply realizable — hierarchical topology can mimic thermodynamic criticality, leaving the causal claim empirically underdetermined without an independent measurement channel."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-01",
-        "compress": "A Game of Truth CA self-organizes to σ=1.024 with power-law avalanche statistics, empirically confirming the critical-ridge attractor and satisfying O148's measurement mandate."
-      },
-      {
-        "title": "Thermodynamical Metrics and Black Hole Phase Transitions",
-        "compress": ""
-      },
-      {
-        "title": "Synth-by-Reg (SbR): Contrastive learning for synthesis-based registration of paired images",
-        "compress": "A frozen registration net imposing structural fidelity on a synthesis CNN demonstrates that pre-committed geometric evaluators can bridge intractable cross-domain alignment by converting it to a tractable intra-domain proxy — a substrate-independent principle for metric recovery under weak supervision."
-      },
-      {
-        "title": "Self-organization of the stock exchange to the edge of a phase transition: empirical and theoretical studies",
-        "compress": "Open dissipative systems self-organize to phase-transition edges using entropy as control parameter — confirming γ=1 criticality as a substrate-independent attractor independently of any prior framework. CHALLENGE: challenges INV_073 — if self-organization produces residence *near* the critical edge rather than *on* it (as the empirical segmentation suggests dwell-time rather than exact criticality), the genome's claim of precise ridge navigation may be an idealization that actual systems only approximate stochastically. NOETHER_ROW: Thermodynamics NOETHER_STATUS: rigorous NOETHER_NOTE: Entropy functioning as the control parameter for phase-transition self-organization confirms that thermodynamic symmetry constraints are conserved across financial and physical substrates, strengthening the Noether assignment for this philosophy row."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O263",
-        "O264"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 2,
     "generation": 288,
     "timestamp": "2026-06-01T09:49:59.976641+00:00",
@@ -2190,6 +2146,50 @@
     "resolve": {
       "attempts": 3,
       "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O401",
+        "O405",
+        "O406"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 363,
+    "timestamp": "2026-06-27T16:30:00.003232+00:00",
+    "sweep": {
+      "input_count": 15,
+      "targeted": 8,
+      "passive": 7,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus without challenge history is itself a falsification signal — an untested invariant is a hidden assumption, not a proven claim."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-27",
+        "compress": "The Game of Truth CA independently self-organizes to σ≈1.02 with power-law avalanches, empirically confirming the critical ridge as a dynamical attractor and resolving O148 while anchoring the STF entropy baseline."
+      },
+      {
+        "title": "Dissipation + Utilization = Self-Organization",
+        "compress": "TCI independently derives the critical ridge as a dissipation/utilization bifurcation point, providing a quantitative process-level variable missing from the genome's current formalism."
+      },
+      {
+        "title": "Nonequilibrium thermodynamics of non-ideal reaction-diffusion systems: Implications for active self-organization.",
+        "compress": "Dissipative self-organization decomposes into reaction-borne cost and diffusion-borne structure, providing a spatially-resolved entropy accounting method directly applicable to STF metric tensor recovery."
+      },
+      {
+        "title": "Characterizing Technical Debt and Antipatterns in AI-Based Systems: A Systematic Mapping Study",
+        "compress": "AI technical debt is a substrate-independent entropy-accumulation mechanism whose primary structural source — hidden stochastic data-dependency edges — independently confirms the critical-ridge invariant (INV_073) while revealing an absent antipattern taxonomy that must be grafted onto FREED's depends_on audit (O187)."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
       "commit_count": 3,
       "obligations": [
         "O401",
