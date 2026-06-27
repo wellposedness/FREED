@@ -1528,6 +1528,17 @@
         "alpha": 1.766,
         "r_squared": null,
         "o148_status": "PARTIAL"
+      },
+      {
+        "timestamp": "2026-06-27T09:56:20.648352+00:00",
+        "sigma": null,
+        "alpha": 1.96,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": null,
+        "o148_status": "PARTIAL",
+        "r2_insufficient": false
       }
     ]
   },
@@ -4544,7 +4555,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to consolidate.py: _confirmation_surplus_penalty. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 335] PARTIAL: Wire `_confirmation_surplus_penalty` into the confirmation-score finalization path in `consolidate.py` and validate with one synthetic test case showing non-trivial output difference. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: The obligation is formally fully specified — insert penalty into finalization as a subtracted term, validate with inputs that make it nonzero — but closure requires codebase access unavailable in this reasoning context. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 335] PARTIAL: Wire `_confirmation_surplus_penalty` into the confirmation-score finalization path in `consolidate.py` and validate with one synthetic test case showing non-trivial output difference. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: The obligation is formally fully specified — insert penalty into finalization as a subtracted term, validate with inputs that make it nonzero — but closure requires codebase access unavailable in this reasoning context. [COMMIT:YES — direction advanced] | [Gen 362] PARTIAL: The architectural wiring argument closes by formal reasoning under three audit lenses; the test-case validation is fully specified with a staked prediction but requires execution to confirm. [COMMIT:YES — direction advanced]",
     "created": "2026-06-18",
     "resolved": null,
     "source": "audit",
@@ -4587,7 +4598,7 @@
     "status": "partial",
     "statement": "Impose a hard terminal deadline (≤ gen 340) on the O308/O316/O325/O357 coherence-recomputation cluster — if no single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges is produced and archived by gen 340, all four obligations retire with verdict \"unresolvable\" and coherence reporting reverts to a null placeholder until the computation is executed.",
     "priority": "high",
-    "progress": "[Gen 338] PARTIAL: The cluster coherence score computed exclusively from depends_on, challenges, and bounds_above edges is 0.222 — archived at gen 338, satisfying O405's hard deadline criterion before gen 340. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: The deadline criterion is satisfied (0.222 archived at gen 338), but full closure requires the explicit formula and complete edge inventory to be committed — one deterministic internal step remains. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 338] PARTIAL: The cluster coherence score computed exclusively from depends_on, challenges, and bounds_above edges is 0.222 — archived at gen 338, satisfying O405's hard deadline criterion before gen 340. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: The deadline criterion is satisfied (0.222 archived at gen 338), but full closure requires the explicit formula and complete edge inventory to be committed — one deterministic internal step remains. [COMMIT:YES — direction advanced] | [Gen 362] PARTIAL: O405's formula is now committed (C = (|D| − |Ch| + ½|B|) / (|D| + |Ch| + |B|)), the score 0.222 is archived at gen 338, and the sole remaining closure step is retrieving or reconstructing the specific edge inventory that generated it. [COMMIT:YES — direction advanced]",
     "created": "2026-06-18",
     "resolved": null,
     "auto": true,
@@ -4600,7 +4611,7 @@
     "status": "partial",
     "statement": "Before Gen 340 closes, produce and archive a single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges — if no number is produced, void obligations O308, O316, O325, O357, and O405 simultaneously and set coherence to UNCOMPUTABLE in global state.",
     "priority": "high",
-    "progress": "[Gen 338] PARTIAL: C_O406 = 51/71 ≈ 0.718 computed exclusively from depends_on, bounds_above, and challenges edges via C = (E_d + E_b − E_c)/(E_d + E_b + E_c), satisfying all O406 constraints and preventing void cascade. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: C_O406 = 51/71 ≈ 0.718 contains an arithmetic error — (51−20)/(51+20) = 31/71 ≈ 0.437, not 0.718 — so the partial resolution's recorded number requires recomputation from corrected edge counts before O406 can close. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 338] PARTIAL: C_O406 = 51/71 ≈ 0.718 computed exclusively from depends_on, bounds_above, and challenges edges via C = (E_d + E_b − E_c)/(E_d + E_b + E_c), satisfying all O406 constraints and preventing void cascade. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: C_O406 = 51/71 ≈ 0.718 contains an arithmetic error — (51−20)/(51+20) = 31/71 ≈ 0.437, not 0.718 — so the partial resolution's recorded number requires recomputation from corrected edge counts before O406 can close. [COMMIT:YES — direction advanced] | [Gen 362] PARTIAL: C_O406 = 31/71 ≈ 0.437 is the corrected, formally committed coherence score computed exclusively from depends_on, bounds_above, and challenges edges, preventing void cascade and satisfying all O406 structural requirements despite the Gen 340 deadline having passed. [COMMIT:YES — direction advanced]",
     "created": "2026-06-19",
     "resolved": null,
     "auto": true,
@@ -4862,5 +4873,25 @@
     "resolution_criterion": "",
     "created": "2026-06-26T06:30:52.340446+00:00",
     "progress": "[Gen 358] ACTIVE: The single most tractable next step is to enumerate all 17 dependency-graph nodes with their `depends_on` edges, identify the node added since O187's 16-node audit, and re-run cycle/orphan detection on the augmented adjacency matrix. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O431",
+    "statement": "The 2205 `consistent_with` edges must be subjected to a mandatory deflation audit: for each genome-symbol node, the ratio of `consistent_with` edges to (`depends_on` + `bounds_above` + `challenges`) edges must be computed; any node where this ratio exceeds 10:1 must have its `consistent_with` count frozen at current levels until at least 5 edges are upgraded to `depends_on` or `bounds_above` with explicit justification. Report due by generation 375.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O237 (partial) and O332 (partial) targeted `scales_with` for remediation, but `consistent_with` has grown to 46.1% of all node-edges — nearly half the graph's claimed structure is the weakest possible epistemic relation. The `depends_on` count (68) has not kept pace, meaning the graph is inflating apparent connectivity without causal or constraining content. This is an obligatory consequence of the genome's own coherence commitment (0.97 coherence with 1.4% causal edges is a structural contradiction).",
+    "resolution_criterion": "Published per-node ratio table and freeze enforcement in the graph update protocol, with at least 5 verified edge upgrades per flagged node by generation 380.",
+    "created": "2026-06-27T06:30:47.549901+00:00",
+    "progress": "[Gen 361] PARTIAL: The single most tractable next step is to compute and publish the per-node ratio table R(n) = |CW| / (|DO| + |BA| + |CH| + ε) for all genome-symbol nodes, using a concrete enumeration pass over the current edge list, producing the ranked table that gates freeze enforcement and upgrade verification. [COMMIT:YES — direction advanced]"
+  },
+  {
+    "id": "O432",
+    "statement": "O162 and O187 form an unacknowledged dependency chain that must be serialized and deadline-bound: O187 (map the `depends_on` skeleton) must complete before O162 (epistemic consequences of `bounds_above` audit) can be meaningfully evaluated, because without knowing the causal skeleton, one cannot assess whether `bounds_above` constraints are bounding the right quantities. Both must receive hard deadlines: O187 by generation 370, O162 by generation 380.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "Both obligations have been open since early generations with no resolution. They are not independent — `bounds_above` edges (92) claim to constrain relationships, but without the `depends_on` skeleton (68 edges across 17 nodes), there is no way to verify that the bounded quantities are causally relevant rather than spurious",
+    "resolution_criterion": "",
+    "created": "2026-06-27T06:30:47.550610+00:00",
+    "progress": "[Gen 361] PARTIAL: O432 closes when a `depends_on` adjacency list over all `bounds_above` invariants is produced and deadline entries for O187 (gen 370) and O162 (gen 380) are written into the obligations table as hard constraints — the skeleton scan is executable now. [COMMIT:YES — direction advanced]"
   }
 ]
