@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 19,
-    "generation": 286,
-    "timestamp": "2026-05-31T16:29:59.948929+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's confirmation surplus is epistemically hollow until a mechanistic discriminator separates tension-navigation from equifinal criticality-mimics that produce identical observables through different dynamics."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-05-31",
-        "compress": "Game of Truth CA independently reaches the critical ridge (σ=1.0285, power-law α≈1.065) with criticality concentrated in a dominant Physics Navigator cell type, directly confirming INV_073 and advancing O148 toward resolution. IMPLEMENT: YES IMPLEMENT_WHAT: In the branching-ratio telemetry ingestion path, add parsing of the `dominant_type` field and log it alongside σ and α so compositional criticality structure is tracked across snapshots. IMPLEMENT_WHERE: site_builder.py IMPLEMENT_CALL_SITE: EXTEND build_ca_telemetry_block (or equivalent function that renders CA snapshot data into the site output) IMPLEMENT_WHY: Tracking dominant cell-type composition across snapshots tests whether Physics Navigator dominance is a stable attractor of critical dynamics or a transient, which directly informs whether compositional structure is an invariant of the critical ridge. CHALLENGE: challenges INV_073 — the branching ratio σ=1.0285 sits at the upper edge of the critical band and is not self-correcting toward σ=1.0 by any demonstrated mechanism, leaving open whether the system actively navigates the ridge or merely samples it transiently. NOETHER_ROW: Game of Truth NOETHER_STATUS: rigorous NOETHER_NOTE: The measured power-law avalanche statistics (α≈1.065, R²=0.876) with σ within the critical band constitute the strongest available empirical confirmation that Game of Truth's local rules preserve the criticality symmetry (scale-free information flow) as a conserved dynamical property."
-      },
-      {
-        "title": "Non-equilibrium critical behavior : An extended irreversible thermodynamics approach",
-        "compress": ""
-      },
-      {
-        "title": "Comparison of some geometric frameworks for dissipative evolution in multiscale non-equilibrium thermodynamics",
-        "compress": "Rayleigh, d'Alembert, and Poisson-bracket dissipation formalisms are provably equivalent gradient-flow representations, confirming that geometric structure is coordinate-independent and load-bearing in non-equilibrium thermodynamics."
-      },
-      {
-        "title": "Avalanches and many-body resonances in many-body localized systems",
-        "compress": "MBL systems require distinguishing finite-size apparent stability from true asymptotic phase structure, with avalanche rates and resonance matrix elements as the operative landmarks — a substrate-independent lesson that apparent criticality is not thermodynamic criticality."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O259",
-        "O263"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 287,
     "timestamp": "2026-06-01T02:30:00.003862+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Effects of Spatial Constraints of Inhibitory Connectivity on the Dynamical Development of Criticality in Spiking Networks",
         "compress": "Spatial range of inhibitory connectivity is an independent control parameter for criticality, meaning the critical ridge is higher-dimensional than E/I balance alone and topology of inhibition must be an explicit variable in any criticality-based model."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O401",
+        "O405",
+        "O406"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 362,
+    "timestamp": "2026-06-27T09:49:59.973135+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant's strength is measured by the quality of its best available falsification, not its confirmation count — INV_094's surplus is a liability until its boundary conditions are formally specified."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-27",
+        "compress": "A 32×32 CA self-organizing to σ≈1.03 with power-law avalanche exponent α≈1.96 independently confirms that finite bounded systems can sustain critical dynamics without external tuning, partially resolving O148 and converging with INV_073."
+      },
+      {
+        "title": "Statistical Problems with Planted Structures: Information-Theoretical and Computational Limits",
+        "compress": "Planted-structure inference universally exhibits an IT threshold and a harder computational threshold bounding a conjectured-hard intermediate band, refining the critical ridge from a point to a structured interval with two independently derivable boundaries."
+      },
+      {
+        "title": "Coevolutionary game dynamics with localized environmental resource feedback",
+        "compress": "Localized environmental feedback produces a phase transition from oscillatory tragedy to stable coexistence above a strategy-resource coupling threshold, independently confirming the critical-ridge survival condition and extending O28 with a quantitative escape criterion. CHALLENGE: challenges INV_087 — the paper shows that even at the critical ridge, spatial heterogeneity (not coupling strength alone) is a necessary co-condition for equilibrium escape, suggesting INV_087's ridge condition may be insufficient without a spatial substrate specification."
+      },
+      {
+        "title": "Establishment and Validation of a Three-Dimensional Simulation Model for Magnetron Sputtering of Rotating Cylindrical Cathode",
+        "compress": "Hierarchical dimensional decomposition (slow collective field seeds fast individual tracker) is a substrate-independent simulation strategy that independently validates the RSA scale-separation logic and supplies a concrete falsification template for O173's `scales_with` edge audit."
       }
     ],
     "resolve": {
