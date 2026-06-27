@@ -883,6 +883,46 @@ function renderCycles(cycles) {
       }
       if (sr != null) parts.push(`survival=${sr}`);
       if (dct != null) parts.push(`dominant=${dct}${dcc != null ? '('+dcc+')' : ''}${dcf != null ? ' '+Math.round(dcf*100)+'%' : ''}`);
+
+      // O148: Structured σ/α/H telemetry metrics grid — labeled fields with
+      // band-membership flags.  σ∉[0.95,1.05] flagged as subcritical/supercritical
+      // for downstream filtering.  This block emits the three primary criticality
+      // observables as individually labeled, machine-readable metric rows so
+      // longitudinal tracking (O148) and STF metric tensor recovery (O112)
+      // can consume them without re-parsing the verdict string.
+      let telemetryMetricsHtml = '';
+      const _tmRows = [];
+      if (sigma != null) {
+        const sVal = parseFloat(sigma);
+        const sigmaInBand = (sVal >= 0.95 && sVal <= 1.05);
+        const sigmaFlag = sigmaInBand ? '✓ CRITICAL' : (sVal > 1.05 ? '⚠ SUPERCRITICAL' : '⚠ SUBCRITICAL');
+        const sigmaFlagColor = sigmaInBand ? 'var(--green)' : (sVal > 1.05 ? 'var(--red)' : 'var(--blue)');
+        _tmRows.push(`<span style="color:var(--muted)">σ</span> <span style="color:var(--text)">${sigma}${sigmaErr != null ? ' ± '+sigmaErr : ''}</span> <span style="color:${sigmaFlagColor};font-weight:600">${sigmaFlag}</span> <span style="color:var(--muted)">[0.95–1.05]</span>`);
+      }
+      if (alpha != null) {
+        const aVal = parseFloat(alpha);
+        const alphaInBand = (aVal >= 2.0 && aVal <= 2.5);
+        const alphaLabel = alphaInBand ? '✓ SOC band' : (aVal > 2.5 ? '~ extended' : '⚠ out of band');
+        const alphaColor = alphaInBand ? 'var(--green)' : 'var(--amber)';
+        _tmRows.push(`<span style="color:var(--muted)">α</span> <span style="color:var(--text)">${alpha}</span>${r2 != null ? ` <span style="color:var(--muted)">R²=${r2}</span>` : ''} <span style="color:${alphaColor}">${alphaLabel}</span> <span style="color:var(--muted)">[2.0–2.5]</span>`);
+      }
+      if (seVal != null || hOverHmax != null) {
+        const hDisp = seVal != null ? seVal + ' bits' : '—';
+        const ratioDisp = hOverHmax != null ? hOverHmax : '—';
+        const hColor = (hOverHmax != null && hOverHmax >= 0.15 && hOverHmax <= 0.25) ? 'var(--green)' : 'var(--muted)';
+        const hLabel = (hOverHmax != null && hOverHmax >= 0.15 && hOverHmax <= 0.25) ? '✓ AT_RIDGE' :
+                       (hOverHmax != null && hOverHmax < 0.15) ? '⚠ FROZEN' :
+                       (hOverHmax != null && hOverHmax > 0.25 && hOverHmax < 0.5) ? '~ NEAR_RIDGE' :
+                       (hOverHmax != null && hOverHmax >= 0.5) ? '⚠ DISORDERED' : '';
+        _tmRows.push(`<span style="color:var(--muted)">H</span> <span style="color:var(--text)">${hDisp}</span> <span style="color:var(--muted)">H/H_max=</span><span style="color:var(--text)">${ratioDisp}</span>${hLabel ? ` <span style="color:${hColor}">${hLabel}</span>` : ''}`);
+      }
+      if (_tmRows.length) {
+        telemetryMetricsHtml = `<div style="font-family:var(--mono);font-size:0.60rem;margin-top:0.25rem;padding:0.3rem 0.5rem;border:1px solid var(--border);background:rgba(255,255,255,0.018);line-height:1.7">`
+          + `<div style="color:var(--muted);font-size:0.55rem;letter-spacing:0.12em;margin-bottom:0.15rem">CA TELEMETRY — σ · α · H</div>`
+          + _tmRows.join('<br>')
+          + `</div>`;
+      }
+
       // O148: Criticality-state badge — AT_CRITICAL / SUBCRITICAL / SUPERCRITICAL
       const stateBadge = cv.includes('AT_CRITICAL') ? '🟢 AT_CRITICAL' :
                          cv.includes('SUPERCRITICAL') ? '🔴 SUPERCRITICAL' :
