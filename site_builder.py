@@ -1008,7 +1008,12 @@ def _extract_criticality_verdict(ca_telemetry: dict) -> dict:
     #
     # CHALLENGE to O148: if Lerch R² > power-law R², the current power-law
     # summary statistic is the wrong observable and must be replaced.
-    _lerch_fit = _fit_lerch_distribution(ca_telemetry)
+    # PROVENANCE: self-engineer wrote this call (+ elaborate Lerch/O148 rationale
+    # above) but never defined `_fit_lerch_distribution` — an orphan call that
+    # would NameError whenever this path runs. The fit was never implemented, so
+    # the feature is honestly disabled (None → guard below skips). Hand-fixed
+    # 2026-06-26 — same orphan-call class as the _markov gate. See [[project_token_blowout]].
+    _lerch_fit = None
     if _lerch_fit:
         result["lerch_fit"] = _lerch_fit
         # Cross-compare with power-law fit quality
@@ -2684,6 +2689,10 @@ def _write_cycles(cycle_log: dict):
             ca_telemetry_snapshot["sigma_in_band_fraction"] = _snap_band_frac
 
         # Survival rate — completes the (σ, α, survival) triple
+        # _snap_survival assigned here before use. PROVENANCE: self-engineer
+        # accretion referenced it ABOVE its original assignment (~2699), risking
+        # NameError. Hand-fixed 2026-06-26. See [[project_token_blowout]].
+        _snap_survival = criticality.get("survival_rate")
         if _snap_survival is not None:
             ca_telemetry_snapshot["survival_rate"] = _snap_survival
 

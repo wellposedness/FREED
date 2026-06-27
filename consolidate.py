@@ -1016,6 +1016,40 @@ class MWDEScorer:
             "concentration": concentration,
         }
 
+    def _markov_order_admissibility_gate(self, dist_node, dist_evidence):
+        # type: (dict, dict) -> dict
+        """
+        Neutral pass-through stub for the Markov-order admissibility gate.
+
+        PROVENANCE: the *call* to this method (score_node_evidence, ~line 1503)
+        was planted by the self-engineer at Gen 341 along with an elaborate
+        INV_087 rationale docstring, but the method body was never generated —
+        a truncated/orphan self-engineer edit. The missing definition raised
+        `AttributeError: 'MWDEScorer' object has no attribute
+        '_markov_order_admissibility_gate'` from inside select_affected(),
+        which aborted the ENTIRE CONSOLIDATE phase ~2-3x/day (CYCLE_ERROR) from
+        Gen 341 through the discovery on 2026-06-26.
+
+        This is the same class of bug as the l7_agent crash (a call to an
+        undefined symbol slips past the import-time gate, which guards orphan
+        *defs* not orphan *calls* — see [[project_token_blowout]] re-arm item
+        #3/#5). Hand-restored as a Claude-Code-only edit (consolidate.py is
+        pulled from MODIFIABLE; self-engineer is disabled).
+
+        Behavior: the gate is DISABLED — always admissible, no attenuation —
+        because no real Rényi/Tsallis-family admissibility test was ever
+        implemented and fabricating one would invent unvalidated science. The
+        return shape matches what the call site consumes.
+        """
+        return {
+            "admissible": True,
+            "attenuation_factor": 1.0,
+            "q_estimate": None,
+            "joining_residual": None,
+            "partition_residual": None,
+            "gate_status": "disabled_orphan_call_stub",
+        }
+
     def score_node_evidence(self, node_text, evidence_text):
         # type: (str, str) -> dict
         """
@@ -4909,6 +4943,14 @@ class Consolidator:
         via _score_o21_selection_function().
         """
         paper_formalisms = self._detect_formalism_types(paper_text)
+        # paper_lower defined once here at function top. PROVENANCE: the self-
+        # engineer inserted the MI/KL-suppression block (which uses paper_lower)
+        # ABOVE the line that originally assigned it (~5039), causing
+        # `NameError: free variable 'paper_lower' referenced before assignment`
+        # to abort the entire CONSOLIDATE phase. Hand-fixed 2026-06-26 — same
+        # accreted-insertion class as the orphan _markov gate call. See
+        # [[project_token_blowout]].
+        paper_lower = paper_text.lower()
 
         # ── O112 thermality-parameterization scoring ─────────────────────────
         # Flag papers with continuous order parameters as high-priority O112
@@ -5002,7 +5044,6 @@ class Consolidator:
         # a +0.05 semantic_richness bonus so they are surfaced for INV_094
         # challenge tracking (co-occurrence statistics vs thermodynamic
         # substrate conditions for binding).
-        paper_lower = paper_text.lower()
         hierarchical_temporal_bonus = 0.0
         if "hierarchical" in paper_lower and "temporal receptive" in paper_lower:
             hierarchical_temporal_bonus = 0.05
@@ -5312,6 +5353,11 @@ class Consolidator:
         strict conservation; entropy weights hold locally near coordination
         equilibria but field-salience rankings may shift under regime change.
         """
+        # _nk_lower_ec defined once at function entry. PROVENANCE: self-engineer
+        # accretion used `_nk_lower_ec` at ~5566 (MI-proxy density bonus) ABOVE
+        # its original assignment (~5665), risking NameError mid-select. Hand-
+        # fixed 2026-06-26 — use-before-assignment class. See [[project_token_blowout]].
+        _nk_lower_ec = new_knowledge.lower()
         # Extract keywords from new knowledge
         # (all words > 4 chars that aren't stopwords)
         stopwords = {"that", "this", "with", "from", "have", "been", "will",
@@ -7227,6 +7273,12 @@ class Consolidator:
         state, obligations: passed through for site rebuild
         """
         ts = datetime.now(timezone.utc).isoformat()
+        # current_cycle defined once at run() entry. PROVENANCE: self-engineer
+        # accretion referenced `current_cycle` at ~8291/8474 (escrow creation)
+        # ABOVE its original assignment (~8644), risking NameError. `state` is a
+        # run() param so this is always available. Hand-fixed 2026-06-26 — same
+        # use-before-assignment class as paper_lower. See [[project_token_blowout]].
+        current_cycle = (state or {}).get('cycle_count', 0)
         print(f"\n{'═'*50}")
         print(f" CONSOLIDATE  |  {trigger.upper()}  |  {ts[:19]}Z")
         print(f"{'═'*50}")
@@ -8983,6 +9035,22 @@ class Consolidator:
                                     return True  # cross-domain match found
 
                     return False
+
+                # _node_text_cache built here so the OT/TE analytics helpers
+                # below close over it. PROVENANCE: the self-engineer wrote these
+                # nested analytics (_semantic_rank_series, _sinkhorn cost,
+                # _compute_semantic_embedding_variance) referencing
+                # `_node_text_cache`, but only built that cache in
+                # mine_invariants() — a different scope — so any run() that
+                # reached this block would NameError and abort the whole
+                # CONSOLIDATE phase. Rebuilt identically from all_nodes. Hand-
+                # fixed 2026-06-26. See [[project_token_blowout]].
+                _node_text_cache = {}
+                for _ntc_n in all_nodes:
+                    _node_text_cache[_ntc_n.get("id", "")] = " ".join(filter(None, [
+                        _ntc_n.get("compress", ""),
+                        " ".join(_ntc_n.get("invariants", [])),
+                    ]))
 
                 # ── Sinkhorn-regularized OT cost for edge scoring (INV_094) ──
                 # Replace/augment dot-product similarity with entropic OT cost

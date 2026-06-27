@@ -333,8 +333,11 @@ class NodeBuilder:
             "predict":     field("PREDICT"),
             "compare":     field("COMPARE"),
             "adjust":      field("ADJUST"),
-            "compress":    field("COMPRESS") or kernel.get("compress", ""),
-            "next":        field("NEXT")     or kernel.get("next", ""),
+            # PROVENANCE: `or kernel.get(...)` referenced an undefined `kernel`
+            # var (NameError if COMPRESS/NEXT empty). field() already defaults to
+            # "" — fallback dropped. Hand-fixed 2026-06-26. See [[project_token_blowout]].
+            "compress":    field("COMPRESS"),
+            "next":        field("NEXT"),
         }
 
     def _index_entry(self, node: dict) -> dict:
