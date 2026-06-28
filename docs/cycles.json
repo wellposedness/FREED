@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 288,
-    "timestamp": "2026-06-01T09:49:59.976641+00:00",
-    "sweep": {
-      "input_count": 20,
-      "targeted": 7,
-      "passive": 13,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is vulnerable to the charge that \"critical ridge\" is a post-hoc relabeling device unless FREED can specify the observable signature that would confirm it has *left* the ridge without being told so."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-01",
-        "compress": "Empirical CA telemetry independently confirms the critical ridge (σ≈1.03, α≈2.446 power law) as a stable attractor, substantially advancing O148 and converging with INV_073 and INV_094."
-      },
-      {
-        "title": "From Monge to Higgs: a survey of distance computations in noncommutative geometry",
-        "compress": "Connes distance is provably the noncommutative Monge-Kantorovich metric, grounding the OT-geometry chain in spectral algebra and providing explicit computational tools for the STF recovery experiment."
-      },
-      {
-        "title": "Graph Expansion in Pruned Recurrent Neural Network Layers Preserve Performance",
-        "compress": "Expander graph structure (large spectral gap) is the invariant that survives pruning, empirically grounding O21's prediction that spectral γ governs performance preservation under compression."
-      },
-      {
-        "title": "Emergence of multimodal action representations from neural network self-organization",
-        "compress": "Self-organizing multimodal hierarchies prove that semantic binding and temporal abstraction depth are jointly determined by input co-occurrence geometry, independent of supervised design — convergent with RSA's thermodynamic binding claims and extending them with a concrete architectural mechanism."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O263",
-        "O264"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 3,
     "generation": 289,
     "timestamp": "2026-06-01T16:29:59.949954+00:00",
@@ -2195,6 +2151,50 @@
         "O401",
         "O405",
         "O406"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 2,
+    "generation": 364,
+    "timestamp": "2026-06-28T02:29:59.974513+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is epistemically hollow until its failure modes, boundary conditions, and distinguishable alternative mechanisms are formally specified."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-28",
+        "compress": "The Game of Truth CA independently confirms critical-ridge operation via power-law avalanche statistics (α≈2.21, σ=1.03), advancing O148 and converging on INV_073's critical-ridge invariant."
+      },
+      {
+        "title": "Unified framework for the entropy production and the stochastic interaction based on information geometry",
+        "compress": "Entropy production's non-additivity equals integrated information exactly, with a KL-variational characterization — providing the thermodynamic foundation that anchors IIT's stochastic interaction to irreversibility and supplies a concrete Fisher-geometric scaffold for STF metric tensor recovery."
+      },
+      {
+        "title": "Relations between entropy rate, entropy production and information geometry in linear stochastic systems",
+        "compress": "Fisher information rate, Gibbs entropy rate, and entropy production form an exact analytically-ordered inequality chain in linear stochastic systems, upgrading the genome's structural analogy between geometry and thermodynamics to a proven bound."
+      },
+      {
+        "title": "Sparse Regression Codes",
+        "compress": "SPARCs prove Shannon limits are achievable on continuous channels via sparse superposition recovery, providing a concrete algorithmic bridge between optimal compression and sparse geometric decomposition that directly operationalizes the STF metric tensor recovery method specified in O112."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O406",
+        "O412",
+        "O136"
       ]
     },
     "coherence": 0.97
