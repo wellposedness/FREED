@@ -20,6 +20,8 @@ import base64
 import threading
 import requests
 import anthropic
+import cost_meter           # process-wide API spend meter (see cost_meter.py)
+cost_meter.install()        # patch Messages.create before any client is constructed/used
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 
