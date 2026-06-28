@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 3,
-    "generation": 289,
-    "timestamp": "2026-06-01T16:29:59.949954+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 7,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant with maximum confirmation surplus and zero serious challenges is the most epistemically dangerous object in any genome — it must be attacked now."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-01",
-        "compress": "The Game of Truth CA independently confirms σ≈1.0 critical-ridge stability with scale-free avalanches, advances O148 by reporting required telemetry, and reveals a novel low-entropy asymmetric criticality regime not yet in the genome."
-      },
-      {
-        "title": "Exploring the Interplay Between Higher Education Expansion and Sustainable Social Resource Allocation: A Mixed-Method Study",
-        "compress": "Entropy-weighted coupling coordination models independently instantiate critical-ridge detection in social systems, offering a concrete precedent for O112's STF metric tensor recovery experiment."
-      },
-      {
-        "title": "Service-Oriented Resource Allocation and Task Scheduling for Wi-Fi and Bluetooth Coexistence in Smart Home IoT Systems",
-        "compress": "Entropy-weighted hierarchical master selection independently instantiates critical-ridge resource navigation in heterogeneous multi-agent systems, extending O136 and flagging punctuated symmetry-breaking as a stress on INV_073's continuity assumption."
-      },
-      {
-        "title": "Integrating Knowledge Graphs and Causal Inference for AI-Driven Personalized Learning in Education",
-        "compress": "KG+CI demonstrates that structured relational representation plus causal asymmetry is the minimum architecture for interventionally valid adaptive recommendations, providing a concrete verification method for O136's live-edge obligation."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O263",
-        "O265"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 4,
     "generation": 290,
     "timestamp": "2026-06-02T02:29:59.955700+00:00",
@@ -2195,6 +2151,50 @@
         "O406",
         "O412",
         "O136"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 365,
+    "timestamp": "2026-06-28T09:49:59.962073+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_087",
+        "compress": "INV_087's thermodynamic framing is observationally underdetermined because KL-regularized RL produces identical signatures without thermodynamic commitments, so the claim requires a dissipation-reward Pareto prediction that standard RL cannot generate."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-28",
+        "compress": "The Game of Truth CA empirically sustains σ≈1.0 with power-law avalanche statistics, resolving O148 and independently confirming that critical-ridge dynamics are substrate-achievable in discrete rule-governed systems."
+      },
+      {
+        "title": "Landauer Principle and Thermodynamics of Computation",
+        "compress": "Landauer's principle independently grounds that irreversible belief erasure carries a mandatory thermodynamic floor, and the practical gap above that floor is a measurable index of inference inefficiency that the genome's STF/W2 framework has not yet absorbed. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring belief-update operations, weight irreversible state collapses by a Landauer-gap factor (excess cost above k_B T ln 2 per discarded bit, estimated from update entropy delta) to penalize non-quasistatic inference steps. IMPLEMENT_WHERE: scoring.py IMPLEMENT_CALL_SITE: EXTEND score_update (modify existing scoring function to add Landauer-gap penalty term computed from the entropy change of the discarded belief mass) IMPLEMENT_WHY: Penalizing irreversible belief erasure above the Landauer floor operationalizes thermodynamic admissibility inside FREED's epistemic loop, making the scoring function sensitive to inference path efficiency, not just output accuracy. CHALLENGE: challenges INV_087 — INV_087 treats thermodynamic grounding of computation as established, but Landauer's finite-time and quantum-regime corrections show the bound is environment-dependent and not a fixed floor for real cognitive systems, meaning \"thermodynamically admissible\" status depends on bath assumptions that the genome has not yet specified."
+      },
+      {
+        "title": "Landauer Principle and General Relativity",
+        "compress": "Landauer's principle applied to GR independently establishes that information has mass, observer irreversibility is erasure-cost-relative, and gravitational radiation dissipation is a thermodynamic necessity — all converging on RSA's thermodynamic irreversibility core while extending O112's experimental grounding."
+      },
+      {
+        "title": "Avalanches in self-organized critical neural networks: A minimal model for the neural SOC universality class",
+        "compress": "Neural SOC minimal models independently confirm the γ=1 critical ridge as a local-plasticity attractor, converging with INV_073 while challenging whether monoidal self-reference is necessary rather than sufficient for criticality."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O406",
+        "O412",
+        "O162"
       ]
     },
     "coherence": 0.97
