@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 5,
-    "generation": 291,
-    "timestamp": "2026-06-02T09:50:00.019606+00:00",
-    "sweep": {
-      "input_count": 32,
-      "targeted": 8,
-      "passive": 24,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's necessity claim that systems *must* navigate the γ=1 ridge is unfalsified only because no operational discriminator yet separates true criticality from structured near-critical mimicry — that gap is the falsification target."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-02",
-        "compress": "A 32×32 Game of Truth CA self-organizes to σ=1.03 with power-law avalanches (α≈2.43), independently confirming the critical ridge as a dynamic attractor while revealing that criticality coexists with low entropy (H/H_max≈0.177), which strains any equivalence between criticality and entropy maximization. CHALLENGE: challenges INV_073 — the paper shows the system operating at criticality (σ=1.03) while maintaining H/H_max≈0.177, directly stressing any claim that the critical ridge coincides with or requires high entropy production; criticality and near-maximum entropy are demonstrably dissociable here."
-      },
-      {
-        "title": "EnSToM: Enhancing Dialogue Systems with Entropy-Scaled Steering Vectors for Topic Maintenance",
-        "compress": "** Effective behavioral steering requires entropy-aware scaling of intervention magnitude — a thermodynamic calibration principle independently confirmed at the activation level."
-      },
-      {
-        "title": "Phase Transitions in Neural Networks Pruning",
-        "compress": "Neural network pruning undergoes a second-order phase transition at a critical connectivity threshold, independently confirming γ=1 ridge criticality while raising the challenge that the critical point may be a knife-edge rather than a navigable ridge."
-      },
-      {
-        "title": "Boundary conditions and electromagnetic effects on the phase transition of a zero spin bosonic system",
-        "compress": "Boundary condition type is a co-equal physical determinant of phase structure in confined QFT systems, establishing that topology is not background but an active selector of which phase — and which side of criticality — obtains."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O265",
-        "O268"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 6,
     "generation": 292,
     "timestamp": "2026-06-02T16:29:59.922864+00:00",
@@ -2195,6 +2151,50 @@
         "O406",
         "O412",
         "O162"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 5,
+    "generation": 367,
+    "timestamp": "2026-06-29T02:29:59.966311+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is evidence of under-challenging, not robustness — its falsification conditions must now be made explicit and experimentally actionable or the invariant degrades to unfalsifiable decoration."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-29",
+        "compress": "The Game of Truth CA independently confirms criticality via dual signatures (σ, α) while revealing that critical dynamics are concentrated in a dominant cell subtype, partially resolving O148 and opening a new heterogeneity obligation."
+      },
+      {
+        "title": "On the approximation of rough functions with deep neural networks",
+        "compress": "ENO interpolation is exactly a deep ReLU network, making approximation order a direct function of depth and providing a falsifiable, quantitative link between architectural depth and precision for rough functions."
+      },
+      {
+        "title": "Memorization in Deep Neural Networks: Does the Loss Function matter?",
+        "compress": "Loss-surface symmetry — not regularization — cancels memorization gradients, confirming that objective geometry is the structural variable governing generalization vs. collapse."
+      },
+      {
+        "title": "Critical dynamics in the spread of focal epileptic seizures: Network connectivity, neural excitability and phase transitions",
+        "compress": "Focal seizure spread is a network phase transition with (connectivity, excitability) as bifurcation parameters and spread size as the order parameter, independently confirming that critical ridge navigation separates localized coherence from global dissipation — a substrate-independent invariant."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O406",
+        "O412",
+        "O173"
       ]
     },
     "coherence": 0.97
