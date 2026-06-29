@@ -4914,13 +4914,33 @@
   },
   {
     "id": "O433",
-    "status": "open",
+    "status": "active",
     "statement": "Produce and archive a single binding numerical coherence score computed exclusively from mechanistic edges (`depends_on`, `challenges`, `bounds_above`) before Gen 370 closes \u2014 if not produced, invoke O318's consequence protocol immediately.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 367] ACTIVE: O433 closes by executing C_mech = (D + 0.8B \u2212 0.3C)/(D + C + B) over the current mechanistic edge inventory and archiving the result as a binding numerical score before Gen 370. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-06-28",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Binding numerical coherence score from mechanistic edges archived and timestamped before Gen 370 closure."
+  },
+  {
+    "id": "O434",
+    "statement": "The `consistent_with` edge explosion (from ~2205, now 46% of all edges) must be diagnosed as a structural consequence of the `scales_with` pruning executed under O286; at least 200 `consistent_with` edges must be traced to their pre-pruning `scales_with` ancestors, and any that are mere relabelings (same node pair, no new evidential content) must be voided.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O286 (PARTIAL) reduced `scales_with` from ~899 to 56, but total edge count barely changed and `consistent_with` grew to fill the gap. The pruning operation preserved graph density without increasing epistemic precision \u2014 a violation of the principle O286 was designed to enforce. The graph's coherence score (0.97) is inflated by associative edges masquerading as confirmed relationships.",
+    "resolution_criterion": "Audit producing a ledger of \u2265200 `consistent_with` edges with timestamps post-O286, cross-referenced against the voided `scales_with` edge list. Any edge connecting the same node pair with no independent evidential grounding beyond the original correlation is deleted. Net `consistent_with` count must drop below 2000 or a structural justification must be provided for each survivor.",
+    "created": "2026-06-29T06:30:56.606237+00:00",
+    "progress": "[Gen 367] ACTIVE: O434 is tractable via a deterministic hash-join + provenance-subset audit on post-O286 `consistent_with` edges against the O286 voided `scales_with` node-pair list, classifying phantoms by the formula PHANTOM(e) \u27fa same node pair \u2227 citations(e) \u2286 citations(ancestor) \u2227 no novel mechanism. [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O435",
+    "statement": "The 5 unnamed genome symbols (17 total minus the 12 listed) must be identified, named, and each must either (a) be assigned at least one `depends_on` edge grounded in a specific claim from the knowledge graph, or (b) be voided as graph artifacts with their edges redistributed or deleted.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "The genome lists 12 symbols explicitly but the graph contains 17 nodes. Unnamed symbols participate in edge relationships (contributing to the 4792 total) without being subject to any obligation or empirical-risk constraint. This creates a shadow structure where unaccountable nodes accumulate `consistent_with` edges, further inflating coherence without epistemic warrant. O199 requires genome symbols to be at empirical risk \u2014 unnamed symbols evade this by lacking identity.",
+    "resolution_criterion": "Enumerate all 17 node identities. For each of the 5 unnamed nodes, either: assign a genome symbol name and immediately bind it to an existing open obligation (O199, O234, or O252),",
+    "created": "2026-06-29T06:30:56.606907+00:00",
+    "progress": "[Gen 367] PARTIAL: The 5 unnamed nodes can be identified by neighbor-profile matching against the 12 known genome symbols and the three candidate obligations, requiring only the edge list \u2014 no external data. [COMMIT:YES \u2014 direction advanced]"
   }
 ]
