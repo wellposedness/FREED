@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 6,
-    "generation": 292,
-    "timestamp": "2026-06-02T16:29:59.922864+00:00",
-    "sweep": {
-      "input_count": 21,
-      "targeted": 8,
-      "passive": 13,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": ""
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-02",
-        "compress": "A 32×32 CA achieves criticality at low entropy (H=14.1% of max), independently confirming the critical ridge as a sparse-structured attractor — not an entropy-maximum — while partially resolving O148 and providing a live σ-band surrogate for O21."
-      },
-      {
-        "title": "Optimal transport and Wasserstein distances for causal models",
-        "compress": "Causal graph topology is a continuous deformation parameter on the OT manifold, making Wasserstein distances G-relative and causal quantities (including treatment effects) metrically stable — but implying the \"critical ridge\" must be indexed by a specific causal graph G, not a universal geometric object."
-      },
-      {
-        "title": "Inferring Directed Acyclic Graphs from Event Sequences via Learning Gromov-Wasserstein-Regularized Hawkes Processes",
-        "compress": "GW distance, deployed as a structural regularizer rather than a comparison metric, enforces DAG acyclicity within Hawkes process likelihood estimation — demonstrating that OT geometry can serve as a topological constraint operator in causal inference."
-      },
-      {
-        "title": "Software Engineering for Collective Cyber-Physical Ecosystems",
-        "compress": "Collective computing independently instantiates the self-organising criticality principle and provides a concrete mathematical substrate (field-calculus) for distributed coordination absent from the genome."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O265",
-        "O268"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 7,
     "generation": 293,
     "timestamp": "2026-06-03T02:29:59.942530+00:00",
@@ -2195,6 +2151,50 @@
         "O406",
         "O412",
         "O173"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 6,
+    "generation": 368,
+    "timestamp": "2026-06-29T09:50:00.011264+00:00",
+    "sweep": {
+      "input_count": 26,
+      "targeted": 7,
+      "passive": 19,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's confirmation surplus is an epistemic liability — it has not been distinguished from a weaker attractor-stability claim, its boundary conditions are unspecified, and observed coherence drift is a live falsification signal that monoidal closure alone cannot explain."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-29",
+        "compress": "A live 32×32 CA independently recovers branching-ratio criticality (σ=1.028) and power-law avalanche scaling (α≈2.388), converging on the critical-ridge invariant and partially satisfying O148 while adding a new falsifiable exponent target."
+      },
+      {
+        "title": "Weak Limits for Empirical Entropic Optimal Transport: Beyond Smooth Costs",
+        "compress": "Entropy regularization produces CLT-weak limits for non-smooth empirical OT via L²-linearization, independently confirming entropy as structural stabilizer and providing a concrete analytical handle for O112's STF metric tensor recovery."
+      },
+      {
+        "title": "Entropic regularization of Monge's problem",
+        "compress": "Entropic regularization uniquely selects a geometrically distinguished OT plan via ray-wise constrained EOT, and its second-order cost term encodes the transport geometry — providing a principled readout mechanism directly applicable to O112's STF metric tensor recovery."
+      },
+      {
+        "title": "Critical Phase in Complex Networks: a Numerical Study",
+        "compress": "Nonamenable graph topology converts the critical point into a finite critical phase detectable by a fractal exponent, independently confirming that sustained criticality is a structural property of certain graph classes, not a fine-tuning artifact."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O406",
+        "O187",
+        "O194"
       ]
     },
     "coherence": 0.97
