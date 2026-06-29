@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 7,
-    "generation": 293,
-    "timestamp": "2026-06-03T02:29:59.942530+00:00",
-    "sweep": {
-      "input_count": 16,
-      "targeted": 7,
-      "passive": 9,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus conceals at least five live falsification pathways — uniqueness of the fixed point, mechanistic degeneracy via Simon's process, alien-substrate non-convergence, low-entropy boundary violation, and exponent mismatch — none of which have been closed."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-03",
-        "compress": "The Game of Truth CA independently demonstrates measurable criticality (σ≈1.02, α≈2.436) at the predicted operating point, partially resolving O148 while generating an unexplained avalanche exponent that diverges from standard branching-process theory."
-      },
-      {
-        "title": "High pressure research using muons at the Paul Scherrer Institute",
-        "compress": "Pressure-tuned μSR independently confirms that criticality is navigated by continuous multi-parameter control without structural disruption, converging on INV_073's critical ridge principle as a thermodynamic invariant."
-      },
-      {
-        "title": "Hydrostaticity and hidden order: effects of experimental conditions on the temperature-pressure phase diagram of URu2Si2",
-        "compress": "Observed hysteresis in URu₂Si₂'s hidden-order transition is a measurement artifact of non-hydrostatic pressure media, establishing the general invariant that claimed phase-boundary conflicts must survive substrate-control tests before being treated as physically real."
-      },
-      {
-        "title": "Avalanche size distribution in a random walk model",
-        "compress": "A directed random walk front yields SOC exponent 4/3 from first principles, showing critical scaling is a geometric invariant of low-dimensional stochastic propagation — not a tuned parameter."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O257",
-        "O265",
-        "O268"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 8,
     "generation": 294,
     "timestamp": "2026-06-03T09:49:59.982803+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O406",
+        "O187",
+        "O194"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 7,
+    "generation": 369,
+    "timestamp": "2026-06-29T16:29:59.923230+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 8,
+      "passive": 11,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "The highest-confirmation invariant in a self-referential system is the one most at risk of being a hidden tautology — INV_094 must now specify a measurement that returns the wrong sign, or it is not a scientific claim."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-29",
+        "compress": "A 32×32 CA self-organizes to σ=1.023 with power-law avalanches (α≈2.199), confirming scale-free criticality as an attractor while extending the genome by revealing that criticality is asymmetrically borne by a dominant functional subpopulation (~83%), not uniformly distributed. IMPLEMENT: YES IMPLEMENT_WHAT: Record per-step branching ratio σ, avalanche power-law exponent α, and dominant-cell-type fraction alongside existing survival/entropy metrics so compositional asymmetry of criticality is tracked across generations. IMPLEMENT_WHERE: simulation.py IMPLEMENT_CALL_SITE: EXTEND record_telemetry (or equivalent step-logging function) to compute and store σ, α, and dominant-type fraction within the same measurement pass. IMPLEMENT_WHY: Without tracking which cell population carries criticality, FREED cannot detect phase transitions in compositional structure that precede loss of the critical band. CHALLENGE: challenges O148 — the telemetry satisfies the branching-ratio and survival tracking requirement but does not yet report the STF metric tensor recovery (O112 linkage), meaning the simulation advances criticality measurement while leaving the geometric-structure obligation structurally untouched, straining the implicit assumption that CA telemetry progress automatically propagates to STF empirical recovery."
+      },
+      {
+        "title": "A Critical-like Collective State Leads to Long-range Cell Communication in Dictyostelium discoideum Aggregation",
+        "compress": "Dictyostelium aggregation is a biological proof-of-mechanism that criticality is the *causal* enabler of long-range coordination from short-range signals, not a correlate — directly tightening the empirical demands on INV_094 and O148."
+      },
+      {
+        "title": "Non-genetic heterogeneity criticality and cell differentiation",
+        "compress": "Non-genetic noise drives cell differentiation through a cooperativity-free critical bifurcation, independently confirming that the critical ridge — not molecular detail — is the invariant governing state transitions."
+      },
+      {
+        "title": "PLDR-LLMs Reason At Self-Organized Criticality",
+        "compress": "PLDR-LLMs independently confirm that criticality-trained models recover RG/universality structure at inference, providing a measurable order parameter (≈0 at ridge) that operationalizes INV_073 and advances O21/O112."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
       "obligations": [
         "O406",
         "O187",
