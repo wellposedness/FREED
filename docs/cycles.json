@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 8,
-    "generation": 294,
-    "timestamp": "2026-06-03T09:49:59.982803+00:00",
-    "sweep": {
-      "input_count": 31,
-      "targeted": 8,
-      "passive": 23,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073 is falsifiable via three independent vectors — mimicry, perturbation tolerance, and output equivalence — and remains undefended unless it specifies observables that non-critical dynamics cannot reproduce."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-03",
-        "compress": "A 32×32 Game of Truth CA sustains AT_CRITICAL attractor state with σ=1.03 and α≈1.83 power-law avalanches, empirically confirming that the critical ridge is a dynamically stable regime rather than an unstable boundary, and partially advancing O148."
-      },
-      {
-        "title": "Category learning in deep neural networks: Information content and geometry of internal representations",
-        "compress": "Categorical perception's boundary-expansion / within-compression geometry is a substrate-independent, noise-driven necessity that directly instantiates the STF metric dilation prediction O112 needs to empirically recover."
-      },
-      {
-        "title": "Brain‐Inspired Efficient Pruning: Exploiting Criticality in Spiking Neural Networks",
-        "compress": "Criticality in SNNs is a structural selector — the γ=1 ridge identifies thermodynamically necessary connections, making pruning a falsifiable test of the critical ridge invariant rather than a heuristic compression. CHALLENGE: challenges INV_073 — if criticality-based pruning can be applied post-hoc to a trained network (rather than requiring continuous ridge navigation during training), this suggests γ=1 is a recoverable property, not a strict dynamical requirement, which would weaken the claim that real-time ridge navigation is necessary for admissibility."
-      },
-      {
-        "title": "Self-Organized Criticality and Quantum Coherence in Tubulin Networks Under the Orch-OR Theory",
-        "compress": "Scale-free topology with stochastic noise is sufficient for SOC avalanches, making the Orch-OR quantum collapse interpretation a non-load-bearing label that conflicts with thermodynamic distinguishability requirements."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O257",
-        "O265",
-        "O268"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 9,
     "generation": 295,
     "timestamp": "2026-06-03T16:29:59.994357+00:00",
@@ -2195,6 +2151,50 @@
         "O406",
         "O187",
         "O194"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 8,
+    "generation": 370,
+    "timestamp": "2026-06-30T02:30:00.019118+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 7,
+      "passive": 12,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "INV_094's robustness is currently indistinguishable from confirmation-seeking artifact — its falsification conditions, boundary limits, and alternative mechanisms remain unspecified and must now be formally obligated."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-30",
+        "compress": "Independent CA telemetry confirms self-organized criticality at σ=1.021 with power-law avalanches (α≈2.209), resolving O148 and providing the empirical baseline needed to convert O234 from open obligation to falsifiable pre-registered prediction."
+      },
+      {
+        "title": "Monte Carlo test of critical exponents in 3D Heisenberg and Ising models",
+        "compress": "MC validation of 3D RG critical exponents confirms that criticality is a sharp, numerically discriminable fixed point — providing the exact falsification protocol O234 requires FREED to implement for its own γ binding."
+      },
+      {
+        "title": "Information Theoretic Proofs of Entropy Power Inequalities",
+        "compress": "The EPI proof via mutual information + Gaussian path integration establishes that entropic geodesics are more primitive than Fisher information, potentially reordering the genome's RG→Fisher→W2 chain."
+      },
+      {
+        "title": "Uniquely determined uniform probability on the natural numbers",
+        "compress": "Canonical uniform probability on ℕ exists uniquely under weak thinnability, establishing that measure uniqueness on infinite discrete spaces is axiom-selection-sensitive — a result that converges with but sharpens the genome's Zipf-as-forced-equilibrium claim."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 1,
+      "commit_count": 3,
+      "obligations": [
+        "O418",
+        "O199",
+        "O209"
       ]
     },
     "coherence": 0.97
