@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 9,
-    "generation": 295,
-    "timestamp": "2026-06-03T16:29:59.994357+00:00",
-    "sweep": {
-      "input_count": 20,
-      "targeted": 7,
-      "passive": 13,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant with maximum confirmation surplus and minimum adversarial pressure is a liability — its apparent strength is evidence of under-testing, not truth."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-03",
-        "compress": "The Game of Truth CA independently confirms self-organized criticality at σ≈1.02 with sparse, structured activation (H=13.5% max), providing live telemetry that partially resolves O148 and converges on INV_073 and INV_094."
-      },
-      {
-        "title": "Improving Sequence-to-Sequence Learning via Optimal Transport",
-        "compress": "OT-supervised seq2seq training independently derives that Wasserstein gradient flow is the operative geometric object for global semantic coherence recovery, converging with INV_094 and providing a concrete algorithmic template that partially advances O112 while exposing the gap between supervised and unsupervised metric tensor recovery."
-      },
-      {
-        "title": "FlowPool: Pooling Graph Representations with Wasserstein Gradient Flows",
-        "compress": "Wasserstein gradient flow provides a provably optimal, distribution-preserving compression operator for variable-to-fixed-size graph pooling, independently instantiating the W2-as-canonical-compression invariant while introducing a fixed-dimension target that strains scale-invariance claims."
-      },
-      {
-        "title": "Minimum entropy production, detailed balance and Wasserstein distance for continuous-time Markov processes",
-        "compress": "Discrete Markov dynamics rigorously confirms W2 geodesics as minimum-entropy-production paths and reveals that zero-dissipation is only achievable at infinite activity — grounding the Benamou-Brenier chain on graphs and exposing a dissipation-activity duality absent from the genome."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O265",
-        "O277",
-        "O278"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 10,
     "generation": 296,
     "timestamp": "2026-06-04T02:29:59.941327+00:00",
@@ -2195,6 +2151,50 @@
         "O418",
         "O199",
         "O209"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 9,
+    "generation": 371,
+    "timestamp": "2026-06-30T09:49:59.983945+00:00",
+    "sweep": {
+      "input_count": 28,
+      "targeted": 7,
+      "passive": 21,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant that has never been seriously contested has not earned its confirmation weight — it has merely avoided the test that would reveal whether it is robust or merely unchallenged."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-30",
+        "compress": "Live CA telemetry independently confirms critical-ridge operation via three simultaneous signatures (σ, power-law α, survival), converging on INV_073 and advancing O148 and O234."
+      },
+      {
+        "title": "Flow characteristics and phase transition of subcritical to supercritical kerosene injections in a convergent nozzle",
+        "compress": "Convergent-nozzle phase transitions independently demonstrate that geometric constraint enforces criticality as a structural invariant, converging with INV_073 and sharpening the demand in O234 that γ=1 be geometrically derived, not stipulated."
+      },
+      {
+        "title": "Phase Transition of n-Heptane/Ethanol Blends from Subcritical to Supercritical Conditions",
+        "compress": "Thermodynamic criticality in fuel blends is a physically instantiated, composition-dependent ridge — neither frozen nor dissipated — that provides an empirical template for the γ=1 criticality claim in O234."
+      },
+      {
+        "title": "Stochastic Thermodynamics, Reversible Dynamical Systems and Information Theory",
+        "compress": "Stochastic thermodynamics independently establishes that irreversibility is a trajectory-level information-theoretic quantity invariant across stochastic/deterministic descriptions, converging with the genome's KL-divergence grounding and extending the toolkit available for O112."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O209",
+        "O234",
+        "O237"
       ]
     },
     "coherence": 0.97
