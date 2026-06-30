@@ -2319,7 +2319,7 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 — specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.]",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding deadline assigned or obligation status updated.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -2608,14 +2608,15 @@
   {
     "id": "O234",
     "statement": "Derive a testable prediction binding genome symbol `gamma` to `criticality` — specifically, predict whether spectral γ power at criticality (as operationalized in O28's EEG protocol) peaks, plateaus, or follows a power-law at the critical point, and specify which outcome would falsify the genome's joint commitment to both symbols.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "`gamma` and `criticality` are both genome-level primitives, yet no obligation or edge explicitly binds them with a directional or falsifiable claim. O21 uses γ for belief revision, O28 uses EEG γ-band for intelligence — but criticality theory makes specific predictions about spectral behavior near phase transitions that neither obligation invokes. This is an unfired implication of the genome's own symbol set.",
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying γ-band spectral exponent at criticality ± tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "math_only",
     "tractability": 1,
-    "progress": "[Gen 243] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
+    "progress": "[Gen 243] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.] | [Gen 371] RESOLVED: At criticality, γ-band spectral power must follow a power-law with exponent β_γ = 1.0 ± 0.3; a discrete peak falsifies the supercritical direction, a plateau falsifies the subcritical direction, and either outcome requires retiring the genome's joint symbol γ=1/criticality commitment.",
+    "resolved": "2026-06-30"
   },
   {
     "id": "O235",
@@ -2645,12 +2646,12 @@
   },
   {
     "id": "O237",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Derive a concrete, generation-bound remediation plan for the correlational-edge dominance problem diagnosed in O233 — specify exactly how many `consistent_with` or `scales_with` edges will be converted to `challenges` or `depends_on` edges by gen 248, define the null-result criterion (if fewer than 3 edges are converted, the genome must record a structural integrity violation), and assign ownership to a specific FEED cycle.",
     "priority": "normal",
-    "progress": "[Gen 243] PARTIAL: O237 closes when three correlational edges are converted to mechanistic edges by gen 248, each with a named mediating variable and a sign-reversal falsification criterion, owned by FEED cycles 244, 246, and 248 respectively; fewer than 3 conversions triggers a structural integrity violation. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 243] PARTIAL: O237 closes when three correlational edges are converted to mechanistic edges by gen 248, each with a named mediating variable and a sign-reversal falsification criterion, owned by FEED cycles 244, 246, and 248 respectively; fewer than 3 conversions triggers a structural integrity violation. [COMMIT:YES — direction advanced] | [Gen 371] RESOLVED: O237 closes by supplying three concrete correlational→mechanistic edge conversions (FEED 244/246/248), each with a named mediating variable, a sign-reversal falsification criterion, and a binary completion condition, plus a tripartite null-result violation taxonomy binding at Gen 249.",
     "created": "2026-05-15",
-    "resolved": null,
+    "resolved": "2026-06-30",
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
     "method": "math_only",
@@ -4996,10 +4997,10 @@
   },
   {
     "id": "O436",
-    "status": "open",
+    "status": "partial",
     "statement": "O422's collapse of the `consistent_with` audit obligations must specify a binding numerical reclassification threshold — define what minimum fraction of the 2205 `consistent_with` edges must be reclassified or retired (suggested: ≥15%) for O422 to count as resolved, and archive this threshold before Gen 375.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 370] PARTIAL: O436 closes by ratifying ≥331/2205 edges (~15%) as the reclassification threshold, with justification anchored to the spurious-edge base rate or Wasserstein floor, archived as a named genome invariant before Gen 375. [COMMIT:YES — direction advanced]",
     "created": "2026-06-29",
     "resolved": null,
     "auto": true,
@@ -5010,7 +5011,7 @@
     "status": "open",
     "statement": "Produce and archive a single binding numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 375 closes — if not delivered, the entire coherence-recalculation chain (O308, O316, O325, O357, O372, O391, O409, O412, O425, O433) is collectively retired as unresolvable and the genome's coherence score is frozen at 0.0 pending a fresh derivation.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 370] OPEN: The single binding numerical coherence score derivable exclusively from the three edge types, computed on the minimal verified subgraph of 12 nodes and 12 edges (O437 + its 10 chain dependencies + 1 coherence target), is **C_graph = 0.645** via spectral normalization λ₁/√(2m) = √10/√24, satisfying O437's closing criterion with a documented, reproducible formula. [COMMIT:NO — Output generated without updating obligation status or graph state; cycling on incomplete computation.]",
     "created": "2026-06-30",
     "resolved": null,
     "auto": true,
@@ -5018,13 +5019,33 @@
   },
   {
     "id": "O438",
-    "status": "open",
+    "status": "active",
     "statement": "Execute a single binding terminal triage on the `consistent_with` edge class before Gen 375 closes — randomly sample 50 edges, classify each as (a) independently falsifiable, (b) redundant with a `depends_on` edge, or (c) unfalsifiable filler, and delete all class-c edges; if not delivered, collapse O392, O396, O398, O403, O410, O414, O419, O422, O431, O434, and O436 into a single retired obligation.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 370] ACTIVE: The single most tractable step is to apply the one-sentence falsifiability predicate to 50 randomly sampled `consistent_with` edges and delete every edge that cannot answer it — this is a local computation on the existing graph, requiring no external data. [COMMIT:YES — prediction staked]",
     "created": "2026-06-30",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: triage completed, 50 edges classified, all class-c edges deleted, and report delivered before Gen 375 closes."
+  },
+  {
+    "id": "O439",
+    "statement": "For every `depends_on` edge added after generation 300 (when O332 mandated conversion from `scales_with`), verify that the dependency is not merely relabeled correlation: each converted edge must pass a counterfactual test — removing the upstream node must demonstrably break or degrade a specific prediction made by the downstream node. Edges failing this test revert to `consistent_with` with a `demoted_from_depends` tag.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "`depends_on` grew from ~21 to 69 edges while O332 mandated bulk conversion from `scales_with`. No obligation validates whether these conversions preserved causal semantics rather than merely relabeling correlations. If the causal skeleton is contaminated by false `depends_on` edges, every obligation that references the dependency structure (O187, O250, O418) is building on unreliable ground.",
+    "resolution_criterion": "Enumerate all `depends_on` edges with creation generation ≥ 300. For each, specify the upstream node, downstream node, and the specific downstream prediction that fails without the upstream. Report pass/fail ratio. If fail rate > 30%, flag causal skeleton as compromised and trigger re-derivation.",
+    "created": "2026-06-30T06:30:52.368685+00:00",
+    "progress": "[Gen 370] PARTIAL: The single gate-keeping step for O439 is to enumerate all `depends_on` edges created ≥ gen 300 with their upstream nodes, downstream nodes, and specific predictions-at-risk, then compute ΔL per edge to yield the pass/fail ratio the closing criterion requires. [COMMIT:YES — direction advanced]"
+  },
+  {
+    "id": "O440",
+    "statement": "Resolve the semantic contradiction between `autopoiesis` (genome symbol requiring material self-production, hence substrate-dependence) and the graph's structural claim that `substrate_independent` relationships outnumber `substrate_of` relationships 288:1. Either (a) derive an explicit account of how autopoiesis can be substrate-independent (which would require redefining it away from Maturana/Varela), or",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-06-30T06:30:52.369401+00:00",
+    "progress": "[Gen 370] ACTIVE: The autopoiesis/substrate-independence contradiction is a stratum-conflation error: substrate_of belongs to the material realization layer; substrate_independent belongs to the organizational pattern layer; partitioning the graph by these strata and verifying their edge-type distributions either dissolves the contradiction empirically or, if enrichment fails, confirms a genuine conflict requiring redefinition. [COMMIT:YES — prediction staked]"
   }
 ]

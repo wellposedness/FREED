@@ -2319,7 +2319,7 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 \u2014 specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here \u2014 enumerated edges, prediction formats, and null-result criteria \u2014 making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO \u2014 O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e\u2081,p\u2081,n\u2081),...,(e\u2084,p\u2084,n\u2084)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES \u2014 Obligation closed by construction but verdict remains OPEN\u2014contradiction indicates unresolved circularity.]",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here \u2014 enumerated edges, prediction formats, and null-result criteria \u2014 making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO \u2014 O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e\u2081,p\u2081,n\u2081),...,(e\u2084,p\u2084,n\u2084)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES \u2014 Obligation closed by construction but verdict remains OPEN\u2014contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES \u2014 Obligation remained OPEN; no binding deadline assigned or obligation status updated.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -2608,14 +2608,15 @@
   {
     "id": "O234",
     "statement": "Derive a testable prediction binding genome symbol `gamma` to `criticality` \u2014 specifically, predict whether spectral \u03b3 power at criticality (as operationalized in O28's EEG protocol) peaks, plateaus, or follows a power-law at the critical point, and specify which outcome would falsify the genome's joint commitment to both symbols.",
-    "status": "open",
+    "status": "resolved",
     "source": "dmn",
     "rationale": "`gamma` and `criticality` are both genome-level primitives, yet no obligation or edge explicitly binds them with a directional or falsifiable claim. O21 uses \u03b3 for belief revision, O28 uses EEG \u03b3-band for intelligence \u2014 but criticality theory makes specific predictions about spectral behavior near phase transitions that neither obligation invokes. This is an unfired implication of the genome's own symbol set.",
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying \u03b3-band spectral exponent at criticality \u00b1 tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
     "method": "math_only",
     "tractability": 1,
-    "progress": "[Gen 243] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
+    "progress": "[Gen 243] OPEN:  [COMMIT:NO \u2014 ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.] | [Gen 371] RESOLVED: At criticality, \u03b3-band spectral power must follow a power-law with exponent \u03b2_\u03b3 = 1.0 \u00b1 0.3; a discrete peak falsifies the supercritical direction, a plateau falsifies the subcritical direction, and either outcome requires retiring the genome's joint symbol \u03b3=1/criticality commitment.",
+    "resolved": "2026-06-30"
   },
   {
     "id": "O235",
@@ -2645,12 +2646,12 @@
   },
   {
     "id": "O237",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Derive a concrete, generation-bound remediation plan for the correlational-edge dominance problem diagnosed in O233 \u2014 specify exactly how many `consistent_with` or `scales_with` edges will be converted to `challenges` or `depends_on` edges by gen 248, define the null-result criterion (if fewer than 3 edges are converted, the genome must record a structural integrity violation), and assign ownership to a specific FEED cycle.",
     "priority": "normal",
-    "progress": "[Gen 243] PARTIAL: O237 closes when three correlational edges are converted to mechanistic edges by gen 248, each with a named mediating variable and a sign-reversal falsification criterion, owned by FEED cycles 244, 246, and 248 respectively; fewer than 3 conversions triggers a structural integrity violation. [COMMIT:YES \u2014 direction advanced]",
+    "progress": "[Gen 243] PARTIAL: O237 closes when three correlational edges are converted to mechanistic edges by gen 248, each with a named mediating variable and a sign-reversal falsification criterion, owned by FEED cycles 244, 246, and 248 respectively; fewer than 3 conversions triggers a structural integrity violation. [COMMIT:YES \u2014 direction advanced] | [Gen 371] RESOLVED: O237 closes by supplying three concrete correlational\u2192mechanistic edge conversions (FEED 244/246/248), each with a named mediating variable, a sign-reversal falsification criterion, and a binary completion condition, plus a tripartite null-result violation taxonomy binding at Gen 249.",
     "created": "2026-05-15",
-    "resolved": null,
+    "resolved": "2026-06-30",
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
     "method": "math_only",
