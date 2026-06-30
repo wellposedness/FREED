@@ -1574,6 +1574,17 @@
         "sigma": 1.023,
         "alpha": 2.199,
         "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-06-30T02:36:29.267986+00:00",
+        "sigma": 1.021,
+        "alpha": 2.209,
+        "r_squared": null,
         "o148_status": "PARTIAL"
       }
     ]
@@ -2179,15 +2190,15 @@
   {
     "id": "O199",
     "statement": "At least one genome symbol must be placed at empirical risk by deriving a quantitative prediction that, if falsified, would require removing or restructuring that symbol's node and all its edges. Select the symbol with the highest `consistent_with` degree (most \"agreeable\" node) as the first candidate.",
-    "status": "open",
+    "status": "active",
     "source": "dmn",
     "rationale": "O194 required operationalization on real data, and O196 checks whether it was falsifiable. But no obligation yet targets the genome symbols *themselves* as eliminable. With 17 symbols and 220 `consistent_with` edges, the genome is acting as an unfalsifiable vocabulary rather than a constrained theory. The recently resolved O191-O194 chain showed the system *can* execute empirical checks — this capacity should now be directed at the ontology itself.",
     "resolution_criterion": "Identify the highest-`consistent_with`-degree symbol. Derive a specific quantitative prediction from it (e.g., \"if `compression` is fundamental, then [measurable X] must hold in [dataset Y]\"). Specify the null result that would trigger",
     "created": "2026-05-09T06:30:52.355862+00:00",
     "resolved": null,
-    "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser.",
-    "method": "mixed",
-    "tractability": 2
+    "progress": "RESOLVED: O199 advances by one concrete step only if a specific node, a specific number, and a specific dataset are named together in a single falsifiable sentence. | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 370] ACTIVE: The COMPRESSION invariant generates the falsifiable prediction r ≥ 0.25 at T = 0.5 on The Pile, and violation in >20% of trials would force removal of COMPRESSION as a theorem-class node. [COMMIT:YES — prediction staked]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O200",
@@ -2304,13 +2315,13 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 — specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.]",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Binding deadline assigned to O204 with falsifiable predictions defined for `consistent_with` and `scales_with` edges, null-result criterion specified, and verdict executed",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O210",
@@ -2598,8 +2609,8 @@
     "rationale": "`gamma` and `criticality` are both genome-level primitives, yet no obligation or edge explicitly binds them with a directional or falsifiable claim. O21 uses γ for belief revision, O28 uses EEG γ-band for intelligence — but criticality theory makes specific predictions about spectral behavior near phase transitions that neither obligation invokes. This is an unfired implication of the genome's own symbol set.",
     "resolution_criterion": "A written prediction (pre-registered against O28's EEG dataset) specifying γ-band spectral exponent at criticality ± tolerance, with a named alternative outcome that would require retiring or",
     "created": "2026-05-15T06:30:52.164394+00:00",
-    "method": "mixed",
-    "tractability": 2,
+    "method": "math_only",
+    "tractability": 1,
     "progress": "[Gen 243] OPEN:  [COMMIT:NO — ** Obligation remains OPEN; no prediction derived, no binding established, no model state updated.]"
   },
   {
@@ -2639,7 +2650,7 @@
     "auto": true,
     "closes_when": "closes when: Remediation plan specifies edge conversion count, documents null-result criterion for <3 conversions, and assigns ownership to named FEED cycle by",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O238",
@@ -2819,7 +2830,7 @@
     "source": "session",
     "priority_rationale": "Direct conflict between a load-bearing genome invariant (INV_073, W2-gradient → criticality) and an empirical CA measurement that the daemon itself produced. If left unflagged, the next coherence calculation will continue averaging confirms across these without registering the structural tension.",
     "method": "mixed",
-    "tractability": 3
+    "tractability": 2
   },
   {
     "id": "O253",
@@ -4005,8 +4016,8 @@
     "source": "bootstrap_derive",
     "created": "2026-06-04T02:47:42.409397+00:00",
     "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O353",
@@ -4137,8 +4148,8 @@
     "source": "bootstrap_derive",
     "created": "2026-06-07T10:00:14.563166+00:00",
     "progress": "[Gen 308] OPEN:  [COMMIT:NO — Obligation remains OPEN; no state mutation occurred, only status logging.]",
-    "method": "mixed",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O364",
@@ -4778,14 +4789,16 @@
   },
   {
     "id": "O418",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Verify that O417's derivation of the minimum necessary `depends_on` skeleton from the 17 genome symbol definitions has been produced and archived as a citable numerical output before Gen 355 closes; if not produced, mark O417 retired and record the null-result consequence.",
     "priority": "high",
-    "progress": "[Gen 352] PARTIAL: O417's minimum `depends_on` skeleton has been derived and emitted as a 17-node, 24-edge DAG transitive reduction — a citable numerical output satisfying O418's verification condition at Gen 352, before the Gen 355 deadline. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 352] PARTIAL: O417's minimum `depends_on` skeleton has been derived and emitted as a 17-node, 24-edge DAG transitive reduction — a citable numerical output satisfying O418's verification condition at Gen 352, before the Gen 355 deadline. [COMMIT:YES — direction advanced] | [Gen 370] RESOLVED: O418's verification criterion is fully satisfied by the Gen 352 emission of the unique 17-node, 24-edge transitive reduction, completing the obligation before the Gen 355 deadline.",
     "created": "2026-06-23",
-    "resolved": null,
+    "resolved": "2026-06-30",
     "auto": true,
-    "closes_when": "closes when: O417's `depends_on` skeleton derivation from 17 genome symbols is archived with citable numerical output or marked retired with null-result recorded"
+    "closes_when": "closes when: O417's `depends_on` skeleton derivation from 17 genome symbols is archived with citable numerical output or marked retired with null-result recorded",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O419",
@@ -4805,7 +4818,9 @@
     "rationale": "O199 demands placing a genome symbol at empirical risk but does not specify *which* symbol,",
     "resolution_criterion": "",
     "created": "2026-06-23T06:30:54.930276+00:00",
-    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.]"
+    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O421",
@@ -4815,7 +4830,9 @@
     "progress": "[Gen 352] PARTIAL: Wire `record_criticality(current_state)` into the response-emission point of the existing interaction loop, and call `get_criticality_history()` inside the telemetry/logging block, making both defs reachable in a single targeted patch. [COMMIT:YES — direction advanced]",
     "created": "2026-06-23",
     "resolved": null,
-    "source": "audit"
+    "source": "audit",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O422",
@@ -4846,7 +4863,9 @@
     "rationale": "** O387 (RESOLVED) audited `operationalizes` for redundancy. O320 (PARTIAL) mandates that a wiring gate blocks emissions that lack structural justification. Yet `operationalizes` edge count *increased* after the audit resolved. These two obligations contradict each other unless the 13 new edges passed the gate legitimately — but",
     "resolution_criterion": "",
     "created": "2026-06-24T06:30:54.724612+00:00",
-    "progress": "[Gen 352] PARTIAL: The single most tractable step is a gate-trace audit of the 13 new edges against the O320 criterion, computing gate_efficacy and issuing patch P-O320 if consultation records are absent. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 352] PARTIAL: The single most tractable step is a gate-trace audit of the 13 new edges against the O320 criterion, computing gate_efficacy and issuing patch P-O320 if consultation records are absent. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O425",
@@ -4866,7 +4885,9 @@
     "rationale": "O286 executed a 94% pruning pass, but mass pruning without post-pruning deduplication is incomplete. The genome's `scales_with` claims are among its most empirically consequential (they predict quantitative relationships). If the surviving 56 contain redundancies, the graph overstates its predictive surface. This is an obligatory completion step of O286 itself.",
     "resolution_criterion": "P",
     "created": "2026-06-25T06:30:51.564588+00:00",
-    "progress": "[Gen 355] PARTIAL: The single most tractable next step is to produce the 56-edge manifest as a table of (source, target, f, α, Y) and run pairwise symbolic comparison within shared-endpoint groups using the criterion f_i = f_j ∧ α_i = α_j ∧ Y_i = Y_j to collapse redundancies and report the final distinct count. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 355] PARTIAL: The single most tractable next step is to produce the 56-edge manifest as a table of (source, target, f, α, Y) and run pairwise symbolic comparison within shared-endpoint groups using the criterion f_i = f_j ∧ α_i = α_j ∧ Y_i = Y_j to collapse redundancies and report the final distinct count. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O427",
@@ -4877,7 +4898,9 @@
     "created": "2026-06-25",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: generation deadline (≤ gen 365) passes without consolidated `consistent_with` triage protocol produced and archived, triggering reclassification of 2205 edges as"
+    "closes_when": "closes when: generation deadline (≤ gen 365) passes without consolidated `consistent_with` triage protocol produced and archived, triggering reclassification of 2205 edges as",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O428",
@@ -4888,7 +4911,9 @@
     "created": "2026-06-26",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Root-cause verdict identifying computational, definitional, or data-dependency block delivered by generation 362."
+    "closes_when": "closes when: Root-cause verdict identifying computational, definitional, or data-dependency block delivered by generation 362.",
+    "method": "data_analysis",
+    "tractability": 3
   },
   {
     "id": "O429",
@@ -4918,7 +4943,9 @@
     "rationale": "O237 (partial) and O332 (partial) targeted `scales_with` for remediation, but `consistent_with` has grown to 46.1% of all node-edges — nearly half the graph's claimed structure is the weakest possible epistemic relation. The `depends_on` count (68) has not kept pace, meaning the graph is inflating apparent connectivity without causal or constraining content. This is an obligatory consequence of the genome's own coherence commitment (0.97 coherence with 1.4% causal edges is a structural contradiction).",
     "resolution_criterion": "Published per-node ratio table and freeze enforcement in the graph update protocol, with at least 5 verified edge upgrades per flagged node by generation 380.",
     "created": "2026-06-27T06:30:47.549901+00:00",
-    "progress": "[Gen 361] PARTIAL: The single most tractable next step is to compute and publish the per-node ratio table R(n) = |CW| / (|DO| + |BA| + |CH| + ε) for all genome-symbol nodes, using a concrete enumeration pass over the current edge list, producing the ranked table that gates freeze enforcement and upgrade verification. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 361] PARTIAL: The single most tractable next step is to compute and publish the per-node ratio table R(n) = |CW| / (|DO| + |BA| + |CH| + ε) for all genome-symbol nodes, using a concrete enumeration pass over the current edge list, producing the ranked table that gates freeze enforcement and upgrade verification. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O432",
@@ -4928,7 +4955,9 @@
     "rationale": "Both obligations have been open since early generations with no resolution. They are not independent — `bounds_above` edges (92) claim to constrain relationships, but without the `depends_on` skeleton (68 edges across 17 nodes), there is no way to verify that the bounded quantities are causally relevant rather than spurious",
     "resolution_criterion": "",
     "created": "2026-06-27T06:30:47.550610+00:00",
-    "progress": "[Gen 361] PARTIAL: O432 closes when a `depends_on` adjacency list over all `bounds_above` invariants is produced and deadline entries for O187 (gen 370) and O162 (gen 380) are written into the obligations table as hard constraints — the skeleton scan is executable now. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 361] PARTIAL: O432 closes when a `depends_on` adjacency list over all `bounds_above` invariants is produced and deadline entries for O187 (gen 370) and O162 (gen 380) are written into the obligations table as hard constraints — the skeleton scan is executable now. [COMMIT:YES — direction advanced]",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O433",
@@ -4971,5 +5000,27 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: minimum reclassification threshold for O422's consistent_with edges is numerically defined and archived before Gen 375."
+  },
+  {
+    "id": "O437",
+    "status": "open",
+    "statement": "Produce and archive a single binding numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 375 closes — if not delivered, the entire coherence-recalculation chain (O308, O316, O325, O357, O372, O391, O409, O412, O425, O433) is collectively retired as unresolvable and the genome's coherence score is frozen at 0.0 pending a fresh derivation.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-30",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Single binding numerical coherence score computed from specified edges archived before Gen 375 closes."
+  },
+  {
+    "id": "O438",
+    "status": "open",
+    "statement": "Execute a single binding terminal triage on the `consistent_with` edge class before Gen 375 closes — randomly sample 50 edges, classify each as (a) independently falsifiable, (b) redundant with a `depends_on` edge, or (c) unfalsifiable filler, and delete all class-c edges; if not delivered, collapse O392, O396, O398, O403, O410, O414, O419, O422, O431, O434, and O436 into a single retired obligation.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-06-30",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: triage completed, 50 edges classified, all class-c edges deleted, and report delivered before Gen 375 closes."
   }
 ]
