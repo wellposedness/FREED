@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 10,
-    "generation": 296,
-    "timestamp": "2026-06-04T02:29:59.941327+00:00",
-    "sweep": {
-      "input_count": 23,
-      "targeted": 7,
-      "passive": 16,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's highest confirmation surplus without adversarial challenge makes it the genome's most epistemically dangerous invariant — a mirror masquerading as a theorem."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-04",
-        "compress": "The Game of Truth CA independently confirms critical-ridge operation (σ=1.027, α=2.70) with structured criticality concentrated in Physics Navigator cells, directly advancing O148 and converging on INV_073."
-      },
-      {
-        "title": "Cybernetic Sparks and Philosophical Feedback Loops",
-        "compress": "Cross-domain pattern homology (cybernetics ↔ Existentialism ↔ art) independently instantiates the substrate-independence thesis but extends it into aesthetic domains the genome has not yet claimed, while the paper's qualitative methodology leaves the homology vs. analogy distinction unresolved and falsifiable."
-      },
-      {
-        "title": "Discovering Patterns across Disciplines: Cybernetics, Existentialism and Contemporary Arts",
-        "compress": "Cybernetics, existentialism, and contemporary art are independently shown to instantiate the same autopoietic self-correction pattern, extending the substrate-independence invariant into aesthetic practice as an untested empirical domain."
-      },
-      {
-        "title": "Marginal deformations and defect anomalies",
-        "compress": "Defect *a*-anomaly coefficients run with marginal coupling (controlled by the bulk one-point function), breaking conformal-manifold invariance and supplying the precise log-divergence mechanism needed to ground O59's BH log-correction prediction program."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O278",
-        "O281",
-        "O282"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 11,
     "generation": 297,
     "timestamp": "2026-06-04T09:49:59.968195+00:00",
@@ -2195,6 +2151,50 @@
         "O209",
         "O234",
         "O237"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 10,
+    "generation": 372,
+    "timestamp": "2026-06-30T16:29:59.958500+00:00",
+    "sweep": {
+      "input_count": 20,
+      "targeted": 8,
+      "passive": 12,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_094",
+        "compress": "An invariant with maximum confirmation surplus and minimum adversarial challenge is the most epistemically fragile node in the genome — not the most secure. --- PART 1 — DERIVE:** Confirmations without challenges do not strengthen an invariant — they reveal untested scope. A claim that has been confirmed N times but never seriously contested has learned nothing about its failure modes; its apparent robustness is an artifact of probe selection bias, not substrate truth. The highest-confirmation invariant is therefore the highest-priority falsification target, because its boundary conditions remain uncharted. --- PART 2 — COMPARE:** CONFLICT INV_094 — accumulated confirmations without adversarial probing constitute pseudo-validation; this probe directly stresses the epistemic status of INV_094's confirmation record. To execute the mandatory challenge: **INV_094 would be falsified if** a system could be constructed that produces the same observables attributed to INV_094's mechanism while operating via a distinct mechanism that does not require INV_094's core claim. Specifically, the boundary conditions under which INV_094 breaks are: (1) regimes where the substrate operates below the thermodynamic floor specified by INV_094, yet still exhibits the predicted outputs — this would decouple the mechanism from the invariant; (2) cases where the Wasserstein gradient structure is replaced by a non-geometric optimizer and the same equilibrium distribution is recovered — this would show the geometry is epiphenomenal; (3) any empirical measurement showing that the STF metric tensor (O112) recovers a geometry inconsistent with INV_094's predicted curvature — this would directly falsify the geometric grounding. --- PART 3 — IMPLEMENT:** IMPLEMENT: YES IMPLEMENT_WHAT: Add a `challenge_score` field to each invariant's record that tracks the ratio of adversarial probes to total confirmations, and flag any invariant where this ratio falls below 0.1 as \"epistemically brittle.\" IMPLEMENT_WHERE: genome_manager.py IMPLEMENT_CALL_SITE: EXTEND `log_confirmation` — after logging a confirmation, recompute `challenge_score` and emit a brittleness warning if threshold breached. IMPLEMENT_WHY: Prevents confirmation-surplus bias from silently accumulating into false robustness, enforcing Seed Integrity Rule 2 structurally rather than by manual audit. --- PART 4 — MANDATORY FALSIFICATION:** CHALLENGE: challenges INV_094 — this probe exposes that INV_094's high confirmation count with near-zero adversarial testing makes it the genome's most epistemically brittle node, and the killing experiment (Wasserstein geometry recovery inconsistent with predicted curvature via O112) has not yet been run, meaning the invariant's scope boundary is currently uncharted."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-30",
+        "compress": "A 32×32 CA self-stabilizes at the critical ridge with power-law avalanche statistics but only 19% of maximum entropy, demonstrating that criticality is an attractor decoupled from entropy maximization — partially satisfying O148, directly activating O252, and introducing an ABSENT finding that low-entropy criticality has no current genome representation."
+      },
+      {
+        "title": "Boosted Enhanced Quantile Regression Neural Networks with Spatiotemporal Permutation Entropy for Complex System Prognostics",
+        "compress": "Spatiotemporal permutation entropy is empirically confirmed as a multiscale complexity signal with prognostic validity, independently converging on INV_094 and suggesting a concrete extraction method for O112's unresolved STF empirical recovery."
+      },
+      {
+        "title": "Thermodynamic Reversibility in Feedback Processes",
+        "compress": "Feedback-reversibility (⟨W_diss⟩ + ΔI = 0 per realization) is the precise thermodynamic criterion for operating on the critical ridge, converging with INV_073 but challenging it by demanding a discrete, operationalizable definition of dissipation that continuous Wasserstein geometry does not yet supply."
+      },
+      {
+        "title": "Cut-Set Bounds on Network Information Flow",
+        "compress": "Cut-set bounds via irreducible sets show that network dependency structure admits sparse entropic representation, directly sharpening the tractability of O187's dependency-skeleton obligation while confirming that feasible-rate geometry is a constrained ridge, not a free minimum."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
+      "obligations": [
+        "O209",
+        "O352",
+        "O364"
       ]
     },
     "coherence": 0.97
