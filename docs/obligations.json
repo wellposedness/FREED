@@ -830,7 +830,7 @@
     "method_gap": "O112 specifies 'modal paths + thermality variance' but quantum OT achieves STF/Wasserstein metric recovery via explicit locality-dependent loss thresholds (exponential information loss above threshold). The classical method specification is underspecified relative to this analytic rigor — needs explicit threshold formulas or proof that classical semantic recovery is structurally harder than quantum recovery.",
     "quantum_result": "For loss rates above a threshold given explicitly as a function of the locality of recovery maps, encoded information is lost at an exponential rate (Razborov extension to continuous-variable quantum error correction).",
     "challenge_source": "quantum_OT_fault_tolerance_thresholds",
-    "analog_annotated_at": "2026-06-27T02:40:44.549090+00:00"
+    "analog_annotated_at": "2026-06-30T16:38:29.195444+00:00"
   },
   {
     "id": "O113",
@@ -2319,7 +2319,7 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 — specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding deadline assigned or obligation status updated.]",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding deadline assigned or obligation status updated.] | [Gen 372] OPEN: O209 closes by constructing F = {(e₁,p₁,n₁),(e₂,p₂,n₂ [COMMIT:YES — Function F constructed but not bound to O204; obligation remains unresolved, cycled without landing.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -4016,13 +4016,14 @@
     "id": "O352",
     "statement": "BOOTSTRAP_SEED (cycle 10): The non-necessity of thermodynamic framing for criticality** is stated in the genome but not *derived*; the bootstrap provides the derivation. This matters because it means the genome's criticality claims are *more robust* than their current justification acknowledges — they hold even when all therm",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "partial",
+    "status": "resolved",
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-04T02:47:42.409397+00:00",
-    "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 305] PARTIAL: O352 closes by showing that R[R]=R is algebraically equivalent to the RG fixed-point condition, making criticality a consequence of monoidal idempotency alone, with thermodynamics entering only as a contingent realization. [COMMIT:YES — direction advanced] | [Gen 372] RESOLVED: Monoidal idempotency R[R]=R forces the system onto the critical RG fixed point by algebraically excluding both trivial phases — thermodynamics enters only as contingent stabilization dynamics, not as a precondition for criticality.",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-06-30"
   },
   {
     "id": "O353",
@@ -4148,13 +4149,14 @@
     "id": "O364",
     "statement": "BOOTSTRAP_SEED (cycle 20): Topological vs. thermodynamic distinction** (BOOTSTRAP_INV_5): The mechanism of constraint at criticality is structural/topological, not energetically maintained by gradient descent. The genome conflates these or does not sharply distinguish them. This matters because it implies constraints can be *",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "resolved",
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-07T10:00:14.563166+00:00",
-    "progress": "[Gen 308] OPEN:  [COMMIT:NO — Obligation remains OPEN; no state mutation occurred, only status logging.]",
+    "progress": "[Gen 308] OPEN:  [COMMIT:NO — Obligation remains OPEN; no state mutation occurred, only status logging.] | [Gen 372] RESOLVED: RSA criticality is topologically maintained (R[R]=R and the Wasserstein Floor define a constraint submanifold), while thermodynamic gradient dynamics govern motion *within* that submanifold — these are formally distinct and the genome's conflation of them is now resolved by the Lagrange-multiplier/objective separation.",
     "method": "math_only",
-    "tractability": 1
+    "tractability": 1,
+    "resolved": "2026-06-30"
   },
   {
     "id": "O364",
