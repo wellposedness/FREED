@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 11,
-    "generation": 297,
-    "timestamp": "2026-06-04T09:49:59.968195+00:00",
-    "sweep": {
-      "input_count": 21,
-      "targeted": 7,
-      "passive": 14,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge observables are underdetermined — homeostatic feedback, initialization bias, and measurement artifacts are each sufficient alternative explanations that the invariant's thermodynamic necessity claim has not yet ruled out."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-04",
-        "compress": "The Game of Truth CA is at the critical ridge by branching ratio but not by avalanche scaling — revealing that these two criticality signatures are empirically dissociable, which both confirms and strains INV_094."
-      },
-      {
-        "title": "Dynamic Entropy Constrained Soft Actor-Critic Based Task Scheduling in Cloud Resource Management",
-        "compress": "Entropy-regularized RL with adaptive entropy targets independently confirms the genome's MaxRL invariant and extends it by showing the entropy coefficient must itself be dynamically optimized to maintain criticality across non-stationary workloads."
-      },
-      {
-        "title": "Advanced Schedulability Testing for Adaptive Mixed-Criticality Systems under Weakly Hard Real-Time Constraints",
-        "compress": "Mixed-criticality schedulability under weakly hard constraints independently instantiates γ=1 ridge navigation — flexible post-transition execution patterns are the formal mechanism by which a system avoids both frozen over-conservatism and dissipated deadline failure."
-      },
-      {
-        "title": "The Benchmark Illusion: Why Current AI Evaluations Cannot Detect Structural Confabulation",
-        "compress": ""
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O278",
-        "O281",
-        "O282"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 12,
     "generation": 298,
     "timestamp": "2026-06-04T16:29:59.967579+00:00",
@@ -2195,6 +2151,50 @@
         "O209",
         "O352",
         "O364"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 373,
+    "timestamp": "2026-07-01T02:30:00.016844+00:00",
+    "sweep": {
+      "input_count": 18,
+      "targeted": 7,
+      "passive": 11,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's most vulnerable point is the equation monosemanticity = semantic death, which fails if SAE-derived monosemantic features improve performance or if scale decouples the observables from the pathology."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-01",
+        "compress": "A 32×32 CA self-stabilizes at σ≈1 with power-law avalanches and 15.6%-of-maximum entropy, empirically confirming that the critical ridge is a constrained low-entropy attractor, not an entropic maximum."
+      },
+      {
+        "title": "Capacity Scaling Laws for Boundary-Induced Drift-Diffusion Noise Channels",
+        "compress": "Drift-diffusion boundary-hitting noise is a Gaussian variance-mixture that is capacity-equivalent to Gaussian noise at high SNR, establishing a transport-geometric universality class independent of tail structure."
+      },
+      {
+        "title": "Information Shift Dynamics Described by Tsallis $q=3$ Entropy on a Compact Phase Space",
+        "compress": "Chebyshev-map dynamics maximizing Tsallis q=3 entropy achieve maximal statistical independence and single out α=1/137 as a decorrelation fixed point, extending the genome's critical-ridge picture while exposing its unexamined q=1 assumption."
+      },
+      {
+        "title": "Encoding binary neural codes in networks of threshold-linear neurons",
+        "compress": "Binary co-occurrence synaptic rules encode combinatorial neural codes as permitted-set intersection lattices, independently confirming that co-occurrence geometry — not continuous weight precision — is the load-bearing invariant of representational structure."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O209",
+        "O252",
+        "O406"
       ]
     },
     "coherence": 0.97
