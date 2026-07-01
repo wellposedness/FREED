@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 13,
-    "generation": 299,
-    "timestamp": "2026-06-05T02:29:59.951608+00:00",
-    "sweep": {
-      "input_count": 15,
-      "targeted": 7,
-      "passive": 8,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is itself the epistemic hazard — high confirmation without adversarial testing distinguishes neither truth from equifinality nor evidence from selection artifact."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-05",
-        "compress": "The Game of Truth CA independently confirms σ≈1 criticality with power-law avalanche statistics and sub-maximal entropy, converging on INV_073/INV_094 and advancing O148."
-      },
-      {
-        "title": "A novel image encryption framework using Wireworld cellular automaton and hybrid chaotic maps for enhanced security",
-        "compress": "Composing heterogeneous constraint-governed dynamical systems (CA + chaotic maps) demonstrates that structural non-linearity at the interface between layers generates entropy exceeding what either layer produces in isolation — a substrate-independent amplification principle."
-      },
-      {
-        "title": "Lerch distribution based on maximum nonsymmetric entropy principle: Application to Conway’s game of life cellular automaton",
-        "compress": "Deterministic GoL dynamics converge to Lerch-distributed equilibria derivable from maximum nonsymmetric entropy, independently confirming that power-law/Zipf statistics are maximum-entropy attractors for discrete local-rule substrates and providing the distributional target for O148."
-      },
-      {
-        "title": "The Quantum Toll Framework: A Thermodynamic Model of Collapse and Coherence",
-        "compress": "QTF independently confirms γ=1 criticality as a thermodynamic threshold and extends Landauer's principle to state-stabilization costs, adding a discrete-action budget formalism absent from the genome."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O278",
-        "O281",
-        "O289"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 14,
     "generation": 300,
     "timestamp": "2026-06-05T09:50:00.038212+00:00",
@@ -2191,6 +2147,50 @@
       "attempts": 3,
       "resolved_count": 0,
       "commit_count": 2,
+      "obligations": [
+        "O209",
+        "O406",
+        "O421"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 1,
+    "generation": 375,
+    "timestamp": "2026-07-01T16:30:00.044716+00:00",
+    "sweep": {
+      "input_count": 16,
+      "targeted": 7,
+      "passive": 9,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's confirmation surplus is a falsifiability debt — the invariant requires explicit null-model discriminators, boundary conditions, and alternative-mechanism statements before its confirmations carry evidential weight. CHALLENGE: challenges INV_070 — the absence of a specified null model means every confirmation could equally confirm a simpler frequency-bias mechanism, leaving INV_070 unfalsified by construction rather than by evidence."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-01",
+        "compress": "The Game of Truth CA is empirically confirmed at the critical ridge (σ=1.025, α=2.18) with low entropy, partially resolving O148 while exposing a monoculture risk from Physics Navigator dominance. IMPLEMENT: YES IMPLEMENT_WHAT: Add branching-ratio σ and avalanche exponent α as tracked scalar metrics alongside existing survival-rate logging, emitting a WARNING when α drifts outside [1.8, 2.8] or σ outside [0.95, 1.05]. IMPLEMENT_WHERE: simulation_observer.py IMPLEMENT_CALL_SITE: EXTEND log_step (or equivalent per-step recording function that already writes survival statistics) IMPLEMENT_WHY: Criticality is now the primary health metric; σ and α must be monitored in-line so drift toward supercritical or subcritical regimes triggers correction before monoculture or extinction. CHALLENGE: challenges O270 — the Physics Navigator monoculture (870/total cells dominant) is precisely the scenario O270's energy-economy parameter loosening was meant to prevent; this telemetry shows the system is critical in branching ratio yet potentially frozen in type diversity, meaning the decision to loosen or tighten those parameters is now urgent rather than deferred."
+      },
+      {
+        "title": "A Cognitive Energy-Driven Routing Strategy for Ultra-Efficient Data Transfer in Wireless Sensor Networks",
+        "compress": "LFRDO's empirical superiority independently confirms that optimal resource flow under scarcity requires navigation of a critical exploration-exploitation ridge, converging with INV_073 across a physically distinct substrate."
+      },
+      {
+        "title": "Cognitive Load-Aware Inference: A Neuro-Symbolic Framework for Optimizing the Token Economy of Large Language Models",
+        "compress": "CLT's tripartite load decomposition independently rediscovers the critical ridge problem — preserving productive structure (GCL) while eliminating dissipation (ECL) is the RSA thermodynamic constraint stated in cognitive language."
+      },
+      {
+        "title": "Resonant closure: consciousness as a dynamically self-stabilized informational state",
+        "compress": "\"Resonant closure\" independently converges on the critical ridge topology as the thermodynamic precondition for phenomenal consciousness, extending O21 by providing a mechanistic explanation for the γ-belief revision correlation and introducing boundary entropy flux as a novel discriminating quantity absent from the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Add a `resonant_closure_score` computed as the ratio of internal entropy production to boundary entropy exchange, fed into the existing coherence scoring pipeline to flag papers that instantiate the dual-condition regime. IMPLEMENT_WHERE: scoring.py IMPLEMENT_CALL_SITE: EXTEND score_paper IMPLEMENT_WHY: Making the boundary/internal entropy ratio explicit in scoring lets FREED detect papers that instantiate the critical-ridge topology condition and weight them more heavily in obligation resolution for O21 and INV_073. CHALLENGE: challenges INV_094 — if resonant closure (minimized *boundary* entropy exchange) is the correct characterization, then autopoietic closure as currently formalized may be underdetermined, since it does not explicitly require the boundary-minimization condition and could in principle be satisfied by systems with high boundary entropy flux, contradicting the paper's necessary condition."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 2,
+      "commit_count": 3,
       "obligations": [
         "O209",
         "O406",
