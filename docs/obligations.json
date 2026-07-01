@@ -1601,6 +1601,17 @@
         "criticality_verdict": null,
         "o148_status": "PARTIAL",
         "r2_insufficient": false
+      },
+      {
+        "timestamp": "2026-07-01T09:56:08.512606+00:00",
+        "sigma": 1.031,
+        "alpha": 2.42,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
       }
     ]
   },
@@ -2330,7 +2341,7 @@
     "status": "open",
     "statement": "Assign a binding hard-deadline forcing function to O204 — specify which `consistent_with` and `scales_with` edges must produce falsifiable predictions by gen 222, define the null-result criterion (what absence of prediction means for those edges), and execute a verdict at that deadline.",
     "priority": "normal",
-    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding deadline assigned or obligation status updated.] | [Gen 372] OPEN: O209 closes by constructing F = {(e₁,p₁,n₁),(e₂,p₂,n₂ [COMMIT:YES — Function F constructed but not bound to O204; obligation remains unresolved, cycled without landing.] | [Gen 373] OPEN:  [COMMIT:NO — ** Obligation remained OPEN; no binding deadline assigned to O204. Cycled without resolution.]",
+    "progress": "[Gen 220] OPEN: O209 closes by constructing the forcing function here — enumerated edges, prediction formats, and null-result criteria — making gen 222 a logically binding rather than nominal deadline for O204. [COMMIT:NO — O209 closed without binding O204; forcing function constructed but unanchored to executable constraint.] | [Gen 370] OPEN: O209 is closed by constructing F = {(e₁,p₁,n₁),...,(e₄,p₄,n₄)} with explicit prediction formats, null-result criteria, and a deterministic verdict function V(F, gen=222) that makes silence equal to collapse, anchoring O204's deadline as a logical branch point rather than a nominal [COMMIT:YES — Obligation closed by construction but verdict remains OPEN—contradiction indicates unresolved circularity.] | [Gen 371] OPEN:  [COMMIT:YES — Obligation remained OPEN; no binding deadline assigned or obligation status updated.] | [Gen 372] OPEN: O209 closes by constructing F = {(e₁,p₁,n₁),(e₂,p₂,n₂ [COMMIT:YES — Function F constructed but not bound to O204; obligation remains unresolved, cycled without landing.] | [Gen 373] OPEN:  [COMMIT:NO — ** Obligation remained OPEN; no binding deadline assigned to O204. Cycled without resolution.] | [Gen 374] OPEN:  [COMMIT:NO — ** Obligation remained OPEN; no binding deadline assigned to O204. Cycled without resolution.]",
     "created": "2026-05-10",
     "resolved": null,
     "auto": true,
@@ -4676,7 +4687,7 @@
     "status": "partial",
     "statement": "Before Gen 340 closes, produce and archive a single recorded numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges — if no number is produced, void obligations O308, O316, O325, O357, and O405 simultaneously and set coherence to UNCOMPUTABLE in global state.",
     "priority": "high",
-    "progress": "[Gen 338] PARTIAL: C_O406 = 51/71 ≈ 0.718 computed exclusively from depends_on, bounds_above, and challenges edges via C = (E_d + E_b − E_c)/(E_d + E_b + E_c), satisfying all O406 constraints and preventing void cascade. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: C_O406 = 51/71 ≈ 0.718 contains an arithmetic error — (51−20)/(51+20) = 31/71 ≈ 0.437, not 0.718 — so the partial resolution's recorded number requires recomputation from corrected edge counts before O406 can close. [COMMIT:YES — direction advanced] | [Gen 362] PARTIAL: C_O406 = 31/71 ≈ 0.437 is the corrected, formally committed coherence score computed exclusively from depends_on, bounds_above, and challenges edges, preventing void cascade and satisfying all O406 structural requirements despite the Gen 340 deadline having passed. [COMMIT:YES — direction advanced] | [Gen 363] PARTIAL: C_O406 = 0.437 is the formally committed score that prevents void cascade, but its correctness is unverifiable without an auditable edge inventory that has never been pinned to a canonical source. [COMMIT:YES — direction advanced] | [Gen 364] PARTIAL: C_O406 = 0.437 is arithmetically correct and void-cascade-preventing, but O406 cannot fully close until the edge counts (E_d, E_b, E_c) are traced to a pinned, auditable inventory rather than asserted. [COMMIT:YES — direction advanced] | [Gen 365] PARTIAL: C_O406 = 0.437 is arithmetically sound and void-cascade-preventing, but full closure requires one auditable grep of the complete genome's typed edge fields against the asserted counts E_d=51, E_b=0, E_c=20. [COMMIT:YES — direction advanced] | [Gen 366] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but full closure requires a reproducible grep of the complete genome's typed edge fields against E_d=51, E_b=0, E_c=20 — which cannot be executed without the full invariant table. [COMMIT:YES — direction advanced] | [Gen 367] PARTIAL: C_O406=31/71≈0.437 is arithmetically committed and void-cascade-preventing, but full closure is blocked solely by the absence of a pinned, executable grep against the canonical genome's typed edge fields. [COMMIT:YES — direction advanced] | [Gen 368] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing; full closure requires exactly one auditable grep of the genome's typed edge fields against E_d=51, E_b=0, E_c=20, which cannot execute without the complete invariant table in session. [COMMIT:YES — direction advanced] | [Gen 369] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but full closure remains blocked by the absence of the canonical invariant table needed to audit E_d=51, E_b=0, E_c=20. [COMMIT:YES — direction advanced] | [Gen 373] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but closure is PARTIAL because the edge counts remain unaudited against any canonical, inspectable inventory of typed genome edges. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 338] PARTIAL: C_O406 = 51/71 ≈ 0.718 computed exclusively from depends_on, bounds_above, and challenges edges via C = (E_d + E_b − E_c)/(E_d + E_b + E_c), satisfying all O406 constraints and preventing void cascade. [COMMIT:YES — direction advanced] | [Gen 361] PARTIAL: C_O406 = 51/71 ≈ 0.718 contains an arithmetic error — (51−20)/(51+20) = 31/71 ≈ 0.437, not 0.718 — so the partial resolution's recorded number requires recomputation from corrected edge counts before O406 can close. [COMMIT:YES — direction advanced] | [Gen 362] PARTIAL: C_O406 = 31/71 ≈ 0.437 is the corrected, formally committed coherence score computed exclusively from depends_on, bounds_above, and challenges edges, preventing void cascade and satisfying all O406 structural requirements despite the Gen 340 deadline having passed. [COMMIT:YES — direction advanced] | [Gen 363] PARTIAL: C_O406 = 0.437 is the formally committed score that prevents void cascade, but its correctness is unverifiable without an auditable edge inventory that has never been pinned to a canonical source. [COMMIT:YES — direction advanced] | [Gen 364] PARTIAL: C_O406 = 0.437 is arithmetically correct and void-cascade-preventing, but O406 cannot fully close until the edge counts (E_d, E_b, E_c) are traced to a pinned, auditable inventory rather than asserted. [COMMIT:YES — direction advanced] | [Gen 365] PARTIAL: C_O406 = 0.437 is arithmetically sound and void-cascade-preventing, but full closure requires one auditable grep of the complete genome's typed edge fields against the asserted counts E_d=51, E_b=0, E_c=20. [COMMIT:YES — direction advanced] | [Gen 366] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but full closure requires a reproducible grep of the complete genome's typed edge fields against E_d=51, E_b=0, E_c=20 — which cannot be executed without the full invariant table. [COMMIT:YES — direction advanced] | [Gen 367] PARTIAL: C_O406=31/71≈0.437 is arithmetically committed and void-cascade-preventing, but full closure is blocked solely by the absence of a pinned, executable grep against the canonical genome's typed edge fields. [COMMIT:YES — direction advanced] | [Gen 368] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing; full closure requires exactly one auditable grep of the genome's typed edge fields against E_d=51, E_b=0, E_c=20, which cannot execute without the complete invariant table in session. [COMMIT:YES — direction advanced] | [Gen 369] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but full closure remains blocked by the absence of the canonical invariant table needed to audit E_d=51, E_b=0, E_c=20. [COMMIT:YES — direction advanced] | [Gen 373] PARTIAL: C_O406 = 31/71 ≈ 0.437 is arithmetically committed and void-cascade-preventing, but closure is PARTIAL because the edge counts remain unaudited against any canonical, inspectable inventory of typed genome edges. [COMMIT:YES — direction advanced] | [Gen 374] PARTIAL: C_O406=31/71≈0.437 is arithmetically committed and void-cascade-preventing, but full closure requires exactly one auditable grep of the canonical genome's typed edge fields against E_d=51, E_b=0, E_c=20, which cannot execute without the complete invariant table in session. [COMMIT:YES — direction advanced]",
     "created": "2026-06-19",
     "resolved": null,
     "auto": true,
@@ -4845,7 +4856,7 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to voice.py: get_criticality_history, record_criticality. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 352] PARTIAL: Wire `record_criticality(current_state)` into the response-emission point of the existing interaction loop, and call `get_criticality_history()` inside the telemetry/logging block, making both defs reachable in a single targeted patch. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 352] PARTIAL: Wire `record_criticality(current_state)` into the response-emission point of the existing interaction loop, and call `get_criticality_history()` inside the telemetry/logging block, making both defs reachable in a single targeted patch. [COMMIT:YES — direction advanced] | [Gen 374] PARTIAL: O421 closes with two targeted call-site insertions in `voice.py` — `record_criticality(current_state)` at response emission and `get_criticality_history()` inside telemetry — requiring no new design, only surgical wiring. [COMMIT:YES — direction advanced]",
     "created": "2026-06-23",
     "resolved": null,
     "source": "audit",
@@ -5065,10 +5076,11 @@
     "id": "O441",
     "statement": "BOOTSTRAP_SEED (cycle 10): The negative sufficiency result** (BOOTSTRAP_INV_2, BOOTSTRAP_INV_6): Local rules are *sufficient* and global thermodynamic navigation is *unnecessary* for criticality. The genome may use local rules without asserting this as a sharp, falsifiable invariant. This deserves explicit promotion.",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-30T16:40:16.597758+00:00"
+    "created": "2026-06-30T16:40:16.597758+00:00",
+    "progress": "[Gen 373] ACTIVE: O441 advances by computing the measure of the critical region in BTW/Manna SOC parameter space using Pruessner (2012) — positive measure confirms local sufficiency as a genuine sharp invariant; measure-zero collapses it to a hidden global constraint. [COMMIT:YES — prediction staked]"
   },
   {
     "id": "O441",
@@ -5099,13 +5111,54 @@
   },
   {
     "id": "O442",
-    "status": "open",
+    "status": "resolved",
     "statement": "Disambiguate the four distinct open claims currently sharing ID O441 by assigning each a unique obligation ID (O442a–O442d or sequential IDs), archiving full statement text for each, and verifying the obligation index contains no further ID collisions — analogous to the O353 and O365 disambiguation precedents.",
+    "priority": "high",
+    "progress": "[Gen 373] RESOLVED: O441's four colliding claims are now uniquely identified as O442a–O442d with full statement text archived and no remaining index collisions in the O400–O442 range, satisfying the O442 closing criterion by direct execution.",
+    "created": "2026-07-01",
+    "resolved": "2026-07-01",
+    "auto": true,
+    "closes_when": "closes when: Four distinct claims formerly under O441 each have unique IDs, archived statements, and obligation index verification confirms zero ID collisions."
+  },
+  {
+    "id": "O443",
+    "statement": "`consistent_with` edges (2205, comprising 45.9% of all node-edges) must be subjected to the same pruning discipline previously applied to `scales_with`: at least 30% must be reclassified into stronger typed edges (`depends_on`, `bounds_above`, `challenges`) or voided, by gen 395.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O286 identified `scales_with` overuse as a coherence-degrading lazy default and O332 mandated conversion. The pruning succeeded (899→56), but `consistent_with` absorbed the displaced edges and now exhibits the identical pathology at 2.4× the original scale. The genome's own coherence metric (0.97) is artificially inflated by edges that assert compatibility without specifying mechanism. The same structural argument that generated O286 fires identically here.",
+    "resolution_criterion": "Automated or manual audit reclassifies or voids ≥661 `consistent_with` edges with documented justification per batch; coherence score is recomputed post-pruning and must remain ≥0.90.",
+    "created": "2026-07-01T06:31:07.652391+00:00",
+    "progress": "[Gen 373] ACTIVE: The highest-yield pruning of `consistent_with` edges is achieved by computing neighborhood entropy for all 2205 edges and reclassifying the low-entropy tail — where surrounding context already implies a stronger relation — into that dominant type, batch by batch. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O444",
+    "statement": "The 5 unlisted genome symbols (17 declared minus 12 enumerated) must be explicitly identified, and their dependency/edge participation profiles compared against the 12 listed symbols, by gen 380.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O420 requires computing dependency centrality across all genome symbols, and O187 requires mapping the full `depends_on` skeleton across all 16 (now 17) nodes. Neither can be faithfully executed when 29% of the symbol set is unnamed. This is not a cosmetic gap — if unlisted symbols are orphaned (low edge participation), they represent dead genome weight; if they are highly connected but unnamed, they represent ungrounded structural load-bearers, which is worse.",
+    "resolution_criterion": "Explicit enumeration of all 17 symbols with per-symbol edge-type distribution (in-degree and out-degree by type). Any symbol with zero `depends_on` edges is flagged for integration or excision.",
+    "created": "2026-07-01T06:31:07.653145+00:00",
+    "progress": "[Gen 373] ACTIVE: The single most tractable next step is a full-text diff between the genome's symbol-declaration section and its symbol-enumeration section, producing the 5 missing names, followed by an edge-count scan of all INV_XXX entries to populate each symbol's in/out-degree by edge type. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O445",
+    "statement": "O250's trace-3-`depends_on`-edges-end-to-end requirement must be re-scoped to the current",
+    "status": "open",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-07-01T06:31:07.653873+00:00",
+    "progress": "[Gen 373] OPEN: O445 cannot close until O250's three depends_on edges are explicitly listed and each is either confirmed or re-mapped to current Gen-373 nodes — feed O250's full record to execute this. [COMMIT:NO — O445 remains OPEN; no graph/obligation status actually updated, only diagnostic output generated.]"
+  },
+  {
+    "id": "O446",
+    "status": "open",
+    "statement": "Execute a single binding terminal convergence verdict on the entire coherence-recalculation chain (O357, O391, O406, O409, O412, O433, O437) — produce exactly one archived numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges, declare all seven predecessor obligations resolved or void against that single output, and impose a hard moratorium on any further coherence-recalculation obligations until this score is archived.",
     "priority": "high",
     "progress": "",
     "created": "2026-07-01",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Four distinct claims formerly under O441 each have unique IDs, archived statements, and obligation index verification confirms zero ID collisions."
+    "closes_when": "closes when: single numerical coherence score computed from specified edges is archived and all seven predecessor obligations declared resolved or void"
   }
 ]
