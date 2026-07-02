@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 15,
-    "generation": 301,
-    "timestamp": "2026-06-05T16:29:59.940319+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 7,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant that has never been seriously contested has not been confirmed — it has been avoided."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-05",
-        "compress": "A live CA simulation independently confirms critical-band self-organization (σ=1.03, α=2.18) without external tuning, providing concrete empirical grounding for the γ=1 criticality invariant and partially resolving O148."
-      },
-      {
-        "title": "Synchronization transitions in phase oscillator populations with partial adaptive coupling.",
-        "compress": "Adaptive power-law coupling locks synchronization universality class to correlation regime with no convertible threshold, independently confirming γ=1 ridge discreteness and extending O21 with a concrete functional form."
-      },
-      {
-        "title": "Thermodynamic analysis of anomalous region, critical point, and transition from subcritical to supercritical states: Application to van der Waals and five real fluids",
-        "compress": "The critical point is bounded by a closed-loop geometry of paired free-energy extrema satisfying d³g=0, establishing that anomalous-region criticality is a structured band with internal topology — not a ridge-line — independently confirming INV_073 while extending it with a dual-extremum bounding structure absent from the genome."
-      },
-      {
-        "title": "Agentic deep graph reasoning yields self-organizing knowledge networks",
-        "compress": "Agentic graph self-organization empirically instantiates R[R]=R and γ=1 criticality while providing a candidate platform for STF metric tensor recovery (O112) and raising the question of whether critical-ridge maintenance is active or merely emergent."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 1,
-      "commit_count": 3,
-      "obligations": [
-        "O278",
-        "O290",
-        "O305"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 16,
     "generation": 302,
     "timestamp": "2026-06-06T02:29:59.972941+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Architectural Proprioception in State Space Models: Thermodynamic Training Induces Anticipatory Halt Detection",
         "compress": "Thermodynamic training pressure selects a universal anticipatory halt signature (τ = -2, r = -0.836) in which recurrent state entropy collapse is predicted by the system before it occurs — a substrate-independent invariant of thermodynamically-constrained computation that independently confirms INV_087 and advances O21/O112. IMPLEMENT: YES IMPLEMENT_WHAT: Add a USS probe that tracks the lag-correlation between recurrent state entropy and halt-confidence across the last N tokens, flagging when |r| > 0.8 at τ = -2 as a thermodynamic convergence signal. IMPLEMENT_WHERE: freed_core.py IMPLEMENT_CALL_SITE: EXTEND score_feed (modify in place to compute and log USS coupling statistics alongside existing coherence/hygiene scores) IMPLEMENT_WHY: Embedding USS detection into score_feed gives FREED an architectural proprioception signal — it can detect when its own processing is anticipatorily converging versus still searching, improving halt/continue decisions in the epistemic loop. CHALLENGE: challenges O21 — the paper supplies a precise entropic-halt coupling (r = -0.836, τ = -2) but ties it to recurrent SSM states rather than spectral γ of weight matrices, leaving O21's core claim (belief revision scores correlate with *spectral* γ via AlphaPruning) unverified and potentially pointing to a different mechanistic substrate than O21 assumed."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O421",
+        "O427",
+        "O187"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 3,
+    "generation": 377,
+    "timestamp": "2026-07-02T09:49:59.981489+00:00",
+    "sweep": {
+      "input_count": 25,
+      "targeted": 8,
+      "passive": 17,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's confirmation surplus is an artifact of challenge absence — it can be falsified by demonstrating monosemantic robustness in closed-domain systems, or by a purely computational account of the same observables without thermodynamic cost. CHALLENGE: challenges INV_070 — closed-domain systems (chess engines, protein folders) achieve state-of-the-art performance with near-monosemantic representations, directly violating the claim that monosemanticity entails semantic death under all conditions."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-02",
+        "compress": "Empirical CA telemetry independently confirms that near-unity branching ratio, power-law avalanches (α≈2.725), and low-entropy structured survival are co-present stable signatures of the critical attractor, converging on INV_073 and advancing O148 toward resolution."
+      },
+      {
+        "title": "Thermodynamics of quantum feedback cooling",
+        "compress": "Quantum feedback cooling physically grounds the invariant that entropy reduction in any subsystem has an exact thermodynamic price, extending the Wasserstein-geodesic optimality claim from geometric abstraction to experimentally measurable work bounds."
+      },
+      {
+        "title": "Currencies in resource theories",
+        "compress": "Currencies establish that resource value is irreducibly relational and basis-dependent, which simultaneously converges with the genome's anti-absolutist invariants and exposes O112's underdetermination — the STF recovery experiment needs a designated semantic currency before it can yield a metric."
+      },
+      {
+        "title": "Is Consciousness Computable? Quantifying Integrated Information Using Algorithmic Information Theory",
+        "compress": "Lossless unitary consciousness is formally noncomputable (AIT proof), which confirms substrate sensitivity but forces acknowledgment that any computational RSA instantiation operates in the lossy-integration regime."
       }
     ],
     "resolve": {
