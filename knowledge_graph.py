@@ -40,6 +40,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+try:
+    import substrate as _substrate   # read-only provenance/diversity classifier
+except Exception:                    # pragma: no cover - fail-safe, never break minting
+    _substrate = None
+
 FREED_DIR   = Path(__file__).parent
 GRAPH_FILE  = FREED_DIR / "FREED_graph.json"
 STATE_FILE  = FREED_DIR / "FREED_state.json"   # source of current generation for edge gen-stamping (O384)
@@ -3256,18 +3261,33 @@ class KnowledgeGraph:
         self._ensure_loaded()
         new_edges = extract_edges(kernel_output, source_url, source_title,
                                   context_tag=context_tag)
-        # O400 mint-time reclassification: ca_sim is FREED's own simulation.
-        # A "confirms"/"supports" edge from it onto a genome invariant is the
-        # model confirming the theory it instantiates, not independent evidence.
-        # Retype before any counting so it can never re-inflate the keystone
-        # confirm/deficit math (the self-confirmation metronome — see
-        # FREED_log/casim_selfconfirmation_FINDING_2026-06-17.md).
-        if str(source_url).startswith("local://ca_sim"):
+        # Substrate gate (2026-07-01, generalizes O400): a confirms/supports edge
+        # whose SOURCE is ENDOGENOUS (FREED's own ca_sim telemetry, adversarial
+        # probe, or other local:// output) is the system confirming itself, not
+        # independent evidence. Retype to simulation_consistent BEFORE any counting
+        # so it can never inflate the keystone confirm/deficit math (the
+        # self-confirmation metronome — FREED_log/casim_selfconfirmation_FINDING_2026-06-17.md).
+        # O400 covered only ca_sim->INV_* and leaked ca_sim->O148/O140 telemetry
+        # confirms (mirror-gate 2026-07-01); substrate_of() closes every endogenous
+        # source × any target. Falls back to a local:// string test if substrate
+        # is unavailable, so minting never breaks.
+        if _substrate is not None:
+            try:
+                _endogenous_src = _substrate.substrate_class(
+                    _substrate.substrate_of({"from": source_url,
+                                             "from_title": source_title})) == "endogenous"
+                _gate_tag = "substrate_gate"
+            except Exception:
+                _endogenous_src = str(source_url).startswith("local://")
+                _gate_tag = "substrate_gate_fallback"
+        else:
+            _endogenous_src = str(source_url).startswith("local://")
+            _gate_tag = "substrate_gate_fallback"
+        if _endogenous_src:
             for e in new_edges:
-                if (e.get("type") in ("confirms", "supports")
-                        and str(e.get("to", "")).upper().startswith("INV_")):
+                if e.get("type") in ("confirms", "supports"):
                     e["reclassified_from"] = e["type"]
-                    e["reclassified_by"] = "O400"
+                    e["reclassified_by"] = _gate_tag
                     e["type"] = "simulation_consistent"
         if prediction_weights and new_edges:
             for e in new_edges:
