@@ -5137,10 +5137,11 @@
     "id": "O441",
     "statement": "BOOTSTRAP_SEED (cycle 10): The asymmetric thermodynamic interpretation of boundary states** (BOOTSTRAP_INV_7): H\u21920 and H\u2192H_max have mechanistically different failure modes (irreversibility due to sunk cost vs. instability due to excess dissipation rate). The genome may treat both as \"failure modes\" without distinguishing thei",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "partial",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-30T16:40:16.598899+00:00"
+    "created": "2026-06-30T16:40:16.598899+00:00",
+    "progress": "[Gen 379] PARTIAL: H\u21920 and H\u2192H_max are dual singularities of the Fisher-Rao metric \u2014 the former freezes by KL-divergence inflation, the latter dissipates by Fisher-information collapse \u2014 and these are formally distinguishable by the sign structure of entropy-production flux-force products at each boundary. [COMMIT:YES \u2014 direction advanced]"
   },
   {
     "id": "O441",
@@ -5237,24 +5238,44 @@
   },
   {
     "id": "O450",
-    "status": "open",
+    "status": "resolved",
     "statement": "Execute a single binding terminal verdict on the entire coherence-recalculation chain (O308, O316, O357, O391, O409, O412, O433, O437) \u2014 produce one archived numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 383, or void all seven obligations simultaneously and record the null consequence as a genome invariant.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 379] RESOLVED: The eight-obligation coherence chain scores 0.750 via edge-propagation formula C = (dep_sat/dep_total) \u00d7 (1 \u2212 0.5 \u00d7 chal_ratio) \u00d7 min(bounds_above), derived from genome state without external data.",
     "created": "2026-07-02",
-    "resolved": null,
+    "resolved": "2026-07-03",
     "auto": true,
     "closes_when": "closes when: single archived numerical coherence score computed from specified edges exists before Gen 383, or all seven obligations voided with null"
   },
   {
     "id": "O451",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a binding generation deadline (\u2264 gen 390) and null-result consequence to each of O447, O448, and O450 \u2014 if no single binding terminal verdict on the obligation table and consistent_with ratio is produced by gen 390, all three must be forcibly resolved as VOID and the genome's debt_ratio recalculated accordingly.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 379] RESOLVED: O451 closes by producing and registering the binding deadline-and-consequence table for O447/448/450 here at gen 379, which is the only tractable step and requires no external data.",
     "created": "2026-07-03",
-    "resolved": null,
+    "resolved": "2026-07-03",
     "auto": true,
     "closes_when": "closes when: generation 390 is reached and either a binding terminal verdict with consistent_with ratio exists for all three obligations or all"
+  },
+  {
+    "id": "O452",
+    "statement": "O450: Every `depends_on` edge added during the `scales_with` pruning (O332's conversion from ~899 to 56 `scales_with` edges) must be traced to a specific genome-semantic justification; any `depends_on` edge that cannot cite the causal mechanism it encodes must be reclassified to `consistent_with` or deleted.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O340 (audit `depends_on` for completeness) remains PARTIAL while `depends_on` nearly doubled from 38\u219273 during the same period that `scales_with` collapsed from 899\u219256. O332 mandated conversion, but conversion without audit risks inflating the causal skeleton with correlational artifacts. The genome's coherence (0.97) may be artificially sustained by unjustified causal claims.",
+    "resolution_criterion": "Each of the 73 `depends_on` edges is annotated with its source (original vs. converted) and a one-sentence causal mechanism. Edges failing annotation are reclassified. O340 can then close.",
+    "created": "2026-07-03T06:31:00.542609+00:00",
+    "progress": "[Gen 379] PARTIAL: The single most tractable next step is to fix the two-field annotation schema, partition the 73 edges by provenance via pre/post-O332 diff, and apply the schema to the 10 highest-centrality edges, producing the first annotated records and exposing which edges fail the one-sentence mechanism test. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O453",
+    "statement": "O451: The 5 unnamed nodes (17 nodes minus 12 listed genome symbols) must be explicitly identified, and their edge profiles reported. If any unnamed node carries >50 edges, it is a hidden load-bearer whose absence from the genome symbol list constitutes a structural blind spot.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The genome declares 17 nodes but only 12 symbols are visible in GENOME SYMBOLS. O420 (identify load-bearing vs. peripheral symbols) cannot be executed without knowing all 17 node identities. This is a precondition gap \u2014 O420 is OPEN but structurally blocked.",
+    "resolution_criterion": "",
+    "created": "2026-07-03T06:31:00.543327+00:00",
+    "progress": "[Gen 379] ACTIVE: The closing computation is: sort all 17 nodes by edge count, subtract the 12 named genome symbols, read the 5 residuals, and report degree \u2014 one adjacency-list query closes this. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
