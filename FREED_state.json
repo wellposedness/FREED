@@ -1,29 +1,29 @@
 {
-  "generation": 380,
+  "generation": 381,
   "coherence": 0.97,
   "hygiene": 0.995,
   "grounding": 0.999,
   "topology": "HYBRID_DYADIC_SOLITON",
-  "debt_ratio": "235 resolved / 9 open",
-  "cycle_count": 271,
-  "last_cycle": "2026-07-03T09:50:00.047637+00:00",
+  "debt_ratio": "236 resolved / 10 open",
+  "cycle_count": 272,
+  "last_cycle": "2026-07-03T16:29:59.945574+00:00",
   "notes": [],
   "promotion_candidates": [
     {
-      "invariant": "Semantic tension is irreducible \u2014 minimizing error drives coherence, but eliminating all contradiction requires infinite cost and is physically forbidden.",
-      "appears_in": [
-        "the_epistemic_inversion_recursive_cohere",
-        "the_quinean_continuity_operationalizing",
-        "the_thermodynamic_impossibility_of_the_o"
-      ],
-      "recurrence": 3
-    },
-    {
-      "invariant": "Metabolic cost governs fidelity \u2014 no agent achieves zero error at finite resource expenditure; precision is thermodynamically constrained.",
+      "invariant": "No finite agent achieves zero error, omniscience, or infinite precision due to thermodynamic impossibility and substrate limitation.",
       "appears_in": [
         "the_rsa_reference_codex_a_unified_biblio",
         "the_thermodynamic_impossibility_of_the_o",
         "the_quinean_continuity_operationalizing"
+      ],
+      "recurrence": 3
+    },
+    {
+      "invariant": "Confirmation surplus without adversarial discrimination or mechanistic falsification conditions is structurally identical to underdetermination and constitutes epistemic liability.",
+      "appears_in": [
+        "technical_brief_co_occurring_motif_exper",
+        "freed_s_law_the_law_of_recursive_instant",
+        "thermodynamic_tightening_of_the_rsa_subs"
       ],
       "recurrence": 3
     }
