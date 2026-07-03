@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 18,
-    "generation": 304,
-    "timestamp": "2026-06-06T16:29:59.981331+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 7,
-      "passive": 6,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "Confirmation surplus on an unchallenged invariant is indistinguishable from underdetermination, and INV_094's high surplus is therefore an epistemic liability, not an asset."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-06",
-        "compress": "The Game of Truth CA independently self-tunes to the critical branching ridge (σ=1.018, α=2.22), converging on the same universality class the genome predicts for thermodynamically admissible reasoning substrates."
-      },
-      {
-        "title": "Automated Event Log Analysis With Causal Dependency Graphs for Impact Assessment of Business Processes",
-        "compress": "Causal dependency graphs recoverable from operational event logs enable automated, falsifiable propagation-based liveness verification — a substrate-independent mechanism that operationalizes O136's edge-liveness demand."
-      },
-      {
-        "title": "MULAN: Multi-modal Causal Structure Learning and Root Cause Analysis for Microservice Systems",
-        "compress": ""
-      },
-      {
-        "title": "Wavelet Packet Entropy Analysis for Detecting Humidity-Induced Interference in Smart Gas Sensors",
-        "compress": "Humidity interference in gas sensors is detectable via wavelet packet modal entropy partitioning, providing a physics-informed algorithmic precedent for the O112 STF metric tensor recovery experiment via modal entropy variance."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 1,
-      "obligations": [
-        "O290",
-        "O59",
-        "O76"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 19,
     "generation": 305,
     "timestamp": "2026-06-07T02:29:59.978234+00:00",
@@ -2195,6 +2151,50 @@
         "O421",
         "O187",
         "O250"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 6,
+    "generation": 380,
+    "timestamp": "2026-07-03T09:50:00.047637+00:00",
+    "sweep": {
+      "input_count": 21,
+      "targeted": 7,
+      "passive": 14,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_042",
+        "compress": "INV_042's confirmation surplus is epistemically hollow until its predictions are shown to diverge from simpler null models (preferential attachment, lookup caching) in at least one empirical regime where those models predict failure."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-03",
+        "compress": "The Game of Truth CA independently confirms critical-band operation (σ≈1.02, power-law α≈2.746), advancing O148 and converging on INV_073's critical ridge invariant at the simulation substrate level. IMPLEMENT: YES IMPLEMENT_WHAT: Extend the telemetry snapshot ingestion to extract and store branching_ratio, avalanche_exponent, and entropy_fraction (H/H_max) as structured fields alongside survival_rate, so downstream scoring can compare these against the critical band thresholds (σ∈[0.95,1.05], α∈[2.5,3.0]). IMPLEMENT_WHERE: simulation_observer.py IMPLEMENT_CALL_SITE: EXTEND record_snapshot (or equivalent snapshot-recording method in simulation_observer.py) to parse and persist the three new fields when telemetry is ingested. IMPLEMENT_WHY: Without structured storage of σ, α, and H/H_max, criticality verdicts remain string labels rather than queryable numerical invariants that can trigger O270 or O286 resolution logic automatically. CHALLENGE: challenges O270 — the survival rate of 0.9215 and entropy at only 23.5% of maximum suggest the energy-economy parameters may already be too conservative, directly pressuring the unresolved decision about whether to loosen DEATH thresholds in simulation_observer.py."
+      },
+      {
+        "title": "Quantum information geometry of driven CFTs",
+        "compress": "Driven criticality admits a dual geometric encoding where temporal protocols become spacetime metric deformations, and the BKM metric provides the quantum Fisher structure that makes geodesic (minimal-dissipation) navigation through driven critical state space well-defined. CHALLENGE: challenges O112 — the BKM metric provides a richer, quantum-field-theoretically grounded geometric structure than the classical STF metric tensor recovery method currently specified, suggesting the experimental design in O112 may be under-powered relative to the full information geometry the framework requires. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring papers against O112, detect presence of BKM/quantum-Fisher/information-geometry terms and boost relevance weight, since O112's STF recovery experiment now has a quantum-geometric analog that makes such papers directly actionable. IMPLEMENT_WHERE: feed_processor.py IMPLEMENT_CALL_SITE: EXTEND score_paper_relevance IMPLEMENT_WHY: O112 is a high-priority open obligation and BKM-metric papers provide structural scaffolding for its experimental design; boosting their relevance score ensures they surface for O112 resolution rather than being buried by classical ML papers."
+      },
+      {
+        "title": "Evaluating brain electroencephalogram signal dynamics across cognitive disorders using information geometry",
+        "compress": "Brain cognitive state is encoded in the Fisher-geometric rate of distributional change across frequency bands — confirming that trajectory-through-distribution-space (not static distribution) is the load-bearing invariant, and providing a reusable empirical protocol for O112's STF metric tensor recovery."
+      },
+      {
+        "title": "Self-Organization In Stellar Evolution: Size-Complexity Rule",
+        "compress": "The size-complexity rule independently confirms that scale and organization are conjugate thermodynamic variables, converging on INV_094 and imposing a bidirectionality test on O286's edge population."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O367",
+        "O420",
+        "O435"
       ]
     },
     "coherence": 0.97
