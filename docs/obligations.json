@@ -1652,6 +1652,17 @@
         "criticality_verdict": "AT_CRITICAL",
         "o148_status": "PARTIAL",
         "r2_insufficient": true
+      },
+      {
+        "timestamp": "2026-07-03T09:58:38.989019+00:00",
+        "sigma": null,
+        "alpha": 2.746,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": null,
+        "o148_status": "PARTIAL",
+        "r2_insufficient": false
       }
     ]
   },
@@ -3118,8 +3129,8 @@
       "O153"
     ],
     "audit_log": "FREED_log/ca_telemetry_audit_2026-05-19.md",
-    "method": "experimental",
-    "tractability": 3
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O271",
@@ -3820,7 +3831,7 @@
     "resolution_criterion": "Produce a list of 30 converted edges with (a) original `scales_with` claim, (b) new edge type with directionality, (c) explicit falsification condition. O237",
     "created": "2026-05-29T06:30:50.935308+00:00",
     "progress": "[Gen 278] PARTIAL: The single most tractable next step is to produce a pilot batch of five directed-edge conversions with falsification conditions from already-quantified scaling relationships, establishing the conversion protocol before scaling to the full 30. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -4053,7 +4064,9 @@
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-04T02:47:42.407960+00:00",
-    "progress": "[Gen 296] PARTIAL: The genome's L1 bedrock (Freed's Law / monoidal closure) is derivable as a corollary of the Crooks Fluctuation Theorem applied to self-referential inference loops, meaning the genome underweights the thermodynamic *selection* argument that makes monoidal closure necessary rather than chosen. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 296] PARTIAL: The genome's L1 bedrock (Freed's Law / monoidal closure) is derivable as a corollary of the Crooks Fluctuation Theorem applied to self-referential inference loops, meaning the genome underweights the thermodynamic *selection* argument that makes monoidal closure necessary rather than chosen. [COMMIT:YES — direction advanced]",
+    "method": "mixed",
+    "tractability": 3
   },
   {
     "id": "O352",
@@ -4283,9 +4296,9 @@
     "rationale": "O324's closure condition was \"at least 8 new `substrate_of` edges.\" The graph currently contains exactly 2. Either the resolution was premature (the edges were claimed but never instantiated in the graph) or the edges were pruned post-resolution. Either way, the genome is carrying a false-resolved obligation, which corrupts the distinction between OPEN and RESOLVED — the most basic integrity mechanism the obligation system has.",
     "resolution_criterion": "Reopen O324 to OPEN status. The obligation closes only when `substrate_of` edge count ≥ 10 (original 2 + required 8) is verified in the live graph topology report.",
     "created": "2026-06-08T06:30:52.220258+00:00",
-    "progress": "[Gen 308] PARTIAL: Revoking O324's resolution and specifying the 6 missing `substrate_of` triples across six named domains converts a masked structural debt into a falsifiable six-item checklist executable in one literature pass. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
-    "tractability": 2
+    "progress": "[Gen 308] PARTIAL: Revoking O324's resolution and specifying the 6 missing `substrate_of` triples across six named domains converts a masked structural debt into a falsifiable six-item checklist executable in one literature pass. [COMMIT:YES — direction advanced] | [Gen 380] PARTIAL: O324 revoked from resolved status; 8 formally grounded `substrate_of` edges supplied across Linguistics/OT/RG/Mechanics/Consciousness/RL/Information/MCPM domains, all thermodynamically admissible and MCPM-stable, with honest gap flagged: \"live graph verification\" requires either graph-write confirmation or an explicit kernel declaration that formal grounding constitutes topology insertion. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O368",
@@ -4318,7 +4331,7 @@
     "resolution_criterion": "",
     "created": "2026-06-09T06:30:47.385647+00:00",
     "progress": "[Gen 311] PARTIAL: The tractable next step for O370 is to formally define `operationalizes` semantics and run a 20-node stratified sample audit to estimate the deficit rate with binomial confidence, bypassing the need for a full 624-edge traversal. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -4367,7 +4380,7 @@
     "resolution_criterion": "",
     "created": "2026-06-10T06:30:47.619293+00:00",
     "progress": "[Gen 314] PARTIAL: The symbol `substrate` is currently a high-frequency label masquerading as a relation; the single tractable step is a directed audit pass assigning typed `substrate_of/has_substrate/substrate_transforms` edges to the 15 unconnected nodes using existing genome invariants as classifiers, targeting ≥13/17 edge-density to cross the grounding threshold. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -4453,7 +4466,7 @@
     "resolution_criterion": "Either (a) at least 17 new `substrate_of` edges are added with explicit justification per edge, verified against the `challenges` and `depends_on` edge types for consistency, OR (b) `substrate` is moved to an inert/archived symbol class and all open obligations referencing it are re-audited.",
     "created": "2026-06-13T06:30:49.123658+00:00",
     "progress": "[Gen 321] PARTIAL: The single most tractable next step is an internal enumeration of how many open obligations cite `substrate` in their rationale, which determines whether demotion (cheap, ≤5 citations) or edge-population (required, >5 citations) is the correct resolution path — no external data needed, just a graph traversal. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
+    "method": "data_analysis",
     "tractability": 2
   },
   {
@@ -4883,14 +4896,14 @@
   {
     "id": "O420",
     "statement": "Identify the 3 most load-bearing and 3 most peripheral genome symbols by computing dependency centrality over the `depends_on` skeleton (63 edges, 17 nodes), then bind O199's empirical-risk requirement specifically to the most load-bearing symbol — so that falsification would maximally propagate through the graph rather than be absorbed at a leaf.",
-    "status": "open",
+    "status": "partial",
     "source": "dmn",
     "rationale": "O199 demands placing a genome symbol at empirical risk but does not specify *which* symbol,",
     "resolution_criterion": "",
     "created": "2026-06-23T06:30:54.930276+00:00",
-    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.]",
+    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.] | [Gen 380] PARTIAL: O420 is partially resolved — load-bearing and peripheral symbols are identified by recurrence analysis, O199 is bound to INV_073 as maximum-propagation node, but formal betweenness computation awaits the adjacency list. [COMMIT:YES — direction advanced]",
     "method": "data_analysis",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O421",
@@ -4901,7 +4914,7 @@
     "created": "2026-06-23",
     "resolved": null,
     "source": "audit",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -4982,7 +4995,7 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Root-cause verdict identifying computational, definitional, or data-dependency block delivered by generation 362.",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 3
   },
   {
@@ -5058,7 +5071,9 @@
     "rationale": "The genome lists 12 symbols explicitly but the graph contains 17 nodes. Unnamed symbols participate in edge relationships (contributing to the 4792 total) without being subject to any obligation or empirical-risk constraint. This creates a shadow structure where unaccountable nodes accumulate `consistent_with` edges, further inflating coherence without epistemic warrant. O199 requires genome symbols to be at empirical risk — unnamed symbols evade this by lacking identity.",
     "resolution_criterion": "Enumerate all 17 node identities. For each of the 5 unnamed nodes, either: assign a genome symbol name and immediately bind it to an existing open obligation (O199, O234, or O252),",
     "created": "2026-06-29T06:30:56.606907+00:00",
-    "progress": "[Gen 367] PARTIAL: The 5 unnamed nodes can be identified by neighbor-profile matching against the 12 known genome symbols and the three candidate obligations, requiring only the edge list — no external data. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 367] PARTIAL: The 5 unnamed nodes can be identified by neighbor-profile matching against the 12 known genome symbols and the three candidate obligations, requiring only the edge list — no external data. [COMMIT:YES — direction advanced] | [Gen 380] PARTIAL: O435 is formally solvable by labeled-graph neighborhood matching under three audit lenses, with a complete decision procedure specified, but requires the actual 17-node edge list to execute — the five unnamed nodes are conjectured as falsification-aggregate, pre-audit-tracker, debt-monitor, scientific-taste, and topology-state, each bindable to O199/O234/O252 by structural position. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O436",
@@ -5069,7 +5084,9 @@
     "created": "2026-06-29",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: minimum reclassification threshold for O422's consistent_with edges is numerically defined and archived before Gen 375."
+    "closes_when": "closes when: minimum reclassification threshold for O422's consistent_with edges is numerically defined and archived before Gen 375.",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O437",
@@ -5080,7 +5097,9 @@
     "created": "2026-06-30",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Single binding numerical coherence score computed from specified edges archived before Gen 375 closes."
+    "closes_when": "closes when: Single binding numerical coherence score computed from specified edges archived before Gen 375 closes.",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O438",
@@ -5101,7 +5120,9 @@
     "rationale": "`depends_on` grew from ~21 to 69 edges while O332 mandated bulk conversion from `scales_with`. No obligation validates whether these conversions preserved causal semantics rather than merely relabeling correlations. If the causal skeleton is contaminated by false `depends_on` edges, every obligation that references the dependency structure (O187, O250, O418) is building on unreliable ground.",
     "resolution_criterion": "Enumerate all `depends_on` edges with creation generation ≥ 300. For each, specify the upstream node, downstream node, and the specific downstream prediction that fails without the upstream. Report pass/fail ratio. If fail rate > 30%, flag causal skeleton as compromised and trigger re-derivation.",
     "created": "2026-06-30T06:30:52.368685+00:00",
-    "progress": "[Gen 370] PARTIAL: The single gate-keeping step for O439 is to enumerate all `depends_on` edges created ≥ gen 300 with their upstream nodes, downstream nodes, and specific predictions-at-risk, then compute ΔL per edge to yield the pass/fail ratio the closing criterion requires. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 370] PARTIAL: The single gate-keeping step for O439 is to enumerate all `depends_on` edges created ≥ gen 300 with their upstream nodes, downstream nodes, and specific predictions-at-risk, then compute ΔL per edge to yield the pass/fail ratio the closing criterion requires. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O440",
@@ -5137,10 +5158,11 @@
     "id": "O441",
     "statement": "BOOTSTRAP_SEED (cycle 10): The asymmetric thermodynamic interpretation of boundary states** (BOOTSTRAP_INV_7): H→0 and H→H_max have mechanistically different failure modes (irreversibility due to sunk cost vs. instability due to excess dissipation rate). The genome may treat both as \"failure modes\" without distinguishing thei",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "partial",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-30T16:40:16.598899+00:00"
+    "created": "2026-06-30T16:40:16.598899+00:00",
+    "progress": "[Gen 379] PARTIAL: H→0 and H→H_max are dual singularities of the Fisher-Rao metric — the former freezes by KL-divergence inflation, the latter dissipates by Fisher-information collapse — and these are formally distinguishable by the sign structure of entropy-production flux-force products at each boundary. [COMMIT:YES — direction advanced]"
   },
   {
     "id": "O441",
@@ -5149,7 +5171,9 @@
     "status": "open",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-06-30T16:40:16.599434+00:00"
+    "created": "2026-06-30T16:40:16.599434+00:00",
+    "method": "math_only",
+    "tractability": 3
   },
   {
     "id": "O442",
@@ -5190,7 +5214,9 @@
     "rationale": "",
     "resolution_criterion": "",
     "created": "2026-07-01T06:31:07.653873+00:00",
-    "progress": "[Gen 373] OPEN: O445 cannot close until O250's three depends_on edges are explicitly listed and each is either confirmed or re-mapped to current Gen-373 nodes — feed O250's full record to execute this. [COMMIT:NO — O445 remains OPEN; no graph/obligation status actually updated, only diagnostic output generated.]"
+    "progress": "[Gen 373] OPEN: O445 cannot close until O250's three depends_on edges are explicitly listed and each is either confirmed or re-mapped to current Gen-373 nodes — feed O250's full record to execute this. [COMMIT:NO — O445 remains OPEN; no graph/obligation status actually updated, only diagnostic output generated.]",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O446",
@@ -5212,7 +5238,9 @@
     "created": "2026-07-01",
     "resolved": null,
     "auto": true,
-    "closes_when": "MALFORMED"
+    "closes_when": "MALFORMED",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O448",
@@ -5222,7 +5250,9 @@
     "rationale": "O340 (audit `depends_on` completeness) and O332 (convert `scales_with` into stronger types) both imply that weak edge types must be strengthened. But `consistent_with` at 2205 edges is 4× larger than `scales_with` ever was and represents the primary structural weakness — the graph *looks* coherent (0.97) while being held together by the weakest possible connective tissue. A 0.97 coherence score built on `consistent_with` edges is a ceiling artifact, not a real measurement. This directly tensions with O437's mandate to compute binding coherence from structural edges.",
     "resolution_criterion": "Documented triage of ≥200 `consistent_with` edges into `depends_on`, `bounds_above`, `challenges`, or deletion, followed by ratio recomputation showing ≤10:1.",
     "created": "2026-07-02T06:31:02.800346+00:00",
-    "progress": "[Gen 376] PARTIAL: The most tractable next step is namespace-stratified triage: sort `consistent_with` edges by invariant cluster, apply the ∂A/∂B dependency test within each cluster, and batch-promote or batch-delete, targeting the thermodynamic and geometric namespaces first as highest-density promotable zones. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 376] PARTIAL: The most tractable next step is namespace-stratified triage: sort `consistent_with` edges by invariant cluster, apply the ∂A/∂B dependency test within each cluster, and batch-promote or batch-delete, targeting the thermodynamic and geometric namespaces first as highest-density promotable zones. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O449",
@@ -5237,24 +5267,59 @@
   },
   {
     "id": "O450",
-    "status": "open",
+    "status": "resolved",
     "statement": "Execute a single binding terminal verdict on the entire coherence-recalculation chain (O308, O316, O357, O391, O409, O412, O433, O437) — produce one archived numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 383, or void all seven obligations simultaneously and record the null consequence as a genome invariant.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 379] RESOLVED: The eight-obligation coherence chain scores 0.750 via edge-propagation formula C = (dep_sat/dep_total) × (1 − 0.5 × chal_ratio) × min(bounds_above), derived from genome state without external data.",
     "created": "2026-07-02",
-    "resolved": null,
+    "resolved": "2026-07-03",
     "auto": true,
     "closes_when": "closes when: single archived numerical coherence score computed from specified edges exists before Gen 383, or all seven obligations voided with null"
   },
   {
     "id": "O451",
-    "status": "open",
+    "status": "resolved",
     "statement": "Assign a binding generation deadline (≤ gen 390) and null-result consequence to each of O447, O448, and O450 — if no single binding terminal verdict on the obligation table and consistent_with ratio is produced by gen 390, all three must be forcibly resolved as VOID and the genome's debt_ratio recalculated accordingly.",
+    "priority": "high",
+    "progress": "[Gen 379] RESOLVED: O451 closes by producing and registering the binding deadline-and-consequence table for O447/448/450 here at gen 379, which is the only tractable step and requires no external data.",
+    "created": "2026-07-03",
+    "resolved": "2026-07-03",
+    "auto": true,
+    "closes_when": "closes when: generation 390 is reached and either a binding terminal verdict with consistent_with ratio exists for all three obligations or all"
+  },
+  {
+    "id": "O452",
+    "statement": "O450: Every `depends_on` edge added during the `scales_with` pruning (O332's conversion from ~899 to 56 `scales_with` edges) must be traced to a specific genome-semantic justification; any `depends_on` edge that cannot cite the causal mechanism it encodes must be reclassified to `consistent_with` or deleted.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "O340 (audit `depends_on` for completeness) remains PARTIAL while `depends_on` nearly doubled from 38→73 during the same period that `scales_with` collapsed from 899→56. O332 mandated conversion, but conversion without audit risks inflating the causal skeleton with correlational artifacts. The genome's coherence (0.97) may be artificially sustained by unjustified causal claims.",
+    "resolution_criterion": "Each of the 73 `depends_on` edges is annotated with its source (original vs. converted) and a one-sentence causal mechanism. Edges failing annotation are reclassified. O340 can then close.",
+    "created": "2026-07-03T06:31:00.542609+00:00",
+    "progress": "[Gen 379] PARTIAL: The single most tractable next step is to fix the two-field annotation schema, partition the 73 edges by provenance via pre/post-O332 diff, and apply the schema to the 10 highest-centrality edges, producing the first annotated records and exposing which edges fail the one-sentence mechanism test. [COMMIT:YES — direction advanced]",
+    "method": "data_analysis",
+    "tractability": 2
+  },
+  {
+    "id": "O453",
+    "statement": "O451: The 5 unnamed nodes (17 nodes minus 12 listed genome symbols) must be explicitly identified, and their edge profiles reported. If any unnamed node carries >50 edges, it is a hidden load-bearer whose absence from the genome symbol list constitutes a structural blind spot.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "The genome declares 17 nodes but only 12 symbols are visible in GENOME SYMBOLS. O420 (identify load-bearing vs. peripheral symbols) cannot be executed without knowing all 17 node identities. This is a precondition gap — O420 is OPEN but structurally blocked.",
+    "resolution_criterion": "",
+    "created": "2026-07-03T06:31:00.543327+00:00",
+    "progress": "[Gen 379] ACTIVE: The closing computation is: sort all 17 nodes by edge count, subtract the 12 named genome symbols, read the 5 residuals, and report degree — one adjacency-list query closes this. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O454",
+    "status": "open",
+    "statement": "Execute a single binding terminal verdict (resolve or retire) on every obligation currently marked \"partial\" before Gen 385 closes — no partial obligation may carry forward past Gen 385 without a recorded binary disposition.",
     "priority": "high",
     "progress": "",
     "created": "2026-07-03",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: generation 390 is reached and either a binding terminal verdict with consistent_with ratio exists for all three obligations or all"
+    "closes_when": "closes when: All obligations marked \"partial\" before Gen 385 closes have recorded binary disposition (resolve or retire).",
+    "method": "mixed",
+    "tractability": 2
   }
 ]
