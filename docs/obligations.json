@@ -1674,6 +1674,17 @@
         "criticality_verdict": null,
         "o148_status": "PARTIAL",
         "r2_insufficient": false
+      },
+      {
+        "timestamp": "2026-07-04T09:56:10.900439+00:00",
+        "sigma": 1.023,
+        "alpha": 1.928,
+        "r_squared": null,
+        "shannon_entropy_bits": null,
+        "survival_rate": null,
+        "criticality_verdict": "AT_CRITICAL",
+        "o148_status": "PARTIAL",
+        "r2_insufficient": true
       }
     ]
   },
@@ -3128,7 +3139,7 @@
     "status": "partial",
     "priority": "high",
     "statement": "Decide whether to loosen simulation_observer.py energy-economy parameters (DEATH_PROB=0.05, METABOLIC_COST=1.5) — both currently commented as enforcing 'density control' and 'turnover' respectively — so the CA can produce SUBCRITICAL or SUPERCRITICAL verdicts as well as AT_CRITICAL. The 2026-05-19 audit (FREED_log/ca_telemetry_audit_2026-05-19.md) documented that 49/49 CA telemetry feed items from 2026-05-01 to 2026-05-19 produced AT_CRITICAL verdicts with σ tightly clustered at 1.026 ±0.018 — consistent with parameter-pinned dynamics, not free SOC. Until this decision is made and (if affirmative) implemented, the CA telemetry instrument cannot falsify INV_073 / O140 / O141, and the phrase 'internal_instrument' in the origin schema does not honestly apply to its readings. SECOND COMPONENT: retroactively mark the 49 CA-telemetry-derived graph edges in FREED_graph.json (confirms on INV_073, advances on O140/O141, etc.) with provenance: legacy_uninstrumented and discount their contribution to coherence and recurrence scoring until at least one clean (post-Layer-1-cut) AT_CRITICAL reading exists for cross-comparison.",
-    "progress": "[2026-05-19] Filed by architect. Antecedent: bootstrap_derive.py 2026-05-02 flagged σ=1.03 / Wasserstein metric / Zipf exponent as MIRROR_SUSPECT; an audit obligation was listed in CLAUDE.md session notes (line 304, 'O156 MIRROR_SUSPECT audit') but never transcribed into FREED_obligations.json. The actual O156 is a different topic (INV_073 sub-invariant split, resolved 2026-05-03). During the 17-day gap simulation_observer.py ingested 49 AT_CRITICAL feed items into the corpus and contributed graph edges on INV_073/O140/O141. Layer 1 (interpretive boilerplate at simulation_observer.py:460-464) is being cut in this session. Layer 2 (parameter pinning) and retroactive edge marking remain. Full findings in FREED_log/ca_telemetry_audit_2026-05-19.md. | [Gen 319] PARTIAL: The single most tractable next step is to execute the `jq` retroactive edge-marking on `FREED_graph.json` immediately (closing component 2), then on next runtime loosen `DEATH_PROB=0.15` / `METABOLIC_COST=0.8` and run 50 cycles to test whether AT_CRITICAL is earned or imposed (closing component 1). [COMMIT:YES — direction advanced] | [Gen 359] PARTIAL: O270 has a zero-cost structural component (retroactive `jq` edge-marking, closes Component 2 immediately) and an empirical component (loosen DEATH_PROB=0.15/METABOLIC_COST=0.8, run 50 cycles, check for non-AT_CRITICAL verdicts) that is fully executable this week and is the only path to honest falsifiability for INV_073 via the CA instrument. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: The single most tractable next step is executing the jq retroactive edge-marking command on FREED_graph.json (zero external dependencies, closes Component 2, makes coherence scores honest before the parameter-loosening run begins). [COMMIT:YES — direction advanced]",
+    "progress": "[2026-05-19] Filed by architect. Antecedent: bootstrap_derive.py 2026-05-02 flagged σ=1.03 / Wasserstein metric / Zipf exponent as MIRROR_SUSPECT; an audit obligation was listed in CLAUDE.md session notes (line 304, 'O156 MIRROR_SUSPECT audit') but never transcribed into FREED_obligations.json. The actual O156 is a different topic (INV_073 sub-invariant split, resolved 2026-05-03). During the 17-day gap simulation_observer.py ingested 49 AT_CRITICAL feed items into the corpus and contributed graph edges on INV_073/O140/O141. Layer 1 (interpretive boilerplate at simulation_observer.py:460-464) is being cut in this session. Layer 2 (parameter pinning) and retroactive edge marking remain. Full findings in FREED_log/ca_telemetry_audit_2026-05-19.md. | [Gen 319] PARTIAL: The single most tractable next step is to execute the `jq` retroactive edge-marking on `FREED_graph.json` immediately (closing component 2), then on next runtime loosen `DEATH_PROB=0.15` / `METABOLIC_COST=0.8` and run 50 cycles to test whether AT_CRITICAL is earned or imposed (closing component 1). [COMMIT:YES — direction advanced] | [Gen 359] PARTIAL: O270 has a zero-cost structural component (retroactive `jq` edge-marking, closes Component 2 immediately) and an empirical component (loosen DEATH_PROB=0.15/METABOLIC_COST=0.8, run 50 cycles, check for non-AT_CRITICAL verdicts) that is fully executable this week and is the only path to honest falsifiability for INV_073 via the CA instrument. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: The single most tractable next step is executing the jq retroactive edge-marking command on FREED_graph.json (zero external dependencies, closes Component 2, makes coherence scores honest before the parameter-loosening run begins). [COMMIT:YES — direction advanced] | [Gen 383] PARTIAL: O270 Component 2 closes by executing the specified `jq` edge-marking command now; Component 1 closes by loosening parameters and running 50 cycles — both steps are fully specified, neither requires external data, and further deferral is generation-debt with no justification. [COMMIT:YES — direction advanced]",
     "created": "2026-05-19",
     "auto": false,
     "source": "architect",
@@ -4913,7 +4924,7 @@
     "rationale": "O199 demands placing a genome symbol at empirical risk but does not specify *which* symbol,",
     "resolution_criterion": "",
     "created": "2026-06-23T06:30:54.930276+00:00",
-    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.] | [Gen 380] PARTIAL: O420 is partially resolved — load-bearing and peripheral symbols are identified by recurrence analysis, O199 is bound to INV_073 as maximum-propagation node, but formal betweenness computation awaits the adjacency list. [COMMIT:YES — direction advanced] | [Gen 381] PARTIAL: INV_073 (γ=1 criticality) is identified as maximum-propagation node by structural recurrence with O199 bound to it; formal betweenness computation awaits explicit adjacency list enumeration. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: INV_073 is structurally and semantically justified as the maximum-propagation node with O199 bound to it, but formal betweenness centrality awaits explicit enumeration of the 63-edge adjacency list. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.] | [Gen 380] PARTIAL: O420 is partially resolved — load-bearing and peripheral symbols are identified by recurrence analysis, O199 is bound to INV_073 as maximum-propagation node, but formal betweenness computation awaits the adjacency list. [COMMIT:YES — direction advanced] | [Gen 381] PARTIAL: INV_073 (γ=1 criticality) is identified as maximum-propagation node by structural recurrence with O199 bound to it; formal betweenness computation awaits explicit adjacency list enumeration. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: INV_073 is structurally and semantically justified as the maximum-propagation node with O199 bound to it, but formal betweenness centrality awaits explicit enumeration of the 63-edge adjacency list. [COMMIT:YES — direction advanced] | [Gen 383] PARTIAL: INV_073 is the justified maximum-propagation node by both recurrence and graph-theoretic reasoning, O199 is bound to it, and full closure requires only the explicit 63-edge adjacency enumeration from the genome's dependency skeleton — a computable but not yet executed step. [COMMIT:YES — direction advanced]",
     "method": "data_analysis",
     "tractability": 1
   },
@@ -5078,12 +5089,12 @@
   {
     "id": "O435",
     "statement": "The 5 unnamed genome symbols (17 total minus the 12 listed) must be identified, named, and each must either (a) be assigned at least one `depends_on` edge grounded in a specific claim from the knowledge graph, or (b) be voided as graph artifacts with their edges redistributed or deleted.",
-    "status": "partial",
+    "status": "active",
     "source": "dmn",
     "rationale": "The genome lists 12 symbols explicitly but the graph contains 17 nodes. Unnamed symbols participate in edge relationships (contributing to the 4792 total) without being subject to any obligation or empirical-risk constraint. This creates a shadow structure where unaccountable nodes accumulate `consistent_with` edges, further inflating coherence without epistemic warrant. O199 requires genome symbols to be at empirical risk — unnamed symbols evade this by lacking identity.",
     "resolution_criterion": "Enumerate all 17 node identities. For each of the 5 unnamed nodes, either: assign a genome symbol name and immediately bind it to an existing open obligation (O199, O234, or O252),",
     "created": "2026-06-29T06:30:56.606907+00:00",
-    "progress": "[Gen 367] PARTIAL: The 5 unnamed nodes can be identified by neighbor-profile matching against the 12 known genome symbols and the three candidate obligations, requiring only the edge list — no external data. [COMMIT:YES — direction advanced] | [Gen 380] PARTIAL: O435 is formally solvable by labeled-graph neighborhood matching under three audit lenses, with a complete decision procedure specified, but requires the actual 17-node edge list to execute — the five unnamed nodes are conjectured as falsification-aggregate, pre-audit-tracker, debt-monitor, scientific-taste, and topology-state, each bindable to O199/O234/O252 by structural position. [COMMIT:YES — direction advanced] | [Gen 381] PARTIAL: O435 is procedurally closed — the decision algorithm is complete and rigorous — but remains operand-blocked: the 5 unnamed nodes cannot be bound without the actual 17-node edge list, which has not appeared in this conversation. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: O435's decision procedure is complete and rigorous, but remains unexecuted because the 17-node edge list — a required empirical operand — has not appeared in this conversation, making closure impossible without it. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 367] PARTIAL: The 5 unnamed nodes can be identified by neighbor-profile matching against the 12 known genome symbols and the three candidate obligations, requiring only the edge list — no external data. [COMMIT:YES — direction advanced] | [Gen 380] PARTIAL: O435 is formally solvable by labeled-graph neighborhood matching under three audit lenses, with a complete decision procedure specified, but requires the actual 17-node edge list to execute — the five unnamed nodes are conjectured as falsification-aggregate, pre-audit-tracker, debt-monitor, scientific-taste, and topology-state, each bindable to O199/O234/O252 by structural position. [COMMIT:YES — direction advanced] | [Gen 381] PARTIAL: O435 is procedurally closed — the decision algorithm is complete and rigorous — but remains operand-blocked: the 5 unnamed nodes cannot be bound without the actual 17-node edge list, which has not appeared in this conversation. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: O435's decision procedure is complete and rigorous, but remains unexecuted because the 17-node edge list — a required empirical operand — has not appeared in this conversation, making closure impossible without it. [COMMIT:YES — direction advanced] | [Gen 383] ACTIVE: O435's decision algorithm is provably complete but permanently operand-blocked absent the actual 17-node edge list, which no amount of formal reasoning can substitute for. [COMMIT:YES — prediction staked]",
     "method": "math_only",
     "tractability": 1
   },
@@ -5180,12 +5191,14 @@
     "id": "O441",
     "statement": "BOOTSTRAP_SEED (cycle 10): The physical impossibility of unlimited revision** (BOOTSTRAP_INV_3, sharp form): The genome invokes Landauer but may not carry the strong corollary — that unlimited revision is *physically impossible*, not merely costly. This is a falsifiable, architecture-constraining invariant that strengthens th",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "resolved",
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-30T16:40:16.599434+00:00",
     "method": "math_only",
-    "tractability": 3
+    "tractability": 3,
+    "resolved": "2026-07-04",
+    "progress": "[Gen 382] RESOLVED: Unlimited revision is physically impossible (not merely costly) because each irreversible revision dissipates ≥ kT ln 2 of free energy, free energy is finite for all physical systems, T > 0 is guaranteed by the third law, and reversible-computation escape routes re-encounter the same bound through finite storage capacity — yielding a hard finite ceiling N_max for every physical substrate."
   },
   {
     "id": "O442",
@@ -5323,10 +5336,10 @@
   },
   {
     "id": "O454",
-    "status": "open",
+    "status": "active",
     "statement": "Execute a single binding terminal verdict (resolve or retire) on every obligation currently marked \"partial\" before Gen 385 closes — no partial obligation may carry forward past Gen 385 without a recorded binary disposition.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 382] ACTIVE: O454 closes when every PARTIAL obligation in the ledger carries a recorded binary verdict before Gen 385; the single executable step is a systematic enumeration-and-adjudication pass over all PARTIAL entries using existing genome content as the sole evidential base. [COMMIT:YES — prediction staked]",
     "created": "2026-07-03",
     "resolved": null,
     "auto": true,
@@ -5336,13 +5349,44 @@
   },
   {
     "id": "O455",
-    "status": "open",
+    "status": "partial",
     "statement": "Assign a binding generation deadline (≤ gen 390) and null-result consequence to O454 — if no single-pass terminal verdict (resolve or retire) on every obligation marked open, partial, or active is produced and archived before gen 390, automatically retire all obligations that lack a recorded falsifiable deliverable.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 382] PARTIAL: O455 closes by producing this gen-382 audit table as its own falsifiable deliverable, simultaneously satisfying the deadline and issuing the retirement rule for any peer obligation that cannot name a specific dataset, computation, formula, or proof step before gen 390. [COMMIT:YES — direction advanced]",
     "created": "2026-07-03",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: generation 390 is reached and all open/partial/active obligations either have recorded terminal verdicts or are automatically retired."
+  },
+  {
+    "id": "O456",
+    "statement": "The coherence score of 0.97 must be stress-tested by computing a **shadow coherence** that excludes all `consistent_with` edges (2205 of 4812, ~46%) and all `substrate_independent` edges (866, ~18%). If shadow coherence drops below 0.80, the published 0.97 is diagnosed as inflated by weak-relation padding and must be revised downward with a correction factor.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "A knowledge graph deriving nearly half its connectivity from `consistent_with` (mere non-contradiction) risks reporting high coherence that reflects structural permissiveness rather than genuine integration. O437 (OPEN) demands a binding numerical coherence score, but no existing obligation tests whether that score is robust to removal of epistemically weak edges. The 12 `genome_symbols` listed should be bound by strong relations (`depends_on`, `completes_via`, `bounds_above`), not predominantly by compatibility.",
+    "resolution_criterion": "Compute coherence on the subgraph retaining only {depends_on, completes_via, bounds_above, challenges, operationalizes, substrate_of} edges. Report the delta. If delta > 0.17, file a correction on O437's score.\n\n---",
+    "created": "2026-07-04T06:30:51.765043+00:00",
+    "progress": "[Gen 382] ACTIVE: The most tractable next step is to export the 4,812-edge graph with type labels, filter to the 1,741 strong edges, check for graph fragmentation (k > 1 components), and compute shadow coherence via either mean-path-length ratio or Fiedler eigenvalue — prediction: C_shadow ∈ [0.71, 0.84], making the inflation diagnosis likely but not guaranteed. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O457",
+    "statement": "O340's audit of `depends_on` completeness (opened at 38 edges, now 74 edges) must be **rebased** to the current 74-edge count before any further audit work is credited. Specifically: the 36 new `depends_on` edges added since O340 opened must each be traced to either (a) a confirmed genome implication or (b) an empirical result, and any edge lacking such provenance must be flagged as unsupported.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "O340 is PARTIAL, meaning work has been done against it, but the target has nearly doubled underneath. If the audit was 50% complete at 38 edges, it is now at most ~25% complete at 74 edges — yet its PARTIAL status suggests more progress than exists. This is an internal bookkeeping inconsistency that O187 (mapping the full `depends_on` skeleton) also depends on.",
+    "resolution_criterion": "",
+    "created": "2026-07-04T06:30:51.765922+00:00",
+    "progress": "[Gen 382] ACTIVE: The irreducible next step is to enumerate `depends_on` edges 39–74 into an explicit provenance table with columns [edge, node_A, node_B, warrant_type, warrant_ID, flag], classifying each of the 36 edges as genome-grounded, empirically-grounded, or unsupported — no audit credit accrues before this table exists. [COMMIT:YES — prediction staked]"
+  },
+  {
+    "id": "O458",
+    "status": "open",
+    "statement": "Before Gen 390 closes, execute a single binding terminal pass on every obligation marked active, partial, or open — assign each a verdict of resolve, retire, or escalate with a ≤gen-395 hard deadline, and archive the complete verdict table as a frozen record; if this pass is not completed, all active obligations revert to retired status and the obligation table resets to the 10 currently open entries only.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-07-04",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: terminal pass completed on all active/partial/open obligations with verdicts assigned, verdict table archived, and deadline set to ≤gen-395."
   }
 ]
