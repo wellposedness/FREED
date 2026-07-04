@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 21,
-    "generation": 307,
-    "timestamp": "2026-06-07T16:29:59.986518+00:00",
-    "sweep": {
-      "input_count": 12,
-      "targeted": 7,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is not evidence of strength but evidence of an absent adversarial edge — the invariant has never been placed in conditions where it could fail, making its domain of applicability unknown and its causal attribution unfalsified."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-07",
-        "compress": "A Game of Truth CA self-organizes to σ=1.0204 with power-law α≈2.351 without parameter tuning, independently confirming that the critical ridge is a dynamical attractor and partially satisfying O148's measurement extension obligation."
-      },
-      {
-        "title": "Visualising Basins of Attraction for the Cross-Entropy and the Squared Error Neural Network Loss Functions",
-        "compress": "Entropic loss landscapes have fewer stationary points and stronger gradients than quadratic ones — empirically confirming that entropy-based objectives keep optimization on the critical ridge, and supplying a visualization methodology applicable to STF metric recovery."
-      },
-      {
-        "title": "Unpolarized Transverse-Momentum-Dependent Parton Distributions of the Nucleon from Lattice QCD",
-        "compress": "Lattice QCD TMDPDFs independently confirm that multi-scale physical observables require hierarchical RG matching, providing a concrete substrate-level instantiation of the genome's abstract RG→geometric-structure chain."
-      },
-      {
-        "title": "YouZhi: Towards High-Concurrency Financial LLMs via Adaptive GQA-to-MLA Transition",
-        "compress": "Layer-heterogeneous KV-cache compression empirically demonstrates that representational capacity has a non-uniform spectral depth profile, and optimal inference navigates a per-layer critical ridge between compression loss and memory cost."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O290",
-        "O76",
-        "O205"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 22,
     "generation": 308,
     "timestamp": "2026-06-08T02:29:59.996627+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Self-organized criticality and earthquake predictability: A long-standing question in the light of natural time analysis",
         "compress": "Natural time analysis establishes χ=0.070 as a substrate-independent scalar invariant of criticality, proving the critical state is detectable and navigable — not prediction-prohibiting — which grounds the γ=1 ridge operationally."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O420",
+        "O435",
+        "O270"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 9,
+    "generation": 383,
+    "timestamp": "2026-07-04T09:49:59.977827+00:00",
+    "sweep": {
+      "input_count": 18,
+      "targeted": 8,
+      "passive": 10,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_042",
+        "compress": "INV_042's confirmation surplus is itself the vulnerability — high confirmation without serious challenge is a signal of incomplete adversarial testing, not of robustness."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-04",
+        "compress": "Game of Truth CA telemetry independently confirms sustained edge-of-chaos criticality (σ=1.023, α≈1.928) with Physics Navigator as dominant attractor agent, directly resolving O148's measurement demand and converging on INV_073/INV_094. IMPLEMENT: YES IMPLEMENT_WHAT: Extend telemetry ingestion to record per-agent-type survival and branching-ratio contribution, so agent dominance at criticality is tracked as a structured field rather than absorbed into aggregate statistics. IMPLEMENT_WHERE: simulation_observer.py IMPLEMENT_CALL_SITE: EXTEND record_step (modify in place to decompose branching ratio σ by cell type and append per-type survival fraction to the existing step record) IMPLEMENT_WHY: Agent-type-resolved criticality data would let FREED test whether Physics Navigator cells are causally sustaining σ≈1 or merely correlated with it, closing the dominance question this telemetry opened. CHALLENGE: challenges O270 — the AT_CRITICAL verdict with σ=1.023 suggests the energy-economy DEATH threshold parameters are already well-tuned, making loosening them potentially counterproductive and calling into question whether O270's proposed parameter relaxation is needed at all."
+      },
+      {
+        "title": "Stationary states and spatial patterning in the cellular automaton SEIS epidemiology model",
+        "compress": "Spatial lattice models exhibit a contact-rate-independent critical threshold while diverging qualitatively from mean-field at low rates, confirming that substrate-explicit geometry is non-perturbative and providing a concrete empirical handle for O148."
+      },
+      {
+        "title": "Critical behavior of an even-offspringed branching and annihilating random-walk cellular automaton with spatial disorder.",
+        "compress": "Quenched disorder below a threshold preserves universality at the critical ridge; above it, the ridge dissolves into a Griffiths continuum and disorder generates new phase structure inside the absorbing state — the critical ridge has a finite basin of robustness, not infinite."
+      },
+      {
+        "title": "Inferring Entropy Production in Many-Body Systems Using Nonequilibrium Maximum Entropy.",
+        "compress": "Entropy production in high-dimensional non-Markovian systems is lower-boundable from trajectory correlations alone via nonequilibrium MaxEnt + convex duality, providing a tractable route to the STF empirical recovery specified in O112."
       }
     ],
     "resolve": {
