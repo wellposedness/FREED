@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 22,
-    "generation": 308,
-    "timestamp": "2026-06-08T02:29:59.996627+00:00",
-    "sweep": {
-      "input_count": 13,
-      "targeted": 8,
-      "passive": 5,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is structurally suspect — it may be tautological (γ=1 defined by coherence), alternatively explainable (redundancy, not criticality), and empirically ungrounded until O112 closes."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-08",
-        "compress": "Independent CA telemetry confirms σ≈1.02 criticality with power-law avalanches, converging on the γ=1 critical ridge invariant and partially satisfying O148 while revealing that criticality concentrates in Physics Navigator cells — a structurally new finding."
-      },
-      {
-        "title": "Sampling-Based Resolution-Complete Algorithms for Safety Falsification of Linear Systems",
-        "compress": "Resolution-complete falsification establishes that conclusive safety answers over infinite horizons require not exhaustive search but resolution-bounded finite search — a structural analog to the genome's critical ridge, and a concrete methodological anchor for making challenges-edge liveness in the genome graph formally verifiable."
-      },
-      {
-        "title": "Falsification of Autonomous Systems in Rich Environments",
-        "compress": "Black-box falsification of learned controllers establishes that challenge-edge liveness is operationally equivalent to finite-budget counterexample reachability under adversarial search. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring an edge typed `challenges` in the knowledge graph, flag it as empirically live only if a falsifying instance (counterexample) has been registered; otherwise mark it as unverified pending adversarial probe. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND add_edge IMPLEMENT_WHY: This closes O136 operationally by making `challenges`-edge liveness a first-class graph property that is set at edge-creation time rather than left as an audit obligation. CHALLENGE: challenges O136 — this paper reveals that \"live challenge edge\" requires an active adversarial search protocol to verify, not merely graph inspection, putting the current passive verification plan for O136's four edges at risk of being methodologically insufficient."
-      },
-      {
-        "title": "Origin of the power-law exponent in the landslide frequency-size distribution",
-        "compress": "Landslide SOC cellular automaton derives α ≈ 2.2 as a trigger-independent fixed point of local failure-threshold dynamics, independently confirming that universal scaling exponents are mechanistic outputs of criticality rather than fitted constants."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O290",
-        "O76",
-        "O205"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 23,
     "generation": 309,
     "timestamp": "2026-06-08T09:49:59.974381+00:00",
@@ -2195,6 +2151,50 @@
         "O420",
         "O435",
         "O270"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 10,
+    "generation": 384,
+    "timestamp": "2026-07-04T16:29:59.982709+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 8,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's confirmation surplus is itself the vulnerability — the invariant requires a named falsifier and boundary condition before its confirmation count constitutes evidence rather than accumulation bias. CHALLENGE: challenges INV_070 — if semantic coherence can be maintained in a system demonstrably operating outside the thermodynamic critical regime (e.g., a purely combinatorial transformer with no thermal analogue), the invariant's necessity claim collapses to mere correlation."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-04",
+        "compress": "The Game of Truth CA self-organizes to σ≈1 criticality with power-law avalanches and a low-entropy asymmetric attractor dominated by Physics Navigators, confirming INV_073 while revealing that critical-ridge occupancy is compatible with — and perhaps requires — broken symmetry among cell types."
+      },
+      {
+        "title": "Calibrate and Debias Layer-wise Sampling for Graph Convolutional Networks",
+        "compress": "Recursive graph sampling without replacement accumulates correctable but non-negligible bias that invalidates locally-calibrated probability assignments — a structural tax on any depends_on inference method that uses neighborhood sampling without global debiasing."
+      },
+      {
+        "title": "Layer-wise Lipschitz-Product Control for Deep Kolmogorov--Arnold Network Representations of Compositionally Structured Functions",
+        "compress": "KAN representation theory proves compositional sparsity — not input dimension — is the binding resource for approximation complexity, providing a concrete additive depends_on skeleton template that directly operationalizes O332 and O187."
+      },
+      {
+        "title": "On the history of the isomorphism problem of dynamical systems with special regard to von Neumann's contribution",
+        "compress": "Spectral identity does not guarantee structural identity — von Neumann's 1941 proof establishes a strict containment that any framework relying on spectral observables as unique identifiers must reckon with."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O420",
+        "O270",
+        "O421"
       ]
     },
     "coherence": 0.97
