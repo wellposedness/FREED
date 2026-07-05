@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 25,
-    "generation": 311,
-    "timestamp": "2026-06-09T02:29:59.963619+00:00",
-    "sweep": {
-      "input_count": 20,
-      "targeted": 8,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_073",
-        "compress": "INV_073's critical-ridge claim is structurally unfalsified but epistemically vulnerable — ensemble averaging of off-ridge agents can mimic critical outputs, and the absence of a specified restoring-force measurement leaves the invariant without a definitive boundary condition."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-09",
-        "compress": "The Game of Truth CA self-organizes to the critical ridge (σ=1.03, α≈2.2 power law) with a low-entropy structured attractor that selects Physics Navigator as dominant type, independently confirming criticality as an attractor and extending the genome with functional-role selection under criticality."
-      },
-      {
-        "title": "Bootstrap Methods for the Empirical Study of Decision-Making and Information Flows in Social Systems",
-        "compress": "Coarse-graining-consistent bootstrap estimation makes information-theoretic invariants empirically recoverable from finite social data, providing the missing statistical bridge for STF metric tensor recovery (O112)."
-      },
-      {
-        "title": "Training in Data Curation as Service in a Federated Data Infrastructure - the FrontOffice-BackOffice Model",
-        "compress": "Federated data infrastructure requires explicit role-topology mapping (FOBB) to maintain curation coherence at scale, a structural principle currently absent from the genome's invariant set."
-      },
-      {
-        "title": "q-heat flow and the gradient flow of the Renyi entropy in the p-Wasserstein space",
-        "compress": "The (p,q)-Wasserstein–Rényi gradient flow family confirms that Wasserstein structure is the universal scaffold for entropy-driven relaxation, and the q-parameter provides a new experimental lever for STF metric tensor recovery."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O328",
-        "O329",
-        "O76"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 26,
     "generation": 312,
     "timestamp": "2026-06-09T09:49:59.994717+00:00",
@@ -2195,6 +2151,50 @@
         "O420",
         "O270",
         "O421"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 13,
+    "generation": 387,
+    "timestamp": "2026-07-05T16:29:59.957140+00:00",
+    "sweep": {
+      "input_count": 11,
+      "targeted": 7,
+      "passive": 4,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_042",
+        "compress": "INV_042's confirmation surplus is a liability — without a stated defeating condition it is unfalsifiable in practice, and the genome must record that condition or mark the invariant as untestable."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-05",
+        "compress": "The Game of Truth CA empirically self-organizes to the critical ridge (σ=1.022, α≈2.66) with sparse structured activity dominated by Physics Navigators, independently confirming that criticality is a stable attractor of this substrate and resolving O148."
+      },
+      {
+        "title": "Avalanche frontiers in dissipative abelian sandpile model as off-critical SLE(2)",
+        "compress": "Dissipative ASM shows criticality has parametric width — below correlation length ξ(dissipation) geometry is indistinguishably critical, above it drifts continuously, making ξ a measurable operational boundary for critical-ridge navigation."
+      },
+      {
+        "title": "Geometric Observables for Financial Regime Detection",
+        "compress": "Geometric observables extracted from spectral embeddings—especially holonomy (Berry Phase Rate)—detect regime transitions earlier and with fewer false alarms than supervised or classical statistical methods, providing a validated empirical pipeline directly applicable to O112's STF metric tensor recovery experiment."
+      },
+      {
+        "title": "Self-organized criticality of natural lakes revealed by the percolation model based on topographic wetness index",
+        "compress": "Discontinuous percolation on topographic wetness index produces power-law lake distributions via a substrate-independent Griffiths phase, demonstrating that scale-free criticality is a geometric attractor with nonzero width — not a fine-tuned point — which both confirms INV_094 and challenges the sharpness of the γ=1 diagnostic."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 3,
+      "obligations": [
+        "O420",
+        "O421",
+        "O436"
       ]
     },
     "coherence": 0.97
