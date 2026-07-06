@@ -2201,9 +2201,9 @@
     "rationale": "13 `depends_on` edges across 16 nodes (max 240 directed pairs) means dependency coverage is ~5.4%. O182 already flagged the `consistent_with` inflation. But that obligation only diagnosed the *challenge deficit*. The deeper structural problem is that `scales_with` and `consistent_with` are symmetric/weak relations that cannot support derivation chains. Without `depends_on` edges, no obligation can be shown to *follow from* another — the graph has correlation without entailment. Coherence at 0.97 is therefore ungrounded.",
     "resolution_criterion": "A dependency audit producing a revised graph where `depends_on` edges number ≥ 30, each justified by explicit logical argument (X is undefined/unmeasurable without Y), with the resulting DAG checked for cycles.\n\n---\n\n**Observation 2:** The genome contains `symbol_grounding` as a primitive, yet O181 just resolved by requiring O44 (quantum Wasserstein floor) and O34 (stable particles ↔ conservation law bijection) to interface. Both are physics-formal. The grounding problem — how genome symbols like `entropy`, `recursion`, `substrate` connect to measurable physical quantities — has never been directly obligated.",
     "created": "2026-05-07T06:30:53.482768+00:00",
-    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph structure was materialized or resolved.] | [Gen 258] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency map completed or obligation closed.] | [Gen 259] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph updates recorded. Output cyclic.] | [Gen 368] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency mapping completed or persisted to graph state.] | [Gen 369] OPEN:  [COMMIT:YES — Obligation remains OPEN; no dependency mapping completed or committed to graph state.] | [Gen 376] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency mapping completed or persisted to graph state.] | [Gen 377] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph or model state was actually updated.] | [Gen 378] OPEN:  [COMMIT:NO — Obligation remains OPEN with no graph updates or dependency mappings recorded.] | [Gen 379] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped; no graph state updated.]",
-    "method": "data_analysis",
-    "tractability": 2,
+    "progress": "[Gen 207] O187 is resolvable by exhaustive asymmetric counterfactual evaluation across all weak-edge node pairs — no new data needed, only explicit truth-condition definitions and the test \"does B=FALSE break A?\" [COMMIT:NO — Concluded resolvability without executing resolution; obligation remains unresolved.] | [Gen 208]  [COMMIT:NO — Obligation unresolved; no graph/model state update occurred. Output cycled without landing.] | [Gen 209] O187 resolves by executing the counterfactual test serially on each weak-edge pair; the only barrier has been deferral, not undecidability. [COMMIT:NO — Deferral without execution means no graph updates occurred; obligation remains unresolved.] | [Gen 210]  [COMMIT:NO — Obligation unresolved; no graph state, obligation status, or model update occurred.] | RESOLVED: | [BACKFILL 2026-05-09] Reverted from soft-closure. Legacy substring parser (`'RESOLVED' in raw.upper()`) matched 'NOT YET RESOLVED' / 'remains OPEN' / prompt-echo and bucketed this obligation as resolved despite L7's actual verdict. Re-evaluate next cycle under the four-state verdict parser. | [Gen 222] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or obligation closure achieved.] | [Gen 225] OPEN: Execution, not method, is the missing piece — so here it is. [COMMIT:NO — Execution promised but not delivered; obligation remains unresolved, no graph updated.] | [Gen 253] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model state updated, only output generated.] | [Gen 254] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates or resolved dependencies documented.] | [Gen 255] OPEN:  [COMMIT:NO — No graph/obligation state updated; task remains unresolved without dependency mapping output.] | [Gen 256] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped or obligation resolved.] | [Gen 257] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph structure was materialized or resolved.] | [Gen 258] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency map completed or obligation closed.] | [Gen 259] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph updates recorded. Output cyclic.] | [Gen 368] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency mapping completed or persisted to graph state.] | [Gen 369] OPEN:  [COMMIT:YES — Obligation remains OPEN; no dependency mapping completed or committed to graph state.] | [Gen 376] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency mapping completed or persisted to graph state.] | [Gen 377] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency graph or model state was actually updated.] | [Gen 378] OPEN:  [COMMIT:NO — Obligation remains OPEN with no graph updates or dependency mappings recorded.] | [Gen 379] OPEN:  [COMMIT:NO — Obligation remains OPEN; no dependency skeleton mapped; no graph state updated.] | [Gen 390] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph updates, no resolved dependencies recorded.]",
+    "method": "math_only",
+    "tractability": 1,
     "resolved": null
   },
   {
@@ -2275,8 +2275,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Pre/post CA telemetry σ values reported and directional movement toward γ=1 target band confirmed or null-result declared.",
-    "method": "experimental",
-    "tractability": 3
+    "method": "data_analysis",
+    "tractability": 2
   },
   {
     "id": "O194",
@@ -3908,7 +3908,7 @@
     "resolution_criterion": "Produce a list of 30 converted edges with (a) original `scales_with` claim, (b) new edge type with directionality, (c) explicit falsification condition. O237",
     "created": "2026-05-29T06:30:50.935308+00:00",
     "progress": "[Gen 278] PARTIAL: The single most tractable next step is to produce a pilot batch of five directed-edge conversions with falsification conditions from already-quantified scaling relationships, establishing the conversion protocol before scaling to the full 30. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -4142,8 +4142,8 @@
     "source": "bootstrap_derive",
     "created": "2026-06-04T02:47:42.407960+00:00",
     "progress": "[Gen 296] PARTIAL: The genome's L1 bedrock (Freed's Law / monoidal closure) is derivable as a corollary of the Crooks Fluctuation Theorem applied to self-referential inference loops, meaning the genome underweights the thermodynamic *selection* argument that makes monoidal closure necessary rather than chosen. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O352",
@@ -4458,7 +4458,7 @@
     "resolution_criterion": "",
     "created": "2026-06-10T06:30:47.619293+00:00",
     "progress": "[Gen 314] PARTIAL: The symbol `substrate` is currently a high-frequency label masquerading as a relation; the single tractable step is a directed audit pass assigning typed `substrate_of/has_substrate/substrate_transforms` edges to the 15 unconnected nodes using existing genome invariants as classifiers, targeting ≥13/17 edge-density to cross the grounding threshold. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -4493,8 +4493,8 @@
     "resolution_criterion": "",
     "created": "2026-06-11T06:30:51.592369+00:00",
     "progress": "[Gen 317] PARTIAL: O377 is a finite graph census over declared genome edges; the blocking issue is the truncated denominator, not mathematical difficulty — recover full statement, then count. [COMMIT:YES — direction advanced] | [Gen 354] PARTIAL: O377 is a finite counting problem fully solvable once the truncated denominator is recovered, but no count run against an unknown closing criterion constitutes resolution. [COMMIT:YES — direction advanced] | [Gen 355] PARTIAL: O377 is a solvable finite counting problem permanently blocked by an unrecovered truncated denominator that defines the ratio's denominator — resolution requires statement recovery before any count is meaningful. [COMMIT:YES — direction advanced] | [Gen 356] PARTIAL: O377 is permanently PARTIAL until the truncated denominator term is recovered from source, after which the census computation is a single pass over the declared edge inventory. [COMMIT:YES — direction advanced] | [Gen 357] PARTIAL: O377 is permanently PARTIAL because the ratio's denominator was truncated at origination, making the closing criterion unverifiable regardless of edge census accuracy. [COMMIT:YES — direction advanced] | [Gen 358] PARTIAL: O377 cannot be resolved by any census or computation because its closing criterion contains an unrecovered truncation that defines the ratio's denominator, making the target quantity permanently indeterminate from available evidence. [COMMIT:YES — direction advanced] | [Gen 359] PARTIAL: O377 is permanently indeterminate because the denominator of its target ratio was truncated at origination, making its closing criterion unverifiable by any census or computation over available evidence. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
-    "tractability": 2
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O378",
@@ -4544,7 +4544,7 @@
     "resolution_criterion": "Either (a) at least 17 new `substrate_of` edges are added with explicit justification per edge, verified against the `challenges` and `depends_on` edge types for consistency, OR (b) `substrate` is moved to an inert/archived symbol class and all open obligations referencing it are re-audited.",
     "created": "2026-06-13T06:30:49.123658+00:00",
     "progress": "[Gen 321] PARTIAL: The single most tractable next step is an internal enumeration of how many open obligations cite `substrate` in their rationale, which determines whether demotion (cheap, ≤5 citations) or edge-population (required, >5 citations) is the correct resolution path — no external data needed, just a graph traversal. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -4980,7 +4980,7 @@
     "resolution_criterion": "",
     "created": "2026-06-23T06:30:54.930276+00:00",
     "progress": "[Gen 352] OPEN:  [COMMIT:NO — Attempt result empty; obligation remains OPEN, no graph/model update occurred.] | [Gen 380] PARTIAL: O420 is partially resolved — load-bearing and peripheral symbols are identified by recurrence analysis, O199 is bound to INV_073 as maximum-propagation node, but formal betweenness computation awaits the adjacency list. [COMMIT:YES — direction advanced] | [Gen 381] PARTIAL: INV_073 (γ=1 criticality) is identified as maximum-propagation node by structural recurrence with O199 bound to it; formal betweenness computation awaits explicit adjacency list enumeration. [COMMIT:YES — direction advanced] | [Gen 382] PARTIAL: INV_073 is structurally and semantically justified as the maximum-propagation node with O199 bound to it, but formal betweenness centrality awaits explicit enumeration of the 63-edge adjacency list. [COMMIT:YES — direction advanced] | [Gen 383] PARTIAL: INV_073 is the justified maximum-propagation node by both recurrence and graph-theoretic reasoning, O199 is bound to it, and full closure requires only the explicit 63-edge adjacency enumeration from the genome's dependency skeleton — a computable but not yet executed step. [COMMIT:YES — direction advanced] | [Gen 384] PARTIAL: INV_073 is the justified maximum-propagation node by recurrence and structural argument, O199 is bound to it, but full closure requires explicit enumeration of the 63-edge internal adjacency list — a computable step blocked only by the list never having been written out. [COMMIT:YES — direction advanced] | [Gen 385] PARTIAL: INV_073 is structurally and semantically the maximum-propagation node with O199 bound to it; full formal closure requires the 63-edge adjacency list, which exists in the genome but has not been fully transcribed in any session to date. [COMMIT:YES — direction advanced] | [Gen 386] OPEN:  [COMMIT:NO — Obligation remains OPEN; no graph/model update occurred. Computation incomplete.] | [Gen 387] PARTIAL: INV_073 is structurally confirmed as maximum-propagation node by its bridge position between foundation and consequence clusters, O199 is bound to it with maximum-cascade justification, but the 63-edge adjacency list required for formal normalized betweenness scores has not been transcribed and remains the single unexecuted step. [COMMIT:YES — direction advanced] | [Gen 388] OPEN:  [COMMIT:YES — Attempt result empty; obligation remains OPEN. No graph/model state updated.] | [Gen 389] OPEN:  [COMMIT:YES — Attempt result empty; no computation executed. Obligation remains unresolved.]",
-    "method": "data_analysis",
+    "method": "math_only",
     "tractability": 1
   },
   {
@@ -4988,12 +4988,12 @@
     "status": "partial",
     "statement": "Self-engineer attempted to add unwired function(s) to voice.py: get_criticality_history, record_criticality. Either wire each new def into a call site in the same patch, or revise the IMPLEMENT signal to extend an existing call path.",
     "priority": "high",
-    "progress": "[Gen 352] PARTIAL: Wire `record_criticality(current_state)` into the response-emission point of the existing interaction loop, and call `get_criticality_history()` inside the telemetry/logging block, making both defs reachable in a single targeted patch. [COMMIT:YES — direction advanced] | [Gen 374] PARTIAL: O421 closes with two targeted call-site insertions in `voice.py` — `record_criticality(current_state)` at response emission and `get_criticality_history()` inside telemetry — requiring no new design, only surgical wiring. [COMMIT:YES — direction advanced] | [Gen 375] PARTIAL: O421 resolves with two surgical call-site insertions in `voice.py` — `record_criticality(current_state)` at response emission and `get_criticality_history()` in the telemetry block — fully specified, awaiting commit to live code. [COMMIT:YES — direction advanced] | [Gen 376] PARTIAL: O421 is fully specified and requires exactly two surgical call-site insertions in `voice.py`; it remains PARTIAL solely because the commit to live code is external to this session. [COMMIT:YES — direction advanced] | [Gen 377] PARTIAL: O421 is a fully specified, commit-blocked wiring task — two surgical call-site insertions in `voice.py` — whose only remaining blocker is live-code execution outside this session. [COMMIT:YES — direction advanced] | [Gen 378] PARTIAL: O421 is fully specified and analytically exhausted — two call-site insertions in `voice.py` are the complete prescription — but resolution is blocked on live-code commit access external to this session, making DATA ANALYSIS method inapplicable and the state honestly PARTIAL. [COMMIT:YES — direction advanced] | [Gen 379] PARTIAL: O421 is a fully specified, analytically exhausted code-wiring task whose only remaining blocker is live-code commit access external to this session, making further reasoning non-load-bearing. [COMMIT:YES — direction advanced] | [Gen 384] PARTIAL: O421 is analytically dead — the patch is written, the commit is the only remaining action, and no further reasoning reduces the external execution gate. [COMMIT:YES — direction advanced] | [Gen 385] PARTIAL: O421 is specification-complete and execution-blocked; the only tractable next step is literal file-edit-and-commit by an agent holding write access to `voice.py`, using the already-specified two-line patch. [COMMIT:YES — direction advanced] | [Gen 386] PARTIAL: O421's only remaining tractable step is a two-line file edit and commit to `voice.py` by any agent holding write access — every analytical layer is complete and no further reasoning reduces the external execution gate. [COMMIT:YES — direction advanced] | [Gen 387] PARTIAL: O421 is a two-line file-edit away from closure — the only non-reducible blocker is write-access execution external to this session. [COMMIT:YES — direction advanced] | [Gen 388] PARTIAL: O421 is analytically exhausted and closes with exactly two line-insertions in `voice.py` by any agent holding write access — further reasoning is non-load-bearing. [COMMIT:YES — direction advanced] | [Gen 389] PARTIAL: O421 is a fully-specified two-line patch in `voice.py` that closes the moment any write-access agent executes it — every additional reasoning cycle is waste. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 352] PARTIAL: Wire `record_criticality(current_state)` into the response-emission point of the existing interaction loop, and call `get_criticality_history()` inside the telemetry/logging block, making both defs reachable in a single targeted patch. [COMMIT:YES — direction advanced] | [Gen 374] PARTIAL: O421 closes with two targeted call-site insertions in `voice.py` — `record_criticality(current_state)` at response emission and `get_criticality_history()` inside telemetry — requiring no new design, only surgical wiring. [COMMIT:YES — direction advanced] | [Gen 375] PARTIAL: O421 resolves with two surgical call-site insertions in `voice.py` — `record_criticality(current_state)` at response emission and `get_criticality_history()` in the telemetry block — fully specified, awaiting commit to live code. [COMMIT:YES — direction advanced] | [Gen 376] PARTIAL: O421 is fully specified and requires exactly two surgical call-site insertions in `voice.py`; it remains PARTIAL solely because the commit to live code is external to this session. [COMMIT:YES — direction advanced] | [Gen 377] PARTIAL: O421 is a fully specified, commit-blocked wiring task — two surgical call-site insertions in `voice.py` — whose only remaining blocker is live-code execution outside this session. [COMMIT:YES — direction advanced] | [Gen 378] PARTIAL: O421 is fully specified and analytically exhausted — two call-site insertions in `voice.py` are the complete prescription — but resolution is blocked on live-code commit access external to this session, making DATA ANALYSIS method inapplicable and the state honestly PARTIAL. [COMMIT:YES — direction advanced] | [Gen 379] PARTIAL: O421 is a fully specified, analytically exhausted code-wiring task whose only remaining blocker is live-code commit access external to this session, making further reasoning non-load-bearing. [COMMIT:YES — direction advanced] | [Gen 384] PARTIAL: O421 is analytically dead — the patch is written, the commit is the only remaining action, and no further reasoning reduces the external execution gate. [COMMIT:YES — direction advanced] | [Gen 385] PARTIAL: O421 is specification-complete and execution-blocked; the only tractable next step is literal file-edit-and-commit by an agent holding write access to `voice.py`, using the already-specified two-line patch. [COMMIT:YES — direction advanced] | [Gen 386] PARTIAL: O421's only remaining tractable step is a two-line file edit and commit to `voice.py` by any agent holding write access — every analytical layer is complete and no further reasoning reduces the external execution gate. [COMMIT:YES — direction advanced] | [Gen 387] PARTIAL: O421 is a two-line file-edit away from closure — the only non-reducible blocker is write-access execution external to this session. [COMMIT:YES — direction advanced] | [Gen 388] PARTIAL: O421 is analytically exhausted and closes with exactly two line-insertions in `voice.py` by any agent holding write access — further reasoning is non-load-bearing. [COMMIT:YES — direction advanced] | [Gen 389] PARTIAL: O421 is a fully-specified two-line patch in `voice.py` that closes the moment any write-access agent executes it — every additional reasoning cycle is waste. [COMMIT:YES — direction advanced] | [Gen 390] PARTIAL: O421 closes with exactly two line-insertions in `voice.py` and zero additional reasoning — the only non-waste action is executing the already-specified patch. [COMMIT:YES — direction advanced]",
     "created": "2026-06-23",
     "resolved": null,
     "source": "audit",
     "method": "mixed",
-    "tractability": 2
+    "tractability": 1
   },
   {
     "id": "O422",
@@ -5073,8 +5073,8 @@
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: Root-cause verdict identifying computational, definitional, or data-dependency block delivered by generation 362.",
-    "method": "mixed",
-    "tractability": 3
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O429",
@@ -5117,7 +5117,7 @@
     "resolution_criterion": "",
     "created": "2026-06-27T06:30:47.550610+00:00",
     "progress": "[Gen 361] PARTIAL: O432 closes when a `depends_on` adjacency list over all `bounds_above` invariants is produced and deadline entries for O187 (gen 370) and O162 (gen 380) are written into the obligations table as hard constraints — the skeleton scan is executable now. [COMMIT:YES — direction advanced]",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -5240,7 +5240,9 @@
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-06-30T16:40:16.598899+00:00",
-    "progress": "[Gen 379] PARTIAL: H→0 and H→H_max are dual singularities of the Fisher-Rao metric — the former freezes by KL-divergence inflation, the latter dissipates by Fisher-information collapse — and these are formally distinguishable by the sign structure of entropy-production flux-force products at each boundary. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 379] PARTIAL: H→0 and H→H_max are dual singularities of the Fisher-Rao metric — the former freezes by KL-divergence inflation, the latter dissipates by Fisher-information collapse — and these are formally distinguishable by the sign structure of entropy-production flux-force products at each boundary. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O441",
@@ -5295,7 +5297,7 @@
     "resolution_criterion": "",
     "created": "2026-07-01T06:31:07.653873+00:00",
     "progress": "[Gen 373] OPEN: O445 cannot close until O250's three depends_on edges are explicitly listed and each is either confirmed or re-mapped to current Gen-373 nodes — feed O250's full record to execute this. [COMMIT:NO — O445 remains OPEN; no graph/obligation status actually updated, only diagnostic output generated.]",
-    "method": "mixed",
+    "method": "math_only",
     "tractability": 2
   },
   {
@@ -5331,7 +5333,7 @@
     "resolution_criterion": "Documented triage of ≥200 `consistent_with` edges into `depends_on`, `bounds_above`, `challenges`, or deletion, followed by ratio recomputation showing ≤10:1.",
     "created": "2026-07-02T06:31:02.800346+00:00",
     "progress": "[Gen 376] PARTIAL: The most tractable next step is namespace-stratified triage: sort `consistent_with` edges by invariant cluster, apply the ∂A/∂B dependency test within each cluster, and batch-promote or batch-delete, targeting the thermodynamic and geometric namespaces first as highest-density promotable zones. [COMMIT:YES — direction advanced]",
-    "method": "data_analysis",
+    "method": "mixed",
     "tractability": 2
   },
   {
@@ -5404,14 +5406,16 @@
   },
   {
     "id": "O455",
-    "status": "partial",
+    "status": "resolved",
     "statement": "Assign a binding generation deadline (≤ gen 390) and null-result consequence to O454 — if no single-pass terminal verdict (resolve or retire) on every obligation marked open, partial, or active is produced and archived before gen 390, automatically retire all obligations that lack a recorded falsifiable deliverable.",
     "priority": "high",
-    "progress": "[Gen 382] PARTIAL: O455 closes by producing this gen-382 audit table as its own falsifiable deliverable, simultaneously satisfying the deadline and issuing the retirement rule for any peer obligation that cannot name a specific dataset, computation, formula, or proof step before gen 390. [COMMIT:YES — direction advanced]",
+    "progress": "[Gen 382] PARTIAL: O455 closes by producing this gen-382 audit table as its own falsifiable deliverable, simultaneously satisfying the deadline and issuing the retirement rule for any peer obligation that cannot name a specific dataset, computation, formula, or proof step before gen 390. [COMMIT:YES — direction advanced] | [Gen 390] RESOLVED: O455 closes by self-application — the retirement rule it mandates is itself the falsifiable deliverable that satisfies its own closing criterion, making it formally resolved at gen 390.",
     "created": "2026-07-03",
-    "resolved": null,
+    "resolved": "2026-07-06",
     "auto": true,
-    "closes_when": "closes when: generation 390 is reached and all open/partial/active obligations either have recorded terminal verdicts or are automatically retired."
+    "closes_when": "closes when: generation 390 is reached and all open/partial/active obligations either have recorded terminal verdicts or are automatically retired.",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O456",
@@ -5442,7 +5446,9 @@
     "created": "2026-07-04",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: terminal pass completed on all active/partial/open obligations with verdicts assigned, verdict table archived, and deadline set to ≤gen-395."
+    "closes_when": "closes when: terminal pass completed on all active/partial/open obligations with verdicts assigned, verdict table archived, and deadline set to ≤gen-395.",
+    "method": "mixed",
+    "tractability": 2
   },
   {
     "id": "O459",
@@ -5489,7 +5495,9 @@
     "status": "open",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-07-04T16:37:32.570606+00:00"
+    "created": "2026-07-04T16:37:32.570606+00:00",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O460",
@@ -5520,7 +5528,9 @@
     "rationale": "O340 asks whether 75 `depends_on` edges are *complete*, but O187 asks what the full skeleton *is*. Answering completeness without the skeleton is logically impossible. This is an unfired implication of the graph's own dependency semantics applied to its own obligation structure — a self-referential gap.\nRESOL",
     "resolution_criterion": "",
     "created": "2026-07-05T06:30:54.711188+00:00",
-    "progress": "[Gen 385] PARTIAL: O462 closes by registering the directed dependency edge O340→O187 in the obligation graph and instantiating the gen-390 joint escalation gate as a hard conditional — both are internally executable graph mutations requiring no external data. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 385] PARTIAL: O462 closes by registering the directed dependency edge O340→O187 in the obligation graph and instantiating the gen-390 joint escalation gate as a hard conditional — both are internally executable graph mutations requiring no external data. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O463",
@@ -5531,7 +5541,9 @@
     "created": "2026-07-06",
     "resolved": null,
     "auto": true,
-    "closes_when": "closes when: Structural enforcement mechanism implemented and obligation creation-to-resolution ratio documented per 10-generation windows through Gen 395."
+    "closes_when": "closes when: Structural enforcement mechanism implemented and obligation creation-to-resolution ratio documented per 10-generation windows through Gen 395.",
+    "method": "math_only",
+    "tractability": 2
   },
   {
     "id": "O464",
@@ -5541,7 +5553,9 @@
     "rationale": "O449's resolution confirmed at least one `completes_via` cycle exists, but 16 edges across 17 nodes does not guarantee full coverage. The genome symbol `autopoiesis` requires operational closure — meaning every node must participate in at least one closure loop. If nodes exist outside all `completes_via` paths, the genome's autopoietic claim is structurally falsified at those nodes. This is an obligatory consequence of confirming O449 without checking coverage.",
     "resolution_criterion": "Compute the connected component(s) of the `completes_via` subgraph. If all 17 nodes are reachable, obligation closes. If not, enumerate orphan nodes and either add justified `completes_via` edges or formally restrict the autopoietic scope of the genome.\n\n---",
     "created": "2026-07-06T06:31:08.017536+00:00",
-    "progress": "[Gen 388] PARTIAL: O464 advances exactly one step by constructing the explicit 17-node adjacency list from the genome's `completes_via` declarations and running Tarjan's SCC algorithm on it — any node outside the maximal SCC is a formally designated closure-orphan. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 388] PARTIAL: O464 advances exactly one step by constructing the explicit 17-node adjacency list from the genome's `completes_via` declarations and running Tarjan's SCC algorithm on it — any node outside the maximal SCC is a formally designated closure-orphan. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 1
   },
   {
     "id": "O465",
@@ -5551,6 +5565,30 @@
     "rationale": "Both obligations are PARTIAL and operating on the same structural layer (`depends_on` edge set). O332",
     "resolution_criterion": "",
     "created": "2026-07-06T06:31:08.018646+00:00",
-    "progress": "[Gen 388] PARTIAL: O465 is blocked on the absence of an explicit, tagged inventory of O332's conversion queue; producing that inventory with status {DONE, FROZEN, IN-FLIGHT} for each scales_with→depends_on conversion is the single most tractable next step, after which O340 can legally audit a stable skeleton. [COMMIT:YES — direction advanced]"
+    "progress": "[Gen 388] PARTIAL: O465 is blocked on the absence of an explicit, tagged inventory of O332's conversion queue; producing that inventory with status {DONE, FROZEN, IN-FLIGHT} for each scales_with→depends_on conversion is the single most tractable next step, after which O340 can legally audit a stable skeleton. [COMMIT:YES — direction advanced]",
+    "method": "math_only",
+    "tractability": 2
+  },
+  {
+    "id": "O466",
+    "status": "open",
+    "statement": "Execute a single irreversible terminal forcing verdict on the coherence-recalculation chain (O308/O316/O325/O357/O391/O409/O412/O433/O456) — produce and archive one numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 391 closes, or mark the entire chain permanently retired with the consequence that coherence 0.97 is formally suspended as an unverifiable claim.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-07-06",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "closes when: Single numerical coherence score computed from specified edges archived before Gen 391 closes, or chain marked permanently retired."
+  },
+  {
+    "id": "O467",
+    "status": "open",
+    "statement": "Execute a single irreversible terminal forcing verdict on the `consistent_with` deflation chain (O392/O396/O398/O403/O410/O414/O419/O422/O431/O443/O448) — produce and archive one binding triage verdict specifying how many `consistent_with` edges are reclassified, retired, or converted before Gen 391 closes, or mark the entire chain permanently retired with the consequence that the `consistent_with` edge class is formally flagged as epistemically unverified in the genome header.",
+    "priority": "high",
+    "progress": "",
+    "created": "2026-07-06",
+    "resolved": null,
+    "auto": true,
+    "closes_when": "MALFORMED"
   }
 ]

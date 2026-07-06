@@ -1,23 +1,32 @@
 {
-  "generation": 389,
+  "generation": 390,
   "coherence": 0.97,
   "hygiene": 0.995,
   "grounding": 0.999,
   "topology": "HYBRID_DYADIC_SOLITON",
-  "debt_ratio": "240 resolved / 10 open",
-  "cycle_count": 280,
-  "last_cycle": "2026-07-06T09:50:00.091732+00:00",
+  "debt_ratio": "241 resolved / 12 open",
+  "cycle_count": 281,
+  "last_cycle": "2026-07-06T16:29:59.983165+00:00",
   "notes": [],
   "promotion_candidates": [
     {
-      "invariant": "Semantic tension (irreducible contradiction, prediction error, gradient) must be navigated and minimized rather than eliminated, and zero tension is thermodynamically impossible.",
+      "invariant": "No agent achieves zero error or infinite precision at finite cost; semantic tension is irreducible.",
       "appears_in": [
-        "rsa_omega_unified_kernel_v4_2_1_structur",
-        "the_epistemic_inversion_recursive_cohere",
-        "the_quinean_continuity_operationalizing"
+        "the_thermodynamic_impossibility_of_the_o",
+        "the_quinean_continuity_operationalizing",
+        "the_rsa_reference_codex_a_unified_biblio"
+      ],
+      "recurrence": 3
+    },
+    {
+      "invariant": "Substrate independence of learning dynamics holds across neural, artificial, and non-neural systems.",
+      "appears_in": [
+        "the_rsa_reference_codex_a_unified_biblio",
+        "recursive_semantic_alignment_rsa_framewo",
+        "alignment_as_cognitive_gravity_reactive"
       ],
       "recurrence": 3
     }
   ],
-  "dissipative_criticality_count": 6
+  "dissipative_criticality_count": 7
 }
