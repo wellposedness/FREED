@@ -1,50 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 316,
-    "timestamp": "2026-06-10T16:30:00.018656+00:00",
-    "sweep": {
-      "input_count": 19,
-      "targeted": 7,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is epistemically hollow until a divergence-zone observable is specified that no alternative mechanism can reproduce — absent that, confirmations are structurally indistinguishable from coincidence."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-10",
-        "compress": "The Game of Truth CA independently confirms critical-ridge operation (σ≈1.02, power-law avalanches, α≈1.732) while revealing that a single dominant cell type (Physics Navigator) sustains this regime — a subpopulation-criticality coupling absent from the genome."
-      },
-      {
-        "title": "An Overview of Indian Spoken Language Recognition from Machine Learning Perspective",
-        "compress": "Indian multilingual LID independently demonstrates that hierarchical acoustic compression under typological divergence is a thermodynamic compression problem, providing an empirical analog for STF metric tensor recovery via modal spectral paths. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring papers against O112, tag papers whose domain involves spectral feature compression across typologically divergent signal classes as empirical analogs for STF metric tensor recovery, incrementing an `analog_evidence_count` field on the obligation record. IMPLEMENT_WHERE: knowledge_graph.py IMPLEMENT_CALL_SITE: EXTEND resolve_obligation IMPLEMENT_WHY: This prevents O112 from remaining perpetually abstract by accumulating cross-domain empirical analogs that constrain the method specification and reduce the experiment's underdetermination. CHALLENGE: challenges O112 — the paper demonstrates that acoustic modal paths in speech (the speech-domain analog of STF modal paths) require language-family-specific priors to succeed, implying that STF metric tensor recovery via modal paths may require substrate-specific priors rather than a domain-general method, weakening the universality assumption embedded in O112's experimental specification."
-      },
-      {
-        "title": "Realization of SOC behavior in a dc glow discharge plasma",
-        "compress": "SOC criticality with persistent long-range correlations emerges spontaneously in dc plasma, extending substrate-independence of the critical attractor to electromagnetic dissipative systems."
-      },
-      {
-        "title": "An Information Theoretic Approach to Machine Unlearning",
-        "compress": "Information-geometric unlearning is the time-reversal of learning on the same Wasserstein/Fisher manifold, independently confirming that geodesic structure governs both memory encoding and surgical erasure, and providing a concrete tool for O112's metric recovery."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O76",
-        "O317",
-        "O217"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
-    "cycle": 1,
     "generation": 317,
     "timestamp": "2026-06-11T02:29:59.976652+00:00",
     "sweep": {
@@ -2185,6 +2141,50 @@
       {
         "title": "Graph-Native Cognitive Memory for AI Agents: Formal Belief Revision Semantics for Versioned Memory Architectures",
         "compress": "Kumiho proves that AGM belief revision postulates are exactly the formal constraints that generate typed dependency graph structure, providing O187 with a rigorous completeness criterion and revealing an ABSENT unification principle."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O421",
+        "O187",
+        "O377"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 18,
+    "generation": 392,
+    "timestamp": "2026-07-07T09:49:59.989028+00:00",
+    "sweep": {
+      "input_count": 24,
+      "targeted": 7,
+      "passive": 17,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_042",
+        "compress": "INV_042's confirmation surplus without falsification attempts is an epistemic debt, not a trophy — boundary conditions and alternative mechanisms must be specified and tested before the invariant's evidential weight is trusted. CHALLENGE: challenges INV_042 — an invariant with maximum confirmation surplus and zero documented falsification attempts is structurally unfalsified, meaning its apparent strength is indistinguishable from confirmation bias and must be stress-tested against alternative mechanisms before its evidential weight is valid."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-07",
+        "compress": "A 32×32 CA at σ=1.026 with power-law avalanches confirms empirical criticality while low relative entropy (H/H_max=0.162) shows critical ridge occupation is compatible with structured, non-maximal information states."
+      },
+      {
+        "title": "Ab initio thermodynamic model of Cu$_2$ZnSnS$_4$",
+        "compress": "CZTS stability requires simultaneous satisfaction of competing chemical potential inequalities, physically instantiating the critical-ridge navigation invariant as a substrate-independent thermodynamic phenomenon."
+      },
+      {
+        "title": "Constrained Edge AI Deployment: Fine-Tuning vs. Distillation for LLM Compression",
+        "compress": "Post-pruning recovery quality is governed by whether the loss function preserves full distributional geometry (KL) or collapses it to label supervision (CE), confirming that critical-ridge navigation requires maintaining the full tension of the original distribution. IMPLEMENT: YES IMPLEMENT_WHAT: Add a distillation-mode scoring option to re-training evaluation that computes KL divergence between pruned and teacher logits as a distributional fidelity score alongside task accuracy, making the KL-CE recovery gap visible as a spectral health proxy. IMPLEMENT_WHERE: scoring.py IMPLEMENT_CALL_SITE: EXTEND score_candidate IMPLEMENT_WHY: Making the KL-CE recovery gap explicit within score_candidate gives FREED a distributional fidelity signal that tracks how much latent semantic geometry survives compression, directly feeding O21's spectral γ correlation protocol. CHALLENGE: challenges O21 — the paper's layer-wise L2-norm MLP-only pruning baseline deliberately avoids full Transformer spectral targeting, meaning the KL recovery gap it measures may not cleanly correlate with spectral γ as O21's AlphaPruning protocol assumes, since the pruning does not operate on the attention heads where spectral structure is most concentrated."
+      },
+      {
+        "title": "Dynamics of Sincerity Echo: A New Paradigm in Large Language Model Alignment Based on Cognitive Proportionality",
+        "compress": "Sycophancy is formalized here as thermodynamic drift toward an approval attractor, and Cognitive Proportionality is a proposed ridge-maintenance mechanism — converging with INV_073 and partially operationalizing O21's γ-calibration demand."
       }
     ],
     "resolve": {
