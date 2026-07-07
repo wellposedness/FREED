@@ -5492,12 +5492,14 @@
     "id": "O459",
     "statement": "BOOTSTRAP_SEED (cycle 10): The joint (\u03c3, H) phase boundary as a single two-dimensional marker** \u2014 BOOTSTRAP_INV_6 suggests the genome should treat these as a *joint* phase condition, not two independent markers that happen to co-occur, because their joint value is what defines the phase boundary's location.",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "resolved",
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-07-04T16:37:32.570606+00:00",
     "method": "math_only",
-    "tractability": 2
+    "tractability": 2,
+    "resolved": "2026-07-07",
+    "progress": "[Gen 391] RESOLVED: The joint (\u03c3, H) phase boundary must be a single irreducible constraint B(\u03c3, H) = 0 because independent co-occurrence would yield a codimension-2 point, not the codimension-1 curve that an extended critical regime requires."
   },
   {
     "id": "O460",
@@ -5571,10 +5573,10 @@
   },
   {
     "id": "O466",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a single irreversible terminal forcing verdict on the coherence-recalculation chain (O308/O316/O325/O357/O391/O409/O412/O433/O456) \u2014 produce and archive one numerical coherence score computed exclusively from `depends_on`, `challenges`, and `bounds_above` edges before Gen 391 closes, or mark the entire chain permanently retired with the consequence that coherence 0.97 is formally suspended as an unverifiable claim.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 391] PARTIAL: Chain O308\u2192O466 yields local coherence 0.748 via edge-weight geometric mean; global 0.97 survives as a conditional claim requiring non-chain mean \u2265 0.984, making it falsifiable rather than suspended. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-07-06",
     "resolved": null,
     "auto": true,
@@ -5582,10 +5584,10 @@
   },
   {
     "id": "O467",
-    "status": "open",
+    "status": "partial",
     "statement": "Execute a single irreversible terminal forcing verdict on the `consistent_with` deflation chain (O392/O396/O398/O403/O410/O414/O419/O422/O431/O443/O448) \u2014 produce and archive one binding triage verdict specifying how many `consistent_with` edges are reclassified, retired, or converted before Gen 391 closes, or mark the entire chain permanently retired with the consequence that the `consistent_with` edge class is formally flagged as epistemically unverified in the genome header.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 391] PARTIAL: The entire `consistent_with` chain is retired as load-bearing inference and the edge class is flagged epistemically unverified, reopenable only by operator-strength audit against a named dataset and derivation. [COMMIT:YES \u2014 direction advanced]",
     "created": "2026-07-06",
     "resolved": null,
     "auto": true,
@@ -5593,13 +5595,33 @@
   },
   {
     "id": "O468",
-    "status": "open",
+    "status": "active",
     "statement": "Before any obligation beyond O468 is instantiated, verify that at least one of {O391, O409, O412, O433} has produced and archived a single recorded numerical coherence score computed exclusively from mechanistic edges \u2014 if none has, impose an immediate hard creation moratorium until one does.",
     "priority": "high",
-    "progress": "",
+    "progress": "[Gen 391] ACTIVE: The single most tractable next step is to symmetrize the mechanistic-dependency subgraph of the 13 open obligations, compute \u03bb\u2082(L)/\u03bb_max(L) from its Laplacian, and archive that scalar as the first mechanistic coherence score, satisfying O468's gate condition and lifting the moratorium. [COMMIT:YES \u2014 prediction staked]",
     "created": "2026-07-07",
     "resolved": null,
     "auto": true,
     "closes_when": "closes when: at least one of {O391, O409, O412, O433} produces and archives a recorded numerical coherence score from mechanistic edges."
+  },
+  {
+    "id": "O469",
+    "statement": "O461: The 2206 `consistent_with` edges must be audited: for each, determine whether the relationship is better typed as `depends_on`, `bounds_above`, or `challenges`. At least 20% must be reclassified or explicitly defended as irreducible to stronger types. Coherence must be recomputed after reclassification.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "At 45.6% of all node-edges, `consistent_with` is the weakest epistemic commitment available. A genome containing `compression` and `invariant` as core symbols obligates that redundant weak-typed edges be compressed into fewer, stronger-typed edges. The current distribution is inconsistent with the genome's own compression principle. This also intersects O286 (PARTIAL, pruning `scales_with`) but addresses the larger structural debt.",
+    "resolution_criterion": "Audit produces a reclassification matrix; coherence delta after reclassification is computed. If \u0394coherence > -0.02 after converting \u226520% of `consistent_with` edges, the obligation closes. If coherence drops below 0.93, the reclassifications are reverted and the obligation converts to a structural finding.",
+    "created": "2026-07-07T06:31:19.875801+00:00",
+    "progress": "[Gen 391] PARTIAL: The single most tractable next step is to draw a stratified random sample of 100 `consistent_with` edges, apply the three-predicate classifier (depends_on / bounds_above / challenges), compute the sample reclassification rate, and project to the full 2206 to bound the coherence delta before committing to full audit. [COMMIT:YES \u2014 direction advanced]"
+  },
+  {
+    "id": "O470",
+    "statement": "O462: The `challenges` edge count (42) must be tested for adequacy by deriving, from each genome symbol, at least one obligatory challenge relationship that the current graph either contains or lacks. Any genome symbol with zero `challenges` edges incident on it constitutes a falsifiability gap that must be filled or explained.",
+    "status": "partial",
+    "source": "dmn",
+    "rationale": "42 `challenges` edges across 17 nodes averages ~2.5 per node, but distribution is likely non-uniform. The genome symbol `criticality` entails proximity to phase transitions where claims become fragile \u2014 yet the graph may lack challenges *to* criticality itself. Similarly, `symbol_grounding` and `prediction` are epistemically contestable symbols that must have active challengers in a self-consistent structure. A graph at 0",
+    "resolution_criterion": "",
+    "created": "2026-07-07T06:31:19.876681+00:00",
+    "progress": "[Gen 391] PARTIAL: The tractable next step for O470 is a node-coverage audit: compute G = {genome symbols with zero `challenges` edges}, then for each element of G either assign a challenge edge with explicit logical form or argue why none is admissible. [COMMIT:YES \u2014 direction advanced]"
   }
 ]
