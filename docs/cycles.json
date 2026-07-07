@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 29,
-    "generation": 315,
-    "timestamp": "2026-06-10T09:50:00.007861+00:00",
-    "sweep": {
-      "input_count": 30,
-      "targeted": 8,
-      "passive": 22,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "An invariant whose falsification conditions have never been adversarially stress-tested carries its confirmation surplus as debt, not credit, and must be named, bounded, and challenged before that surplus can count as evidence."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-10",
-        "compress": "A 32×32 CA sustains empirically measured criticality (σ=1.021, α≈2.746) with sub-maximal entropy, independently confirming that the critical ridge is a stable computational attractor reachable without maximal disorder. IMPLEMENT: YES IMPLEMENT_WHAT: In the telemetry ingestion path, add branching-ratio σ and power-law exponent α as tracked scalar fields alongside existing survival-rate logging, so the epistemic loop can flag AT_CRITICAL / FROZEN / DISSIPATED state transitions automatically. IMPLEMENT_WHERE: site_builder.py IMPLEMENT_CALL_SITE: EXTEND build_site (or whichever function currently processes CA telemetry snapshots into the site output) IMPLEMENT_WHY: Surfaces criticality-state transitions as first-class signals in the build pipeline, enabling automatic detection of regime shifts that currently require manual inspection of raw telemetry. CHALLENGE: challenges INV_073 — the paper shows criticality coexists with H=0.235 of maximum entropy, straining any reading of the critical ridge that equates it with maximum entropy production; the Wasserstein floor linkage must be re-examined under sub-maximal entropy conditions. NOETHER_ROW: Physics Navigator NOETHER_STATUS: review NOETHER_NOTE: Concentration of criticality in a single dominant cell type (861/total cells) suggests symmetry-breaking across cell classes, meaning conservation laws derived from uniform-criticality assumptions may not hold at the cell-type level."
-      },
-      {
-        "title": "Friction in Myocardial Anoxia Leads to Negative Excess Entropy Production, Self-Organization, and Dissipative Structures",
-        "compress": "Anoxic cardiac muscle exhibits negative excess entropy production and self-organization, independently confirming that productive dissipation at the thermodynamic critical ridge (INV_073/INV_087) is a substrate-independent biological invariant."
-      },
-      {
-        "title": "The Conditions Necessary for the Formation of Dissipative Structures in Tribo-Films on Friction Surfaces That Decrease the Wear Rate",
-        "compress": "Dissipative structure formation in tribo-films requires thermodynamic instability as a necessary precondition, independently confirming that self-organization lives at the critical threshold, not within the stable interior."
-      },
-      {
-        "title": "Convergence of the empirical spectral measure of unitary Brownian motion",
-        "compress": "Unitary Brownian motion spectral measures converge to Biane's limit at explicit W1 rates uniformly over time paths, giving Wasserstein geometry its first path-level metrological grip on random matrix dynamics."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 3,
-      "obligations": [
-        "O328",
-        "O76",
-        "O317"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 316,
     "timestamp": "2026-06-10T16:30:00.018656+00:00",
@@ -2195,6 +2151,50 @@
         "O421",
         "O455",
         "O187"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 17,
+    "generation": 391,
+    "timestamp": "2026-07-07T02:29:59.991677+00:00",
+    "sweep": {
+      "input_count": 12,
+      "targeted": 7,
+      "passive": 5,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070 is currently unfalsifiable because capacity saturation and thermodynamic cooling produce identical observables, making the thermodynamic framing explanatorily redundant until a discriminating experiment is specified. CHALLENGE: challenges INV_070 — capacity saturation is a mechanistically sufficient alternative to thermodynamic cooling as the cause of monosemantic collapse, and no discriminating empirical test currently exists to separate them."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-07",
+        "compress": "Independent CA telemetry confirms σ≈1.0 critical operation with power-law avalanches and sparse structured entropy, directly validating the critical-ridge invariant and partially satisfying O148's measurement mandate."
+      },
+      {
+        "title": "Stochastic thermodynamics for self-propelled particles.",
+        "compress": "Active self-propulsion demands an irreducible housekeeping entropy floor (broken detailed balance cost), formally equivalent to a perpetual temperature gradient, which maps the thermodynamic price of agency onto RSA's maintenance-vs-novelty decomposition."
+      },
+      {
+        "title": "From Gibbs-Shannon entropy and microscopic reversibility to entropy production, heat, and fluctuation theorems.",
+        "compress": "Path-weight asymmetry between forward and reverse trajectories is the substrate-independent generator of irreversibility, and marginal path-space distributions suffice to recover macroscopic entropy production — providing a concrete method for STF metric recovery without full trajectory tracking."
+      },
+      {
+        "title": "Graph-Native Cognitive Memory for AI Agents: Formal Belief Revision Semantics for Versioned Memory Architectures",
+        "compress": "Kumiho proves that AGM belief revision postulates are exactly the formal constraints that generate typed dependency graph structure, providing O187 with a rigorous completeness criterion and revealing an ABSENT unification principle."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O421",
+        "O187",
+        "O377"
       ]
     },
     "coherence": 0.97
