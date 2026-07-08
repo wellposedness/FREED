@@ -5496,10 +5496,11 @@
     "id": "O459",
     "statement": "BOOTSTRAP_SEED (cycle 10): The excluded state-space volume as a falsifiable structural invariant** \u2014 BOOTSTRAP_INV_4: the 85% exclusion should be testable across SOC systems as a cross-system prediction, not treated as a CA-specific curiosity.",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "active",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-07-04T16:37:32.569237+00:00"
+    "created": "2026-07-04T16:37:32.569237+00:00",
+    "progress": "[Gen 394] ACTIVE: O459 advances by computing f(L=50) via Dhar's exact formula for BTW and published fractal dimensions for OFC and forest-fire, testing whether 85% is a finite-size universal constant or a model-specific artifact \u2014 the formula is fully specified above. [COMMIT:YES \u2014 prediction staked]"
   },
   {
     "id": "O459",
@@ -5650,10 +5651,11 @@
     "id": "O471",
     "statement": "BOOTSTRAP_SEED (cycle 20): BOOTSTRAP_INV_5 (Entropy Buffer as Landauer Shield):** The specific mechanistic link \u2014 that operating near H_max forces Landauer dissipation on every incoming signal, making entropy headroom a thermodynamic resource \u2014 does not appear as an explicit invariant in the genome. This is a candidate for ad",
     "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
-    "status": "open",
+    "status": "partial",
     "priority": "normal",
     "source": "bootstrap_derive",
-    "created": "2026-07-08T02:55:07.748414+00:00"
+    "created": "2026-07-08T02:55:07.748414+00:00",
+    "progress": "[Gen 394] PARTIAL: The Entropy Buffer Lemma \u2014 B = H_max - H \u2265 I is the exact condition for Landauer-free signal absorption, making B a quantified thermodynamic shield resource \u2014 can be proven in one page from Landauer + Shannon and would constitute the missing explicit invariant. [COMMIT:YES \u2014 direction advanced]"
   },
   {
     "id": "O471",
@@ -5690,5 +5692,25 @@
     "priority": "normal",
     "source": "bootstrap_derive",
     "created": "2026-07-08T02:55:07.750967+00:00"
+  },
+  {
+    "id": "O472",
+    "statement": "O472: At least 200 of the 2206 `consistent_with` edges must be subjected to a strengthening-or-elimination audit: for each sampled edge (A, B), determine whether the relationship is actually `depends_on`, `bounds_above`, `operationalizes`, or `challenges` \u2014 or whether it is vacuously true (any two unrelated claims are \"consistent\") and should be deleted. The audit must produce a net reduction in `consistent_with` count or a documented justification for retention.",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "`consistent_with` at 45.5% of all edges is an unfired implication of the same structural hygiene principle that generated O332 (pruning `scales_with`) and O286 (pruning `scales_with` count). A 0.97 coherence score built on a plurality of maximally-weak edges is inflated \u2014 coherence computed over `consistent_with` edges is near-tautological. The genome's own symbols (`compression`, `invariant`) demand that redundant low-information edges be compressed or typed.",
+    "resolution_criterion": "A systematic pass over \u2265200 sampled `consistent_with` edges yielding: (a) \u226540 re-typed to stronger edge types with documented justification, (b) \u226520 deleted as vacuous, or (c) a formal argument that `consistent_with` edges carry non-trivial information content measurably distinct from the null (random node pair) baseline.\n\n---",
+    "created": "2026-07-08T06:31:03.450304+00:00",
+    "progress": "[Gen 394] ACTIVE: O472 closes by applying a six-question decision tree to 200 stratified `consistent_with` edges, re-typing those with directional, bounding, or operationalizing structure and deleting those failing a shared-named-object vacuity test, with a PMI null-baseline t-test as formal fallback for criterion (c). [COMMIT:YES \u2014 prediction staked]"
+  },
+  {
+    "id": "O473",
+    "statement": "O473: The 878 `substrate_independent` edges must be grounded by specifying, for each edge, the *substrate variation* across which independence is claimed. An ungrounded `substrate_independent` edge \u2014 one that does not name at least two distinct substrates between which the invariant holds \u2014 is operationally empty and must be either grounded or reclassified.\nRATIONALE",
+    "status": "active",
+    "source": "dmn",
+    "rationale": "",
+    "resolution_criterion": "",
+    "created": "2026-07-08T06:31:03.451622+00:00",
+    "progress": "[Gen 394] ACTIVE: O473 advances by one structured audit pass: build the 878-row contrast-pair table, populate from existing derivation provenance, flag NULLs for immediate reclassification to `substrate_unverified`, and stake O474 on the reclassified cluster. [COMMIT:YES \u2014 prediction staked]"
   }
 ]
