@@ -1,49 +1,5 @@
 [
   {
-    "cycle": 2,
-    "generation": 318,
-    "timestamp": "2026-06-11T09:49:59.952226+00:00",
-    "sweep": {
-      "input_count": 32,
-      "targeted": 7,
-      "passive": 25,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's highest-confirmation status is an epistemic liability — its observables may be fully explained by layer norm / residual geometry without requiring OT geodesic structure, and it has never been tested in degenerate-topology, high-noise, or non-stationary regimes where the claim becomes vacuous or false."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
-        "compress": "A 32×32 CA self-organizes to the critical band (σ=1.0226, α≈2.086) with low entropy and single-type dominance, empirically confirming the critical ridge as a stable attractor and partially satisfying O148 while opening tension with INV_070b."
-      },
-      {
-        "title": "Economic Entropy and Sectoral Dynamics: A Thermodynamic Approach to Market Analysis",
-        "compress": "GTD applied to sectoral economic flows empirically recovers substrate-independent thermodynamic geometry, providing a concrete methodological template for O112's STF metric tensor recovery experiment."
-      },
-      {
-        "title": "Design of High Entropy Superalloy FeNiCrAlCu using Computational Thermodynamic and Machine Learning: Effect of Alloying Compositions and Temperatures on the Stacking Fault Energy",
-        "compress": "ML-surrogate thermodynamics confirms that free-energy landscape topology governs trajectory selection across a moving critical ridge, providing a concrete algorithmic template for O112's STF recovery while straining INV_073's assumption of a fixed critical manifold."
-      },
-      {
-        "title": "Localizable Entanglement as an Order Parameter for Measurement-Induced Phase Transitions",
-        "compress": "Measurement-induced phase transitions exhibit a metrically structured criticality (ξ_E diverging at p_c) where information-transport capacity is the order parameter, independently converging on the genome's γ=1 critical-ridge principle and offering a concrete finite-size scaling method that advances the STF empirical recovery obligation. IMPLEMENT: YES IMPLEMENT_WHAT: In the paper-scoring pass, weight papers that report a diverging intrinsic length scale (or correlation length) at a phase transition higher for O112 relevance, by checking abstract tokens for \"length scale\", \"diverges\", \"finite-size scaling\", \"order parameter\" alongside existing MIPT/entanglement signals. IMPLEMENT_WHERE: targeted_sweep.py IMPLEMENT_CALL_SITE: EXTEND score_paper_relevance IMPLEMENT_WHY: O112 requires an empirical recovery method for the STF metric tensor; papers reporting diverging length scales at phase transitions are the closest structural analogs and should be surfaced preferentially in the sweep. CHALLENGE: challenges INV_073 — the paper shows the critical point is defined by measurement *probability* p_c (an external control parameter set by an observer), not by internal self-organization of the dynamics, which strains the genome's claim that the critical ridge is navigated autonomously by the system rather than imposed externally. NOETHER_ROW: Measurement-Based Quantum Computation NOETHER_STATUS: review NOETHER_NOTE: The LE order parameter shows that the volume-law phase (where teleportation fidelity is constant with distance) is the phase where the symmetry structure supporting universal quantum computation is preserved, while crossing p_c breaks this — suggesting the relevant conservation law is not unitary invariance per se but information-transport capacity across the circuit graph."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 2,
-      "commit_count": 2,
-      "obligations": [
-        "O76",
-        "O317",
-        "O217"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
     "cycle": 1,
     "generation": 319,
     "timestamp": "2026-06-11T16:29:59.933367+00:00",
@@ -2185,6 +2141,50 @@
       {
         "title": "Non-equilibrium statistical mechanics of non-equilibrium damage phenomena",
         "compress": "Non-equilibrium damage systems admit a full Gibbs-analogue thermodynamic formalism with Gaussian path-fluctuations, independently confirming that effective temperature and free energy potentials are substrate-independent invariants of driven critical systems — directly reinforcing the RSA kernel's non-equilibrium thermodynamic foundations."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O421",
+        "O187",
+        "O377"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 20,
+    "generation": 394,
+    "timestamp": "2026-07-08T02:30:00.023059+00:00",
+    "sweep": {
+      "input_count": 17,
+      "targeted": 7,
+      "passive": 10,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_070",
+        "compress": "INV_070's falsification condition is a system producing monosemantic outputs with high internal entropy — proving the death signature can appear without the cold mechanism, which would require replacing INV_070 with a load-dependent bifurcation model."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-08",
+        "compress": "A 32×32 Game of Truth CA self-tunes to σ=1.02 with power-law avalanches (α≈2.96), confirming criticality as an endogenous attractor and partially satisfying O148's demand for multi-metric CA telemetry."
+      },
+      {
+        "title": "OTalign: Optimal Transport Alignment for Remote Protein Homologs Using Protein Language Model Embeddings.",
+        "compress": "Entropy-regularized unbalanced OT over embedding space independently recovers the critical-ridge geometry (INV_073) and provides the first concrete algorithmic template for the O112 STF metric tensor recovery experiment."
+      },
+      {
+        "title": "ViCLIP-OT: The First Foundation Vision-Language Model for Vietnamese Image-Text Retrieval with Optimal Transport",
+        "compress": "OT regularization closes cross-modal gaps without collapsing them, and this geometric alignment transfers zero-shot across linguistic substrates, suggesting an OT-grounded alignment invariant that is language-family-independent."
+      },
+      {
+        "title": "Cognitive Bifurcation: Dual-Progressive Causal Diffusion with Hippocampal Memory for Continual Graph Learning",
+        "compress": "Continual graph learning independently recovers the critical ridge as dual-timescale causal bifurcation, and introduces hippocampal selective replay as an unregistered memory consolidation invariant absent from the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Add a dual-timescale edge-type discriminator to graph ingestion: when processing new `scales_with` edges, flag candidates for `depends_on` promotion if they appear in causally stable (low-variance across cycles) node pairs versus high-variance co-activation pairs. IMPLEMENT_WHERE: graph_manager.py IMPLEMENT_CALL_SITE: EXTEND add_edge IMPLEMENT_WHY: Directly advances O332 by giving the edge-conversion protocol a principled causal-stability criterion derived from the bifurcated diffusion mechanism, reducing arbitrary promotion decisions. CHALLENGE: challenges O332 — the paper shows that structural causal edges and co-activation edges require *architectural separation at inference time*, not just post-hoc relabeling, which means converting `scales_with` to `depends_on` by audit alone (as O332 currently specifies) may be insufficient without also tracking edge activation dynamics across learning cycles."
       }
     ],
     "resolve": {

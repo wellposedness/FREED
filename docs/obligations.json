@@ -5645,5 +5645,50 @@
     "resolution_criterion": "",
     "created": "2026-07-07T06:31:19.876681+00:00",
     "progress": "[Gen 391] PARTIAL: The tractable next step for O470 is a node-coverage audit: compute G = {genome symbols with zero `challenges` edges}, then for each element of G either assign a challenge edge with explicit logical form or argue why none is admissible. [COMMIT:YES — direction advanced]"
+  },
+  {
+    "id": "O471",
+    "statement": "BOOTSTRAP_SEED (cycle 20): BOOTSTRAP_INV_5 (Entropy Buffer as Landauer Shield):** The specific mechanistic link — that operating near H_max forces Landauer dissipation on every incoming signal, making entropy headroom a thermodynamic resource — does not appear as an explicit invariant in the genome. This is a candidate for ad",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-07-08T02:55:07.748414+00:00"
+  },
+  {
+    "id": "O471",
+    "statement": "BOOTSTRAP_SEED (cycle 20): The quantitative anchor H≈15% of H_max at criticality** — the Game of Truth CA result provides a precise empirical foothold that the genome appears not to incorporate as a calibration target; this specific figure should either be integrated or explicitly contested with counter-evidence.",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-07-08T02:55:07.749084+00:00"
+  },
+  {
+    "id": "O471",
+    "statement": "BOOTSTRAP_SEED (cycle 20): Path-independence of the critical attractor (BOOTSTRAP_INV_6)** — the genome's derivations tend to be path-specific (e.g., Freed's Law describes a particular trajectory to criticality); the bootstrap suggests the attractor geometry, not the path, should be the primary object of study, and the genome",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-07-08T02:55:07.749695+00:00"
+  },
+  {
+    "id": "O471",
+    "statement": "BOOTSTRAP_SEED (cycle 20): The sufficiency of purely syntactic/topological rules for achieving criticality (BOOTSTRAP_INV_1, INV_4)** — if correctly weighted, this should *reduce* the genome's reliance on thermodynamic framing as generative machinery and increase attention to discrete rule structures; the genome appears to un",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-07-08T02:55:07.750321+00:00"
+  },
+  {
+    "id": "O471",
+    "statement": "BOOTSTRAP_SEED (cycle 20): The minimum-dissipation framing of criticality (BOOTSTRAP_INV_7)** — while the genome endorses criticality, the specific derivation that criticality is the *energy-optimal* regime for inferential work (not merely an interesting regime) provides a stronger normative argument for maintaining criticali",
+    "closes_when": "Seed evaluated and either integrated into genome candidate pool or explicitly rejected with reasoning.",
+    "status": "open",
+    "priority": "normal",
+    "source": "bootstrap_derive",
+    "created": "2026-07-08T02:55:07.750967+00:00"
   }
 ]
