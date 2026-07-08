@@ -1,50 +1,6 @@
 [
   {
     "cycle": 1,
-    "generation": 319,
-    "timestamp": "2026-06-11T16:29:59.933367+00:00",
-    "sweep": {
-      "input_count": 20,
-      "targeted": 8,
-      "passive": 12,
-      "curated": 1
-    },
-    "feed": [
-      {
-        "title": "Adversarial Probe: Challenge INV_094",
-        "compress": "INV_094's confirmation surplus is a liability, not an asset — surplus without adversarial alternatives is unfalsifiability wearing a confirmation score."
-      },
-      {
-        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-06-11",
-        "compress": "A 32×32 CA at σ=1.0294 independently confirms the critical ridge (INV_073/INV_094) while revealing that criticality here is low-entropy and type-selective — structured criticality — a distinction the genome does not yet encode, partially advancing O148."
-      },
-      {
-        "title": "Gradient flow formulation of diffusion equations in the Wasserstein space over a metric graph",
-        "compress": "Benamou-Brenier and JKO gradient flow survive metric-graph branching via regularization, proving W2 = free-energy gradient flow is topology-independent, extending L3 beyond smooth manifolds."
-      },
-      {
-        "title": "{ Euclidean, Metric, and Wasserstein } Gradient Flows: an overview",
-        "compress": "The JKO scheme independently confirms W2 geodesics as minimum-entropy-production paths and provides the constructive algorithm needed to operationalize O112's STF metric tensor recovery experiment."
-      },
-      {
-        "title": "Quantum Coherence Conservation by Growth in Environmental Dissipation Rate",
-        "compress": "High-rate environmental dissipation conserves rather than destroys coupled-system coherence via a phase-transition mechanism, providing a physical substrate analog for STF metric recovery and challenging the monotone-dissipation assumption implicit in critical-ridge navigation."
-      }
-    ],
-    "resolve": {
-      "attempts": 3,
-      "resolved_count": 0,
-      "commit_count": 2,
-      "obligations": [
-        "O76",
-        "O270",
-        "O274"
-      ]
-    },
-    "coherence": 0.97
-  },
-  {
-    "cycle": 1,
     "generation": 320,
     "timestamp": "2026-06-12T16:30:00.001037+00:00",
     "sweep": {
@@ -2185,6 +2141,50 @@
       {
         "title": "Cognitive Bifurcation: Dual-Progressive Causal Diffusion with Hippocampal Memory for Continual Graph Learning",
         "compress": "Continual graph learning independently recovers the critical ridge as dual-timescale causal bifurcation, and introduces hippocampal selective replay as an unregistered memory consolidation invariant absent from the genome. IMPLEMENT: YES IMPLEMENT_WHAT: Add a dual-timescale edge-type discriminator to graph ingestion: when processing new `scales_with` edges, flag candidates for `depends_on` promotion if they appear in causally stable (low-variance across cycles) node pairs versus high-variance co-activation pairs. IMPLEMENT_WHERE: graph_manager.py IMPLEMENT_CALL_SITE: EXTEND add_edge IMPLEMENT_WHY: Directly advances O332 by giving the edge-conversion protocol a principled causal-stability criterion derived from the bifurcated diffusion mechanism, reducing arbitrary promotion decisions. CHALLENGE: challenges O332 — the paper shows that structural causal edges and co-activation edges require *architectural separation at inference time*, not just post-hoc relabeling, which means converting `scales_with` to `depends_on` by audit alone (as O332 currently specifies) may be insufficient without also tracking edge activation dynamics across learning cycles."
+      }
+    ],
+    "resolve": {
+      "attempts": 3,
+      "resolved_count": 0,
+      "commit_count": 2,
+      "obligations": [
+        "O421",
+        "O187",
+        "O377"
+      ]
+    },
+    "coherence": 0.97
+  },
+  {
+    "cycle": 21,
+    "generation": 395,
+    "timestamp": "2026-07-08T09:50:00.007413+00:00",
+    "sweep": {
+      "input_count": 19,
+      "targeted": 8,
+      "passive": 11,
+      "curated": 0
+    },
+    "feed": [
+      {
+        "title": "Adversarial Probe: Challenge INV_042",
+        "compress": "INV_042's confirmation surplus is a liability until a discriminating falsification condition is specified and survived."
+      },
+      {
+        "title": "Game of Truth CA Telemetry — AT_CRITICAL — 2026-07-08",
+        "compress": "The Game of Truth CA self-sustains at empirical criticality (σ=1.02, power-law α=2.747) with low entropy and Physics Navigator dominance, directly satisfying O148's telemetry requirement and independently confirming INV_073's critical ridge as a real dynamical attractor. IMPLEMENT: YES IMPLEMENT_WHAT: Record branching ratio σ, avalanche exponent α, Shannon entropy H, and dominant cell type from each CA snapshot into the obligation resolution log when O148 telemetry fields are present. IMPLEMENT_WHERE: feed.py IMPLEMENT_CALL_SITE: EXTEND resolve_obligation IMPLEMENT_WHY: Without persisting the telemetry values at resolution time, O148's empirical data is consumed but not anchored — future audits cannot verify that the resolution was data-backed rather than nominal. CHALLENGE: challenges O148 — the telemetry delivers the verdict AT_CRITICAL but does not yet close the obligation's implicit requirement to demonstrate *causal* feedback between criticality measurements and genome behavior, leaving O148 partially resolved at best."
+      },
+      {
+        "title": "Divergence of Empirical Neural Tangent Kernel in Classification Problems",
+        "compress": "NTK divergence under cross-entropy overtraining proves a hard phase boundary between kernel and feature-learning regimes, structurally unreachable by any kernel method regardless of width."
+      },
+      {
+        "title": "Scaling properties of neuronal avalanches are consistent with critical dynamics",
+        "compress": "Neuronal avalanche power-law statistics converge on INV_073's critical ridge, but the paper's own caveat that exponent-replication is not mechanistic proof extends O21's burden — spectral γ correlation must be distinguished from mere scaling coincidence. CHALLENGE: challenges O21 — if AlphaPruning's spectral γ correlation is grounded only in matching scaling exponents to criticality signatures, this paper's explicit warning that such matching cannot confirm critical dynamics means O21's protocol may be demonstrating correlation without causal mechanism. IMPLEMENT: YES IMPLEMENT_WHAT: When scoring avalanche or spectral evidence, flag whether the evidence is exponent-matching only (weak) versus mechanistic/causal (strong), adding a `criticality_evidence_tier` field (values: EXPONENT_MATCH | MECHANISTIC | CAUSAL_CHAIN) to the obligation scoring record. IMPLEMENT_WHERE: feed_processor.py IMPLEMENT_CALL_SITE: EXTEND resolve_obligation IMPLEMENT_WHY: This prevents O21 from being falsely resolved by scaling-exponent correlation alone, enforcing the paper's own epistemic standard that mechanism must be distinguished from statistical signature."
+      },
+      {
+        "title": "Criticality in sheared, disordered solids. II. Correlations in avalanche dynamics",
+        "compress": "Avalanche criticality in disordered solids is a structured three-regime power spectrum whose white-noise bandwidth collapses under finite driving rate, providing a concrete, rate-dependent spectral signature for the critical ridge that extends O21's belief-revision scoring toward a falsifiable temporal observable."
       }
     ],
     "resolve": {
